@@ -320,14 +320,14 @@ public:
         initialOffset_ = offset;
     }
 
-    OffsetT<CalcDimension> GetInitialOffset()
+    OffsetT<CalcDimension> GetInitialOffset() const
     {
-        return initialOffset_;
+        return initialOffset_.has_value() ? initialOffset_.value() : OffsetT(CalcDimension(), CalcDimension());
     }
 
-    bool IsInitialized()
+    bool NeedSetInitialOffset()
     {
-        return isInitialized_;
+        return !isInitialized_ && initialOffset_.has_value();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -392,7 +392,7 @@ private:
     float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
 
     //initialOffset
-    OffsetT<CalcDimension> initialOffset_;
+    std::optional<OffsetT<CalcDimension>> initialOffset_;
 
     //scrollToEdge
     ScrollEdgeType scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;

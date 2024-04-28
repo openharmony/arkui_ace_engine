@@ -900,7 +900,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
 {
     /**
      * @tc.cases: Scrollable list, Not set ScrollEnabled
-     * @tc.expected: Default by list scrollable_
+     * @tc.expected: Default by list isScrollable_
      */
     CreateWithItem([](ListModelNG model) { model.SetScrollEnabled(true); });
     EXPECT_TRUE(pattern_->scrollableEvent_->GetEnable());
@@ -915,7 +915,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction002, TestSize.Level1)
 {
     /**
      * @tc.cases: UnScrollable list, Not set ScrollEnabled
-     * @tc.expected: Default by list scrollable_
+     * @tc.expected: Default by list isScrollable_
      */
     Create([](ListModelNG model) {
         model.SetScrollEnabled(true);
@@ -936,7 +936,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction003, TestSize.Level1)
 {
     /**
      * @tc.cases: Scrollable list, set ScrollEnabled:false
-     * @tc.expected: Default by list scrollable_
+     * @tc.expected: Default by list isScrollable_
      */
     CreateWithItem([](ListModelNG model) { model.SetScrollEnabled(false); });
     EXPECT_FALSE(pattern_->scrollableEvent_->GetEnable());
@@ -951,7 +951,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction004, TestSize.Level1)
 {
     /**
      * @tc.cases: UnScrollable list, Set ScrollEnabled:true
-     * @tc.expected: Decided by list scrollable_
+     * @tc.expected: Decided by list isScrollable_
      */
     Create([](ListModelNG model) { model.SetScrollEnabled(true); });
     EXPECT_FALSE(pattern_->scrollableEvent_->GetEnable());
@@ -1014,7 +1014,7 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption001, TestSize.Level1)
         model.SetEdgeEffect(EdgeEffect::SPRING, false);
     });
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
-    EXPECT_TRUE(pattern_->scrollable_);
+    EXPECT_TRUE(pattern_->isScrollable_);
 }
 
 /**
@@ -1029,7 +1029,7 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption002, TestSize.Level1)
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
     });
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
-    EXPECT_TRUE(pattern_->scrollable_);
+    EXPECT_TRUE(pattern_->isScrollable_);
 }
 
 /**
@@ -1044,7 +1044,7 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption003, TestSize.Level1)
         model.SetEdgeEffect(EdgeEffect::SPRING, false);
     });
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
-    EXPECT_FALSE(pattern_->scrollable_);
+    EXPECT_FALSE(pattern_->isScrollable_);
 }
 
 /**
@@ -1059,7 +1059,7 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption004, TestSize.Level1)
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
     });
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
-    EXPECT_TRUE(pattern_->scrollable_);
+    EXPECT_TRUE(pattern_->isScrollable_);
 }
 
 /**
@@ -1261,5 +1261,80 @@ HWTEST_F(ListAttrTestNg, ChainAnimation003, TestSize.Level1)
     chainAnimation = pattern_->chainAnimation_;
     EXPECT_FLOAT_EQ(chainAnimation->conductivity_, conductivity);
     EXPECT_FLOAT_EQ(chainAnimation->intensity_, intensity);
+}
+
+/**
+ * @tc.name: FadingEdge001
+ * @tc.desc: Test SetFadingEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, FadingEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: SetFadingEdge false
+     * @tc.expected: FadingEdge false
+     */
+    Create([](ListModelNG model) {
+        model.SetFadingEdge(false);
+        CreateItem(TOTAL_LINE_NUMBER);
+    });
+    EXPECT_FALSE(layoutProperty_->GetFadingEdgeValue(true));
+
+    /**
+     * @tc.cases: SetFadingEdge true
+     * @tc.expected: FadingEdge true
+     */
+    Create([](ListModelNG model) {
+        model.SetFadingEdge(true);
+        CreateItem(TOTAL_LINE_NUMBER);
+    });
+    EXPECT_TRUE(layoutProperty_->GetFadingEdgeValue(false));
+    frameNode_->SetOverlayNode(nullptr);
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: FadingEdge002
+ * @tc.desc: Test SetFadingEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: ContentStartOffset 50.f and Space 10.f
+     * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
+     */
+    Create([](ListModelNG model) {
+        model.SetFadingEdge(true);
+        model.SetContentStartOffset(50.f);
+        model.SetContentEndOffset(50.f);
+        model.SetSpace(Dimension(10.f));
+        CreateItem(TOTAL_LINE_NUMBER);
+    });
+    EXPECT_EQ(pattern_->GetTotalOffset(), -50);
+    EXPECT_EQ(pattern_->startMainPos_, 50.f);
+    EXPECT_EQ(pattern_->endMainPos_, 820.f);
+    EXPECT_EQ(pattern_->contentStartOffset_, 50.f);
+    EXPECT_EQ(pattern_->contentEndOffset_, 50.f);
+
+    /**
+     * @tc.cases: ScrollTo 0.f
+     * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
+     */
+    pattern_->ScrollTo(0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->startMainPos_, 0.f);
+    EXPECT_EQ(pattern_->endMainPos_, 880.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    /**
+     * @tc.cases: ScrollTo 50.f
+     * @tc.expected: startMainPos_ < 0
+     */
+    pattern_->ScrollTo(50);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->startMainPos_, -50.f);
+    EXPECT_EQ(pattern_->endMainPos_, 830.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);
 }
 } // namespace OHOS::Ace::NG

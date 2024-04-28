@@ -220,6 +220,16 @@ public:
         return contentEndOffset_;
     }
 
+    void SetPrevContentStartOffset(float prevContentStartOffset)
+    {
+        prevContentStartOffset_ = prevContentStartOffset;
+    }
+
+    void SetPrevContentEndOffset(float prevContentEndOffset)
+    {
+        prevContentEndOffset_ = prevContentEndOffset;
+    }
+
     float GetStartPosition() const
     {
         if (itemPosition_.empty()) {
@@ -366,7 +376,8 @@ protected:
     virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount);
 
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, float referencePos,
-        bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout);
+        bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout,
+        bool needAdjustRefPos = false);
     static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
@@ -386,9 +397,12 @@ protected:
     LayoutConstraintF childLayoutConstraint_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     RefPtr<ListPositionMap> posMap_;
+    std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
     void CheckJumpToIndex();
+    void CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper, int32_t startIndex,
+        float& startPos, bool isGroup, bool forwardLayout);
 
     std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
@@ -412,6 +426,7 @@ private:
     bool IsUniformHeightProbably();
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
+    void UpdateSnapAlignContentOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
@@ -430,6 +445,8 @@ private:
     float endMainPos_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    float prevContentStartOffset_ = 0.0f;
+    float prevContentEndOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
     bool canOverScroll_ = false;

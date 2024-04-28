@@ -154,6 +154,7 @@ public:
     {
         if (!recreateGesture_) {
             gestures_.clear();
+            backupGestures_.clear();
         }
         gestures_.emplace_back(gesture);
         backupGestures_.emplace_back(gesture);
@@ -325,6 +326,9 @@ public:
 
     GestureEventFunc GetClickEvent()
     {
+        if (!IsClickable()) {
+            return nullptr;
+        }
         return clickEventActuator_->GetClickEvent();
     }
 
@@ -635,6 +639,13 @@ public:
     void SetDragGatherPixelMaps(const GestureEvent& info);
     void SetMouseDragGatherPixelMaps();
     void SetNotMouseDragGatherPixelMaps();
+#if defined(PIXEL_MAP_SUPPORTED)
+    static void PrintBuilderNode(
+        const RefPtr<UINode>& customNode, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
+    static void PrintIfImageNode(
+        const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
+    static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+#endif
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -652,6 +663,7 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

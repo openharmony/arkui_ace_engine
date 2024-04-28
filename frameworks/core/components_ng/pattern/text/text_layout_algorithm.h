@@ -64,6 +64,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     const RefPtr<Paragraph>& GetParagraph() const override;
+    void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override {};
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
 
@@ -103,6 +104,7 @@ protected:
     virtual void UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper);
 
     virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper);
+    OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
 
     void GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring textForAI,
         const TextStyle& textStyle, bool isDragging);
@@ -152,6 +154,7 @@ private:
     void SetImageSpanTextStyleByLines(const TextStyle& textStyle,
         std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
         std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
+    void UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper);
     int32_t GetFirstSpanStartPositon();
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;

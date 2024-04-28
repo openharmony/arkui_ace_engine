@@ -41,6 +41,16 @@ void ImageSpanView::SetVerticalAlign(FrameNode* frameNode, VerticalAlign vertica
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, verticalAlign, frameNode);
 }
 
+void ImageSpanView::SetBaselineOffset(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value);
+}
+
+void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value, frameNode);
+}
+
 void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

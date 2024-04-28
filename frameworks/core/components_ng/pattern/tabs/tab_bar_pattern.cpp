@@ -106,9 +106,9 @@ void TabBarPattern::InitSurfaceChangedCallback()
                 if (!pattern) {
                     return;
                 }
-                if (type == WindowSizeChangeReason::UNDEFINED) {
-                    pattern->windowSizeChangeReason_ = type;
-                }
+
+                pattern->windowSizeChangeReason_ = type;
+                pattern->prevRootSize_ = std::make_pair(prevWidth, prevHeight);
 
                 if (type == WindowSizeChangeReason::ROTATION) {
                     pattern->windowSizeChangeReason_ = type;
@@ -714,13 +714,14 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             animationTargetIndex_ != indicator) {
             swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
             animationTargetIndex_.reset();
-        } else if (*windowSizeChangeReason_ == WindowSizeChangeReason::UNDEFINED ||
-            *windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
+            windowSizeChangeReason_.reset();
+        } else if (prevRootSize_.first != PipelineContext::GetCurrentRootWidth() ||
+            prevRootSize_.second != PipelineContext::GetCurrentRootHeight()) {
             // UNDEFINED currently implies window change on foldable
             PlayTabBarTranslateAnimation(indicator_);
             UpdateIndicator(indicator_);
+            windowSizeChangeReason_.reset();
         }
-        windowSizeChangeReason_.reset();
     }
     UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
     if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&
@@ -732,7 +733,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void TabBarPattern::HandleClick(const GestureEvent& info)
 {
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::FIRST_MOVE, "");
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
     if (info.GetSourceDevice() == SourceType::KEYBOARD) {
         return;
     }
@@ -1100,6 +1101,7 @@ void TabBarPattern::ChangeMask(int32_t index, float imageSize, const OffsetF& or
         auto tabBarOffset = tabBarGeometryNode->GetMarginFrameOffset();
         maskGeometryNode->SetMarginFrameOffset(maskOffset + tabBarOffset);
         maskGeometryNode->SetFrameSize(SizeF(imageSize * radiusRatio * 2.0f, imageSize * radiusRatio * 2.0f));
+        maskRenderContext->SavePaintRect();
         maskRenderContext->SyncGeometryProperties(nullptr);
         BorderRadiusProperty borderRadiusProperty;
         borderRadiusProperty.SetRadius(Dimension(imageSize * radiusRatio));
@@ -1114,6 +1116,7 @@ void TabBarPattern::ChangeMask(int32_t index, float imageSize, const OffsetF& or
         maskImageProperty->UpdateUserDefinedIdealSize(
             CalcSize(NG::CalcLength(Dimension(imageSize)), NG::CalcLength(Dimension(imageSize))));
         maskImageRenderContext->SetVisible(false);
+        maskImageRenderContext->SavePaintRect();
         maskImageRenderContext->SyncGeometryProperties(nullptr);
     }
     maskImageRenderContext->UpdateOpacity(opacity);

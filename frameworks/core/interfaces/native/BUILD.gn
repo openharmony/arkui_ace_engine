@@ -65,6 +65,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_checkbox_modifier.cpp",
       "node/node_common_modifier.cpp",
       "node/node_container_modifier.cpp",
+      "node/node_content_modifier.cpp",
       "node/node_date_picker_modifier.cpp",
       "node/node_gesture_modifier.cpp",
       "node/node_image_modifier.cpp",
@@ -79,6 +80,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_span_modifier.cpp",
       "node/node_stack_modifier.cpp",
       "node/node_swiper_modifier.cpp",
+      "node/node_symbol_glyph_modifier.cpp",
       "node/node_text_area_modifier.cpp",
       "node/node_text_input_modifier.cpp",
       "node/node_text_modifier.cpp",
@@ -86,6 +88,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_timepicker_modifier.cpp",
       "node/node_toggle_modifier.cpp",
       "node/panel_modifier.cpp",
+      "node/particle_modifier.cpp",
       "node/path_modifier.cpp",
       "node/pattern_lock_modifier.cpp",
       "node/polygon_modifier.cpp",
@@ -112,7 +115,6 @@ template("ace_core_interfaces_native_node") {
       "node/view_model.cpp",
       "node/water_flow_modifier.cpp",
     ]
-
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
     include_dirs = [ "${ace_root}/interfaces/inner_api/ace" ]
@@ -132,9 +134,6 @@ template("ace_core_interfaces_native_node") {
       sources += [ "node/plugin_modifier.cpp" ]
     }
     external_deps = []
-    if (is_ohos) {
-      external_deps += [ "input:libmmi-client" ]
-    }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }

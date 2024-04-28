@@ -228,6 +228,22 @@ void ResetWaterFlowFriction(ArkUINodeHandle node)
     WaterFlowModelNG::SetFriction(frameNode, FRICTION_DEFAULT);
 }
 
+void SetEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetEdgeEffect(frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
+}
+
+void ResetEdgeEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    EdgeEffect edgeEffect = EdgeEffect::NONE;
+    ArkUI_Bool alwaysEnabled = false;
+    WaterFlowModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+}
+
 ArkUI_Int32 GetLayoutDirection(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -358,6 +374,8 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         SetCachedCount,
         ResetCachedCount,
         GetCachedCount,
+        SetEdgeEffect,
+        ResetEdgeEffect,
     };
     return &modifier;
 }
@@ -377,6 +395,20 @@ void SetOnWillScroll(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
+}
+
+void SetOnReachEnd(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onReachEnd = [node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_REACH_END;
+        SendArkUIAsyncEvent(&event);
+    };
+    ScrollableModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

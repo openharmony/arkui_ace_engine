@@ -209,6 +209,13 @@ public:
         return renderContextForSurface_;
     }
 
+    void SetSurfaceRotation(bool isLock);
+
+    bool GetSurfaceRotation()
+    {
+        return isSurfaceLock_;
+    }
+
     void SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext);
 
     void RestoreHandlingRenderContextForSurface();
@@ -280,7 +287,7 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnAreaChangedInner() override;
     void OnWindowHide() override;
@@ -288,7 +295,6 @@ private:
     void NativeSurfaceHide();
     void NativeSurfaceShow();
     void OnModifyDone() override;
-    void BeforeCreateLayoutWrapper() override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
 
@@ -317,6 +323,7 @@ private:
     void HandleUnregisterOnFrameEvent();
     bool ExportTextureAvailable();
     void AddAfterLayoutTaskForExportTexture();
+    void AddAfterLayoutTaskForRotation();
     bool DoTextureExport();
     bool StopTextureExport();
     void InitializeRenderContext();
@@ -327,6 +334,7 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
+    void SetRotation();
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -373,12 +381,15 @@ private:
     std::optional<float> selfIdealSurfaceOffsetY_;
     std::string surfaceId_;
 
+    bool isSurfaceLock_ = false;
+
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     uint64_t exportTextureSurfaceId_ = 0U;
     bool hasReleasedSurface_ = false;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
+    Rotation rotation_ = Rotation::ROTATION_0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif

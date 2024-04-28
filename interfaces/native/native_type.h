@@ -99,6 +99,13 @@ struct ArkUI_Context;
 typedef struct ArkUI_Context* ArkUI_ContextHandle;
 
 /**
+ * @brief Defines the pointer type of the ArkUI native node content object.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_NodeContent* ArkUI_NodeContentHandle;
+
+/**
  * @brief Defines the event callback type.
  *
  * @since 12
@@ -366,6 +373,24 @@ typedef enum {
     /** Line through the text. */
     ARKUI_TEXT_DECORATION_TYPE_LINE_THROUGH,
 } ArkUI_TextDecorationType;
+
+/**
+ * @brief Enumerates the text decoration line styles.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Solid line. */
+    ARKUI_TEXT_DECORATION_STYLE_SOLID = 0,
+    /** Double line. */
+    ARKUI_TEXT_DECORATION_STYLE_DOUBLE,
+    /** Dotted line. */
+    ARKUI_TEXT_DECORATION_STYLE_DOTTED,
+    /** Dashed line. */
+    ARKUI_TEXT_DECORATION_STYLE_DASHED,
+    /** Wavy line. */
+    ARKUI_TEXT_DECORATION_STYLE_WAVY,
+} ArkUiTextDecorationStyle;
 
 /**
  * @brief Enumerates the text cases.
@@ -1445,6 +1470,36 @@ typedef enum {
       * long tail state. */
     ARKUI_FINISH_CALLBACK_LOGICALLY,
 } ArkUI_FinishCallbackType;
+
+/**
+ * @brief 交叉轴方向的布局方式。
+  *
+ * @since 12
+ */
+typedef enum {
+     /** ListItem在List中，交叉轴方向首部对齐。 */
+    ARKUI_LIST_ITEM_ALIGN_START = 0,
+    /** ListItem在List中，交叉轴方向居中对齐。*/
+    ARKUI_LIST_ITEM_ALIGN_CENTER,
+    /** ListItem在List中，交叉轴方向尾部对齐。*/
+    ARKUI_LIST_ITEM_ALIGN_END,
+} ArkUI_ListItemAlign;
+
+/**
+ * @brief Enumerates the component units.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Default, which is fp for fonts and vp for non-fonts. */
+    ARKUI_LENGTH_METRIC_UNIT_DEFAULT = -1,
+    /** px. */
+    ARKUI_LENGTH_METRIC_UNIT_PX = 0,
+    /** vp. */
+    ARKUI_LENGTH_METRIC_UNIT_VP,
+    /** fp. */
+    ARKUI_LENGTH_METRIC_UNIT_FP
+} ArkUI_LengthMetricUnit;
 
 /**
 * @brief Creates a size constraint.

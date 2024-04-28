@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
@@ -539,6 +540,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         }
     };
 
+    auto didBuildFunc = [weak = AceType::WeakClaim(this)]() {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
+        if (jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteDidBuild();
+        }
+    };
+
     auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
@@ -627,11 +637,11 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         }
         AceType::DynamicCast<NG::UINode>(recycleNode)->SetActive(false);
         jsView->SetRecycleCustomNode(recycleNode);
-        if (!recycleNode->HasRecycleRenderFunc()) {
+        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
+        if (!recycleNode->HasRecycleRenderFunc() && jsView->recycleCustomNode_) {
             jsView->jsViewFunction_->ExecuteAboutToRecycle();
         }
         recycleNode->ResetRecycle();
-        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
     };
 
     auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active) -> void {
@@ -656,6 +666,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
     };
 
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
+        .didBuildFunc = std::move(didBuildFunc),
         .renderFunc = std::move(renderFunction),
         .updateFunc = std::move(updateFunction),
         .removeFunc = std::move(removeFunction),
@@ -908,6 +919,42 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
     }
 }
 
+void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
+{
+    auto result = NG::UIObserverHandler::GetInstance().GetRouterPageState(GetViewNode());
+    if (result) {
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        auto jsContext = JsConverter::ConvertNapiValueToJsVal(result->context);
+        obj->SetPropertyObject("context", jsContext);
+        obj->SetProperty<int32_t>("index", result->index);
+        obj->SetProperty<std::string>("name", result->name);
+        obj->SetProperty<std::string>("path", result->path);
+        obj->SetProperty<int32_t>("state", static_cast<int32_t>(result->state));
+        obj->SetProperty<std::string>("pageId", result->pageId);
+        info.SetReturnValue(obj);
+    }
+}
+
+void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto navigationMgr = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(navigationMgr);
+    auto result = navigationMgr->GetNavigationInfo(GetViewNode());
+    CHECK_NULL_VOID(result);
+    auto stack = result->pathStack.Upgrade();
+    CHECK_NULL_VOID(stack);
+    auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
+    CHECK_NULL_VOID(jsStack);
+    auto navPathStackObj = jsStack->GetDataSourceObj();
+    CHECK_NULL_VOID(!navPathStackObj->IsEmpty());
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty<std::string>("navigationId", result->navigationId);
+    obj->SetPropertyObject("pathStack", navPathStackObj);
+    info.SetReturnValue(obj);
+}
+
 void JSViewPartialUpdate::JSGetUIContext(const JSCallbackInfo& info)
 {
     ContainerScope scope(GetInstanceId());
@@ -955,6 +1002,10 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "queryNavDestinationInfo", &JSViewPartialUpdate::JSGetNavDestinationInfo);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "queryNavigationInfo", &JSViewPartialUpdate::JSGetNavigationInfo);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "queryRouterPageInfo", &JSViewPartialUpdate::JSGetRouterPageInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);

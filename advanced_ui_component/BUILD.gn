@@ -22,6 +22,7 @@ group("advanced_ui_component") {
     "editabletitlebar/interfaces:editabletitlebar",
     "exceptionprompt/interfaces:exceptionprompt",
     "filter/interfaces:filter",
+    "fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent",
     "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
     "popup/interfaces:popup",
     "progressbutton/interfaces:progressbutton",

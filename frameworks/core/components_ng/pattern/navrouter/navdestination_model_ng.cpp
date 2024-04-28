@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -111,10 +112,10 @@ bool NavDestinationModelNG::ParseCommonTitle(
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
         //max title font size shoule be 14.0 vp
-        textLayoutProperty->UpdateAdaptMaxFontSize(NavigationGetTheme()->GetSubTitleFontSize());
+        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
         //min title font size should be 10.0 vp
         textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-        textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
+        textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
         textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -323,6 +324,18 @@ void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
     ParseCommonTitle(hasSubTitle, true, "", title);
 }
 
+void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
 void NavDestinationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
     const std::string& bundleName, const std::string& moduleName)
 {
@@ -500,5 +513,66 @@ void NavDestinationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
     titleBarNode->SetMenu(customMenu);
     titleBarNode->UpdatePrevMenuIsCustom(true);
     titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+}
+
+void NavDestinationModelNG::SetBackgroundColor(const Color& color, bool isVaild)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    if (!isVaild) {
+        navDestinationPattern->SetIsUserDefinedBgColor(false);
+        return;
+    }
+    ViewAbstract::SetBackgroundColor(color);
+    navDestinationPattern->SetIsUserDefinedBgColor(true);
+}
+
+void NavDestinationModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    if (!isVaild) {
+        navDestinationPattern->SetIsUserDefinedBgColor(false);
+        return;
+    }
+    ViewAbstract::SetBackgroundColor(frameNode, color);
+    navDestinationPattern->SetIsUserDefinedBgColor(true);
+}
+
+void NavDestinationModelNG::SetOnWillAppear(std::function<void()>&& willAppear)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnWillAppear(willAppear);
+}
+
+void NavDestinationModelNG::SetOnWillHide(std::function<void()>&& willHide)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnWillHide(willHide);
+}
+
+void NavDestinationModelNG::SetOnWillShow(std::function<void()>&& willShow)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnWillShow(willShow);
+}
+
+void NavDestinationModelNG::SetOnWillDisAppear(std::function<void()>&& willDisAppear)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
 }
 } // namespace OHOS::Ace::NG

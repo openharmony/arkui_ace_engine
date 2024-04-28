@@ -171,7 +171,7 @@ class BarWidthModifier extends ModifierWithKey<Length> {
   }
 }
 
-class BarAdaptiveHeightModifier extends Modifier<boolean> {
+class BarAdaptiveHeightModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -309,7 +309,7 @@ class BarPositionModifier extends ModifierWithKey<number> {
   }
 }
 
-class TabsHideTitleBarModifier extends Modifier<string> {
+class TabsHideTitleBarModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }

@@ -461,9 +461,6 @@ export struct SubHeader {
           })
           .onTouch((event) => {
             if (event.type === TouchType.Down) {
-              if (button.action) {
-                button.action();
-              }
               this.buttonBgColor = $r('sys.color.interactive_pressed');
             }
             if (event.type === TouchType.Up) {
@@ -475,6 +472,11 @@ export struct SubHeader {
               if (button.action) {
                 button.action();
               }
+            }
+          })
+          .onClick((event)=>{
+            if (button.action) {
+              button.action();
             }
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -545,9 +547,6 @@ export struct SubHeader {
         })
         .onTouch((event) => {
           if (event.type === TouchType.Down) {
-            if (textArrow.action) {
-              textArrow.action();
-            }
             this.textArrowBgColor = $r('sys.color.interactive_pressed');
           }
           if (event.type === TouchType.Up) {
@@ -559,6 +558,11 @@ export struct SubHeader {
             if (textArrow.action) {
               textArrow.action();
             }
+          }
+        })
+        .onClick((event)=>{
+          if (textArrow.action) {
+            textArrow.action();
           }
         })
         .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -755,9 +759,6 @@ struct SingleIconStyle {
       })
       .onTouch((event) => {
         if (event.type === TouchType.Down) {
-          if (this.item?.action) {
-            this.item?.action();
-          }
           this.bgColor = $r('sys.color.interactive_pressed');
         }
         if (event.type === TouchType.Up) {
@@ -776,6 +777,11 @@ struct SingleIconStyle {
           if (this.item?.action) {
             this.item?.action();
           }
+        }
+      })
+      .onClick((event)=>{
+        if (this.item?.action) {
+          this.item?.action();
         }
       })
     }

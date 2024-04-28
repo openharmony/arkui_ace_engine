@@ -97,4 +97,6 @@ declare class ModifierJS {
   PluginComponentModifier(nativePtr: KNode, classType: ModifierType): void;
   RefreshModifier(nativePtr: KNode, classType: ModifierType): void;
   TabContentModifier(nativePtr: KNode, classType: ModifierType): void;
+  ParticleModifier(nativePtr: KNode, classType: ModifierType): void;
+  SymbolGlyphModifier(nativePtr: KNode, classType: ModifierType): void;
 }

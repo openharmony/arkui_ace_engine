@@ -336,6 +336,10 @@ public:
 
     void JSGetNavDestinationInfo(const JSCallbackInfo& info);
 
+    void JSGetRouterPageInfo(const JSCallbackInfo& info);
+
+    void JSGetNavigationInfo(const JSCallbackInfo& info);
+
     void JSGetUIContext(const JSCallbackInfo& info);
 
     void JSGetUniqueId(const JSCallbackInfo& info);

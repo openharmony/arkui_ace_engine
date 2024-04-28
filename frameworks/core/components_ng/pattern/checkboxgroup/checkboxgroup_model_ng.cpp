@@ -164,9 +164,6 @@ void CheckBoxGroupModelNG::SetWidth(FrameNode* frameNode, const Dimension& width
 
 void CheckBoxGroupModelNG::SetCheckboxGroupStyle(CheckBoxStyle checkboxGroupStyle)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
-        return;
-    }
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle);
 }
 

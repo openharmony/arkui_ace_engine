@@ -126,7 +126,14 @@ public:
     {
         return GetParagraphLength() == 0;
     }
-    
+    void SetParagraphId(uint32_t id) override
+    {
+        if (paragraph_) {
+            paragraph_->SetParagraghId(id);
+        }
+    }
+    LineMetrics GetLineMetricsByRectF(RectF& rect) override;
+
 private:
     void CreateBuilder();
     bool CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent);

@@ -37,6 +37,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
@@ -45,6 +46,43 @@ namespace {
 #if defined(WINDOWS_PLATFORM)
 constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
 #endif
+constexpr char BACKGROUND_COLOR_PROPERTY[] = "backgroundColor";
+constexpr char BACKGROUND_BLUR_STYLE_PROPERTY[] = "backgroundBlurStyle";
+} // namespace
+
+namespace {
+void* UnwrapNapiValue(const JSRef<JSVal>& obj)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!obj->IsObject()) {
+        LOGE("info[0] is not an object when try CreateFromNapiValue");
+        return nullptr;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+#ifdef USE_ARK_ENGINE
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+#endif
+    JSValueWrapper valueWrapper = value;
+
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType != napi_object) {
+        LOGE("napiValue is not napi_object");
+        return nullptr;
+    }
+    void* objectNapi = nullptr;
+    napi_unwrap(env, napiValue, &objectNapi);
+    return objectNapi;
+#else
+    return nullptr;
+#endif
+}
 } // namespace
 
 #if !defined(PREVIEW)
@@ -81,38 +119,6 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
 }
 
-namespace {
-void* UnwrapNapiValue(const JSRef<JSVal>& obj)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!obj->IsObject()) {
-        LOGE("info[0] is not an object when try CreateFromNapiValue");
-        return nullptr;
-    }
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, nullptr);
-    auto nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_RETURN(nativeEngine, nullptr);
-#ifdef USE_ARK_ENGINE
-    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
-#endif
-    JSValueWrapper valueWrapper = value;
-
-    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
-    auto env = reinterpret_cast<napi_env>(nativeEngine);
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, napiValue, &valueType);
-    if (valueType != napi_object) {
-        LOGE("napiValue is not napi_object");
-        return nullptr;
-    }
-    void* objectNapi = nullptr;
-    napi_unwrap(env, napiValue, &objectNapi);
-    return objectNapi;
-}
-} // namespace
-
 bool GetPixelMapListFromAnimatedDrawable(JSRef<JSVal> obj, std::vector<RefPtr<PixelMap>>& pixelMaps,
     int32_t& duration, int32_t& iterations)
 {
@@ -124,11 +130,6 @@ RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj)
     return PixelMap::GetFromDrawable(UnwrapNapiValue(obj));
 }
 
-RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
-{
-    return DrawingColorFilter::CreateDrawingColorFilter(UnwrapNapiValue(obj));
-}
-
 const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
 {
     auto nodePtr = static_cast<std::shared_ptr<Rosen::RSNode>*>(UnwrapNapiValue(obj));
@@ -136,11 +137,7 @@ const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
         return nullptr;
     }
     return *nodePtr;
-#else
-    return nullptr;
 }
-#endif
-} // namespace
 
 RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 {
@@ -162,8 +159,12 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     return WantWrap::CreateWantWrap(reinterpret_cast<napi_env>(nativeEngine), nativeValue);
 }
-
 #endif
+
+RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
+{
+    return DrawingColorFilter::CreateDrawingColorFilter(UnwrapNapiValue(obj));
+}
 
 // When the api version >= 11, it is disable event version.
 bool IsDisableEventVersion()
@@ -273,5 +274,28 @@ bool CheckRegexValid(const std::string& pattern)
     napi_get_value_bool(env, result, &isValid);
     return isValid;
 #endif
+}
+
+void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOptions& options)
+{
+    options.color.reset();
+    options.blurStyle.reset();
+    if (!obj->IsObject()) {
+        return;
+    }
+    auto optObj = JSRef<JSObject>::Cast(obj);
+    auto colorProperty = optObj->GetProperty(BACKGROUND_COLOR_PROPERTY);
+    Color color;
+    if (JSViewAbstract::ParseJsColor(colorProperty, color)) {
+        options.color = color;
+    }
+    auto blurProperty = optObj->GetProperty(BACKGROUND_BLUR_STYLE_PROPERTY);
+    if (blurProperty->IsNumber()) {
+        auto blurStyle = blurProperty->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            options.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework

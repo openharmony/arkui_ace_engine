@@ -77,6 +77,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
+const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
+    LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
@@ -89,6 +91,7 @@ constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -323,6 +326,24 @@ void JSTextField::SetTextAlign(int32_t value)
     }
 }
 
+void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TextFieldModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        TextFieldModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(LINE_BREAK_STRATEGY_TYPES.size())) {
+        TextFieldModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetLineBreakStrategy(LINE_BREAK_STRATEGY_TYPES[index]);
+}
+
 void JSTextField::SetInputStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -387,13 +408,19 @@ void JSTextField::SetCaretPosition(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
     int32_t caretPosition = 0;
-    if (!ParseJsInt32(info[0], caretPosition)) {
-        return;
-    }
-    if (caretPosition < 0) {
-        return;
+    auto tempInfo = info[0];
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!ParseJsInt32(tempInfo, caretPosition) || caretPosition < 0) {
+            caretPosition = 0;
+        }
+    } else {
+        if (!ParseJsInt32(tempInfo, caretPosition)) {
+            return;
+        }
+        if (caretPosition < 0) {
+            return;
+        }
     }
     TextFieldModel::GetInstance()->SetCaretPosition(caretPosition);
 }
@@ -574,6 +601,18 @@ void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
 
     bool isShowPasswordIcon = jsValue->ToBoolean();
     TextFieldModel::GetInstance()->SetShowPasswordIcon(isShowPasswordIcon);
+}
+
+void JSTextField::ShowPasswordText(const JSCallbackInfo& info)
+{
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetShowPasswordText(false);
+        return;
+    }
+
+    bool showPassword = tmpInfo->ToBoolean();
+    TextFieldModel::GetInstance()->SetShowPasswordText(showPassword);
 }
 
 void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
@@ -905,6 +944,14 @@ void JSTextField::SetOnTextSelectionChange(const JSCallbackInfo& info)
     CHECK_NULL_VOID(jsValue->IsFunction());
     JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
+}
+
+void JSTextField::SetOnSecurityStateChange(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    JsEventCallback<void(bool)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
+    TextFieldModel::GetInstance()->SetOnSecurityStateChange(std::move(callback));
 }
 
 void JSTextField::SetOnContentScroll(const JSCallbackInfo& info)
@@ -1427,6 +1474,8 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         std::optional<TextDecorationStyle> textDecorationStyle;
         if (styleValue->IsNumber()) {
             textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        } else {
+            textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
         }
         TextFieldModel::GetInstance()->SetTextDecoration(textDecoration);
         TextFieldModel::GetInstance()->SetTextDecorationColor(result);
@@ -1506,6 +1555,18 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseLengthMetricsToDimension(info[0], value)) {
+        value.Reset();
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    TextFieldModel::GetInstance()->SetLineSpacing(value);
+}
+
 void JSTextField::SetFontFeature(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1524,12 +1585,18 @@ void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
 {
     do {
         auto tmpInfo = info[0];
-        if (info.Length() < 1 || !tmpInfo->IsNumber() || tmpInfo->IsUndefined()) {
+        int32_t overflow = 0;
+        if (info.Length() < 1) {
             break;
         }
-        auto overflow = tmpInfo->ToNumber<int32_t>();
-        if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        if (!tmpInfo->IsNumber() && !tmpInfo->IsUndefined()) {
             break;
+        }
+        if (!tmpInfo->IsUndefined()) {
+            overflow = tmpInfo->ToNumber<int32_t>();
+            if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+                break;
+            }
         }
         TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
     } while (false);

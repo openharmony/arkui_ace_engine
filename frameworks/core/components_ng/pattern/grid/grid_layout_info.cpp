@@ -225,6 +225,7 @@ int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
     for (auto it : lastLine->second) {
         maxIdx = std::max(maxIdx, it.second);
     }
+    maxIdx = std::max(maxIdx, FindEndIdx(endLine).itemIdx);
     return maxIdx - minIdx + 1;
 }
 
@@ -654,7 +655,7 @@ void GridLayoutInfo::ClearMatrixToEnd(int32_t idx, int32_t lineIdx)
     gridMatrix_.erase(it, gridMatrix_.end());
 }
 
-float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap) const
+float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool regular) const
 {
     float len = 0.0f;
     float offset = currentOffset_;
@@ -662,7 +663,7 @@ float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap) const
     auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
     for (auto it = lineHeightMap_.find(startMainLineIndex_); it != endIt; ++it) {
         // skip adding starting lines that are outside viewport in LayoutIrregular
-        if (Negative(it->second + offset + mainGap)) {
+        if (!regular && Negative(it->second + offset + mainGap)) {
             offset += it->second + mainGap;
             continue;
         }
@@ -687,5 +688,34 @@ float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, fl
     }
     float bottomPos = offset + heightInView;
     return bottomPos - mainSize;
+}
+
+void GridLayoutInfo::ClearHeightsFromMatrix(int32_t lineIdx)
+{
+    auto lineIt = lineHeightMap_.find(lineIdx);
+    if (lineIt == lineHeightMap_.end()) {
+        return;
+    }
+    if (gridMatrix_.find(lineIdx) != gridMatrix_.end()) {
+        lineIt++;
+    }
+    lineHeightMap_.erase(lineIt, lineHeightMap_.end());
+}
+
+MatIter GridLayoutInfo::FindStartLineInMatrix(MatIter iter, int32_t index) const
+{
+    if (iter == gridMatrix_.end() || iter == gridMatrix_.begin()) {
+        return iter;
+    }
+
+    --iter;
+    int32_t maxValue = 0;
+    while (CheckRow(maxValue, iter->second, index)) {
+        if (iter == gridMatrix_.begin()) {
+            return iter;
+        }
+        --iter;
+    }
+    return ++iter;
 }
 } // namespace OHOS::Ace::NG

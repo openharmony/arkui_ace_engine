@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include <functional>
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
@@ -59,6 +60,7 @@ constexpr int32_t DEFAULT_GROUP_UNDERLINE_COLOR_VALUES_COUNT = 4;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr bool DEFAULT_SELECT_ALL = false;
 std::string g_strValue;
 
 void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -652,11 +654,11 @@ ArkUI_Uint32 GetTextInputCaretColor(ArkUINodeHandle node)
     return TextFieldModelNG::GetCaretColor(frameNode).GetValue();
 }
 
-ArkUI_Float32 GetTextInputCaretStyle(ArkUINodeHandle node)
+ArkUI_Float32 GetTextInputCaretStyle(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return TextFieldModelNG::GetCaretStyle(frameNode).Value();
+    return TextFieldModelNG::GetCaretStyle(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 ArkUI_Bool GetTextInputShowUnderline(ArkUINodeHandle node)
@@ -693,7 +695,7 @@ void GetTextInputPlaceholderFont(ArkUINodeHandle node, ArkUITextFont* font)
     CHECK_NULL_VOID(frameNode);
     Font value = TextFieldModelNG::GetPlaceholderFont(frameNode);
     if (value.fontSize.has_value()) {
-        font->fontSize = value.fontSize.value().Value();
+        font->fontSize = value.fontSize.value().GetNativeValue(static_cast<DimensionUnit>(font->fontSizeUnit));
     }
     if (value.fontWeight.has_value()) {
         font->fontWeight = static_cast<ArkUI_Int32>(value.fontWeight.value());
@@ -765,11 +767,11 @@ ArkUI_Int32 GetTextInputCancelButtonStyle(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(TextFieldModelNG::GetCleanNodeStyle(frameNode));
 }
 
-ArkUI_Float32 GetTextInputCancelIconSize(ArkUINodeHandle node)
+ArkUI_Float32 GetTextInputCancelIconSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return TextFieldModelNG::GetCancelIconSize(frameNode).Value();
+    return TextFieldModelNG::GetCancelIconSize(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 ArkUI_CharPtr getTextInputTextCancelIconSrc(ArkUINodeHandle node)
@@ -815,11 +817,11 @@ ArkUI_Int32 GetTextInputFontWeight(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(TextFieldModelNG::GetFontWeight(frameNode));
 }
 
-ArkUI_Float32 GetTextInputFontSize(ArkUINodeHandle node)
+ArkUI_Float32 GetTextInputFontSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return TextFieldModelNG::GetFontSize(frameNode).Value();
+    return TextFieldModelNG::GetFontSize(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 void SetTextInputBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -1021,7 +1023,312 @@ void SetTextInputHeightAdaptivePolicy(ArkUINodeHandle node, ArkUI_Int32 value)
 
 void ResetTextInputHeightAdaptivePolicy(ArkUINodeHandle node) {}
 
+ArkUI_Bool GetTextInputSelectionMenuHidden(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TextFieldModelNG::GetSelectionMenuHidden(frameNode);
+}
+
+void SetTextInputPlaceholderFontEnum(ArkUINodeHandle node, const struct ArkUIResourceLength* size, ArkUI_Int32 weight,
+    ArkUI_CharPtr family, ArkUI_Int32 style)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Font font;
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(size->unit);
+    if (size->unit >= 0) {
+        if (unitEnum == DimensionUnit::CALC) {
+            font.fontSize = CalcDimension(size->string, DimensionUnit::CALC);
+        } else {
+            font.fontSize = CalcDimension(size->value, unitEnum);
+        }
+    } else {
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        font.fontSize = theme->GetFontSize();
+    }
+
+    if (weight > -1) {
+        font.fontWeight = static_cast<FontWeight>(weight);
+    } else {
+        font.fontWeight = DEFAULT_FONT_WEIGHT;
+    }
+
+    if (family != nullptr) {
+        font.fontFamilies = Framework::ConvertStrToFontFamilies(std::string(family));
+    } else {
+        std::vector<std::string> fontFamilies;
+        fontFamilies.emplace_back(DEFAULT_FONT_FAMILY[0]);
+        font.fontFamilies = fontFamilies;
+    }
+
+    if (style >= 0) {
+        font.fontStyle = static_cast<Ace::FontStyle>(style);
+    } else {
+        font.fontStyle = DEFAULT_FONT_STYLE;
+    }
+    TextFieldModelNG::SetPlaceholderFont(frameNode, font);
+}
+
+void SetTextInputTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextOverflow valueTextOverflow = static_cast<TextOverflow>(value);
+    TextFieldModelNG::SetTextOverflow(frameNode, valueTextOverflow);
+}
+
+void ResetTextInputTextOverflow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
+}
+
+void SetTextInputTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+}
+
+void ResetTextInputTextIndent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::VP));
+}
+
+void SetTextInputShowPassword(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowPassword(frameNode, static_cast<bool>(value));
+}
+
+void ResetTextInputShowPassword(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowPassword(frameNode, false);
+}
+
+ArkUI_Bool GetTextInputShowPassword(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TextFieldModelNG::GetShowPassword(frameNode);
+}
 } // namespace
+
+void SetTextInputSelectAll(ArkUINodeHandle node, ArkUI_Uint32 enableSelectAll)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetSelectAllValue(frameNode, static_cast<bool>(enableSelectAll));
+}
+
+void ResetTextInputSelectAll(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetSelectAllValue(frameNode, DEFAULT_SELECT_ALL);
+}
+
+void SetTextInputShowCounter(
+    ArkUINodeHandle node, ArkUI_Uint32 open, ArkUI_Int32 thresholdPercentage, ArkUI_Uint32 highlightBorder)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowCounter(frameNode, static_cast<bool>(open));
+    TextFieldModelNG::SetCounterType(frameNode, thresholdPercentage);
+    TextFieldModelNG::SetShowCounterBorder(frameNode, static_cast<bool>(highlightBorder));
+}
+
+void ResetTextInputShowCounter(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowCounter(frameNode, false);
+    TextFieldModelNG::SetCounterType(frameNode, -1);
+    TextFieldModelNG::SetShowCounterBorder(frameNode, true);
+}
+
+void SetTextInputOnEditChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEditChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        TextFieldModelNG::SetOnEditChange(frameNode, std::move(*onEditChange));
+    } else {
+        TextFieldModelNG::SetOnEditChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnEditChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnEditChange(frameNode, nullptr);
+}
+
+void SetTextInputFilter(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string inputFilter(value);
+    if (callback) {
+        auto onError = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetInputFilter(frameNode, inputFilter, *onError);
+    } else {
+        TextFieldModelNG::SetInputFilter(frameNode, inputFilter, nullptr);
+    }
+}
+
+void ResetTextInputFilter(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetInputFilter(frameNode, "", nullptr);
+}
+
+void SetTextInputOnSubmitWithEvent(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onSubmit = reinterpret_cast<std::function<void(int32_t, NG::TextFieldCommonEvent&)>*>(callback);
+        TextFieldModelNG::SetOnSubmit(frameNode, std::move(*onSubmit));
+    } else {
+        TextFieldModelNG::SetOnSubmit(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnSubmitWithEvent(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnSubmit(frameNode, nullptr);
+}
+
+void SetTextInputOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        TextFieldModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnChange(frameNode, nullptr);
+}
+
+void SetTextInputOnTextSelectionChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(int32_t, int32_t)>*>(callback);
+        TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(*onChange));
+    } else {
+        TextFieldModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnTextSelectionChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+}
+
+void SetTextInputOnContentScroll(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onScroll = reinterpret_cast<std::function<void(float, float)>*>(callback);
+        TextFieldModelNG::SetOnContentScroll(frameNode, std::move(*onScroll));
+    } else {
+        TextFieldModelNG::SetOnContentScroll(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnContentScroll(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnContentScroll(frameNode, nullptr);
+}
+
+void SetTextInputOnCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCopy = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetOnCopy(frameNode, std::move(*onCopy));
+    } else {
+        TextFieldModelNG::SetOnCopy(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnCopy(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnCopy(frameNode, nullptr);
+}
+
+void SetTextInputOnCut(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCut = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetOnCut(frameNode, std::move(*onCut));
+    } else {
+        TextFieldModelNG::SetOnCut(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnCut(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnCut(frameNode, nullptr);
+}
+
+void SetTextInputOnPaste(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onPasteWithEvent = reinterpret_cast<std::function<void(
+                const std::string&, NG::TextCommonEvent&)>*>(callback);
+        TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(*onPasteWithEvent));
+    } else {
+        TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnPaste(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
+}
 
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -1055,7 +1362,16 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputWordBreak, ResetTextInputWordBreak, SetTextInputPasswordRules, ResetTextInputPasswordRules,
         SetTextInputEnableAutoFill, ResetTextInputEnableAutoFill, ResetTextInputPadding, SetTextInputAdaptMinFontSize,
         ResetTextInputAdaptMinFontSize, SetTextInputAdaptMaxFontSize, ResetTextInputAdaptMaxFontSize,
-        SetTextInputHeightAdaptivePolicy, ResetTextInputHeightAdaptivePolicy };
+        SetTextInputHeightAdaptivePolicy, ResetTextInputHeightAdaptivePolicy, SetTextInputPlaceholderFontEnum,
+        SetTextInputTextOverflow, ResetTextInputTextOverflow, SetTextInputTextIndent, ResetTextInputTextIndent,
+        SetTextInputSelectAll, ResetTextInputSelectAll, SetTextInputShowCounter, ResetTextInputShowCounter,
+        SetTextInputOnEditChange, ResetTextInputOnEditChange, SetTextInputFilter, ResetTextInputFilter,
+        SetTextInputOnSubmitWithEvent, ResetTextInputOnSubmitWithEvent, SetTextInputOnChange, ResetTextInputOnChange,
+        SetTextInputOnTextSelectionChange, ResetTextInputOnTextSelectionChange, SetTextInputOnContentScroll,
+        ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy,
+        SetTextInputOnCut, ResetTextInputOnCut, SetTextInputOnPaste, ResetTextInputOnPaste,
+        GetTextInputSelectionMenuHidden, SetTextInputShowPassword, ResetTextInputShowPassword,
+        GetTextInputShowPassword };
     return &modifier;
 }
 
@@ -1133,6 +1449,21 @@ void SetOnTextInputSelectionChange(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));
+}
+
+void SetOnTextInputEditChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [node, extraParam](bool isEditing) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXT_INPUT_EDIT_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = static_cast<int>(isEditing);
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnEditChanged(frameNode, std::move(onChange));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

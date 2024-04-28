@@ -48,6 +48,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
@@ -847,6 +848,9 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
+    if (attachFunc_) {
+        attachFunc_(GetId());
+    }
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -884,6 +888,9 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
     }
     if (configurationChange.colorModeUpdate) {
         pattern_->OnColorConfigurationUpdate();
+        if (colorModeUpdateCallback_) {
+            colorModeUpdateCallback_();
+        }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -940,6 +947,9 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
         }
     }
     pattern_->OnDetachFromMainTree();
+    if (detachFunc_) {
+        detachFunc_(GetId());
+    }
     eventHub_->FireOnDisappear();
     renderContext_->OnNodeDisappear(recursive);
 }
@@ -1136,9 +1146,18 @@ RectF FrameNode::GetRectWithRender()
     return currFrameRect;
 }
 
+bool FrameNode::CheckAncestorPageShow()
+{
+    auto pageNode = GetPageNode();
+    if (!pageNode) {
+        return true;
+    }
+    return pageNode->GetPattern<PagePattern>()->IsOnShow();
+}
+
 void FrameNode::TriggerOnSizeChangeCallback()
 {
-    if (!IsActive()) {
+    if (!IsActive() || !CheckAncestorPageShow()) {
         return;
     }
     if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
@@ -1208,10 +1227,11 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     double currentVisibleRatio =
         std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect), VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
     if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
+        auto lastVisibleCallbackRatio = lastVisibleCallbackRatio_;
         ProcessAllVisibleCallback(visibleAreaUserRatios, visibleAreaUserCallback,
-            currentVisibleRatio, lastVisibleCallbackRatio_);
+            currentVisibleRatio, lastVisibleCallbackRatio);
         ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback,
-            currentVisibleRatio, lastVisibleCallbackRatio_);
+            currentVisibleRatio, lastVisibleCallbackRatio);
         lastVisibleRatio_ = currentVisibleRatio;
     }
 }
@@ -2359,7 +2379,7 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
-OffsetF FrameNode::GetPaintRectCenter() const
+OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
@@ -2368,6 +2388,9 @@ OffsetF FrameNode::GetPaintRectCenter() const
     auto center = offset + OffsetF(trans.Width() / 2.0f, trans.Height() / 2.0f);
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
+        if (checkWindowBoundary && parent->IsWindowBoundary()) {
+            break;
+        }
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         auto scale = renderContext->GetTransformScale();
@@ -2997,6 +3020,7 @@ void FrameNode::Layout()
     if (SelfOrParentExpansive()) {
         if (IsRootMeasureNode() && !needRestoreSafeArea_ && SelfExpansive()) {
             GetGeometryNode()->RestoreCache();
+            needRestoreSafeArea_ = true;
         } else if (needRestoreSafeArea_) {
             // if safeArea not restored in measure because of constraint not changed and so on,
             // restore this node
@@ -3048,16 +3072,16 @@ void FrameNode::Layout()
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
-    bool isFocusOnOverlay = pipeline->CheckOverlayFocus();
-    AvoidKeyboard(isFocusOnPage || isFocusOnOverlay);
+    AvoidKeyboard(isFocusOnPage);
     bool needSyncRsNode = false;
-    bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode);
+    DirtySwapConfig config;
+    bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode, config);
     // skip wrapping task if node will not sync
     CHECK_NULL_VOID(willSyncGeoProperties);
-    auto task = [weak = WeakClaim(this), needSync = needSyncRsNode]() {
+    auto task = [weak = WeakClaim(this), needSync = needSyncRsNode, dirtyConfig = config]() {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        frameNode->SyncGeometryNode(needSync);
+        frameNode->SyncGeometryNode(needSync, dirtyConfig);
     };
     pipeline->AddSyncGeometryNodeTask(task);
     if (IsRootMeasureNode()) {
@@ -3100,13 +3124,23 @@ bool FrameNode::ParentExpansive()
     return parentOpts && parentOpts->Expansive();
 }
 
+void FrameNode::UpdateFocusState()
+{
+    auto focusHub = GetFocusHub();
+    if (focusHub && focusHub->IsCurrentFocus()) {
+        focusHub->ClearFocusState(false);
+        focusHub->PaintFocusState(false);
+    }
+}
+
 bool FrameNode::SelfOrParentExpansive()
 {
     return SelfExpansive() || ParentExpansive();
 }
 
-bool FrameNode::OnLayoutFinish(bool& needSyncRsNode)
+bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 {
+    isLayoutComplete_ = true;
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
     if (!isActive_ && !hasTransition) {
@@ -3144,7 +3178,10 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode)
     }
     renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());
     renderContext_->SyncPartialRsProperties();
-    DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
+    config = { .frameSizeChange = frameSizeChange,
+        .frameOffsetChange = frameOffsetChange,
+        .contentSizeChange = contentSizeChange,
+        .contentOffsetChange = contentOffsetChange };
     // check if need to paint content.
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(layoutAlgorithm_);
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -3166,10 +3203,13 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode)
     return true;
 }
 
-void FrameNode::SyncGeometryNode(bool needSyncRsNode)
+void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config)
 {
-    ACE_LAYOUT_SCOPED_TRACE("SyncGeometryNode[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
-        GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+    if (SystemProperties::GetSyncDebugTraceEnabled()) {
+        ACE_LAYOUT_SCOPED_TRACE("SyncGeometryNode[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+            GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+    }
+
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
         if (!renderContext_->HasBorderColor()) {
@@ -3192,8 +3232,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode)
         }
     }
     if (needSyncRsNode) {
-        pattern_->BeforeSyncGeometryProperties();
-        isLayoutComplete_ = true;
+        pattern_->BeforeSyncGeometryProperties(config);
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
         TriggerOnSizeChangeCallback();
     }
@@ -3213,11 +3252,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode)
     }
 
     // update focus state
-    auto focusHub = GetFocusHub();
-    if (focusHub && focusHub->IsCurrentFocus()) {
-        focusHub->ClearFocusState(false);
-        focusHub->PaintFocusState(false);
-    }
+    UpdateFocusState();
 
     // rebuild child render node.
     RebuildRenderContextTree();
@@ -3864,6 +3899,9 @@ void FrameNode::GetVisibleRect(RectF& visibleRect, RectF& frameRect) const
         visibleRect = ApplyFrameNodeTranformToRect(visibleRect, parentUi);
         auto parentRect = parentUi->GetPaintRectWithTransform();
         visibleRect = visibleRect.Constrain(parentRect);
+        if (visibleRect.IsEmpty()) {
+            return;
+        }
         frameRect = ApplyFrameNodeTranformToRect(frameRect, parentUi);
         parentUi = parentUi->GetAncestorNodeOfFrame(true);
     }

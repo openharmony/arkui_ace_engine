@@ -153,7 +153,8 @@ void PanRecognizer::OnRejected()
 void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end)
 {
     PointF windowPoint(event.x, event.y);
-    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
 
     TouchEvent transformEvent = event;
     transformEvent.x = windowPoint.GetX();
@@ -296,7 +297,8 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         UpdateTouchPointInVelocityTracker(event, true);
     }
 
-    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+    if ((currentFingers_ <= fingers_) &&
+        (refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
             (*onActionCancel_)();
@@ -310,16 +312,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             SendCallbackMsg(onActionEnd_);
             ReportSlideOff();
             averageDistance_.Reset();
-            int64_t overTime = GetSysTimestamp();
-            int64_t inputTime = overTime;
-            if (firstInputTime_.has_value()) {
-                inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
-            }
-            if (SystemProperties::GetTraceInputEventEnabled()) {
-                ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PanGesture",
-                    static_cast<long long>(inputTime), static_cast<long long>(overTime));
-            }
-            firstInputTime_.reset();
+            AddOverTimeTrace();
             refereeState_ = RefereeState::READY;
         }
     }
@@ -356,16 +349,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         // AxisEvent is single one.
         SendCallbackMsg(onActionEnd_);
         ReportSlideOff();
-        int64_t overTime = GetSysTimestamp();
-        int64_t inputTime = overTime;
-        if (firstInputTime_.has_value()) {
-            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
-        }
-        if (SystemProperties::GetTraceInputEventEnabled()) {
-            ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PanGesture",
-                static_cast<long long>(inputTime), static_cast<long long>(overTime));
-        }
-        firstInputTime_.reset();
+        AddOverTimeTrace();
     }
 }
 
@@ -379,8 +363,10 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     PointF windowPoint(event.GetOffset().GetX(), event.GetOffset().GetY());
     PointF windowTouchPoint(touchPoints_[event.id].GetOffset().GetX(), touchPoints_[event.id].GetOffset().GetY());
-    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false, isPostEventResult_);
-    NGGestureRecognizer::Transform(windowTouchPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(windowTouchPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
 
@@ -511,7 +497,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& /*event*/)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
+    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         // AxisEvent is single one.
         SendCancelMsg();
         refereeState_ = RefereeState::READY;
@@ -632,7 +618,8 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         }
         info.SetPointerId(touchPoint.id);
         PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+            isPostEventResult_, touchPoint.postEventNodeId);
         info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
@@ -657,6 +644,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
+        info.SetPointerEvent(lastTouchEvent_.pointerEvent);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -882,5 +870,19 @@ bool PanRecognizer::AboutToAddCurrentFingers(int32_t touchId)
     }
     currentFingers_++;
     return true;
+}
+
+void PanRecognizer::AddOverTimeTrace()
+{
+    int64_t overTime = GetSysTimestamp();
+    int64_t inputTime = overTime;
+    if (firstInputTime_.has_value()) {
+        inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+    }
+    if (SystemProperties::GetTraceInputEventEnabled()) {
+        ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PanGesture",
+            static_cast<long long>(inputTime), static_cast<long long>(overTime));
+    }
+    firstInputTime_.reset();
 }
 } // namespace OHOS::Ace::NG

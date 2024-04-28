@@ -121,7 +121,7 @@ private:
 
     static panda::Local<panda::JSValueRef> ConstructorInterceptor(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 
-    static void DestructorInterceptor(void* nativePtr, void* data);
+    static void DestructorInterceptor(void *env, void* nativePtr, void* data);
 
     static panda::Local<panda::JSValueRef> JSConstructorInterceptor(panda::JsiRuntimeCallInfo *runtimeCallInfo);
 

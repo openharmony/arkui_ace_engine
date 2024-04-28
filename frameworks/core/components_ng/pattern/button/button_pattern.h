@@ -373,6 +373,7 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> hoverListener_;
     bool isHover_ = false;
+    bool isFocus_ = false;
     bool isPress_ = false;
 
     bool isInHover_ = false;
@@ -383,6 +384,7 @@ private:
     std::optional<Color> blendClickColor_ = std::nullopt;
     std::optional<Color> blendHoverColor_ = std::nullopt;
 
+    bool isTextFadeOut_ = false;
     bool isColorUpdateFlag_ = false;
     SizeF preFrameSize_;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);

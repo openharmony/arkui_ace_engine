@@ -160,10 +160,7 @@ public:
         uiStatus_ = UIStatus::UNSELECTED;
     }
 
-    RefPtr<GroupManager> GetGroupManager() const
-    {
-        return groupManager_.Upgrade();
-    }
+    RefPtr<GroupManager> GetGroupManager();
 
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
@@ -206,6 +203,9 @@ private:
         CheckBoxStyle checkBoxGroupStyle);
     void GetCheckBoxGroupStyle(const RefPtr<FrameNode>& frameNode, CheckBoxStyle& checkboxGroupStyle);
     void InnerFocusPaintCircle(RoundRect& paintRect);
+    void GetCheckBoxNameList(const RefPtr<FrameNode>& frameNode,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, const std::string& group,
+        bool select, std::vector<std::string>& vec);
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
     RefPtr<ClickEvent> clickListener_;
@@ -227,7 +227,7 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool initSelected_ = false;
-    std::string navId_ = "";
+    std::optional<std::string> currentNavId_ = std::nullopt;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

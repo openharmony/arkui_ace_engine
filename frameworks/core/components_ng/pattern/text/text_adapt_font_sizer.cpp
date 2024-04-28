@@ -41,6 +41,7 @@ bool TextAdaptFontSizer::AdaptMaxFontSize(TextStyle& textStyle, const std::strin
         return false;
     }
     auto maxSize = GetMaxMeasureSize(contentConstraint);
+    GetSuitableSize(maxSize, layoutWrapper);
     // Use the minFontSize to layout the paragraph. While using the minFontSize, if the paragraph could be layout in 1
     // line, then increase the font size and try to layout using the maximum available fontsize.
     textStyle.SetFontSize(Dimension(minFontSize));
@@ -69,6 +70,8 @@ bool TextAdaptFontSizer::AdaptMaxFontSize(TextStyle& textStyle, const std::strin
         }
     }
     fontSize = static_cast<float>((left - 1 == length - 1) ? (maxFontSize) : (minFontSize + stepSize * (left - 1)));
+    fontSize = LessNotEqual(fontSize, minFontSize) ? minFontSize : fontSize;
+    fontSize = GreatNotEqual(fontSize, maxFontSize) ? maxFontSize : fontSize;
     textStyle.SetFontSize(Dimension(fontSize));
     return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
 }
@@ -94,6 +97,7 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
     int32_t right = length - 1;
     float fontSize = 0.0f;
     auto maxSize = GetMaxMeasureSize(contentConstraint);
+    GetSuitableSize(maxSize, layoutWrapper);
     while (left <= right) {
         int32_t mid = left + (right - left) / 2;
         fontSize = static_cast<float>((mid == length - 1) ? (maxFontSize) : (minFontSize + stepSize * mid));
@@ -108,6 +112,8 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
         }
     }
     fontSize = static_cast<float>((left - 1 == length - 1) ? (maxFontSize) : (minFontSize + stepSize * (left - 1)));
+    fontSize = LessNotEqual(fontSize, minFontSize) ? minFontSize : fontSize;
+    fontSize = GreatNotEqual(fontSize, maxFontSize) ? maxFontSize : fontSize;
     textStyle.SetFontSize(Dimension(fontSize));
     return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
 }

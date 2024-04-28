@@ -40,12 +40,14 @@ public:
     RefPtr<FrameNode> GetMenuBarRow();
     RefPtr<FrameNode> GetMenuBar();
     RefPtr<FrameNode> GetMenuButton();
+    RefPtr<FrameNode> GetDivider();
     RefPtr<FrameNode> GetCloseButton();
     RefPtr<FrameNode> GetMenuIcon();
     RefPtr<FrameNode> GetCloseIcon();
     void UpdateColor();
-    void UpdateMenuBarColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar);
+    void UpdateMenuBarColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar, bool isLight);
     void UpdateButtonColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button);
+    void UpdateDividerColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& divider, bool isLight);
     void UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon);
     void UpdateLayout();
     void UpdateMenuBarLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar, bool isRtl);

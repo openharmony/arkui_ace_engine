@@ -465,6 +465,12 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 
+    scrollable->SetOnContinuousSliding([weak = WeakClaim(this)]() -> double {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, 0.0);
+        return pattern->GetMainContentSize();
+    });
+
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
@@ -2006,7 +2012,11 @@ void ScrollablePattern::Fling(double flingVelocity)
     CHECK_NULL_VOID(scrollableEvent_);
     auto scrollable = scrollableEvent_->GetScrollable();
     CHECK_NULL_VOID(scrollable);
-    scrollable->StartScrollAnimation(0.0, flingVelocity);
+    if (IsOutOfBoundary()) {
+        scrollable->HandleOverScroll(flingVelocity);
+    } else {
+        scrollable->StartScrollAnimation(0.0f, flingVelocity);
+    }
 }
 
 void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus)
@@ -2331,13 +2341,13 @@ void ScrollablePattern::HandleHotZone(
 void ScrollablePattern::HandleMoveEventInComp(const PointF& point)
 {
     float offsetPct = IsInHotZone(point);
-    if (NearZero(offsetPct)) {
+    if ((Positive(offsetPct) && !IsAtTop()) || (Negative(offsetPct) && !IsAtBottom())) {
+        // The drag point enters the hot zone
+        HotZoneScroll(offsetPct);
+    } else {
         // Although it entered the rolling component, it is not in the rolling component hot zone.Then stop
         // scrolling
         HandleLeaveHotzoneEvent();
-    } else {
-        // The drag point enters the hot zone
-        HotZoneScroll(offsetPct);
     }
 }
 
@@ -2507,6 +2517,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
         fixedVelocityMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
             auto pattern = weakScroll.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (pattern->IsReverse()) {
+                offset = -offset;
+            }
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
         });
         fixedVelocityMotion_->SetVelocity(velocity);

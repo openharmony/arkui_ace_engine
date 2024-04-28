@@ -91,7 +91,7 @@ private:
 };
 
 using DataAbilityHelperImpl = std::function<RefPtr<DataAbilityHelper>()>;
-class DataProviderManagerStandard : public DataProviderManagerInterface {
+class ACE_FORCE_EXPORT DataProviderManagerStandard : public DataProviderManagerInterface {
     DECLARE_ACE_TYPE(DataProviderManagerStandard, DataProviderManagerInterface)
 
 public:
@@ -105,6 +105,7 @@ public:
     void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) override;
 
     int32_t GetDataProviderFile(const std::string& uriStr, const std::string& mode) override;
+    int32_t ReadMovingPhotoVideo(const std::string &uri);
 
 private:
     void InitHelper();

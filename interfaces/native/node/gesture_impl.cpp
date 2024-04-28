@@ -23,6 +23,7 @@
 
 #include "core/gestures/gesture_event.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/event/ui_input_event_impl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,6 +67,14 @@ ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_Ges
             break;
     }
     return ret;
+}
+
+const ArkUI_UIInputEvent* OH_ArkUI_GestureEvent_GetRawInputEvent(const ArkUI_GestureEvent* event)
+{
+    if (!event) {
+        return nullptr;
+    }
+    return reinterpret_cast<ArkUI_UIInputEvent*>(event->eventData.rawPointerEvent);
 }
 
 int32_t OH_ArkUI_LongPress_GetRepeatCount(const ArkUI_GestureEvent* event)
@@ -132,6 +141,8 @@ namespace OHOS::Ace::GestureModel {
 
 constexpr int32_t DEFAULT_PAN_FINGERS = 1;
 constexpr int32_t MAX_PAN_FINGERS = 10;
+constexpr double DEFAULT_PINCH_DISTANCE = 5.0f;
+constexpr double DEFAULT_SWIPE_SPEED = 100.0f;
 
 struct GestureInnerData {
     void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParam);
@@ -155,9 +166,14 @@ ArkUI_GestureRecognizer* CreateLongPressGesture(int32_t fingers, bool repeatResu
 
 ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingers, double distance)
 {
+    if (LessOrEqual(distance, 0.0f)) {
+        distance = DEFAULT_PINCH_DISTANCE;
+    }
+    double distanceNum = OHOS::Ace::NodeModel::GetFullImpl()->getBasicAPI()->convertLengthMetricsUnit(
+        distance, static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_PX), static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_VP));
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPinchGesture(fingers,
-        distance);
+        distanceNum);
     return new ArkUI_GestureRecognizer{ PINCH_GESTURE, gesture, nullptr };
 }
 
@@ -171,9 +187,14 @@ ArkUI_GestureRecognizer* CreateRotationGesture(int32_t fingers, double angle)
 
 ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingers, ArkUI_GestureDirectionMask directions, double speed)
 {
+    if (LessOrEqual(speed, 0.0f)) {
+        speed = DEFAULT_SWIPE_SPEED;
+    }
+    double speedNum = OHOS::Ace::NodeModel::GetFullImpl()->getBasicAPI()->convertLengthMetricsUnit(
+        speed, static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_PX), static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_VP));
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createSwipeGesture(fingers,
-        directions, speed);
+        directions, speedNum);
     return new ArkUI_GestureRecognizer{ SWIPE_GESTURE, gesture, nullptr };
 }
 
@@ -234,7 +255,13 @@ ArkUI_GestureRecognizerType GetGestureType(ArkUI_GestureRecognizer* recognizer)
 void HandleGestureEvent(ArkUINodeEvent* event)
 {
     auto* extraData = reinterpret_cast<GestureInnerData*>(event->extraParam);
-    extraData->targetReceiver(reinterpret_cast<ArkUI_GestureEvent *>(&event->gestureAsyncEvent), extraData->extraParam);
+    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent *>(&event->gestureAsyncEvent);
+    ArkUI_UIInputEvent uiEvent;
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+    uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    uiEvent.inputEvent = gestureEvent->eventData.rawPointerEvent;
+    gestureEvent->eventData.rawPointerEvent = &uiEvent;
+    extraData->targetReceiver(gestureEvent, extraData->extraParam);
     delete event;
 }
 

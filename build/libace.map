@@ -76,12 +76,14 @@
       OHOS::Ace::UdmfClient::*;
       OHOS::Ace::DragEvent::*;
       OHOS::Ace::ResourceManager::*;
+      OHOS::Ace::ResourceWrapper::*;
       OHOS::Ace::NG::AppBarView::*;
       OHOS::Ace::Color::*;
       OHOS::Ace::NG::UIObserverHandler::*;
       OHOS::Ace::UIDisplaySync::*;
       OHOS::Ace::Dimension::*;
       OHOS::Ace::Matrix4::*;
+      OHOS::Ace::NG::DragDropFuncWrapper::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 
@@ -101,14 +103,93 @@
       vtable?for?OHOS::Ace::SubwindowManager;
       vtable?for?OHOS::Ace::ThemeConstants;
       vtable?for?OHOS::Ace::UIContentImpl;
+      vtable?for?OHOS::Ace::ResourceWrapper;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
       VTT?for?OHOS::Ace::Framework::MediaQueryInfo;
       VTT?for?OHOS::Ace::Platform::AceContainer;
       VTT?for?OHOS::Ace::PluginComponentManager::UIServiceListener;
+      VTT?for?OHOS::Ace::ResourceWrapper;
       VTT?for?OHOS::Ace::Scheduler;
       VTT?for?OHOS::Ace::ThemeConstants;
+
+      OHOS::Ace::AceScopedTraceFlag::*;
+      OHOS::Ace::AnimationUtils::*;
+      OHOS::Ace::ContainerScope::*;
+      OHOS::Ace::Dimension::*;
+      OHOS::Ace::ImageSourceInfo::*;
+      OHOS::Ace::JsonUtil::*;
+      OHOS::Ace::Recorder::*;
+      OHOS::Ace::Referenced::*;
+      OHOS::Ace::Recorder::IsCacheAvaliable*;
+      OHOS::Ace::Recorder::EventRecorder::*;
+      OHOS::Ace::Recorder::EventParamsBuilder::*;
+      "OHOS::Ace::PipelineBase::GetCurrentContext()";
+      OHOS::Ace::V2::COLUMN_ETS_TAG;
+      OHOS::Ace::V2::IMAGE_ETS_TAG;
+      OHOS::Ace::V2::MOVING_PHOTO_ETS_TAG;
+      OHOS::Ace::NG::AccessibilityProperty::*;
+      OHOS::Ace::NG::BoxLayoutAlgorithm::*;
+      OHOS::Ace::NG::EventHub::*;
+      OHOS::Ace::NG::FlexLayoutAlgorithm::*;
+      OHOS::Ace::NG::FrameNode::*;
+      OHOS::Ace::NG::GestureEventHub::*;
+      OHOS::Ace::NG::ImagePattern::*;
+      OHOS::Ace::NG::LayoutProperty::*;
+      OHOS::Ace::NG::LayoutWrapper::*;
+      OHOS::Ace::NG::LongPressEventActuator::*;
+      OHOS::Ace::NG::MediaPlayer::*;
+      OHOS::Ace::NG::PipelineContext::*;
+      OHOS::Ace::NG::RenderContext::*;
+      OHOS::Ace::NG::RenderSurface::*;
+      OHOS::Ace::NG::UINode::*;
+      OHOS::Ace::NG::ViewStackProcessor::*;
+      OHOS::Ace::DataAbilityHelperStandard::*;
+      OHOS::Ace::DataProviderManagerStandard::*;
+
+      "OHOS::Ace::ElementRegister::GetInstance()";
+      "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";
+      "OHOS::Ace::ElementRegister::AddUINode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
+      "OHOS::Ace::ElementRegister::GetNodeById(int)";
+
+      construction?vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm-in-OHOS::Ace::NG::MovingPhotoLayoutAlgorithm;
+      construction?vtable?for?OHOS::Ace::NG::EventHub-in-OHOS::Ace::NG::MovingPhotoEventHub;
+      construction?vtable?for?OHOS::Ace::NG::FrameNode-in-OHOS::Ace::NG::MovingPhotoNode;
+      construction?vtable?for?OHOS::Ace::NG::FlexLayoutAlgorithm-in-OHOS::Ace::NG::LinearLayoutAlgorithm;
+      construction?vtable?for?OHOS::Ace::NG::FlexLayoutProperty-in-OHOS::Ace::NG::LinearLayoutProperty;
+      construction?vtable?for?OHOS::Ace::NG::LayoutProperty-in-OHOS::Ace::NG::FlexLayoutProperty;
+      construction?vtable?for?OHOS::Ace::NG::LayoutProperty-in-OHOS::Ace::NG::LinearLayoutProperty;
+      construction?vtable?for?OHOS::Ace::NG::LayoutProperty-in-OHOS::Ace::NG::MovingPhotoLayoutProperty;
+      construction?vtable?for?OHOS::Ace::NG::LayoutWrapper-in-OHOS::Ace::NG::MovingPhotoNode;
+      construction?vtable?for?OHOS::Ace::NG::UINode-in-OHOS::Ace::NG::MovingPhotoNode;
+
+      non-virtual?thunk?to?OHOS::Ace::NG::UINode::*;
+      non-virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
+
+      virtual?thunk?to?OHOS::Ace::NG::UINode::*;
+      virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
+
+      vtable?for?OHOS::Ace::NG::AccessibilityProperty;
+      vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
+      vtable?for?OHOS::Ace::NG::EventHub;
+      vtable?for?OHOS::Ace::NG::FlexLayoutProperty;
+      vtable?for?OHOS::Ace::NG::LayoutProperty;
+      vtable?for?OHOS::Ace::NG::LinearLayoutAlgorithm;
+      vtable?for?OHOS::Ace::NG::LinearLayoutProperty;
+      vtable?for?OHOS::Ace::NG::LongPressRecognizer;
+      vtable?for?OHOS::Ace::NG::MovingPhotoEventHub;
+      vtable?for?OHOS::Ace::NG::MovingPhotoLayoutProperty;
+      vtable?for?OHOS::Ace::NG::MovingPhotoNode;
+      vtable?for?OHOS::Ace::NG::TouchEventActuator;
+
+      VTT?for?OHOS::Ace::NG::AccessibilityProperty;
+      VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
+      VTT?for?OHOS::Ace::NG::EventHub;
+      VTT?for?OHOS::Ace::NG::FlexLayoutAlgorithm;
+      VTT?for?OHOS::Ace::NG::LayoutProperty;
+      VTT?for?OHOS::Ace::NG::LongPressRecognizer;
+      VTT?for?OHOS::Ace::NG::TouchEventActuator;
     };
   local:
     *;

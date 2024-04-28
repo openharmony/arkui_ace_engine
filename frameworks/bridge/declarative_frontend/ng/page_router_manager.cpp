@@ -29,6 +29,7 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
 #include "bridge/js_frontend/frontend_delegate.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/container.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
@@ -44,6 +45,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
+constexpr int32_t BUNDLE_START_POS = 8;
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
@@ -63,7 +65,7 @@ void ExitToDesktop()
             pipeline->SendEventToAccessibility(event);
             pipeline->Finish(false);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPageRouterExitToDesktop");
 }
 
 } // namespace
@@ -97,7 +99,8 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
             auto pageRouterManager = weak.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             taskExecutor->PostTask(
-                [pageRouterManager, info]() { pageRouterManager->LoadOhmUrl(info); }, TaskExecutor::TaskType::JS);
+                [pageRouterManager, info]() { pageRouterManager->LoadOhmUrl(info); },
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrl");
         };
 
         auto silentInstallErrorCallBack = [taskExecutor, instanceId](int32_t errorCode, const std::string& errorMsg) {
@@ -106,7 +109,7 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
                 [errorCode, errorMsg]() {
                     LOGW("Run page error = %{public}d, errorMsg = %{public}s", errorCode, errorMsg.c_str());
                 },
-                TaskExecutor::TaskType::JS);
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterErrorLog");
         };
 
         pageUrlChecker->LoadPageUrl(url, callback, silentInstallErrorCallBack);
@@ -143,7 +146,8 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
     auto pageRouterManager = AceType::Claim(this);
     CHECK_NULL_VOID(pageRouterManager);
     taskExecutor->PostTask(
-        [pageRouterManager, info]() { pageRouterManager->LoadOhmUrl(info); }, TaskExecutor::TaskType::JS);
+        [pageRouterManager, info]() { pageRouterManager->LoadOhmUrl(info); },
+        TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrl");
 #endif
 }
 
@@ -183,7 +187,7 @@ void PageRouterManager::Push(const RouterPageInfo& target)
                 CHECK_NULL_VOID(router);
                 router->Push(target);
             },
-            TaskExecutor::TaskType::JS);
+            "ArkUIPageRouterPush", TaskExecutor::TaskType::JS);
         return;
     }
     RouterOptScope scope(this);
@@ -202,7 +206,7 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
                 CHECK_NULL_VOID(router);
                 router->PushNamedRoute(target);
             },
-            TaskExecutor::TaskType::JS);
+            "ArkUIPageRouterPushNamedRoute", TaskExecutor::TaskType::JS);
         return;
     }
     RouterOptScope scope(this);
@@ -246,7 +250,7 @@ void PageRouterManager::Replace(const RouterPageInfo& target)
                 CHECK_NULL_VOID(router);
                 router->Replace(target);
             },
-            TaskExecutor::TaskType::JS);
+            "ArkUIPageRouterReplace", TaskExecutor::TaskType::JS);
         return;
     }
     RouterOptScope scope(this);
@@ -265,7 +269,7 @@ void PageRouterManager::ReplaceNamedRoute(const RouterPageInfo& target)
                 CHECK_NULL_VOID(router);
                 router->ReplaceNamedRoute(target);
             },
-            TaskExecutor::TaskType::JS);
+            "ArkUIPageRouterReplaceNamedRoute", TaskExecutor::TaskType::JS);
         return;
     }
     RouterOptScope scope(this);
@@ -288,7 +292,7 @@ void PageRouterManager::BackWithTarget(const RouterPageInfo& target)
                 CHECK_NULL_VOID(router);
                 router->BackWithTarget(target);
             },
-            TaskExecutor::TaskType::JS);
+            "ArkUIPageRouterBackWithTarget", TaskExecutor::TaskType::JS);
         return;
     }
     RouterOptScope scope(this);
@@ -310,7 +314,7 @@ void PageRouterManager::BackToIndexWithTarget(int32_t index, const std::string& 
                 CHECK_NULL_VOID(router);
                 router->BackToIndexWithTarget(index, params);
             },
-            TaskExecutor::TaskType::JS);
+            "ArkUIPageRouterBackToIndex", TaskExecutor::TaskType::JS);
         return;
     }
     RouterOptScope scope(this);
@@ -329,7 +333,7 @@ void PageRouterManager::Clear()
                 CHECK_NULL_VOID(router);
                 router->Clear();
             },
-            TaskExecutor::TaskType::JS);
+            "ArkUIPageRouterClear", TaskExecutor::TaskType::JS);
         return;
     }
     RouterOptScope scope(this);
@@ -875,7 +879,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([pageUrlChecker, url = target.url]() { pageUrlChecker->CheckPreload(url); },
-        TaskExecutor::TaskType::BACKGROUND);
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIPageRouterPushOhmUrl");
 }
 
 void PageRouterManager::StartPush(const RouterPageInfo& target)
@@ -899,14 +903,15 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
             auto pageRouterManager = weak.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             taskExecutor->PostTask(
-                [pageRouterManager, target]() { pageRouterManager->PushOhmUrl(target); }, TaskExecutor::TaskType::JS);
+                [pageRouterManager, target]() { pageRouterManager->PushOhmUrl(target); },
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterPushOhmUrl");
         };
 
         auto silentInstallErrorCallBack = [errorCallback = target.errorCallback, taskExecutor, instanceId](
                                               int32_t errorCode, const std::string& errorMsg) {
             ContainerScope scope(instanceId);
             taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
-                TaskExecutor::TaskType::JS);
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterErrorCallback");
         };
 
         CleanPageOverlay();
@@ -973,7 +978,7 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([pageUrlChecker, url = target.url]() { pageUrlChecker->CheckPreload(url); },
-        TaskExecutor::TaskType::BACKGROUND);
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIPageRouterReplaceOhmUrl");
 }
 
 void PageRouterManager::StartReplace(const RouterPageInfo& target)
@@ -998,14 +1003,14 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
             auto pageRouterManager = weak.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             taskExecutor->PostTask([pageRouterManager, target]() { pageRouterManager->ReplaceOhmUrl(target); },
-                TaskExecutor::TaskType::JS);
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterReplaceOhmUrl");
         };
 
         auto silentInstallErrorCallBack = [errorCallback = target.errorCallback, taskExecutor, instanceId](
                                               int32_t errorCode, const std::string& errorMsg) {
             ContainerScope scope(instanceId);
             taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
-                TaskExecutor::TaskType::JS);
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterErrorCallback");
         };
 
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
@@ -1082,9 +1087,6 @@ void PageRouterManager::StartBackToIndex(int32_t index, const std::string& param
     }
     PopPageToIndex(index - 1, params, true, true);
     return;
-    if (!restorePageStack_.empty()) {
-        StartRestore(target);
-    }
 }
 
 void PageRouterManager::BackCheckAlert(const RouterPageInfo& target)
@@ -1169,7 +1171,11 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     if (!result) {
-        LOGE("Update RootComponent Failed or LoadNamedRouter Failed");
+#if !defined(PREVIEW)
+        if (!target.isNamedRouterMode && target.url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
+            ThrowError("Load Page Failed: " + target.url, ERROR_CODE_LOAD_PAGE_ERROR);
+        }
+#endif
         pageRouterStack_.pop_back();
         return;
     }
@@ -1190,8 +1196,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         LOGE("LoadPage OnPageReady Failed");
         return;
     }
-    AccessibilityEventType type = AccessibilityEventType::CHANGE;
-    pageNode->OnAccessibilityEvent(type);
+    pageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     LOGI("LoadPage Success");
 }
 
@@ -1455,17 +1460,20 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         auto stageManager = pipelineContext->GetStageManager();
         auto stageNode = stageManager->GetStageNode();
         auto popNode = stageNode->GetChildren().back();
-        auto popIndex = stageNode->GetChildren().size() - 1;
+        int8_t popIndex = static_cast<int8_t>(stageNode->GetChildren().size() - 1);
+        bool findPage = false;
         if (info.routerMode == RouterMode::SINGLE) {
             auto pageInfo = FindPageInStack(info.url);
             if (pageInfo.second) {
                 // find page in stack, move position and update params.
                 MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
+                findPage = true;
             }
-        } else {
-            LoadPage(GenerateNextPageId(), info, false, false);
         }
-        if (popNode == stageNode->GetChildren().back()) {
+        if (!findPage) {
+            LoadPage(GenerateNextPageId(), info, true, false);
+        }
+        if (popIndex < 0 || popNode == stageNode->GetChildren().back()) {
             return;
         }
         auto iter = pageRouterStack_.begin();
@@ -1495,5 +1503,24 @@ bool PageRouterManager::CheckIndexValid(int32_t index) const
         return false;
     }
     return true;
+}
+
+bool PageRouterManager::CheckOhmUrlValid(const std::string& ohmUrl)
+{
+    size_t bundleEndPos = ohmUrl.find('/');
+    std::string bundleName = ohmUrl.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
+    size_t moduleStartPos = bundleEndPos + 1;
+    size_t moduleEndPos = ohmUrl.find('/', moduleStartPos);
+    std::string moduleName = ohmUrl.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+    auto runtime = std::static_pointer_cast<Framework::ArkJSRuntime>(
+        Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    return runtime->IsExecuteModuleInAbcFile(bundleName, moduleName, ohmUrl);
+}
+
+void PageRouterManager::ThrowError(const std::string& msg, int32_t code)
+{
+    auto runtime = std::static_pointer_cast<Framework::ArkJSRuntime>(
+        Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    runtime->ThrowError(msg, code);
 }
 } // namespace OHOS::Ace::NG

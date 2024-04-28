@@ -17,6 +17,7 @@
 
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
 namespace OHOS::Ace::NG {
 DataPanelLayoutAlgorithm::DataPanelLayoutAlgorithm() = default;
@@ -26,6 +27,14 @@ void DataPanelLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> DataPanelLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pattern = host->GetPattern<DataPanelPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        host->GetGeometryNode()->Reset();
+        return std::nullopt;
+    }
     // 1.If user set the width and height, use the selfIdealSize.
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();

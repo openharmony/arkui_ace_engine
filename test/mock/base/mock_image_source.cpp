@@ -14,19 +14,21 @@
  */
 #include "test/mock/base/mock_image_source.h"
 namespace OHOS::Ace {
+RefPtr<MockImageSource> MockImageSource::mockImageSource_ = nullptr;
+
 RefPtr<ImageSource> ImageSource::Create(int32_t fd)
 {
-    return nullptr;
+    return MockImageSource::mockImageSource_;
 }
 
 RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
 {
-    return nullptr;
+    return MockImageSource::mockImageSource_;
 }
 
 RefPtr<ImageSource> ImageSource::Create(const std::string& filePath)
 {
-    return nullptr;
+    return MockImageSource::mockImageSource_;
 }
 
 bool ImageSource::IsAstc(const uint8_t* data, size_t size)
@@ -34,7 +36,7 @@ bool ImageSource::IsAstc(const uint8_t* data, size_t size)
     return true;
 }
 
-Size ImageSource::GetASTCInfo(const uint8_t* data, size_t size)
+ImageSource::Size ImageSource::GetASTCInfo(const uint8_t* data, size_t size)
 {
     return {0, 0};
 }

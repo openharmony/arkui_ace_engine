@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 
 class BuilderNode {
   private _JSBuilderNode: JSBuilderNode;
@@ -29,12 +29,18 @@ class BuilderNode {
   public update(params: Object) {
     this._JSBuilderNode.update(params);
   }
-  public build(builder: WrappedBuilder<Object[]>, params: Object) {
-    this._JSBuilderNode.build(builder, params);
+  public build(builder: WrappedBuilder<Object[]>, params: Object, needPrxoy: boolean = true) {
+    this._JSBuilderNode.build(builder, params, needPrxoy);
     this.nodePtr_ = this._JSBuilderNode.getNodePtr();
+  }
+  public getNodePtr(): NodePtr {
+    return this._JSBuilderNode.getValidNodePtr();
   }
   public getFrameNode(): FrameNode {
     return this._JSBuilderNode.getFrameNode();
+  }
+  public getFrameNodeWithoutCheck(): FrameNode | null {
+    return this._JSBuilderNode.getFrameNodeWithoutCheck();
   }
   public postTouchEvent(touchEvent: TouchEvent): boolean {
     return this._JSBuilderNode.postTouchEvent(touchEvent);
@@ -99,11 +105,11 @@ class JSBuilderNode extends BaseNode {
     }
     return nodeInfo;
   }
-  public build(builder: WrappedBuilder<Object[]>, params: Object) {
+  public build(builder: WrappedBuilder<Object[]>, params: Object, needPrxoy: boolean = true) {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.params_ = params;
     this.updateFuncByElmtId.clear();
-    this.nodePtr_ = super.create(builder.builder, this.params_);
+    this.nodePtr_ = super.create(builder.builder, this.params_, needPrxoy);
     this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
     if (this.frameNode_ === undefined || this.frameNode_ === null) {
       this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -136,7 +142,7 @@ class JSBuilderNode extends BaseNode {
 
   protected purgeDeletedElmtIds(): void {
     UINodeRegisterProxy.obtainDeletedElmtIds();
-    UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
   }
   public purgeDeleteElmtId(rmElmtId: number): boolean {
     const result = this.updateFuncByElmtId.delete(rmElmtId);
@@ -157,6 +163,10 @@ class JSBuilderNode extends BaseNode {
     return null;
   }
 
+  public getFrameNodeWithoutCheck(): FrameNode | null | undefined {
+    return this.frameNode_;
+  }
+
   public observeComponentCreation(func: (arg0: number, arg1: boolean) => void) {
     let elmId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmId, new WeakRef(this));
@@ -173,7 +183,7 @@ class JSBuilderNode extends BaseNode {
     const _componentName: string = classObject && 'name' in classObject ? (Reflect.get(classObject, 'name') as string) : 'unspecified UINode';
     const _popFunc: () => void =
       classObject && "pop" in classObject ? classObject.pop! : () => { };
-    const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+    const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
@@ -232,7 +242,7 @@ class JSBuilderNode extends BaseNode {
     if (idGenFunc === undefined) {
       idGenFuncUsesIndex = true;
       // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
-      idGenFunc = (item: any, index: number) => {
+      idGenFunc = (item: any, index: number): string => {
         try {
           return `${index}__${JSON.stringify(item)}`;
         } catch (e) {
@@ -295,6 +305,9 @@ class JSBuilderNode extends BaseNode {
   }
   public getNodePtr(): NodePtr {
     return this.nodePtr_;
+  }
+  public getValidNodePtr(): NodePtr {
+    return this._nativeRef?.getNativeHandle();
   }
   public dispose(): void {
     this.frameNode_?.dispose();

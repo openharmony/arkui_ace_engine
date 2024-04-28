@@ -270,6 +270,41 @@ HWTEST_F(GridLayoutInfoTest, GetContentOffset001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridLayoutInfo::GetContentOffset002
+ * @tc.desc: test GetContentOffset with irregular items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentOffset002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f }, { 3, 5.0f }, { 4, 5.0f }, { 5, 5.0f },
+        { 6, 5.0f } };
+    info.gridMatrix_ = MATRIX_DEMO_12;
+
+    auto option = GetOptionDemo12();
+
+    info.crossCount_ = 3;
+    info.childrenCount_ = 7;
+    info.hasBigItem_ = true;
+
+    info.startIndex_ = 0;
+    info.startMainLineIndex_ = 0;
+    info.currentOffset_ = -4.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 4.0f);
+
+    info.startIndex_ = 2;
+    info.startMainLineIndex_ = 1;
+    info.currentOffset_ = -11.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 17.0f);
+
+    info.currentOffset_ = -20.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 26.0f);
+
+    info.currentOffset_ = -29.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 35.0f);
+}
+
+/**
  * @tc.name: GridLayoutInfo::GetCurrentOffsetOfRegularGrid001
  * @tc.desc: test GetCurrentOffsetOfRegularGrid with varying lineHeights
  * @tc.type: FUNC

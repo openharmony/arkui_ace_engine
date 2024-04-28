@@ -27,8 +27,8 @@
 
 namespace OHOS::Ace {
 struct FileInfo {
-    FileInfo(std::string name, size_t size, time_t time)
-        : fileName(std::move(name)), fileSize(size), accessTime(time) {}
+    FileInfo(std::string name, size_t size, time_t time, size_t cnt)
+        : fileName(std::move(name)), fileSize(size), accessTime(time), accessCount(cnt) {}
 
     // file information will be sort by access time.
     bool operator<(const FileInfo& otherFile) const
@@ -38,6 +38,7 @@ struct FileInfo {
     std::string fileName;
     size_t fileSize;
     time_t accessTime;
+    size_t accessCount;
 };
 
 class ImageFileCache : public Singleton<ImageFileCache> {
@@ -67,8 +68,10 @@ private:
     void SaveCacheInner(const std::string& cacheKey, const std::string& suffix, size_t cacheSize,
         std::vector<std::string>& removeVector);
     std::string GetCacheFilePathInner(const std::string& url, const std::string& suffix);
-    bool ConvertToAstcAndWriteToFile(const void* const data, size_t size, const std::string& fileCacheKey,
-        size_t& astcSize, const std::string& url);
+    void ConvertToAstcAndWriteToFile(const std::string& fileCacheKey, const std::string& filePath,
+        const std::string& url);
+    bool WriteFile(const std::string& url, const void* const data, size_t size,
+        const std::string& fileCacheKey, const std::string& suffix);
 
     std::shared_mutex cacheFilePathMutex_;
     std::string cacheFilePath_;
@@ -78,7 +81,7 @@ private:
     std::atomic<float> clearCacheFileRatio_ = 0.5f; // default clear ratio is 0.5
 
     std::mutex cacheFileSizeMutex_;
-    int64_t cacheFileSize_ = 0;
+    size_t cacheFileSize_ = 0;
 
     std::mutex cacheFileInfoMutex_;
     // lru

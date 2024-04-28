@@ -46,6 +46,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/gestures/pinch_gesture.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -92,6 +93,7 @@ public:
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
@@ -105,15 +107,6 @@ public:
         VK_SHOW,
         VK_HIDE
     };
-
-    std::optional<RenderContext::ContextParam> GetContextParam() const override
-    {
-        if (renderMode_ == RenderMode::SYNC_RENDER) {
-            return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
-        } else {
-            return RenderContext::ContextParam { RenderContext::ContextType::HARDWARE_SURFACE, "RosenWeb" };
-        }
-    }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -219,6 +212,16 @@ public:
     PermissionClipboardCallback GetPermissionClipboardCallback() const
     {
         return permissionClipboardCallback_;
+    }
+
+    void SetOnOpenAppLinkCallback(OnOpenAppLinkCallback&& callback)
+    {
+        onOpenAppLinkCallback_ = std::move(callback);
+    }
+
+    OnOpenAppLinkCallback GetOnOpenAppLinkCallback() const
+    {
+        return onOpenAppLinkCallback_;
     }
 
     void SetRenderMode(RenderMode renderMode)
@@ -388,6 +391,7 @@ public:
     {
         return isFullScreen_;
     }
+    void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void QuickMenuIsNeedNewAvoid(
@@ -403,9 +407,9 @@ public:
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
-    bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
+    bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     void UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type);
-    void UpdateCustomCursor(int32_t windowId, const OHOS::NWeb::NWebCursorInfo& info);
+    void UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     std::shared_ptr<OHOS::Media::PixelMap> CreatePixelMapFromString(const std::string& filePath);
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
@@ -469,20 +473,32 @@ public:
     {
         return rootLayerHeight_;
     }
+    Size GetDrawSize() const
+    {
+        return drawSize_;
+    }
+    bool IsVirtualKeyBoardShow() const
+    {
+        return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
+    }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int64_t accessibilityId);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
     void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
+    void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
+    std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
+    void Backward();
 
 private:
+    RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
-    void UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
+    void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnAttachToFrameNode() override;
@@ -581,6 +597,8 @@ private:
     void InitSlideUpdateListener();
     void CalculateHorizontalDrawRect(bool isNeedReset);
     void CalculateVerticalDrawRect(bool isNeedReset);
+    void InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleScaleGestureChange(const GestureEvent& event);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -590,9 +608,14 @@ private:
     void HandleOnDragDropLink(RefPtr<UnifiedData> aceData);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
+    void DragDropSelectionMenu();
+    void OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName);
     int32_t dropX_ = 0;
     int32_t dropY_ = 0;
     int onDragMoveCnt = 0;
+    bool isDragEndMenuShow_ = false;
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> dropParams_ = nullptr;
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> menuCallback_ = nullptr;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> curMoveInTime;
@@ -623,12 +646,14 @@ private:
     void RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo);
     void CloseSelectOverlay();
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
+    void DelTouchOverlayInfoByTouchId(int32_t touchId);
     std::optional<OffsetF> GetCoordinatePoint();
     void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
     OffsetF GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound);
     void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
+    bool GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t accessibilityId) const;
     void SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchLocationInfo& changedInfo,
         const TouchEventInfo& tempTouchInfo, TouchEventInfo& touchEventInfo);
     struct TouchInfo {
@@ -650,7 +675,7 @@ private:
     bool ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
-    void PostTaskToUI(const std::function<void()>&& task) const;
+    void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const;
     void OfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
     bool FilterScrollEventHandleOffset(const float offset);
@@ -660,6 +685,7 @@ private:
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback();
+    bool CheckSafeAreaIsExpand();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -667,12 +693,14 @@ private:
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
+    OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
+    RefPtr<RenderContext> renderContextForSurface_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -682,6 +710,7 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle_ = nullptr;
+    bool isQuickMenuMouseTrigger_ = false;
     float selectHotZone_ = 10.0f;
     RefPtr<DragEvent> dragEvent_;
     bool isUrlLoaded_ = false;
@@ -709,6 +738,7 @@ private:
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
     bool isCurrentStartHandleDragging_ = false;
+    std::list<TouchInfo> touchOverlayInfo_;
     bool isPopup_ = false;
     int32_t tooltipTextId_ = -1;
     int32_t tooltipId_ = -1;
@@ -749,7 +779,10 @@ private:
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
     ReachEdge isFlingReachEdge_ = { false, false };
+    RefPtr<PinchGesture> pinchGesture_ = nullptr;
+    double pinchValue_ = 1.0;
     std::queue<TouchEventInfo> touchEventQueue_;
+    std::unordered_map<int32_t, bool> naitve_map_;
 };
 } // namespace OHOS::Ace::NG
 

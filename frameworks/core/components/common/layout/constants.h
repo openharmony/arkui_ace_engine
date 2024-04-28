@@ -217,6 +217,13 @@ enum class TextDataDetectType {
     URL,
     EMAIL,
     ADDRESS,
+    DATETIME,
+};
+
+enum class LineBreakStrategy {
+    GREEDY = 0,
+    HIGH_QUALITY,
+    BALANCED,
 };
 
 enum class WhiteSpace {
@@ -253,6 +260,11 @@ enum class TextMarqueeState {
     START = 0,
     BOUNCE,
     FINISH,
+};
+
+enum class MarqueeStartPolicy {
+    DEFAULT = 0,
+    ON_FOCUS,
 };
 
 // overflow-x: visible|hidden|scroll|auto|no-display|no-content;

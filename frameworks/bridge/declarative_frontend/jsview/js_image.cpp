@@ -53,6 +53,19 @@ namespace {
 
 namespace OHOS::Ace {
 
+namespace {
+ImageSourceInfo CreateSourceInfo(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
+    const std::string &moduleName)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (pixmap) {
+        return ImageSourceInfo(pixmap);
+    }
+#endif
+    return { src, bundleName, moduleName };
+}
+} // namespace
+
 std::unique_ptr<ImageModel> ImageModel::instance_ = nullptr;
 std::mutex ImageModel::mutex_;
 
@@ -112,10 +125,18 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
         return;
     }
 
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    bool isCard = context->IsFormRender();
+
     std::string src;
+    bool srcValid = false;
     if (args[0]->IsString()) {
         src = args[0]->ToString();
-    } else if (!ParseJsMedia(args[0], src)) {
+    } else {
+        srcValid = ParseJsMedia(args[0], src);
+    }
+    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
         return;
     }
     int32_t resId = 0;
@@ -126,13 +147,18 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
             resId = tmp->ToNumber<int32_t>();
         }
     }
-    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
-        return;
-    }
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(args[0], bundleName, moduleName);
-    ImageSourceInfo srcInfo = ImageSourceInfo { src, bundleName, moduleName };
+    RefPtr<PixelMap> pixmap = nullptr;
+
+    // input is Drawable
+    if (!srcValid && !isCard) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        pixmap = CreatePixelMapFromNapiValue(args[0]);
+#endif
+    }
+    auto srcInfo = CreateSourceInfo(src, pixmap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber((resId == -1));
     ImageModel::GetInstance()->SetAlt(srcInfo);
 }
@@ -267,9 +293,8 @@ void JSImage::Create(const JSCallbackInfo& info)
             if (GetPixelMapListFromAnimatedDrawable(info[0], pixelMaps, duration, iterations)) {
                 CreateImageAnimation(pixelMaps, duration, iterations);
                 return;
-            } else {
-                pixmap = GetDrawablePixmap(info[0]);
             }
+            pixmap = GetDrawablePixmap(info[0]);
         } else {
             pixmap = CreatePixelMapFromNapiValue(info[0]);
         }
@@ -539,13 +564,11 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         return;
     }
     if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
-#ifndef PREVIEW
         auto drawingColorFilter = CreateDrawingColorFilter(tmpInfo);
         if (drawingColorFilter) {
             ImageModel::GetInstance()->SetDrawingColorFilter(drawingColorFilter);
             return;
         }
-#endif
         JSColorFilter* colorFilter;
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
             colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();

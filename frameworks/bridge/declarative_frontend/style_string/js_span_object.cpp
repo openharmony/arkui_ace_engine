@@ -15,23 +15,49 @@
 
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 
-#include <string>
 #include <numeric>
+#include <string>
+
+#include "canvas_napi/js_canvas.h"
 
 #include "base/geometry/calc_dimension.h"
+#include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
-#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
+
+CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool withoutPercent = true)
+{
+    auto value = 0.0;
+    auto valueObj = obj->GetProperty("value");
+    if (!valueObj->IsNull() && valueObj->IsNumber()) {
+        value = valueObj->ToNumber<float>();
+    }
+    auto unit = DimensionUnit::VP;
+    auto unitObj = obj->GetProperty("unit");
+    if (!unitObj->IsNull() && unitObj->IsNumber()) {
+        unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
+    }
+    CalcDimension size = CalcDimension(value, unit);
+    if (withoutPercent && unit == DimensionUnit::PERCENT) {
+        size = CalcDimension(0, DimensionUnit::VP);
+    }
+    return size;
+}
 
 void JSFontSpan::JSBind(BindingTarget globalObj)
 {
@@ -104,19 +130,9 @@ void JSFontSpan::ParseJsFontSize(const JSRef<JSObject>& obj, Font& font)
         auto fontSize = obj->GetProperty("fontSize");
         CalcDimension size = theme->GetTextStyle().GetFontSize();
         if (!fontSize->IsNull() && fontSize->IsObject()) {
-            auto fontSizeObj = JSRef<JSObject>::Cast(fontSize);
-            auto value = 0.0;
-            auto fontSizeVal = fontSizeObj->GetProperty("value");
-            if (!fontSizeVal->IsNull() && fontSizeVal->IsNumber()) {
-                value = fontSizeVal->ToNumber<float>();
-            }
-            auto unit = DimensionUnit::VP;
-            auto fontSizeUnit = fontSizeObj->GetProperty("unit");
-            if (!fontSizeUnit->IsNull() && fontSizeUnit->IsNumber()) {
-                unit = static_cast<DimensionUnit>(fontSizeUnit->ToNumber<int32_t>());
-            }
-            if (value >= 0) {
-                size = CalcDimension(value, unit);
+            auto sizeTmp = ParseLengthMetrics(fontSize, false);
+            if (sizeTmp.Value() >= 0 && sizeTmp.Unit() != DimensionUnit::PERCENT) {
+                size = sizeTmp;
             }
         }
         font.fontSize = size;
@@ -195,7 +211,7 @@ void JSFontSpan::GetFontSize(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontSize.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(fontSpan_->GetFont().fontSize.value().ToString())));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(fontSpan_->GetFont().fontSize.value().ConvertToVp())));
     info.SetReturnValue(ret);
 }
 
@@ -207,8 +223,8 @@ void JSFontSpan::GetFontStyle(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontStyle.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
-        std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontStyle.value())))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontStyle.value())))));
     info.SetReturnValue(ret);
 }
 
@@ -220,8 +236,8 @@ void JSFontSpan::GetFontWeight(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontWeight.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
-        std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontWeight.value())))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontWeight.value())))));
     info.SetReturnValue(ret);
 }
 
@@ -241,7 +257,7 @@ void JSFontSpan::GetFontFamily(const JSCallbackInfo& info)
 
 void JSFontSpan::SetFontFamily(const JSCallbackInfo& info) {}
 
-RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
+const RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
 {
     return fontSpan_;
 }
@@ -258,6 +274,8 @@ void JSDecorationSpan::JSBind(BindingTarget globalObj)
         "type", &JSDecorationSpan::GetTextDecorationType, &JSDecorationSpan::SetTextDecorationType);
     JSClass<JSDecorationSpan>::CustomProperty(
         "color", &JSDecorationSpan::GetTextDecorationColor, &JSDecorationSpan::SetTextDecorationColor);
+    JSClass<JSDecorationSpan>::CustomProperty(
+        "style", &JSDecorationSpan::GetTextDecorationStyle, &JSDecorationSpan::SetTextDecorationStyle);
     JSClass<JSDecorationSpan>::Bind(globalObj, JSDecorationSpan::Constructor, JSDecorationSpan::Destructor);
 }
 
@@ -291,12 +309,17 @@ RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSRef<JSObj
     if (!colorObj->IsNull() && JSViewAbstract::ParseJsColor(colorObj, color)) {
         colorOption = color;
     }
+    std::optional<TextDecorationStyle> styleOption;
+    JSRef<JSVal> styleObj = JSRef<JSVal>::Cast(obj->GetProperty("style"));
+    if (!styleObj->IsNull() && styleObj->IsNumber()) {
+        styleOption = static_cast<TextDecorationStyle>(styleObj->ToNumber<int32_t>());
+    }
     TextDecoration type = TextDecoration::NONE;
     JSRef<JSVal> typeObj = JSRef<JSVal>::Cast(obj->GetProperty("type"));
     if (!typeObj->IsNull() && typeObj->IsNumber()) {
         type = static_cast<TextDecoration>(typeObj->ToNumber<int32_t>());
     }
-    return AceType::MakeRefPtr<DecorationSpan>(type, colorOption);
+    return AceType::MakeRefPtr<DecorationSpan>(type, colorOption, styleOption);
 }
 
 void JSDecorationSpan::GetTextDecorationType(const JSCallbackInfo& info)
@@ -319,6 +342,19 @@ void JSDecorationSpan::GetTextDecorationColor(const JSCallbackInfo& info)
 }
 
 void JSDecorationSpan::SetTextDecorationColor(const JSCallbackInfo& info) {}
+
+void JSDecorationSpan::GetTextDecorationStyle(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(decorationSpan_);
+    if (!decorationSpan_->GetTextDecorationStyle().has_value()) {
+        return;
+    }
+    auto ret =
+        JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(decorationSpan_->GetTextDecorationStyle().value()))));
+    info.SetReturnValue(ret);
+}
+
+void JSDecorationSpan::SetTextDecorationStyle(const JSCallbackInfo& info) {}
 
 RefPtr<DecorationSpan>& JSDecorationSpan::GetDecorationSpan()
 {
@@ -361,23 +397,16 @@ void JSBaselineOffsetSpan::Destructor(JSBaselineOffsetSpan* baselineOffsetSpan)
 
 RefPtr<BaselineOffsetSpan> JSBaselineOffsetSpan::ParseJSBaselineOffsetSpan(const JSRef<JSObject>& obj)
 {
-    auto value = 0.0;
-    auto valueObj = obj->GetProperty("value");
-    if (!valueObj->IsNull() && valueObj->IsNumber()) {
-        value = valueObj->ToNumber<float>();
+    if (obj->IsUndefined()) {
+        return AceType::MakeRefPtr<BaselineOffsetSpan>(CalcDimension(0, DimensionUnit::VP));
     }
-    auto unit = DimensionUnit::VP;
-    auto unitObj = obj->GetProperty("unit");
-    if (!unitObj->IsNull() && unitObj->IsNumber()) {
-        unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
-    }
-    return AceType::MakeRefPtr<BaselineOffsetSpan>(CalcDimension(value, unit));
+    return AceType::MakeRefPtr<BaselineOffsetSpan>(ParseLengthMetrics(obj));
 }
 
 void JSBaselineOffsetSpan::GetBaselineOffset(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(baselineOffsetSpan_);
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(baselineOffsetSpan_->GetBaselineOffset().ConvertToPx())));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(baselineOffsetSpan_->GetBaselineOffset().ConvertToVp())));
     info.SetReturnValue(ret);
 }
 
@@ -425,23 +454,16 @@ void JSLetterSpacingSpan::Destructor(JSLetterSpacingSpan* letterSpacingSpan)
 
 RefPtr<LetterSpacingSpan> JSLetterSpacingSpan::ParseJSLetterSpacingSpan(const JSRef<JSObject>& obj)
 {
-    auto value = 0.0;
-    auto valueObj = obj->GetProperty("value");
-    if (!valueObj->IsNull() && valueObj->IsNumber()) {
-        value = valueObj->ToNumber<float>();
+    if (obj->IsUndefined()) {
+        return AceType::MakeRefPtr<LetterSpacingSpan>(CalcDimension(0, DimensionUnit::VP));
     }
-    auto unit = DimensionUnit::VP;
-    auto unitObj = obj->GetProperty("unit");
-    if (!unitObj->IsNull() && unitObj->IsNumber()) {
-        unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
-    }
-    return AceType::MakeRefPtr<LetterSpacingSpan>(CalcDimension(value, unit));
+    return AceType::MakeRefPtr<LetterSpacingSpan>(ParseLengthMetrics(obj));
 }
 
 void JSLetterSpacingSpan::GetLetterSpacing(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(letterSpacingSpan_);
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(letterSpacingSpan_->GetLetterSpacing().ConvertToPx())));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(letterSpacingSpan_->GetLetterSpacing().ConvertToVp())));
     info.SetReturnValue(ret);
 }
 
@@ -536,8 +558,8 @@ void JSGestureSpan::SetGestureSpan(const RefPtr<GestureSpan>& gestureSpan)
 void JSTextShadowSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextShadowSpan>::Declare("TextShadowStyle");
-    JSClass<JSTextShadowSpan>::CustomProperty("textShadow", &JSTextShadowSpan::GetTextShadow,
-        &JSTextShadowSpan::SetTextShadow);
+    JSClass<JSTextShadowSpan>::CustomProperty(
+        "textShadow", &JSTextShadowSpan::GetTextShadow, &JSTextShadowSpan::SetTextShadow);
     JSClass<JSTextShadowSpan>::Bind(globalObj, JSTextShadowSpan::Constructor, JSTextShadowSpan::Destructor);
 }
 
@@ -605,4 +627,403 @@ void JSTextShadowSpan::SetTextShadowSpan(const RefPtr<TextShadowSpan>& textShado
     textShadowSpan_ = textShadowSpan;
 }
 
+// JSImageAttachment
+void JSImageAttachment::Constructor(const JSCallbackInfo& args)
+{
+    auto imageAttachment = Referenced::MakeRefPtr<JSImageAttachment>();
+    imageAttachment->IncRefCount();
+
+    RefPtr<ImageSpan> span;
+    if (args.Length() <= 0) {
+        ImageSpanOptions imageOption;
+        span = AceType::MakeRefPtr<ImageSpan>(imageOption);
+    } else {
+        span = JSImageAttachment::ParseJsImageSpan(JSRef<JSObject>::Cast(args[0]));
+    }
+    imageAttachment->imageSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(imageAttachment));
+}
+
+void JSImageAttachment::Destructor(JSImageAttachment* imageSpan)
+{
+    if (imageSpan != nullptr) {
+        imageSpan->DecRefCount();
+    }
+}
+
+void JSImageAttachment::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSImageAttachment>::Declare("ImageAttachment");
+    JSClass<JSImageAttachment>::CustomProperty(
+        "value", &JSImageAttachment::GetImageSrc, &JSImageAttachment::SetImageSrc);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "size", &JSImageAttachment::GetImageSize, &JSImageAttachment::SetImageSize);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "verticalAlign", &JSImageAttachment::GetImageVerticalAlign, &JSImageAttachment::SetImageVerticalAlign);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "objectFit", &JSImageAttachment::GetImageObjectFit, &JSImageAttachment::SetImageObjectFit);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "layoutStyle", &JSImageAttachment::GetImageLayoutStyle, &JSImageAttachment::SetImageLayoutStyle);
+    JSClass<JSImageAttachment>::Bind(globalObj, JSImageAttachment::Constructor, JSImageAttachment::Destructor);
+}
+
+RefPtr<ImageSpan> JSImageAttachment::ParseJsImageSpan(const JSRef<JSObject>& obj)
+{
+    auto imageOptions = JSImageAttachment::CreateImageOptions(obj);
+    auto imageAttribute = JSImageAttachment::ParseJsImageSpanAttribute(obj);
+    imageOptions.imageAttribute = imageAttribute;
+    auto imageSpan = MakeRefPtr<ImageSpan>(imageOptions);
+    return imageSpan;
+}
+
+ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& obj)
+{
+    ImageSpanOptions options;
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, options);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, options);
+    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
+
+    std::string imageSrc;
+    std::string bundleName;
+    std::string moduleName;
+    auto imageValue = obj->GetProperty("value");
+    bool srcValid = JSContainerBase::ParseJsMedia(imageValue, imageSrc);
+    if (isCard && imageValue->IsString()) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(imageSrc);
+        bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+        if (notSupport) {
+            imageSrc.clear();
+        }
+    }
+    JSImage::GetJsMediaBundleInfo(imageValue, bundleName, moduleName);
+    options.image = imageSrc;
+    options.bundleName = bundleName;
+    options.moduleName = moduleName;
+    if (!srcValid) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (!isCard) {
+            if (JSImage::IsDrawable(imageValue)) {
+                options.imagePixelMap = GetDrawablePixmap(imageValue);
+            } else {
+                options.imagePixelMap = CreatePixelMapFromNapiValue(imageValue);
+            }
+        }
+#endif
+    }
+    return options;
+}
+
+ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSObject>& obj)
+{
+    ImageSpanAttribute imageStyle;
+    auto sizeObj = obj->GetProperty("size");
+    if (sizeObj->IsObject()) {
+        ImageSpanSize imageSize;
+        JSRef<JSArray> size = JSRef<JSArray>::Cast(sizeObj);
+        JSRef<JSVal> width = size->GetProperty("width");
+        CalcDimension imageSpanWidth;
+        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVpNG(width, imageSpanWidth, false) &&
+            GreatNotEqual(imageSpanWidth.Value(), 0.0)) {
+            imageSize.width = imageSpanWidth;
+        }
+        JSRef<JSVal> height = size->GetProperty("height");
+        CalcDimension imageSpanHeight;
+        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVpNG(height, imageSpanHeight) &&
+            GreatNotEqual(imageSpanHeight.Value(), 0.0)) {
+            imageSize.height = imageSpanHeight;
+        }
+        imageStyle.size = imageSize;
+    }
+    JSRef<JSVal> verticalAlign = obj->GetProperty("verticalAlign");
+    if (!verticalAlign->IsNull()) {
+        auto align = static_cast<VerticalAlign>(verticalAlign->ToNumber<int32_t>());
+        if (align < VerticalAlign::TOP || align > VerticalAlign::NONE) {
+            align = VerticalAlign::BOTTOM;
+        }
+        imageStyle.verticalAlign = align;
+    }
+    JSRef<JSVal> objectFit = obj->GetProperty("objectFit");
+    if (!objectFit->IsNull() && objectFit->IsNumber()) {
+        auto fit = static_cast<ImageFit>(objectFit->ToNumber<int32_t>());
+        if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
+            fit = ImageFit::COVER;
+        }
+        imageStyle.objectFit = fit;
+    } else {
+        imageStyle.objectFit = ImageFit::COVER;
+    }
+    auto layoutStyleObj = obj->GetProperty("layoutStyle");
+    auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
+    if (!layoutStyleObject->IsUndefined()) {
+        auto marginAttr = layoutStyleObject->GetProperty("margin");
+        imageStyle.marginProp = JSRichEditor::ParseMarginAttr(marginAttr);
+        auto paddingAttr = layoutStyleObject->GetProperty("padding");
+        imageStyle.paddingProp = JSRichEditor::ParseMarginAttr(paddingAttr);
+        auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
+        imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
+    }
+    return imageStyle;
+}
+
+void JSImageAttachment::GetImageSrc(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageOptions = imageSpan_->GetImageSpanOptions();
+    JSRef<JSVal> ret;
+    if (imageOptions.image.has_value()) {
+        ret = JSRef<JSVal>::Make(ToJSValue(imageOptions.image.value()));
+    }
+    if (imageOptions.imagePixelMap.has_value()) {
+#ifdef PIXEL_MAP_SUPPORTED
+        ret = ConvertPixmap(imageOptions.imagePixelMap.value());
+#endif
+    }
+    info.SetReturnValue(ret);
+}
+
+void JSImageAttachment::GetImageSize(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->size.has_value()) {
+        return;
+    }
+    auto imageSize = JSRef<JSObject>::New();
+    auto size = imageAttr->size;
+    if (size->width.has_value()) {
+        imageSize->SetProperty<float>("width", size->width->ConvertToVp());
+    } else {
+        imageSize->SetProperty<float>("width", 0.0);
+    }
+
+    if (size->height.has_value()) {
+        imageSize->SetProperty<float>("height", size->height->ConvertToVp());
+    } else {
+        imageSize->SetProperty<float>("height", 0.0);
+    }
+    info.SetReturnValue(imageSize);
+}
+
+void JSImageAttachment::GetImageVerticalAlign(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->verticalAlign.has_value()) {
+        return;
+    }
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(imageAttr->verticalAlign.value()))));
+}
+
+void JSImageAttachment::GetImageObjectFit(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->objectFit.has_value()) {
+        return;
+    }
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(imageAttr->objectFit.value()))));
+}
+
+JSRef<JSObject> JSImageAttachment::CreateEdge(const NG::PaddingPropertyT<NG::CalcLength>& edge)
+{
+    auto obj = JSRef<JSObject>::New();
+    if (edge.top.has_value()) {
+        obj->SetProperty("top", edge.top->GetDimension().ConvertToVp());
+    }
+    if (edge.bottom.has_value()) {
+        obj->SetProperty("bottom", edge.bottom->GetDimension().ConvertToVp());
+    }
+    if (edge.left.has_value()) {
+        obj->SetProperty("left", edge.left->GetDimension().ConvertToVp());
+    }
+    if (edge.right.has_value()) {
+        obj->SetProperty("right", edge.right->GetDimension().ConvertToVp());
+    }
+    return obj;
+}
+
+JSRef<JSObject> JSImageAttachment::CreateBorderRadius(const NG::BorderRadiusProperty& borderRadius)
+{
+    auto jsBorderRadius = JSRef<JSObject>::New();
+    if (borderRadius.radiusTopLeft.has_value()) {
+        jsBorderRadius->SetProperty("topLeft", borderRadius.radiusTopLeft->ConvertToVp());
+    }
+    if (borderRadius.radiusTopRight.has_value()) {
+        jsBorderRadius->SetProperty("topRight", borderRadius.radiusTopRight->ConvertToVp());
+    }
+    if (borderRadius.radiusBottomLeft.has_value()) {
+        jsBorderRadius->SetProperty("bottomLeft", borderRadius.radiusBottomLeft->ConvertToVp());
+    }
+    if (borderRadius.radiusBottomRight.has_value()) {
+        jsBorderRadius->SetProperty("bottomRight", borderRadius.radiusBottomRight->ConvertToVp());
+    }
+    return jsBorderRadius;
+}
+
+void JSImageAttachment::GetImageLayoutStyle(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value()) {
+        return;
+    }
+    auto layoutStyle = JSRef<JSObject>::New();
+    if (imageAttr->marginProp.has_value()) {
+        layoutStyle->SetPropertyObject("margin", CreateEdge(imageAttr->marginProp.value()));
+    }
+    if (imageAttr->paddingProp.has_value()) {
+        layoutStyle->SetPropertyObject("padding", CreateEdge(imageAttr->paddingProp.value()));
+    }
+    if (imageAttr->borderRadius.has_value()) {
+        layoutStyle->SetPropertyObject("borderRadius", CreateBorderRadius(imageAttr->borderRadius.value()));
+    }
+    info.SetReturnValue(layoutStyle);
+}
+
+const RefPtr<ImageSpan>& JSImageAttachment::GetImageSpan()
+{
+    return imageSpan_;
+}
+
+void JSImageAttachment::SetImageSpan(const RefPtr<ImageSpan>& imageSpan)
+{
+    imageSpan_ = imageSpan;
+}
+
+const ImageSpanOptions& JSImageAttachment::GetImageOptions() const
+{
+    return imageSpan_->GetImageSpanOptions();
+}
+
+JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj, const JSCallbackInfo& args) : customSpanObj_(customSpanObj)
+{
+    auto obj = JSRef<JSObject>::Cast(customSpanObj);
+    if (obj->IsUndefined()) {
+        return;
+    }
+    JSRef<JSVal> onMeasure = obj->GetProperty("onMeasure");
+    if (onMeasure->IsFunction()) {
+        auto jsDrawFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(obj), JSRef<JSFunc>::Cast(onMeasure));
+        auto onMeasureFunc = JSCustomSpan::ParseOnMeasureFunc(jsDrawFunc, args.GetExecutionContext());
+        CustomSpan::SetOnMeasure(onMeasureFunc);
+    }
+    JSRef<JSVal> onDraw = obj->GetProperty("onDraw");
+    if (onDraw->IsFunction()) {
+        auto jsDrawFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(obj), JSRef<JSFunc>::Cast(onDraw));
+        auto onDrawFunc = JSCustomSpan::ParseOnDrawFunc(jsDrawFunc, args.GetExecutionContext());
+        CustomSpan::SetOnDraw(onDrawFunc);
+    }
+}
+
+JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj,
+    std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
+    std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw, int32_t start, int32_t end)
+    : CustomSpan(onMeasure, onDraw, start, end), customSpanObj_(customSpanObj)
+{}
+void JSCustomSpan::SetJsCustomSpanObject(const JSRef<JSObject>& customSpanObj)
+{
+    customSpanObj_ = customSpanObj;
+}
+
+JSRef<JSObject>& JSCustomSpan::GetJsCustomSpanObject()
+{
+    return customSpanObj_;
+}
+RefPtr<SpanBase> JSCustomSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    if (end - start > 1) {
+        return nullptr;
+    }
+    RefPtr<SpanBase> spanBase = MakeRefPtr<JSCustomSpan>(customSpanObj_, GetOnMeasure(), GetOnDraw(), start, end);
+    return spanBase;
+}
+
+bool JSCustomSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto customSpan = DynamicCast<JSCustomSpan>(other);
+    if (!customSpan) {
+        return false;
+    }
+    return &(customSpan->customSpanObj_) == &customSpanObj_;
+}
+
+std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMeasureFunc(
+    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
+{
+    std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> drawCallback =
+        [func = std::move(jsDraw), execCtx](CustomSpanMeasureInfo customSpanMeasureInfo) -> CustomSpanMetrics {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> contextObj = objectTemplate->NewInstance();
+        contextObj->SetProperty<float>("fontSize", customSpanMeasureInfo.fontSize);
+        auto jsVal = JSRef<JSVal>::Cast(contextObj);
+        JSRef<JSObject> result = JSRef<JSObject>::Cast(func->ExecuteJS(1, &jsVal));
+        float width = 0;
+        if (result->HasProperty("width")) {
+            auto widthObj = result->GetProperty("width");
+            width = widthObj->ToNumber<float>();
+        }
+        std::optional<float> height;
+        if (result->HasProperty("height")) {
+            auto heightObj = result->GetProperty("height");
+            height = heightObj->ToNumber<float>();
+        }
+        return { width, height };
+    };
+    return drawCallback;
+}
+std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseOnDrawFunc(
+    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
+{
+    std::function<void(NG::DrawingContext&, CustomSpanOptions)> drawCallback =
+        [func = std::move(jsDraw), execCtx](NG::DrawingContext& context, CustomSpanOptions customSpanOptions) -> void {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> contextObj = objectTemplate->NewInstance();
+        JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
+        sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
+        sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
+        contextObj->SetPropertyObject("size", sizeObj);
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        ScopeRAII scope(env);
+        auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
+        OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
+        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        if (unwrapCanvas) {
+            unwrapCanvas->SaveCanvas();
+            unwrapCanvas->ClipCanvas(context.width, context.height);
+        }
+        JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
+        contextObj->SetPropertyObject("canvas", jsCanvasVal);
+
+        auto jsVal = JSRef<JSVal>::Cast(contextObj);
+        panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+        napi_wrap(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+        JSRef<JSObject> customSpanOptionsObj = objectTemplate->NewInstance();
+        customSpanOptionsObj->SetProperty<float>("x", customSpanOptions.x);
+        customSpanOptionsObj->SetProperty<float>("lineTop", customSpanOptions.lineTop);
+        customSpanOptionsObj->SetProperty<float>("lineBottom", customSpanOptions.lineBottom);
+        customSpanOptionsObj->SetProperty<float>("baseline", customSpanOptions.baseline);
+        auto customSpanOptionsVal = JSRef<JSVal>::Cast(customSpanOptionsObj);
+        JSRef<JSVal> params[] = { jsVal, customSpanOptionsVal };
+        func->ExecuteJS(2, params);
+        if (unwrapCanvas) {
+            unwrapCanvas->RestoreCanvas();
+            unwrapCanvas->ResetCanvas();
+        }
+    };
+    return drawCallback;
+}
 } // namespace OHOS::Ace::Framework

@@ -881,6 +881,14 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg029, TestSize.Level1)
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
     EXPECT_TRUE(newShowSideBar);
 
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton1 = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton3 = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<SideBarContainerPattern>());
+    frameNode->children_.push_back(backButton);
+    frameNode->children_.push_back(backButton1);
+    frameNode->children_.push_back(backButton2);
+    frameNode->children_.push_back(backButton3);
     EXPECT_TRUE(pattern->showSideBar_);
     pattern->showSideBar_ = false;
     EXPECT_FALSE(pattern->showSideBar_);
@@ -1559,6 +1567,14 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg050, TestSize.Level1)
     pattern->frameNode_ = frameNode;
     auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton1 = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton3 = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<SideBarContainerPattern>());
+    frameNode->children_.push_back(backButton);
+    frameNode->children_.push_back(backButton1);
+    frameNode->children_.push_back(backButton2);
+    frameNode->children_.push_back(backButton3);
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
     EXPECT_TRUE(newShowSideBar);
     EXPECT_TRUE(pattern->showSideBar_);

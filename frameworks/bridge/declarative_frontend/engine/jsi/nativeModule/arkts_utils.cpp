@@ -894,6 +894,24 @@ bool ArkTSUtils::ParseJsFontFamiliesFromResource(
     return true;
 }
 
+bool ArkTSUtils::ParseJsLengthMetrics(
+    const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension& result)
+{
+    auto jsObj = jsValue->ToObject(vm);
+    auto value = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "unit"));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber(vm)->Value());
+    }
+    CalcDimension dimension(value->ToNumber(vm)->Value(), unit);
+    result = dimension;
+    return true;
+}
+
 bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result)
 {
     if (!jsValue->IsObject() && !jsValue->IsString()) {
@@ -1411,5 +1429,32 @@ void ArkTSUtils::PushOuterBorderDimensionVector(
         values.emplace_back(0);
         units.emplace_back(0);
     }
+}
+
+bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId)
+{
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        symbolId = 0;
+        return false;
+    }
+    auto jsObj = jsValue->ToObject(vm);
+    auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    if (resId->IsNull() || !resId->IsNumber()) {
+        return false;
+    }
+    auto resourceObject = GetResourceObject(vm, jsValue);
+    if (!resourceObject) {
+        return false;
+    }
+    auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+    auto symbol = resourceWrapper->GetSymbolById(resId->Uint32Value(vm));
+    if (!symbol) {
+        return false;
+    }
+    symbolId = symbol;
+    return true;
 }
 } // namespace OHOS::Ace::NG

@@ -106,6 +106,16 @@ public:
 
     void DoSetActiveChildRange(int32_t start, int32_t end) override;
 
+    const WeakPtr<UINode>& GetNavigationNode() const
+    {
+        return navigationNode_;
+    }
+
+    void SetNavigationNode(const WeakPtr<UINode>& navigationNode)
+    {
+        navigationNode_ = navigationNode;
+    }
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
@@ -113,6 +123,7 @@ private:
     bool needMarkParent_ = true;
     bool prevJsActive_ = true;
     std::list<ExtraInfo> extraInfos_;
+    WeakPtr<UINode> navigationNode_;
 };
 } // namespace OHOS::Ace::NG
 

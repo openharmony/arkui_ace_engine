@@ -73,6 +73,12 @@ constexpr char EVENT_KEY_PAGE_DEPTH_THRESHOLD[] = "PAGE_DEPTH_THRESHOLD";
 constexpr char EVENT_KEY_FUNCTION_NAME[] = "FUNCTION_NAME";
 constexpr char EVENT_KEY_FUNCTION_EXECUTE_TIME[] = "FUNCTION_EXECUTE_TIME";
 constexpr char EVENT_KEY_FUNCTION_TIME_THRESHOLD[] = "FUNCTION_TIME_THRESHOLD";
+constexpr char EVENT_KEY_NOTIFY_HOVER_STATUS_CHANGE[] = "NOTIFY_HOVER_STATUS_CHANGE";
+constexpr char EVENT_KEY_FOLDER_STATUS[] = "FOLDER_STATUS";
+constexpr char EVENT_KEY_HOVER_TIME[] = "HOVER_TIME";
+constexpr char EVENT_KEY_IS_HOVER_MODE[] = "IS_HOVER_MODE";
+constexpr char EVENT_KEY_APP_ROTATION[] = "APP_ROTATION";
+constexpr char EVENT_KEY_WINDOW_MODE[] = "WINDOW_MODE";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 
@@ -527,5 +533,21 @@ void EventReport::ReportFunctionTimeout(const std::string& functionName, int64_t
         EVENT_KEY_FUNCTION_NAME, functionName,
         EVENT_KEY_FUNCTION_EXECUTE_TIME, time,
         EVENT_KEY_FUNCTION_TIME_THRESHOLD, threshold);
+}
+
+void EventReport::ReportHoverStatusChange(
+    int32_t foldStatus, int32_t time, bool isHoverMode, int32_t appRotation, int32_t windowMode)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    auto abilityName = AceApplicationInfo::GetInstance().GetAbilityName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_NOTIFY_HOVER_STATUS_CHANGE,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_FOLDER_STATUS, foldStatus,
+        EVENT_KEY_HOVER_TIME, time,
+        EVENT_KEY_IS_HOVER_MODE, isHoverMode,
+        EVENT_KEY_WINDOW_MODE, windowMode,
+        EVENT_KEY_APP_ROTATION, appRotation);
 }
 } // namespace OHOS::Ace

@@ -542,7 +542,7 @@ void RelativeContainerLayoutAlgorithm::CheckChain(LayoutWrapper* layoutWrapper)
         auto childLayoutProperty = childWrapper->GetLayoutProperty();
         CHECK_NULL_VOID(childLayoutProperty);
         const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
-        if (!flexItem) {
+        if (!flexItem || !flexItem->HasAlignRules()) {
             continue;
         }
 
@@ -1008,13 +1008,14 @@ bool RelativeContainerLayoutAlgorithm::IsAlignRuleInChain(const AlignDirection& 
 
 void RelativeContainerLayoutAlgorithm::InsertToReliedOnMap(const std::string& anchorName, const std::string& nodeName)
 {
-    if (reliedOnMap_.count(anchorName) == 0) {
+    auto iter = reliedOnMap_.find(anchorName);
+    if (iter == reliedOnMap_.end()) {
         std::set<std::string> reliedList;
         reliedList.insert(nodeName);
         reliedOnMap_[anchorName] = reliedList;
         return;
     }
-    reliedOnMap_[anchorName].insert(nodeName);
+    iter->second.insert(nodeName);
 }
 
 void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
@@ -1023,7 +1024,7 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
         auto childWrapper = mapItem.second.layoutWrapper;
         const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
         auto childHostNode = childWrapper->GetHostNode();
-        if (!flexItem) {
+        if (!flexItem || !flexItem->HasAlignRules()) {
             continue;
         }
         for (const auto& alignRule : flexItem->GetAlignRulesValue()) {
@@ -1105,7 +1106,7 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
         auto childWrapper = mapItem.second.layoutWrapper;
         auto childHostNode = childWrapper->GetHostNode();
         const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
-        if (!flexItem) {
+        if (!flexItem || !flexItem->HasAlignRules()) {
             visitedNode.push(mapItem.first);
             layoutQueue.push(mapItem.second.id);
             continue;

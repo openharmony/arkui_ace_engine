@@ -65,7 +65,6 @@ int32_t SubwindowOhos::id_ = 0;
 static std::atomic<int32_t> gToastDialogId = 0;
 RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
 {
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Create Subwindow, parent container id is %{public}d", instanceId);
     return AceType::MakeRefPtr<SubwindowOhos>(instanceId);
 }
 
@@ -73,6 +72,8 @@ SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContain
 {
     SetSubwindowId(windowId_);
     id_++;
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Create Subwindow, subwindow id %{public}d, container id %{public}d", windowId_,
+        instanceId);
 }
 
 void SubwindowOhos::InitContainer()
@@ -92,13 +93,14 @@ void SubwindowOhos::InitContainer()
         auto windowType = parentWindow->GetType();
         if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+        } else if (GetAboveApps()) {
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
             auto hostWindowId = parentPipeline->GetFocusWindowId();
             windowOption->SetExtensionTag(true);
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(hostWindowId);
-        } else if (GetAboveApps()) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
+            SetUIExtensionHostWindowId(hostWindowId);
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
@@ -336,9 +338,12 @@ void SubwindowOhos::ShowWindow(bool needFocus)
         return;
     }
     // Set min window hot area so that sub window can transparent event.
-    std::vector<Rect> rects;
-    rects.emplace_back(MIN_WINDOW_HOT_AREA);
-    SetHotAreas(rects, -1);
+    std::vector<Rosen::Rect> hotAreas;
+    Rosen::Rect rosenRect {};
+    RectConverter(MIN_WINDOW_HOT_AREA, rosenRect);
+    hotAreas.emplace_back(rosenRect);
+    window_->SetTouchHotAreas(hotAreas);
+
     window_->SetNeedDefaultAnimation(false);
     auto ret = window_->SetFocusable(needFocus);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
@@ -617,6 +622,7 @@ void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimat
         overlay->CleanMenuInSubWindow(targetId);
         overlay->RemoveFilter();
     }
+    overlay->EraseMenuInfo(targetId);
     HideWindow();
     context->FlushPipelineImmediately();
     if (inWindow) {
@@ -674,92 +680,39 @@ RefPtr<StackElement> SubwindowOhos::GetStack()
 #endif
 }
 
-void SubwindowOhos::DeleteHotAreas(int32_t overlayId)
+void SubwindowOhos::DeleteHotAreas(int32_t nodeId)
 {
-    hotAreasMap_.erase(overlayId);
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "delete hot area %{public}d", nodeId);
+    hotAreasMap_.erase(nodeId);
     std::vector<Rosen::Rect> hotAreas;
     for (auto it = hotAreasMap_.begin(); it != hotAreasMap_.end(); it++) {
-        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-            hotAreas.emplace_back(*it2);
-        }
+        hotAreas.insert(hotAreas.end(), it->second.begin(), it->second.end());
     }
     window_->SetTouchHotAreas(hotAreas);
 }
 
-void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
+void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set hot areas enter");
     CHECK_NULL_VOID(window_);
 
     std::vector<Rosen::Rect> hotAreas;
     Rosen::Rect rosenRect {};
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "set hot area %{public}d", nodeId);
     for (const auto& rect : rects) {
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set hot area rect %{public}s", rect.ToString().c_str());
         RectConverter(rect, rosenRect);
         hotAreas.emplace_back(rosenRect);
     }
-    if (overlayId >= 0) {
-        hotAreasMap_[overlayId] = hotAreas;
+    if (nodeId >= 0) {
+        hotAreasMap_[nodeId] = hotAreas;
     }
 
-    window_->SetTouchHotAreas(hotAreas);
-}
-
-void SubwindowOhos::SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
-{
-    CHECK_NULL_VOID(window_);
-    std::vector<Rosen::Rect> hotAreas;
-    Rosen::Rect rosenRect {};
-    for (const auto& rect : rects) {
-        RectConverter(rect, rosenRect);
-        hotAreas.emplace_back(rosenRect);
-    }
-    if (overlayId >= 0) {
-        popupHotAreasMap_[overlayId] = hotAreas;
-    }
     std::vector<Rosen::Rect> hotAreasNow;
-    for (auto it = popupHotAreasMap_.begin(); it != popupHotAreasMap_.end(); it++) {
-        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-            hotAreasNow.emplace_back(*it2);
-        }
+    for (auto it = hotAreasMap_.begin(); it != hotAreasMap_.end(); it++) {
+        hotAreasNow.insert(hotAreasNow.end(), it->second.begin(), it->second.end());
     }
     window_->SetTouchHotAreas(hotAreasNow);
-}
-
-void SubwindowOhos::DeletePopupHotAreas(int32_t overlayId)
-{
-    popupHotAreasMap_.erase(overlayId);
-    std::vector<Rosen::Rect> hotAreas;
-    for (auto it = popupHotAreasMap_.begin(); it != popupHotAreasMap_.end(); it++) {
-        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-            hotAreas.emplace_back(*it2);
-        }
-    }
-    window_->SetTouchHotAreas(hotAreas);
-}
-
-void SubwindowOhos::SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
-{
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set dialog hot areas enter");
-    CHECK_NULL_VOID(window_);
-    std::vector<Rosen::Rect> hotAreas;
-    Rosen::Rect rosenRect {};
-    for (const auto& rect : rects) {
-        RectConverter(rect, rosenRect);
-        hotAreas.emplace_back(rosenRect);
-    }
-    if (overlayId >= 0) {
-        hotAreasMap_[overlayId] = hotAreas;
-    }
-    std::vector<Rosen::Rect> hotAreas2;
-    for (auto it = hotAreasMap_.begin(); it != hotAreasMap_.end(); it++) {
-        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-            hotAreas2.emplace_back(*it2);
-        }
-    }
-    OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreas2);
-    if (ret != OHOS::Rosen::WMError::WM_OK) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Set hot areas failed with errCode: %{public}d", static_cast<int32_t>(ret));
-        return;
-    }
 }
 
 void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
@@ -807,8 +760,8 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     return dialog;
 }
 
-RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(const DialogProperties& dialogProps,
-    const RefPtr<NG::UINode>& customNode)
+RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
+    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -854,8 +807,7 @@ void SubwindowOhos::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
     return overlay->CloseDialog(dialogNode);
 }
 
-void SubwindowOhos::OpenCustomDialogNG(
-    const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
+void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "open customDialog ng subwindow enter");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -874,6 +826,8 @@ void SubwindowOhos::OpenCustomDialogNG(
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_VOID(parentOverlay);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "overlay in parent container %{public}d, SetSubWindowId %{public}d",
+            parentContainerId_, GetSubwindowId());
     }
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
@@ -888,7 +842,8 @@ void SubwindowOhos::OpenCustomDialogNG(
 
 void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter, child container id %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -901,7 +856,8 @@ void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId)
 
 void SubwindowOhos::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter, child container id %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -1094,7 +1050,6 @@ void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t dura
 void SubwindowOhos::ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom,
     const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for Service enter");
     bool ret = CreateEventRunner();
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create event runner failed");
@@ -1148,7 +1103,7 @@ void SubwindowOhos::ShowToastForService(const std::string& message, int32_t dura
 void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
     const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show toast, window parent id is %{public}d", parentContainerId_);
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowToastForService(message, duration, bottom, showMode, alignment, offset);
     } else {
@@ -1182,7 +1137,6 @@ void SubwindowOhos::ShowDialogForService(const std::string& title, const std::st
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog for service enter");
     bool ret = CreateEventRunner();
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create event runner failed");
@@ -1227,7 +1181,6 @@ void SubwindowOhos::ShowDialogForService(const std::string& title, const std::st
 void SubwindowOhos::ShowDialogForAbility(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog for ability enter");
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
 
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -1248,7 +1201,6 @@ void SubwindowOhos::ShowDialogForAbility(const PromptDialogAttr& dialogAttr, con
 void SubwindowOhos::ShowDialogForService(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog for service enter");
     bool ret = CreateEventRunner();
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create event runner failed");
@@ -1293,7 +1245,7 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show dialog, window parent id is %{public}d", parentContainerId_);
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowDialogForService(title, message, buttons, autoCancel, std::move(callback), callbacks);
     } else {
@@ -1304,7 +1256,7 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
 void SubwindowOhos::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show dialog with attr, window parent id is %{public}d", parentContainerId_);
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowDialogForService(dialogAttr, buttons, std::move(callback), callbacks);
     } else {
@@ -1312,14 +1264,15 @@ void SubwindowOhos::ShowDialog(const PromptDialogAttr& dialogAttr, const std::ve
     }
 }
 
-void SubwindowOhos::OpenCustomDialogForAbility(const PromptDialogAttr& dialogAttr,
-    std::function<void(int32_t)>&& callback)
+void SubwindowOhos::OpenCustomDialogForAbility(
+    const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback)
 {
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "open custom dialog");
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
 
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     if (!aceContainer) {
+        TAG_LOGW(
+            AceLogTag::ACE_SUB_WINDOW, "open dialog fail, the container %{public}d can not find", childContainerId_);
         return;
     }
 
@@ -1331,15 +1284,16 @@ void SubwindowOhos::OpenCustomDialogForAbility(const PromptDialogAttr& dialogAtt
     delegate->OpenCustomDialog(dialogAttr, std::move(callback));
 }
 
-void SubwindowOhos::OpenCustomDialogForService(const PromptDialogAttr& dialogAttr,
-    std::function<void(int32_t)>&& callback)
+void SubwindowOhos::OpenCustomDialogForService(
+    const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback)
 {
     // temporary not support
-    LOGW("temporary not support for service by promptAction with CustomBuilder");
+    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "temporary not support for service by promptAction with CustomBuilder");
 }
 
 void SubwindowOhos::OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "open custom dialog, window parent id is %{public}d", parentContainerId_);
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         OpenCustomDialogForService(dialogAttr, std::move(callback));
     } else {
@@ -1457,7 +1411,7 @@ void SubwindowOhos::UpdateAceView(int32_t width, int32_t height, float density, 
 void SubwindowOhos::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show action menu enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show custom dialog, window parent id is %{public}d", parentContainerId_);
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowActionMenuForService(title, button, std::move(callback));
     } else {
@@ -1471,6 +1425,15 @@ Rect SubwindowOhos::GetParentWindowRect() const
     CHECK_NULL_RETURN(parentWindow_, rect);
     auto parentWindowRect = parentWindow_->GetRect();
     return Rect(parentWindowRect.posX_, parentWindowRect.posY_, parentWindowRect.width_, parentWindowRect.height_);
+}
+
+Rect SubwindowOhos::GetUIExtensionHostWindowRect() const
+{
+    Rect rect;
+    CHECK_NULL_RETURN(parentWindow_, rect);
+    auto id = GetUIExtensionHostWindowId();
+    auto hostWindowRect = parentWindow_->GetHostWindowRect(id);
+    return Rect(hostWindowRect.posX_, hostWindowRect.posY_, hostWindowRect.width_, hostWindowRect.height_);
 }
 
 void SubwindowOhos::RequestFocus()
@@ -1606,5 +1569,26 @@ void SubwindowOhos::MarkDirtyDialogSafeArea()
     auto lastChild = rootNode->GetLastChild();
     CHECK_NULL_VOID(lastChild);
     lastChild->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+}
+
+bool SubwindowOhos::CheckHostWindowStatus() const
+{
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_RETURN(parentContainer, false);
+    sptr<OHOS::Rosen::Window> parentWindow = parentContainer->GetUIWindow(parentContainerId_);
+    CHECK_NULL_RETURN(parentWindow, false);
+    if (parentWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_RETURN(parentPipeline, false);
+        auto hostWindowId = parentPipeline->GetFocusWindowId();
+        auto hostWindowRect = parentWindow->GetHostWindowRect(hostWindowId);
+        auto isValid = GreatNotEqual(hostWindowRect.width_, 0) && GreatNotEqual(hostWindowRect.height_, 0);
+        if (!isValid) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
+                "UIExtension Window failed to obtain host window information. Please check if permissions are enabled");
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace

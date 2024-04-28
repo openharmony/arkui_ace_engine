@@ -14,14 +14,13 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_path2d.h"
+
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
-constexpr int JS_PATH2D_PARAMETER_COUNTS = 2;
-JSPath2D::JSPath2D()
-{
-}
+JSPath2D::JSPath2D() {}
 
 void JSPath2D::Constructor(const JSCallbackInfo& args)
 {
@@ -32,9 +31,9 @@ void JSPath2D::Constructor(const JSCallbackInfo& args)
     args.SetSize(sizeof(JSPath2D));
     EcmaVM* vm = args.GetVm();
     CHECK_NULL_VOID(vm);
-    panda::JsiRuntimeCallInfo* runtimeCallInfo = args.GetJsiRuntimeCallInfo();
-    CHECK_NULL_VOID(runtimeCallInfo);
-    jsPath2d->thisObj_ = panda::CopyableGlobal<panda::JSValueRef>(vm, runtimeCallInfo->GetThisRef());
+    Local<ObjectRef> pathCmdObj = ObjectRef::New(vm);
+    pathCmdObj->SetNativePointerFieldCount(vm, 1);
+    jsPath2d->pathCmdObj_ = panda::CopyableGlobal<panda::JSValueRef>(vm, pathCmdObj);
 }
 
 void JSPath2D::Destructor(JSPath2D* controller)
@@ -61,25 +60,20 @@ void JSPath2D::JSBind(BindingTarget globalObj)
     JSClass<JSPath2D>::Bind(globalObj, JSPath2D::Constructor, JSPath2D::Destructor);
 }
 
+// addPath(path: path2D, transform?:Matrix2D): void
 void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsObject()) {
-        return;
-    }
-    auto* jsPath2d = JSRef<JSObject>::Cast(args[0])->Unwrap<JSPath2D>();
-    if (jsPath2d == nullptr) {
-        return;
-    }
+    // one parameter
+    auto* jsPath2d = args.UnwrapArg<JSPath2D>(0);
+    CHECK_NULL_VOID(jsPath2d);
     auto canvasPath2D = jsPath2d->GetCanvasPath2d();
     path2d_->AddPath(canvasPath2D);
     SetPathSize(args);
-    if (args.Length() != JS_PATH2D_PARAMETER_COUNTS) {
-        return;
-    }
 
+    // two parameters
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        auto* jsMatrix2d = JSRef<JSObject>::Cast(args[1])->Unwrap<JSMatrix2d>();
-        if (jsMatrix2d != nullptr) {
+        auto* jsMatrix2d = args.UnwrapArg<JSMatrix2d>(1);
+        if (jsMatrix2d) {
             path2d_->SetTransform(jsMatrix2d->JsGetScaleX(), jsMatrix2d->JsGetRotateX(), jsMatrix2d->JsGetRotateY(),
                 jsMatrix2d->JsGetScaleY(), jsMatrix2d->JsGetTranslateX(), jsMatrix2d->JsGetTranslateY());
             SetPathSize(args);

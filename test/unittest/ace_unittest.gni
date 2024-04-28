@@ -22,6 +22,7 @@ image_test_output_path = "ace_engine/image"
 basic_test_output_path = "ace_engine/basic"
 interface_test_output_path = "ace_engine/interfaces"
 svg_test_output_path = "ace_engine/svg"
+bridge_test_output_path = "ace_engine/bridge"
 
 template("ace_unittest") {
   forward_variables_from(invoker, "*")

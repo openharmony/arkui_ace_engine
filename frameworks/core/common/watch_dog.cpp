@@ -77,7 +77,7 @@ void CheckGcSignal()
     }
 
     // Check again
-    AnrThread::AnrThread::PostTaskToTaskRunner(CheckGcSignal, GC_CHECK_PERIOD);
+    AnrThread::AnrThread::PostTaskToTaskRunner(CheckGcSignal, GC_CHECK_PERIOD, "ArkUIWatchDogCheckGcSignal");
 }
 
 inline int32_t BlockGcSignal()
@@ -167,7 +167,7 @@ ThreadWatcher::ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type, bo
             CHECK_NULL_VOID(sp);
             sp->Check();
         },
-        NORMAL_CHECK_PERIOD);
+        NORMAL_CHECK_PERIOD, "ArkUIWatchDogCheck");
 }
 
 ThreadWatcher::~ThreadWatcher() {}
@@ -194,7 +194,7 @@ void ThreadWatcher::DefusingBomb()
                 sp->DefusingTopBomb();
             }
         },
-        type_);
+        type_, "ArkUIWatchDogDefusingTopBomb");
 }
 
 void ThreadWatcher::DefusingTopBomb()
@@ -294,7 +294,7 @@ void ThreadWatcher::Check()
             CHECK_NULL_VOID(sp);
             sp->Check();
         },
-        period);
+        period, "ArkUIWatchDogThreadStateCheck");
 }
 
 void ThreadWatcher::CheckAndResetIfNeeded()
@@ -368,7 +368,7 @@ void ThreadWatcher::RawReport(RawEventType type) const
                     std::lock_guard lk(*m);
                     engine.Reset();
                 },
-                TaskExecutor::TaskType::JS);
+                TaskExecutor::TaskType::JS, "ArkUIWatchDogEngineReset");
         }
         tid = taskExecutor->GetTid(type_);
     }
@@ -398,7 +398,7 @@ void ThreadWatcher::PostCheckTask()
                 CHECK_NULL_VOID(sp);
                 sp->TagIncrease();
             },
-            type_);
+            type_, "ArkUIWatchDogTagIncrease");
         std::unique_lock<std::shared_mutex> lock(mutex_);
         ++loopTime_;
         if (state_ != State::NORMAL) {
@@ -427,7 +427,7 @@ WatchDog::WatchDog()
 {
     AnrThread::Start();
 #if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM)
-    AnrThread::PostTaskToTaskRunner(InitializeGcTrigger, GC_CHECK_PERIOD);
+    AnrThread::PostTaskToTaskRunner(InitializeGcTrigger, GC_CHECK_PERIOD, "ArkUIWatchDogInitGcTrigger");
 #endif
 }
 
@@ -480,7 +480,7 @@ void WatchDog::BuriedBomb(int32_t instanceId, uint64_t bombId)
                 watchers.uiWatcher->BuriedBomb(bombId);
             }
         },
-        IMMEDIATELY_PERIOD);
+        IMMEDIATELY_PERIOD, "ArkUIWatchDogBuriedBomb");
 }
 
 void WatchDog::DefusingBomb(int32_t instanceId)
@@ -501,6 +501,6 @@ void WatchDog::DefusingBomb(int32_t instanceId)
                 watchers.uiWatcher->DefusingBomb();
             }
         },
-        IMMEDIATELY_PERIOD);
+        IMMEDIATELY_PERIOD, "ArkUIWatchDogDefusingBomb");
 }
 } // namespace OHOS::Ace

@@ -355,6 +355,30 @@ private:
     int32_t parentNWebId_ = -1;
 };
 
+class WebAppLinkCallbackOhos : public WebAppLinkCallback {
+    DECLARE_ACE_TYPE(WebAppLinkCallbackOhos, WebAppLinkCallback)
+public:
+    WebAppLinkCallbackOhos(const std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback>& callback)
+        : callback_(callback) {}
+
+    void ContinueLoad() override
+    {
+        if (callback_) {
+            callback_->ContinueLoad();
+        }
+    }
+
+    void CancelLoad() override
+    {
+        if (callback_) {
+            callback_->CancelLoad();
+        }
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback_;
+};
+
 class DataResubmittedOhos : public DataResubmitted {
     DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted)
 
@@ -650,6 +674,7 @@ public:
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
     void OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request);
+    void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
@@ -667,7 +692,7 @@ public:
     void OnActive();
     void OnWebviewHide();
     void OnWebviewShow();
-    bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
+    bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     void OnSelectPopupMenu(
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
@@ -831,6 +856,12 @@ public:
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost);
     bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
+    void ScaleGestureChange(double scale, double centerX, double centerY);
+    std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
+    // Backward
+    void Backward();
+    bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -879,8 +910,7 @@ private:
     void RegisterConfigObserver();
     void UnRegisterConfigObserver();
 
-    // Backward and forward
-    void Backward();
+    // forward
     void Forward();
     void ClearHistory();
     void ClearSslCache();
@@ -904,6 +934,7 @@ private:
     void UnregisterSurfacePositionChangedCallback();
 
     void NotifyPopupWindowResult(bool result);
+    void IsNativeType(const double& x, const double& y);
 
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
     void SurfaceOcclusionCallback(float visibleRatio);

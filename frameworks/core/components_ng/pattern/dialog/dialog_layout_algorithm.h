@@ -60,6 +60,8 @@ private:
     void AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll);
 
     bool ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
+    bool IsGetExpandDisplayValidHeight();
+    RefPtr<PipelineContext> GetCurrentPipelineContext();
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
     int32_t GetDeviceColumns(GridSizeType type, DeviceType deviceType);
@@ -87,7 +89,8 @@ private:
     void UpdateSafeArea();
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
-    double GetRealSize(Dimension dialogFrame, double size);
+    void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
+    
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;
@@ -101,6 +104,9 @@ private:
     TouchingBoundaryType touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;
 
     bool expandDisplay_ = false;
+    double expandDisplayValidHeight_ = 0.0;
+    bool isUIExtensionSubWindow_ = false;
+    RectF hostWindowRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };

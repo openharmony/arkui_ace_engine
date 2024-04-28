@@ -60,6 +60,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    void DumpInfo() override;
+
     void SetTextNode(RefPtr<FrameNode> textNode)
     {
         textNode_ = textNode;
@@ -87,6 +89,12 @@ public:
     {
         return foldDisplayModeChangedCallbackId_.has_value();
     }
+    
+    void SetToastInfo(const ToastInfo& toastInfo)
+    {
+        toastInfo_ = toastInfo;
+    }
+    
 private:
     void BeforeCreateLayoutWrapper() override;
     void UpdateToastSize(const RefPtr<FrameNode>& toast);
@@ -101,7 +109,9 @@ private:
 
     RefPtr<FrameNode> textNode_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
+    ToastInfo toastInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
+    double toastBottom_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOAST_TOAST_PATTERN_H

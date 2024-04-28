@@ -38,6 +38,7 @@ public:
     bool IsMediaPlayerValid() override;
     void SetVolume(float leftVolume, float rightVolume) override;
     bool SetSource(const std::string& src) override;
+    bool SetSourceByFd(int32_t fd) override;
     void SetRenderSurface(const RefPtr<RenderSurface>& renderSurface) override;
     void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent, StateChangedEvent&& stateChangedEvent,
         CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent, CommonEvent&& startRenderFrameEvent) override;

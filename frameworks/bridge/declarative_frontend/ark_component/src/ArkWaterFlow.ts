@@ -175,6 +175,25 @@ class FrictionModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
+class WaterFlowEdgeEffectModifier extends ModifierWithKey<ArkWaterFlowEdgeEffect> {
+  constructor(value: ArkWaterFlowEdgeEffect) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowEdgeEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().waterFlow.resetEdgeEffect(node);
+    } else {
+      getUINativeModule().waterFlow.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
+  }
+}
+
 class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -249,6 +268,13 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
   }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, WaterFlowClipModifier.identity, WaterFlowClipModifier, value);
+    return this;
+  }
+  edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this {
+    let effect: ArkWaterFlowEdgeEffect = new ArkWaterFlowEdgeEffect();
+    effect.value = value;
+    effect.options = options;
+    modifierWithKey(this._modifiersWithKeys, WaterFlowEdgeEffectModifier.identity, WaterFlowEdgeEffectModifier, effect);
     return this;
   }
 }

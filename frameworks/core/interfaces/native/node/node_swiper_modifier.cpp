@@ -331,6 +331,15 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     return digitalParameters;
 }
 
+void SetIndicatorInteractive(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetIndicatorInteractive(frameNode, static_cast<bool>(value));
+}
+
+void ResetIndicatorInteractive(ArkUINodeHandle node) {}
+
 void SetSwiperNextMargin(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -815,20 +824,6 @@ ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle node)
     return NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(node);
 }
 
-void SetCachedCount(ArkUINodeHandle node, ArkUI_Int32 cachedCount)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetCachedCount(frameNode, cachedCount);
-}
-
-void ResetCachedCount(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetCachedCount(frameNode, 1);
-}
-
 ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -851,8 +846,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         ResetSwiperDuration, SetSwiperEnabled, ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex,
         GetSwiperVertical, GetSwiperDuration, GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve,
         GetSwiperDisableSwipe, GetSwiperItemSpace, GetSwiperShowIndicator, GetSwiperShowDisplayArrow,
-        GetSwiperEffectMode, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, SetCachedCount, ResetCachedCount,
-        GetCachedCount };
+        GetSwiperEffectMode, SetIndicatorInteractive, ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter,
+        GetNodeAdapter, GetCachedCount };
     return &modifier;
 }
 

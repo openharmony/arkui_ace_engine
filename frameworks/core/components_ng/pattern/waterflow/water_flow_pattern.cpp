@@ -288,30 +288,7 @@ bool WaterFlowPattern::ScrollToTargetIndex(int32_t index)
         return false;
     }
     auto item = layoutInfo_.items_[layoutInfo_.GetSegment(index)].at(crossIndex).at(index);
-    float targetPosition = 0.0;
-    ScrollAlign align = layoutInfo_.align_;
-    switch (align) {
-        case ScrollAlign::START:
-            targetPosition = item.first;
-            break;
-        case ScrollAlign::END:
-            targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
-            break;
-        case ScrollAlign::AUTO:
-            if (layoutInfo_.currentOffset_ + item.first < 0) {
-                targetPosition = item.first;
-            } else if (layoutInfo_.currentOffset_ + item.first + item.second > layoutInfo_.lastMainSize_) {
-                targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
-            } else {
-                targetPosition = -layoutInfo_.currentOffset_;
-            }
-            break;
-        case ScrollAlign::CENTER:
-            targetPosition = -(-item.first + (layoutInfo_.lastMainSize_ - item.second) / 2);
-            break;
-        default:
-            return false;
-    }
+    float targetPosition = -layoutInfo_.JumpToTargetAlign(item);
     ScrollablePattern::AnimateTo(targetPosition, -1, nullptr, true);
     return true;
 }
@@ -330,7 +307,12 @@ bool WaterFlowPattern::UpdateStartIndex(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    layoutInfo_.jumpIndex_ = (index == LAST_ITEM ? host->GetTotalChildCount() - 1 : index);
+    auto childCount = host->GetTotalChildCount();
+    layoutInfo_.jumpIndex_ = (index == LAST_ITEM ? childCount - 1 : index);
+    //if target index is footer, fix align because it will jump after fillViewport.
+    if (layoutInfo_.footerIndex_ == 0 && layoutInfo_.jumpIndex_ == childCount - 1) {
+        SetScrollAlign(ScrollAlign::END);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -456,8 +438,16 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t childUpdateIdx = host->GetChildrenUpdated();
+    if (childUpdateIdx > -1 && layoutInfo_.GetSegment(childUpdateIdx) == start && sections_->IsSpecialUpdate()) {
+        // optimize adding or removing children in the last section. Prevent complete reset of that section.
+        ++start;
+    }
     layoutInfo_.InitSegments(sections_->GetSectionInfo(), start);
     layoutInfo_.margins_.clear();
+
     MarkDirtyNodeSelf();
 }
 

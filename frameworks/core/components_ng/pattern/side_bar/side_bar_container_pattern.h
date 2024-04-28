@@ -104,6 +104,11 @@ public:
         isControlButtonClick_ = value;
     }
 
+    void SetRightToLeftMode(bool value)
+    {
+        isRightToLeft_ = value;
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -176,6 +181,7 @@ private:
     void AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
     SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
     RefPtr<FrameNode> GetSideBarNode(const RefPtr<FrameNode>& host) const;
+    RefPtr<FrameNode> GetFirstFrameNode(const RefPtr<UINode>& host) const;
     RefPtr<FrameNode> GetSideBarNodeOrFirstChild() const;
     RefPtr<FrameNode> GetControlButtonNode() const;
     RefPtr<FrameNode> GetContentNode(const RefPtr<FrameNode>& host) const;
@@ -185,6 +191,7 @@ private:
     Dimension ConvertPxToPercent(float value) const;
     void UpdateDividerShadow() const;
     void SetSideBarActive(bool isActive, bool onlyJsActive) const;
+    void OnLanguageConfigurationUpdate() override;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
@@ -207,6 +214,7 @@ private:
     bool hasInit_ = false;
     bool autoHide_ = false;
     bool inAnimation_ = false;
+    bool isRightToLeft_ = false;
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;

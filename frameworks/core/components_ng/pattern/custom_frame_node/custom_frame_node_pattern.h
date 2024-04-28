@@ -61,32 +61,6 @@ public:
         return true;
     }
 
-    void SetOnAttachFunc(std::function<void(int32_t)>&& attachFunc)
-    {
-        attachFunc_ = std::move(attachFunc);
-    }
-
-    void SetOnDetachFunc(std::function<void(int32_t)>&& detachFunc)
-    {
-        detachFunc_ = std::move(detachFunc);
-    }
-
-    void OnAttachToMainTree() override
-    {
-        CHECK_NULL_VOID(attachFunc_);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        attachFunc_(host->GetId());
-    }
-
-    void OnDetachFromMainTree() override
-    {
-        CHECK_NULL_VOID(detachFunc_);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        detachFunc_(host->GetId());
-    }
-
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         auto renderNodePaintProperty = MakeRefPtr<RenderNodePaintProperty>();
@@ -121,8 +95,6 @@ public:
 private:
     std::function<void(DrawingContext& context)> drawCallback_;
     RefPtr<RenderNodeModifier> renderNodeModifier_;
-    std::function<void(int32_t)> attachFunc_;
-    std::function<void(int32_t)> detachFunc_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_FRAME_NODE_CUSTOM_FRAME_NODE_PATTERN_H

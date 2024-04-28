@@ -95,6 +95,7 @@ public:
     void GetCalendarMonthData(int32_t year, int32_t month, ObtainedMonth& calendarMonthData);
     CalendarMonth GetNextMonth(const CalendarMonth& calendarMonth);
     CalendarMonth GetLastMonth(const CalendarMonth& calendarMonth);
+    void SetOptionsButtonUpdateColorFlags(size_t index, bool isUpdate);
 
 private:
     void OnModifyDone() override;
@@ -144,6 +145,7 @@ private:
     bool isFocused_ = false;
     bool isCalendarFirstFocused_ = false;
     bool hoverState_ = false;
+    std::vector<bool> updateColorFlags = {true, true, true, true};
     OffsetF dialogOffset_;
     WeakPtr<FrameNode> entryNode_ = nullptr;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;

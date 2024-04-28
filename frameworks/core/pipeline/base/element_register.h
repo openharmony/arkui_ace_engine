@@ -38,28 +38,17 @@ namespace OHOS::Ace {
 using ElementIdType = int32_t;
 class Element;
 
-
-// removed_items is a Set of elmtId and UINode TAG
-// The TAG aims easier analysis for DFX and debug
-// This std::pair needs a custom has function
-struct deleted_element_hash {
-    inline std::size_t operator()(const std::pair<ElementIdType, std::string>& v) const
-    {
-        return v.first;
-    }
-};
-
-using RemovedElementsType = std::unordered_set<std::pair<ElementIdType, std::string>, deleted_element_hash>;
+using RemovedElementsType = std::unordered_set<ElementIdType>;
 
 class ACE_EXPORT ElementRegister {
 public:
     static constexpr ElementIdType UndefinedElementId = static_cast<ElementIdType>(-1);
 
-    static ElementRegister* GetInstance();
+    ACE_FORCE_EXPORT static ElementRegister* GetInstance();
     RefPtr<Element> GetElementById(ElementIdType elementId);
     RefPtr<V2::ElementProxy> GetElementProxyById(ElementIdType elementId);
 
-    RefPtr<AceType> GetNodeById(ElementIdType elementId);
+    ACE_FORCE_EXPORT RefPtr<AceType> GetNodeById(ElementIdType elementId);
     /**
      * version of GetNodeById(elmtId) function to return an Element of
      * given class. returns nullptr if Element with this elmtId baddest found
@@ -77,7 +66,7 @@ public:
     RefPtr<NG::UINode> GetUINodeById(ElementIdType elementId);
     NG::FrameNode* GetFrameNodePtrById(ElementIdType elementId);
 
-    bool AddUINode(const RefPtr<NG::UINode>& node);
+    ACE_FORCE_EXPORT bool AddUINode(const RefPtr<NG::UINode>& node);
 
     bool Exists(ElementIdType elementId);
 
@@ -91,7 +80,7 @@ public:
      * means GetElementById on this elmtId no longer returns an Element
      * method adds the elmtId to the removed Element Set
      */
-    bool RemoveItem(ElementIdType elementId, const std::string& tag = std::string("undefined TAG"));
+    bool RemoveItem(ElementIdType elementId);
 
     /**
      * remove Element with given elmtId from the Map
@@ -100,7 +89,7 @@ public:
      * Use with caution: e.g. only use when knowing the Element will
      * be added with new ElementId shortly
      */
-    bool RemoveItemSilently(ElementIdType elementId);
+    ACE_FORCE_EXPORT bool RemoveItemSilently(ElementIdType elementId);
 
     void MoveRemovedItems(RemovedElementsType& removedItems);
 

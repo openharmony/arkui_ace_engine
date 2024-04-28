@@ -41,6 +41,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components/common/layout/position_param.h"
 #include "frameworks/core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 #include "frameworks/core/pipeline/base/element.h"
 
@@ -91,6 +92,8 @@ std::string srcimages = "common/images/mmm.jpg";
 const std::string VALUE_EMPTY = "";
 const std::string VALUE_X = "X";
 const std::string VALUE_CX = "CX";
+const std::string VALUE_TAB = "TAB";
+const std::string VALUE_DPAD_UP = "DPAD_UP";
 ViewAbstractModelNG viewAbstractModelNG;
 auto callback = []() { srcimages = "test"; };
 int32_t flag = 0;
@@ -2217,6 +2220,139 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest041, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ViewAbstractTest042
+ * @tc.desc: Test the SetKeyboardShortcut of View_Abstract for tab/Up arrow/Down arrow/Left arrow/Right arrow key.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a FrameNode and get eventManager.
+     */
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto eventManager = PipelineContext::GetCurrentContext()->GetEventManager();
+    /**
+     * @tc.steps: step2. call SetKeyboardShortcut with tab and ModifierKey.
+     * @tc.expected: add fail
+     */
+    std::vector<ModifierKey> keys;
+    keys.push_back(ModifierKey::SHIFT);
+    ViewAbstract::SetKeyboardShortcut(VALUE_TAB, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    keys.clear();
+
+    /**
+     * @tc.steps: step3. call SetKeyboardShortcut with up arrow.
+     * @tc.expected: add success
+     */
+    ViewAbstract::SetKeyboardShortcut(VALUE_DPAD_UP, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
+    keys.clear();
+
+    /**
+     * @tc.steps: step4. call SetKeyboardShortcut with up arrow and ModifierKey.
+     * @tc.expected: add success
+     */
+    keys.push_back(ModifierKey::ALT);
+    ViewAbstract::SetKeyboardShortcut(VALUE_DPAD_UP, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
+    keys.clear();
+
+    /**
+     * @tc.steps: step5. call SetKeyboardShortcut with tab.
+     * @tc.expected: add success
+     */
+
+    ViewAbstract::SetKeyboardShortcut(VALUE_TAB, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
+}
+
+/**
+ * @tc.name: ViewAbstractOffsetEdges001
+ * @tc.desc: test offset attribute, use Edges type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. use ViewAbstract::SetOffsetEdges.
+     * @tc.expected: success set render property offsetEdges value.
+     */
+    EdgesParam edges;
+    CalcDimension top(30, DimensionUnit::VP);
+    CalcDimension left(20, DimensionUnit::VP);
+    edges.SetTop(top);
+    edges.SetLeft(left);
+    ViewAbstract::SetOffsetEdges(edges);
+
+    EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetOffsetEdgesValue(EdgesParam {}).top.value_or(Dimension {}).ConvertToVp(), 30.0f);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetOffsetEdgesValue(EdgesParam {}).left.value_or(Dimension {}).ConvertToVp(), 20.0f);
+
+    /**
+     * @tc.steps: step5. finish view stack.
+     */
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: ViewAbstractPositionEdges001
+ * @tc.desc: test position attribute, use Edges type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractPositionEdges001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. use ViewAbstract::SetPositionEdges.
+     * @tc.expected: success set render property PositionEdges value.
+     */
+    EdgesParam edges;
+    CalcDimension bottom(30, DimensionUnit::VP);
+    CalcDimension right(20, DimensionUnit::VP);
+    edges.SetBottom(bottom);
+    edges.SetRight(right);
+    ViewAbstract::SetPositionEdges(edges);
+
+    EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetPositionEdgesValue(EdgesParam {}).bottom.value_or(Dimension {}).ConvertToVp(), 30.0f);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetPositionEdgesValue(EdgesParam {}).right.value_or(Dimension {}).ConvertToVp(), 20.0f);
+
+    /**
+     * @tc.steps: step5. finish view stack.
+     */
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
  * @tc.name: ViewAbstractDisableClickTest
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
@@ -2738,6 +2874,55 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ViewAbstractMenuBorderRadius001
+ * @tc.desc: Test the BindMenu and BindContextMenu of ViewAbstractModelNG (use true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuBorderRadius001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> mainNode =
+        FrameNode::CreateFrameNode("targetNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+    std::vector<NG::OptionParam> params = {};
+    std::function<void()> buildFunc;
+    MenuParam menuParam;
+
+    menuParam.type = MenuType::MENU;
+    menuParam.isShow = true;
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(16));
+    menuParam.borderRadius = borderRadius;
+
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(targetNode, nullptr);
+    std::function<void()> action = [] {};
+    params.emplace_back("MenuItem1", "", action);
+    params.emplace_back("MenuItem2", "", action);
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    auto targetId = targetNode->GetId();
+
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    ASSERT_NE(menuNode, nullptr);
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    EXPECT_EQ(wrapperPattern->GetHasCustomRadius(), true);
+}
+
+/**
  * @tc.name: ViewAbstractDisableClickByFrameNodeTest
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
@@ -3135,5 +3320,52 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractSetOnSizeChangeByFrameNodeTest, TestSiz
     auto eventHub = node->GetEventHub<EventHub>();
     auto& callback = eventHub->onSizeChanged_;
     EXPECT_NE(callback, nullptr);
+}
+
+/**
+ * @tc.name: MotionBlur001
+ * @tc.desc: SetMotionBlur.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, MotionBlur001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. use ViewAbstract::SetMotionBlur.
+     * @tc.expected: success set render property motionBlur value.
+     */
+    MotionBlurOption motionBlurOption;
+    CalcDimension radius(5, DimensionUnit::VP);
+    motionBlurOption.radius = radius;
+    motionBlurOption.anchor.x = 0.5;
+    motionBlurOption.anchor.y = 0.5;
+    ViewAbstract::SetMotionBlur(motionBlurOption);
+    /**
+     * @tc.steps: step4. get propMotionBlur value of the node.
+     * @tc.expected: anchor.x = 0.5, anchor.y = 0.5, radius = 5.
+     */
+    EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetOrCreateForeground()->propMotionBlur->anchor.x, 0.5);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetOrCreateForeground()->propMotionBlur->anchor.y, 0.5);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetOrCreateForeground()->propMotionBlur->radius.Value(), 5);
+
+    /**
+     * @tc.steps: step5. finish view stack.
+     */
+    ViewStackProcessor::GetInstance()->Finish();
 }
 } // namespace OHOS::Ace::NG

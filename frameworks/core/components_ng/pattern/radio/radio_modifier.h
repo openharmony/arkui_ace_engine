@@ -58,6 +58,9 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
+        if (useContentModifier_->Get()) {
+            return;
+        }
         RSCanvas& canvas = context.canvas;
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             PaintIndicator(canvas, isCheck_->Get(), size_->Get(), offset_->Get());
@@ -74,6 +77,9 @@ public:
     void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve);
     void InitializeParam();
     void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
+    void PaintRingCircle(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset, RSBrush brush) const;
+    void PaintOutRingCircle(
+        RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset, RSPen outPen) const;
     void PaintIndicator(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
     void PaintUnselectedIndicator(RSCanvas& canvas, float outCircleRadius, float centerX, float centerY) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;
@@ -200,6 +206,13 @@ public:
         }
     }
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
 private:
     float shadowWidth_ = 1.5f;
     float borderWidth_ = 1.5f;
@@ -219,6 +232,7 @@ private:
     RefPtr<PropertyBool> isCheck_;
     RefPtr<PropertyInt> uiStatus_;
     RefPtr<PropertyBool> isFocused_;
+    RefPtr<PropertyBool> useContentModifier_;
 
     RefPtr<AnimatablePropertyColor> pointColor_;
     RefPtr<AnimatablePropertyColor> activeColor_;

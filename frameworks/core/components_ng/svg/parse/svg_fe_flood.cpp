@@ -49,7 +49,10 @@ void SvgFeFlood::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, co
     floodColor = floodColor.ChangeOpacity(floodOpacity);
     auto shaderFilter = RSRecordingShaderEffect::CreateColorShader(floodColor.GetValue());
     CHECK_NULL_VOID(shaderFilter);
-    imageFilter = RSRecordingImageFilter::CreateShaderImageFilter(shaderFilter);
+    Rect effectFilterArea = effectFilterArea_;
+
+    imageFilter = RSRecordingImageFilter::CreateShaderImageFilter(shaderFilter,
+        { effectFilterArea.Left(), effectFilterArea.Top(), effectFilterArea.Right(), effectFilterArea.Bottom() });
 
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
     RegisterResult(declaration->GetResult(), imageFilter, resultHash);

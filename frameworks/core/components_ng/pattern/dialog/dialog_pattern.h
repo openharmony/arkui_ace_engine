@@ -154,6 +154,7 @@ public:
     void SetDialogProperties(const DialogProperties& param)
     {
         dialogProperties_ = param;
+        InitHostWindowRect();
     }
 
     const DialogProperties& GetDialogProperties() const
@@ -164,6 +165,8 @@ public:
     void OnColorConfigurationUpdate() override;
 
     void OnLanguageConfigurationUpdate() override;
+
+    void DumpInfo() override;
 
     bool AvoidBottom() const override
     {
@@ -218,6 +221,16 @@ public:
         }
     }
 
+    bool IsUIExtensionSubWindow() const
+    {
+        return isUIExtensionSubWindow_;
+    }
+
+    RectF GetHostWindowRect() const
+    {
+        return hostWindowRect_;
+    }
+
 private:
     bool AvoidKeyboard() const override
     {
@@ -225,6 +238,10 @@ private:
     }
     void OnModifyDone() override;
 
+    void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void InitHostWindowRect();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -273,6 +290,8 @@ private:
     void UpdateSheetIconAndText();
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
+    void DumpBoolProperty();
+    void DumpObjectProperty();
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -299,6 +318,8 @@ private:
     std::function<void()> onWillAppearCallback_ = nullptr;
     std::function<void()> onWillDisappearCallback_ = nullptr;
     std::unordered_map<DialogContentNode, RefPtr<FrameNode>> contentNodeMap_;
+    bool isUIExtensionSubWindow_ = false;
+    RectF hostWindowRect_;
 };
 } // namespace OHOS::Ace::NG
 

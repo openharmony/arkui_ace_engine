@@ -20,6 +20,10 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ParticleModelNG : public OHOS::Ace::ParticleModel {
 public:
     void Create(std::list<ParticleOption>& arrayValue) override;
+    void DisturbanceField(const std::vector<ParticleDisturbance>& disturbanceArray) override;
+    static void DisturbanceField(const std::vector<ParticleDisturbance>& disturbanceArray, NG::FrameNode* frameNode);
+    void updateEmitter(const std::vector<EmitterProps>& emitterProps) override;
+    static void updateEmitter(const std::vector<EmitterProps>& emitterProps, NG::FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif

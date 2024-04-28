@@ -81,6 +81,13 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::GetLayoutPosition,
     OHOS::Ace::NodeModel::MeasureNode,
     OHOS::Ace::NodeModel::LayoutNode,
+    OHOS::Ace::NodeModel::AddNodeEventReceiver,
+    OHOS::Ace::NodeModel::RemoveNodeEventReceiver,
+    OHOS::Ace::NodeModel::AddNodeCustomEventReceiver,
+    OHOS::Ace::NodeModel::RemoveNodeCustomEventReceiver,
+    nullptr,
+    nullptr,
+    OHOS::Ace::NodeModel::SetLengthMetricUnit,
 };
 
 ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
@@ -194,7 +201,7 @@ void* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version)
 
 void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const char* structName)
 {
-    if (!OHOS::Ace::NodeModel::GetFullImpl()) {
+    if (!OHOS::Ace::NodeModel::InitialFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
             "fail to get %{public}d node api family, impl library is not found", type);
         return nullptr;

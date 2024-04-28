@@ -24,6 +24,7 @@
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -108,6 +109,10 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     if (textLineStyle) {
         json->PutExtAttr("lineHeight",
             textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("lineSpacing",
+            textLineStyle->GetLineSpacing().value_or(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("baselineOffset",
+            textLineStyle->GetBaselineOffset().value_or(Dimension()).ToString().c_str(), filter);
     }
     TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
 }
@@ -207,6 +212,7 @@ void SpanNode::DumpInfo()
     }
     dumpLog.AddDesc(std::string("FontSize: ").append(textStyle->GetFontSize().ToString()));
     dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle->GetLineHeight().ToString()));
+    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle->GetLineSpacing().ToString()));
     dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle->GetBaselineOffset().ToString()));
     dumpLog.AddDesc(std::string("WordSpacing: ").append(textStyle->GetWordSpacing().ToString()));
     dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle->GetTextIndent().ToString()));
@@ -229,8 +235,8 @@ void SpanNode::DumpInfo()
     }
 }
 
-int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
-    const RefPtr<Paragraph>& builder, double /* width */, double /* height */, VerticalAlign /* verticalAlign */)
+int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
+    PlaceholderStyle /*placeholderStyle*/)
 {
     CHECK_NULL_RETURN(builder, -1);
     std::optional<TextStyle> textStyle;
@@ -298,6 +304,7 @@ void SpanItem::UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, con
         if (symbolUnicode != 0) {
             UpdateSymbolSpanColor(frameNode, themeTextStyle);
         }
+        themeTextStyle.SetFontFamilies({"HM Symbol"});
         builder->PushStyle(themeTextStyle);
     }
     textStyle_ = textStyle;
@@ -381,9 +388,9 @@ void SpanItem::UpdateTextStyleForAISpan(
 
 void SpanItem::SetAiSpanTextStyle(std::optional<TextStyle>& aiSpanTextStyle)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     if (!aiSpanTextStyle.has_value()) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
         TextStyle themeTextStyle =
             CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
         if (NearZero(themeTextStyle.GetFontSize().Value())) {
@@ -391,9 +398,12 @@ void SpanItem::SetAiSpanTextStyle(std::optional<TextStyle>& aiSpanTextStyle)
         }
         aiSpanTextStyle = themeTextStyle;
     } else {
-        aiSpanTextStyle.value().SetTextColor(Color::BLUE);
+        auto hyerlinkTheme = pipelineContext->GetTheme<HyperlinkTheme>();
+        CHECK_NULL_VOID(hyerlinkTheme);
+        auto hyerlinkColor = hyerlinkTheme->GetTextColor();
+        aiSpanTextStyle.value().SetTextColor(hyerlinkColor);
         aiSpanTextStyle.value().SetTextDecoration(TextDecoration::UNDERLINE);
-        aiSpanTextStyle.value().SetTextDecorationColor(Color::BLUE);
+        aiSpanTextStyle.value().SetTextDecorationColor(hyerlinkColor);
     }
 }
 
@@ -536,6 +546,40 @@ bool SpanItem::IsDragging()
     return selectedStart >= 0 && selectedEnd >= 0;
 }
 
+ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
+{
+    bool selectFlag = true;
+    ResultObject resultObject;
+    int32_t endPosition = interval.second;
+    int32_t startPosition = interval.first;
+    int32_t itemLength = endPosition - startPosition;
+
+    if (startPosition >= start && endPosition <= end) {
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+    } else if (startPosition < start && endPosition <= end && endPosition > start) {
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = start - startPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+    } else if (startPosition >= start && startPosition < end && endPosition >= end) {
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
+    } else if (startPosition <= start && endPosition >= end) {
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = start - startPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
+    } else {
+        selectFlag = false;
+    }
+    if (selectFlag) {
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.type = SelectSpanType::TYPESPAN;
+        resultObject.span = WeakClaim(this);
+        resultObject.valueString = content;
+        resultObject.isInit = true;
+    }
+    return resultObject;
+}
+
 #define INHERIT_TEXT_STYLE(group, name, func)                                     \
     do {                                                                          \
         if ((textLayoutProp)->Has##name()) {                                      \
@@ -567,6 +611,7 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode)
     INHERIT_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
 
     INHERIT_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
+    INHERIT_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
     return textStyle;
 }
 
@@ -596,6 +641,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
 
     COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
+    COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
     COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
     COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
     COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
@@ -661,36 +707,43 @@ void ImageSpanNode::DumpInfo()
     dumpLog.AddDesc("--------------- print text style ---------------");
     dumpLog.AddDesc(std::string("FontSize: ").append(textStyle.GetFontSize().ToString()));
     dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle.GetLineHeight().ToString()));
+    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle.GetLineSpacing().ToString()));
     dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
     dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
     dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
 }
 
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
-    double width, double height, VerticalAlign verticalAlign)
+    PlaceholderStyle placeholderStyle)
 {
     CHECK_NULL_RETURN(builder, -1);
     PlaceholderRun run;
     textStyle = TextStyle();
-    run.width = width;
-    run.height = height;
-    switch (verticalAlign) {
-        case VerticalAlign::TOP:
-            run.alignment = PlaceholderAlignment::TOP;
-            break;
-        case VerticalAlign::CENTER:
-            run.alignment = PlaceholderAlignment::MIDDLE;
-            break;
-        case VerticalAlign::BOTTOM:
-        case VerticalAlign::NONE:
-            run.alignment = PlaceholderAlignment::BOTTOM;
-            break;
-        case VerticalAlign::BASELINE:
-            run.alignment = PlaceholderAlignment::ABOVEBASELINE;
-            break;
-        default:
-            run.alignment = PlaceholderAlignment::BOTTOM;
+    run.width = placeholderStyle.width;
+    run.height = placeholderStyle.height;
+    if (!NearZero(placeholderStyle.baselineOffset)) {
+        run.baseline_offset = placeholderStyle.height + placeholderStyle.baselineOffset;
+        run.alignment = PlaceholderAlignment::BASELINE;
+    } else {
+        switch (placeholderStyle.verticalAlign) {
+            case VerticalAlign::TOP:
+                run.alignment = PlaceholderAlignment::TOP;
+                break;
+            case VerticalAlign::CENTER:
+                run.alignment = PlaceholderAlignment::MIDDLE;
+                break;
+            case VerticalAlign::BOTTOM:
+            case VerticalAlign::NONE:
+                run.alignment = PlaceholderAlignment::BOTTOM;
+                break;
+            case VerticalAlign::BASELINE:
+                run.alignment = PlaceholderAlignment::ABOVEBASELINE;
+                break;
+            default:
+                run.alignment = PlaceholderAlignment::BOTTOM;
+        }
     }
+
     // ImageSpan should ignore decoration styles
     textStyle.SetTextDecoration(TextDecoration::NONE);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
@@ -709,6 +762,47 @@ void ImageSpanItem::UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& im
     backgroundStyle = property->GetPlaceHolderStyle();
 }
 
+void ImageSpanItem::SetImageSpanOptions(const ImageSpanOptions& options)
+{
+    this->options = options;
+}
+
+void ImageSpanItem::ResetImageSpanOptions()
+{
+    options.imageAttribute.reset();
+}
+
+RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
+{
+    auto sameSpan = MakeRefPtr<ImageSpanItem>();
+    sameSpan->SetImageSpanOptions(options);
+    return sameSpan;
+}
+
+ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
+{
+    int32_t itemLength = 1;
+    ResultObject resultObject;
+
+    int32_t endPosition = interval.second;
+    int32_t startPosition = interval.first;
+    resultObject.type = SelectSpanType::TYPEIMAGE;
+    if ((start <= startPosition) && (end >= endPosition)) {
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+        if (options.image.has_value()) {
+            resultObject.valueString = options.image.value();
+        }
+        if (options.imagePixelMap.has_value()) {
+            resultObject.valuePixelMap = options.imagePixelMap.value();
+        }
+        resultObject.isInit = true;
+    }
+    return resultObject;
+}
+
 void SpanItem::GetIndex(int32_t& start, int32_t& end) const
 {
     auto contentLen = StringUtils::ToWstring(content).length();
@@ -717,19 +811,27 @@ void SpanItem::GetIndex(int32_t& start, int32_t& end) const
 }
 
 int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
-    double width, double height, VerticalAlign /* verticalAlign */)
+    PlaceholderStyle placeholderStyle)
 {
     CHECK_NULL_RETURN(builder, -1);
     textStyle = TextStyle();
     PlaceholderRun run;
-    run.width = width;
-    run.height = height;
+    run.width = placeholderStyle.width;
+    run.height = placeholderStyle.height;
     textStyle.SetTextDecoration(TextDecoration::NONE);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     run_ = run;
     builder->PopStyle();
     return index;
+}
+
+RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
+{
+    auto sameSpan = MakeRefPtr<CustomSpanItem>();
+    sameSpan->onMeasure = onMeasure;
+    sameSpan->onDraw = onDraw;
+    return sameSpan;
 }
 
 void BaseSpan::SetTextBackgroundStyle(const TextBackgroundStyle& style)
@@ -750,10 +852,10 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
     std::set<PropertyInfo> inheritPropertyInfo;
     const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
         PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
-        PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
-        PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
+        PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::BASELINE_OFFSET, PropertyInfo::LINEHEIGHT,
+        PropertyInfo::TEXT_ALIGN, PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
         PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
-        PropertyInfo::FONTFEATURE };
+        PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING };
     set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
     return inheritPropertyInfo;

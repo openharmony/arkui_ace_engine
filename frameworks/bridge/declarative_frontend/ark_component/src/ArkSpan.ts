@@ -198,6 +198,19 @@ class SpanLetterSpacingModifier extends ModifierWithKey<string> {
     }
   }
 }
+class SpanBaselineOffsetModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity = Symbol('spanBaselineOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().span.resetBaselineOffset(node);
+    } else {
+      getUINativeModule().span.setBaselineOffset(node, this.value!);
+    }
+  }
+}
 class SpanFontModifier extends ModifierWithKey<Font> {
   constructor(value: Font) {
     super(value);
@@ -229,8 +242,8 @@ class SpanFontModifier extends ModifierWithKey<Font> {
     }
   }
 }
-class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType, color?: ResourceColor }> {
-  constructor(value: { type: TextDecorationType, color?: ResourceColor }) {
+class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }> {
+  constructor(value: { type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
   static identity = Symbol('spanDecoration');
@@ -238,12 +251,12 @@ class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType,
     if (reset) {
       getUINativeModule().span.resetDecoration(node);
     } else {
-      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color);
+      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color, this.value.style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (isResource(this.stageValue.color) && isResource(this.value.color)) {
@@ -270,7 +283,6 @@ class SpanFontWeightModifier extends ModifierWithKey<string> {
 }
 
 class ArkSpanComponent implements CommonMethod<SpanAttribute> {
-  _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
   nativePtr: KNode;
@@ -279,7 +291,6 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   _nativePtrChanged: boolean;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
-    this._modifiers = new Map();
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
@@ -852,7 +863,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
     return this;
   }
-  decoration(value: { type: TextDecorationType, color?: ResourceColor }): SpanAttribute {
+  decoration(value: { type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, value);
     return this;
   }
@@ -889,6 +900,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
   letterSpacing(value: number | string): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanLetterSpacingModifier.identity, SpanLetterSpacingModifier, value);
+    return this;
+  }
+  baselineOffset(value: LengthMetrics): SpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, SpanBaselineOffsetModifier.identity, SpanBaselineOffsetModifier, value);
     return this;
   }
   textCase(value: TextCase): SpanAttribute {

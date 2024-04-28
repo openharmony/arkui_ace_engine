@@ -62,7 +62,7 @@ struct TestProperty {
     std::optional<Ace::FontWeight> fontWeight = std::nullopt;
     std::optional<std::vector<std::string>> fontFamily = std::nullopt;
     std::optional<std::vector<Shadow>> textShadow = std::nullopt;
-    std::optional<FONT_FEATURES_MAP> fontFeature = std::nullopt;
+    std::optional<FONT_FEATURES_LIST> fontFeature = std::nullopt;
 };
 
 class TextClockTestNG : public testing::Test {
@@ -160,13 +160,13 @@ HWTEST_F(TextClockTestNG, TextClockTest001, TestSize.Level1)
     EXPECT_EQ(textClockLayoutProperty->GetTextShadow(), errSetShadows);
     EXPECT_EQ(errShadow.GetBlurRadius(), 0);
 
-    FONT_FEATURES_MAP fontFeatures;
-    fontFeatures.try_emplace("ss01", 1);
+    FONT_FEATURES_LIST fontFeatures;
+    fontFeatures.emplace_back(std::make_pair("ss01", 1));
     textClockLayoutProperty->UpdateFontFeature(fontFeatures);
     EXPECT_EQ(textClockLayoutProperty->GetFontFeature(), fontFeatures);
 
-    FONT_FEATURES_MAP errFontFeatures;
-    errFontFeatures.try_emplace("ss02", 1);
+    FONT_FEATURES_LIST errFontFeatures;
+    errFontFeatures.emplace_back(std::make_pair("ss02", 1));
     textClockLayoutProperty->UpdateFontFeature(fontFeatures);
     EXPECT_EQ(textClockLayoutProperty->GetFontFeature(), fontFeatures);
 
@@ -497,8 +497,8 @@ HWTEST_F(TextClockTestNG, TextClockTest008, TestSize.Level1)
     std::vector<Shadow> setShadows;
     setShadows.emplace_back(shadow);
     testProperty.textShadow = std::make_optional(setShadows);
-    FONT_FEATURES_MAP fontFeatures;
-    fontFeatures.try_emplace("ss02", 1);
+    FONT_FEATURES_LIST fontFeatures;
+    fontFeatures.emplace_back(std::make_pair("ss02", 1));
     testProperty.fontFeature = std::make_optional(fontFeatures);
 
     RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
@@ -733,22 +733,6 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
     pattern->OnVisibleChange(true);
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_2);
-
-    /**
-     * @tc.steps: step6. form visible be changed, call the event entry function.
-     * @tc.expected: check whether the value is correct.
-     */
-    utc = UTC_1;
-    pattern->OnFormVisibleChange(false);
-    pattern->UpdateTimeText();
-    EXPECT_EQ(utc, UTC_1);
-    pattern->OnFormVisibleChange(true);
-    pattern->UpdateTimeText();
-    EXPECT_EQ(utc, UTC_1);
-    pattern->prevTime_ = "";
-    pattern->OnFormVisibleChange(true);
-    pattern->UpdateTimeText();
-    EXPECT_EQ(utc, UTC_2);
     MockPipelineContext::TearDown();
 }
 
@@ -845,17 +829,13 @@ HWTEST_F(TextClockTestNG, TextClockTest012, TestSize.Level1)
 
     pattern->OnVisibleChange(false);
     pattern->OnVisibleAreaChange(false);
-    pattern->OnFormVisibleChange(false);
     EXPECT_FALSE(pattern->isSetVisible_);
     EXPECT_FALSE(pattern->isInVisibleArea_);
-    EXPECT_FALSE(pattern->isFormVisible_);
 
     pattern->OnVisibleChange(true);
     pattern->OnVisibleAreaChange(true);
-    pattern->OnFormVisibleChange(true);
     EXPECT_TRUE(pattern->isSetVisible_);
     EXPECT_TRUE(pattern->isInVisibleArea_);
-    EXPECT_TRUE(pattern->isFormVisible_);
 }
 
 /**
@@ -896,5 +876,142 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(layoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+}
+
+
+/**
+ * @tc.name: TextClockTest014
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and get frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    model.SetHoursWest(HOURS_WEST);
+    auto controller = pattern->GetTextClockController();
+    ASSERT_NE(controller, nullptr);
+    controller->Start();
+    auto node = [](TextClockConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(HOURS_WEST, config.timeZoneOffset_);
+                EXPECT_EQ(true, config.started_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: TextClockTest015
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and get frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    model.SetHoursWest(HOURS_WEST);
+    auto controller = pattern->GetTextClockController();
+    ASSERT_NE(controller, nullptr);
+    controller->Start();
+    controller->Stop();
+    auto node = [](TextClockConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(HOURS_WEST, config.timeZoneOffset_);
+                EXPECT_EQ(false, config.started_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: TextClockTest016
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and get frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    float hoursWest = 8;
+    model.SetHoursWest(hoursWest);
+    auto controller = pattern->GetTextClockController();
+    ASSERT_NE(controller, nullptr);
+    controller->Start();
+    auto node = [=](TextClockConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(hoursWest, config.timeZoneOffset_);
+                EXPECT_EQ(true, config.started_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: TextClockTest017
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and get frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    float hoursWest = 8;
+    model.SetHoursWest(hoursWest);
+    auto controller = pattern->GetTextClockController();
+    ASSERT_NE(controller, nullptr);
+    controller->Start();
+    controller->Stop();
+    auto node = [=](TextClockConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(hoursWest, config.timeZoneOffset_);
+                EXPECT_EQ(false, config.started_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
 }
 } // namespace OHOS::Ace::NG

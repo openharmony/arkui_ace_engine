@@ -140,7 +140,7 @@ HWTEST_F(CheckBoxGroupTestNG, OnModifyDone001, TestSize.Level1)
      */
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
-    
+
     /**
      * @tc.steps: step2. call the OnModifyDone function of the checkboxgroup pattern
      * @tc.expected: the margin property meetings expectations
@@ -170,7 +170,7 @@ HWTEST_F(CheckBoxGroupTestNG, UpdateUIStatus001, TestSize.Level1)
      */
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
-    
+
     /**
      * @tc.steps: step2. call the UpdateUIStatus function of the checkboxgroup pattern.
      * @tc.expected: the UpdateUIStatus meetings expectations.
@@ -205,7 +205,7 @@ HWTEST_F(CheckBoxGroupTestNG, OnAfterModifyDone001, TestSize.Level1)
      */
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
-    
+
     /**
      * @tc.steps: step2. call the OnAfterModifyDone function of the checkboxgroup pattern.
      * @tc.expected: the inspectorId property meetings expectations.
@@ -239,7 +239,7 @@ HWTEST_F(CheckBoxGroupTestNG, UpdateGroupCheckStatus001, TestSize.Level1)
      */
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
-    
+
     /**
      * @tc.steps: step2. call the OnAfterModifyDone function of the checkboxgroup pattern.
      * @tc.expected: the initSelected_ property meetings expectations.
@@ -312,7 +312,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest001, TestSize.Level1
     checkBoxGroupModelNG.SetWidth(WIDTH);
     checkBoxGroupModelNG.SetHeight(HEIGHT);
     checkBoxGroupModelNG.SetPadding(PADDING, newArgs, flag);
-    
+
     /**
      * @tc.steps: step3. Get paint property and get CheckBoxGroup property
      * @tc.expected: Check the CheckBoxGroup property value
@@ -1895,6 +1895,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest028, TestSize.Level1
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
      */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
 
@@ -1910,8 +1912,9 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest028, TestSize.Level1
     ASSERT_NE(frameNode, nullptr);
     auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     ASSERT_NE(checkBoxPaintProperty, nullptr);
-    EXPECT_EQ(checkBoxPaintProperty->HasCheckBoxGroupSelectedStyle(), true);
+    ASSERT_TRUE(checkBoxPaintProperty->HasCheckBoxGroupSelectedStyle());
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupSelectedStyleValue(), CheckBoxStyle::SQUARE_STYLE);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1921,6 +1924,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest028, TestSize.Level1
  */
 HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest029, TestSize.Level1)
 {
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
      */
@@ -1941,7 +1946,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest029, TestSize.Level1
     ASSERT_NE(checkBoxPaintProperty, nullptr);
     auto json = JsonUtil::Create(true);
     checkBoxPaintProperty->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("shape"), "1");
+    EXPECT_EQ(json->GetString("checkboxShape"), "1");
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1951,9 +1957,11 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest029, TestSize.Level1
  */
 HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest030, TestSize.Level1)
 {
-     /**
+    /**
      * @tc.steps: step1. Init CheckBoxGroup node
      */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     CheckBoxModelNG checkboxModelNG;
     checkboxModelNG.Create(NAME, GROUP_NAME, TAG);
     checkboxModelNG.SetCheckboxStyle(CheckBoxStyle::CIRCULAR_STYLE);
@@ -1984,5 +1992,6 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest030, TestSize.Level1)
     auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
     EXPECT_NE(checkBoxPaintProperty, nullptr);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelectedStyleValue(), CheckBoxStyle::CIRCULAR_STYLE);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

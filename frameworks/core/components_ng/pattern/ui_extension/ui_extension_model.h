@@ -40,7 +40,8 @@ public:
     static UIExtensionModel* GetInstance();
     virtual ~UIExtensionModel() = default;
 
-    virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller = false);
+    virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
+        const RefPtr<NG::FrameNode>& placeholderNode = nullptr, bool transferringCaller = false);
     // for Embedded Component
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, NG::SessionType sessionType);
     // for DynamicComponent

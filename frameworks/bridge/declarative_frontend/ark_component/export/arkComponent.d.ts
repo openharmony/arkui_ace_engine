@@ -16,7 +16,9 @@ declare type KNode = number | null;
 declare function getUINativeModule(): any;
 declare enum ModifierType {
     ORIGIN = 0,
-    STATE = 1
+    STATE = 1,
+    FRAME_NODE = 2,
+    EXPOSE_MODIFIER = 3,
 }
 declare class JsPointerClass {
     invalid(): boolean;
@@ -25,13 +27,6 @@ interface Equable {
     isEqual(value: Equable): boolean;
 }
 declare type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
-declare class Modifier<T extends number | string | boolean | Equable | Resource | object> {
-    stageValue?: T;
-    value?: T;
-    constructor(value: T);
-    applyStage(node: KNode): boolean;
-    applyPeer(node: KNode, reset: boolean): void;
-}
 declare class ModifierWithKey<T extends number | string | boolean | object> {
     stageValue?: T;
     value?: T;
@@ -42,13 +37,13 @@ declare class ModifierWithKey<T extends number | string | boolean | object> {
 }
 declare class ArkComponent implements CommonMethod<CommonAttribute> {
     _changed: boolean;
-    _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
     nativePtr: KNode;
     _weakPtr: JsPointerClass;
     _classType: ModifierType | undefined;
     _nativePtrChanged: boolean;
     constructor(nativePtr: KNode, classType?: ModifierType);
+    initialize(...args: Object[]);
     applyModifierPatch(): void;
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     outline(value: OutlineOptions): this;
@@ -61,6 +56,8 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this;
     backgroundEffect(options: BackgroundEffectOptions): this;
     backgroundBrightness(params: BackgroundBrightnessOptions): this;
+    backgroundBrightnessInternal(params: BrightnessOptions): this;
+    foregroundBrightness(params: BrightnessOptions): this;
     dragPreviewOptions(value: DragPreviewOptions): this;
     responseRegion(value: Array<Rectangle> | Rectangle): this;
     mouseResponseRegion(value: Array<Rectangle> | Rectangle): this;
@@ -458,7 +455,6 @@ declare class ArkSearchComponent extends ArkComponent implements CommonMethod<Se
 }
 declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     _changed: boolean;
-    _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
     nativePtr: KNode;
     _weakPtr: JsPointerClass;
@@ -697,6 +693,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
         color?: ResourceColor;
     }): TextAttribute;
     letterSpacing(value: number | string): TextAttribute;
+    lineSpacing(value: LengthMetrics): TextAttribute;
     textCase(value: TextCase): TextAttribute;
     baselineOffset(value: number | string): TextAttribute;
     copyOption(value: CopyOptions): TextAttribute;
@@ -1847,6 +1844,7 @@ declare class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAtt
         offsetRemain: number;
     }): this;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
+    edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
 }
 declare class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1924,4 +1922,25 @@ declare class ArkGridContainerComponent extends ArkComponent implements ColumnAt
 declare class ArkEffectComponentComponent extends ArkComponent implements EffectComponentAttribute {
 }
 declare class ArkRemoteWindowComponent extends ArkComponent implements RemoteWindowAttribute {
+}
+declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    disturbanceFields(fields: Array<DisturbanceFieldsOptions>): ParticleAttribute;
+}
+declare class CheckboxWidthModifier extends ModifierWithKey<Length> {}
+declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {}
+declare class TextForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {}
+
+declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyphAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    fontColor(value: ResourceColor[]): SymbolGlyphAttribute;
+    fontSize(value: number | string | Resource): SymbolGlyphAttribute;
+    fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute;
+    renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute;
+    effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
+}
+
+declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    emitter(fields: Array<EmitterProps>): ParticleAttribute;
 }

@@ -77,11 +77,11 @@ type RemovedElementInfo = { elmtId: number, tag: string };
 
 declare class UINodeRegisterProxy {
   public static instance_: UINodeRegisterProxy;
-  public removeElementsInfo_: Array<RemovedElementInfo>;
+  public removeElementsInfo_: Array<number>;
   public static ElementIdToOwningViewPU_: Map<number, WeakRef<JSBuilderNode>>;
-  public unregisterElmtIdsFromViewPUs(): void;
+  public unregisterElmtIdsFromIViews(): void;
   private obtainDeletedElmtIds(): void;
-  public static unregisterElmtIdsFromViewPUs(): void;
+  public static unregisterElmtIdsFromIViews(): void;
   public static obtainDeletedElmtIds(): void;
 }
 
@@ -103,11 +103,26 @@ declare interface CommonAttribute { }
 
 declare interface AttributeModifier<T> { }
 
+declare enum ModifierType {
+  ORIGIN = 0,
+  STATE = 1,
+  FRAME_NODE = 2,
+}
+
 declare class ArkComponent {
   nativePtr: NodePtr;
-  _modifiersWithKeys: FrameNodeAttributeMap;
-  constructor(nativePtr: NodePtr);
+  constructor(nativePtr: NodePtr, classType?: ModifierType);
+  setNodePtr(noed: NodePtr);
+  initialize(...args: Object[]);
 }
+
+declare class ArkTextComponent extends ArkComponent {}
+
+declare class ArkColumnComponent extends ArkComponent {}
+
+declare class ArkRowComponent extends ArkComponent {}
+
+declare class ArkStackComponent extends ArkComponent {}
 
 declare class UICommonEvent {
   private _nodePtr: NodePtr;

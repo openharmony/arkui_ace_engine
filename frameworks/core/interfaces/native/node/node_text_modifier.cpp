@@ -27,6 +27,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr Dimension DEFAULT_LINE_HEIGHT = Dimension(0.0, DimensionUnit::PX);
+constexpr Dimension DEFAULT_LINE_SPACING = Dimension(0.0, DimensionUnit::PX);
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
@@ -275,6 +276,7 @@ void GetTextDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration
     CHECK_NULL_VOID(frameNode);
     decoration->decorationType = static_cast<int32_t>(TextModelNG::GetDecoration(frameNode));
     decoration->color = TextModelNG::GetTextDecorationColor(frameNode).GetValue();
+    decoration->style = static_cast<int32_t>(TextModelNG::GetTextDecorationStyle(frameNode));
 }
 
 void ResetTextDecoration(ArkUINodeHandle node)
@@ -681,7 +683,7 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
     CHECK_NULL_VOID(frameNode);
     Font value = TextModelNG::GetFont(frameNode);
     if (value.fontSize.has_value()) {
-        font->fontSize = value.fontSize.value().Value();
+        font->fontSize = value.fontSize.value().GetNativeValue(static_cast<DimensionUnit>(font->fontSizeUnit));
     }
     if (value.fontWeight.has_value()) {
         font->fontWeight = static_cast<ArkUI_Int32>(value.fontWeight.value());
@@ -705,11 +707,12 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
     }
 }
 
-ArkUI_Float32 GetFontSize(ArkUINodeHandle node)
+ArkUI_Float32 GetFontSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return static_cast<ArkUI_Float32>(TextModelNG::GetFontSize(frameNode).Value());
+    return static_cast<ArkUI_Float32>(
+        TextModelNG::GetFontSize(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit)));
 }
 
 ArkUI_Int32 GetFontWeight(ArkUINodeHandle node)
@@ -754,6 +757,27 @@ void ResetTextFontFeature(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     std::string strValue = "";
     TextModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
+void SetTextLineSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetLineSpacing(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+}
+
+float GetTextLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetLineSpacing(frameNode);
+}
+
+void ResetTextLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING);
 }
 } // namespace
 
@@ -838,7 +862,10 @@ const ArkUITextModifier* GetTextModifier()
         GetTextWordBreak,
         GetTextEllipsisMode,
         SetTextFontFeature,
-        ResetTextFontFeature
+        ResetTextFontFeature,
+        SetTextLineSpacing,
+        GetTextLineSpacing,
+        ResetTextLineSpacing
     };
 
     return &modifier;

@@ -125,13 +125,15 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     auto animationValue = obj->GetProperty("animation");
     if (animationValue->IsObject()) {
         auto animationObj = JSRef<JSObject>::Cast(animationValue);
+        auto curveArgs = animationObj->GetProperty("curve");
+        bool hasDuration = true;
         if (!ConvertFromJSValue(animationObj->GetProperty("duration"), duration) || Negative(duration)) {
             duration = DEFAULT_DURATION;
         }
-
-        auto curveArgs = animationObj->GetProperty("curve");
-        ParseCurveParams(curve, curveArgs);
-        ConvertFromJSValue(animationObj->GetProperty("canOverScroll"), canOverScroll);
+        if (!hasDuration && !ParseCurveParams(curve, curveArgs) &&
+            !ConvertFromJSValue(animationObj->GetProperty("canOverScroll"), canOverScroll)) {
+            smooth = true;
+        }
     } else if (animationValue->IsBoolean()) {
         smooth = animationValue->ToBoolean();
     }
@@ -145,20 +147,23 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth, canOverScroll);
 }
 
-void JSScroller::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
+bool JSScroller::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
 {
     std::string curveName;
     if (ConvertFromJSValue(jsValue, curveName)) {
         auto index = BinarySearchFindIndex(CURVE_MAP, ArraySize(CURVE_MAP), curveName.c_str());
         if (index >= 0) {
             curve = CURVE_MAP[index].value;
+            return true;
         }
     } else if (jsValue->IsObject()) {
         JSRef<JSVal> curveString = JSRef<JSObject>::Cast(jsValue)->GetProperty("__curveString");
         if (curveString->IsString()) {
             curve = CreateCurve(curveString->ToString());
+            return true;
         }
     }
+    return false;
 }
 
 void JSScroller::ScrollEdge(const JSCallbackInfo& args)
@@ -196,17 +201,16 @@ void JSScroller::Fling(const JSCallbackInfo& args)
         return;
     }
     double flingVelocity = 0.0;
-    if (args[0]->IsNumber()) {
-        flingVelocity = args[0]->ToNumber<double>();
-        if (NearZero(flingVelocity)) {
-            return;
-        }
-        flingVelocity = Dimension(flingVelocity, DimensionUnit::VP).ConvertToPx();
-    } else {
+    if (!args[0]->IsNumber()) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "The parameter check failed.");
         return;
     }
+    flingVelocity = args[0]->ToNumber<double>();
+    if (NearZero(flingVelocity)) {
+        return;
+    }
     ContainerScope scope(instanceId_);
+    flingVelocity = Dimension(flingVelocity, DimensionUnit::VP).ConvertToPx();
     scrollController->Fling(flingVelocity);
 }
 
@@ -284,7 +288,12 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
         !ConvertFromJSValue(args[1], yOffset)) {
         return;
     }
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
+        return;
+    }
 
+    ContainerScope scope(instanceId_);
     auto deltaX = xOffset.Value();
     auto deltaY = yOffset.Value();
     auto container = Container::Current();
@@ -303,11 +312,7 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
             }
         }
     }
-    auto scrollController = controllerWeak_.Upgrade();
-    if (scrollController) {
-        ContainerScope scope(instanceId_);
-        scrollController->ScrollBy(deltaX, deltaY, false);
-    }
+    scrollController->ScrollBy(deltaX, deltaY, false);
 }
 
 void JSScroller::IsAtEnd(const JSCallbackInfo& args)

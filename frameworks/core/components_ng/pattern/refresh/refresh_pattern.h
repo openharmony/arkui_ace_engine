@@ -105,7 +105,7 @@ private:
     ScrollResult HandleDragUpdate(float delta, float mainSpeed = 0.0f);
     void HandleDragEnd(float speed);
     void HandleDragCancel();
-    float CalculateFriction();
+    float CalculatePullDownRatio();
     void TriggerStatusChange(RefreshStatus newStatus);
     void OnAttachToFrameNode() override;
     float GetFollowRatio();
@@ -146,6 +146,7 @@ private:
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     float scrollOffset_;
+    float lastScrollOffset_;
     bool isSourceFromAnimation_ = false;
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;

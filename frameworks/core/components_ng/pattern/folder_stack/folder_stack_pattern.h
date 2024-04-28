@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include <ctime>
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT FolderStackPattern : public StackPattern {
@@ -103,6 +104,15 @@ public:
 
     void SetLayoutBeforeAnimation(const RefPtr<FolderStackGroupNode>& hostNode);
 
+    void SetLastTime(std::time_t time)
+    {
+        lastTime_ = time;
+    }
+    std::time_t GetLastTime()
+    {
+        return lastTime_;
+    }
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void RegisterFoldStatusListener();
@@ -127,6 +137,7 @@ private:
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     FoldStatus lastFoldStatus_ = FoldStatus::UNKNOWN;
     CancelableCallback<void()> foldStatusDelayTask_;
+    std::time_t lastTime_ = std::time(0);
 };
 } // namespace OHOS::Ace::NG
 

@@ -326,11 +326,11 @@ void ImagePattern::OnImageLoadSuccess()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-    });
+    }, "ArkUIImageCreateAnalyzerOverlay");
     host->MarkNeedRenderOnly();
 }
 
-bool ImagePattern::CheckIfNeeedLayout()
+bool ImagePattern::CheckIfNeedLayout()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
@@ -357,9 +357,18 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(event);
 
-    if (CheckIfNeeedLayout()) {
+    if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    } else {
+        return;
+    }
+
+    // 1. If PropertyChangeFlag contains PROPERTY_UPDATE_MEASURE,
+    //    the image will be decoded after layout.
+    // 2. The image node in imageAnimator will not be decoded after layout, decode directly.
+    auto layoutProp = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    if (!((layoutProp->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
+        isImageAnimator_) {
         StartDecoding(geometryNode->GetContentSize());
     }
 }
@@ -556,7 +565,7 @@ void ImagePattern::LoadImageDataIfNeed()
                 auto host = pattern->GetHost();
                 pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
             }
-        });
+        }, "ArkUIImageUpdateAnalyzerUIConfig");
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
@@ -865,6 +874,14 @@ void ImagePattern::OnVisibleChange(bool visible)
 {
     if (!visible) {
         CloseSelectOverlay();
+    }
+    // control pixelMap List
+    if (isAnimation_) {
+        if (visible) {
+            animator_->Forward();
+        } else {
+            animator_->Pause();
+        }
     }
     // control svg / gif animation
     if (image_) {
@@ -1524,25 +1541,20 @@ void ImagePattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNod
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto obscuredReasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
+    const auto& castRenderContext = imageFrameNode->GetRenderContext();
+    if (castRenderContext) {
+        castRenderContext->UpdateObscured(obscuredReasons);
+    }
+    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto renderProperty = host->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(renderProperty);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
 
     imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(images_[index].pixelMap));
-    if (renderProperty->HasColorFilter()) {
-        imageRenderProperty->UpdateColorFilter(renderProperty->GetColorFilter().value());
-    }
-    if (renderProperty->HasImageFit()) {
-        imageRenderProperty->UpdateImageFit(renderProperty->GetImageFit().value());
-    }
-    if (layoutProperty->HasImageFit()) {
-        imageLayoutProperty->UpdateImageFit(layoutProperty->GetImageFit().value());
-    }
+    SetColorFilter(imageFrameNode);
+    SetImageFit(imageFrameNode);
     //use the size of first pixelmap when no size is set
     auto &&layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (!layoutConstraint || !layoutConstraint->selfIdealSize.has_value()) {
@@ -1573,12 +1585,8 @@ void ImagePattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t in
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto renderProperty = host->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(renderProperty);
     auto imageLayoutProperty = cacheImage.imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageRenderProperty = cacheImage.imageNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
     CHECK_NULL_VOID(images_[index].pixelMap);
     // pixelmap
     if (imageLayoutProperty->HasImageSourceInfo()) {
@@ -1590,15 +1598,8 @@ void ImagePattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t in
             cacheImage.isLoaded = false;
         }
     }
-    if (renderProperty->HasColorFilter()) {
-        imageRenderProperty->UpdateColorFilter(renderProperty->GetColorFilter().value());
-    }
-    if (renderProperty->HasImageFit()) {
-        imageRenderProperty->UpdateImageFit(renderProperty->GetImageFit().value());
-    }
-    if (layoutProperty->HasImageFit()) {
-        imageLayoutProperty->UpdateImageFit(layoutProperty->GetImageFit().value());
-    }
+    SetColorFilter(cacheImage.imageNode);
+    SetImageFit(cacheImage.imageNode);
     //use the size of first pixelmap when no size is set
     auto &&layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (!layoutConstraint || !layoutConstraint->selfIdealSize.has_value()) {
@@ -1658,39 +1659,20 @@ void ImagePattern::AdaptSelfSize()
         layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->IsValid()) {
         return;
     }
-    Dimension maxWidth;
-    Dimension maxHeight;
-    double maxWidthPx = 0.0;
-    double maxHeightPx = 0.0;
-    for (const auto& image : images_) {
-        if (image.width.Unit() != DimensionUnit::PERCENT) {
-            auto widthPx = image.width.ConvertToPx();
-            if (widthPx > maxWidthPx) {
-                maxWidthPx = widthPx;
-                maxWidth = image.width;
-            }
-        }
-        if (image.height.Unit() != DimensionUnit::PERCENT) {
-            auto heightPx = image.height.ConvertToPx();
-            if (heightPx > maxHeightPx) {
-                maxHeightPx = heightPx;
-                maxHeight = image.height;
-            }
-        }
-    }
-    if (!maxWidth.IsValid() || !maxHeight.IsValid()) {
-        return;
-    }
+    hasSizeChanged = true;
+    CalcSize realSize = {
+        CalcLength(images_[0].pixelMap->GetWidth()), CalcLength(images_[0].pixelMap->GetHeight()) };
+
     const auto& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (!layoutConstraint || !layoutConstraint->selfIdealSize) {
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(maxWidth), CalcLength(maxHeight)));
+        layoutProperty->UpdateUserDefinedIdealSize(realSize);
         return;
     }
     if (!layoutConstraint->selfIdealSize->Width()) {
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(maxWidth), std::nullopt));
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(images_[0].pixelMap->GetWidth()), std::nullopt));
         return;
     }
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(maxHeight)));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(images_[0].pixelMap->GetHeight())));
 }
 
 int32_t ImagePattern::GetNextIndex(int32_t preIndex)
@@ -1823,5 +1805,75 @@ void ImagePattern::SetDuration(int32_t duration)
         CHECK_NULL_VOID(imageAnimator);
         imageAnimator->animator_->SetDuration(finalDuration);
     });
+}
+
+void ImagePattern::ResetImageProperties()
+{
+    SetCopyOption(CopyOptions::None);
+    OnImageModifyDone();
+}
+
+void ImagePattern::ResetImageAndAlt()
+{
+    image_ = nullptr;
+    loadingCtx_ = nullptr;
+    srcRect_.Reset();
+    dstRect_.Reset();
+    altLoadingCtx_ = nullptr;
+    altImage_ = nullptr;
+    altDstRect_.reset();
+    altSrcRect_.reset();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto rsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->ClearDrawCommands();
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ImagePattern::ResetPictureSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ClearUserDefinedIdealSize(true, true);
+    hasSizeChanged = false;
+}
+
+void ImagePattern::SetColorFilter(const RefPtr<FrameNode>& imageFrameNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderProperty = host->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProperty);
+    auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    if (renderProperty->HasColorFilter()) {
+        imageRenderProperty->UpdateColorFilter(renderProperty->GetColorFilter().value());
+    }
+    if (renderProperty->HasDrawingColorFilter()) {
+        imageRenderProperty->UpdateDrawingColorFilter(renderProperty->GetDrawingColorFilter().value());
+    }
+}
+
+void ImagePattern::SetImageFit(const RefPtr<FrameNode>& imageFrameNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto renderProperty = host->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProperty);
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    if (renderProperty->HasImageFit()) {
+        imageRenderProperty->UpdateImageFit(renderProperty->GetImageFit().value());
+    }
+    if (layoutProperty->HasImageFit()) {
+        imageLayoutProperty->UpdateImageFit(layoutProperty->GetImageFit().value());
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,7 +145,7 @@ public:
 
     std::list<int32_t> GetRouteOfFirstScope() override
     {
-        return { 2, 0 };
+        return {};
     }
 
     std::string GetEntryFocusViewName() override
@@ -202,6 +202,18 @@ public:
         return inspectorId_;
     }
 
+    void SetIsUserDefinedBgColor(bool isUserDefinedBgColor)
+    {
+        isUserDefinedBgColor_ = isUserDefinedBgColor;
+    }
+
+    bool IsUserDefinedBgColor() const
+    {
+        return isUserDefinedBgColor_;
+    }
+
+    void OnLanguageConfigurationUpdate() override;
+
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -214,6 +226,8 @@ private:
     RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;
     bool isOnShow_ = false;
+    bool isUserDefinedBgColor_ = false;
+    bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
 };

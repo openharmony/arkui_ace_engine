@@ -482,9 +482,8 @@ public:
     
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
-        CHECK_NULL_VOID(scrollableEvent_);
-        auto canScroll = scrollableEvent_->GetEnable();
-        animateCanOverScroll_ = canScroll && animateCanOverScroll;
+        bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
+        animateCanOverScroll_ = isScrollable && animateCanOverScroll;
     }
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent(GestureEvent& info);
@@ -517,6 +516,9 @@ public:
     }
 
     void CheckRestartSpring(bool sizeDiminished);
+
+    void HandleMoveEventInComp(const PointF& point);
+    void HandleLeaveHotzoneEvent();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -754,8 +756,6 @@ private:
     void HotZoneScroll(const float offset);
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
-    void HandleMoveEventInComp(const PointF& point);
-    void HandleLeaveHotzoneEvent();
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);
     RefPtr<InputEvent> mouseEvent_;

@@ -56,8 +56,6 @@ public:
 private:
     void UpdateTextStyleToModifier(
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, bool isDisabled);
-    void UpdateSelectedBackGroundColor(
-        const RefPtr<TextFieldPaintProperty>& paintProperty, const RefPtr<TextFieldTheme>& theme);
 
 private:
     WeakPtr<Pattern> pattern_;

@@ -419,4 +419,9 @@ NestedScrollOptions WaterFlowModelNG::GetNestedScroll(FrameNode* frameNode)
     CHECK_NULL_RETURN(pattern, defaultOptions);
     return pattern->GetNestedScroll();
 }
+
+void WaterFlowModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
+{
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+}
 } // namespace OHOS::Ace::NG

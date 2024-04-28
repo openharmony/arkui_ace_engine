@@ -37,6 +37,10 @@ enum class DragPreviewMode : int32_t {
     DISABLE_SCALE = 2,
 };
 
+typedef struct {
+    double opacity;
+} OptionsAfterApplied;
+
 struct DragPreviewOption {
     DragPreviewMode mode = DragPreviewMode::AUTO;
     bool defaultAnimationBeforeLifting = false;
@@ -55,6 +59,8 @@ struct DragPreviewOption {
         }
         return std::nullopt;
     }
+    std::function<void(WeakPtr<NG::FrameNode>)> onApply;
+    OptionsAfterApplied options; // options from modifier after applied
 };
 
 class ACE_EXPORT Gesture : public virtual AceType {

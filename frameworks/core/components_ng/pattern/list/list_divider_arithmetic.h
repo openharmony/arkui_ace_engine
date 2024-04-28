@@ -94,20 +94,30 @@ public:
         }
         DividerMap another = rhs->GetDividerMap();
         DividerMap one = dividermap_;
-
-        if (another.size() != one.size()) {
-            return false;
-        }
-        auto iterAnother = another.begin();
-        auto iterOne = one.begin();
-        for (; iterAnother != another.end(); ++iterAnother, ++iterOne) {
-            if (iterAnother->first != iterOne->first ||
-                iterAnother->second.offset != iterOne->second.offset ||
-                iterAnother->second.length != iterOne->second.length) {
+        for (const auto& child : one) {
+            auto it = another.find(child.first);
+            if (it == another.end() || it->second.offset != child.second.offset ||
+                it->second.length != child.second.length) {
                 return false;
             }
         }
-        return true;
+        return true && !one.empty();
+    }
+
+    bool IsSurfaceChange(const RefPtr<CustomAnimatableArithmetic>& value) const
+    {
+        RefPtr<ListDividerArithmetic> rhs = AceType::DynamicCast<ListDividerArithmetic>(value);
+        if (!rhs) {
+            return false;
+        }
+        DividerMap another = rhs->GetDividerMap();
+        DividerMap one = dividermap_;
+        auto iterAnother = another.begin();
+        auto iterOne = one.begin();
+        if (iterAnother == another.end() || iterOne == one.end()) {
+            return false;
+        }
+        return iterAnother->second.length < iterOne->second.length / 2.0f;
     }
 
     DividerMap GetDividerMap() const

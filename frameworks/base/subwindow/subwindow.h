@@ -69,14 +69,13 @@ public:
     virtual void MarkDirtyDialogSafeArea() = 0;
 
     // Add interface for hot regions
-    virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
-    virtual void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
-    virtual void DeleteHotAreas(int32_t overlayId) {};
-    virtual void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
-    virtual void DeletePopupHotAreas(int32_t overlayId) {};
+    virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId) {};
+    virtual void DeleteHotAreas(int32_t nodeId) {};
 
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
+    virtual Rect GetUIExtensionHostWindowRect() const = 0;
+    virtual bool CheckHostWindowStatus() const = 0;
 
     int32_t GetSubwindowId() const
     {
@@ -86,6 +85,16 @@ public:
     void SetSubwindowId(int32_t id)
     {
         subwindowId_ = id;
+    }
+
+    int32_t GetUIExtensionHostWindowId() const
+    {
+        return uiExtensionHostWindowId_;
+    }
+
+    void SetUIExtensionHostWindowId(int32_t id)
+    {
+        uiExtensionHostWindowId_ = id;
     }
 
     void SetAboveApps(bool isAboveApps)
@@ -119,6 +128,7 @@ public:
     virtual void ResizeWindowForFoldStatus(int32_t parentContainerId) = 0;
 private:
     int32_t subwindowId_ = 0;
+    int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
 };
 

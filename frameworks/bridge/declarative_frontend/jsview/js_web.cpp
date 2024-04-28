@@ -1657,6 +1657,54 @@ private:
     RefPtr<ContextMenuResult> result_;
 };
 
+class JSWebAppLinkCallback : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebAppLinkCallback>::Declare("WebAppLinkCallback");
+        JSClass<JSWebAppLinkCallback>::CustomMethod("continueLoad", &JSWebAppLinkCallback::ContinueLoad);
+        JSClass<JSWebAppLinkCallback>::CustomMethod("cancelLoad", &JSWebAppLinkCallback::CancelLoad);
+        JSClass<JSWebAppLinkCallback>::Bind(
+            globalObj, &JSWebAppLinkCallback::Constructor, &JSWebAppLinkCallback::Destructor);
+    }
+
+    void SetEvent(const WebAppLinkEvent& eventInfo)
+    {
+        callback_ = eventInfo.GetCallback();
+    }
+
+    void ContinueLoad(const JSCallbackInfo& args)
+    {
+        if (callback_) {
+            callback_->ContinueLoad();
+        }
+    }
+
+    void CancelLoad(const JSCallbackInfo& args)
+    {
+        if (callback_) {
+            callback_->CancelLoad();
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebAppLinkCallback = Referenced::MakeRefPtr<JSWebAppLinkCallback>();
+        jsWebAppLinkCallback->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebAppLinkCallback));
+    }
+
+    static void Destructor(JSWebAppLinkCallback* jsWebAppLinkCallback)
+    {
+        if (jsWebAppLinkCallback != nullptr) {
+            jsWebAppLinkCallback->DecRefCount();
+        }
+    }
+
+    RefPtr<WebAppLinkCallback> callback_;
+};
+
 void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
@@ -1806,6 +1854,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSDataResubmitted::JSBind(globalObj);
     JSScreenCaptureRequest::JSBind(globalObj);
     JSNativeEmbedGestureRequest::JSBind(globalObj);
+    JSWebAppLinkCallback::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -2133,15 +2182,35 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     auto result = func->Call(webviewController, 1, argv);
             };
         }
+
+        auto setOpenAppLinkFunction = controller->GetProperty("openAppLink");
+        std::function<void(const std::shared_ptr<BaseEventInfo>&)> openAppLinkCallback = nullptr;
+        if (setOpenAppLinkFunction->IsFunction()) {
+            openAppLinkCallback = [webviewController = controller,
+                func = JSRef<JSFunc>::Cast(setOpenAppLinkFunction)]
+                (const std::shared_ptr<BaseEventInfo>& info) {
+                    auto* eventInfo = TypeInfoHelper::DynamicCast<WebAppLinkEvent>(info.get());
+                    JSRef<JSObject> obj = JSRef<JSObject>::New();
+                    JSRef<JSObject> callbackObj = JSClass<JSWebAppLinkCallback>::NewInstance();
+                    auto callbackEvent = Referenced::Claim(callbackObj->Unwrap<JSWebAppLinkCallback>());
+                    callbackEvent->SetEvent(*eventInfo);
+                    obj->SetPropertyObject("result", callbackObj);
+                    JSRef<JSVal> urlVal = JSRef<JSVal>::Make(ToJSValue(eventInfo->GetUrl()));
+                    obj->SetPropertyObject("url", urlVal);
+                    JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
+                    auto result = func->Call(webviewController, 1, argv);
+            };
+        }
         
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
         WebModel::GetInstance()->Create(
-            dstSrc.value(), std::move(setIdCallback),
+            isPopup ? "" : dstSrc.value(), std::move(setIdCallback),
             std::move(setHapPathCallback), parentNWebId, isPopup, renderMode,
             incognitoMode);
 
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
+        WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
         if (!cmdLine.empty()) {
@@ -3676,7 +3745,7 @@ void JSWeb::OnPageVisible(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<PageVisibleEvent>(info.get());
             postFunc->Execute(*eventInfo);
-        });
+        }, "ArkUIWebPageVisible");
     };
     WebModel::GetInstance()->SetPageVisibleId(std::move(uiCallback));
 }
@@ -3739,7 +3808,7 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<DataResubmittedEvent>(info.get());
             postFunc->Execute(*eventInfo);
-        });
+        }, "ArkUIWebDataResubmitted");
     };
     WebModel::GetInstance()->SetOnDataResubmitted(uiCallback);
 }
@@ -3842,7 +3911,7 @@ void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<FaviconReceivedEvent>(info.get());
             postFunc->Execute(*eventInfo);
-        });
+        }, "ArkUIWebFaviconReceived");
     };
     WebModel::GetInstance()->SetFaviconReceivedId(uiCallback);
 }
@@ -3875,7 +3944,7 @@ void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<TouchIconUrlEvent>(info.get());
             postFunc->Execute(*eventInfo);
-        });
+        }, "ArkUIWebTouchIconUrlReceived");
     };
     WebModel::GetInstance()->SetTouchIconUrlId(uiCallback);
 }
@@ -3993,7 +4062,7 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<FirstContentfulPaintEvent>(info.get());
             postFunc->Execute(*eventInfo);
-        });
+        }, "ArkUIWebFirstContentfulPaint");
     };
     WebModel::GetInstance()->SetFirstContentfulPaintId(std::move(uiCallback));
 }
@@ -4025,7 +4094,7 @@ void JSWeb::OnFirstMeaningfulPaint(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<FirstMeaningfulPaintEvent>(info.get());
             postFunc->Execute(*eventInfo);
-        });
+        }, "ArkUIWebFirstMeaningfulPaint");
     };
     WebModel::GetInstance()->SetFirstMeaningfulPaintId(std::move(uiCallback));
 }
@@ -4061,7 +4130,7 @@ void JSWeb::OnLargestContentfulPaint(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<LargestContentfulPaintEvent>(info.get());
             postFunc->Execute(*eventInfo);
-        });
+        }, "ArkUIWebLargestContentfulPaint");
     };
     WebModel::GetInstance()->SetLargestContentfulPaintId(std::move(uiCallback));
 }
@@ -4093,7 +4162,7 @@ void JSWeb::OnSafeBrowsingCheckResult(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<SafeBrowsingCheckResultEvent>(info.get());
             postFunc->Execute(*eventInfo);
-        });
+        }, "ArkUIWebSafeBrowsingCheckResult");
     };
     WebModel::GetInstance()->SetSafeBrowsingCheckResultId(std::move(uiCallback));
 }
@@ -4129,7 +4198,7 @@ void JSWeb::OnNavigationEntryCommitted(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<NavigationEntryCommittedEvent>(info.get());
             postFunc->Execute(*eventInfo);
-        });
+        }, "ArkUIWebNavigationEntryCommitted");
     };
     WebModel::GetInstance()->SetNavigationEntryCommittedId(std::move(uiCallback));
 }
@@ -4163,7 +4232,7 @@ void JSWeb::OnIntelligentTrackingPreventionResult(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<IntelligentTrackingPreventionResultEvent>(info.get());
             postFunc->Execute(*eventInfo);
-        });
+        }, "ArkUIWebIntelligentTrackingPreventionResult");
     };
     WebModel::GetInstance()->SetIntelligentTrackingPreventionResultId(std::move(uiCallback));
 }
@@ -4184,7 +4253,7 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
         context->PostSyncEvent([execCtx, postFunc = func]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             postFunc->Execute();
-        });
+        }, "ArkUIWebControllerAttached");
     };
     WebModel::GetInstance()->SetOnControllerAttached(std::move(uiCallback));
 }

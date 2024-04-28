@@ -29,7 +29,7 @@
 namespace OHOS::Ace::NG {
 RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
-    auto obj = AceType::MakeRefPtr<SvgImageObject>(src, SizeF(), data);
+    auto obj = AceType::MakeRefPtr<SvgImageObject>(src, SizeF());
     if (!obj->MakeSvgDom(data, src)) {
         return nullptr;
     }
@@ -42,50 +42,35 @@ RefPtr<SvgDomBase> SvgImageObject::GetSVGDom() const
 }
 
 void SvgImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool /*forceResize*/, bool /*syncLoad*/)
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
 {
-    auto src = GetSourceInfo();
-    auto key = ImageUtils::GenerateImageKey(src, resizeTarget);
-
-    if (!svgImageData_) {
-        ctx->FailCallback("svgImageData is null when SvgImageObject try MakeSvgDom");
-        return;
-    }
-    auto svgDomBase = MakeSvgDom(svgImageData_, src);
-    if (!svgDomBase) {
-        ctx->FailCallback("MakeSvgDom failed");
-        return;
-    }
-    auto canvasImage = MakeRefPtr<SvgCanvasImage>(svgDomBase);
+    CHECK_NULL_VOID(GetSVGDom());
+    // just set svgDom to canvasImage
+    auto canvasImage = MakeRefPtr<SvgCanvasImage>(GetSVGDom());
     ctx->SuccessCallback(canvasImage);
 }
 
-RefPtr<SvgDomBase> SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const ImageSourceInfo& src)
+bool SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const ImageSourceInfo& src)
 {
-    RefPtr<SvgDomBase> svgDomBase;
 #ifndef USE_ROSEN_DRAWING
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
-    CHECK_NULL_RETURN(skiaImageData, nullptr);
-    svgDomBase = skiaImageData->MakeSvgDom(src.GetFillColor());
+    CHECK_NULL_RETURN(skiaImageData, false);
+    svgDomBase_ = skiaImageData->MakeSvgDom(src.GetFillColor());
 #else
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
-    CHECK_NULL_RETURN(rosenImageData, nullptr);
+    CHECK_NULL_RETURN(rosenImageData, false);
     // update SVGSkiaDom
-    svgDomBase = rosenImageData->MakeSvgDom(src);
+    svgDomBase_ = rosenImageData->MakeSvgDom(src);
 #endif
-    CHECK_NULL_RETURN(svgDomBase, nullptr);
-    imageSize_ = svgDomBase->GetContainerSize();
+    CHECK_NULL_RETURN(svgDomBase_, false);
+    imageSize_ = svgDomBase_->GetContainerSize();
 
     if (imageSize_.IsNonPositive()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE,
             "[Engine Log] [Image] %{public}s doesn't have an intrinsic size. The developer must set a size for it.",
             GetSourceInfo().ToString().c_str());
     }
-    return svgDomBase;
+    return true;
 }
 
-const RefPtr<ImageData>& SvgImageObject::GetSvgImageData() const
-{
-    return svgImageData_;
-}
 } // namespace OHOS::Ace::NG

@@ -26,9 +26,56 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class LeadingMarginSize {
+public:
+    LeadingMarginSize() = default;
+    ~LeadingMarginSize() = default;
+
+    LeadingMarginSize(Dimension width, Dimension height) : width_(width), height_(height) {}
+
+    std::string ToString() const
+    {
+        static const int32_t precision = 2;
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(precision);
+        ss << "width: " << width_.ToString();
+        ss << " height: " << height_.ToString();
+        return ss.str();
+    }
+
+    bool operator==(const LeadingMarginSize& size) const
+    {
+        return NearEqual(width_, size.width_) && NearEqual(height_, size.height_);
+    }
+
+    Dimension Width() const
+    {
+        return width_;
+    }
+
+    Dimension Height() const
+    {
+        return height_;
+    }
+
+private:
+    Dimension width_;
+    Dimension height_;
+};
+
+struct LineMetrics {
+    float ascender;
+    float descender;
+    float capHeight;
+    float xHeight;
+    float width;
+    float height;
+    float x;
+    float y;
+};
 
 struct LeadingMargin {
-    SizeF size;
+    LeadingMarginSize size;
     RefPtr<PixelMap> pixmap;
 
     bool operator==(const LeadingMargin& other) const
@@ -54,6 +101,7 @@ struct ParagraphStyle {
     std::string fontLocale;
     WordBreak wordBreak = WordBreak::NORMAL;
     EllipsisMode ellipsisMode = EllipsisMode::TAIL;
+    LineBreakStrategy lineBreakStrategy = LineBreakStrategy::GREEDY;
     TextOverflow textOverflow = TextOverflow::CLIP;
     std::optional<LeadingMargin> leadingMargin;
     double fontSize = 14.0;
@@ -136,6 +184,8 @@ public:
 #ifndef USE_ROSEN_DRAWING
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 #endif
+    virtual void SetParagraphId(uint32_t id) = 0;
+    virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
 };
 } // namespace OHOS::Ace::NG
 

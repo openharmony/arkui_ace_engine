@@ -16,10 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_CLOCK_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_CLOCK_MODEL_NG_H
 
+#include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model.h"
 
 namespace OHOS::Ace::NG {
+class TextClockConfiguration : public CommonConfiguration {
+public:
+    TextClockConfiguration(float timeZoneOffset, bool started, int64_t timeValue, bool enabled)
+        : CommonConfiguration(enabled), timeZoneOffset_(timeZoneOffset), started_(started), timeValue_(timeValue)
+    {}
+    float timeZoneOffset_;
+    bool started_;
+    int64_t timeValue_;
+};
+using TextClockMakeCallback = std::function<RefPtr<FrameNode>(const TextClockConfiguration& textClockConfiguration)>;
 class ACE_EXPORT TextClockModelNG : public OHOS::Ace::TextClockModel {
 public:
     RefPtr<TextClockController> Create() override;
@@ -32,7 +43,7 @@ public:
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
-    void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+    void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void InitFontDefault(const TextStyle& textStyle) override;
 
     static void SetFormat(FrameNode* frameNode, const std::string& format);
@@ -41,7 +52,7 @@ public:
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
-
+    static void SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallback&& jsMake);
 };
 } // namespace OHOS::Ace::NG
 

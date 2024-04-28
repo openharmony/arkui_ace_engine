@@ -171,6 +171,7 @@ public:
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
     void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
+    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override;
     void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
@@ -239,6 +240,7 @@ public:
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
     bool StopTextureExport() override;
+    void SetSurfaceRotation(bool isLock) override;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -275,12 +277,14 @@ public:
     void ClearAccessibilityFocus() override;
 
     void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
+    void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) override;
 
     void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) override;
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnPositionEdgesUpdate(const EdgesParam& value) override;
+    void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
@@ -326,7 +330,7 @@ public:
     void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
-    void SetUsingContentRectForRenderFrame(bool value) override;
+    void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) override;
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
@@ -418,6 +422,8 @@ private:
     void OnDynamicLightUpRateUpdate(const float rate) override;
     void OnDynamicDimDegreeUpdate(const float degree) override;
     void OnDynamicLightUpDegreeUpdate(const float degree) override;
+    void OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
+    void OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
@@ -448,6 +454,7 @@ private:
     {
         return transitionEffect_ != nullptr && transitionEffect_->HasDisappearTransition();
     }
+    bool HasValidBgImageResizable();
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
@@ -632,6 +639,7 @@ private:
     bool isTouchUpFinished_ = true;
 
     bool useContentRectForRSFrame_;
+    bool adjustRSFrameByContentRect_ = false;
 
     RectF paintRect_;
 

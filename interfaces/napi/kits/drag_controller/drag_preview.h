@@ -82,7 +82,7 @@ public:
                         return;
                     };
                 },
-                TaskExecutor::TaskType::JS);
+                TaskExecutor::TaskType::JS, "ArkUIDragUpdatePreviewStyle");
             dragPreview->previewStyle_.types.clear();
         }
         napi_close_handle_scope(env, scope);
@@ -120,7 +120,7 @@ public:
                     return;
                 };
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUIDragUpdatePreviewAnimationStyle");
         dragPreview->hasAnimation_ = false;
         dragPreview->previewStyle_.types.clear();
         return nullptr;

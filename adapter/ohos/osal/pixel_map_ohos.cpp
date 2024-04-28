@@ -87,6 +87,20 @@ RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
     return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
 }
 
+RefPtr<PixelMap> PixelMap::CopyPixelMap(const RefPtr<PixelMap>& pixelMap)
+{
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    OHOS::Media::InitializationOptions opts;
+    auto mediaPixelMap = pixelMap->GetPixelMapSharedPtr();
+    std::unique_ptr<Media::PixelMap> uniquePixelMap = Media::PixelMap::Create(*mediaPixelMap, opts);
+    CHECK_NULL_RETURN(uniquePixelMap, nullptr);
+    Media::PixelMap* pixelMapRelease = uniquePixelMap.release();
+    CHECK_NULL_RETURN(pixelMapRelease, nullptr);
+    std::shared_ptr<Media::PixelMap> newPixelMap(pixelMapRelease);
+    CHECK_NULL_RETURN(newPixelMap, nullptr);
+    return AceType::MakeRefPtr<PixelMapOhos>(newPixelMap);
+}
+
 RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
 {
     CHECK_NULL_RETURN(ptr, nullptr);
@@ -98,8 +112,12 @@ bool PixelMap::GetPxielMapListFromAnimatedDrawable(void* ptr, std::vector<RefPtr
     int32_t& duration, int32_t& iterations)
 {
     CHECK_NULL_RETURN(ptr, false);
-    auto* animatedDrawable = reinterpret_cast<Napi::AnimatedDrawableDescriptor*>(ptr);
-    CHECK_NULL_RETURN(animatedDrawable, false);
+    auto* drawable = reinterpret_cast<Napi::DrawableDescriptor*>(ptr);
+    auto drawableType = drawable->GetDrawableType();
+    if (drawableType != Napi::DrawableDescriptor::DrawableType::ANIMATED) {
+        return false;
+    }
+    auto* animatedDrawable = static_cast<Napi::AnimatedDrawableDescriptor*>(drawable);
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList = animatedDrawable->GetPixelMapList();
     for (uint32_t i = 0; i < pixelMapList.size(); i++) {
         pixelMaps.push_back(AceType::MakeRefPtr<PixelMapOhos>(std::move(pixelMapList[i])));

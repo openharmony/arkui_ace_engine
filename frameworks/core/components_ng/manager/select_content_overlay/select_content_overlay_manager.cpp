@@ -325,7 +325,7 @@ void SelectContentOverlayManager::CreateSelectOverlay(SelectOverlayInfo& info, b
             CHECK_NULL_VOID(manager);
             manager->CreateAndMountNode(node, animation);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUISelectOverlayCreate");
 }
 
 void SelectContentOverlayManager::CreateAndMountNode(const RefPtr<FrameNode>& overlayNode, bool animation)
@@ -488,11 +488,11 @@ void SelectContentOverlayManager::ShowOptionMenu()
     pattern->UpdateMenuIsShow(true);
 }
 
-void SelectContentOverlayManager::HideOptionMenu()
+void SelectContentOverlayManager::HideOptionMenu(bool noAnimation)
 {
     auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
     CHECK_NULL_VOID(pattern);
-    pattern->UpdateMenuIsShow(false);
+    pattern->UpdateMenuIsShow(false, noAnimation);
 }
 
 void SelectContentOverlayManager::ToggleOptionMenu()

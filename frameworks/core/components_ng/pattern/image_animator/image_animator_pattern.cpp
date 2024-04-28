@@ -241,6 +241,10 @@ void ImageAnimatorPattern::GenerateCachedImages()
     }
     while (cacheImages_.size() < cacheImageNum) {
         auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(imageNode);
+        auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+        CHECK_NULL_VOID(imagePattern);
+        imagePattern->SetImageAnimator(true);
         auto imageLayoutProperty = imageNode->GetLayoutProperty();
         imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         imageLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
@@ -548,12 +552,6 @@ void ImageAnimatorPattern::SetIteration(int32_t iteration)
 
 void ImageAnimatorPattern::SetDuration(int32_t duration)
 {
-    if (durationTotal_ == 0) {
-        for (int i = 0; i < images_.size(); i++) {
-            images_[i].duration = duration / images_.size();
-            durationTotal_ += images_[i].duration;
-        }
-    }
     int32_t finalDuration = durationTotal_ > 0 ? durationTotal_ : duration;
     if (IsFormRender()) {
         finalDuration = finalDuration < DEFAULT_DURATION ? finalDuration : DEFAULT_DURATION;

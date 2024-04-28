@@ -49,7 +49,7 @@ NativeTexture::~NativeTexture()
                 return;
             }
             resRegister->UnregisterEvent(eventHash);
-        });
+        }, "ArkUIXComponentUnregisterEvent");
     }
 }
 
@@ -68,7 +68,7 @@ void NativeTexture::Create(const std::function<void(int64_t)>& onCreate, const s
         if (texture) {
             texture->CreateTexture(onCreate, idStr);
         }
-    });
+    }, "ArkUIXComponentNativeTextureCreate");
 }
 
 void NativeTexture::CreateTexture(const std::function<void(int64_t)>& onCreate, const std::string& idStr)

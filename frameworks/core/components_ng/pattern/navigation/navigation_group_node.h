@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,14 +166,12 @@ public:
         isOnAnimation_ = isOnAnimation;
     }
 
-    WeakPtr<UINode> GetCustomNode() const {
-        return customNode_;
-    }
-
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
+
+    float CheckLanguageDirection();
 
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
@@ -188,7 +186,6 @@ private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
-    WeakPtr<UINode> customNode_;
     std::vector<RefPtr<NavDestinationGroupNode>> hideNodes_; // dialog destination hide pages.
     int32_t lastStandardIndex_ = -1;
     bool isOnAnimation_ { false };

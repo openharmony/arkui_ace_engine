@@ -862,13 +862,16 @@ void RadioPattern::HandleEnabled()
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
+    auto radioPaintProperty = GetHost()->GetPaintProperty<RadioPaintProperty>();
     if (enabled_ != enabled) {
         enabled_ = enabled;
-        if (!enabled_) {
+        if (!enabled_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             if (!radioModifier_) {
                 radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
             }
-            radioModifier_->SetUIStatus(UIStatus::UNSELECTED);
+            if (!radioPaintProperty->HasRadioCheck() || !radioPaintProperty->GetRadioCheckValue()) {
+                radioModifier_->SetUIStatus(UIStatus::UNSELECTED);
+            }
         }
         auto paintProperty = GetPaintProperty<RadioPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
@@ -895,8 +898,13 @@ void RadioPattern::SetRadioChecked(bool check)
 
 void RadioPattern::FireBuilder()
 {
-    CHECK_NULL_VOID(makeFunc_);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value() && !builderChildNode_) {
+        host->RemoveChildAtIndex(0);
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
     CHECK_NULL_VOID(host);
     host->RemoveChildAtIndex(0);
     customNode_ = BuildContentModifierNode();

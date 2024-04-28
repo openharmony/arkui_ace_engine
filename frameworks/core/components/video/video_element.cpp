@@ -252,7 +252,7 @@ void VideoElement::RegisterMediaPlayerEvent()
             if (video != nullptr) {
                 video->OnCurrentTimeChange(currentPos);
             }
-        });
+        }, "ArkUIVideoCurrentTimeChange");
     };
 
     auto&& stateChangedEvent = [videoElement, uiTaskExecutor](PlaybackStatus status) {
@@ -261,7 +261,7 @@ void VideoElement::RegisterMediaPlayerEvent()
             if (video) {
                 video->OnPlayerStatus(status);
             }
-        });
+        }, "ArkUIVideoStatusChange");
     };
 
     auto&& errorEvent = [videoElement, uiTaskExecutor]() {
@@ -270,7 +270,7 @@ void VideoElement::RegisterMediaPlayerEvent()
             if (video) {
                 video->OnError("", "");
             }
-        });
+        }, "ArkUIVideoError");
     };
 
     auto&& resolutionChangeEvent = [videoElement, uiTaskExecutor]() {
@@ -279,7 +279,7 @@ void VideoElement::RegisterMediaPlayerEvent()
             if (video) {
                 video->OnResolutionChange();
             }
-        });
+        }, "ArkUIVideoResolutionChange");
     };
 
     mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>(ContainerScope::CurrentId());
@@ -886,7 +886,7 @@ void VideoElement::SetMethodCall(const RefPtr<VideoComponent>& videoComponent)
                 if (videoElement) {
                     videoElement->Start();
                 }
-            });
+            }, "ArkUIVideoStart");
         });
         videoController->SetPausetImpl([weak = WeakClaim(this), uiTaskExecutor]() {
             uiTaskExecutor.PostTask([weak]() {
@@ -894,7 +894,7 @@ void VideoElement::SetMethodCall(const RefPtr<VideoComponent>& videoComponent)
                 if (videoElement) {
                     videoElement->Pause();
                 }
-            });
+            }, "ArkUIVideoPause");
         });
         videoController->SetStopImpl([weak = WeakClaim(this), uiTaskExecutor]() {
             uiTaskExecutor.PostTask([weak]() {
@@ -902,7 +902,7 @@ void VideoElement::SetMethodCall(const RefPtr<VideoComponent>& videoComponent)
                 if (videoElement) {
                     videoElement->Stop();
                 }
-            });
+            }, "ArkUIVideoStop");
         });
         videoController->SetSeekToImpl([weak = WeakClaim(this), uiTaskExecutor](float pos, SeekMode seekMode) {
             uiTaskExecutor.PostTask([weak, pos, seekMode]() {
@@ -910,7 +910,7 @@ void VideoElement::SetMethodCall(const RefPtr<VideoComponent>& videoComponent)
                 if (videoElement) {
                     videoElement->SetCurrentTime(pos, seekMode);
                 }
-            });
+            }, "ArkUIVideoSetCurrentTime");
         });
         videoController->SetRequestFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isPortrait) {
             uiTaskExecutor.PostTask([weak, isPortrait]() {
@@ -919,7 +919,7 @@ void VideoElement::SetMethodCall(const RefPtr<VideoComponent>& videoComponent)
                     videoElement->OnPreFullScreen(isPortrait);
                     videoElement->FullScreen();
                 }
-            });
+            }, "ArkUIVideoFullScreen");
         });
         videoController->SetExitFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isSync) {
             if (isSync) {
@@ -934,7 +934,7 @@ void VideoElement::SetMethodCall(const RefPtr<VideoComponent>& videoComponent)
                 if (videoElement) {
                     videoElement->ExitFullScreen();
                 }
-            });
+            }, "ArkUIVideoExitFullScreen");
         });
     }
 }
@@ -991,7 +991,7 @@ void VideoElement::CreatePlatformResource()
             if (videoElement) {
                 videoElement->OnError(errorId, param);
             }
-        });
+        }, "ArkUIVideoError");
     };
     texture_ = AceType::MakeRefPtr<Texture>(context_, errorCallback);
 
@@ -1031,7 +1031,7 @@ void VideoElement::InitListener()
                 if (video) {
                     video->OnTextureRefresh();
                 }
-            });
+            }, "ArkUIVideoTextureRefresh");
         };
         texture_->SetRefreshListener(onTextureRefresh);
     }
@@ -1046,7 +1046,7 @@ void VideoElement::InitListener()
             if (video) {
                 video->OnPrepared(width, height, isPlaying, duration, currentPos, needFireEvent);
             }
-        });
+        }, "ArkUIVideoPrepared");
     };
 
     auto onPlayerStatus = [videoElement, uiTaskExecutor](bool isPlaying) {
@@ -1058,7 +1058,7 @@ void VideoElement::InitListener()
             if (video) {
                 video->OnPlayerStatus(isPlaying ? PlaybackStatus::STARTED : PlaybackStatus::NONE);
             }
-        });
+        }, "ArkUIVideoPlayerStatus");
     };
 
     auto onCurrentTimeChange = [videoElement, uiTaskExecutor](uint32_t currentPos) {
@@ -1070,7 +1070,7 @@ void VideoElement::InitListener()
             if (video) {
                 video->OnCurrentTimeChange(currentPos);
             }
-        });
+        }, "ArkUIVideoCurrentTimeChange");
     };
 
     auto onCompletion = [videoElement, uiTaskExecutor] {
@@ -1082,7 +1082,7 @@ void VideoElement::InitListener()
             if (video) {
                 video->OnCompletion();
             }
-        });
+        }, "ArkUIVideoCompletion");
     };
 
     player_->AddPreparedListener(onPrepared);
@@ -1122,7 +1122,7 @@ void VideoElement::ReleasePlatformResource()
                 player_.Reset();
             } else {
                 // Make sure it's destroyed when it's release task done.
-                platformTaskExecutor.PostTask([player = player_]() {});
+                platformTaskExecutor.PostTask([player = player_]() {}, "ArkUIVideoReleasePlayer");
             }
         }
 
@@ -1137,7 +1137,7 @@ void VideoElement::ReleasePlatformResource()
                 texture_->Release();
             }
             // Make sure it's destroyed when it's release task done.
-            platformTaskExecutor.PostTask([texture = texture_]() {});
+            platformTaskExecutor.PostTask([texture = texture_]() {}, "ArkUIVideoReleaseTexture");
 #else
                 auto gpuTaskExecutor =
                     SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::GPU);
@@ -1151,11 +1151,11 @@ void VideoElement::ReleasePlatformResource()
                     }
                     texture->Release();
                     // Make sure it's destroyed when it's release task done.
-                    platformTaskExecutor.PostTask([texture]() {});
-                });
+                    platformTaskExecutor.PostTask([texture]() {}, "ArkUIVideoReleaseTexture");
+                }, "ArkUIVideoReleaseTexture");
             } else {
                 // Make sure it's destroyed when it's release task done.
-                platformTaskExecutor.PostTask([texture = texture_]() {});
+                platformTaskExecutor.PostTask([texture = texture_]() {}, "ArkUIVideoReleaseTexture");
             }
 #endif
         }
@@ -1336,7 +1336,7 @@ void VideoElement::OnPlayerStatus(PlaybackStatus status)
                 LOGI("Video OnPrepared video size: %{public}s", videoSize.ToString().c_str());
                 video->OnPrepared(videoSize.Width(), videoSize.Height(), false, duration, startTime, true);
             }
-        });
+        }, "ArkUIVideoPrepared");
     } else if (status == PlaybackStatus::PLAYBACK_COMPLETE) {
         OnCompletion();
     }
@@ -1753,7 +1753,7 @@ void VideoElement::Start()
             return;
         }
         auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        platformTask.PostTask([mediaPlayer = mediaPlayer_] { mediaPlayer->Play(); });
+        platformTask.PostTask([mediaPlayer = mediaPlayer_] { mediaPlayer->Play(); }, "ArkUIVideoPlay");
     }
 #else
     if (isStop_) {

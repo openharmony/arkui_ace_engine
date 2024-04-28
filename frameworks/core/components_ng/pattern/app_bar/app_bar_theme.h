@@ -133,6 +133,35 @@ public:
     {
         return focusedOutlineColor_;
     }
+    const Color& GetBlurColorLight() const
+    {
+        return blurColorLight_;
+    }
+
+    const Color& GetBlurColorDark() const
+    {
+        return blurColorDark_;
+    }
+
+    const Color& GetDividerColorLight() const
+    {
+        return dividerColorLight_;
+    }
+
+    const Color& GetDividerColorDark() const
+    {
+        return dividerColorDark_;
+    }
+
+    const Color& GetBorderColorLight() const
+    {
+        return borderColorLight_;
+    }
+
+    const Color& GetBorderColorDark() const
+    {
+        return borderColorDark_;
+    }
 
     const Dimension& GetBentRadius() const
     {
@@ -219,6 +248,11 @@ public:
         return iconVerticalMargin_;
     }
 
+    Dimension GetBlurRadius() const
+    {
+        return blurRadius_;
+    }
+
 private:
     AppBarTheme() = default;
     static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<AppBarTheme>& theme)
@@ -244,6 +278,12 @@ private:
         theme->hoverColor_ = appBarPattern->GetAttr<Color>("hover_color", Color());
         theme->clickEffectColor_ = appBarPattern->GetAttr<Color>("click_effect_color", Color());
         theme->focusedOutlineColor_ = appBarPattern->GetAttr<Color>("focused_outline_color", Color());
+        theme->blurColorLight_ = appBarPattern->GetAttr<Color>("blur_color_light", Color(0x99FFFFFF));
+        theme->blurColorDark_ = appBarPattern->GetAttr<Color>("blur_color_dark", Color(0x99000000));
+        theme->dividerColorLight_ = appBarPattern->GetAttr<Color>("divider_color_light", Color(0x33000000));
+        theme->dividerColorDark_ = appBarPattern->GetAttr<Color>("divider_color_dark", Color(0x33FFFFFF));
+        theme->borderColorLight_ = appBarPattern->GetAttr<Color>("border_color_light", Color(0x33182431));
+        theme->borderColorDark_ = appBarPattern->GetAttr<Color>("border_color_dark", Color(0x4DFFFFFF));
         theme->bentRadius_ = appBarPattern->GetAttr<Dimension>("bent_radius", 18.0_vp);
         theme->rightAngle_ = appBarPattern->GetAttr<Dimension>("right_angle", 0.0_vp);
         theme->menuBarWidth_ = appBarPattern->GetAttr<Dimension>("menu_bar_width", 80.0_vp);
@@ -261,6 +301,7 @@ private:
         theme->iconOutsideMargin_ = appBarPattern->GetAttr<Dimension>("icon_outside_margin", 12.0_vp);
         theme->iconInsideMargin_ = appBarPattern->GetAttr<Dimension>("icon_inside_margin", 8.0_vp);
         theme->iconVerticalMargin_ = appBarPattern->GetAttr<Dimension>("icon_vertical_margin", 8.0_vp);
+        theme->blurRadius_ = appBarPattern->GetAttr<Dimension>("blur_radius", 5.0_vp);
     }
 
     Dimension appBarHeight_;
@@ -279,6 +320,12 @@ private:
     Color hoverColor_;
     Color clickEffectColor_;
     Color focusedOutlineColor_;
+    Color blurColorLight_;
+    Color blurColorDark_;
+    Color dividerColorLight_;
+    Color dividerColorDark_;
+    Color borderColorLight_;
+    Color borderColorDark_;
     Dimension bentRadius_;
     Dimension rightAngle_;
     Dimension menuBarWidth_;
@@ -296,6 +343,7 @@ private:
     Dimension iconOutsideMargin_;
     Dimension iconInsideMargin_;
     Dimension iconVerticalMargin_;
+    Dimension blurRadius_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_APP_BAR_THEME_H

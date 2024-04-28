@@ -39,7 +39,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "native_event.h"
 #include "native_type.h"
 #include "native_xcomponent_key_event.h"
 #include "ui_input_event.h"
@@ -724,6 +723,17 @@ int32_t OH_NativeXComponent_RegisterOnTouchInterceptCallback(
  */
 int32_t OH_NativeXComponent_GetTouchEventSourceType(
     OH_NativeXComponent* component, int32_t pointId, OH_NativeXComponent_EventSourceType* sourceType);
+
+/**
+ * @brief Obtains the pointer to an <b>OH_NativeXComponent</b> instance based on the specified component
+ * instance created by the native API.
+ *
+ * @param node Indicates the pointer to the component instance created by the native API.
+ * @return Returns the pointer to the <b>OH_NativeXComponent</b> instance.
+ * @since 12
+ * @version 1.0
+ */
+OH_NativeXComponent* OH_NativeXComponent_GetNativeXComponent(ArkUI_NodeHandle node);
 
 #ifdef __cplusplus
 };

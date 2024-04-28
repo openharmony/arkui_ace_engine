@@ -158,6 +158,15 @@ void RefreshModelNG::ResetOnOffsetChange()
     eventHub->ResetOnOffsetChange();
 }
 
+void RefreshModelNG::SetPullDownRatio(const std::optional<float>& pullDownRatio)
+{
+    if (pullDownRatio.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullDownRatio, pullDownRatio.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(RefreshLayoutProperty, PullDownRatio);
+    }
+}
+
 void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

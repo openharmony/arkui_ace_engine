@@ -244,7 +244,13 @@ bool FocusView::RequestDefaultFocus()
         return ret;
     }
     SetIsViewRootScopeFocused(false);
-    auto ret = focusViewHub->RequestFocusImmediately();
+    bool ret = false;
+    if (focusViewHub->IsCurrentFocus()) {
+        focusViewHub->InheritFocus();
+        ret = true;
+    } else {
+        ret = focusViewHub->RequestFocusImmediately();
+    }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on focus view return: %{public}d.", ret);
     return ret;
 }
