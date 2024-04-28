@@ -71,7 +71,7 @@ void SymbolModelNG::SetSymbolEffectOptions(SymbolEffectOptions& symbolEffectOpti
     CHECK_NULL_VOID(frameNode);
     auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
     auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-    symbolEffectOptions.updateFlags(lastSymbolEffectOptions);
+    symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions);
 }
 } // namespace OHOS::Ace::NG

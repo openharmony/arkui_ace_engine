@@ -84,7 +84,7 @@ public:
         triggerNum_ = triggerNum;
     }
 
-    void updateFlags(const SymbolEffectOptions& lastOptions)
+    void UpdateFlags(const SymbolEffectOptions& lastOptions)
     {
         bool isCurTriggerSetted = triggerNum_.has_value();
         bool isCurActiveSetted = isActive_.has_value();
@@ -203,7 +203,7 @@ private:
     std::optional<int32_t> triggerNum_;
     std::optional<bool> isTriggerNumChanged_;
     bool isTxtActive_ = false;
-    int16_t isTxtActiveSource_ = -1; // -2:内部的trigger,    -1:未设置开关   0:isActive   1:用户js接口的Trigger
+    int16_t isTxtActiveSource_ = -1; // -1:未设置开关   0:isActive   1:用户js接口的Trigger
     int32_t repeatCount_ = 1;
 };
 } // namespace OHOS::Ace::NG

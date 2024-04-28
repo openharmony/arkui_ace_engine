@@ -118,6 +118,7 @@ group("linux_core_unittest") {
     "pattern/stage:stage_test_ng",
     "pattern/stepper:stepper_test_ng",
     "pattern/swiper:swiper_test_ng",
+    "pattern/symbol:symbol_test_ng",
     "pattern/tabs:tabs_test_ng",
     "pattern/text:text_test_ng",
     "pattern/text_clock:text_clock_test_ng",
