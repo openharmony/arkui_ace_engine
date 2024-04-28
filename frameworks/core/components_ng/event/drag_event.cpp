@@ -1289,9 +1289,7 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
             CHECK_NULL_VOID(pattern);
             auto modifier = weakModifier.Upgrade();
             CHECK_NULL_VOID(modifier);
-            if (modifier->IsHandlesShow()) {
-                pattern->ShowHandles();
-            }
+            pattern->ShowHandles(modifier->IsHandlesShow());
         }
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);

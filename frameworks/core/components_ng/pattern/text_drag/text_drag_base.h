@@ -55,6 +55,11 @@ public:
         CloseSelectOverlay();
     }
 
+    virtual void ShowHandles(const bool isNeedShowHandles)
+    {
+        ShowHandles();
+    }
+
     virtual void ShowHandles()
     {
         CreateHandles();

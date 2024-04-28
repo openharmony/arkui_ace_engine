@@ -298,6 +298,7 @@ public:
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
+    void ShowHandles(const bool isNeedShowHandles) override;
     void ShowHandles() override;
     void HandleMenuCallbackOnSelectAll();
     void HandleOnSelectAll() override;

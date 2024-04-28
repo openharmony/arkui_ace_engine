@@ -131,7 +131,6 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
         width = contentRect.Width();
         dragPattern->SetContentOffset({0 - dragOffset, box.Top() - dragOffset});
     }
-    width = !NearZero(selectedWidth) ? selectedWidth : width;
     dragContext->UpdatePosition(OffsetT<Dimension>(Dimension(globalX), Dimension(globalY)));
     RectF rect(textStartX + globalOffset.GetX() - globalX, textStartY + globalOffset.GetY() - globalY, width, height);
     SelectPositionInfo info(leftHandleX + globalOffset.GetX() - globalX, leftHandleY + globalOffset.GetY() - globalY,
