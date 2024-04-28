@@ -723,15 +723,208 @@ class TextInputFontFeatureModifier extends ModifierWithKey<FontFeature> {
   }
 }
 
+class TextInputCancelButtonModifier extends ModifierWithKey<{ style?: CancelButtonStyle, icon?: IconOptions }> {
+  constructor(value: { style?: CancelButtonStyle, icon?: IconOptions }) {
+    super(value);
+  }
+  static identity = Symbol('textInputCancelButton');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetCancelButton(node);
+    } else {
+      getUINativeModule().textInput.setCancelButton(node, this.value.style,
+        this.value.icon?.size, this.value.icon?.color, this.value.icon?.src);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue.style !== this.value.style ||
+      !isBaseOrResourceEqual(this.stageValue.icon?.size, this.value.icon?.size) ||
+      !isBaseOrResourceEqual(this.stageValue.icon?.color, this.value.icon?.color) ||
+      !isBaseOrResourceEqual(this.stageValue.icon?.src, this.value.icon?.src);
+  }
+}
+
+class TextInputSelectAllModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity = Symbol('textInputSelectAll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetSelectAll(node);
+    }
+    else {
+      getUINativeModule().textInput.setSelectAll(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputShowCounterModifier extends ModifierWithKey<{value: boolean, options?: InputCounterOptions}> {
+  constructor(value: {value: boolean, options?: InputCounterOptions}) {
+    super(value);
+  }
+  static identity = Symbol('textInputShowCounter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetShowCounter(node);
+    }
+    else {
+      getUINativeModule().textInput.setShowCounter(node, this.value.value, this.value.options);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.options, this.value.options);
+  }
+}
+
+class TextInputOnEditChangeModifier extends ModifierWithKey<(isEditing: boolean) => void> {
+  constructor(value: (isEditing: boolean) => void) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnEditChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnEditChange(node);
+    } else {
+      getUINativeModule().textInput.setOnEditChange(node, this.value);
+    }
+  }
+}
+
+class TextInputFilterModifier extends ModifierWithKey<ArkTextInputFilter> {
+  constructor(value: ArkTextInputFilter) {
+    super(value);
+  }
+  static identity = Symbol('textInputFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetInputFilter(node);
+    }
+    else {
+      getUINativeModule().textInput.setInputFilter(node, this.value.value, this.value.error);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.error, this.value.error);
+  }
+}
+
+class TextInputOnSubmitModifier extends ModifierWithKey<(enterKey: EnterKeyType, event: SubmitEvent) => void> {
+  constructor(value: (enterKey: EnterKeyType, event: SubmitEvent) => void) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnSubmit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnSubmit(node);
+    } else {
+      getUINativeModule().textInput.setOnSubmit(node, this.value);
+    }
+  }
+}
+
+class TextInputOnChangeModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnChange(node);
+    } else {
+      getUINativeModule().textInput.setOnChange(node, this.value);
+    }
+  }
+}
+
+class TextInputOnTextSelectionChangeModifier extends ModifierWithKey<(selectionStart: number, selectionEnd: number) => void> {
+  constructor(value: (selectionStart: number, selectionEnd: number) => void) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnTextSelectionChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnTextSelectionChange(node);
+    } else {
+      getUINativeModule().textInput.setOnTextSelectionChange(node, this.value);
+    }
+  }
+}
+
+class TextInputOnContentScrollModifier extends ModifierWithKey<(totalOffsetX: number, totalOffsetY: number) => void> {
+  constructor(value: (totalOffsetX: number, totalOffsetY: number) => void) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnContentScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnContentScroll(node);
+    } else {
+      getUINativeModule().textInput.setOnContentScroll(node, this.value);
+    }
+  }
+}
+
+class TextInputOnCopyModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnCopy(node);
+    } else {
+      getUINativeModule().textInput.setOnCopy(node, this.value);
+    }
+  }
+}
+
+class TextInputOnCutModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnCut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnCut(node);
+    } else {
+      getUINativeModule().textInput.setOnCut(node, this.value);
+    }
+  }
+}
+
+class TextInputOnPasteModifier extends ModifierWithKey<(value: string, event: PasteEvent) => void> {
+  constructor(value: (value: string, event: PasteEvent) => void) {
+    super(value);
+  }
+  static identity = Symbol('textInputOnPaste');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetOnPaste(node);
+    } else {
+      getUINativeModule().textInput.setOnPaste(node, this.value);
+    }
+  }
+}
+
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   cancelButton(value: { style?: CancelButtonStyle, icon?: IconOptions }): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputCancelButtonModifier.identity,
+      TextInputCancelButtonModifier, value);
+    return this;
   }
   selectAll(value: boolean): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputSelectAllModifier.identity,
+      TextInputSelectAllModifier, value);
+    return this;
   }
   enableAutoFill(value: boolean): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoFillModifier.identity,
@@ -744,7 +937,12 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     return this;
   }
   showCounter(value: boolean): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    let arkValue = new ArkTextInputShowCounter();
+    arkValue.value = value;
+    arkValue.options = options;
+    modifierWithKey(this._modifiersWithKeys, TextInputShowCounterModifier.identity,
+      TextInputShowCounterModifier, arkValue);
+    return this;
   }
 
   type(value: InputType): TextInputAttribute {
@@ -776,22 +974,34 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     return this;
   }
   onEditChanged(callback: (isEditing: boolean) => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputOnEditChangeModifier.identity,
+      TextInputOnEditChangeModifier, callback);
+    return this;
   }
   onEditChange(callback: (isEditing: boolean) => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputOnEditChangeModifier.identity,
+      TextInputOnEditChangeModifier, callback);
+    return this;
   }
-  onSubmit(callback: (enterKey: EnterKeyType) => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+  onSubmit(callback: (enterKey: EnterKeyType, event: SubmitEvent) => void): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnSubmitModifier.identity,
+      TextInputOnSubmitModifier, callback);
+    return this;
   }
   onChange(callback: (value: string) => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputOnChangeModifier.identity,
+      TextInputOnChangeModifier, callback);
+    return this;
   }
   onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputOnTextSelectionChangeModifier.identity,
+      TextInputOnTextSelectionChangeModifier, callback);
+    return this;
   }
   onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputOnContentScrollModifier.identity,
+      TextInputOnContentScrollModifier, callback);
+    return this;
   }
   maxLength(value: number): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputMaxLengthModifier.identity,
@@ -826,16 +1036,27 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     return this;
   }
   inputFilter(value: ResourceStr, error?: (value: string) => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    let arkValue = new ArkTextInputFilter();
+    arkValue.value = value;
+    arkValue.error = error;
+    modifierWithKey(this._modifiersWithKeys, TextInputFilterModifier.identity,
+      TextInputFilterModifier, arkValue);
+    return this;
   }
   onCopy(callback: (value: string) => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputOnCopyModifier.identity,
+      TextInputOnCopyModifier, callback);
+    return this;
   }
   onCut(callback: (value: string) => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputOnCutModifier.identity,
+      TextInputOnCutModifier, callback);
+    return this;
   }
   onPaste(callback: (value: string) => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextInputOnPasteModifier.identity,
+      TextInputOnPasteModifier, callback);
+    return this;
   }
   copyOption(value: CopyOptions): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputCopyOptionModifier.identity,

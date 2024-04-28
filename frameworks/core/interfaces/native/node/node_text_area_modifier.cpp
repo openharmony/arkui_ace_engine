@@ -823,6 +823,174 @@ void ResetTextAreaLineSpacing(ArkUINodeHandle node)
     value.Reset();
     TextFieldModelNG::SetLineSpacing(frameNode, value);
 }
+
+void SetTextAreaOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        TextFieldModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnChange(frameNode, nullptr);
+}
+
+void SetTextAreaEnterKeyType(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnterKeyType(frameNode, CastToTextInputAction(value));
+}
+
+void ResetTextAreaEnterKeyType(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnterKeyType(frameNode, TextInputAction::NEW_LINE);
+}
+
+void SetTextAreaInputFilter(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string inputFilter(value);
+    if (callback) {
+        auto onError = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetInputFilter(frameNode, inputFilter, *onError);
+    } else {
+        TextFieldModelNG::SetInputFilter(frameNode, inputFilter, nullptr);
+    }
+}
+
+void ResetTextAreaInputFilter(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetInputFilter(frameNode, "", nullptr);
+}
+
+void SetTextAreaOnTextSelectionChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(int32_t, int32_t)>*>(callback);
+        TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(*onChange));
+    } else {
+        TextFieldModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnTextSelectionChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+}
+
+void SetTextAreaOnContentScroll(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onScroll = reinterpret_cast<std::function<void(float, float)>*>(callback);
+        TextFieldModelNG::SetOnContentScroll(frameNode, std::move(*onScroll));
+    } else {
+        TextFieldModelNG::SetOnContentScroll(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnContentScroll(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnContentScroll(frameNode, nullptr);
+}
+
+void SetTextAreaOnEditChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEditChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        TextFieldModelNG::SetOnEditChange(frameNode, std::move(*onEditChange));
+    } else {
+        TextFieldModelNG::SetOnEditChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnEditChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnEditChange(frameNode, nullptr);
+}
+
+void SetTextAreaOnCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCopy = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetOnCopy(frameNode, std::move(*onCopy));
+    } else {
+        TextFieldModelNG::SetOnCopy(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnCopy(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnCopy(frameNode, nullptr);
+}
+
+void SetTextAreaOnCut(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCut = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetOnCut(frameNode, std::move(*onCut));
+    } else {
+        TextFieldModelNG::SetOnCut(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnCut(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnCut(frameNode, nullptr);
+}
+
+void SetTextAreaOnPaste(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onPasteWithEvent = reinterpret_cast<std::function<void(
+                const std::string&, NG::TextCommonEvent&)>*>(callback);
+        TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(*onPasteWithEvent));
+    } else {
+        TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnPaste(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -850,7 +1018,12 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         ResetTextAreaHeightAdaptivePolicy, SetTextAreaSelectedBackgroundColor, ResetTextAreaSelectedBackgroundColor,
         SetTextAreaCaretStyle, ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow,
         SetTextAreaTextIndent, ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing,
-        GetTextAreaSelectionMenuHidden };
+        GetTextAreaSelectionMenuHidden, SetTextAreaOnChange, ResetTextAreaOnChange,
+        SetTextAreaEnterKeyType, ResetTextAreaEnterKeyType, SetTextAreaInputFilter, ResetTextAreaInputFilter,
+        SetTextAreaOnTextSelectionChange, ResetTextAreaOnTextSelectionChange,
+        SetTextAreaOnContentScroll, ResetTextAreaOnContentScroll,
+        SetTextAreaOnEditChange, ResetTextAreaOnEditChange, SetTextAreaOnCopy, ResetTextAreaOnCopy,
+        SetTextAreaOnCut, ResetTextAreaOnCut, SetTextAreaOnPaste, ResetTextAreaOnPaste };
     return &modifier;
 }
 

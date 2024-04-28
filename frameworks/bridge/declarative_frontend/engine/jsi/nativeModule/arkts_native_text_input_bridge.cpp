@@ -1364,32 +1364,31 @@ ArkUINativeModuleValue TextInputBridge::SetShowCounter(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> showCounterArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     Local<JSValueRef> inputOptionsArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
-
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!showCounterArg->IsBoolean() && !inputOptionsArg->IsObject()) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputShowCounter(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     auto showCounter = showCounterArg->ToBoolean(vm)->Value();
-
-    auto jsObj = inputOptionsArg->ToObject(vm);
-    auto highlightBorderArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "highlightBorder"));
-    auto isBorderArgInvalid =
-        highlightBorderArg->IsUndefined() || highlightBorderArg->IsNull() || !highlightBorderArg->IsBoolean();
     auto highlightBorder = true;
-    if (!isBorderArgInvalid) {
-        highlightBorder = highlightBorderArg->BooleaValue();
+    auto thresholdValue = DEFAULT_MODE;
+    if (inputOptionsArg->IsObject()) {
+        auto jsObj = inputOptionsArg->ToObject(vm);
+        auto highlightBorderArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "highlightBorder"));
+        auto isBorderArgInvalid =
+            highlightBorderArg->IsUndefined() || highlightBorderArg->IsNull() || !highlightBorderArg->IsBoolean();
+        if (!isBorderArgInvalid) {
+            highlightBorder = highlightBorderArg->BooleaValue();
+        }
+        auto thresholdArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "thresholdPercentage"));
+        auto thresholdValue = thresholdArg->Int32Value(vm);
+        if (thresholdArg->IsNull() || thresholdArg->IsUndefined() || !thresholdArg->IsNumber()) {
+            thresholdValue = DEFAULT_MODE;
+        } else if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
+            thresholdValue = ILLEGAL_VALUE;
+            showCounter = false;
+        }
     }
-
-    auto thresholdArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "thresholdPercentage"));
-    auto thresholdValue = thresholdArg->Int32Value(vm);
-    if (thresholdArg->IsNull() || thresholdArg->IsUndefined() || !thresholdArg->IsNumber()) {
-        thresholdValue = DEFAULT_MODE;
-    } else if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
-        thresholdValue = ILLEGAL_VALUE;
-        showCounter = false;
-    }
-
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputShowCounter(
         nativeNode, static_cast<uint32_t>(showCounter), thresholdValue, static_cast<uint32_t>(highlightBorder));
     return panda::JSValueRef::Undefined(vm);

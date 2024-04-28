@@ -9458,6 +9458,133 @@ class TextAreaShowCounterModifier extends ModifierWithKey {
   }
 }
 TextAreaShowCounterModifier.identity = Symbol('textAreaShowCounter');
+class TextAreaOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnChange(node);
+    } else {
+      getUINativeModule().textArea.setOnChange(node, this.value);
+    }
+  }
+}
+TextAreaOnChangeModifier.identity = Symbol('textAreaOnChange');
+class TextAreaEnterKeyTypeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetEnterKeyType(node);
+    } else {
+      getUINativeModule().textArea.setEnterKeyType(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaEnterKeyTypeModifier.identity = Symbol('textAreaEnterKeyType');
+class TextAreaInputFilterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetInputFilter(node);
+    }
+    else {
+      getUINativeModule().textArea.setInputFilter(node, this.value.value, this.value.error);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.error, this.value.error);
+  }
+}
+TextAreaInputFilterModifier.identity = Symbol('textAreaInputFilter');
+class TextAreaOnTextSelectionChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnTextSelectionChange(node);
+    } else {
+      getUINativeModule().textArea.setOnTextSelectionChange(node, this.value);
+    }
+  }
+}
+TextAreaOnTextSelectionChangeModifier.identity = Symbol('textAreaOnTextSelectionChange');
+
+class TextAreaOnContentScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnContentScroll(node);
+    } else {
+      getUINativeModule().textArea.setOnContentScroll(node, this.value);
+    }
+  }
+}
+TextAreaOnContentScrollModifier.identity = Symbol('textAreaOnContentScroll');
+class TextAreaOnEditChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnEditChange(node);
+    } else {
+      getUINativeModule().textArea.setOnEditChange(node, this.value);
+    }
+  }
+}
+TextAreaOnEditChangeModifier.identity = Symbol('textAreaOnEditChange');
+class TextAreaOnCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnCopy(node);
+    } else {
+      getUINativeModule().textArea.setOnCopy(node, this.value);
+    }
+  }
+}
+TextAreaOnCopyModifier.identity = Symbol('textAreaOnCopy');
+class TextAreaOnCutModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnCut(node);
+    } else {
+      getUINativeModule().textArea.setOnCut(node, this.value);
+    }
+  }
+}
+TextAreaOnCutModifier.identity = Symbol('textAreaOnCut');
+class TextAreaOnPasteModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnPaste(node);
+    } else {
+      getUINativeModule().textArea.setOnPaste(node, this.value);
+    }
+  }
+}
+TextAreaOnPasteModifier.identity = Symbol('textAreaOnPaste');
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -9506,28 +9633,39 @@ class ArkTextAreaComponent extends ArkComponent {
     return this;
   }
   inputFilter(value, error) {
-    throw new Error('Method not implemented.');
+    let arkValue = new ArkTextInputFilter();
+    arkValue.value = value;
+    arkValue.error = error;
+    modifierWithKey(this._modifiersWithKeys, TextAreaInputFilterModifier.identity, TextAreaInputFilterModifier, arkValue);
+    return this;
   }
   onChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnChangeModifier.identity, TextAreaOnChangeModifier, callback);
+    return this;
   }
   onTextSelectionChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnTextSelectionChangeModifier.identity, TextAreaOnTextSelectionChangeModifier, callback);
+    return this;
   }
   onContentScroll(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnContentScrollModifier.identity, TextAreaOnContentScrollModifier, callback);
+    return this;
   }
   onEditChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnEditChangeModifier.identity, TextAreaOnEditChangeModifier, callback);
+    return this;
   }
   onCopy(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnCopyModifier.identity, TextAreaOnCopyModifier, callback);
+    return this;
   }
   onCut(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnCutModifier.identity, TextAreaOnCutModifier, callback);
+    return this;
   }
   onPaste(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnPasteModifier.identity, TextAreaOnPasteModifier, callback);
+    return this;
   }
   copyOption(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaCopyOptionModifier.identity, TextAreaCopyOptionModifier, value);
@@ -9613,6 +9751,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   textIndent(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaTextIndentModifier.identity, TextAreaTextIndentModifier, value);
+    return this;
+  }
+  enterKeyType(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnterKeyTypeModifier.identity, TextAreaEnterKeyTypeModifier, value);
     return this;
   }
 }

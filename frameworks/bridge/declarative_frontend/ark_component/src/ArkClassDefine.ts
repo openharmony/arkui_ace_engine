@@ -937,6 +937,31 @@ class ArkTextAreaShowCounter {
   }
 }
 
+class ArkTextInputShowCounter {
+  value: boolean;
+  options?: any;
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkTextInputShowCounter): boolean {
+    return (this.value === another.value) &&
+      (this.options === another.options);
+  }
+}
+
+class ArkTextInputFilter {
+  value: ResourceStr | undefined;
+  error?: (value: string) => void;
+  constructor() {
+    this.value = undefined;
+    this.error = undefined;
+  }
+  isEqual(another: ArkSearchInputFilter): boolean {
+    return (this.value === another.value);
+  }
+}
+
 class ArkDotIndicator extends DotIndicator {
   type: string | undefined;
   leftValue: Length | undefined;

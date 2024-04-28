@@ -1122,7 +1122,6 @@ ArkUI_Bool GetTextInputShowPassword(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return TextFieldModelNG::GetShowPassword(frameNode);
 }
-} // namespace
 
 void SetTextInputSelectAll(ArkUINodeHandle node, ArkUI_Uint32 enableSelectAll)
 {
@@ -1329,6 +1328,7 @@ void ResetTextInputOnPaste(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
 }
+} // namespace
 
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()

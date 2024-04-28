@@ -549,6 +549,140 @@ class TextAreaTextIndentModifier extends ModifierWithKey<Dimension> {
   }
 }
 
+class TextAreaOnChangeModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnChange(node);
+    } else {
+      getUINativeModule().textArea.setOnChange(node, this.value);
+    }
+  }
+}
+
+class TextAreaEnterKeyTypeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaEnterKeyType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetEnterKeyType(node);
+    } else {
+      getUINativeModule().textArea.setEnterKeyType(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaInputFilterModifier extends ModifierWithKey<ArkTextInputFilter> {
+  constructor(value: ArkTextInputFilter) {
+    super(value);
+  }
+  static identity = Symbol('textAreaInputFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetInputFilter(node);
+    }
+    else {
+      getUINativeModule().textArea.setInputFilter(node, this.value.value, this.value.error);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.error, this.value.error);
+  }
+}
+
+class TextAreaOnTextSelectionChangeModifier extends ModifierWithKey<(selectionStart: number, selectionEnd: number) => void> {
+  constructor(value: (selectionStart: number, selectionEnd: number) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnTextSelectionChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnTextSelectionChange(node);
+    } else {
+      getUINativeModule().textArea.setOnTextSelectionChange(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnContentScrollModifier extends ModifierWithKey<(totalOffsetX: number, totalOffsetY: number) => void> {
+  constructor(value: (totalOffsetX: number, totalOffsetY: number) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnContentScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnContentScroll(node);
+    } else {
+      getUINativeModule().textArea.setOnContentScroll(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnEditChangeModifier extends ModifierWithKey<(isEditing: boolean) => void> {
+  constructor(value: (isEditing: boolean) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnEditChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnEditChange(node);
+    } else {
+      getUINativeModule().textArea.setOnEditChange(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnCopyModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnCopy(node);
+    } else {
+      getUINativeModule().textArea.setOnCopy(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnCutModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnCut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnCut(node);
+    } else {
+      getUINativeModule().textArea.setOnCut(node, this.value);
+    }
+  }
+}
+
+class TextAreaOnPasteModifier extends ModifierWithKey<(value: string, event: PasteEvent) => void> {
+  constructor(value: (value: string, event: PasteEvent) => void) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnPaste');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnPaste(node);
+    } else {
+      getUINativeModule().textArea.setOnPaste(node, this.value);
+    }
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -594,28 +728,46 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     return this;
   }
   inputFilter(value: ResourceStr, error?: (value: string) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    let arkValue = new ArkTextInputFilter();
+    arkValue.value = value;
+    arkValue.error = error;
+    modifierWithKey(this._modifiersWithKeys, TextAreaInputFilterModifier.identity, TextAreaInputFilterModifier, arkValue);
+    return this;
   }
   onChange(callback: (value: string) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnChangeModifier.identity,
+      TextAreaOnChangeModifier, callback);
+    return this;
   }
   onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnTextSelectionChangeModifier.identity,
+      TextAreaOnTextSelectionChangeModifier, callback);
+    return this;
   }
   onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnContentScrollModifier.identity,
+      TextAreaOnContentScrollModifier, callback);
+    return this;
   }
   onEditChange(callback: (isEditing: boolean) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnEditChangeModifier.identity,
+      TextAreaOnEditChangeModifier, callback);
+    return this;
   }
   onCopy(callback: (value: string) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnCopyModifier.identity,
+      TextAreaOnCopyModifier, callback);
+    return this;
   }
   onCut(callback: (value: string) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnCutModifier.identity,
+      TextAreaOnCutModifier, callback);
+    return this;
   }
   onPaste(callback: (value: string) => void): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnPasteModifier.identity,
+      TextAreaOnPasteModifier, callback);
+    return this;
   }
   copyOption(value: CopyOptions): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaCopyOptionModifier.identity, TextAreaCopyOptionModifier, value);
@@ -707,6 +859,11 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   textIndent(value: Dimension): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaTextIndentModifier.identity, TextAreaTextIndentModifier, value);
+    return this;
+  }
+  enterKeyType(value: EnterKeyType): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnterKeyTypeModifier.identity,
+      TextAreaEnterKeyTypeModifier, value);
     return this;
   }
 }
