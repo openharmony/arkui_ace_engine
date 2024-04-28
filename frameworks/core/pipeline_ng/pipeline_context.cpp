@@ -544,6 +544,7 @@ void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal Window focus first, set focusflag to window.");
         windowFocus_.reset();
         windowShow_.reset();
+        CHECK_NULL_VOID(focusOnNodeCallback_);
         focusOnNodeCallback_();
         preNodeId_ = curFrameNode->GetId();
         return;
@@ -575,7 +576,6 @@ void PipelineContext::IsCloseSCBKeyboard()
     RefPtr<FrameNode> curFrameNode = HandleFocusNode();
     if (curFrameNode == nullptr) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
-        FocusHub::CloseKeyboard();
         return;
     }
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
@@ -2722,11 +2722,8 @@ void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
     onShow_ = true;
-    if (focusOnNodeCallback_) {
-        windowShow_ = true;
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowShow is OK.");
-    }
     window_->OnShow();
+    windowShow_ = true;
     RequestFrame();
     FlushWindowStateChangedCallback(true);
     AccessibilityEvent event;
@@ -2778,10 +2775,7 @@ void PipelineContext::WindowFocus(bool isFocus)
                 curFocusView->RequestDefaultFocus();
             }
         }
-        if (focusOnNodeCallback_) {
-            windowFocus_ = true;
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowfocus focusOnNodeCallback_.");
-        }
+        windowFocus_ = true;
         RequestFrame();
     }
     FlushWindowFocusChangedCallback(isFocus);
