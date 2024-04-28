@@ -156,11 +156,6 @@ public:
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
     void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     RefPtr<OHOS::Ace::WantWrap> GetWantWrap();
-    void SetIsModalState(bool isModalState)
-    {
-        isModalState_ = isModalState;
-    }
-
     bool IsShowPlaceholder()
     {
         return isShowPlaceholder_;
@@ -255,7 +250,7 @@ private:
     int32_t uiExtensionId_ = 0;
     int32_t callbackId_ = 0;
     RectF displayArea_;
-    bool isModalState_ = false;
+    bool isKeyAsync_ = false;
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;

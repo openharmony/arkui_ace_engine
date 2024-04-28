@@ -49,6 +49,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
+}
 UIExtensionPattern::UIExtensionPattern(
     bool isTransferringCaller, bool isModal, bool isAsyncModalBinding, SessionType sessionType)
     : isTransferringCaller_(isTransferringCaller), isModal_(isModal), isAsyncModalBinding_(isAsyncModalBinding)
@@ -149,6 +152,9 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         NotifyDestroy();
     }
+
+    isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
+    UIEXT_LOGI("The ability KeyAsync %{public}d.", isKeyAsync_);
     MountPlaceholderNode();
     sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
     NotifyForeground();
@@ -570,7 +576,7 @@ void UIExtensionPattern::DispatchKeyEvent(const KeyEvent& event)
 bool UIExtensionPattern::DispatchKeyEventSync(const KeyEvent& event)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
-    if (isModalState_) {
+    if (isKeyAsync_) {
         sessionWrapper_->NotifyKeyEventAsync(event.rawKeyEvent, false);
         return true;
     }
