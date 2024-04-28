@@ -2187,9 +2187,16 @@ void SwiperPattern::HandleTouchBottomLoop()
 void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex)
 {
     // Keep follow hand
-    if ((preFirstIndex == 0 && currentFirstIndex_ == TotalCount() - 1) ||
-        (preFirstIndex == TotalCount() - 1 && currentFirstIndex_ == 0)) {
+    if (preFirstIndex == 0 && currentFirstIndex_ == TotalCount() - 1) {
         needTurn_ = true;
+        if (isTouchDown_ && LessOrEqual(mainDeltaSum_, 0.0f)) {
+            needTurn_ = false;
+        }
+    } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex_ == 0) {
+        needTurn_ = true;
+        if (isTouchDown_ && GreatOrEqual(mainDeltaSum_, 0.0f)) {
+            needTurn_ = false;
+        }
     }
 
     if (GreatNotEqual(additionalOffset, 0.0f)) {
