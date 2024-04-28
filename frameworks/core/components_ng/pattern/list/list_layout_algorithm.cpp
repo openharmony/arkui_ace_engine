@@ -1255,10 +1255,20 @@ void ListLayoutAlgorithm::LayoutItem(RefPtr<LayoutWrapper>& wrapper, int32_t ind
         crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
     }
     auto chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
-    if (axis_ == Axis::VERTICAL) {
-        offset = offset + OffsetF(crossOffset, pos.startPos + chainOffset);
+    auto layoutDirection = wrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL) {
+        if (axis_ == Axis::VERTICAL) {
+            auto size = wrapper->GetGeometryNode()->GetFrameSize();
+            offset = offset + OffsetF(crossSize - crossOffset - size.Width(), pos.startPos + chainOffset);
+        } else {
+            offset = offset + OffsetF(contentMainSize_ - pos.endPos - chainOffset, crossOffset);
+        }
     } else {
-        offset = offset + OffsetF(pos.startPos + chainOffset, crossOffset);
+        if (axis_ == Axis::VERTICAL) {
+            offset = offset + OffsetF(crossOffset, pos.startPos + chainOffset);
+        } else {
+            offset = offset + OffsetF(pos.startPos + chainOffset, crossOffset);
+        }
     }
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
     SetListItemIndex(wrapper, index);
