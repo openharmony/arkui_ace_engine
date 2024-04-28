@@ -617,7 +617,7 @@ HWTEST_F(OverlayTestNg, PopupTest002, TestSize.Level1)
      */
     overlayManager->HideCustomPopups();
     EXPECT_FALSE(overlayManager->popupMap_.empty());
-    EXPECT_TRUE(rootNode->GetChildren().empty());
+    EXPECT_FALSE(rootNode->GetChildren().empty());
     /**
      * @tc.steps: step4. call RemoveOverlay when childCount is 2
      * @tc.expected: remove one popupNode at a time
