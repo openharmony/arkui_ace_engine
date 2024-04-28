@@ -1842,24 +1842,28 @@ void RichEditorPattern::CalcCaretInfoByClick(const Offset& touchOffset)
     textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
     textRect.SetHeight(textRect.Height() - std::max(baselineOffset_, 0.0f));
     Offset textOffset = { touchOffset.GetX() - textRect.GetX(), touchOffset.GetY() - textRect.GetY() };
+    auto [lastClickOffset, caretHeight] = CalcAndRecordLastClickCaretInfo(textOffset);
+    CHECK_NULL_VOID(overlayMod_);
+    DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(lastClickOffset, caretHeight);
+
+    MoveCaretToContentRect(lastClickOffset, caretHeight);
+}
+
+std::pair<OffsetF, float> RichEditorPattern::CalcAndRecordLastClickCaretInfo(const Offset& textOffset)
+{
     // get the caret position
     auto position = paragraphs_.GetIndex(textOffset);
     // get the caret offset when click
-    float selectLineHeight = 0.0f;
-    auto lastClickOffset = paragraphs_.ComputeCursorInfoByClick(position, selectLineHeight,
+    float caretHeight = 0.0f;
+    auto lastClickOffset = paragraphs_.ComputeCursorInfoByClick(position, caretHeight,
         OffsetF(static_cast<float>(textOffset.GetX()), static_cast<float>(textOffset.GetY())));
 
-    lastClickOffset.AddX(textRect.GetX());
-    lastClickOffset.AddY(textRect.GetY());
+    lastClickOffset += richTextRect_.GetOffset();
     if (isShowPlaceholder_) {
         lastClickOffset = CalculateEmptyValueCaretRect();
     }
-
-    CHECK_NULL_VOID(overlayMod_);
-    DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(lastClickOffset, selectLineHeight);
     SetLastClickOffset(lastClickOffset);
-
-    MoveCaretToContentRect(lastClickOffset, selectLineHeight);
+    return std::make_pair(lastClickOffset, caretHeight);
 }
 
 void RichEditorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -2038,8 +2042,10 @@ bool RichEditorPattern::JudgeContentDraggable()
     return iter != selResult.end();
 }
 
-void RichEditorPattern::CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight)
+std::pair<OffsetF, float> RichEditorPattern::CalculateCaretOffsetAndHeight()
 {
+    OffsetF caretOffset;
+    float caretHeight = 0.0f;
     auto caretPosition = GetCaretPosition();
     float caretHeightUp = 0.0f;
     OffsetF caretOffsetUp = CalcCursorOffsetByPosition(caretPosition, caretHeightUp, false, false);
@@ -2048,7 +2054,7 @@ void RichEditorPattern::CalculateCaretOffsetAndHeight(OffsetF& caretOffset, floa
         caretOffset = CalculateEmptyValueCaretRect();
         caretHeight =
             isShowPlaceholder_ ? caretHeightUp : Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx();
-        return;
+        return std::make_pair(caretOffset, caretHeight);
     }
     float caretHeightDown = 0.0f;
     OffsetF caretOffsetDown = CalcCursorOffsetByPosition(caretPosition, caretHeightDown, true, false);
@@ -2060,13 +2066,14 @@ void RichEditorPattern::CalculateCaretOffsetAndHeight(OffsetF& caretOffset, floa
     }
     caretOffset = isShowCaretDown ? caretOffsetDown : caretOffsetUp;
     caretHeight = isShowCaretDown ? caretHeightDown : caretHeightUp;
-    CHECK_NULL_VOID(overlayMod_);
+    CHECK_NULL_RETURN(overlayMod_, std::make_pair(caretOffset, caretHeight));
     auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
     auto caretWidth = overlayModifier->GetCaretWidth();
     auto contentRect = GetTextContentRect();
     if (GreatOrEqual(caretOffset.GetX() + caretWidth, contentRect.Right())) {
         caretOffset.SetX(caretOffset.GetX() - caretWidth);
     }
+    return std::make_pair(caretOffset, caretHeight);
 }
 
 OffsetF RichEditorPattern::CalculateEmptyValueCaretRect()
@@ -2415,13 +2422,12 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     Offset textOffset = { touchX - textRect.GetX() - GetParentGlobalOffset().GetX(),
         touchY - textRect.GetY() - GetParentGlobalOffset().GetY() - theme->GetInsertCursorOffset().ConvertToPx() };
     auto position = isShowPlaceholder_? 0 : paragraphs_.GetIndex(textOffset);
-    float caretHeight = 0.0f;
     SetCaretPosition(position);
-    OffsetF lastTouchOffset = { static_cast<float>(textOffset.GetX()), static_cast<float>(textOffset.GetY()) };
-    OffsetF caretOffset = paragraphs_.ComputeCursorInfoByClick(position, caretHeight, lastTouchOffset);
+    CalcAndRecordLastClickCaretInfo(textOffset);
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     CHECK_NULL_VOID(overlayMod_);
     auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
-    overlayModifier->SetCaretOffsetAndHeight(caretOffset + textRect.GetOffset(), caretHeight);
+    overlayModifier->SetCaretOffsetAndHeight(caretOffset, caretHeight);
 
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG, .showScrollbar = true };
     auto localOffset = OffsetF(touchX, touchY) - parentGlobalOffset_;
@@ -2784,9 +2790,7 @@ bool RichEditorPattern::RequestCustomKeyboard()
     isCustomKeyboardAttached_ = true;
     contentChange_ = false;
     keyboardOverlay_ = overlayManager;
-    OffsetF caretOffset;
-    float caretHeight = 0.0f;
-    CalculateCaretOffsetAndHeight(caretOffset, caretHeight);
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     keyboardOverlay_->AvoidCustomKeyboard(frameNode->GetId(), caretHeight);
     return true;
 }
@@ -4349,10 +4353,7 @@ void RichEditorPattern::HandleTouchMove(const Offset& offset)
     Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto position = paragraphs_.GetIndex(textOffset);
     SetCaretPosition(position);
-    float caretHeight = 0.0f;
-    auto lastClickOffset = paragraphs_.ComputeCursorInfoByClick(position, caretHeight,
-        OffsetF(static_cast<float>(textOffset.GetX()), static_cast<float>(textOffset.GetY())));
-    SetLastClickOffset(lastClickOffset + richTextRect_.GetOffset());
+    CalcAndRecordLastClickCaretInfo(textOffset);
     if (selectOverlay_->IsSingleHandleShow()) {
         textSelector_.Update(caretPosition_);
         CalculateHandleOffsetAndShowOverlay();
@@ -4914,9 +4915,7 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     auto isSingleHandle = IsSingleHandle();
     selectOverlay_->SetIsSingleHandle(isSingleHandle);
     if (isSingleHandle) {
-        OffsetF caretOffset;
-        float caretHeight = 0.0f;
-        CalculateCaretOffsetAndHeight(caretOffset, caretHeight);
+        auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
         // only show the second handle.
         secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight };
         secondHandleOffset = caretOffset + textPaintOffset - rootOffset;
