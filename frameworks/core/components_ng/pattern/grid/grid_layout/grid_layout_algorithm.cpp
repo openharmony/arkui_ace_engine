@@ -183,7 +183,8 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(LayoutWrapper* layoutWrapper, i
 {
     auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, OffsetF());
-    auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), frameSize);
 
     // Calculate the position for current child.
     float positionX = 0.0f;
