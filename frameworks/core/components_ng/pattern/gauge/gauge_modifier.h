@@ -129,6 +129,7 @@ private:
     void CreateDefaultColor(std::vector<RSColorQuad>& colors, std::vector<float>& pos);
     void CreateDefaultTrianglePath(float pathStartVertexX, float pathStartVertexY, float radius, RSPath& path);
     WeakPtr<Pattern> pattern_;
+    void GetDrawPath(RSPath& path, RenderRingInfo& data, float startAngle, float sweepAngle);
 
     RefPtr<AnimatablePropertyFloat> value_;
     RefPtr<AnimatablePropertyFloat> min_;
