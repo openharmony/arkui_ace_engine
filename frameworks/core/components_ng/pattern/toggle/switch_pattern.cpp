@@ -636,19 +636,36 @@ void SwitchPattern::SetSwitchIsOn(bool ison)
 
 void SwitchPattern::FireBuilder()
 {
-    CHECK_NULL_VOID(makeFunc_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChildAtIndex(0);
-    contentModifierNode_ = BuildContentModifierNode();
+    if (!makeFunc_.has_value()) {
+        auto children = host->GetChildren();
+        for (const auto& child : children) {
+            if (child->GetId() == nodeId_) {
+                host->RemoveChildAndReturnIndex(child);
+                host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+                break;
+            }
+        }
+        return;
+    }
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
+    nodeId_ = contentModifierNode_->GetId();
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
 }
 
 RefPtr<FrameNode> SwitchPattern::BuildContentModifierNode()
 {
-    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();

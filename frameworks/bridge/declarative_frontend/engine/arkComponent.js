@@ -12862,7 +12862,12 @@ class ArkToggleComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().toggle.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -12870,10 +12875,11 @@ class ArkToggleComponent extends ArkComponent {
   }
   makeContentModifierNode(context, toggleConfiguration) {
     toggleConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.toggleNode)) {
+    if (isUndefined(this.toggleNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.toggleNode = new xNode.BuilderNode(context);
       this.toggleNode.build(this.builder, toggleConfiguration);
+      this.needRebuild = false;
     } else {
       this.toggleNode.update(toggleConfiguration);
     }
