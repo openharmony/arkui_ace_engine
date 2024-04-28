@@ -409,6 +409,7 @@ void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->OnTooltip("");
         if (info.GetChangedTouches().empty()) {
             return;
         }
@@ -504,6 +505,7 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
     CHECK_NULL_VOID(delegate_);
+    OnTooltip("");
     if (info.GetAction() == MouseAction::PRESS) {
         delegate_->OnContextMenuHide("");
         WebRequestFocus();
