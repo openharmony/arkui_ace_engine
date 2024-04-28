@@ -28,11 +28,14 @@ public:
     ~SvgPath() override = default;
     static RefPtr<SvgNode> Create();
 
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+
 #ifndef USE_ROSEN_DRAWING
     SkPath AsPath(const Size& viewPort) const override;
 #else
     RSRecordingPath AsPath(const Size& viewPort) const override;
 #endif
+    std::string d_;
 };
 
 } // namespace OHOS::Ace::NG

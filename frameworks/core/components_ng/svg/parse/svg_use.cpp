@@ -19,20 +19,16 @@
 #include "frameworks/core/components/declaration/svg/svg_declaration.h"
 
 namespace OHOS::Ace::NG {
-
-SvgUse::SvgUse() : SvgGraphic()
-{
-    declaration_ = AceType::MakeRefPtr<SvgDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
+namespace {
+const char DOM_SVG_SRC_VIEW_BOX[] = "viewBox";
 }
+
+SvgUse::SvgUse() : SvgGraphic() {}
 
 void SvgUse::OnInitStyle()
 {
-    auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    useOffsetX_ = declaration->GetX().Value();
-    useOffsetY_ = declaration->GetY().Value();
+    useOffsetX_ = useAttr_.x.Value();
+    useOffsetY_ = useAttr_.y.Value();
 }
 
 RefPtr<SvgNode> SvgUse::Create()
@@ -44,15 +40,15 @@ RSRecordingPath SvgUse::AsPath(const Size& viewPort) const
 {
     auto svgContext = svgContext_.Upgrade();
     CHECK_NULL_RETURN(svgContext, RSRecordingPath());
-    if (declaration_->GetHref().empty()) {
+    if (attributes_.href.empty()) {
         LOGE("href is empty");
         return {};
     }
-    auto refSvgNode = svgContext->GetSvgNodeById(declaration_->GetHref());
+    auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_RETURN(refSvgNode, RSRecordingPath());
 
     AttributeScope scope(refSvgNode);
-    refSvgNode->Inherit(declaration_);
+    refSvgNode->InheritAttr(attributes_);
     return refSvgNode->AsPath(viewPort);
 }
 
@@ -60,35 +56,85 @@ void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Co
 {
     auto svgContext = svgContext_.Upgrade();
     CHECK_NULL_VOID(svgContext);
-    if (declaration_->GetHref().empty()) {
+    if (attributes_.href.empty()) {
         return;
     }
-    auto refSvgNode = svgContext->GetSvgNodeById(declaration_->GetHref());
+    auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_VOID(refSvgNode);
 
-    auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
-    if (declaration->GetX().Value() != 0 || declaration->GetY().Value() != 0) {
-        canvas.Translate(declaration->GetX().Value(), declaration->GetY().Value());
+    if (useAttr_.x.Value() != 0 || useAttr_.y.Value() != 0) {
+        canvas.Translate(useAttr_.x.Value(), useAttr_.y.Value());
     }
     AttributeScope scope(refSvgNode);
-    refSvgNode->Inherit(declaration);
+    refSvgNode->InheritAttr(attributes_);
 
     refSvgNode->Draw(canvas, layout, color);
 }
 
+bool SvgUse::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgAttributes&)> SVG_ATTR_ARRAY[] = {
+        { DOM_SVG_MIRROR,
+            [](const std::string& val, SvgAttributes& attr) {
+                attr.autoMirror = val == "true";
+            } },
+        { DOM_SVG_HEIGHT,
+            [](const std::string& val, SvgAttributes& attr) {
+                attr.height = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_SRC_VIEW_BOX,
+            [](const std::string& val, SvgAttributes& attr) {
+                if (val.empty()) {
+                    return;
+                }
+                std::vector<double> viewBox;
+                StringUtils::StringSplitter(val, ' ', viewBox);
+                if (viewBox.size() == 4) {
+                    attr.viewBox = Rect(viewBox[0], viewBox[1], viewBox[2], viewBox[3]);
+                }
+            } },
+        { DOM_SVG_VIEW_BOX,
+            [](const std::string& val, SvgAttributes& attr) {
+                if (val.empty()) {
+                    return;
+                }
+                std::vector<double> viewBox;
+                StringUtils::StringSplitter(val, ' ', viewBox);
+                if (viewBox.size() == 4) {
+                    attr.viewBox = Rect(viewBox[0], viewBox[1], viewBox[2], viewBox[3]);
+                }
+            } },
+        { DOM_SVG_WIDTH,
+            [](const std::string& val, SvgAttributes& attr) {
+                attr.width = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_X,
+            [](const std::string& val, SvgAttributes& attr) {
+                attr.x = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_Y,
+            [](const std::string& val, SvgAttributes& attr) {
+                attr.y = SvgAttributesParser::ParseDimension(val);
+            } },
+    };
+    auto attrIter = BinarySearchFindIndex(SVG_ATTR_ARRAY, ArraySize(SVG_ATTR_ARRAY), name.c_str());
+    if (attrIter != -1) {
+        SVG_ATTR_ARRAY[attrIter].value(value, useAttr_);
+        return true;
+    }
+    return false;
+}
+
 SvgUse::AttributeScope::AttributeScope(const RefPtr<SvgNode>& node) : node_(node)
 {
-    auto declaration = node->GetDeclaration();
-    CHECK_NULL_VOID(declaration);
-    attributes_ = static_cast<SvgBaseAttribute&>(declaration->GetAttribute(AttributeTag::SPECIALIZED_ATTR));
+    auto nodeAttr = node->GetBaseAttributes();
+    attributes_ = nodeAttr;
 }
 
 SvgUse::AttributeScope::~AttributeScope()
 {
     auto node = node_.Upgrade();
     CHECK_NULL_VOID(node);
-    auto declaration = node->GetDeclaration();
-    CHECK_NULL_VOID(declaration);
-    declaration->ReplaceAttributes(attributes_);
+    node->SetBaseAttributes(attributes_);
 }
 } // namespace OHOS::Ace::NG

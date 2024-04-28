@@ -37,6 +37,20 @@ struct SvgBaseAttribute : Attribute {
     std::string href;
     std::string id;
     ClipState clipState;
+
+    void Inherit(const SvgBaseAttribute& parent)
+    {
+        if (!hasOpacity) {
+            if (parent.hasOpacity) {
+                opacity = parent.opacity;
+            } else {
+                opacity = 1.0; // default opacity is 1.0
+            }
+        }
+        fillState.Inherit(parent.fillState);
+        strokeState.Inherit(parent.strokeState);
+        clipState.Inherit(parent.clipState);
+    }
 };
 
 class SvgBaseDeclaration : public Declaration {
