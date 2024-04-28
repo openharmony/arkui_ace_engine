@@ -265,6 +265,8 @@ public:
 
     void GetPointTransform(PointF& point) override;
 
+    void GetPointTransformRotate(PointF& point) override;
+
     void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;
@@ -558,6 +560,7 @@ private:
     void OnePixelRounding(bool isRound, uint8_t flag);
     Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
+    Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.

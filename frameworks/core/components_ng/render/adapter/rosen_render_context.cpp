@@ -1815,6 +1815,54 @@ Matrix4 RosenRenderContext::GetMatrix()
     return translateMat * rotationMat * skewMat * scaleMat;
 }
 
+// only for GetPositionToXXXWithTransform in FrameNode.
+// contains rotate and perspective matrix set by tranform.
+Matrix4 RosenRenderContext::GetMatrixWithTransformRotate()
+{
+    CHECK_NULL_RETURN(rsNode_, {});
+    auto center = rsNode_->GetStagingProperties().GetPivot();
+
+    Matrix4 rotateMat;
+    if (transformMatrixModifier_ &&
+        !transformMatrixModifier_->quaternionValue->GetStagingValue().IsIdentity()) {
+        auto quaternionValue = transformMatrixModifier_->quaternionValue->GetStagingValue();
+        rotateMat = Matrix4::QuaternionToMatrix(quaternionValue[0], quaternionValue[1],
+            quaternionValue[2], quaternionValue[3]);
+    } else {
+        int32_t degree = rsNode_->GetStagingProperties().GetRotation();
+        if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
+            degree = 0;
+            return Matrix4();
+        }
+        rotateMat = Matrix4::CreateRotate(degree, 0, 0, 1);
+    }
+
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto skew = rsNode_->GetStagingProperties().GetSkew();
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+    auto perspective = rsNode_->GetStagingProperties().GetPersp();
+
+    RectF rect = GetPaintRectWithoutTransform();
+    auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
+    auto centerPos = rect.GetOffset() + centOffset;
+
+    auto perspectiveMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                       Matrix4::CreateFactorPerspective(perspective[0], perspective[1]) *
+                       Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+    auto translateMat = Matrix4::CreateTranslate(translate[0], translate[1], 0);
+    auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                       rotateMat *
+                       Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+    auto skewMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                    Matrix4::CreateFactorSkew(skew[0], skew[1]) *
+                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+    auto scaleMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                    Matrix4::CreateScale(scale[0], scale[1], 1) *
+                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+
+    return perspectiveMat * translateMat * rotationMat * skewMat * scaleMat;
+}
+
 Matrix4 RosenRenderContext::GetLocalTransformMatrix()
 {
     auto invertMat = GetRevertMatrix();
@@ -1835,6 +1883,16 @@ void RosenRenderContext::GetPointWithRevert(PointF& point)
 void RosenRenderContext::GetPointTransform(PointF& point)
 {
     auto transformMat = GetMatrix();
+    Point tmp(point.GetX(), point.GetY());
+    auto transformPoint = transformMat * tmp;
+    point.SetX(transformPoint.GetX());
+    point.SetY(transformPoint.GetY());
+}
+
+// only for GetPositionToXXXWithTransform in FrameNode
+void RosenRenderContext::GetPointTransformRotate(PointF& point)
+{
+    auto transformMat = GetMatrixWithTransformRotate();
     Point tmp(point.GetX(), point.GetY());
     auto transformPoint = transformMat * tmp;
     point.SetX(transformPoint.GetX());
