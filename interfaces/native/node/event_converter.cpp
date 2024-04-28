@@ -213,8 +213,6 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
                 return ON_LIST_WILL_SCROLL;
             }
             return ON_WILL_SCROLL;
-        case NODE_ON_DID_SCROLL:
-            return ON_DID_SCROLL;
         case NODE_ON_TOUCH_INTERCEPT:
             return ON_TOUCH_INTERCEPT;
         case NODE_ON_REACH_END:
