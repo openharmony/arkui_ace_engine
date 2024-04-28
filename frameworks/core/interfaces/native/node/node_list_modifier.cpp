@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -529,6 +530,15 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return ListModelNG::GetCachedCount(frameNode);
 }
 
+void SetScrollIndexTo(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ScrollToIndex(values[0], values[1], values[2]);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -545,7 +555,7 @@ const ArkUIListModifier* GetListModifier()
         SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset,
         ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
         GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
-        GetNodeAdapter, GetCachedCount };
+        GetNodeAdapter, GetCachedCount, SetScrollIndexTo };
     return &modifier;
 }
 

@@ -765,20 +765,20 @@ typedef enum {
 
 
 /**
- * @brief item对齐方式
+ * @brief 滚动到具体item时的对齐方式。
  *
  * @since 12
  */
 typedef enum {
-    /** 首部对齐。指定item首部与List首部对齐。*/
-    ARKUI_SCROLL_ALIGN_START = 0,
-    /** 居中对齐。指定item主轴方向居中对齐于List。*/
-    ARKUI_SCROLL_ALIGN_CENTER,
-    /** 尾部对齐。指定item尾部与List尾部对齐。*/
-    ARKUI_SCROLL_ALIGN_END,
-    /** 自动对齐。若指定item完全处于显示区，不做调整。否则依照滑动距离最短的原则，将指定item首部对齐或尾部对齐于List,使指定item完全处于显示区。*/
-    ARKUI_SCROLL_ALIGN_AUTO,
-} ArkUI_ScrollAlign;
+    /** 首部对齐。指定item首部与容器首部对齐。*/
+    ARKUI_SCROLL_ALIGNMENT_START = 0,
+    /** 居中对齐。指定item主轴方向居中对齐于容器。*/
+    ARKUI_SCROLL_ALIGNMENT_CENTER,
+    /** 尾部对齐。指定item尾部与容器尾部对齐。*/
+    ARKUI_SCROLL_ALIGNMENT_END,
+    /** 自动对齐。若指定item完全处于显示区，不做调整。否则依照滑动距离最短的原则，将指定item首部对齐或尾部对齐于容器,使指定item完全处于显示区。*/
+    ARKUI_SCROLL_ALIGNMENT_AUTO,
+} ArkUI_ScrollAlignment;
 
 /**
  * @brief 定义当前滚动状态。

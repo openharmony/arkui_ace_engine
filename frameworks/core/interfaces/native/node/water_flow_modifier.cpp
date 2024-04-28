@@ -17,6 +17,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 
@@ -333,6 +334,15 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return WaterFlowModelNG::GetCachedCount(frameNode);
 }
 
+void SetScrollIndexTo(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ScrollToIndex(values[0], values[1], values[2]);
+}
+
 } // namespace
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
@@ -376,6 +386,7 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         GetCachedCount,
         SetEdgeEffect,
         ResetEdgeEffect,
+        SetScrollIndexTo,
     };
     return &modifier;
 }

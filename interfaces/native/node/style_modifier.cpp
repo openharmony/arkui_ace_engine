@@ -3996,38 +3996,6 @@ void ResetScrollEnablePaging(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollEnablePaging(node->uiNodeHandle);
 }
 
-int32_t SetScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    ArkUI_Int32 values[ALLOW_SIZE_3] = { 0, DEFAULT_FALSE, ScrollAlign::NONE };
-    values[0] = item->value[0].i32;
-    if (item->size > 1 && InRegion(NUM_0, NUM_1, item->value[1].i32)) {
-        values[1] = item->value[1].i32;
-    }
-    if (item->size > 2 && InRegion(NUM_0, NUM_3, item->value[2].i32)) {
-        values[2] = item->value[2].i32;
-    }
-    switch (node->type) {
-        case ARKUI_NODE_LIST:
-            values[2] = (values[2] == ScrollAlign::NONE) ? ScrollAlign::START : values[2];
-            break;
-        case ARKUI_NODE_GRID:
-            values[2] = (values[2] == ScrollAlign::NONE) ? ScrollAlign::AUTO : values[2];
-            break;
-        case ARKUI_NODE_WATER_FLOW:
-            values[2] = (values[2] == ScrollAlign::NONE) ? ScrollAlign::START : values[2];
-            break;
-        default:
-            return ERROR_CODE_PARAM_INVALID;
-    }
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollIndexTo(node->uiNodeHandle, );
-    return ERROR_CODE_NO_ERROR;
-}
-
 int32_t SetScrollPage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
@@ -4213,6 +4181,26 @@ const ArkUI_AttributeItem* GetListAlignListItem(ArkUI_NodeHandle node)
     ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getListModifier()->getAlignListItem(node->uiNodeHandle);
     g_numberValues[0].i32 = value;
     return &g_attributeItem;
+}
+
+int32_t SetListScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Int32 values[ALLOW_SIZE_3] = { 0, DEFAULT_FALSE, ScrollAlign::NONE };
+    values[0] = item->value[0].i32;
+    if (item->size > 1 && InRegion(NUM_0, NUM_1, item->value[1].i32)) {
+        values[1] = item->value[1].i32;
+    }
+    if (item->size > 2 && InRegion(NUM_0, NUM_3, item->value[2].i32)) {
+        values[2] = item->value[2].i32;
+    }
+    values[2] = (values[2] == ScrollAlign::NONE) ? ScrollAlign::START : values[2];
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getListModifier()->setScrollIndexTo(node->uiNodeHandle, values);
+    return ERROR_CODE_NO_ERROR;
 }
 
 int32_t SetTextAreaPlaceholderFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -8966,6 +8954,26 @@ const ArkUI_AttributeItem* GetWaterFlowCachedCount(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetWaterFlowScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Int32 values[ALLOW_SIZE_3] = { 0, DEFAULT_FALSE, ScrollAlign::NONE };
+    values[0] = item->value[0].i32;
+    if (item->size > 1 && InRegion(NUM_0, NUM_1, item->value[1].i32)) {
+        values[1] = item->value[1].i32;
+    }
+    if (item->size > 2 && InRegion(NUM_0, NUM_3, item->value[2].i32)) {
+        values[2] = item->value[2].i32;
+    }
+    values[2] = (values[2] == ScrollAlign::NONE) ? ScrollAlign::START : values[2];
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->setScrollIndexTo(node->uiNodeHandle, values);
+    return ERROR_CODE_NO_ERROR;
+}
+
 bool CheckIfAttributeLegal(ArkUI_NodeHandle node, int32_t type)
 {
     if (node->type == ARKUI_NODE_SPAN) {
@@ -9953,7 +9961,7 @@ void ResetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
     static Setter* setters[] = { SetListDirection, SetListSticky, SetListSpace, SetListNodeAdapter,
-        SetListCachedCount, SetListAlignListItem };
+        SetListCachedCount, SetListAlignListItem, SetListScrollToIndex};
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -10137,7 +10145,7 @@ void ResetRefreshAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetLayoutDirection, SetColumnsTemplate, SetRowsTemplate, SetWaterFlowColumnsGap,
-        SetWaterFlowRowsGap, nullptr, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount };
+        SetWaterFlowRowsGap, nullptr, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount, SetWaterFlowScrollToIndex };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;

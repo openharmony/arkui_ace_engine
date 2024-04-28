@@ -1633,6 +1633,7 @@ struct ArkUIListModifier {
     void (*resetNodeAdapter)(ArkUINodeHandle node);
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
+    void (*setScrollIndexTo)(ArkUINodeHandle node, ArkUI_Int32* values);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -1882,7 +1883,6 @@ struct ArkUIScrollModifier {
     void (*getScrollNestedScroll)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*getScrollOffset)(ArkUINodeHandle node, ArkUI_Float32* values);
     ArkUI_Int32 (*getScrollEdge)(ArkUINodeHandle node);
-    void (*setScrollIndexTo)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*setScrollPage)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*setScrollBy)(ArkUINodeHandle node, ArkUI_Float32* values);
 };
@@ -2447,6 +2447,7 @@ struct ArkUIWaterFlowModifier {
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
     void (*setEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled);
     void (*resetEdgeEffect)(ArkUINodeHandle node);
+    void (*setScrollIndexTo)(ArkUINodeHandle node, ArkUI_Int32* values);
 };
 
 struct ArkUIMenuItemModifier {

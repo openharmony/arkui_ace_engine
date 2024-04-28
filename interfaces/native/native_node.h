@@ -3323,7 +3323,6 @@ typedef enum {
      */
     NODE_SCROLL_ENABLE_PAGING,
 
-    NODE_SCROLL_TO_INDEX,
     NODE_SCROLL_PAGE,
     NODE_SCROLL_BY,
 
@@ -3397,6 +3396,19 @@ typedef enum {
      * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlign}  \n
     */
     NODE_LIST_ALIGN_LIST_ITEM,
+
+    /**
+     * @brief 滑动到指定index。
+     * 
+     * 开启smooth动效时，会对经过的所有item进行加载和布局计算，当大量加载item时会导致性能问题。\n
+     * \n
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：要滑动到的目标元素在当前容器中的索引值。\n
+     * .value[1]?.i32：设置滑动到列表项在列表中的索引值时是否有动效，1表示有动效，0表示没有动效。默认值：0。\n
+     * .value[2]?.i32：指定滑动到的元素与当前容器的对齐方式，参数类型{@link ArkUI_ScrollAlignment}, 默认值：ScrollAlign.START。
+     *
+     */
+    NODE_LIST_SCROLL_TO_INDEX,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -3855,6 +3867,19 @@ typedef enum {
     * .value[0].i32: number of cached items in the water flowadapter. \n
     */
     NODE_WATER_FLOW_CACHED_COUNT,
+
+    /**
+     * @brief 滑动到指定index。
+     * 
+     * 开启smooth动效时，会对经过的所有item进行加载和布局计算，当大量加载item时会导致性能问题。\n
+     * \n
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：要滑动到的目标元素在当前容器中的索引值。\n
+     * .value[1]?.i32：设置滑动到列表项在列表中的索引值时是否有动效，1表示有动效，0表示没有动效。默认值：0。\n
+     * .value[2]?.i32：指定滑动到的元素与当前容器的对齐方式，参数类型{@link ArkUI_ScrollAlignment}。默认值为：ScrollAlign.START。\n
+     *
+     */
+    NODE_WATER_FLOW_SCROLL_TO_INDEX,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
