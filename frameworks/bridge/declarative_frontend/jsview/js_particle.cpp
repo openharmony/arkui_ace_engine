@@ -819,8 +819,10 @@ void JSParticle::JsDisturbanceFields(const JSCallbackInfo& args)
     std::vector<ParticleDisturbance> dataArray;
     JSRef<JSArray> dataJsArray = JSRef<JSArray>::Cast(args[0]);
     for (size_t i = 0; i < dataJsArray->Length(); i++) {
-        auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
-        AddDisturbance(dataArray, jsObject);
+        if (dataJsArray->GetValueAt(i)->IsObject()) {
+            auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
+            AddDisturbance(dataArray, jsObject);
+        }
     }
 
     ParticleModel::GetInstance()->DisturbanceField(dataArray);
@@ -829,8 +831,8 @@ void JSParticle::JsDisturbanceFields(const JSCallbackInfo& args)
 void JSParticle::ParseEmitterProps(std::vector<OHOS::Ace::EmitterProps>& data, const JSRef<JSObject>& paramObj)
 {
     EmitterProps emitterProperty;
-    auto index = 0;
-    auto indexJsValue = paramObj->GetProperty("index")->ToNumber<int32_t>();
+    uint32_t index = 0u;
+    uint32_t indexJsValue = paramObj->GetProperty("index")->ToNumber<uint32_t>();
     emitterProperty.index = indexJsValue > 0 ? indexJsValue : index;
 
     auto emitRateProperty = paramObj->GetProperty("emitRate");
@@ -865,8 +867,10 @@ void JSParticle::JsEmitter(const JSCallbackInfo& args)
     std::vector<EmitterProps> dataArray;
     JSRef<JSArray> dataJsArray = JSRef<JSArray>::Cast(args[0]);
     for (size_t i = 0; i < dataJsArray->Length(); i++) {
-        auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
-        ParseEmitterProps(dataArray, jsObject);
+        if (dataJsArray->GetValueAt(i)->IsObject()) {
+            auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
+            ParseEmitterProps(dataArray, jsObject);
+        }
     }
 
     ParticleModel::GetInstance()->updateEmitter(dataArray);

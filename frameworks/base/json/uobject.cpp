@@ -277,8 +277,8 @@ void UObject::WriteInt32(int32_t value)
         LOGE("memcpy overflow.");
         return;
     }
-    offset_ += sizeof(int32_t);
-    buffer_ += sizeof(int32_t);
+    offset_ += static_cast<int32_t>(sizeof(size_t));
+    buffer_ += static_cast<int32_t>(sizeof(size_t));
 }
 
 void UObject::WriteSizeT(size_t value)
@@ -287,8 +287,8 @@ void UObject::WriteSizeT(size_t value)
         LOGE("memcpy overflow.");
         return;
     }
-    offset_ += sizeof(size_t);
-    buffer_ += sizeof(size_t);
+    offset_ += static_cast<int32_t>(sizeof(size_t));
+    buffer_ += static_cast<int32_t>(sizeof(size_t));
 }
 
 void UObject::WriteInt64(int64_t value)

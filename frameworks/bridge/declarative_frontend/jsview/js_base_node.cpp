@@ -52,6 +52,9 @@ const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VI
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 {
     auto builder = info[0];
+    if (!builder->IsFunction()) {
+        return;
+    }
     auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
