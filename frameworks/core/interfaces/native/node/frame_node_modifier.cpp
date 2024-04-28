@@ -185,27 +185,23 @@ ArkUI_Int32 GetIdByNodePtr(ArkUINodeHandle node)
     return nodeId;
 }
 
-ArkUI_Float32* GetPositionToParent(ArkUINodeHandle node)
+void GetPositionToParent(ArkUINodeHandle node, ArkUI_Float32* parentOffset)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
+    CHECK_NULL_VOID(currentNode);
     auto currFrameRect = currentNode->GetRectWithRender();
     auto offset = currFrameRect.GetOffset();
-    ArkUI_Float32* ret = new ArkUI_Float32[2];
-    ret[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    ret[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return ret;
+    parentOffset[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    parentOffset[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
 }
 
-ArkUI_Float32* GetPositionToWindow(ArkUINodeHandle node)
+void GetPositionToWindow(ArkUINodeHandle node, ArkUI_Float32* windowOffset)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
+    CHECK_NULL_VOID(currentNode);
     auto offset = currentNode->GetOffsetRelativeToWindow();
-    ArkUI_Float32* ret = new ArkUI_Float32[2];
-    ret[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    ret[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return ret;
+    windowOffset[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    windowOffset[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
 }
 
 ArkUI_Float32* GetMeasuredSize(ArkUINodeHandle node)
