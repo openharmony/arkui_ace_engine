@@ -459,7 +459,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         showSelect_ = true;
     }
     if (needSelectAll_ && !isLongPress_) {
-        HandleOnSelectAll(true);
+        HandleOnSelectAll(false);
         needSelectAll_ = false;
     }
     if (mouseStatus_ == MouseStatus::RELEASED) {
@@ -1119,7 +1119,7 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
         isFocusedBeforeClick_ = false;
-        HandleOnSelectAll(true);
+        HandleOnSelectAll(false);
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -1203,7 +1203,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     selectController_->MoveSecondHandleToContentRect(textSize);
     StopTwinkling();
     showSelect_ = true;
-    if (isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
+    if (!IsShowHandle() || isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
         CloseSelectOverlay(true);
         if (inlineSelectAllFlag_ && !isKeyEvent && !IsUsingMouse()) {
             return;
@@ -1904,7 +1904,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex, lastCaretRect) &&
         info.GetSourceDevice() != SourceType::MOUSE) {
         if (needSelectAll_) {
-            HandleOnSelectAll(true);
+            HandleOnSelectAll(false);
         } else {
             needCloseOverlay = false;
             ProcessOverlay({ .hideHandle = contentController_->IsEmpty(), .animation = true, .hideHandleLine = true });
@@ -1915,7 +1915,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
             needCloseOverlay = false;
             DelayProcessOverlay({ .menuIsShow = false, .animation = true });
         } else if (needSelectAll_) {
-            HandleOnSelectAll(true);
+            HandleOnSelectAll(false);
         } else {
             needCloseOverlay = false;
             ProcessOverlay({ .menuIsShow = false, .animation = true, .hideHandleLine = true });
@@ -4026,6 +4026,9 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
         "Textfield handleSurface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
         "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
+    if (newWidth == prevWidth && newHeight == prevHeight) {
+        return;
+    }
     if (SelectOverlayIsOn()) {
         if (selectOverlay_->IsShowMouseMenu()) {
             CloseSelectOverlay();
@@ -4409,7 +4412,6 @@ void TextFieldPattern::SetSelectionFlag(
     }
 
     SetIsSingleHandle(!IsSelected());
-    selectOverlay_->SetUsingMouse(false);
     if (!IsShowHandle()) {
         CloseSelectOverlay(true);
     } else {
@@ -4422,7 +4424,11 @@ void TextFieldPattern::SetSelectionFlag(
         } else {
             isShowMenu = false;
         }
-        ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
+        if (!isShowMenu && IsUsingMouse()) {
+            CloseSelectOverlay();
+        } else {
+            ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);

@@ -2076,10 +2076,23 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
         return;
     }
     showSelected_ = false;
-    ShowSelectOverlay();
+    if (IsShowHandle()) {
+        ShowSelectOverlay();
+    } else {
+        CloseSelectOverlay();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextPattern::IsShowHandle()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    return !theme->IsShowHandle();
 }
 
 // Deprecated: Use the TextSelectOverlay::ProcessOverlay() instead.

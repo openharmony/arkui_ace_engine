@@ -676,6 +676,7 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
+    bool IsShowHandle();
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick);
     void UpdateContainerChildren(const RefPtr<UINode>& parent, const RefPtr<UINode>& child);
