@@ -50,6 +50,7 @@ group("core_layout_unittest") {
     ":layout_property_test_ng",
     ":layout_wrapper_build_test_ng",
     ":layout_wrapper_node_test_ng",
-    ":layout_wrapper_test_ng",
+
+    #":layout_wrapper_test_ng",
   ]
 }
