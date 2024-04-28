@@ -3996,7 +3996,7 @@ void ResetScrollEnablePaging(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollEnablePaging(node->uiNodeHandle);
 }
 
-void SetScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+int32_t SetScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0) {
@@ -4021,14 +4021,14 @@ void SetScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             values[2] = (values[2] == ScrollAlign::NONE) ? ScrollAlign::START : values[2];
             break;
         default:
-            break;
+            return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollIndexTo(node->uiNodeHandle, );
     return ERROR_CODE_NO_ERROR;
 }
 
-void SetScrollPage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+int32_t SetScrollPage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[0].i32)) {
@@ -4041,6 +4041,24 @@ void SetScrollPage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollPage(node->uiNodeHandle, values[0], values[1]);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetScrollBy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_TWO_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Float32 values[ALLOW_SIZE_2] = { 0.0, 0.0 };
+    values[0] = item->value[0].f32;
+    values[1] = item->value[1].f32;
+    if(node->type != ARKUI_NODE_SCROLL || node->type != ARKUI_NODE_LIST ||
+        node->type != ARKUI_NODE_GRID || node->type != ARKUI_NODE_WATER_FLOW) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollBy(node->uiNodeHandle, values);
     return ERROR_CODE_NO_ERROR;
 }
 

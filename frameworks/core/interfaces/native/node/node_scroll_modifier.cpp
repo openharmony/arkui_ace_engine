@@ -447,9 +447,13 @@ void SetScrollPage(ArkUINodeHandle node, ArkUI_Int32 next, ArkUI_Int32 animation
     pattern->ScrollPage(next, animation);
 }
 
-void SetScrollBy(ArkUINodeHandle node)
+void SetScrollBy(ArkUINodeHandle node, ArkUI_Float32* values)
 {
-
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<ScrollControllerBase> scrollControllerBase = ScrollModelNG::GetOrCreateController(frameNode);
+    CHECK_NULL_VOID(scrollControllerBase);
+    scrollControllerBase->ScrollBy(values[0], values[1], false);
 }
 
 } // namespace

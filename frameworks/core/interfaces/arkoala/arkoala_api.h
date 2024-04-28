@@ -1882,7 +1882,7 @@ struct ArkUIScrollModifier {
     ArkUI_Int32 (*getScrollEdge)(ArkUINodeHandle node);
     void (*setScrollIndexTo)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*setScrollPage)(ArkUINodeHandle node, ArkUI_Int32* values);
-    void (*setScrollBy)(ArkUINodeHandle node, ArkUI_Int32* values);
+    void (*setScrollBy)(ArkUINodeHandle node, ArkUI_Float32* values);
 };
 
 struct ArkUIListItemModifier {
