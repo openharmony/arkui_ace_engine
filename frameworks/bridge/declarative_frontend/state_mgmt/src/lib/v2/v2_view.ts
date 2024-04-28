@@ -72,10 +72,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             // FIXME split View: enable delete  this purgeDeleteElmtId(elmtId);
         });
 
-        /*if this hasRecycleManager() {
-           this getRecycleManager() purgeAllCachedRecycleNode();
-        }*/
-
         // unregistration of ElementIDs
         stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID`);
 
@@ -198,14 +194,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             this.markNeedUpdate();
             this.restoreInstanceId();
         }
-        /*  if (this hasRecycleManager()) {
-              this dirtDescendantElementIds_ add(this.recycleManager_.proxyNodeId(elmtId));
-            } else {
-        */
         this.dirtDescendantElementIds_.add(elmtId);
-        /*
-            }
-        */
         stateMgmtConsole.debug(`${this.debugInfo__()}: uiNodeNeedUpdate: updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
 
         stateMgmtProfiler.end();
@@ -233,14 +222,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added
             // to newly created this.dirtDescendantElementIds_ Set
             dirtElmtIdsFromRootNode.forEach(elmtId => {
-                /*if (this hasRecycleManager()) {
-                   this UpdateElement (this recycleManager_ proxyNodeId(elmtId));
-                 } else {
-                    */
                 this.UpdateElement(elmtId);
-                /*
-                 }
-                */
                 this.dirtDescendantElementIds_.delete(elmtId);
             });
 

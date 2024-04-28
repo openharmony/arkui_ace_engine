@@ -623,7 +623,6 @@ abstract class ViewPU extends PUV2ViewBase
       }
     } while (this.dirtDescendantElementIds_.size);
     stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE, dump of ViewPU in next lines`);
-    //this dumpStateVars();
     stateMgmtProfiler.end();
   }
 
