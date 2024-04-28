@@ -177,6 +177,7 @@ public:
         if (allFrameNodeChildren_.empty()) {
             Build();
             uint32_t count = 0;
+            auto guard = GetGuard();
             for (const auto& child : children_) {
                 AddFrameNode(child.node, allFrameNodeChildren_, partFrameNodeChildren_, count);
             }
