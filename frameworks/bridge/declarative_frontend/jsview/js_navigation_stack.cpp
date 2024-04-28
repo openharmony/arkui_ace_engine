@@ -145,20 +145,20 @@ void JSNavigationStack::Push(const std::string& name, const RefPtr<NG::RouteInfo
     }
 
     auto pushFunc = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("pushName"));
-    JSRef<JSVal> params[2];
+    JSRef<JSVal> params[ARGC_COUNT_TWO];
     params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     params[1] = param;
-    pushFunc->Call(dataSourceObj_, 2, params);
+    pushFunc->Call(dataSourceObj_, ARGC_COUNT_TWO, params);
 }
 
 void JSNavigationStack::PushName(const std::string& name, const JSRef<JSVal>& param)
 {
     // obtain param from routeInfo
     auto pushFunc = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("pushName"));
-    JSRef<JSVal> params[2];
+    JSRef<JSVal> params[ARGC_COUNT_TWO];
     params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     params[1] = param;
-    pushFunc->Call(dataSourceObj_, 2, params);
+    pushFunc->Call(dataSourceObj_, ARGC_COUNT_TWO, params);
 }
 
 void JSNavigationStack::Push(const std::string& name, int32_t index)
@@ -166,10 +166,10 @@ void JSNavigationStack::Push(const std::string& name, int32_t index)
     auto getFunc = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getParamByIndex"));
     auto param = JSRef<JSVal>::Cast(getFunc->Call(dataSourceObj_));
     auto pushFunc = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("pushName"));
-    JSRef<JSVal> params[2];
+    JSRef<JSVal> params[ARGC_COUNT_TWO];
     params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     params[1] = param;
-    pushFunc->Call(dataSourceObj_, 2, params);
+    pushFunc->Call(dataSourceObj_, ARGC_COUNT_TWO, params);
 }
 
 void JSNavigationStack::RemoveName(const std::string& name)
@@ -272,9 +272,6 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
             return node;
         }
     }
-    JSRef<JSVal> params[2];
-    params[0] = JSRef<JSVal>::Make(ToJSValue(name));
-    params[1] = param;
     RefPtr<NG::UINode> node;
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     if (LoadCurrentDestinationBuilder(name, param, customNode) != ERROR_CODE_NO_ERROR) {
@@ -308,9 +305,6 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Rou
     }
     auto name = jsRouteInfo->GetName();
     auto param = jsRouteInfo->GetParam();
-    JSRef<JSVal> params[2];
-    params[0] = JSRef<JSVal>::Make(ToJSValue(name));
-    params[1] = param;
     RefPtr<NG::UINode> node;
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     if (LoadCurrentDestinationBuilder(name, param, customNode) != ERROR_CODE_NO_ERROR) {

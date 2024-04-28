@@ -170,7 +170,6 @@ void NavigationPattern::OnModifyDone()
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
     isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
-
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
