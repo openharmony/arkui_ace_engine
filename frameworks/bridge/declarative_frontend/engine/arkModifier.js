@@ -991,6 +991,20 @@ class ParticleModifier extends ArkParticleComponent {
   }
 }
 
+class SymbolGlyphModifier extends ArkSymbolGlyphComponent {
+  constructor(src, nativePtr, classType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+    if (src !== undefined) {
+      this.initialize([src]);
+    }
+  }
+  applyNormalAttribute(instance) {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
+  }
+}
+
 export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier, CheckboxGroupModifier, CircleModifier,
   ColumnModifier, ColumnSplitModifier, CounterModifier, DataPanelModifier, DatePickerModifier, DividerModifier, FormComponentModifier, GaugeModifier,
   GridModifier, GridColModifier, GridItemModifier, GridRowModifier, HyperlinkModifier, ImageAnimatorModifier, ImageModifier, ImageSpanModifier, LineModifier,
@@ -1000,4 +1014,4 @@ export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonM
   ScrollModifier, SearchModifier, SelectModifier, ShapeModifier, SideBarContainerModifier, SliderModifier, SpanModifier, StackModifier, StepperItemModifier,
   SwiperModifier, TabsModifier, TextAreaModifier, TextModifier, TextClockModifier, TextInputModifier, TextPickerModifier, TextTimerModifier, TimePickerModifier,
   ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier, PluginComponentModifier, RefreshModifier, TabContentModifier, ModifierUtils, AttributeUpdater,
-  ParticleModifier };
+  ParticleModifier, SymbolGlyphModifier };

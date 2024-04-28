@@ -1931,6 +1931,15 @@ declare class CheckboxWidthModifier extends ModifierWithKey<Length> {}
 declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {}
 declare class TextForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {}
 
+declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyphAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    fontColor(value: ResourceColor[]): SymbolGlyphAttribute;
+    fontSize(value: number | string | Resource): SymbolGlyphAttribute;
+    fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute;
+    renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute;
+    effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
+}
+
 declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     emitter(fields: Array<EmitterProps>): ParticleAttribute;

@@ -29,6 +29,13 @@ public:
     void SetFontColor(std::vector<Color>& symbolColor) override;
     void SetSymbolEffect(const std::uint32_t effectStrategy) override;
     void SetClipEdge() override;
+
+    static void SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
+    static void SetRenderingStrategy(FrameNode* frameNode, const std::uint32_t renderingStrategy);
+    static void SetSymbolEffect(FrameNode* frameNode, const std::uint32_t effectStrategy);
+    static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode);
 };
 } // namespace OHOS::Ace::NG
 
