@@ -281,6 +281,12 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 {
     auto& info = gridLayoutInfo_;
 
+    if (info.jumpIndex_ == JUMP_TO_BOTTOM_EDGE) {
+        GridIrregularFiller filler(&info, wrapper_);
+        filler.FillMatrixOnly(info.childrenCount_ - 1);
+        info.PrepareJumpToBottom();
+    }
+
     if (info.jumpIndex_ == LAST_ITEM) {
         info.jumpIndex_ = info.childrenCount_ - 1;
     }
@@ -294,18 +300,18 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     }
 
     int32_t jumpLineIdx = FindJumpLineIdx(info.jumpIndex_);
-    info.jumpIndex_ = EMPTY_JUMP_INDEX;
 
     PrepareLineHeight(mainSize, jumpLineIdx);
 
     GridLayoutRangeSolver solver(&info, wrapper_);
-    auto res = solver.FindRangeOnJump(jumpLineIdx, mainGap_);
+    auto res = solver.FindRangeOnJump(info.jumpIndex_, jumpLineIdx, mainGap_);
 
     info.currentOffset_ = res.pos;
     info.startMainLineIndex_ = res.startRow;
     info.startIndex_ = info.gridMatrix_.at(res.startRow).at(0);
     info.endMainLineIndex_ = res.endRow;
     info.endIndex_ = res.endIdx;
+    info.jumpIndex_ = EMPTY_JUMP_INDEX;
 }
 
 void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()

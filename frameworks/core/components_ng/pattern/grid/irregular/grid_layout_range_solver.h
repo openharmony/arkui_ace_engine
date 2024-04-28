@@ -56,11 +56,12 @@ public:
     /**
      * @brief Finds the layout range when jumping to a new index.
      *
+     * @param jumpIdx The item index.
      * @param jumpLineIdx The index of the jump line.
      * @param mainGap The main gap between rows.
      * @return The layout range info after jumping to the target line.
      */
-    RangeInfo FindRangeOnJump(int32_t jumpLineIdx, float mainGap);
+    RangeInfo FindRangeOnJump(int32_t jumpIdx, int32_t jumpLineIdx, float mainGap);
 
     /**
      * @brief Solves the forward end index for a given target length and starting line index.

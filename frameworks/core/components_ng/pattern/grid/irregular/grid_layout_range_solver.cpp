@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
+
 namespace OHOS::Ace::NG {
 GridLayoutRangeSolver::GridLayoutRangeSolver(GridLayoutInfo* info, LayoutWrapper* wrapper)
     : info_(info), wrapper_(wrapper)
@@ -38,7 +40,7 @@ Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
     return SolveBackward(mainGap, info_->currentOffset_, info_->startMainLineIndex_);
 }
 
-GridLayoutRangeSolver::RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpLineIdx, float mainGap)
+GridLayoutRangeSolver::RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpIdx, int32_t jumpLineIdx, float mainGap)
 {
     auto mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_->axis_);
     /*
@@ -58,10 +60,11 @@ GridLayoutRangeSolver::RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t 
         }
         case ScrollAlign::CENTER: {
             // align by item center
+            auto size = GridLayoutUtils::GetItemSize(info_, wrapper_, jumpIdx);
+            auto [centerLine, offset] = info_->FindItemCenter(jumpLineIdx, size.rows, mainGap);
             float halfMainSize = mainSize / 2.0f;
-            float halfLine = info_->lineHeightMap_.at(jumpLineIdx) / 2.0f;
-            auto [endLineIdx, endIdx] = SolveForwardForEndIdx(mainGap, halfMainSize + halfLine, jumpLineIdx);
-            auto res = SolveBackward(mainGap, halfMainSize - halfLine, jumpLineIdx);
+            auto [endLineIdx, endIdx] = SolveForwardForEndIdx(mainGap, halfMainSize + offset, centerLine);
+            auto res = SolveBackward(mainGap, halfMainSize - offset, centerLine);
             return { res.row, res.pos, endLineIdx, endIdx };
         }
         case ScrollAlign::END: {

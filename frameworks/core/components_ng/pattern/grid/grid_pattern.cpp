@@ -28,12 +28,15 @@
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -1833,6 +1836,19 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
         }
     }
     FireAndCleanScrollingListener();
+}
+
+void GridPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
+{
+    if (UseIrregularLayout() && scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
+        // for irregular layout, last item might not be at bottom
+        gridLayoutInfo_.jumpIndex_ = JUMP_TO_BOTTOM_EDGE;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        return;
+    }
+    ScrollablePattern::ScrollToEdge(scrollEdgeType, smooth);
 }
 
 // Turn on the scrolling animation

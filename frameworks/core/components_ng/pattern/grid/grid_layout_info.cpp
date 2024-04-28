@@ -16,6 +16,7 @@
 #include <numeric>
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 int32_t GridLayoutInfo::GetItemIndexByPosition(int32_t position)
@@ -745,5 +746,28 @@ bool GridLayoutInfo::HeightSumSmaller(float other, float mainGap) const
         }
     }
     return true;
+}
+
+std::pair<int32_t, float> GridLayoutInfo::FindItemCenter(int32_t startLine, int32_t lineCnt, float mainGap) const
+{
+    float halfLen = (GetHeightInRange(startLine, startLine + lineCnt, mainGap) - mainGap) / 2.0f;
+    auto it = lineHeightMap_.find(startLine);
+    float len = 0.0f;
+    while (it != lineHeightMap_.end() && LessNotEqual(len + it->second + mainGap, halfLen)) {
+        len += it->second + mainGap;
+        ++it;
+    }
+    return {it->first, halfLen - len};
+}
+
+void GridLayoutInfo::PrepareJumpToBottom()
+{
+    if (gridMatrix_.empty() || gridMatrix_.rbegin()->second.empty()) {
+        TAG_LOGW(ACE_GRID, "Matrix setup is incorrect");
+        jumpIndex_ = LAST_ITEM;
+    } else {
+        jumpIndex_ = std::abs(gridMatrix_.rbegin()->second.begin()->second);
+    }
+    scrollAlign_ = ScrollAlign::END;
 }
 } // namespace OHOS::Ace::NG
