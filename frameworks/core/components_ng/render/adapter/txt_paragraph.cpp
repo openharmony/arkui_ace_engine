@@ -162,10 +162,6 @@ void TxtParagraph::Build()
 #else
     paragraph_ = builder_->CreateTypography();
 #endif
-
-    if (paraStyle_.leadingMargin) {
-        SetIndents({ paraStyle_.leadingMargin->size.Width().ConvertToPx() });
-    }
 }
 
 uint32_t TxtParagraph::destructCount = 0;
@@ -295,11 +291,20 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
     paragraph_->Paint(&canvas, x, y);
 #endif
     if (paraStyle_.leadingMargin && paraStyle_.leadingMargin->pixmap) {
+        auto size = paraStyle_.leadingMargin->size;
+        CaretMetricsF metrics;
+        auto flag = ComputeOffsetForCaretUpstream(0, metrics) || ComputeOffsetForCaretDownstream(0, metrics);
+        if (flag) {
+            x += metrics.offset.GetX() - size.Width().ConvertToPx();
+            auto sizeRect = SizeF(size.Width().ConvertToPx(), size.Height().ConvertToPx());
+            y += Alignment::GetAlignPosition(
+                SizeF(sizeRect.Width(), metrics.height), sizeRect, paraStyle_.leadingMarginAlign)
+                    .GetY();
+        }
         auto canvasImage = PixelMapImage::Create(paraStyle_.leadingMargin->pixmap);
         auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
         CHECK_NULL_VOID(pixelMapImage);
         auto& rsCanvas = const_cast<RSCanvas&>(canvas);
-        auto size = paraStyle_.leadingMargin->size;
         auto width = size.Width().ConvertToPx();
         auto height = size.Height().ConvertToPx();
         pixelMapImage->DrawRect(rsCanvas, ToRSRect(RectF(x, y, width, height)));
@@ -532,7 +537,6 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
             Rosen::TextRectWidthStyle::TIGHT);
 #endif
     }
-
     if (boxes.empty()) {
         return false;
     }

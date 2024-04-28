@@ -152,6 +152,23 @@ struct PlaceholderStyle {
     VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
     TextBaseline baseline = TextBaseline::ALPHABETIC;
 };
+
+struct CustomSpanPlaceholderInfo {
+    int32_t customSpanIndex = -1;
+    int32_t paragraphIndex = -1;
+    std::function<void(NG::DrawingContext&, CustomSpanOptions)> onDraw;
+
+    std::string ToString()
+    {
+        std::string result = "CustomPlaceholderInfo: [";
+        result += "customSpanIndex: " + std::to_string(customSpanIndex);
+        result += ", paragraphIndex: " + std::to_string(paragraphIndex);
+        result += ", onDraw: ";
+        result += !onDraw ? "nullptr" : "true";
+        result += "]";
+        return result;
+    }
+};
 struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
 
@@ -225,7 +242,7 @@ public:
     {
         resourceObject_ = resourceObject;
     }
-    void MarkNeedRemoveNewLine(bool value)
+    void SetNeedRemoveNewLine(bool value)
     {
         needRemoveNewLine = value;
     }
