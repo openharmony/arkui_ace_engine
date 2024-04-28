@@ -187,9 +187,7 @@ void SafeAreaManager::ExpandSafeArea()
     while (iter != needExpandNodes_.end()) {
         auto frameNode = (*iter).Upgrade();
         if (frameNode) {
-            if (!frameNode->NeedRestoreSafeArea()) {
-                frameNode->SaveGeoState();
-            }
+            frameNode->SaveGeoState();
             frameNode->ExpandSafeArea(isFocusOnPage);
         }
         ++iter;

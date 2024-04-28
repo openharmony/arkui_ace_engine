@@ -3025,7 +3025,6 @@ void FrameNode::Layout()
     if (SelfOrParentExpansive()) {
         if (IsRootMeasureNode() && !needRestoreSafeArea_ && SelfExpansive()) {
             GetGeometryNode()->RestoreCache();
-            needRestoreSafeArea_ = true;
         } else if (needRestoreSafeArea_) {
             // if safeArea not restored in measure because of constraint not changed and so on,
             // restore this node
