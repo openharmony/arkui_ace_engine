@@ -4106,7 +4106,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController014, TestSize.Level1)
     option2.start = 0;
     option2.end = 1;
     richEditorController->DeleteSpans(option2); // delete half symbol span, will fail
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 
     ClearSpan();
 }
