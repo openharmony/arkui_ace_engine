@@ -77,6 +77,7 @@ void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameN
     CHECK_NULL_VOID(mainPipeline);
     auto manager = mainPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    manager->UpdateGatherNodeToTop();
     auto gatherNode = manager->GetGatherNode();
     CHECK_NULL_VOID(gatherNode);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
@@ -147,8 +148,8 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     if (!hasPreviewTransitionEffect_) {
         auto menuWrapper = GetMenuWrapper();
         auto menuPattern = GetMenuPattern(menuWrapper);
-        ShowScaleAnimation(context, menuTheme, menuPattern);
         ShowGatherAnimation(host, menuWrapper);
+        ShowScaleAnimation(context, menuTheme, menuPattern);
     }
     isFirstShow_ = false;
     return false;

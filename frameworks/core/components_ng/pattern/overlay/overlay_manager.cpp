@@ -4963,6 +4963,19 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
         option.GetOnFinishEvent());
 }
 
+void OverlayManager::UpdateGatherNodeToTop()
+{
+    auto frameNode = gatherNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto rootNode = frameNode->GetParent();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->RemoveChild(frameNode);
+    frameNode->MountToParent(rootNode);
+    frameNode->OnMountToParentDone();
+    rootNode->RebuildRenderContextTree();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
 RefPtr<FrameNode> OverlayManager::GetPixelMapContentNode() const
 {
     auto column = pixmapColumnNodeWeak_.Upgrade();

@@ -1856,7 +1856,7 @@ void DragEventActuator::HandleTouchUpEvent()
     DragAnimationHelper::PlayNodeResetAnimation(Claim(this));
     auto preDragStatus = dragDropManager->GetPreDragStatus();
     if (preDragStatus >= PreDragStatus::ACTION_DETECTING_STATUS &&
-        preDragStatus < PreDragStatus::PREVIEW_LIFT_STARTED) {
+        preDragStatus < PreDragStatus::PREVIEW_LIFT_FINISHED) {
         if (IsNeedGather()) {
             SetGatherNode(nullptr);
             ClearGatherNodeChildrenInfo();

@@ -321,6 +321,7 @@ void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameN
     CHECK_NULL_VOID(mainPipeline);
     auto manager = mainPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
+    manager->UpdateGatherNodeToTop();
     auto gatherNode = manager->GetGatherNode();
     CHECK_NULL_VOID(gatherNode);
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -394,6 +395,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     CHECK_NULL_VOID(imageGestureHub);
     InitPanEvent(imageGestureHub, menuNode);
 
+    ShowGatherAnimation(target, menuNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
@@ -402,7 +404,6 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     ShowPixelMapAnimation(imageNode, menuNode);
-    ShowGatherAnimation(imageNode, menuNode);
 }
 
 void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
