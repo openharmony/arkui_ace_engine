@@ -2496,8 +2496,10 @@ int32_t UIContentImpl::CreateModalUIExtension(
                 overlay->CreateModalUIExtension(want, callbacks, config.isProhibitBack, config.isAsyncModalBinding);
         },
         TaskExecutor::TaskType::UI, "ArkUICreateModalUIExtension");
-    LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension create modal page end, sessionId=%{public}d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId);
+    LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension create modal page end, sessionId=%{public}d, "
+         "isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
+        config.isAsyncModalBinding);
     return sessionId;
 }
 
