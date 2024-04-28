@@ -95,6 +95,12 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     changedInfo.SetSourceTool(lastPoint.sourceTool);
     event.AddChangedTouchLocationInfo(std::move(changedInfo));
     event.SetTarget(GetEventTarget().value_or(EventTarget()));
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    event.SetPatternName(patternName.c_str());
 
     // all fingers collection
     for (const auto& item : lastPoint.pointers) {

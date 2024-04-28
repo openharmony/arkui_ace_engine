@@ -112,6 +112,12 @@ ClickInfo ClickRecognizer::GetClickInfo()
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }
@@ -412,6 +418,13 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
+    
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }
