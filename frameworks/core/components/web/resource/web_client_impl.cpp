@@ -386,6 +386,9 @@ bool WebClientImpl::OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrl
         case WebResponseDataType::RESOURCE_URL_TYPE:
             response->PutResponseResourceUrl(webResponse->GetResourceUrl());
             break;
+        case WebResponseDataType::BUFFER_TYPE:
+            response->PutResponseDataBuffer(webResponse->GetBuffer(), webResponse->GetBufferSize());
+            break;
         default:
             response->PutResponseData(data);
             break;
