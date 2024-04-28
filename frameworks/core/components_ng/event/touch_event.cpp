@@ -86,6 +86,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     changedInfo.SetScreenLocation(Offset(lastPoint.screenX, lastPoint.screenY));
     changedInfo.SetTouchType(lastPoint.type);
     changedInfo.SetForce(lastPoint.force);
+    changedInfo.SetOriginalId(lastPoint.originalId);
     if (lastPoint.tiltX.has_value()) {
         changedInfo.SetTiltX(lastPoint.tiltX.value());
     }
