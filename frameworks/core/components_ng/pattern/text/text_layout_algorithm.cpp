@@ -455,23 +455,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph_, false);
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        CHECK_NULL_RETURN(layoutProperty, false);
-        auto symbolSourceInfo = layoutProperty->GetSymbolSourceInfo();
-        CHECK_NULL_RETURN(symbolSourceInfo, false);
-        TextStyle symbolTextStyle = textStyle;
-        symbolTextStyle.isSymbolGlyph_ = true;
-        symbolTextStyle.SetRenderStrategy(
-            symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
-        symbolTextStyle.SetEffectStrategy(
-            symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
-        symbolTextStyle.SetFontFamilies({ "HM Symbol" });
-        paragraph_->PushStyle(symbolTextStyle);
-        paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
-        paragraph_->PopStyle();
-        paragraph_->Build();
-        paragraph_->SetParagraphSymbolAnimation(frameNode);
-        return true;
+        return UpdateSymbolTextStyle(textStyle, paragraph_, layoutWrapper, frameNode);
     }
     paragraph_->PushStyle(textStyle);
     CHECK_NULL_RETURN(pattern, -1);
@@ -492,6 +476,35 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     }
     paragraph_->Build();
     UpdateSymbolSpanEffect(frameNode);
+    return true;
+}
+
+bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, RefPtr<Paragraph>& paragraph,
+    LayoutWrapper* layoutWrapper, RefPtr<FrameNode>& frameNode)
+{
+    auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto symbolSourceInfo = layoutProperty->GetSymbolSourceInfo();
+    CHECK_NULL_RETURN(symbolSourceInfo, false);
+    TextStyle symbolTextStyle = textStyle;
+    symbolTextStyle.isSymbolGlyph_ = true;
+    symbolTextStyle.SetRenderStrategy(
+        symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
+    symbolTextStyle.SetEffectStrategy(
+        symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
+    symbolTextStyle.SetFontFamilies({ "HM Symbol" });
+    paragraph->PushStyle(symbolTextStyle);
+    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    symbolEffectOptions.Reset();
+    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
+        auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
+        symboloptiOns.Reset();
+    }
+    paragraph->AddSymbol(symbolSourceInfo->GetUnicode());
+    paragraph->PopStyle();
+    paragraph->Build();
+    paragraph->SetParagraphSymbolAnimation(frameNode);
     return true;
 }
 

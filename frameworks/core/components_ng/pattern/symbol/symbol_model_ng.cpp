@@ -65,6 +65,16 @@ void SymbolModelNG::SetClipEdge()
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void SymbolModelNG::SetSymbolEffectOptions(SymbolEffectOptions& symbolEffectOptions)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions);
+}
+
 void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor, frameNode);

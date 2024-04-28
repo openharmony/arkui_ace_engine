@@ -95,6 +95,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("renderingStrategy",
         GetSymbolRenderingStrategyInJson(GetSymbolRenderingStrategy()).c_str(), filter);
     json->PutExtAttr("effectStrategy", GetSymbolEffectStrategyInJson(GetSymbolEffectStrategy()).c_str(), filter);
+    json->Put("symbolEffect", GetSymbolEffectOptionsInJson(
+        GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
 
     auto jsonDecoration = JsonUtil::Create(true);
     std::string type = V2::ConvertWrapTextDecorationToStirng(GetTextDecoration().value_or(TextDecoration::NONE));
