@@ -85,6 +85,8 @@ public:
 
     bool AboutToAddCurrentFingers(int32_t touchId) override;
 
+    bool AboutToMinusCurrentFingers(int32_t touchId) override;
+
 private:
     class PanVelocity {
     public:

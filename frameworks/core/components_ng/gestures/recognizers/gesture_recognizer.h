@@ -300,6 +300,11 @@ public:
         return true;
     }
 
+    virtual bool AboutToMinusCurrentFingers(int32_t touchId)
+    {
+        return true;
+    }
+
     bool IsInAttachedNode(const TouchEvent& event);
 
 protected:
