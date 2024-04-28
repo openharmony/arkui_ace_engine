@@ -542,6 +542,8 @@ void PipelineContext::ResetDragging() {}
 
 void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
+void PipelineContext::CheckAndUpdateKeyboardInset() {}
+
 bool PipelineContext::PrintVsyncInfoIfNeed() const
 {
     return false;
