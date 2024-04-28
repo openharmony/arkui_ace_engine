@@ -286,7 +286,7 @@ public:
         ProcessOffscreenNode(itemInfo.second, false);
         ViewStackProcessor::GetInstance()->SetPredict(itemInfo.second);
         itemInfo.second->Build(nullptr);
-        auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false));
+        auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false, true));
         if (frameNode && frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
             frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
         }
