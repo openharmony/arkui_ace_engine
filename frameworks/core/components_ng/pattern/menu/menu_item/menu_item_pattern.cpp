@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include <memory>
 #include <optional>
@@ -133,14 +134,6 @@ void MenuItemPattern::OnMountToParentDone()
     UpdateTextNodes();
 }
 
-void MenuItemPattern::OnAttachToFrameNode()
-{
-    RegisterOnKeyEvent();
-    RegisterOnClick();
-    RegisterOnTouch();
-    RegisterOnHover();
-}
-
 void CustomMenuItemPattern::OnAttachToFrameNode()
 {
     RegisterOnKeyEvent();
@@ -152,6 +145,7 @@ void MenuItemPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
     RefPtr<FrameNode> leftRow =
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
@@ -166,6 +160,7 @@ void MenuItemPattern::OnModifyDone()
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
     UpdateIcon(rightRow, false);
+    AddExpandIcon(rightRow, menuProperty);
     if (IsDisabled()) {
         UpdateDisabledStyle();
     }
@@ -174,6 +169,10 @@ void MenuItemPattern::OnModifyDone()
     host->GetRenderContext()->SetClipToBounds(true);
 
     InitFocusEvent();
+    RegisterOnKeyEvent();
+    RegisterOnTouch();
+    RegisterOnHover();
+    RegisterOnClick();
 
     auto layoutProp = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProp);
@@ -384,29 +383,29 @@ void MenuItemPattern::ShowSubMenu()
     // parentMenu no need focus
     auto menuNode = GetMenu(true);
     CHECK_NULL_VOID(menuNode);
+    auto layoutProps = parentMenu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+
+    auto itemProps = host->GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProps);
+    auto hasFurtherExpand = itemProps->GetHasFurtherExpand().value_or(true);
+    auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    if (expandingMode == SubMenuExpandingMode::EMBEDDED) {
+        ShowEmbeddedSubMenu(hasFurtherExpand);
+        return;
+    }
+
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->FocusViewHide();
     auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(parentMenuPattern);
-    auto showedSubMenu = parentMenuPattern->GetShowedSubMenu();
-    if (showedSubMenu) {
-        auto showedSubMenuPattern = showedSubMenu->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(showedSubMenuPattern);
-        auto showedMenuItem = showedSubMenuPattern->GetParentMenuItem();
-        CHECK_NULL_VOID(showedMenuItem);
-        if (showedMenuItem->GetId() != host->GetId()) {
-            parentMenuPattern->HideSubMenu();
-        }
-    }
+    HideSubMenu();
     isSubMenuShowed_ = true;
-    NG::ScopedViewStackProcessor builderViewStackProcessor;
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
     MenuParam param;
-    auto layoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
     param.isShowInSubWindow = layoutProps->GetShowInSubWindowValue(false);
     auto focusMenuRenderContext = menuNode->GetRenderContext();
     CHECK_NULL_VOID(focusMenuRenderContext);
@@ -416,7 +415,9 @@ void MenuItemPattern::ShowSubMenu()
     }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
     ParseMenuRadius(param);
-    auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
+    auto subMenu = MenuView::Create(
+        expandingMode == SubMenuExpandingMode::STACK ? BuildStackSubMenu(customNode) : customNode,
+        host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
     parentMenuPattern->SetShowedSubMenu(subMenu);
@@ -435,7 +436,7 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
     auto menuWrapper = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapper);
     subMenu->MountToParent(menuWrapper);
-    OffsetF offset = GetSubMenuPostion(host);
+    OffsetF offset = GetSubMenuPosition(host);
     auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuProps);
     menuProps->UpdateMenuOffset(offset);
@@ -444,6 +445,41 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
     // select overlay menu no need focus
     if (!isSelectOverlayMenu) {
         menuPattern->FocusViewShow();
+    }
+}
+
+void MenuItemPattern::ShowEmbeddedSubMenu(bool hasFurtherExpand)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!hasFurtherExpand) {
+        CloseMenu();
+        return;
+    }
+    isExpanded_ = !isExpanded_;
+    UpdateExpandableArea();
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::HideSubMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parentMenu = GetMenu();
+    CHECK_NULL_VOID(parentMenu);
+    auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(parentMenuPattern);
+
+    auto showedSubMenu = parentMenuPattern->GetShowedSubMenu();
+    if (showedSubMenu) {
+        auto showedSubMenuPattern = showedSubMenu->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(showedSubMenuPattern);
+        auto showedMenuItem = showedSubMenuPattern->GetParentMenuItem();
+        CHECK_NULL_VOID(showedMenuItem);
+        if (showedMenuItem->GetId() != host->GetId()) {
+            parentMenuPattern->HideSubMenu();
+        }
     }
 }
 
@@ -462,6 +498,8 @@ void MenuItemPattern::CloseMenu()
 
 void MenuItemPattern::RegisterOnClick()
 {
+    if (onClickEventSet_) return;
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto event = [weak = WeakClaim(this)](GestureEvent& /* info */) {
@@ -489,22 +527,26 @@ void MenuItemPattern::RegisterOnClick()
             pattern->ShowSubMenu();
             return;
         }
-
         // hide menu when menu item is clicked
         pattern->CloseMenu();
     };
     auto clickEvent = MakeRefPtr<ClickEvent>(std::move(event));
 
-    auto gestureHub = host->GetOrCreateGestureEventHub();
+    auto clickableArea = GetClickableArea();
+    CHECK_NULL_VOID(clickableArea);
+    auto gestureHub = clickableArea->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->AddClickEvent(clickEvent);
+    onClickEventSet_ = true;
 }
 
 void MenuItemPattern::RegisterOnTouch()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
+    if (onTouchEventSet_) return;
+
+    auto clickableArea = GetClickableArea();
+    CHECK_NULL_VOID(clickableArea);
+    auto gestureHub = clickableArea->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
@@ -512,30 +554,36 @@ void MenuItemPattern::RegisterOnTouch()
         CHECK_NULL_VOID(pattern);
         pattern->OnTouch(info);
     };
-    auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gestureHub->AddTouchEvent(touchEvent);
+    auto onTouch = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gestureHub->AddTouchEvent(onTouch);
+    onTouchEventSet_ = true;
 }
 
 void MenuItemPattern::RegisterOnHover()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto inputHub = host->GetOrCreateInputEventHub();
+    if (onHoverEventSet_) return;
+
+    auto clickableArea = GetClickableArea();
+    CHECK_NULL_VOID(clickableArea);
+    auto inputHub = clickableArea->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnHover(isHover);
     };
-    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnHoverEvent(mouseEvent);
+    auto onHover = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnHoverEvent(onHover);
+    onHoverEventSet_ = true;
 }
 
 void MenuItemPattern::RegisterOnKeyEvent()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
+    if (onKeyEventSet_) return;
+    
+    auto clickableArea = GetClickableArea();
+    CHECK_NULL_VOID(clickableArea);
+    auto focusHub = clickableArea->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
@@ -543,6 +591,7 @@ void MenuItemPattern::RegisterOnKeyEvent()
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+    onKeyEventSet_ = true;
 }
 
 void MenuItemPattern::OnTouch(const TouchEventInfo& info)
@@ -693,14 +742,13 @@ void MenuItemPattern::AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode)
     AddHoverRegions(topLeftPoint, bottomRightPoint);
 }
 
-OffsetF MenuItemPattern::GetSubMenuPostion(const RefPtr<FrameNode>& targetNode)
-{
-    // show menu at left top point of targetNode
-    OffsetF position;
+OffsetF MenuItemPattern::GetSubMenuPosition(const RefPtr<FrameNode>& targetNode)
+{    // show menu at left top point of targetNode
     auto frameSize = targetNode->GetGeometryNode()->GetMarginFrameSize();
-    position = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
+    OffsetF position = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
     return position;
 }
+
 
 void MenuItemPattern::AddHoverRegions(const OffsetF& topLeftPoint, const OffsetF& bottomRightPoint)
 {
@@ -739,9 +787,9 @@ void MenuItemPattern::PlayBgColorAnimation(bool isHoverChange)
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
+        auto clickableArea = pattern->GetClickableArea();
+        CHECK_NULL_VOID(clickableArea);
+        auto renderContext = clickableArea->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->BlendBgColor(pattern->GetBgBlendColor());
     });
@@ -791,6 +839,187 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     selectIcon_->MountToParent(row, 0);
     selectIcon_->MarkModifyDone();
     selectIcon_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& column, RefPtr<MenuLayoutProperty>& menuProperty)
+{
+    CHECK_NULL_VOID(menuProperty);
+    auto expandingMode = menuProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    auto canExpand = GetSubBuilder() != nullptr
+        && (expandingMode == SubMenuExpandingMode::EMBEDDED
+            || expandingMode == SubMenuExpandingMode::STACK);
+    if (!canExpand) {
+        if (expandIcon_) {
+            column->RemoveChild(expandIcon_);
+            expandIcon_ = nullptr;
+            column->MarkModifyDone();
+            column->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+        return;
+    }
+    if (!expandIcon_) {
+        expandIcon_ = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(expandIcon_);
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto iconPath = iconTheme->GetIconPath(
+        expandingMode == SubMenuExpandingMode::STACK
+            ? InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG
+            : isExpanded_
+                ? InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG
+                : InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    ImageSourceInfo imageSourceInfo(iconPath);
+    auto props = expandIcon_->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateImageSourceInfo(imageSourceInfo);
+    UpdateIconSrc(expandIcon_, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
+        selectTheme->GetMenuIconColor(), true);
+
+    auto expandIconIndex = column->GetChildren().size();
+    expandIcon_->MountToParent(column, expandIconIndex);
+    expandIcon_->MarkModifyDone();
+    expandIcon_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::UpdateExpandableArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<FrameNode> expandableArea =
+        host->GetChildAtIndex(EXPANDABLE_AREA_VIEW_INDEX)
+            ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(EXPANDABLE_AREA_VIEW_INDEX))
+            : nullptr;
+    CHECK_NULL_VOID(expandableArea);
+
+    if (!isExpanded_) {
+        for (auto item : expandableItems_) {
+            expandableArea->RemoveChild(item);
+        }
+        expandableArea->MarkModifyDone();
+        expandableArea->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+
+    auto buildFunc = GetSubBuilder();
+    if (buildFunc != nullptr) {
+        buildFunc();
+        auto menu = NG::ViewStackProcessor::GetInstance()->Finish();
+        CHECK_NULL_VOID(menu);
+
+        if (menu->GetTag() == V2::MENU_ETS_TAG) {
+            if (expandableItems_.size() == 0) {
+                BuildEmbeddedMenuItems(menu);
+            }
+            for (auto item : expandableItems_) {
+                item->MountToParent(expandableArea);
+            }
+        }
+    }
+    expandableArea->MarkModifyDone();
+    expandableArea->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::BuildEmbeddedMenuItems(RefPtr<UINode>& node, bool needNextLevel)
+{
+    auto children = node->GetChildren();
+    if (children.empty()) return;
+
+    for (auto child : children) {
+        if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+            if (!needNextLevel) return;
+            BuildEmbeddedMenuItems(child, false);
+        } else if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+            auto childItem = AceType::DynamicCast<FrameNode>(child);
+            auto props = childItem->GetLayoutProperty<MenuItemLayoutProperty>();
+
+            auto oldEventHub = childItem->GetEventHub<MenuItemEventHub>();
+            auto onChange = oldEventHub->GetOnChange();
+            auto isSelected = oldEventHub->GetCurrentUIState() == UI_STATE_SELECTED;
+
+            MenuItemProperties menuItemProps;
+            auto model = new NG::MenuItemModelNG();
+            model->Create(menuItemProps);
+            auto stack = ViewStackProcessor::GetInstance();
+            auto eventHub = stack->GetMainFrameNodeEventHub<MenuItemEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->SetOnChange(onChange);
+
+            auto item = AceType::DynamicCast<FrameNode>(stack->Finish());
+            auto newProps = AceType::DynamicCast<MenuItemLayoutProperty>(props->Clone());
+            newProps->UpdateHasFurtherExpand(false);
+            item->SetLayoutProperty(newProps);
+
+            auto pattern = item->GetPattern<MenuItemPattern>();
+            pattern->SetSelected(isSelected);
+            eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+            expandableItems_.push_back(item);
+        }
+    }
+}
+
+RefPtr<UINode> MenuItemPattern::BuildStackSubMenu(RefPtr<UINode>& node)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, node);
+    auto layoutProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, node);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, node);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_RETURN(iconTheme, node);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, node);
+    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetSrc(iconPath);
+    imageSourceInfo.SetFillColor(selectTheme->GetMenuIconColor());
+    auto content = layoutProperty->GetContent().value_or(layoutProperty->GetLabel().value_or(""));
+
+    MenuItemProperties menuItemProps;
+    menuItemProps.content = content;
+    menuItemProps.endIcon = imageSourceInfo;
+    auto model = new NG::MenuItemModelNG();
+    model->Create(menuItemProps);
+    auto stack = ViewStackProcessor::GetInstance();
+
+    auto titleItem = AceType::DynamicCast<FrameNode>(stack->Finish());
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto columnProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+    columnProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
+    columnProperty->UpdateCrossAxisAlign(FlexAlign::STRETCH);
+
+    auto pattern = titleItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_RETURN(pattern, node);
+    titleItem->MountToParent(columnNode);
+
+    if (node->GetTag() == V2::MENU_ETS_TAG) {
+        if (expandableItems_.size() == 0) {
+            BuildEmbeddedMenuItems(node);
+        }
+        for (auto item : expandableItems_) {
+            item->MountToParent(columnNode);
+        }
+    }
+
+    return AceType::DynamicCast<NG::UINode>(columnNode);
+}
+
+RefPtr<FrameNode> MenuItemPattern::GetClickableArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto clickableArea = host->GetChildAtIndex(CLICKABLE_AREA_VIEW_INDEX);
+    CHECK_NULL_RETURN(clickableArea, host);
+    auto clickableAreaNode = AceType::DynamicCast<FrameNode>(clickableArea);
+    CHECK_NULL_RETURN(clickableAreaNode, host);
+    return clickableAreaNode;
 }
 
 void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)

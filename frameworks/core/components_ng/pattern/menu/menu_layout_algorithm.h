@@ -203,6 +203,9 @@ private:
     void ProcessArrowParams(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
     BorderRadiusProperty GetMenuRadius(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
 
+    void CalculateIdealSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
+        PaddingPropertyF padding, SizeF& idealSize, RefPtr<FrameNode> parentItem);
+
     OffsetF targetOffset_;
     SizeF targetSize_;
     Placement placement_ = Placement::BOTTOM_LEFT;

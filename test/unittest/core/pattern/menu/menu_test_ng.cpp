@@ -2574,7 +2574,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon001, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -2610,7 +2610,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -2658,7 +2658,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -2707,7 +2707,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon004, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -2749,7 +2749,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon001, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2788,7 +2788,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2838,7 +2838,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2875,7 +2875,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2922,7 +2922,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Level1)
     itemPattern->OnModifyDone();
 
     EXPECT_FALSE(itemEventHub->IsEnabled());
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 2u);
     auto startIconNode = AceType::DynamicCast<FrameNode>(leftRow->GetChildAtIndex(0));
@@ -2968,7 +2968,9 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestEvent001, TestSize.Level1)
      */
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
-    auto gestureHub = itemNode->GetOrCreateGestureEventHub();
+    auto clickableNode = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(CLICKABLE_AREA_VIEW_INDEX));
+    ASSERT_NE(clickableNode, nullptr);
+    auto gestureHub = clickableNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     auto clickEventActuator = gestureHub->clickEventActuator_;
     ASSERT_NE(clickEventActuator, nullptr);
@@ -3366,7 +3368,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNg009, TestSize.Level1)
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
     mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
-    auto position = menuItemPattern->GetSubMenuPostion(mainMenu);
+    auto position = menuItemPattern->GetSubMenuPosition(mainMenu);
     EXPECT_EQ(position, OffsetF(100, 0));
 }
 
