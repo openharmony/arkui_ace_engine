@@ -323,39 +323,56 @@ int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset, bool isSel
     int32_t index;
 #ifndef USE_GRAPHIC_TEXT_GINE
     index = static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
+#else
+    index = static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
+#endif
+    if (isSelectionPos) {
+        AdjustIndexForward(offset, true, index);
+    }
+    return index;
+}
+
+void TxtParagraph::AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index)
+{
+    if (index < 0) {
+        index = 0;
+        return;
+    }
+    auto totalLen = static_cast<size_t>(placeholderCnt_) + text_.length();
+    if (static_cast<unsigned int>(index) == totalLen) {
+        --index;
+        AdjustIndexForward(offset, false, index);
+        return;
+    }
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto boxes = paragraph_->GetRectsForRange(
         index, index + 1, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-    index = static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
     auto boxes = paragraph_->GetTextRectsByBoundary(
         index, index + 1, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
 #endif
-    if (isSelectionPos) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        auto boxes = paragraph_->GetRectsForRange(
-            index, index + 1, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
-#else
-        auto boxes = paragraph_->GetTextRectsByBoundary(
-            index, index + 1, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
-#endif
-        if (boxes.empty()) {
-            return --index;
-        }
-        for (const auto& textBox : boxes) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            auto left = textBox.rect.fLeft;
-            auto right = textBox.rect.fRight;
-#else
-            auto left = textBox.rect.GetLeft();
-            auto right = textBox.rect.GetRight();
-#endif
-            if (left != right) {
-                return index;
-            }
-        }
-        return --index;
+    if (boxes.empty()) {
+        --index;
+        AdjustIndexForward(offset, false, index);
+        return;
     }
-    return index;
+    const auto& textBox = *boxes.begin();
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto left = textBox.rect.fLeft;
+    auto right = textBox.rect.fRight;
+    auto top = textBox.rect.fTop;
+#else
+    auto left = textBox.rect.GetLeft();
+    auto right = textBox.rect.GetRight();
+    auto top = textBox.rect.GetTop();
+#endif
+    if (compareOffset && (LessNotEqual(offset.GetY(), top) || LessNotEqual(offset.GetX(), left))) {
+        --index;
+        AdjustIndexForward(offset, false, index);
+    } else if (NearEqual(left, right)) {
+        --index;
+        AdjustIndexForward(offset, false, index);
+    }
 }
 
 bool TxtParagraph::CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent)
