@@ -1493,6 +1493,10 @@ void TextPattern::InitDragEvent()
     auto onDragEnd = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        // 拖拽框架强引用导致退出页面后还能够运行到这里
+        if (pattern->isDetachFromMainTree_) {
+            return;
+        }
         ContainerScope scope(pattern->GetHostInstanceId());
         pattern->showSelect_ = true;
         if (pattern->spans_.empty()) {

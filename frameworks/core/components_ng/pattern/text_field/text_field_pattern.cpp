@@ -1756,7 +1756,7 @@ void TextFieldPattern::InitDragDropCallBack()
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         ContainerScope scope(pattern->GetHostInstanceId());
-        if (pattern->dragStatus_ == DragStatus::DRAGGING) {
+        if (pattern->dragStatus_ == DragStatus::DRAGGING && !pattern->isDetachFromMainTree_) {
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
             auto host = pattern->GetHost();

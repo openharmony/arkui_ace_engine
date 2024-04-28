@@ -1136,6 +1136,15 @@ public:
 
 protected:
     virtual void InitDragEvent();
+    void OnAttachToMainTree() override
+    {
+        isDetachFromMainTree_ = false;
+    }
+
+    void OnDetachFromMainTree() override
+    {
+        isDetachFromMainTree_ = true;
+    }
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1469,7 +1478,7 @@ private:
     bool showCountBorderStyle_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
-
+    bool isDetachFromMainTree_ = false;
     bool isFocusTextColorSet_ = false;
 };
 } // namespace OHOS::Ace::NG
