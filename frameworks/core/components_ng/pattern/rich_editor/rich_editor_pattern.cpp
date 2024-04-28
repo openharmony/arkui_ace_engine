@@ -1692,11 +1692,6 @@ void RichEditorPattern::MoveCaretAndStartFocus(const Offset& textOffset)
     if (focusHub) {
         SetCaretPosition(position);
         if (focusHub->RequestFocusImmediately()) {
-            float caretHeight = 0.0f;
-            OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, false, false);
-            MoveCaretToContentRect();
-            CHECK_NULL_VOID(overlayMod_);
-            DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
             StartTwinkling();
             if (overlayMod_) {
                 RequestKeyboard(false, true, true);
