@@ -730,7 +730,7 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
         }
         JSRef<JSVal> height = size->GetProperty("height");
         CalcDimension imageSpanHeight;
-        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVpNG(height, imageSpanHeight) &&
+        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVpNG(height, imageSpanHeight, false) &&
             GreatNotEqual(imageSpanHeight.Value(), 0.0)) {
             imageSize.height = imageSpanHeight;
         }
