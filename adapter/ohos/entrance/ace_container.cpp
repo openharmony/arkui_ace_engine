@@ -196,6 +196,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     ACE_DCHECK(callback);
     if (useNewPipeline) {
         SetUseNewPipeline();
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            SetUsePartialUpdate();
+        }
     }
     InitializeTask();
     platformEventCallback_ = std::move(callback);
@@ -217,6 +220,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     ACE_DCHECK(callback);
     if (useNewPipeline) {
         SetUseNewPipeline();
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            SetUsePartialUpdate();
+        }
     }
     if (!isSubContainer_) {
         InitializeTask();
@@ -238,6 +244,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     ACE_DCHECK(callback);
     if (useNewPipeline) {
         SetUseNewPipeline();
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            SetUsePartialUpdate();
+        }
     }
     if (!isSubContainer_) {
         InitializeTask(taskWrapper);
