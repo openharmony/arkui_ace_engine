@@ -688,7 +688,7 @@ void RegisterCustomNodeAsyncEvent(ArkUINodeHandle node, int32_t eventType, void*
         companion->SetExtraParam(eventType, extraParam);
     } else {
         auto originEventType = companion->GetFlags();
-        companion->SetFlags(originEventType | eventType);
+        companion->SetFlags(static_cast<uint32_t>(originEventType) | static_cast<uint32_t>(eventType));
         companion->SetExtraParam(eventType, extraParam);
     }
 }
@@ -702,7 +702,7 @@ ArkUI_Int32 UnregisterCustomNodeEvent(ArkUINodeHandle node, ArkUI_Int32 eventTyp
     if ((originEventType & eventType) != eventType) {
         return -1;
     }
-    companion->SetFlags(originEventType ^ eventType);
+    companion->SetFlags(static_cast<uint32_t>(originEventType) ^ static_cast<uint32_t>(eventType));
     companion->EraseExtraParam(eventType);
     return 0;
 }

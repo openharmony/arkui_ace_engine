@@ -98,7 +98,7 @@ struct MouseEvent final {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
-    int32_t touchEventId;
+    int32_t touchEventId = 0;
     int32_t originalId = 0;
     bool isInjected = false;
 
