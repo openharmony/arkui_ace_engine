@@ -694,7 +694,16 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    if (isShowInSubWindow_ && !container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetSubContainerId(Container::CurrentId());
+        container = AceEngine::Get().GetContainer(currentId);
+    }
+    CHECK_NULL_RETURN(container, topLeftPoint + dialogOffset);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_RETURN(context, topLeftPoint + dialogOffset);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
     if (!customSize_ && topLeftPoint.GetY() < safeAreaInsets_.top_.end) {
         topLeftPoint.SetY(safeAreaInsets_.top_.end);
