@@ -927,6 +927,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     else {
       modifierWithKey(this._modifiersWithKeys, TextAreaPaddingModifier.identity, TextAreaPaddingModifier, undefined);
     }
+    return this;
   }
 }
 // @ts-ignore

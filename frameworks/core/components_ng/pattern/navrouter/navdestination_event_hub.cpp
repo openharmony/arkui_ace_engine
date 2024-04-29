@@ -14,6 +14,7 @@
  */
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 
+#include "core/common/container.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"
 namespace OHOS::Ace::NG {
@@ -37,5 +38,17 @@ void NavDestinationEventHub::FireOnDisappear()
         CHECK_NULL_VOID(pattern);
         pattern->SetCustomNode(nullptr);
     });
+}
+
+void NavDestinationEventHub::FireAutoSave()
+{
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
+    if (!node->NeedRequestAutoSave()) {
+        return;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    container->RequestAutoSave(node);
 }
 }

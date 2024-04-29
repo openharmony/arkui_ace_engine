@@ -35,10 +35,11 @@ void JSContentSlot::Create(const JSCallbackInfo& info)
 {
     NG::NodeContent* content = nullptr;
     if (info.Length() > 0 && info[0]->IsObject()) {
-        auto isNodeContent = JSRef<JSObject>::Cast(info[0])->HasProperty("nativeContent_");
-        if (isNodeContent) {
-            auto nodeContent = JSRef<JSObject>::Cast(info[0])->GetProperty("nativeContent_");
-            content = JSRef<JSObject>::Cast(nodeContent)->Unwrap<NG::NodeContent>();
+        auto hasNativePtr = JSRef<JSObject>::Cast(info[0])->HasProperty("nativePtr_");
+        if (hasNativePtr) {
+            auto nodeContent = JSRef<JSObject>::Cast(info[0])->GetProperty("nativePtr_");
+            auto contentHandle = nodeContent.Get().GetLocalHandle();
+            content = reinterpret_cast<NG::NodeContent*>(contentHandle->ToNativePointer(info.GetVm())->Value());
         }
     }
     NG::ContentSlotModel::Create(content);

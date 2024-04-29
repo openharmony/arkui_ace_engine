@@ -330,7 +330,7 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     children_.clear();
     child.second->SetParent(WeakClaim(this));
     if (IsOnMainTree()) {
-        child.second->AttachToMainTree();
+        child.second->AttachToMainTree(false, GetContext());
     }
     PostIdleTask();
     auto childNode = child.second->GetFrameChildByIndex(0, needBuild);

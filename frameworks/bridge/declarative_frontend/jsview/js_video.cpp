@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
 #include "bridge/declarative_frontend/jsview/models/video_model_impl.h"
@@ -360,6 +361,27 @@ EventMarker JSVideo::GetEventMarker(const JSCallbackInfo& info, const std::vecto
     return eventMarker;
 }
 
+void JSVideo::EnableAnalyzer(bool enable)
+{
+    VideoModel::GetInstance()->EnableAnalyzer(enable);
+}
+
+void JSVideo::AnalyzerConfig(const JSCallbackInfo& info)
+{
+    auto configParams = info[0];
+    if (configParams->IsNull() || !configParams->IsObject()) {
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    panda::Local<JsiValue> value = configParams.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    VideoModel::GetInstance()->SetImageAnalyzerConfig(nativeValue);
+}
+
 void JSVideo::JSBind(BindingTarget globalObj)
 {
     JSClass<JSVideo>::Declare("Video");
@@ -381,6 +403,8 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onUpdate", &JSVideo::JsOnUpdate);
     JSClass<JSVideo>::StaticMethod("onError", &JSVideo::JsOnError);
     JSClass<JSVideo>::StaticMethod("onStop", &JSVideo::JsOnStop);
+    JSClass<JSVideo>::StaticMethod("enableAnalyzer", &JSVideo::EnableAnalyzer);
+    JSClass<JSVideo>::StaticMethod("analyzerConfig", &JSVideo::AnalyzerConfig);
 
     JSClass<JSVideo>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSVideo>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

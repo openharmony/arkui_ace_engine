@@ -18,8 +18,6 @@
 #include <unordered_set>
 
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/jsview/js_richeditor.h"
-#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -29,7 +27,8 @@
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 namespace OHOS::Ace::Framework {
 const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
-    SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::Image, SpanType::CustomSpan };
+    SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::Image, SpanType::CustomSpan,
+    SpanType::ParagraphStyle };
 
 void JSSpanString::Constructor(const JSCallbackInfo& args)
 {
@@ -205,11 +204,24 @@ JSRef<JSObject> JSSpanString::CreateJsSpanBaseObject(const RefPtr<SpanBase>& spa
             obj = AceType::DynamicCast<JSCustomSpan>(spanObject)->GetJsCustomSpanObject();
             break;
         }
+        case SpanType::ParagraphStyle: {
+            obj = CreateJsParagraphStyleSpan(spanObject);
+        }
         default:
             break;
     }
     resultObj->SetPropertyObject("styledValue", obj);
     return resultObj;
+}
+
+JSRef<JSObject> JSSpanString::CreateJsParagraphStyleSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<ParagraphStyleSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSParagraphStyleSpan>::NewInstance();
+    auto paragraphSpan = Referenced::Claim(obj->Unwrap<JSParagraphStyleSpan>());
+    paragraphSpan->SetParagraphStyleSpan(span);
+    return obj;
 }
 
 JSRef<JSObject> JSSpanString::CreateJsFontSpan(const RefPtr<SpanBase>& spanObject)
@@ -308,6 +320,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, Sp
             return ParseJsTextShadowSpan(start, length, obj);
         case SpanType::Image:
             return GetImageAttachment(start, length, obj);
+        case SpanType::ParagraphStyle:
+            return ParseJsParagraphStyleSpan(start, length, obj);
         default:
             break;
     }
@@ -320,6 +334,17 @@ RefPtr<SpanBase> JSSpanString::ParseJsFontSpan(int32_t start, int32_t length, co
     auto* fontSpan = AceType::DynamicCast<JSFontSpan>(base);
     if (fontSpan && fontSpan->GetFontSpan()) {
         return AceType::MakeRefPtr<FontSpan>(fontSpan->GetFontSpan()->GetFont(), start, start + length);
+    }
+    return nullptr;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJsParagraphStyleSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj)
+{
+    auto* base = obj->Unwrap<AceType>();
+    auto* paragraphStyleSpan = AceType::DynamicCast<JSParagraphStyleSpan>(base);
+    if (paragraphStyleSpan && paragraphStyleSpan->GetParagraphStyleSpan()) {
+        return AceType::MakeRefPtr<ParagraphStyleSpan>(
+            paragraphStyleSpan->GetParagraphStyleSpan()->GetParagraphStyle(), start, start + length);
     }
     return nullptr;
 }

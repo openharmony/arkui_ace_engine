@@ -332,8 +332,7 @@ std::pair<std::vector<double>, bool> ParseAutoFill(const std::vector<std::string
     return std::make_pair(newLens, NearEqual(gap, 0.0));
 }
 
-std::pair<std::vector<double>, bool> ParseArgsWithoutAutoFill(
-    const std::string& args, double size, double gap)
+std::pair<std::vector<double>, bool> ParseArgsWithoutAutoFill(const std::string& args, double size, double gap)
 {
     std::vector<double> lens;
     if (args.empty()) {
@@ -364,7 +363,7 @@ std::pair<std::vector<double>, bool> ParseArgsWithoutAutoFill(
     peSum = GreatOrEqual(peSum, FULL_PERCENT) ? FULL_PERCENT : peSum;
     // Second loop calculate actual width or height.
     double sizeLeft = size > ((strs.size() - 1) * gap) ? size - (strs.size() - 1) * gap : size;
-    gap = size > ((strs.size() - 1) * gap) ? gap: 0.0;
+    gap = size > ((strs.size() - 1) * gap) ? gap : 0.0;
     double sizeNoGap = sizeLeft;
     double prSumLeft = FULL_PERCENT;
     double frSizeSum = sizeNoGap * (FULL_PERCENT - peSum) / FULL_PERCENT - pxSum;

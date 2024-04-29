@@ -21,6 +21,7 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS {
@@ -168,6 +169,7 @@ public:
     // passed to SkImage to release PixelMap shared_ptr
     static void ReleaseProc(const void* /* pixels */, void* context);
     virtual void SavePixelMapToFile(const std::string& dst) const = 0;
+    virtual RefPtr<PixelMap> GetCropPixelMap(const Rect& srcRect) = 0;
 };
 
 } // namespace Ace

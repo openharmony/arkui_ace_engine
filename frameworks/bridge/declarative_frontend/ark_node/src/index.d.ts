@@ -157,3 +157,5 @@ declare class NativeUtils {
   createNativeStrongRef(nodePtr: NodePtr): NativeStrongRef;
   createNativeWeakRef(nodePtr: NodePtr): NativeWeakRef;
 }
+
+declare function __getCustomProperty__(nodeId: number, key: string): Object | undefined;

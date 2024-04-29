@@ -368,8 +368,7 @@ void MarqueePattern::RegistVisibleAreaChangeCallback()
 
 void MarqueePattern::OnVisibleAreaChange(bool visible)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(!playStatus_);
     CHECK_NULL_VOID(animation_);
     if (visible) {
         AnimationUtils::ResumeAnimation(animation_);

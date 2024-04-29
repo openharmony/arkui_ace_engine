@@ -142,6 +142,10 @@ public:
         gridLayoutInfo_.irregularItemsPosition_.clear();
     }
 
+    void SetIrregular(bool value) {
+        irregular_ = value;
+    }
+
     void ResetPositionFlags()
     {
         gridLayoutInfo_.ResetPositionFlags();
@@ -233,6 +237,10 @@ public:
     bool IsReverse() const override;
 
 private:
+    /**
+     * @brief calculate where startMainLine_ should be after spring animation.
+     * @return main axis position relative to viewport, positive when below viewport.
+     */
     float GetEndOffset();
     float GetMainGap() const;
     float GetAllDelta();
@@ -296,6 +304,7 @@ private:
     bool isLeftEndStep_ = false;
     bool isRightEndStep_ = false;
     bool isSmoothScrolling_ = false;
+    bool irregular_ = false;
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;

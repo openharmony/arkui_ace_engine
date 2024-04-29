@@ -1499,7 +1499,6 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
-    popupInfo.focusable = param->GetFocusable();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
@@ -1580,6 +1579,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
     }
+    popupInfo.focusable = param->GetFocusable();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
     popupInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
     popupInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
@@ -1694,30 +1694,6 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
         return;
     }
     BindMenu(menuNode, targetNode->GetId(), offset);
-}
-
-void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isShowInSubWindow, bool isContextMenu)
-{
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "show menu enter");
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
-    if (isContextMenu || (expandDisplay && isShowInSubWindow)) {
-        SubwindowManager::GetInstance()->ShowMenuNG(nullptr, targetId, offset);
-        return;
-    }
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-
-    overlayManager->ShowMenu(targetId, offset, nullptr);
 }
 
 void ViewAbstract::SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption)
@@ -2433,6 +2409,7 @@ void ViewAbstract::SetPrivacySensitive(bool flag)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->SetPrivacySensitive(flag);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts &opts)
@@ -3066,6 +3043,15 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
 void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
+}
+
+void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateForegroundEffect(radius);
+    }
 }
 
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)

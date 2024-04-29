@@ -49,6 +49,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
@@ -206,6 +207,17 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
 }
 
 } // namespace
+
+void TextFieldPattern::OnAttachContext(PipelineContext* context)
+{
+    CHECK_NULL_VOID(context);
+    SetInstanceId(context->GetInstanceId());
+}
+
+void TextFieldPattern::OnDetachContext(PipelineContext* context)
+{
+    SetInstanceId(INSTANCE_ID_UNDEFINED);
+}
 
 RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
 {
@@ -459,7 +471,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         showSelect_ = true;
     }
     if (needSelectAll_ && !isLongPress_) {
-        HandleOnSelectAll(true);
+        HandleOnSelectAll(false);
         needSelectAll_ = false;
     }
     if (mouseStatus_ == MouseStatus::RELEASED) {
@@ -758,8 +770,7 @@ void TextFieldPattern::HandleFocusEvent()
         StartTwinkling();
     }
     NotifyOnEditChanged(true);
-    auto visible = layoutProperty->GetShowErrorTextValue(false);
-    if (!visible && IsUnderlineMode()) {
+    if (!IsShowError() && IsUnderlineMode()) {
         auto renderContext = host->GetRenderContext();
         auto textFieldTheme = GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
@@ -1120,7 +1131,7 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
         isFocusedBeforeClick_ = false;
-        HandleOnSelectAll(true);
+        HandleOnSelectAll(false);
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -1204,7 +1215,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     selectController_->MoveSecondHandleToContentRect(textSize);
     StopTwinkling();
     showSelect_ = true;
-    if (isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
+    if (!IsShowHandle() || isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
         CloseSelectOverlay(true);
         if (inlineSelectAllFlag_ && !isKeyEvent && !IsUsingMouse()) {
             return;
@@ -1214,7 +1225,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
         }
         return;
     }
-    ProcessOverlay({ .animation = true });
+    selectOverlay_->ProcessSelectAllOverlay({ .animation = true });
 }
 
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
@@ -1742,12 +1753,11 @@ void TextFieldPattern::InitDragDropCallBack()
     };
     eventHub->SetOnDragLeave(std::move(onDragLeave));
 
-    auto onDragEnd = [weakPtr = WeakClaim(this), id = Container::CurrentId()](
-                         const RefPtr<OHOS::Ace::DragEvent>& event) {
-        ContainerScope scope(id);
+    auto onDragEnd = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->dragStatus_ == DragStatus::DRAGGING) {
+        ContainerScope scope(pattern->GetHostInstanceId());
+        if (pattern->dragStatus_ == DragStatus::DRAGGING && !pattern->isDetachFromMainTree_) {
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
             auto host = pattern->GetHost();
@@ -1905,7 +1915,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex, lastCaretRect) &&
         info.GetSourceDevice() != SourceType::MOUSE) {
         if (needSelectAll_) {
-            HandleOnSelectAll(true);
+            HandleOnSelectAll(false);
         } else {
             needCloseOverlay = false;
             ProcessOverlay({ .hideHandle = contentController_->IsEmpty(), .animation = true, .hideHandleLine = true });
@@ -1916,7 +1926,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
             needCloseOverlay = false;
             DelayProcessOverlay({ .menuIsShow = false, .animation = true });
         } else if (needSelectAll_) {
-            HandleOnSelectAll(true);
+            HandleOnSelectAll(false);
         } else {
             needCloseOverlay = false;
             ProcessOverlay({ .menuIsShow = false, .animation = true, .hideHandleLine = true });
@@ -1948,26 +1958,47 @@ bool TextFieldPattern::IsAutoFillPasswordType(const AceAutoFillType& autoFillTyp
            autoFillType == AceAutoFillType::ACE_NEW_PASSWORD);
 }
 
-bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType)
+bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType)
+{
+    if (autoFillType == AceAutoFillType::ACE_UNSPECIFIED) {
+        TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "CheckAutoFillType :autoFillType is ACE_UNSPECIFIED.");
+        return false;
+    } else if (IsAutoFillPasswordType(autoFillType)) {
+        return GetAutoFillTriggeredStateByType(autoFillType);
+    }
+    return true;
+}
+
+bool TextFieldPattern::GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto pageNode = host->GetPageNode();
-    CHECK_NULL_RETURN(pageNode, false);
-    auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pagePattern, false);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    if (aceAutoFillAllType == AceAutoFillType::ACE_UNSPECIFIED) {
-        TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "CheckAutoFillType :aceAutoFillAllType is ACE_UNSPECIFIED.");
-        return false;
-    } else if (aceAutoFillAllType == AceAutoFillType::ACE_USER_NAME ||
-               aceAutoFillAllType == AceAutoFillType::ACE_PASSWORD) {
-        return !pagePattern->IsAutoFillPasswordTriggered();
-    } else if (aceAutoFillAllType == AceAutoFillType::ACE_NEW_PASSWORD) {
-        return !pagePattern->IsAutoFillNewPasswordTriggered();
+    auto autoFillContainerNode = host->GetFirstAutoFillContainerNode();
+    CHECK_NULL_RETURN(autoFillContainerNode, false);
+    auto stateHolder = autoFillContainerNode->GetPattern<AutoFillTriggerStateHolder>();
+    CHECK_NULL_RETURN(stateHolder, false);
+    if (autoFillType == AceAutoFillType::ACE_USER_NAME || autoFillType == AceAutoFillType::ACE_PASSWORD) {
+        return !stateHolder->IsAutoFillPasswordTriggered();
     }
-    return true;
+    if (autoFillType == AceAutoFillType::ACE_NEW_PASSWORD) {
+        return !stateHolder->IsAutoFillNewPasswordTriggered();
+    }
+    return false;
+}
+
+void TextFieldPattern::SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto autoFillContainerNode = host->GetFirstAutoFillContainerNode();
+    CHECK_NULL_VOID(autoFillContainerNode);
+    auto stateHolder = autoFillContainerNode->GetPattern<AutoFillTriggerStateHolder>();
+    CHECK_NULL_VOID(stateHolder);
+    if (autoFillType == AceAutoFillType::ACE_USER_NAME || autoFillType == AceAutoFillType::ACE_PASSWORD) {
+        stateHolder->SetAutoFillPasswordTriggered(true);
+    } else if (autoFillType == AceAutoFillType::ACE_NEW_PASSWORD) {
+        stateHolder->SetAutoFillNewPasswordTriggered(true);
+    }
 }
 
 AceAutoFillType TextFieldPattern::GetAutoFillType()
@@ -2009,22 +2040,12 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup)
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto pageNode = host->GetPageNode();
-    CHECK_NULL_RETURN(pageNode, false);
-    auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pagePattern, false);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
     auto autoFillType = GetAutoFillType();
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-    if (autoFillType == AceAutoFillType::ACE_USER_NAME || autoFillType == AceAutoFillType::ACE_PASSWORD) {
-        pagePattern->SetAutoFillPasswordTriggered(true);
-    } else if (autoFillType == AceAutoFillType::ACE_NEW_PASSWORD) {
-        pagePattern->SetAutoFillNewPasswordTriggered(true);
-    }
+    SetAutoFillTriggeredStateByType(autoFillType);
     SetFillRequestFinish(false);
-    return (container->RequestAutoFill(host, autoFillType, isPopup));
+    return container->RequestAutoFill(host, autoFillType, isPopup);
 }
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -2254,7 +2275,6 @@ void TextFieldPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
-    instanceId_ = context->GetInstanceId();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto textFieldTheme = GetTheme();
@@ -3329,7 +3349,7 @@ void TextFieldPattern::UpdateCounterMargin()
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!IsTextArea() && layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() &&
-        !IsShowPasswordIcon()) {
+        !IsInPasswordMode()) {
         MarginProperty margin;
         const auto& getMargin = layoutProperty->GetMarginProperty();
         if (!getMargin || GetMarginBottom() == MARGIN_ZERO) {
@@ -4027,6 +4047,9 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
         "Textfield handleSurface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
         "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
+    if (newWidth == prevWidth && newHeight == prevHeight) {
+        return;
+    }
     if (SelectOverlayIsOn()) {
         if (selectOverlay_->IsShowMouseMenu()) {
             CloseSelectOverlay();
@@ -4410,7 +4433,6 @@ void TextFieldPattern::SetSelectionFlag(
     }
 
     SetIsSingleHandle(!IsSelected());
-    selectOverlay_->SetUsingMouse(false);
     if (!IsShowHandle()) {
         CloseSelectOverlay(true);
     } else {
@@ -4423,7 +4445,11 @@ void TextFieldPattern::SetSelectionFlag(
         } else {
             isShowMenu = false;
         }
-        ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
+        if (!isShowMenu && IsUsingMouse()) {
+            CloseSelectOverlay();
+        } else {
+            ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5055,6 +5081,17 @@ void TextFieldPattern::RestorePreInlineStates()
     ApplyUnderlineTheme();
     ProcessInnerPadding();
     ProcessResponseArea();
+    ProcessRectPadding();
+}
+
+void TextFieldPattern::ProcessRectPadding()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    CHECK_NULL_VOID(paddingProperty);
+    auto top = paddingProperty->top.has_value() ? paddingProperty->top->GetDimension().ConvertToPx() : 0.0f;
+    textRect_.SetTop(top);
 }
 
 void TextFieldPattern::TextAreaInputRectUpdate(RectF& rect)
@@ -6367,7 +6404,7 @@ bool TextFieldPattern::IsShowCount()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() && !IsShowPasswordIcon() &&
+    return layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() && !IsInPasswordMode() &&
            layoutProperty->HasMaxLength();
 }
 

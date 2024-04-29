@@ -761,6 +761,9 @@ public:
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
     bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
     void OnTooltip(const std::string& tooltip);
+    void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void SuggestionSelected(int32_t index);
+    void OnHideAutofillPopup();
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
@@ -861,6 +864,10 @@ public:
     // Backward
     void Backward();
     bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
+
+    void OnRenderProcessNotResponding(
+        const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
+    void OnRenderProcessResponding();
 
 private:
     void InitWebEvent();
@@ -1001,6 +1008,8 @@ private:
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
+    EventCallbackV2 onRenderProcessNotRespondingV2_;
+    EventCallbackV2 onRenderProcessRespondingV2_;
 
     int32_t renderMode_;
     std::string bundlePath_;

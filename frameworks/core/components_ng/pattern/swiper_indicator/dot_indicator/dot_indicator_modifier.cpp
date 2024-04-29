@@ -141,7 +141,7 @@ std::pair<float, float> DotIndicatorModifier::GetTouchBottomCenterX(ContentPrope
     float leftCenterX = contentProperty.longPointLeftCenterX;
     float rightCenterX = contentProperty.longPointRightCenterX;
 
-    if (isCustomSize_) {
+    if (isCustomSize_ || contentProperty.vectorBlackPointCenterX.empty()) {
         return { leftCenterX, rightCenterX };
     }
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
@@ -192,7 +192,7 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     PaintSelectedIndicator(canvas, leftCenter, rightCenter,
         contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
 
-    bool isLeftTouchBottom = (currentIndex_ == totalCount - 1);
+    bool isLeftTouchBottom = (currentIndex_ == static_cast<int32_t>(totalCount) - 1);
     bool isRightTouchBottom = (currentIndex_ == 0);
     bool isTouchBottom = (isLeftTouchBottom || isRightTouchBottom);
     if (!isTouchBottom || totalCount == 0 || !isTouchBottomLoop_) {

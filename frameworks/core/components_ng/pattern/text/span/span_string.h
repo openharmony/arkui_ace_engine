@@ -49,7 +49,7 @@ public:
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length, SpanType spanType) const;
     bool operator==(const SpanString& other) const;
-    const std::list<RefPtr<NG::SpanItem>>& GetSpanItems() const;
+    std::list<RefPtr<NG::SpanItem>> GetSpanItems() const;
     void AddSpan(const RefPtr<SpanBase>& span);
     void RemoveSpan(int32_t start, int32_t length, SpanType key);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
@@ -74,6 +74,9 @@ protected:
     void RemoveSpecialSpan(int32_t start, int32_t end, SpanType type);
     // For the scene after image remove
     bool CheckRange(const RefPtr<SpanBase>& spanBase) const;
+    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
+    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
+    std::list<RefPtr<NG::SpanItem>>::iterator SplitSpansAndForward(std::list<RefPtr<NG::SpanItem>>::iterator& it);
 
     std::string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;

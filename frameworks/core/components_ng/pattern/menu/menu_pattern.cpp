@@ -464,6 +464,16 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
             CHECK_NULL_VOID(itemProperty);
             auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
             CHECK_NULL_VOID(itemPattern);
+
+            auto expandingMode = layoutProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+            if (expandingMode != itemProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE)) {
+                itemProperty->UpdateExpandingMode(expandingMode);
+                auto expandNode = itemPattern->GetHost();
+                CHECK_NULL_VOID(expandNode);
+                expandNode->MarkModifyDone();
+                expandNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+
             UpdateMenuItemTextNode(layoutProperty, itemProperty, itemPattern);
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
             auto itemGroupNode = AceType::DynamicCast<FrameNode>(child);

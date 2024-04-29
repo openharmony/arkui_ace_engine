@@ -33,6 +33,7 @@ bool GaugePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 void GaugePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -72,7 +73,6 @@ void GaugePattern::OnModifyDone()
             InitDescriptionNode();
         }
     }
-    FireBuilder();
 }
 
 void GaugePattern::FireBuilder()
@@ -80,12 +80,19 @@ void GaugePattern::FireBuilder()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!makeFunc_.has_value()) {
-        host->RemoveChildAtIndex(0);
+        host->RemoveChildAndReturnIndex(contentModifierNode_);
+        contentModifierNode_ = nullptr;
         host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
-    host->RemoveChildAtIndex(0);
-    contentModifierNode_ = BuildContentModifierNode();
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);

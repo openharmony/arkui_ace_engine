@@ -46,7 +46,7 @@ std::ifstream& AceNewPipeJudgement::SafeGetLine(std::ifstream& configFile, std::
 {
     std::string myline;
     std::getline(configFile, myline);
-    if (myline.size() && myline[myline.size() - 1] == '\r') {
+    if (!myline.empty() && myline[myline.size() - 1] == '\r') {
         line = myline.substr(0, myline.size() - 1);
     } else {
         line = myline;

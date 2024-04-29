@@ -976,6 +976,7 @@ abstract class ViewPU extends PUV2ViewBase
         case '-profiler':
           view.printDFXHeader('Profiler Info', command);
           view.dumpReport();
+          this.sendStateInfo('{}');
           break;
         default:
           DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);

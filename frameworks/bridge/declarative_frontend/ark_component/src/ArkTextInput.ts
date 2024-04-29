@@ -555,7 +555,8 @@ class TextInputCaretStyleModifier extends ModifierWithKey<CaretStyle> {
     if (reset) {
       getUINativeModule().textInput.resetCaretStyle(node);
     } else {
-      getUINativeModule().textInput.setCaretStyle(node, this.value!.width);
+      getUINativeModule().textInput.setCaretStyle(node, this.value!.width,
+        this.value.color);
     }
   }
 

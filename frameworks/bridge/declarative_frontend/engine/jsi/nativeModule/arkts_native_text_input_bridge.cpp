@@ -461,22 +461,25 @@ ArkUINativeModuleValue TextInputBridge::SetCaretStyle(ArkUIRuntimeCallInfo *runt
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> caretWidthArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> caretColorArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CalcDimension width;
-    struct ArkUILengthType length = { nullptr, 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, width, false) || LessNotEqual(width.Value(), 0.0)) {
-        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputCaretStyle(nativeNode);
-    } else {
-        length.unit = static_cast<int8_t>(width.Unit());
-        if (width.CalcValue() != "") {
-            length.string = width.CalcValue().c_str();
-        } else {
-            length.number = width.Value();
-        }
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretStyle(nativeNode, &length);
+    auto textFieldTheme = ArkTSUtils::GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, panda::JSValueRef::Undefined(vm));
+    CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, caretWidthArg, caretWidth, false) ||
+            LessNotEqual(caretWidth.Value(), 0.0)) {
+        caretWidth = textFieldTheme->GetCursorWidth();
     }
-
+    Color color;
+    uint32_t caretColor;
+    if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color)) {
+        caretColor = color.GetValue();
+    } else {
+        caretColor = textFieldTheme->GetCursorColor().GetValue();
+    }
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretStyle(
+        nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor);
     return panda::JSValueRef::Undefined(vm);
 }
 

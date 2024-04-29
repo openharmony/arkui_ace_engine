@@ -418,6 +418,8 @@ public:
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
+    void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void OnHideAutofillPopup();
     void UpdateTouchHandleForOverlay();
     bool IsSelectOverlayDragging()
     {
@@ -634,6 +636,8 @@ private:
 
     bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
     bool IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
+
+    void SuggestionSelected(int32_t index);
 #ifdef OHOS_STANDARD_SYSTEM
     WebOverlayType GetTouchHandleOverlayType(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,

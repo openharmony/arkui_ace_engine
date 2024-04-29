@@ -29,20 +29,11 @@ namespace OHOS::Ace {
 
 const std::vector<SpanType> specailTypes = { SpanType::Image, SpanType::CustomSpan };
 
-std::wstring MutableSpanString::GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length)
+void MutableSpanString::SplitSpansByNewLine()
 {
-    if (start >= content.length()) {
-        return StringUtils::ToWstring("");
+    for (auto it = spans_.begin(); it != spans_.end();) {
+        it = SplitSpansAndForward(it);
     }
-    return content.substr(start, length);
-}
-
-std::wstring MutableSpanString::GetWideStringSubstr(const std::wstring& content, int32_t start)
-{
-    if (start >= content.length()) {
-        return StringUtils::ToWstring("");
-    }
-    return content.substr(start);
 }
 
 void MutableSpanString::RemoveSpans(int32_t start, int32_t length)
@@ -84,7 +75,7 @@ void MutableSpanString::ApplyReplaceStringToSpans(
         if (spanItemStart == start && op == SpanStringOperation::REPLACE) {
             (*it)->content = StringUtils::ToString(wOther + GetWideStringSubstr(wContent, length));
             (*it)->interval.second = StringUtils::ToWstring((*it)->content).length() + spanItemStart;
-            ++it;
+            it++;
             continue;
         }
         if (spanItemStart == intersection->first && spanItemEnd == intersection->second) {
@@ -115,7 +106,7 @@ void MutableSpanString::ApplyReplaceStringToSpans(
             (*it)->content = StringUtils::ToString(GetWideStringSubstr(wContent, end - spanItemStart));
             (*it)->interval.first = end;
         }
-        ++it;
+        it++;
     }
 }
 
@@ -182,6 +173,7 @@ void MutableSpanString::ReplaceString(int32_t start, int32_t length, const std::
     ApplyReplaceStringToSpanBase(start, length, other, op);
     UpdateSpansWithOffset(start, otherLength - length);
     UpdateSpanMapWithOffset(start, otherLength - length);
+    SplitSpansByNewLine();
     KeepSpansOrder();
 }
 
@@ -276,6 +268,7 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
         }
     }
     UpdateSpansAndSpanMapWithOffsetAfterInsert(start, otherLength, useFrontStyle);
+    SplitSpansByNewLine();
     KeepSpansOrder();
 }
 
@@ -367,7 +360,7 @@ void MutableSpanString::ApplyInsertSpanStringToSpans(int32_t start, const RefPtr
             auto newSpanItem = (*it)->GetSameStyleSpanItem();
             newSpanItem->interval.first = start + offset;
             newSpanItem->interval.second = spanItemEnd;
-            auto wStr = StringUtils::ToWstring(newSpanItem->content);
+            auto wStr = StringUtils::ToWstring((*it)->content);
             newSpanItem->content = StringUtils::ToString(GetWideStringSubstr(wStr, start));
             (*it)->interval.second = start;
             (*it)->content = StringUtils::ToString(GetWideStringSubstr(wStr, 0, start - spanItemStart));
@@ -501,6 +494,8 @@ void MutableSpanString::InsertStringAroundSpecialNode(
         (*iter)->interval.first += length;
         (*iter)->interval.second += length;
     }
+
+    SplitSpansByNewLine();
 
     for (auto& mapIter : spansMap_) {
         if (spansMap_.find(mapIter.first) == spansMap_.end()) {

@@ -18,6 +18,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -31,6 +32,11 @@ public:
     static void SetFontColor(const JSCallbackInfo& info);
     static void SetSymbolEffect(const JSCallbackInfo& info);
     static void JsClip(const JSCallbackInfo& info);
+    static void SetSymbolEffectOptions(const JSCallbackInfo& info);
+
+private:
+    static void parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::SymbolEffectOptions& symbolEffectOptions);
+    static void parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptions& symbolEffectOptions);
 };
 
 } // namespace OHOS::Ace::Framework

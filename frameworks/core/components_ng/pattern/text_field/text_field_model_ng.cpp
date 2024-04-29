@@ -1592,4 +1592,10 @@ void TextFieldModelNG::SetOnEditChanged(FrameNode* frameNode, std::function<void
     eventHub->SetOnEditChanged(std::move(func));
 }
 
+void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetPadding(newPadding);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
+}
 } // namespace OHOS::Ace::NG

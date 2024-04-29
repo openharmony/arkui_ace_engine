@@ -570,6 +570,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetObscured));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObscured"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetObscured));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setForegroundEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetForegroundEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetForegroundEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetForegroundEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBackgroundEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundEffect"),

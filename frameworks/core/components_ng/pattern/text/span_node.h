@@ -34,6 +34,7 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
 public:                                                                      \
@@ -151,6 +152,23 @@ struct PlaceholderStyle {
     VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
     TextBaseline baseline = TextBaseline::ALPHABETIC;
 };
+
+struct CustomSpanPlaceholderInfo {
+    int32_t customSpanIndex = -1;
+    int32_t paragraphIndex = -1;
+    std::function<void(NG::DrawingContext&, CustomSpanOptions)> onDraw;
+
+    std::string ToString()
+    {
+        std::string result = "CustomPlaceholderInfo: [";
+        result += "customSpanIndex: " + std::to_string(customSpanIndex);
+        result += ", paragraphIndex: " + std::to_string(paragraphIndex);
+        result += ", onDraw: ";
+        result += !onDraw ? "nullptr" : "true";
+        result += "]";
+        return result;
+    }
+};
 struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
 
@@ -224,7 +242,7 @@ public:
     {
         resourceObject_ = resourceObject;
     }
-    void MarkNeedRemoveNewLine(bool value)
+    void SetNeedRemoveNewLine(bool value)
     {
         needRemoveNewLine = value;
     }
@@ -277,6 +295,7 @@ enum class PropertyInfo {
     FONTFEATURE,
     BASELINE_OFFSET,
     LINESPACING,
+    SYMBOL_EFFECT_OPTIONS,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -385,6 +404,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolColorList, std::vector<Color>);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);

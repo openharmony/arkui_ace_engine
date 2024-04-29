@@ -823,12 +823,13 @@ struct CustomDialogContentComponent {
       return Color.Transparent;
     }
 
-    if (this.buttons[0].buttonStyle !== ButtonStyleMode.TEXTUAL ||
-      this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle !== ButtonStyleMode.TEXTUAL) {
-      return Color.Transparent;
-    } else {
-      return $r('sys.color.alert_divider_color');
+    if (this.buttons[0].buttonStyle === ButtonStyleMode.TEXTUAL || this.buttons[0].buttonStyle === undefined) {
+      if (this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === ButtonStyleMode.TEXTUAL ||
+        this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
+        return $r('sys.color.alert_divider_color');
+      }
     }
+    return Color.Transparent;
   }
 
   /**

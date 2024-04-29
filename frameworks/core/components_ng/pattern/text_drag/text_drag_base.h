@@ -25,7 +25,6 @@ constexpr uint32_t DRAGGED_TEXT_OPACITY = 0x66;
 constexpr uint32_t DRAGGED_TEXT_TRANSPARENCY = 0x40;
 
 namespace OHOS::Ace::NG {
-using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>;
 
 // inherited by TextPattern and TextFieldPattern
 // Text Drag polymorphism
@@ -47,12 +46,17 @@ public:
 
     virtual const RefPtr<FrameNode>& MoveDragNode() = 0;
 
-    virtual ParagraphT GetDragParagraph() const = 0;
+    virtual const RefPtr<Paragraph>& GetDragParagraph() const = 0;
 
     virtual void CloseSelectOverlay() = 0;
     virtual void CloseHandleAndSelect()
     {
         CloseSelectOverlay();
+    }
+
+    virtual void ShowHandles(const bool isNeedShowHandles)
+    {
+        ShowHandles();
     }
 
     virtual void ShowHandles()
@@ -71,7 +75,7 @@ public:
 
     virtual void InitSpanImageLayout(const std::vector<int32_t>& placeholderIndex,
         const std::vector<RectF>& rectsForPlaceholders, OffsetF contentOffset) {}
-    
+
     virtual OffsetF GetContentOffset()
     {
         return OffsetF(0, 0);

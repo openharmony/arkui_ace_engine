@@ -1060,6 +1060,27 @@ public:
         return declaration_->GetNativeEmbedGestureEventId();
     }
 
+    void SetRenderProcessNotRespondingId(const EventMarker& renderNotRespondingId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetRenderProcessNotRespondingId(renderNotRespondingId);
+    }
+
+    const EventMarker& GetRenderProcessNotRespondingId() const
+    {
+        return declaration_->GetRenderProcessNotRespondingId();
+    }
+
+    void SetRenderProcessRespondingId(const EventMarker& renderRespondingId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetRenderProcessRespondingId(renderRespondingId);
+    }
+
+    const EventMarker& GetRenderProcessRespondingId() const
+    {
+        return declaration_->GetRenderProcessRespondingId();
+    }
 
 private:
     RefPtr<WebDeclaration> declaration_;

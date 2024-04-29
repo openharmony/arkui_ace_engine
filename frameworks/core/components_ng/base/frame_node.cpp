@@ -75,7 +75,7 @@ namespace OHOS::Ace::NG {
 const std::set<std::string> FrameNode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
     "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 
-class FrameProxy {
+class FrameNode::FrameProxy final : public RecursiveLock {
 public:
     struct FrameChildNode {
         RefPtr<UINode> node;
@@ -83,28 +83,46 @@ public:
         uint32_t count = 0;
     };
 
-    struct RecursionGuard {
-        FrameProxy* proxy_;
-        bool inUse_;
-        explicit RecursionGuard(FrameProxy* proxy) : proxy_(proxy), inUse_(proxy->inUse_)
-        {
-            proxy_->inUse_ = true;
-        }
-        ~RecursionGuard()
-        {
-            proxy_->inUse_ = inUse_;
-            if (!proxy_->inUse_ && proxy_->delayReset_) {
-                proxy_->ResetChildren(proxy_->needResetChild_);
+    void Lock() override
+    {
+        ++inUse_;
+    }
+
+    void Unlock() override
+    {
+        --inUse_;
+        if (!inUse_ && delayReset_) {
+            auto it = &hostNode_->frameProxy_;
+            while ((*it)) {
+                if (this == (*it)->prevFrameProxy_.get()) {
+                    auto me = std::move((*it)->prevFrameProxy_);
+                    (*it)->prevFrameProxy_ = std::move(me->prevFrameProxy_);
+                    break;
+                }
+                it = &(*it)->prevFrameProxy_;
             }
         }
-    };
+    }
 
     RecursionGuard GetGuard()
     {
-        return RecursionGuard { this };
+        return RecursionGuard(*this);
     }
 
-    explicit FrameProxy(FrameNode* frameNode) : hostNode_(frameNode) {}
+    explicit FrameProxy(FrameNode* frameNode) : hostNode_(frameNode)
+    {
+        prevFrameProxy_ = std::move(hostNode_->frameProxy_);
+        if (prevFrameProxy_ && !prevFrameProxy_->needResetChild_) {
+            children_ = prevFrameProxy_->children_;
+            cursor_ = children_.end();
+            if (prevFrameProxy_->cursor_ != prevFrameProxy_->children_.end()) {
+                cursor_ = std::find_if(children_.begin(), children_.end(),
+                    [this](FrameChildNode& node) {
+                        return prevFrameProxy_->cursor_->node == node.node;
+                    });
+            }
+        }
+    }
 
     void Build()
     {
@@ -154,20 +172,17 @@ public:
         }
     }
 
-    const std::list<RefPtr<LayoutWrapper>>& GetAllFrameChildren()
+    ChildrenListWithGuard GetAllFrameChildren()
     {
-        if (!allFrameNodeChildren_.empty()) {
-            return allFrameNodeChildren_;
-        }
-        Build();
-        {
+        if (allFrameNodeChildren_.empty()) {
+            Build();
             uint32_t count = 0;
             auto guard = GetGuard();
             for (const auto& child : children_) {
                 AddFrameNode(child.node, allFrameNodeChildren_, partFrameNodeChildren_, count);
             }
         }
-        return allFrameNodeChildren_;
+        return ChildrenListWithGuard(allFrameNodeChildren_, *this);
     }
 
     RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache)
@@ -225,10 +240,19 @@ public:
     void ResetChildren(bool needResetChild = false)
     {
         if (inUse_) {
+            LOGF("[%{public}d:%{public}s] reset children while in use",
+                hostNode_->GetId(), hostNode_->GetTag().c_str());
+            if (SystemProperties::GetDebugEnabled()) {
+                abort();
+            } else {
+                LogBacktrace();
+            }
             delayReset_ = true;
             needResetChild_ = needResetChild;
+            hostNode_->frameProxy_ = std::make_unique<FrameProxy>(hostNode_);
             return;
         }
+        auto guard = GetGuard();
         delayReset_ = false;
         allFrameNodeChildren_.clear();
         partFrameNodeChildren_.clear();
@@ -292,10 +316,8 @@ public:
         }
     }
 
-    void RemoveAllChildInRenderTree()
+    void RemoveAllChildInRenderTreeAfterReset()
     {
-        SetAllChildrenInActive();
-        ResetChildren();
         Build();
         auto guard = GetGuard();
         for (const auto& child : children_) {
@@ -303,12 +325,19 @@ public:
         }
     }
 
+    void RemoveAllChildInRenderTree()
+    {
+        SetAllChildrenInactive();
+        ResetChildren();
+        hostNode_->frameProxy_->RemoveAllChildInRenderTreeAfterReset();
+    }
+
     uint32_t GetTotalCount()
     {
         return totalCount_;
     }
 
-    void SetAllChildrenInActive()
+    void SetAllChildrenInactive()
     {
         auto guard = GetGuard();
         for (const auto& child : partFrameNodeChildren_) {
@@ -354,17 +383,18 @@ private:
     std::list<FrameChildNode>::iterator cursor_ = children_.begin();
     std::list<RefPtr<LayoutWrapper>> allFrameNodeChildren_;
     std::map<uint32_t, RefPtr<LayoutWrapper>> partFrameNodeChildren_;
+    std::unique_ptr<FrameProxy> prevFrameProxy_;
     uint32_t totalCount_ = 0;
     FrameNode* hostNode_ { nullptr };
-    bool inUse_ = false;
+    uint32_t inUse_ = 0;
     bool delayReset_ = false;
     bool needResetChild_ = false;
 }; // namespace OHOS::Ace::NG
 
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
-    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
-      frameProxy_(std::make_unique<FrameProxy>(this))
+    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern)
 {
+    frameProxy_ = std::make_unique<FrameProxy>(this);
     renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam());
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
@@ -379,6 +409,11 @@ FrameNode::~FrameNode()
 {
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
+    }
+
+    if (removeCustomProperties_) {
+        removeCustomProperties_();
+        removeCustomProperties_ = nullptr;
     }
 
     pattern_->DetachFromFrameNode(this);
@@ -1659,6 +1694,18 @@ RefPtr<FrameNode> FrameNode::GetPageNode()
     return AceType::DynamicCast<FrameNode>(parent);
 }
 
+RefPtr<FrameNode> FrameNode::GetFirstAutoFillContainerNode()
+{
+    if (IsAutoFillContainerNode()) {
+        return Claim(this);
+    }
+    auto parent = GetParent();
+    while (parent && !parent->IsAutoFillContainerNode()) {
+        parent = parent->GetParent();
+    }
+    return AceType::DynamicCast<FrameNode>(parent);
+}
+
 void FrameNode::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
 {
     if (pattern_) {
@@ -2332,6 +2379,60 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
         parent = parent->GetAncestorNodeOfFrame(true);
     }
 
+    return offset;
+}
+
+OffsetF FrameNode::GetPositionToScreen()
+{
+    auto offsetCurrent = GetOffsetRelativeToWindow();
+    auto pipelineContext = GetContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
+    return offset;
+}
+
+OffsetF FrameNode::GetPositionToParentWithTransform() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithoutTransform().GetOffset();
+    PointF pointTmp(offset.GetX(), offset.GetY());
+    context->GetPointTransform(pointTmp);
+    offset.SetX(pointTmp.GetX());
+    offset.SetY(pointTmp.GetY());
+    return offset;
+}
+
+OffsetF FrameNode::GetPositionToScreenWithTransform()
+{
+    auto pipelineContext = GetContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    OffsetF nodeOffset = GetPositionToWindowWithTransform();
+    OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
+    return offset;
+}
+
+OffsetF FrameNode::GetPositionToWindowWithTransform() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithoutTransform().GetOffset();
+    PointF pointNode(offset.GetX(), offset.GetY());
+    context->GetPointTransform(pointNode);
+    auto parent = GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        offset = parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
+        PointF pointTmp(offset.GetX() + pointNode.GetX(), offset.GetY() + pointNode.GetY());
+        parentRenderContext->GetPointTransform(pointTmp);
+        pointNode.SetX(pointTmp.GetX());
+        pointNode.SetY(pointTmp.GetY());
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    offset.SetX(pointNode.GetX());
+    offset.SetY(pointNode.GetY());
     return offset;
 }
 
@@ -3020,7 +3121,6 @@ void FrameNode::Layout()
     if (SelfOrParentExpansive()) {
         if (IsRootMeasureNode() && !needRestoreSafeArea_ && SelfExpansive()) {
             GetGeometryNode()->RestoreCache();
-            needRestoreSafeArea_ = true;
         } else if (needRestoreSafeArea_) {
             // if safeArea not restored in measure because of constraint not changed and so on,
             // restore this node
@@ -3091,17 +3191,17 @@ void FrameNode::Layout()
         CHECK_NULL_VOID(safeAreaManager);
         safeAreaManager->SetRootMeasureNodeId(GetId());
     }
-    // if a node has geo transition but not the root node, add task only but not flush
-    // or add to expand list, self node will be added to expand list in next layout
-    if (geometryTransition != nullptr && !IsRootMeasureNode()) {
-        return;
-    }
     if (SelfOrParentExpansive()) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_VOID(safeAreaManager);
         safeAreaManager->AddNeedExpandNode(GetHostNode());
+    }
+    // if a node has geo transition but not the root node, add task only but not flush
+    // or add to expand list, self node will be added to expand list in next layout
+    if (geometryTransition != nullptr && !IsRootMeasureNode()) {
+        return;
     }
     if (geometryTransition != nullptr) {
         pipeline->FlushSyncGeometryNodeTasks();
@@ -3294,7 +3394,7 @@ uint32_t FrameNode::GetChildTrueTotalCount() const
     return frameProxy_->GetTotalCount();
 }
 
-const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
+ChildrenListWithGuard FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
 {
     const auto& children = frameProxy_->GetAllFrameChildren();
     {
@@ -3859,6 +3959,19 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
 void FrameNode::ChangeSensitiveStyle(bool isSensitive)
 {
     pattern_->OnSensitiveStyleChange(isSensitive);
+}
+
+void FrameNode::AttachContext(PipelineContext* context, bool recursive)
+{
+    UINode::AttachContext(context, recursive);
+    pattern_->OnAttachContext(context);
+}
+
+void FrameNode::DetachContext(bool recursive)
+{
+    CHECK_NULL_VOID(context_);
+    pattern_->OnDetachContext(context_);
+    UINode::DetachContext(recursive);
 }
 
 RectF FrameNode::ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const

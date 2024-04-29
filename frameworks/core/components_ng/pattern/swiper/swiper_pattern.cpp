@@ -479,11 +479,11 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetIndex, int32_t captureId
     CHECK_NULL_VOID(host);
     auto targetNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(targetIndex));
     CHECK_NULL_VOID(targetNode);
-    auto callback = [weak = WeakClaim(this), id = Container::CurrentId(), captureId, targetIndex](
+    auto callback = [weak = WeakClaim(this), captureId, targetIndex](
                         std::shared_ptr<Media::PixelMap> pixelMap) {
-        ContainerScope scope(id);
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
+        ContainerScope scope(swiper->GetHostInstanceId());
         swiper->UpdateCaptureSource(pixelMap, captureId, targetIndex);
     };
     if (forceUpdate) {
@@ -2187,9 +2187,16 @@ void SwiperPattern::HandleTouchBottomLoop()
 void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex)
 {
     // Keep follow hand
-    if ((preFirstIndex == 0 && currentFirstIndex_ == TotalCount() - 1) ||
-        (preFirstIndex == TotalCount() - 1 && currentFirstIndex_ == 0)) {
+    if (preFirstIndex == 0 && currentFirstIndex_ == TotalCount() - 1) {
         needTurn_ = true;
+        if (isTouchDown_ && LessOrEqual(mainDeltaSum_, 0.0f)) {
+            needTurn_ = false;
+        }
+    } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex_ == 0) {
+        needTurn_ = true;
+        if (isTouchDown_ && GreatOrEqual(mainDeltaSum_, 0.0f)) {
+            needTurn_ = false;
+        }
     }
 
     if (GreatNotEqual(additionalOffset, 0.0f)) {

@@ -170,8 +170,8 @@ public:
             theme->contentHeight_ = pattern->GetAttr<Dimension>("textfield_content_height", 0.0_vp);
             auto showPasswordDirectly = pattern->GetAttr<std::string>("show_password_directly", "0");
             theme->showPasswordDirectly_ = StringUtils::StringToInt(showPasswordDirectly);
-            auto textfield_show_handle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
-            theme->textfieldShowHandle_ = StringUtils::StringToInt(textfield_show_handle);
+            auto textfieldShowHandle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
+            theme->textfieldShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
 
             theme->textInputBorderColor_ = pattern->GetAttr<Color>("text_input_border_color", Color());
             theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_vp);

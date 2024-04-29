@@ -31,6 +31,8 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
+enum class SubMenuExpandingMode { SIDE, EMBEDDED, STACK };
+
 struct MenuItemFontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontColor, Color);
@@ -67,6 +69,7 @@ public:
         value->propBorderRadius_ = CloneBorderRadius();
         value->propMenuWidth_ = CloneMenuWidth();
         value->propShowInSubWindow_ = CloneShowInSubWindow();
+        value->propExpandingMode_ = CloneExpandingMode();
         return value;
     }
 
@@ -84,6 +87,7 @@ public:
         ResetBorderRadius();
         ResetMenuWidth();
         ResetShowInSubWindow();
+        ResetExpandingMode();
     }
 
     // if is a rect in target frameNode
@@ -118,6 +122,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectMenuAlignOption, Offset, DimensionOffset, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ExpandingMode, SubMenuExpandingMode, PROPERTY_UPDATE_MEASURE)
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 

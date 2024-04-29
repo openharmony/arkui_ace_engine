@@ -41,12 +41,12 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_select_overlay.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -103,7 +103,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
     TextInputAction GetDefaultTextInputAction() const;
-    
+
     // RichEditor needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
@@ -287,7 +287,7 @@ public:
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
     void RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange);
     bool IsShowHandle();
-    void SetHandles();
+    void UpdateSelectionInfo(int32_t start, int32_t end);
     bool IsEditing();
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
@@ -298,6 +298,7 @@ public:
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
+    void ShowHandles(const bool isNeedShowHandles) override;
     void ShowHandles() override;
     void HandleMenuCallbackOnSelectAll();
     void HandleOnSelectAll() override;
@@ -305,7 +306,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleDraggableFlag(GestureEvent& info, bool& isInterceptEvent);
     bool JudgeContentDraggable();
-    void CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight);
+    std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     OffsetF CalculateEmptyValueCaretRect();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
     RefPtr<GestureEventHub> GetGestureEventHub();
@@ -342,7 +343,7 @@ public:
         return caretSpanIndex_;
     }
 
-    const std::list<ParagraphManager::ParagraphInfo>& GetParagraphs() const
+    std::list<ParagraphManager::ParagraphInfo> GetParagraphs() const override
     {
         return paragraphs_.GetParagraphs();
     }
@@ -619,6 +620,7 @@ private:
         GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
     void HandleOnlyImageSelected(const Offset& globalOffset, const bool isFingerSelected);
     void CalcCaretInfoByClick(const Offset& touchOffset);
+    std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
     void InitMouseEvent();
     void ScheduleCaretTwinkling();

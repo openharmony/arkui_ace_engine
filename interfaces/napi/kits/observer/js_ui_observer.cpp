@@ -888,18 +888,21 @@ napi_value ObserverOff(napi_env env, napi_callback_info info)
     return ObserverProcess::GetInstance().ProcessUnRegister(env, info);
 }
 
-void AddToScrollEventType(napi_env env, napi_value scrollEventType)
+napi_value AddToScrollEventType(napi_env env)
 {
+    napi_value scrollEventType = nullptr;
     napi_value prop = nullptr;
     napi_create_object(env, &scrollEventType);
     napi_create_uint32(env, SCROLL_START, &prop);
     napi_set_named_property(env, scrollEventType, "SCROLL_START", prop);
     napi_create_uint32(env, SCROLL_STOP, &prop);
     napi_set_named_property(env, scrollEventType, "SCROLL_STOP", prop);
+    return scrollEventType;
 }
 
-void AddToRouterPageState(napi_env env, napi_value routerPageState)
+napi_value AddToRouterPageState(napi_env env)
 {
+    napi_value routerPageState = nullptr;
     napi_value prop = nullptr;
     napi_create_object(env, &routerPageState);
     napi_create_uint32(env, ABOUT_TO_APPEAR, &prop);
@@ -912,6 +915,7 @@ void AddToRouterPageState(napi_env env, napi_value routerPageState)
     napi_set_named_property(env, routerPageState, "ON_PAGE_HIDE", prop);
     napi_create_uint32(env, ON_BACK_PRESS, &prop);
     napi_set_named_property(env, routerPageState, "ON_BACK_PRESS", prop);
+    return routerPageState;
 }
 
 static napi_value UIObserverExport(napi_env env, napi_value exports)
@@ -940,10 +944,10 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     napi_set_named_property(env, navDestinationState, "ON_BACKPRESS", prop);
 
     napi_value scrollEventType = nullptr;
-    AddToScrollEventType(env, scrollEventType);
+    scrollEventType = AddToScrollEventType(env);
 
     napi_value routerPageState = nullptr;
-    AddToRouterPageState(env, routerPageState);
+    routerPageState = AddToRouterPageState(env);
 
     napi_property_descriptor uiObserverDesc[] = {
         DECLARE_NAPI_FUNCTION("on", ObserverOn),

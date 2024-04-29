@@ -556,8 +556,6 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
     titleHeight_ = Dimension(Dimension(height, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
     auto customTitleRow = GetCustomTitleRow();
     UpdateRowHeight(customTitleRow, titleHeight_);
-    auto floatingTitleRow = GetFloatingTitleRow();
-    UpdateRowHeight(floatingTitleRow, titleHeight_);
     auto controlButtonsRow = GetControlButtonRow();
     UpdateRowHeight(controlButtonsRow, titleHeight_);
     auto gestureRow = GetGestureRow();

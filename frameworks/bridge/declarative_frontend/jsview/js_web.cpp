@@ -1061,9 +1061,7 @@ public:
             JsiRef<JsiArrayBuffer> arrayBuffer = JsiRef<JsiArrayBuffer>::Cast(args[0]);
             int32_t bufferSize = arrayBuffer->ByteLength();
             void* buffer = arrayBuffer->GetBuffer();
-            const char* charPtr = static_cast<const char*>(buffer);
-            std::string data(charPtr, bufferSize);
-            response_->SetData(data);
+            response_->SetBuffer(static_cast<char*>(buffer), bufferSize);
             return;
         }
         if (args[0]->IsObject()) {
@@ -1833,6 +1831,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onOverrideUrlLoading", &JSWeb::OnOverrideUrlLoading);
     JSClass<JSWeb>::StaticMethod("textAutosizing", &JSWeb::TextAutosizing);
     JSClass<JSWeb>::StaticMethod("enableNativeMediaPlayer", &JSWeb::EnableNativeVideoPlayer);
+    JSClass<JSWeb>::StaticMethod("onRenderProcessNotResponding", &JSWeb::OnRenderProcessNotResponding);
+    JSClass<JSWeb>::StaticMethod("onRenderProcessResponding", &JSWeb::OnRenderProcessResponding);
+
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -3038,6 +3039,7 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     auto object = JSRef<JSVal>::Cast(paramObject->GetProperty("object"));
     auto name = JSRef<JSVal>::Cast(paramObject->GetProperty("name"));
     auto methodList = JSRef<JSVal>::Cast(paramObject->GetProperty("methodList"));
+    auto asyncMethodList = JSRef<JSVal>::Cast(paramObject->GetProperty("asyncMethodList"));
     if (!controllerObj->IsObject()) {
         return;
     }
@@ -3045,9 +3047,9 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     auto jsProxyFunction = controller->GetProperty("jsProxy");
     if (jsProxyFunction->IsFunction()) {
         auto jsProxyCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(jsProxyFunction), object,
-                                   name, methodList]() {
-            JSRef<JSVal> argv[] = { object, name, methodList };
-            func->Call(webviewController, 3, argv);
+                                   name, methodList, asyncMethodList]() {
+            JSRef<JSVal> argv[] = { object, name, methodList, asyncMethodList };
+            func->Call(webviewController, 4, argv);
         };
 
         WebModel::GetInstance()->SetJsProxyCallback(jsProxyCallback);
@@ -4615,6 +4617,65 @@ void JSWeb::EnableNativeVideoPlayer(const JSCallbackInfo& args)
         return;
     }
     WebModel::GetInstance()->SetNativeVideoPlayerConfig(*enable, *shouldOverlay);
+}
+
+JSRef<JSVal> RenderProcessNotRespondingToJSValue(const RenderProcessNotRespondingEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("jsStack", eventInfo.GetJsStack());
+    obj->SetProperty("pid", eventInfo.GetPid());
+    obj->SetProperty("reason", eventInfo.GetReason());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnRenderProcessNotResponding(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RenderProcessNotRespondingEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), RenderProcessNotRespondingToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<RenderProcessNotRespondingEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetRenderProcessNotRespondingId(jsCallback);
+}
+
+JSRef<JSVal> RenderProcessRespondingEventToJSValue(const RenderProcessRespondingEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnRenderProcessResponding(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RenderProcessRespondingEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), RenderProcessRespondingEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<RenderProcessRespondingEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetRenderProcessRespondingId(jsCallback);
 }
 
 } // namespace OHOS::Ace::Framework

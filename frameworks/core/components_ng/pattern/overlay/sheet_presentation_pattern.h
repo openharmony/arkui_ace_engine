@@ -399,6 +399,8 @@ public:
     }
 
     SheetType GetSheetType();
+    void GetSheetTypeWithAuto(SheetType& sheetType);
+    void GetSheetTypeWithPopup(SheetType& sheetType);
 
     void BubbleStyleSheetTransition(bool isTransitionIn);
 
