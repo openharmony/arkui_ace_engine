@@ -1950,7 +1950,7 @@ void AceContainer::CheckAndSetFontFamily()
             return;
         }
     }
-    path = path.append("/font/");
+    path = path.append("/fonts/");
     familyName = GetFontFamilyName(path);
     if (familyName.empty()) {
         return;
@@ -1982,7 +1982,7 @@ bool AceContainer::IsFontFileExistInPath(std::string path)
         }
         if (strcmp(ent->d_name, "flag") == 0) {
             isFlagFileExist = true;
-        } else if (strcmp(ent->d_name, "font") == 0) {
+        } else if (strcmp(ent->d_name, "fonts") == 0) {
             isFontDirExist = true;
         }
     }
@@ -2119,7 +2119,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.themeTag.empty()) {
         std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
-        int fontUpdate = json->GetInt("font");
+        int fontUpdate = json->GetInt("fonts");
         configurationChange.fontUpdate = fontUpdate;
         int iconUpdate = json->GetInt("icons");
         configurationChange.iconUpdate = iconUpdate;
