@@ -1563,7 +1563,9 @@ void ParseBorderColorAndStyle(napi_env env, const std::shared_ptr<PromptAsyncCon
     if (borderWidthProps.has_value()) {
         borderColorProps = GetBorderColorProps(env, asyncContext);
         if (!borderColorProps.has_value()) {
-            borderColorProps = NG::BorderColorProperty({ Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK });
+            NG::BorderColorProperty borderColor;
+            borderColor.SetColor(Color::BLACK);
+            borderColorProps = borderColor;
         }
         borderStyleProps = GetBorderStyleProps(env, asyncContext);
         if (!borderStyleProps.has_value()) {
