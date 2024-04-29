@@ -1344,6 +1344,8 @@ void XComponentPattern::NativeSurfaceHide()
     const auto surfaceHideCallback = nativeXComponentImpl_->GetSurfaceHideCallback();
     CHECK_NULL_VOID(surfaceHideCallback);
     surfaceHideCallback(nativeXComponent_.get(), surface);
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->releaseSurfaceBuffers();
 }
 
 void XComponentPattern::NativeSurfaceShow()
@@ -1367,11 +1369,7 @@ void XComponentPattern::OnWindowHide()
         || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
     }
-    CHECK_NULL_VOID(renderSurface_);
     NativeSurfaceHide();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        renderSurface_->releaseSurfaceBuffers();
-    }
     hasReleasedSurface_ = true;
 }
 
