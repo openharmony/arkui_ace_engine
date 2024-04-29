@@ -734,7 +734,7 @@ TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& cont
     return textDirection;
 }
 
-const RefPtr<Paragraph>& TextFieldLayoutAlgorithm::GetParagraph() const
+RefPtr<Paragraph> TextFieldLayoutAlgorithm::GetParagraph() const
 {
     return paragraph_;
 }
