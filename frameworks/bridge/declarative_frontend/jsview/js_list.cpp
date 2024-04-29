@@ -252,6 +252,9 @@ void JSList::SetChildrenMainSize(const JSCallbackInfo& args)
         auto length = changeArray->Length();
         for (size_t i = 0; i < length; ++i) {
             auto change = changeArray->GetValueAt(i);
+            if (!change->IsObject()) {
+                continue;
+            }
             auto changeObject = JSRef<JSObject>::Cast(change);
             int32_t start = 0;
             int32_t deleteCount = 0;

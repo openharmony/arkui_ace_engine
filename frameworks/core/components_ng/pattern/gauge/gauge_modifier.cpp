@@ -118,7 +118,7 @@ void GaugeModifier::InitProperty()
     }
     if (paintProperty->GetColors().has_value()) {
         auto colors = paintProperty->GetColorsValue();
-        for (int i = 0; i < colors.size(); i++) {
+        for (size_t i = 0; i < colors.size(); i++) {
             auto color =  AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(colors[i]));
             AttachProperty(color);
             colors_.emplace_back(color);
@@ -126,7 +126,7 @@ void GaugeModifier::InitProperty()
     }
     if (paintProperty->HasGradientColors()) {
         auto colors = paintProperty->GetGradientColorsValue().at(0);
-        for (int i = 0; i < colors.size(); i++) {
+        for (size_t i = 0; i < colors.size(); i++) {
             auto color =  AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(colors[i].first));
             AttachProperty(color);
             gradientColors_.emplace_back(color);
@@ -161,14 +161,14 @@ void GaugeModifier::UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty)
     
     if (paintProperty->GetColors().has_value()) {
         auto colors = paintProperty->GetColorsValue();
-        for (int i = 0; i < colors.size() && i < colors_.size(); i++) {
+        for (size_t i = 0; i < colors.size() && i < colors_.size(); i++) {
             colors_[i]->Set(LinearColor(colors[i]));
         }
     }
 
     if (paintProperty->HasGradientColors()) {
         auto colors = paintProperty->GetGradientColorsValue().at(0);
-        for (int i = 0; i < colors.size() && i < gradientColors_.size(); i++) {
+        for (size_t i = 0; i < colors.size() && i < gradientColors_.size(); i++) {
             gradientColors_[i]->Set(LinearColor(colors[i].first));
         }
     }

@@ -239,8 +239,8 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
 {
     double fontSizeNumber = value->fontInfo.fontSizeNumber;
     int8_t fontSizeUnit = value->fontInfo.fontSizeUnit;
-    uint8_t fontStyle = value->fontInfo.fontStyle;
-    uint8_t fontWeight = value->fontInfo.fontWeight;
+    uint8_t fontStyle = static_cast<uint8_t>(value->fontInfo.fontStyle);
+    uint8_t fontWeight = static_cast<uint8_t>(value->fontInfo.fontWeight);
     const char** fontFamilies = value->fontInfo.fontFamilies;
     uint32_t familyLength = value->fontInfo.familyLength;
     std::vector<std::string> families;

@@ -160,7 +160,10 @@ void JSTabContent::Pop()
 
 void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    if (info->IsObject()) {
+        obj = JSRef<JSObject>::Cast(info);
+    }
     IndicatorStyle indicator;
     CalcDimension indicatorHeight;
     CalcDimension indicatorWidth;
@@ -207,7 +210,10 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
 
 void JSTabContent::SetBoard(const JSRef<JSVal>& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    if (info->IsObject()) {
+        obj = JSRef<JSObject>::Cast(info);
+    }
     BoardStyle board;
     CalcDimension borderRadius;
     if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), borderRadius) ||
