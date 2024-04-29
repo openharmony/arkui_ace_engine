@@ -613,10 +613,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     }
     auto buttonCancelNode = CreateCancelNode(cancelEvent, buttonInfos);
     auto acceptIter = dialogEvent.find("acceptId");
-    DialogEvent acceptEvent = nullptr;
-    if (acceptIter != dialogEvent.end()) {
-        acceptEvent = acceptIter->second;
-    }
+    DialogEvent acceptEvent = (acceptIter != dialogEvent.end()) ? acceptIter->second : nullptr;
     auto buttonConfirmNode = CreateConfirmNode(dateNode, acceptEvent, buttonInfos);
 
     buttonCancelNode->MountToParent(contentRow);
