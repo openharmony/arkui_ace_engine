@@ -507,7 +507,8 @@ class TextAreaCaretStyleModifier extends ModifierWithKey<CaretStyle> {
     if (reset) {
       getUINativeModule().textArea.resetCaretStyle(node);
     } else {
-      getUINativeModule().textArea.setCaretStyle(node, this.value.width!);
+      getUINativeModule().textArea.setCaretStyle(node, this.value.width!,
+        this.value.color);
     }
   }
   checkObjectDiff(): boolean {

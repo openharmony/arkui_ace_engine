@@ -853,17 +853,26 @@ ArkUINativeModuleValue TextAreaBridge::SetCaretStyle(ArkUIRuntimeCallInfo* runti
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> caretWidthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> caretColorArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CalcDimension value;
-    if (secondArg->IsNull() || secondArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionNG(vm, secondArg, value, DimensionUnit::VP, false) ||
-        LessNotEqual(value.Value(), 0.0f)) {
-        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaCaretStyle(nativeNode);
-    } else {
-        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaCaretStyle(
-            nativeNode, value.Value(), static_cast<int>(value.Unit()));
+    
+    auto textFieldTheme = ArkTSUtils::GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, panda::JSValueRef::Undefined(vm));
+    CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, caretWidthArg, caretWidth, false) ||
+            LessNotEqual(caretWidth.Value(), 0.0)) {
+        caretWidth = textFieldTheme->GetCursorWidth();
     }
+    Color color;
+    uint32_t caretColor;
+    if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color)) {
+        caretColor = color.GetValue();
+    } else {
+        caretColor = textFieldTheme->GetCursorColor().GetValue();
+    }
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaCaretStyle(
+        nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor);
     return panda::JSValueRef::Undefined(vm);
 }
 

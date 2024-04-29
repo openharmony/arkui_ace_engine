@@ -757,13 +757,14 @@ void ResetTextAreaSelectedBackgroundColor(ArkUINodeHandle node)
     TextFieldModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
 }
 
-void SetTextAreaCaretStyle(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+void SetTextAreaCaretStyle(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Uint32 caretColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CaretStyle caretStyle;
     caretStyle.caretWidth = CalcDimension(value, (DimensionUnit)unit);
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
+    TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
 }
 
 void ResetTextAreaCaretStyle(ArkUINodeHandle node)
@@ -775,9 +776,10 @@ void ResetTextAreaCaretStyle(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     CaretStyle caretStyle;
     caretStyle.caretWidth = theme->GetCursorWidth();
+    uint32_t caretColor = theme->GetCursorColor().GetValue();
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
+    TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
 }
-
 
 void SetTextAreaTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
 {
