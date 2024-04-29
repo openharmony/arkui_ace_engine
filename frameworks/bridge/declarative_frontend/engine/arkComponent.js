@@ -4251,7 +4251,7 @@ function __removeCustomProperties__(nodeId) {
   __elementIdToCustomProperties__.delete(nodeId);
 }
 
-function getCustomProperty(nodeId, key) {
+function __getCustomProperty__(nodeId, key) {
   if (__elementIdToCustomProperties__.has(nodeId)) {
     const customProperties = __elementIdToCustomProperties__.get(nodeId);
 
