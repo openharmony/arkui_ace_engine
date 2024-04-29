@@ -22,11 +22,12 @@
 #include <unordered_map>
 #include <utility>
 
+#include "base/utils/utils.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
-#include "core/components_ng/pattern/text/text_layout_algorithm_base.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -42,7 +43,7 @@ struct DragSpanPosition {
 };
 
 // TextLayoutAlgorithm acts as the underlying text layout.
-class ACE_EXPORT TextLayoutAlgorithm : public TextLayoutAlgorithmBase, public TextAdaptFontSizer {
+class ACE_EXPORT TextLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm, public TextAdaptFontSizer {
     DECLARE_ACE_TYPE(TextLayoutAlgorithm, BoxLayoutAlgorithm, TextAdaptFontSizer);
 
 public:
@@ -66,8 +67,10 @@ public:
 
     std::optional<TextStyle> GetTextStyle() const;
 
-    const RefPtr<Paragraph>& GetParagraph() const override
+    RefPtr<Paragraph> GetParagraph() const override
     {
+        CHECK_NULL_RETURN(paragraphManager_, nullptr);
+        CHECK_NULL_RETURN(!paragraphManager_->GetParagraphs().empty(), nullptr);
         return paragraphManager_->GetParagraphs().front().paragraph;
     }
 
