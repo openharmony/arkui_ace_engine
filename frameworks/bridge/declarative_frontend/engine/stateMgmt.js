@@ -7067,7 +7067,7 @@ class ObserveV2 {
     stopRecordDependencies() {
         const bound = this.stackOfRenderedComponents_.pop();
         if (bound === undefined) {
-            stateMgmtConsole.error("stopRecordDependencies finds empty stack. Internal error!");
+            stateMgmtConsole.error('stopRecordDependencies finds empty stack. Internal error!');
             return;
         }
         let targetsSet;
@@ -7284,7 +7284,7 @@ class ObserveV2 {
         }
         const bound = this.stackOfRenderedComponents_.top();
         if (this.calculatingComputedProp_) {
-            const prop = bound ? bound[1].getProp() : "unknown computed property";
+            const prop = bound ? bound[1].getProp() : 'unknown computed property';
             const error = `Usage of ILLEGAL @Computed function detected for ${prop}! The @Computed function MUST NOT change the state of any observed state variable!`;
             stateMgmtConsole.applicationError(error);
             throw new Error(error);
