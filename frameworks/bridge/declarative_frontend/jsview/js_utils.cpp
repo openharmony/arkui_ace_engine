@@ -48,6 +48,7 @@ constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
 #endif
 constexpr char BACKGROUND_COLOR_PROPERTY[] = "backgroundColor";
 constexpr char BACKGROUND_BLUR_STYLE_PROPERTY[] = "backgroundBlurStyle";
+constexpr char BAR_STYLE_PROPERTY[] = "barStyle";
 } // namespace
 
 namespace {
@@ -296,6 +297,17 @@ void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOpt
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             options.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
+    }
+    auto barStyleProperty = optObj->GetProperty(BAR_STYLE_PROPERTY);
+    if (barStyleProperty->IsNumber()) {
+        auto barStyle = barStyleProperty->ToNumber<int32_t>();
+        if (barStyle >= static_cast<int32_t>(NG::BarStyle::STANDARD) &&
+            barStyle <= static_cast<int32_t>(NG::BarStyle::STACK)) {
+            options.barStyle = static_cast<NG::BarStyle>(barStyle);
+            return;
+        }
+        barStyle = static_cast<int32_t>(NG::BarStyle::STANDARD);
+        return;
     }
 }
 } // namespace OHOS::Ace::Framework
