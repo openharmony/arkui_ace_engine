@@ -152,7 +152,7 @@ void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffse
         pen.SetColor(
             ToRSColor(animatableBorderColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
     }
-    if (!isSelect_->Get() && isFocused_->Get()) {
+    if (!isSelect_->Get() && isFocused_->Get() && !hasUnselectedColor_) {
         pen.SetColor(ToRSColor(borderFocusedColor_));
     }
     if (enabled_->Get() || !isSelect_->Get()) {
