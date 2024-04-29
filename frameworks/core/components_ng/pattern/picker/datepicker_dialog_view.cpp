@@ -648,10 +648,6 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     timePickerRowPattern->SetShowCount(showCount);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ZeroPrefixType hourType = ZeroPrefixType::SHOW;
-        timePickerRowPattern->SetPrefixHour(hourType);
-    }
 
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
@@ -1108,6 +1104,21 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     auto timeNode = CreateTimeNode(settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
     auto timePickerEventHub = timeNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_RETURN(timePickerEventHub, nullptr);
+    auto timePickerRowPattern = timeNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
+    auto timePickerLayout = timeNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ZeroPrefixType hourOptions = settingData.dateTimeOptions.hourType;
+        ZeroPrefixType minuteOptions = settingData.dateTimeOptions.minuteType;
+        if ((timePickerRowPattern->GetPrefixHour() != hourOptions) ||
+            (timePickerRowPattern->GetPrefixMinute() != minuteOptions)) {
+            timePickerRowPattern->SetDateTimeOptionUpdate(true);
+        }
+        timePickerRowPattern->SetPrefixHour(hourOptions);
+        timePickerRowPattern->SetPrefixMinute(minuteOptions);
+        timePickerLayout->UpdatePrefixHour(static_cast<int32_t>(hourOptions));
+        timePickerLayout->UpdatePrefixMinute(static_cast<int32_t>(minuteOptions));
+    }
     auto onChangeCallback = [weak = WeakPtr<FrameNode>(monthDaysNode)]() {
         auto monthDaysNode = weak.Upgrade();
         CHECK_NULL_VOID(monthDaysNode);

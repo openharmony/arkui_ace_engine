@@ -79,7 +79,9 @@ std::string TimePickerRowAccessibilityProperty::GetText() const
 void TimePickerRowAccessibilityProperty::GetMinuteText(std::string& result) const
 {
     auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<NG::TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"].Upgrade();
     CHECK_NULL_VOID(minuteColumn);
@@ -99,7 +101,9 @@ void TimePickerRowAccessibilityProperty::GetMinuteText(std::string& result) cons
 void TimePickerRowAccessibilityProperty::GetSecondText(std::string& result) const
 {
     auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<NG::TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
     if (timePickerRowPattern->GetHasSecond()) {
         auto allChildNode = timePickerRowPattern->GetAllChildNode();
         auto secondColumn = allChildNode["second"].Upgrade();
