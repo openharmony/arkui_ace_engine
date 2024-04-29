@@ -512,6 +512,11 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
     }
 
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+        if (isReceivedArkDrag_) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop Do not reset drag action when dragging,"
+                "drop/cancel/end event will do this");
+            return;
+        }
         ResetDragAction();
     }
 
@@ -549,7 +554,7 @@ void WebPattern::ResetDragAction()
     }
 
     isDragging_ = false;
-    isDisableSlide_ = false;
+    isReceivedArkDrag_ = false;
     // cancel drag action to avoid web kernel can't process other input event
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -627,7 +632,7 @@ bool WebPattern::GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo)
 NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     isDragging_ = true;
-    isDisableSlide_ = true;
+    isReceivedArkDrag_ = true;
     NG::DragDropInfo dragDropInfo;
     if (GenerateDragDropInfo(dragDropInfo)) {
         auto frameNode = GetHost();
@@ -758,7 +763,7 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
             info->GetX(), info->GetY(), pattern->GetWebId());
         pattern->isW3cDragEvent_ = true;
         pattern->isDragging_ = true;
-        pattern->isDisableSlide_ = true;
+        pattern->isReceivedArkDrag_ = true;
         pattern->dropX_ = 0;
         pattern->dropY_ = 0;
         return pattern->HandleOnDragEnter(info);
@@ -1029,7 +1034,7 @@ void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
 void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     isDragging_ = false;
-    isDisableSlide_ = false;
+    isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
@@ -1078,7 +1083,7 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
 {
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
-    isDisableSlide_ = false;
+    isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1096,7 +1101,7 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
     CHECK_NULL_VOID(delegate_);
 
     isDragging_ = false;
-    isDisableSlide_ = false;
+    isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     ClearDragData();
 
@@ -1123,7 +1128,7 @@ void WebPattern::HandleDragCancel()
     frameNode->SetDraggable(false);
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
-    isDisableSlide_ = false;
+    isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     ClearDragData();
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -2053,7 +2058,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     CHECK_NULL_VOID(delegate_);
-    if (!isDisableSlide_) {
+    if (!isReceivedArkDrag_) {
         ResetDragAction();
     }
     std::list<TouchInfo> touchInfos;
