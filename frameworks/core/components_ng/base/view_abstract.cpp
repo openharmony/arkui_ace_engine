@@ -2409,7 +2409,7 @@ void ViewAbstract::SetPrivacySensitive(bool flag)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->SetPrivacySensitive(flag);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts &opts)
