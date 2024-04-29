@@ -49,6 +49,16 @@ template<typename T>
 void DestructorInterceptor(void* env, void* nativePtr, void* data)
 {
     auto* typePtr = reinterpret_cast<T*>(nativePtr);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    if (!taskExecutor) {
+        delete typePtr;
+        return;
+    }
+    auto result =
+        taskExecutor->PostTask([typePtr]() { delete typePtr; }, TaskExecutor::TaskType::UI, "DestructorInterceptor");
+    if (result) {
+        return;
+    }
     delete typePtr;
 }
 

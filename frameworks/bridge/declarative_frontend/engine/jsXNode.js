@@ -349,7 +349,7 @@ class BuilderNodeFinalizationRegisterProxy {
             if (heldValue.name === 'BuilderRootFrameNode') {
                 const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
                 BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
-                builderNode.disposeNode();
+                builderNode.dispose();
             }
         });
     }
