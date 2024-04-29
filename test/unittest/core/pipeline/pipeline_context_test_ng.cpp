@@ -171,6 +171,7 @@ void PipelineContextTestNg::SetUpTestSuite()
 
 void PipelineContextTestNg::TearDownTestSuite()
 {
+    context_->Destroy();
     context_->window_.reset();
     MockContainer::TearDown();
 }
@@ -3491,6 +3492,40 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg086, TestSize.Level1)
     context_->renderingMode_ = RENDERINGMODE_SINGLE_COLOR;
     bool isUpdateBGIamge = context_->CheckNeedDisableUpdateBackgroundImage();
     ASSERT_EQ(isUpdateBGIamge, true);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg087
+ * @tc.desc: Test the function ClearNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg087, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->dirtyPropertyNodes_.emplace(frameNode_);
+    context_->needRenderNode_.emplace(frameNode_);
+    context_->dirtyFocusNode_ = frameNode_;
+    context_->dirtyFocusScope_ = frameNode_;
+    context_->dirtyRequestFocusNode_ = frameNode_;
+    context_->activeNode_ = frameNode_;
+    context_->focusNode_ = frameNode_;
+
+    /**
+     * @tc.step2: detach framenode.
+     */
+    context_->DetachNode(frameNode_);
+
+    EXPECT_NE(context_->dirtyPropertyNodes_.count(frameNode_), 1);
+    EXPECT_NE(context_->needRenderNode_.count(frameNode_), 1);
+    EXPECT_NE(context_->dirtyFocusNode_, frameNode_);
+    EXPECT_NE(context_->dirtyFocusScope_, frameNode_);
+    EXPECT_NE(context_->dirtyRequestFocusNode_, frameNode_);
+    EXPECT_NE(context_->activeNode_, frameNode_);
+    EXPECT_NE(context_->focusNode_, frameNode_);
 }
 } // namespace NG
 } // namespace OHOS::Ace

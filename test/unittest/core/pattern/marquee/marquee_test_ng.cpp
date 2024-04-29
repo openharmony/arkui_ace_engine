@@ -1527,7 +1527,6 @@ HWTEST_F(MarqueeTestNg, MarqueeTest021, TestSize.Level1)
     pattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::MAXIMIZE);
     EXPECT_FALSE(pattern->isOritationListenerRegisted_);
     EXPECT_FALSE(pattern->isRegistedAreaCallback_);
-    EXPECT_TRUE(pattern->measureChanged_);
 
     /**
      * @tc.steps: step4. Call RegistOritationListener.

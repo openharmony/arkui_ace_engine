@@ -134,7 +134,7 @@ RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& cust
     rootNode->SetHostRootId(pipeline->GetInstanceId());
     rootNode->SetHostPageId(-1);
     rootNode->AddChild(customNode);
-    rootNode->AttachToMainTree();
+    rootNode->AttachToMainTree(false, AceType::RawPtr(pipeline));
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     pipeline->FlushUITasks();
     return rootNode;

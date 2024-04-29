@@ -33,6 +33,9 @@ class BaseNode extends __JSBaseNode__ {
     getInstanceId() {
         return this.instanceId_;
     }
+    updateInstance(uiContext) {
+        this.intanceId_ = uiContext.instanceId_;
+    }
 }
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
@@ -79,6 +82,13 @@ class BuilderNode {
     }
     dispose() {
         this._JSBuilderNode.dispose();
+    }
+    updateInstance(uiContext) {
+        this.uiContext_ = uiContext;
+        this.instanceId_ = uiContext.instanceId_;
+        if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
+            this.frameNode_.updateInstance(uiContext);
+        }
     }
 }
 class JSBuilderNode extends BaseNode {
@@ -671,8 +681,24 @@ class FrameNode {
         const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
         return { x: position[0], y: position[1] };
     }
+    getPositionToScreen() {
+        const position = getUINativeModule().frameNode.getPositionToScreen(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
     getPositionToWindow() {
         const position = getUINativeModule().frameNode.getPositionToWindow(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
+    getPositionToParentWithTransform() {
+        const position = getUINativeModule().frameNode.getPositionToParentWithTransform(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
+    getPositionToScreenWithTransform() {
+        const position = getUINativeModule().frameNode.getPositionToScreenWithTransform(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
+    getPositionToWindowWithTransform() {
+        const position = getUINativeModule().frameNode.getPositionToWindowWithTransform(this.getNodePtr());
         return { x: position[0], y: position[1] };
     }
     getMeasuredSize() {
@@ -761,6 +787,9 @@ class FrameNode {
         this._commonEvent.setNodePtr(node);
         this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this._commonEvent;
+    }
+    updateInstance(uiContext) {
+        this.uiContext_ = uiContext;
     }
 }
 class ImmutableFrameNode extends FrameNode {

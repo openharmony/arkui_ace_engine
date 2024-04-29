@@ -1499,8 +1499,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest027, TestSize.Level1)
      * @tc.steps: step1. callback ShowMenu with two condition.
      */
     ContainerScope sontainerScope(1);
-    ViewAbstract::ShowMenu(INDEX, OFFSETF, false);
-    ViewAbstract::ShowMenu(INDEX, OFFSETF, true);
     /**
      * @tc.steps: step2. callback SetForegroundBlurStyle and ResetFlexShrink.
      */

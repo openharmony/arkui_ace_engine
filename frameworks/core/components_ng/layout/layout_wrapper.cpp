@@ -176,7 +176,6 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
             ACE_LAYOUT_SCOPED_TRACE("ExpandSafeArea[%s][self:%d] save cache success res %s", host->GetTag().c_str(),
                 host->GetId(), GetGeometryNode()->GetFrameRect().ToString().c_str());
             auto syncCasheSuccess = GetGeometryNode()->RestoreCache();
-            host->SetNeedRestoreSafeArea(true);
             auto renderContext = host->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
             if (syncCasheSuccess) {

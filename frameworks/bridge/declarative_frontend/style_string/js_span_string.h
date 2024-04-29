@@ -76,6 +76,8 @@ public:
 
     static bool CheckSpanType(int32_t spanType);
     bool CheckParameters(int32_t start, int32_t length);
+    static JSRef<JSObject> CreateJsParagraphStyleSpan(const RefPtr<SpanBase>& spanObject);
+    static RefPtr<SpanBase> ParseJsParagraphStyleSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
     void GetSpans(const JSCallbackInfo& info);
     const RefPtr<SpanString>& GetController();
     void SetController(const RefPtr<SpanString>& spanString);

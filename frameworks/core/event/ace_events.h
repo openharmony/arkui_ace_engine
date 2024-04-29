@@ -178,6 +178,15 @@ public:
         preventDefault_ = preventDefault;
     }
 
+    const std::string& GetPatternName() const
+    {
+        return patternName_;
+    }
+    void SetPatternName(const std::string& patternName)
+    {
+        patternName_ = patternName;
+    }
+
 protected:
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
@@ -195,6 +204,7 @@ protected:
     int32_t targetDisplayId_ = 0;
     bool stopPropagation_ = false;
     bool preventDefault_ = false;
+    std::string patternName_;
 };
 
 class PropagationEventInfo : public virtual TypeInfoBase {

@@ -2706,4 +2706,25 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0040, TestSize.Level1)
     std::set<std::string> allowDrop = frameNode->GetAllowDrop();
     EXPECT_TRUE(allowDrop.empty());
 }
+
+/**
+ * @tc.name: FrameNodeTestNg0050
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0050, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    node->GetOrCreateGestureEventHub();
+    node->AttachContext(AceType::RawPtr(context));
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    EXPECT_EQ(node->context_, AceType::RawPtr(context));
+
+    node->DetachContext(true);
+    EXPECT_EQ(node->context_, nullptr);
+}
 } // namespace OHOS::Ace::NG

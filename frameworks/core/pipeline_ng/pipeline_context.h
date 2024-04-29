@@ -283,6 +283,8 @@ public:
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
+    void CheckAndUpdateKeyboardInset() override;
+
     void UpdateSizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
@@ -686,6 +688,8 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>&& callback);
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
+
+    void DetachNode(RefPtr<UINode> uiNode);
 
     void CheckNeedUpdateBackgroundColor(Color& color);
 

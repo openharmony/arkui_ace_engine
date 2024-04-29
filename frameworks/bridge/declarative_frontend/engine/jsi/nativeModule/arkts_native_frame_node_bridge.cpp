@@ -345,6 +345,21 @@ ArkUINativeModuleValue FrameNodeBridge::GetPositionToParent(ArkUIRuntimeCallInfo
     Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, parentOffset[1]));
     return valueArray;
 }
+ArkUINativeModuleValue FrameNodeBridge::GetPositionToScreen(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 2);
+    ArkUI_Float32 screenPosition[2];
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getPositionToScreen(nativeNode, screenPosition);
+    CHECK_NULL_RETURN(screenPosition, panda::JSValueRef::Undefined(vm));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, screenPosition[0]));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, screenPosition[1]));
+    return valueArray;
+}
 ArkUINativeModuleValue FrameNodeBridge::GetPositionToWindow(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -358,6 +373,51 @@ ArkUINativeModuleValue FrameNodeBridge::GetPositionToWindow(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(windowOffset, panda::JSValueRef::Undefined(vm));
     Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, windowOffset[0]));
     Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, windowOffset[1]));
+    return valueArray;
+}
+ArkUINativeModuleValue FrameNodeBridge::GetPositionToParentWithTransform(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 2);
+    ArkUI_Float32 parentPosition[2];
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getPositionToParentWithTransform(nativeNode, parentPosition);
+    CHECK_NULL_RETURN(parentPosition, panda::JSValueRef::Undefined(vm));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, parentPosition[0]));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, parentPosition[1]));
+    return valueArray;
+}
+ArkUINativeModuleValue FrameNodeBridge::GetPositionToScreenWithTransform(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 2);
+    ArkUI_Float32 screenPosition[2];
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getPositionToScreenWithTransform(nativeNode, screenPosition);
+    CHECK_NULL_RETURN(screenPosition, panda::JSValueRef::Undefined(vm));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, screenPosition[0]));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, screenPosition[1]));
+    return valueArray;
+}
+ArkUINativeModuleValue FrameNodeBridge::GetPositionToWindowWithTransform(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 2);
+    ArkUI_Float32 windowPosition[2];
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getPositionToWindowWithTransform(nativeNode, windowPosition);
+    CHECK_NULL_RETURN(windowPosition, panda::JSValueRef::Undefined(vm));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, windowPosition[0]));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, windowPosition[1]));
     return valueArray;
 }
 ArkUINativeModuleValue FrameNodeBridge::GetMeasuredSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -640,7 +700,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getHistoricalPoints"),
         panda::FunctionRef::New(vm, Framework::JsGetHistoricalPoints));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
-        panda::FunctionRef::New(vm, Framework::JsPreventDefault));
+        panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
     eventObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
     return eventObj;
 }

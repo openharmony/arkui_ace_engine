@@ -318,16 +318,13 @@ void ImagePattern::OnImageLoadSuccess()
     }
     UpdateAnalyzerOverlay();
 
-    auto currentContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(currentContext);
-    int32_t instanceID = currentContext->GetInstanceId();
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask([weak = WeakClaim(this), instanceID] {
-        ContainerScope scope(instanceID);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        ContainerScope scope(pattern->GetHostInstanceId());
         pattern->CreateAnalyzerOverlay();
     }, "ArkUIImageCreateAnalyzerOverlay");
     host->MarkNeedRenderOnly();
@@ -563,18 +560,15 @@ void ImagePattern::LoadImageDataIfNeed()
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src) {
         LoadImage(src);
     } else {
-        auto currentContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(currentContext);
-        int32_t instanceID = currentContext->GetInstanceId();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak = WeakClaim(this), instanceID] {
-            ContainerScope scope(instanceID);
+        uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            ContainerScope scope(pattern->GetHostInstanceId());
             if (pattern->IsSupportImageAnalyzerFeature()) {
                 pattern->CreateAnalyzerOverlay();
                 auto host = pattern->GetHost();

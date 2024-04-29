@@ -58,18 +58,12 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     }
     PaintBackground(*path, canvas, textDragPattern, richEditor);
     CHECK_NULL_VOID(hostPattern);
-
     canvas.Save();
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
-    if (richEditor) {
-        OffsetF offset = { pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY() };
-        for (auto&& info : richEditor->GetParagraphs()) {
-            info.paragraph->Paint(canvas, offset.GetX(), offset.GetY());
-            offset.AddY(info.paragraph->GetHeight());
-        }
-    } else {
-        auto&& paragraph = hostPattern->GetParagraph();
-        paragraph->Paint(canvas, pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY());
+    OffsetF offset = { pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY() };
+    for (auto && info : hostPattern->GetParagraphs()) {
+        info.paragraph->Paint(canvas, offset.GetX(), offset.GetY());
+        offset.AddY(info.paragraph->GetHeight());
     }
     PaintImage(context);
     canvas.Restore();

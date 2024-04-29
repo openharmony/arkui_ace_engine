@@ -135,7 +135,7 @@ const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const int32_t REQUEST_CODE = -1;
-constexpr uint32_t TIMEOUT_LIMIT = 60;
+constexpr uint32_t TIMEOUT_LIMIT = 5;
 constexpr int32_t COUNT_LIMIT = 3;
 
 using ContentFinishCallback = std::function<void()>;
@@ -613,7 +613,7 @@ void UIContentImpl::RunFormPage()
     LOGI("[%{public}s][%{public}s][%{public}d]: Initialize startUrl = %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
     // run page.
-    Platform::AceContainer::RunPage(instanceId_, startUrl_, "", false);
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, formData_, false);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2014,6 +2014,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
         SubwindowManager::GetInstance()->ClearToastInSubwindow();
+        if (pipelineContext) {
+            pipelineContext->CheckAndUpdateKeyboardInset();
+        }
     };
     if (container->IsUseStageModel() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
         task();
@@ -2495,8 +2498,10 @@ int32_t UIContentImpl::CreateModalUIExtension(
                 overlay->CreateModalUIExtension(want, callbacks, config.isProhibitBack, config.isAsyncModalBinding);
         },
         TaskExecutor::TaskType::UI, "ArkUICreateModalUIExtension");
-    LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension create modal page end, sessionId=%{public}d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId);
+    LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension create modal page end, sessionId=%{public}d, "
+         "isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
+        config.isAsyncModalBinding);
     return sessionId;
 }
 

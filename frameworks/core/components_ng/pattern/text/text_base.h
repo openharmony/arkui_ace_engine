@@ -25,11 +25,9 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>;
 
 enum class MouseStatus { PRESSED, RELEASED, MOVE, NONE };
 

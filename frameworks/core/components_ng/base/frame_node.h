@@ -64,12 +64,14 @@ class PipelineContext;
 class Pattern;
 class StateModifyTask;
 class UITask;
-class FrameProxy;
 struct DirtySwapConfig;
 
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
+
+private:
+    class FrameProxy;
 
 public:
     // create a new child element with new element tree.
@@ -383,6 +385,14 @@ public:
 
     OffsetF GetOffsetRelativeToWindow() const;
 
+    OffsetF GetPositionToScreen();
+
+    OffsetF GetPositionToParentWithTransform() const;
+
+    OffsetF GetPositionToScreenWithTransform();
+
+    OffsetF GetPositionToWindowWithTransform() const;
+
     OffsetF GetTransformRelativeOffset() const;
 
     RectF GetTransformRectRelativeToWindow() const;
@@ -674,7 +684,7 @@ public:
      */
     int32_t GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const;
     uint32_t GetChildTrueTotalCount() const;
-    const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
+    ChildrenListWithGuard GetAllChildrenWithBuild(bool addToRenderTree = true) override;
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
@@ -832,6 +842,9 @@ public:
             removeCustomProperties_ = func;
         }
     }
+
+    void AttachContext(PipelineContext* context, bool recursive = false) override;
+    void DetachContext(bool recursive = false) override;
 
 protected:
     void DumpInfo() override;

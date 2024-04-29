@@ -189,16 +189,6 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     int32_t start = range.first;
     int32_t end = range.second;
     UpdateHandleIndex(start, end);
-    int32_t index = 0;
-    if (start != end) {
-        index = std::max(start, end);
-    } else {
-        index = ConvertTouchOffsetToPosition(localOffset);
-    }
-    auto textLength = static_cast<int32_t>(contentController_->GetWideText().length());
-    if (index == textLength && GreatNotEqual(localOffset.GetX(), caretInfo_.rect.GetOffset().GetX())) {
-        UpdateHandleIndex(GetCaretIndex());
-    }
     if (IsSelected()) {
         MoveFirstHandleToContentRect(GetFirstHandleIndex());
         MoveSecondHandleToContentRect(GetSecondHandleIndex());

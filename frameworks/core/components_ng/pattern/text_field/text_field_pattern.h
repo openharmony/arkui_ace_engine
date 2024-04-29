@@ -46,6 +46,8 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_area/text_area_layout_algorithm.h"
@@ -65,8 +67,6 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
-#include "core/components_ng/pattern/select_overlay/magnifier.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -145,12 +145,17 @@ class TextFieldPattern : public ScrollablePattern,
                          public TextInputClient,
                          public TextBase,
                          public Magnifier {
-    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
-        Magnifier);
+    DECLARE_ACE_TYPE(
+        TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase, Magnifier);
 
 public:
     TextFieldPattern();
     ~TextFieldPattern() override;
+
+    int32_t GetInstanceId() const override
+    {
+        return GetHostInstanceId();
+    }
 
     // TextField needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
@@ -565,8 +570,7 @@ public:
 
     static std::u16string CreateObscuredText(int32_t len);
     static std::u16string CreateDisplayText(
-        const std::string& content, int32_t nakedCharPosition,
-        bool needObscureText, bool showPasswordDirectly);
+        const std::string& content, int32_t nakedCharPosition, bool needObscureText, bool showPasswordDirectly);
     bool IsTextArea() const override;
 
     const RefPtr<TouchEventImpl>& GetTouchListener()
@@ -697,9 +701,9 @@ public:
         return contentRect_;
     }
 
-    ParagraphT GetDragParagraph() const override
+    const RefPtr<Paragraph>& GetDragParagraph() const override
     {
-        return { dragParagraph_ };
+        return paragraph_;
     }
 
     const RefPtr<FrameNode>& MoveDragNode() override
@@ -1191,6 +1195,8 @@ private:
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
     void UpdateSelectionByMouseDoubleClick();
 
     void AfterSelection();

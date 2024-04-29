@@ -1227,6 +1227,12 @@ RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, co
         return nullptr;
     }
     CHECK_NULL_RETURN(popupInfo.popupNode, nullptr);
+    auto bubbleRenderProp = popupInfo.popupNode->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_RETURN(bubbleRenderProp, nullptr);
+    auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
+    if (!autoCancel) {
+        return nullptr;
+    }
     popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
     CHECK_NULL_RETURN(popupInfo.isCurrentOnShow, nullptr);
     popupMap_[targetId].isCurrentOnShow = false;
