@@ -447,6 +447,10 @@ class FrameNode {
     this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonEvent;
   }
+  updateInstance(uiContext: UIContext) {
+      this.uiContext_ = uiContext;
+      this.instanceId_ = uiContext.instanceId_;
+  }
 }
 
 class ImmutableFrameNode extends FrameNode {

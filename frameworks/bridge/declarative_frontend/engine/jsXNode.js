@@ -34,7 +34,7 @@ class BaseNode extends __JSBaseNode__ {
         return this.instanceId_;
     }
     updateInstance(uiContext) {
-        this.intanceId_ = uiContext.instanceId_;
+        this.instanceId_ = uiContext.instanceId_;
     }
 }
 /*
@@ -82,13 +82,6 @@ class BuilderNode {
     }
     dispose() {
         this._JSBuilderNode.dispose();
-    }
-    updateInstance(uiContext) {
-        this.uiContext_ = uiContext;
-        this.instanceId_ = uiContext.instanceId_;
-        if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
-            this.frameNode_.updateInstance(uiContext);
-        }
     }
 }
 class JSBuilderNode extends BaseNode {
@@ -327,6 +320,13 @@ class JSBuilderNode extends BaseNode {
         this.nodePtr_ = null;
         this._nativeRef = null;
         this.frameNode_?.resetNodePtr();
+    }
+    updateInstance(uiContext) {
+        this.uiContext_ = uiContext;
+        this.instanceId_ = uiContext.instanceId_;
+        if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
+            this.frameNode_.updateInstance(uiContext);
+        }
     }
 }
 /*
@@ -801,6 +801,7 @@ class FrameNode {
     }
     updateInstance(uiContext) {
         this.uiContext_ = uiContext;
+        this.instanceId_ = uiContext.instanceId_;
     }
 }
 class ImmutableFrameNode extends FrameNode {
