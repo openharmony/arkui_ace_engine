@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+interface LayoutConstraint {
+  maxSize: Size;
+  minSize: Size;
+  percentReference: Size;
+}
+
 class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
@@ -378,6 +384,30 @@ class FrameNode {
 
   getCustomProperty(key: string): Object | undefined {
     return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
+  }
+
+  setMeasuredSize(size: Size): void {
+    getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), size.width, size.height);
+  }
+
+  setLayoutPosition(position: Position): void {
+    getUINativeModule().frameNode.setLayoutPosition(this.getNodePtr(), position.x, position.y);
+  }
+
+  measure(constraint: LayoutConstraint): void {
+    const minSize: Size = constraint.minSize;
+    const maxSize: Size = constraint.maxSize;
+    const percentReference: Size = constraint.percentReference;
+    getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
+      maxSize.height, percentReference.width, percentReference.height);
+  }
+
+  layout(position: Position): void {
+    getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
+  }
+
+  setNeedsLayout(): void {
+    getUINativeModule().frameNode.setNeedsLayout(this.getNodePtr());
   }
 
   get commonAttribute(): ArkComponent {

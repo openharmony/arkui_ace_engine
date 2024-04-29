@@ -2656,6 +2656,16 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsAttached));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorInfo"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetInspectorInfo));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMeasuredSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetMeasuredSize));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLayoutPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetLayoutPosition));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "measureNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::MeasureNode));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "layoutNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::LayoutNode));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNeedsLayout"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetNeedsLayout));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnClick"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnClick));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnTouch"),

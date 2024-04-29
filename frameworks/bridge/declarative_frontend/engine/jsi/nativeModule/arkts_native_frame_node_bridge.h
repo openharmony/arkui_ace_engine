@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_FRAME_NODE_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 
 namespace OHOS::Ace::NG {
 class FrameNodeBridge {
@@ -27,6 +28,14 @@ public:
         EcmaVM* vm, const TouchLocationInfo& touchInfo, TouchEventInfo& info);
     static int GetInstanceId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void SetDrawFunc(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void SetCustomFunc(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static std::function<void(LayoutConstraintF& layoutConstraint)> GetMeasureFunc(EcmaVM* vm,
+        Local<panda::ObjectRef> obj);
+    static void FireMeasureCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal<panda::ObjectRef>> object,
+    LayoutConstraintF& layoutConstraint, Local<panda::StringRef> funcName);
+    static void FireLayoutCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal<panda::ObjectRef>> object,
+        OffsetF& position, Local<panda::StringRef> funcName);
+    static std::function<void(OffsetF& position)> GetLayoutFunc(EcmaVM* vm, Local<panda::ObjectRef> obj);
     static Local<panda::ObjectRef> CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info);
     static Local<panda::ObjectRef> CreateGestureEventInfo(EcmaVM* vm, GestureEvent& info);
     static Local<panda::ObjectRef> CreateMouseInfo(EcmaVM* vm, MouseInfo& info);
@@ -61,6 +70,12 @@ public:
     static ArkUINativeModuleValue IsClipToFrame(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue IsAttached(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetInspectorInfo(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetMeasuredSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetLayoutPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static Local<JSValueRef> GetObjectValueByKey(EcmaVM* vm, Local<JSValueRef> object, const char* key);
+    static ArkUINativeModuleValue MeasureNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue LayoutNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetNeedsLayout(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnClick(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnTouch(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnAppear(ArkUIRuntimeCallInfo* runtimeCallInfo);

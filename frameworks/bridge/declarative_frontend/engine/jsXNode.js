@@ -746,6 +746,25 @@ class FrameNode {
     getCustomProperty(key) {
         return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
     }
+    setMeasuredSize(size) {
+        getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), size.width, size.height);
+    }
+    setLayoutPosition(position) {
+        getUINativeModule().frameNode.setLayoutPosition(this.getNodePtr(), position.x, position.y);
+    }
+    measure(constraint) {
+        const minSize = constraint.minSize;
+        const maxSize = constraint.maxSize;
+        const percentReference = constraint.percentReference;
+        getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
+            maxSize.height, percentReference.width, percentReference.height);
+    }
+    layout(position) {
+        getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
+    }
+    setNeedsLayout() {
+        getUINativeModule().frameNode.setNeedsLayout(this.getNodePtr());
+    }
     get commonAttribute() {
         if (this._commonAttribute === undefined) {
             this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
