@@ -129,6 +129,7 @@ private:
     void UpdateDialogBackgroundColor();
     void UpdateTitleArrowsColor();
     void UpdateOptionsButtonColor();
+    void OnEnterKeyEvent(const KeyEvent& event);
 
     RefPtr<FrameNode> GetCalendarFrameNode();
     RefPtr<CalendarPattern> GetCalendarPattern();

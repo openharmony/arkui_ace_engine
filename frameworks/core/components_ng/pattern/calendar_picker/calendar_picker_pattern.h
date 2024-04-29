@@ -50,7 +50,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::SCOPE, true, FocusStyleType::CUSTOM_REGION };
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
