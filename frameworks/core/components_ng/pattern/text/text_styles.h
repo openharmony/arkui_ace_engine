@@ -18,12 +18,30 @@
 
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace {
+
+struct CustomSpanMeasureInfo {
+    float fontSize;
+};
+
+struct CustomSpanOptions {
+    float x;
+    float lineTop;
+    float lineBottom;
+    float baseline;
+};
+
+struct CustomSpanMetrics {
+    float width;
+    std::optional<float> height;
+};
+
 struct UserGestureOptions {
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
@@ -42,11 +60,11 @@ struct ImageSpanSize {
     {
         std::optional<NG::CalcLength> tmpWidth = std::nullopt;
         if (width.has_value()) {
-            tmpWidth = NG::CalcLength(width->Value());
+            tmpWidth = NG::CalcLength(width->ConvertToPx());
         }
         std::optional<NG::CalcLength> tmpHeight = std::nullopt;
         if (height.has_value()) {
-            tmpHeight = NG::CalcLength(height->Value());
+            tmpHeight = NG::CalcLength(height->ConvertToPx());
         }
         return {tmpWidth, tmpHeight};
     }
@@ -150,6 +168,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolColorList, std::vector<Color>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolRenderingStrategy, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectStrategy, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectOptions, SymbolEffectOptions);
 };
 
 struct TextLineStyle {
@@ -215,6 +234,7 @@ std::string GetFontSizeInJson(const std::optional<Dimension>& value);
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value);
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value);
 std::string GetLineBreakStrategyInJson(const std::optional<Ace::LineBreakStrategy>& value);
+std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H

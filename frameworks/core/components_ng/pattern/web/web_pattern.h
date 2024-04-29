@@ -93,6 +93,7 @@ public:
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
@@ -211,6 +212,16 @@ public:
     PermissionClipboardCallback GetPermissionClipboardCallback() const
     {
         return permissionClipboardCallback_;
+    }
+
+    void SetOnOpenAppLinkCallback(OnOpenAppLinkCallback&& callback)
+    {
+        onOpenAppLinkCallback_ = std::move(callback);
+    }
+
+    OnOpenAppLinkCallback GetOnOpenAppLinkCallback() const
+    {
+        return onOpenAppLinkCallback_;
     }
 
     void SetRenderMode(RenderMode renderMode)
@@ -407,6 +418,8 @@ public:
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
+    void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void OnHideAutofillPopup();
     void UpdateTouchHandleForOverlay();
     bool IsSelectOverlayDragging()
     {
@@ -462,6 +475,14 @@ public:
     {
         return rootLayerHeight_;
     }
+    Size GetDrawSize() const
+    {
+        return drawSize_;
+    }
+    bool IsVirtualKeyBoardShow() const
+    {
+        return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
+    }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int64_t accessibilityId);
@@ -472,13 +493,14 @@ public:
     void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
+    void Backward();
 
 private:
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
-    void UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
+    void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnAttachToFrameNode() override;
@@ -614,6 +636,8 @@ private:
 
     bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
     bool IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
+
+    void SuggestionSelected(int32_t index);
 #ifdef OHOS_STANDARD_SYSTEM
     WebOverlayType GetTouchHandleOverlayType(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
@@ -626,6 +650,7 @@ private:
     void RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo);
     void CloseSelectOverlay();
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
+    void DelTouchOverlayInfoByTouchId(int32_t touchId);
     std::optional<OffsetF> GetCoordinatePoint();
     void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
@@ -672,6 +697,7 @@ private:
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
+    OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;

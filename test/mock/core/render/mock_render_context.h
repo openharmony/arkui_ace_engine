@@ -72,6 +72,12 @@ public:
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
 
+    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
+    {
+        const auto& groupProperty = GetOrCreateForeground();
+        groupProperty->propMotionBlur = motionBlurOption;
+    }
+
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
     {
         return 0;

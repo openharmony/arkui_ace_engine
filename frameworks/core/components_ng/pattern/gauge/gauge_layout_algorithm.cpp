@@ -42,11 +42,22 @@ void GaugeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<GaugePattern>();
     CHECK_NULL_VOID(pattern);
-    BoxLayoutAlgorithm::Measure(layoutWrapper);
     if (pattern->UseContentModifier()) {
-        host->GetGeometryNode()->Reset();
+        auto childList = layoutWrapper->GetAllChildrenWithBuild();
+        std::list<RefPtr<LayoutWrapper>> list;
+        for (const auto& child : childList) {
+            if (pattern->GetContentModifierNode()->GetId() != child->GetHostNode()->GetId()) {
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+                child->Measure(layoutConstraint);
+                list.push_back(child);
+            }
+        }
+        BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, list);
         return;
     }
+    BoxLayoutAlgorithm::Measure(layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         MeasureLimitValueTextWidth(layoutWrapper);
         auto geometryNode = layoutWrapper->GetGeometryNode();
@@ -69,7 +80,7 @@ std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
         host->GetGeometryNode()->Reset();
-        return BoxLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+        return std::nullopt;
     }
     if (contentConstraint.selfIdealSize.IsValid()) {
         auto len =

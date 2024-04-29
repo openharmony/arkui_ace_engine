@@ -59,6 +59,8 @@ public:
     void SetOnDrop(OnDragDropFunc &&onDrop) override;
     void SetCopyOption(const CopyOptions &copyOption) override;
     void SetSmoothEdge(float value) override;
+    void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override;
+    void SetEnhancedImageQuality(AIImageQuality imageQuality) override;
     bool UpdateDragItemInfo(DragItemInfo &itemInfo) override;
     void EnableAnalyzer(bool isEnableAnalyzer) override;
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
@@ -98,6 +100,8 @@ public:
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
     static void SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice);
+    static void SetDynamicRangeMode(FrameNode *frameNode, DynamicRangeMode dynamicRangeMode);
+    static void SetEnhancedImageQuality(FrameNode *frameNode, AIImageQuality imageQuality);
 private:
     RefPtr<ImagePattern> GetImagePattern();
 };

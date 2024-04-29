@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_paint_method.h"
 
+#include "base/utils/utils.h"
 #include "core/components/common/properties/marquee_option.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -40,10 +41,6 @@ void TextPaintMethod::UpdateParagraphAndImageSpanNodeList()
     CHECK_NULL_VOID(textContentModifier_);
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
-    auto paragraph = textPattern->GetParagraph();
-    CHECK_NULL_VOID(paragraph);
-
-    textContentModifier_->SetParagraph(paragraph);
     textContentModifier_->SetImageSpanNodeList(textPattern->GetImageSpanNodeList());
 }
 
@@ -55,15 +52,15 @@ void TextPaintMethod::DoStartTextRace()
     CHECK_NULL_VOID(textPattern);
     auto frameNode = textPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto paragraph = textPattern->GetParagraph();
-    CHECK_NULL_VOID(paragraph);
+    auto pManager = textPattern->GetParagraphManager();
+    CHECK_NULL_VOID(pManager);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
     MarqueeOption option;
     option.start = layoutProperty->GetTextMarqueeStart().value_or(true);
     option.step = layoutProperty->GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx());
-    if (GreatNotEqual(option.step, paragraph->GetTextWidth())) {
+    if (GreatNotEqual(option.step, pManager->GetTextWidth())) {
         option.step = DEFAULT_MARQUEE_STEP_VP.ConvertToPx();
     }
     option.loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
@@ -86,8 +83,8 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
-    auto paragraph = textPattern->GetParagraph();
-    CHECK_NULL_VOID(paragraph);
+    auto pManager = textPattern->GetParagraphManager();
+    CHECK_NULL_VOID(pManager);
 
     UpdateParagraphAndImageSpanNodeList();
 
@@ -109,7 +106,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textOverflow = layoutProperty->GetTextOverflow();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE &&
-        paragraph->GetTextWidth() > contentSize.Width()) {
+        pManager->GetLongestLine() > contentSize.Width()) {
         DoStartTextRace();
     } else {
         textContentModifier_->StopTextRace();
@@ -122,7 +119,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto wideTextLength = pattern->GetDisplayWideTextLength();
     std::vector<RectF> drawObscuredRects;
     if (wideTextLength != 0) {
-        paragraph->GetRectsForRange(0, wideTextLength, drawObscuredRects);
+        drawObscuredRects = pManager->GetRects(0, wideTextLength);
     }
     textContentModifier_->SetDrawObscuredRects(drawObscuredRects);
     if (renderContext->GetClipEdge().has_value()) {
@@ -147,8 +144,8 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
-    auto paragraph = textPattern->GetParagraph();
-    CHECK_NULL_VOID(paragraph);
+    auto pManager = textPattern->GetParagraphManager();
+    CHECK_NULL_VOID(pManager);
 
     auto offset = paintWrapper->GetContentOffset();
     auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
@@ -161,7 +158,7 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto contentRect = textPattern->GetTextContentRect();
     std::vector<RectF> selectedRects;
     if (selection.GetTextStart() != selection.GetTextEnd()) {
-        paragraph->GetRectsForRange(selection.GetTextStart(), selection.GetTextEnd(), selectedRects);
+        selectedRects = pManager->GetRects(selection.GetTextStart(), selection.GetTextEnd());
         TextBase::CalculateSelectedRect(selectedRects, contentRect.Width());
     }
     textOverlayModifier_->SetContentRect(contentRect);

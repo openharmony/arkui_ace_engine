@@ -455,6 +455,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
+    UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
     UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
 
     textConfirmNode->MountToParent(buttonConfirmNode);
@@ -635,6 +636,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
+    UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
 
     buttonCancelNode->MarkModifyDone();
     return buttonCancelNode;
@@ -761,5 +763,32 @@ bool TextPickerDialogView::OnKeyEvent(const KeyEvent& event)
     }
 
     return false;
+}
+
+void TextPickerDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
+    const RefPtr<FrameNode>& buttonNode, bool isConfirm)
+{
+    bool setDefaultFocus = false;
+    if (buttonInfos.size() > CANCEL_BUTTON_INDEX) {
+        if (buttonInfos[ACCEPT_BUTTON_INDEX].isPrimary && buttonInfos[CANCEL_BUTTON_INDEX].isPrimary) {
+            return;
+        }
+        auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
+        if (buttonInfos[index].isPrimary) {
+            setDefaultFocus = true;
+        }
+    } else if (buttonInfos.size() == CANCEL_BUTTON_INDEX) {
+        bool isAcceptButtonPrimary = (buttonInfos[0].isAcceptButton && isConfirm && buttonInfos[0].isPrimary);
+        bool isCancelButtonPrimary = (!buttonInfos[0].isAcceptButton && !isConfirm && buttonInfos[0].isPrimary);
+        if (isAcceptButtonPrimary || isCancelButtonPrimary) {
+            setDefaultFocus = true;
+        }
+    }
+    if (setDefaultFocus && buttonNode) {
+        auto focusHub = buttonNode->GetOrCreateFocusHub();
+        if (focusHub) {
+            focusHub->SetIsDefaultFocus(true);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

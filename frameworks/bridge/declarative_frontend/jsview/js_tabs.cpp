@@ -462,7 +462,10 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
 
     if (info.Length() > 0) {
         auto dividerInfo = info[0];
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(dividerInfo);
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        if (dividerInfo->IsObject()) {
+            obj = JSRef<JSObject>::Cast(dividerInfo);
+        }
         if (dividerInfo->IsNull()) {
             divider.isNull = true;
         } else {

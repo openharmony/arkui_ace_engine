@@ -100,7 +100,6 @@ public:
     {
         if (!makeFunc) {
             makeFunc_ = std::nullopt;
-            contentModifierNode_ = nullptr;
             OnModifyDone();
             return;
         }

@@ -444,11 +444,6 @@ public:
 
     void SetCustomKeyboardOption(bool supportAvoidance);
 
-    void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
-        RefPtr<FrameNode> customKeyboard);
-
-    void SetCustomKeybroadHeight(float customHeight = 0.0);
-
     void SetFilterActive(bool actived)
     {
         hasFilterActived = actived;
@@ -492,6 +487,12 @@ public:
     bool CheckPageNeedAvoidKeyboard() const;
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
     void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
+    void EraseMenuInfo(int32_t targetId)
+    {
+        if (menuMap_.find(targetId) != menuMap_.end()) {
+            menuMap_.erase(targetId);
+        }
+    }
 
 private:
     void PopToast(int32_t targetId);
@@ -586,6 +587,11 @@ private:
         std::optional<ModalTransition> modalTransition);
     void HandleModalPop(std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode, int32_t targetId);
 
+    bool ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
+        bool isBackPressed, bool isPageRouter);
+    bool WebBackward(RefPtr<NG::FrameNode>& overlay);
+    void FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode);
+
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
@@ -610,7 +616,7 @@ private:
     int32_t dismissTargetId_ = 0;
     int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
-    int32_t subWindowId_;
+    int32_t subWindowId_ = -1;
     bool hasPixelMap_ { false };
     bool hasFilter_ { false };
     bool hasEvent_ { false };

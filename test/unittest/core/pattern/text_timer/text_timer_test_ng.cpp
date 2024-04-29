@@ -41,7 +41,9 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr double INPUT_COUNT = 60000.0;
+constexpr double INPUT_COUNT_2 = 20000.0;
 constexpr bool IS_COUNT_DOWN = false;
+constexpr bool IS_COUNT_DOWN_2 = true;
 const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SS";
 const std::string FORMAT_DATA = "08:00:00";
 const int64_t UTC_1 = 1000000000000;
@@ -747,5 +749,138 @@ HWTEST_F(TextTimerTestNg, TextTimerTest010, TestSize.Level1)
     textTimerLayoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("textShadow"));
     EXPECT_EQ(textTimerLayoutProperty->GetTextShadow(), TEXT_SHADOWS);
+}
+
+/**
+ * @tc.name: TextTimerTest011
+ * @tc.desc: Test the SetBuilderFunc and get value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode and init property.
+     */
+    TestProperty testProperty;
+    testProperty.inputCount = std::make_optional(INPUT_COUNT);
+    testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(IS_COUNT_DOWN, config.isCountDown_);
+                EXPECT_EQ(INPUT_COUNT, config.count_);
+                return nullptr;
+            };
+
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: TextTimerTest012
+ * @tc.desc: Test the SetBuilderFunc and get value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.inputCount = std::make_optional(INPUT_COUNT_2);
+    testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN_2);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(IS_COUNT_DOWN_2, config.isCountDown_);
+                EXPECT_EQ(INPUT_COUNT_2, config.count_);
+                return nullptr;
+            };
+
+     /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: TextTimerTest013
+ * @tc.desc: Test the SetBuilderFunc and get value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.inputCount = std::make_optional(INPUT_COUNT_2);
+    testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN_2);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->InitTimerDisplay();
+    auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(IS_COUNT_DOWN_2, config.isCountDown_);
+                EXPECT_EQ(INPUT_COUNT_2, config.count_);
+                EXPECT_EQ(false, config.started_);
+                return nullptr;
+            };
+
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+
+    /**
+     * @tc.steps: step2. start timer and check value.
+     */
+    auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(IS_COUNT_DOWN_2, config.isCountDown_);
+                EXPECT_EQ(INPUT_COUNT_2, config.count_);
+                EXPECT_EQ(true, config.started_);
+                return nullptr;
+            };
+    pattern->HandleStart();
+    pattern->SetBuilderFunc(nextNode);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: TextTimerTest014
+ * @tc.desc: Test the SetBuilderFunc and get value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(ELAPSED_TIME_1, config.elapsedTime_);
+                return nullptr;
+            };
+
+    /**
+     * @tc.steps: step2. Tick timer and check value.
+     */
+    pattern->Tick(100);
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
 }
 } // namespace OHOS::Ace::NG

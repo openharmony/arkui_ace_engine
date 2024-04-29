@@ -348,7 +348,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     auto currentSheetHeight =
         GreatNotEqual((height - currentOffset_), sheetMaxHeight_) ? sheetMaxHeight_ : (height - currentOffset_);
     start_ = currentSheetHeight;
-    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet HandleDragEnd is: %{public}f", currentSheetHeight);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet HandleDragEnd, current height is: %{public}f", currentSheetHeight);
     auto lowerIter = std::lower_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
     auto upperIter = std::upper_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
     if (lowerIter == sheetDetentHeight_.end()) {
@@ -512,7 +512,7 @@ void SheetPresentationPattern::AvoidSafeArea()
     CHECK_NULL_VOID(host->GetFocusHub()->IsCurrentFocus());
     auto heightUp = GetSheetHeightChange();
     sheetHeightUp_ = heightUp;
-    TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, sheet will go up %{public}f.", heightUp);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, sheet height increase %{public}f.", heightUp);
     auto parentOffsetY = GetRootOffsetYToWindow();
     auto offset = pageHeight_ - height_ - heightUp - parentOffsetY;
     auto renderContext = host->GetRenderContext();
@@ -789,7 +789,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
 void SheetPresentationPattern::UpdateCloseIconStatus()
 {
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        TAG_LOGI(AceLogTag::ACE_SHEET, "PlatformVersion less or equal to ten");
+        TAG_LOGI(AceLogTag::ACE_SHEET, "PlatformVersion less or equal to version 10");
         return;
     }
     auto host = GetHost();
@@ -1028,15 +1028,11 @@ SheetType SheetPresentationPattern::GetSheetType()
         return SHEET_BOTTOM;
     }
     SheetType sheetType = SheetType::SHEET_BOTTOM;
-    auto rootHeight = PipelineContext::GetCurrentRootHeight();
-    auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto windowRect = pipelineContext->GetCurrentWindowRect();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
 
-    auto windowManager = pipelineContext->GetWindowManager();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     if (windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
         return SheetType::SHEET_BOTTOM;
@@ -1045,34 +1041,54 @@ SheetType SheetPresentationPattern::GetSheetType()
         return SheetType::SHEET_BOTTOM;
     }
     if (sheetThemeType_ == "auto") {
-        if (IsFold()) {
-            sheetType = SheetType::SHEET_CENTER;
-        } else {
-            if (rootHeight < rootWidth) {
-                sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
-            } else {
-                sheetType = SheetType::SHEET_BOTTOM;
-            }
-        }
+        GetSheetTypeWithAuto(sheetType);
     } else if (sheetThemeType_ == "popup") {
-        if (windowRect.Width() >= SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
-            if (sheetStyle.sheetType.has_value()) {
-                sheetType = sheetStyle.sheetType.value();
-            } else {
-                sheetType = SheetType::SHEET_POPUP;
-            }
-        } else if ((windowRect.Width() >= SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
-                   (windowRect.Width() < SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
-            if (sheetStyle.sheetType.has_value()) {
-                sheetType = sheetStyle.sheetType.value();
-            } else {
-                sheetType = SheetType::SHEET_CENTER;
-            }
-        } else {
-            sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
-        }
+        GetSheetTypeWithPopup(sheetType);
     }
     return sheetType;
+}
+
+void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
+{
+    auto rootHeight = PipelineContext::GetCurrentRootHeight();
+    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    if (IsFold()) {
+        sheetType = SheetType::SHEET_CENTER;
+    } else {
+        if (LessNotEqual(rootHeight, rootWidth)) {
+            sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
+        } else {
+            sheetType = SheetType::SHEET_BOTTOM;
+        }
+    }
+}
+
+void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowRect = pipelineContext->GetCurrentWindowRect();
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+#ifdef PREVIEW
+    windowRect = pipelineContext->GetDisplayWindowRectInfo();
+#endif
+    if (GreatOrEqual(windowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+        if (sheetStyle.sheetType.has_value()) {
+            sheetType = sheetStyle.sheetType.value();
+        } else {
+            sheetType = SheetType::SHEET_POPUP;
+        }
+    } else if (GreatOrEqual(windowRect.Width(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
+               LessNotEqual(windowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+        if (sheetStyle.sheetType.has_value()) {
+            sheetType = sheetStyle.sheetType.value();
+        } else {
+            sheetType = SheetType::SHEET_CENTER;
+        }
+    } else {
+        sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    }
 }
 
 void SheetPresentationPattern::BubbleStyleSheetTransition(bool isTransitionIn)
@@ -1292,7 +1308,7 @@ void SheetPresentationPattern::ClipSheetNode()
 
 void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet get WindowSizeChangeReason type is: %{public}d", type);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet WindowSizeChangeReason type is: %{public}d", type);
     auto sheetType = GetSheetType();
     if ((type == WindowSizeChangeReason::ROTATION) &&
         ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMLANDSPACE))) {

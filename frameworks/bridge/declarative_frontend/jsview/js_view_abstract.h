@@ -421,6 +421,8 @@ public:
     static void JSRenderFit(const JSCallbackInfo& info);
     static void JsExpandSafeArea(const JSCallbackInfo& info);
     static void JsGestureModifier(const JSCallbackInfo& info);
+    static void JsCustomProperty(const JSCallbackInfo& info);
+
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
     static void JsBackgroundImageResizable(const JSCallbackInfo& info);
@@ -579,6 +581,8 @@ public:
 
     static RefPtr<NG::ChainedTransitionEffect> ParseNapiChainedTransition(
         const JSRef<JSObject>& object, const JSExecutionContext& context);
+    static void JsFocusScopeId(const JSCallbackInfo& info);
+    static void JsFocusScopePriority(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

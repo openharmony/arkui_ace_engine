@@ -1584,13 +1584,20 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
                 TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel");
         };
         auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
-            CHECK_NULL_VOID(overlayManager);
-            RefPtr<NG::FrameNode> dialog;
             LOGI("Begin to show dialog ");
+            CHECK_NULL_VOID(overlayManager);
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            if (container->IsSubContainer()) {
+                auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+                container = AceEngine::Get().GetContainer(currentId);
+                CHECK_NULL_VOID(container);
+            }
+            RefPtr<NG::FrameNode> dialog;
             if (dialogProperties.isShowInSubWindow) {
                 dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
                 CHECK_NULL_VOID(dialog);
-                if (dialogProperties.isModal) {
+                if (dialogProperties.isModal && !container->IsUIExtensionWindow()) {
                     DialogProperties Maskarg;
                     Maskarg.isMask = true;
                     Maskarg.autoCancel = dialogProperties.autoCancel;
@@ -1873,8 +1880,6 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu inner enter");
-    ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
-    dialogProperties.buttons.emplace_back(buttonInfo);
     if (Container::IsCurrentUseNewPipeline()) {
         ShowActionMenuInnerNG(dialogProperties, button, std::move(callback));
         return;
@@ -3326,7 +3331,7 @@ RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEf
 {
     napi_value napiVal = reinterpret_cast<napi_value>(value);
     JSRef<JSVal> transitionVal = JsConverter::ConvertNapiValueToJsVal(napiVal);
-    if (transitionVal.IsEmpty()) {
+    if (transitionVal.IsEmpty() || !transitionVal->IsObject()) {
         LOGE("Convert TransitionEffect from napi value to JSVal failed.");
         return nullptr;
     }

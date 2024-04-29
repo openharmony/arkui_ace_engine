@@ -29,6 +29,7 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -46,6 +47,8 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_area/text_area_layout_algorithm.h"
@@ -65,8 +68,6 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
-#include "core/components_ng/pattern/select_overlay/magnifier.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -145,12 +146,17 @@ class TextFieldPattern : public ScrollablePattern,
                          public TextInputClient,
                          public TextBase,
                          public Magnifier {
-    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
-        Magnifier);
+    DECLARE_ACE_TYPE(
+        TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase, Magnifier);
 
 public:
     TextFieldPattern();
     ~TextFieldPattern() override;
+
+    int32_t GetInstanceId() const override
+    {
+        return GetHostInstanceId();
+    }
 
     // TextField needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
@@ -208,13 +214,9 @@ public:
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
     void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
-    void UpdateOverCounterColor();
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
-    bool OverCounter(int32_t originLength);
-    void HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength);
-    void UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
         BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
@@ -230,9 +232,9 @@ public:
         return counterTextNode_;
     }
 
-    bool GetCounterState() const
+    bool GetShowCounterStyleValue() const
     {
-        return counterChange_;
+        return showCountBorderStyle_;
     }
 
     void SetCounterState(bool counterChange)
@@ -569,8 +571,7 @@ public:
 
     static std::u16string CreateObscuredText(int32_t len);
     static std::u16string CreateDisplayText(
-        const std::string& content, int32_t nakedCharPosition,
-        bool needObscureText, bool showPasswordDirectly);
+        const std::string& content, int32_t nakedCharPosition, bool needObscureText, bool showPasswordDirectly);
     bool IsTextArea() const override;
 
     const RefPtr<TouchEventImpl>& GetTouchListener()
@@ -701,9 +702,9 @@ public:
         return contentRect_;
     }
 
-    ParagraphT GetDragParagraph() const override
+    const RefPtr<Paragraph>& GetDragParagraph() const override
     {
-        return { dragParagraph_ };
+        return paragraph_;
     }
 
     const RefPtr<FrameNode>& MoveDragNode() override
@@ -1111,6 +1112,7 @@ public:
     bool IsUnderlineMode();
     bool IsInlineMode();
     bool IsShowError();
+    bool IsShowCount();
     void ResetContextAttr();
     void RestoreDefaultMouseState();
 
@@ -1135,6 +1137,15 @@ public:
 
 protected:
     virtual void InitDragEvent();
+    void OnAttachToMainTree() override
+    {
+        isDetachFromMainTree_ = false;
+    }
+
+    void OnDetachFromMainTree() override
+    {
+        isDetachFromMainTree_ = true;
+    }
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1179,7 +1190,6 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
-    void HanldeMaxLengthAndUnderlineTypingColor();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
 
@@ -1195,6 +1205,8 @@ private:
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
     void UpdateSelectionByMouseDoubleClick();
 
     void AfterSelection();
@@ -1235,11 +1247,13 @@ private:
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
     void SetAccessibilityAction();
+    void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();
+    void ProcessRectPadding();
     void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
@@ -1294,7 +1308,9 @@ private:
     void InitDragDropEventWithOutDragStart();
     void UpdateBlurReason();
     AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
-    bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType);
+    bool CheckAutoFillType(const AceAutoFillType& autoFillType);
+    bool GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
+    void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     AceAutoFillType GetAutoFillType();
     bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
     void DoProcessAutoFill();
@@ -1306,6 +1322,8 @@ private:
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
+    void HandleCountStyle();
+    void HandleDeleteOnCounterScene();
 
     RectF frameRect_;
     RectF textRect_;
@@ -1460,9 +1478,10 @@ private:
     bool isFillRequestFinish_ = false;
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
+    bool showCountBorderStyle_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
-
+    bool isDetachFromMainTree_ = false;
     bool isFocusTextColorSet_ = false;
 };
 } // namespace OHOS::Ace::NG

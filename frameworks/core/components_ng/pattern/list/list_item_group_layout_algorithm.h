@@ -102,13 +102,21 @@ public:
         return tmpIndex;
     }
 
-    void SetListMainSize(float startPos, float endPos, float referencePos, bool forwardLayout)
+    void SetListMainSize(float startPos, float endPos, float referencePos, float prevContentSize, bool forwardLayout)
     {
         startPos_ = startPos;
         endPos_ = endPos;
         referencePos_ = referencePos;
         forwardLayout_ = forwardLayout;
         refPos_ = referencePos;
+        prevContentMainSize_ = prevContentSize;
+    }
+
+    void ModifyReferencePos(int32_t index, float pos);
+
+    void SetNeedAdjustRefPos(bool needAdjust)
+    {
+        needAdjustRefPos_ = needAdjust;
     }
 
     float GetRefPos() const
@@ -282,7 +290,7 @@ private:
     void MeasureHeaderFooter(LayoutWrapper* layoutWrapper);
     void SetActiveChildRange(LayoutWrapper* layoutWrapper);
     float UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos);
-    bool NeedMeasureItem() const;
+    bool NeedMeasureItem();
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
     bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);
@@ -324,10 +332,12 @@ private:
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
     float refPos_ = 0.0f;
+    float prevContentMainSize_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
     bool forwardLayout_ = true;
     bool needAllLayout_ = false;
+    bool needAdjustRefPos_ = false;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;

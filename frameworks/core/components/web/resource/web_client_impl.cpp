@@ -386,6 +386,9 @@ bool WebClientImpl::OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrl
         case WebResponseDataType::RESOURCE_URL_TYPE:
             response->PutResponseResourceUrl(webResponse->GetResourceUrl());
             break;
+        case WebResponseDataType::BUFFER_TYPE:
+            response->PutResponseDataBuffer(webResponse->GetBuffer(), webResponse->GetBufferSize());
+            break;
         default:
             response->PutResponseData(data);
             break;
@@ -1030,5 +1033,55 @@ std::vector<int8_t> WebClientImpl::GetWordSelection(const std::string& text, int
     std::vector<int8_t> vec = { -1, -1 };
     CHECK_NULL_RETURN(delegate, vec);
     return delegate->GetWordSelection(text, offset);
+}
+
+bool WebClientImpl::OnOpenAppLink(
+    const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+
+    return delegate->OnOpenAppLink(url, callback);
+}
+
+void WebClientImpl::OnRenderProcessNotResponding(
+    const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnRenderProcessNotResponding(jsStack, pid, reason);
+}
+
+void WebClientImpl::OnRenderProcessResponding()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnRenderProcessResponding();
+}
+
+void WebClientImpl::OnShowAutofillPopup(
+    const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnShowAutofillPopup(offsetX, offsetY, menu_items);
+}
+
+void WebClientImpl::OnHideAutofillPopup()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnHideAutofillPopup();
 }
 } // namespace OHOS::Ace

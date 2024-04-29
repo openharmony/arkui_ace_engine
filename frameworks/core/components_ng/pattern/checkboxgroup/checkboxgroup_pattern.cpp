@@ -588,6 +588,7 @@ void CheckBoxGroupPattern::InitializeModifierParam(CheckBoxGroupModifier::Parame
     paintParameters.hoverToTouchDuration = checkBoxTheme->GetHoverToTouchDuration();
     paintParameters.uiStatus = UIStatus::UNSELECTED;
     paintParameters.status = CheckBoxGroupPaintProperty::SelectStatus::NONE;
+    paintParameters.defaultPaddingSize = checkBoxTheme->GetDefaultPaddingSize();
 }
 
 void CheckBoxGroupPattern::UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters)

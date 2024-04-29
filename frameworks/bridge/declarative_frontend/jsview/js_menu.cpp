@@ -189,6 +189,23 @@ void JSMenu::SetRadius(const JSCallbackInfo& info)
     }
 }
 
+void JSMenu::SetExpandingMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info[0]->IsNull() || !info[0]->IsNumber()) {
+        return;
+    }
+
+    auto mode = static_cast<SubMenuExpandingMode>(info[0]->ToNumber<int32_t>());
+    auto expandingMode =
+        mode == SubMenuExpandingMode::EMBEDDED
+            ? NG::SubMenuExpandingMode::EMBEDDED
+            : mode == SubMenuExpandingMode::STACK
+                ? NG::SubMenuExpandingMode::STACK
+                : NG::SubMenuExpandingMode::SIDE;
+                
+    MenuModel::GetInstance()->SetExpandingMode(expandingMode);
+}
+
 void JSMenu::JSBind(BindingTarget globalObj)
 {
     JSClass<JSMenu>::Declare("Menu");
@@ -199,6 +216,7 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::StaticMethod("fontColor", &JSMenu::FontColor, opt);
     JSClass<JSMenu>::StaticMethod("width", &JSMenu::SetWidth, opt);
     JSClass<JSMenu>::StaticMethod("radius", &JSMenu::SetRadius, opt);
+    JSClass<JSMenu>::StaticMethod("subMenuExpandingMode", &JSMenu::SetExpandingMode);
     JSClass<JSMenu>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSMenu>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMenu>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

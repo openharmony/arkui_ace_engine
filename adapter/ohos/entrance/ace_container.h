@@ -299,7 +299,7 @@ public:
 
     void ForceFullGC() override;
 
-    void SetLocalStorage(NativeReference* storage, NativeReference* context);
+    void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
     bool ParseThemeConfig(const std::string& themeConfig);
 
@@ -555,6 +555,8 @@ public:
 
     void HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
         int32_t eventType, int64_t timeMs);
+
+    void TerminateUIExtension() override;
 
     void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
     {

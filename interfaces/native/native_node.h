@@ -1382,7 +1382,8 @@ typedef enum {
      *
      */
     NODE_LAYOUT_WEIGHT,
-
+    NODE_DISPLAY_PRIORITY,
+    NODE_OUTLINE_WIDTH,
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -1448,17 +1449,6 @@ typedef enum {
      *
      */
     NODE_TEXT_LINE_HEIGHT,
-    /**
-     * @brief Defines the text line spacing attribute, which can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].f32: line spacing, in fp.\n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].f32: line spacing, in fp.\n
-     *
-     */
-    NODE_TEXT_LINE_SPACING,
     /**
      * @brief Defines the text decoration style and color.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -1689,6 +1679,17 @@ typedef enum {
      *
      */
     NODE_FONT_FEATURE,
+    /**    
+     * @brief Defines the text line spacing attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: line spacing, in fp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: line spacing, in fp.\n
+     *
+     */
+    NODE_TEXT_LINE_SPACING,
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -4188,6 +4189,17 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_EDIT_CHANGE,
+
+    /**
+     * @brief textArea按下输入法回车键触发该事件。
+     *
+     * 触发该事件的条件：按下输入法回车键。keyType为ARKUI_ENTER_KEY_TYPE_NEW_LINE时不触发\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：输入法回车键类型。
+     *
+     */
+    NODE_TEXT_AREA_ON_SUBMIT,
 
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.

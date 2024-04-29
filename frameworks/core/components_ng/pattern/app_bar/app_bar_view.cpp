@@ -208,8 +208,6 @@ RefPtr<FrameNode> AppBarView::BuildDivider()
     MarginProperty margin;
     margin.left = CalcLength(-(theme->GetDividerWidth()));
     auto renderProperty = divider->GetPaintProperty<DividerRenderProperty>();
-    // color
-    renderProperty->UpdateDividerColor(theme->GetDividerColor());
     // line cap
     renderProperty->UpdateLineCap(LineCap::ROUND);
 
@@ -250,9 +248,15 @@ void AppBarView::BindCloseCallback(const RefPtr<FrameNode>& closeButton)
     auto clickCallback = [](GestureEvent& info) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto windowManager = pipeline->GetWindowManager();
-        CHECK_NULL_VOID(windowManager);
-        windowManager->WindowMinimize();
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        if (container->IsUIExtensionWindow()) {
+            container->TerminateUIExtension();
+        } else {
+            auto windowManager = pipeline->GetWindowManager();
+            CHECK_NULL_VOID(windowManager);
+            windowManager->WindowMinimize();
+        }
     };
     auto eventHub = closeButton->GetOrCreateGestureEventHub();
     if (eventHub) {

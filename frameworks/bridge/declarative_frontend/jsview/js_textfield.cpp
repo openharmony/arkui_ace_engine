@@ -91,6 +91,7 @@ constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -345,7 +346,7 @@ void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
 
 void JSTextField::SetInputStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
     auto styleString = info[0]->ToString();
@@ -376,30 +377,37 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
-    if (!jsValue->IsObject()) {
-        return;
-    }
-    CaretStyle caretStyle;
-    auto paramObject = JSRef<JSObject>::Cast(jsValue);
-    auto caretWidth = paramObject->GetProperty("width");
+    if (jsValue->IsObject()) {
+        CaretStyle caretStyle;
+        auto paramObject = JSRef<JSObject>::Cast(jsValue);
+        auto caretWidth = paramObject->GetProperty("width");
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
-        caretStyle.caretWidth = theme->GetCursorWidth();
-    } else {
-        CalcDimension width;
-        if (!ParseJsDimensionVpNG(caretWidth, width, false)) {
-            width = theme->GetCursorWidth();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
+            caretStyle.caretWidth = theme->GetCursorWidth();
+        } else {
+            CalcDimension width;
+            if (!ParseJsDimensionVpNG(caretWidth, width, false)) {
+                width = theme->GetCursorWidth();
+            }
+            if (LessNotEqual(width.Value(), 0.0)) {
+                width = theme->GetCursorWidth();
+            }
+            caretStyle.caretWidth = width;
         }
-        if (LessNotEqual(width.Value(), 0.0)) {
-            width = theme->GetCursorWidth();
+        TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
+
+        // set caret color
+        Color caretColor;
+        auto caretColorProp = paramObject->GetProperty("color");
+        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() || !ParseJsColor(caretColorProp, caretColor)) {
+            caretColor = theme->GetCursorColor();
         }
-        caretStyle.caretWidth = width;
+        TextFieldModel::GetInstance()->SetCaretColor(caretColor);
     }
-    TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
 }
 
 void JSTextField::SetCaretPosition(const JSCallbackInfo& info)
@@ -890,6 +898,9 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 
 void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     auto jsValue = info[0];
     auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
         JSRef<JSFunc>::Cast(jsValue));
@@ -1300,7 +1311,7 @@ void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
 bool JSTextField::ParseJsCustomKeyboardBuilder(
     const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc)
 {
-    if (info.Length() <= index) {
+    if (info.Length() <= index || !info[index]->IsObject()) {
         return false;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[index]);
@@ -1473,6 +1484,8 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         std::optional<TextDecorationStyle> textDecorationStyle;
         if (styleValue->IsNumber()) {
             textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        } else {
+            textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
         }
         TextFieldModel::GetInstance()->SetTextDecoration(textDecoration);
         TextFieldModel::GetInstance()->SetTextDecorationColor(result);

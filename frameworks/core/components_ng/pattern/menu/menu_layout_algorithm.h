@@ -37,10 +37,10 @@ struct MenuDumpInfo {
     std::string targetNode;
     OffsetF targetOffset;
     SizeF targetSize;
-    float previewBeginScale;
-    float previewEndScale;
-    float top;
-    float bottom;
+    float previewBeginScale = 0.0f;
+    float previewEndScale = 0.0f;
+    float top = 0.0f;
+    float bottom = 0.0f;
     OffsetF globalLocation;
     std::string originPlacement;
     OffsetF finalPosition;
@@ -202,6 +202,9 @@ private:
 
     void ProcessArrowParams(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
     BorderRadiusProperty GetMenuRadius(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
+
+    void CalculateIdealSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
+        PaddingPropertyF padding, SizeF& idealSize, RefPtr<FrameNode> parentItem);
 
     OffsetF targetOffset_;
     SizeF targetSize_;

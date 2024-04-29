@@ -51,6 +51,8 @@ public:
     virtual void SetOnUpdate(VideoEventFunc&& onUpdate) = 0;
     virtual void SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange) = 0;
     virtual void SetOnStop(VideoEventFunc&& onStop) {};
+    virtual void EnableAnalyzer(bool enable) {}
+    virtual void SetImageAnalyzerConfig(void* config) {}
 private:
     static std::unique_ptr<VideoModel> instance_;
     static std::mutex mutex_;

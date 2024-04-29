@@ -150,11 +150,15 @@ public:
     {
         if (makeFunc == nullptr) {
             makeFunc_ = std::nullopt;
-            contentModifierNode_ = nullptr;
             OnModifyDone();
             return;
         }
         makeFunc_ = std::move(makeFunc);
+    }
+
+    const RefPtr<FrameNode>& GetContentModifierNode() const
+    {
+        return contentModifierNode_;
     }
 
     bool UseContentModifier() const

@@ -30,7 +30,6 @@ abstract class ViewPU extends PUV2ViewBase
   private isInitialRenderDone: boolean = false;
 
   private runReuse_: boolean = false;
-  private hasBeenRecycled_: boolean = false;
 
   private paramsGenerator_: () => Object;
 
@@ -280,9 +279,6 @@ abstract class ViewPU extends PUV2ViewBase
         childViewPU.setActiveInternal(this.isActive_);
       }
     }
-    if (this.hasRecycleManager()) {
-      this.getRecycleManager().setActive(this.isActive_);
-    }
   }
 
 
@@ -303,9 +299,6 @@ abstract class ViewPU extends PUV2ViewBase
       if (childViewPU) {
         childViewPU.setActiveInternal(this.isActive_);
       }
-    }
-    if (this.hasRecycleManager()) {
-      this.getRecycleManager().setActive(this.isActive_);
     }
   }
 
@@ -791,7 +784,7 @@ abstract class ViewPU extends PUV2ViewBase
     const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const oldElmtId: number = node.id__();
     this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
-    this.hasBeenRecycled_ = true;
+    this.addChild(node);
     this.rebuildUpdateFunc(oldElmtId, compilerAssignedUpdateFunc);
     recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
   }
@@ -821,9 +814,7 @@ abstract class ViewPU extends PUV2ViewBase
       const child = weakRefChild.deref();
       if (child) {
         if (child instanceof ViewPU) {
-          if (!child.hasBeenRecycled_) {
-            child.aboutToReuseInternal();
-          }
+          child.aboutToReuseInternal();
         } else {
           // FIXME fix for mixed V2 - V3 Hierarchies
           throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
@@ -842,9 +833,7 @@ abstract class ViewPU extends PUV2ViewBase
       const child = weakRefChild.deref();
       if (child) {
         if (child instanceof ViewPU) {
-          if (!child.hasBeenRecycled_) {
-            child.aboutToRecycleInternal();
-          }
+          child.aboutToRecycleInternal();
         } else {
           // FIXME fix for mixed V2 - V3 Hierarchies
           throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
@@ -860,7 +849,8 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.getParent() && this.getParent() instanceof ViewPU && !(this.getParent() as ViewPU).isDeleting_) {
       const parentPU : ViewPU = this.getParent() as ViewPU;
       parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
-      this.hasBeenRecycled_ = true;
+      this.parent_.removeChild(this);
+      this.setActiveInternal(false);
     } else {
       this.resetRecycleCustomNode();
       stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
@@ -986,6 +976,7 @@ abstract class ViewPU extends PUV2ViewBase
         case '-profiler':
           view.printDFXHeader('Profiler Info', command);
           view.dumpReport();
+          this.sendStateInfo('{}');
           break;
         default:
           DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);

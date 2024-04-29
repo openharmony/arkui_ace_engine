@@ -277,6 +277,8 @@ public:
         appBgColor_ = color;
     }
 
+    virtual void ChangeDarkModeBrightness(bool isFocus) {}
+
     void SetFormRenderingMode(int8_t renderMode)
     {
         renderingMode_ = renderMode;
@@ -309,6 +311,8 @@ public:
     virtual void LaunchPageTransition() {}
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
+
+    virtual void CheckAndUpdateKeyboardInset() {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
@@ -1142,6 +1146,26 @@ public:
 
     virtual void ChangeSensitiveNodes(bool flag) {}
 
+    virtual bool IsContainerModalVisible()
+    {
+        return false;
+    }
+
+    void setProfilerStatus(bool stateProfilerStatus)
+    {
+        stateProfilerStatus_ = stateProfilerStatus;
+    }
+
+    bool getProfilerStatus() const
+    {
+        return stateProfilerStatus_;
+    }
+
+    uint32_t GetFrameCount() const
+    {
+        return frameCount_;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1307,6 +1331,8 @@ private:
     int32_t height_ = -1;
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
+    uint32_t frameCount_ = 0;
+    bool stateProfilerStatus_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

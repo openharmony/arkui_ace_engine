@@ -207,7 +207,11 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         return;
     }
 
-    onFormSurfaceNodeCallback_(rsSurfaceNode, formInfo.isDynamic);
+    bool isRecoverFormToHandleClickEvent =
+        want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
+    bool isRecover = recycleStatus_ == RecycleStatus::RECYCLED || isRecoverFormToHandleClickEvent;
+
+    onFormSurfaceNodeCallback_(rsSurfaceNode, formInfo.isDynamic, isRecover);
     if (!formRendererDispatcher_) {
         sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
@@ -218,8 +222,6 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
     }
 
-    bool isRecoverFormToHandleClickEvent = want.GetBoolParam(
-        OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
     if (isDynamic_ && isRecoverFormToHandleClickEvent) {
         HandleCachedClickEvents();
     }

@@ -178,21 +178,33 @@ public:
         preventDefault_ = preventDefault;
     }
 
+    const std::string& GetPatternName() const
+    {
+        return patternName_;
+    }
+    void SetPatternName(const std::string& patternName)
+    {
+        patternName_ = patternName;
+    }
+
 protected:
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
     // The origin event time stamp.
     TimeStamp timeStamp_;
     EventTarget target_;
+    // Will be used in drag.
     SourceType deviceType_ = SourceType::NONE;
     float force_ = 0.0f;
     std::optional<float> tiltX_;
     std::optional<float> tiltY_;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
     int64_t deviceId_ = 0;
+    // Will be used in drag.
     int32_t targetDisplayId_ = 0;
     bool stopPropagation_ = false;
     bool preventDefault_ = false;
+    std::string patternName_;
 };
 
 class PropagationEventInfo : public virtual TypeInfoBase {

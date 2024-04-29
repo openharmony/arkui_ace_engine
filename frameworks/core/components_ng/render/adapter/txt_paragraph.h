@@ -110,6 +110,7 @@ public:
 
     // interfaces for calculate the the specified paragraph position
     int32_t GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos = false) override;
+    void AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index);
     void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
     void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
@@ -132,7 +133,8 @@ public:
             paragraph_->SetParagraghId(id);
         }
     }
-    
+    LineMetrics GetLineMetricsByRectF(RectF& rect) override;
+
 private:
     void CreateBuilder();
     bool CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent);

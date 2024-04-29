@@ -49,6 +49,7 @@
 #include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -286,6 +287,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaChange,
     NodeModifier::SetOnTextAreaPaste,
     NodeModifier::SetOnTextAreaSelectionChange,
+    NodeModifier::SetTextInputOnSubmit,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -372,6 +374,14 @@ const ComponentAsyncEventHandler ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[] = 
     NodeModifier::SetOnIndexerPopupSelected,
     NodeModifier::SetIndexerChangeEvent,
     NodeModifier::SetIndexerCreatChangeEvent,
+};
+
+const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnSearchSubmit,
+    NodeModifier::SetOnSearchChange,
+    NodeModifier::SetOnSearchCopy,
+    NodeModifier::SetOnSearchCut,
+    NodeModifier::SetOnSearchPaste,
 };
 
 /* clang-format on */
@@ -549,6 +559,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_SEARCH: {
+            // search event type.
+            if (subKind >= sizeof(SEARCH_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SEARCH_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }
@@ -676,7 +695,7 @@ void RegisterCustomNodeAsyncEvent(ArkUINodeHandle node, int32_t eventType, void*
         companion->SetExtraParam(eventType, extraParam);
     } else {
         auto originEventType = companion->GetFlags();
-        companion->SetFlags(originEventType | eventType);
+        companion->SetFlags(static_cast<uint32_t>(originEventType) | static_cast<uint32_t>(eventType));
         companion->SetExtraParam(eventType, extraParam);
     }
 }
@@ -690,7 +709,7 @@ ArkUI_Int32 UnregisterCustomNodeEvent(ArkUINodeHandle node, ArkUI_Int32 eventTyp
     if ((originEventType & eventType) != eventType) {
         return -1;
     }
-    companion->SetFlags(originEventType ^ eventType);
+    companion->SetFlags(static_cast<uint32_t>(originEventType) ^ static_cast<uint32_t>(eventType));
     companion->EraseExtraParam(eventType);
     return 0;
 }

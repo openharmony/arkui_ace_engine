@@ -107,6 +107,13 @@ ohos_source_set("preview_osal_source") {
       "//third_party/curl:curl_shared",
     ]
 
+    if (ace_use_rosen_drawing) {
+      deps += [
+        "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+      ]
+    }
+
     external_deps = [ "hilog:libhilog" ]
 
     configs = [

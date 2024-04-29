@@ -89,6 +89,8 @@ private:
     static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
         const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
         const RefPtr<ButtonTheme>& buttonTheme);
+    static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
+        const RefPtr<FrameNode>& buttonNode, bool isConfirm);
     static WeakPtr<FrameNode> dialogNode_;
 };
 } // namespace OHOS::Ace::NG

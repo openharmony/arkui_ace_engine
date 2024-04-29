@@ -228,6 +228,7 @@ public:
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
     static Dimension GetLineHeight(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);     
+    static void SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

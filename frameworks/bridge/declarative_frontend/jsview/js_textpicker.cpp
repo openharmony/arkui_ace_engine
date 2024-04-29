@@ -224,6 +224,11 @@ ButtonInfo ParseButtonStyle(const JSRef<JSObject>& pickerButtonParamObject)
         buttonInfo.borderRadius = radius.value();
     }
 
+    auto primaryValue = pickerButtonParamObject->GetProperty("primary");
+    if (primaryValue->IsBoolean()) {
+        buttonInfo.isPrimary = primaryValue->ToBoolean();
+    }
+
     return buttonInfo;
 }
 
@@ -234,6 +239,7 @@ std::vector<ButtonInfo> ParseButtonStyles(const JSRef<JSObject>& paramObject)
     if (acceptButtonStyle->IsObject()) {
         auto acceptButtonStyleParamObject = JSRef<JSObject>::Cast(acceptButtonStyle);
         buttonInfos.emplace_back(ParseButtonStyle(acceptButtonStyleParamObject));
+        buttonInfos[0].isAcceptButton = true;
     }
     auto cancelButtonStyle = paramObject->GetProperty("cancelButtonStyle");
     if (cancelButtonStyle->IsObject()) {
@@ -559,7 +565,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectInternal(const std::vector<NG:
 {
     uint32_t selectedValue = 0;
     for (uint32_t i = 0; i < options.size(); i++) {
-        if (i > values.size() - 1 || values[i].empty()) {
+        if ((values.size() > 0 && i > values.size() - 1) || values[i].empty()) {
             selectedValues.emplace_back(0);
             continue;
         }
@@ -578,7 +584,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectArrayInternal(
     const std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     for (uint32_t i = 0; i < options.size(); i++) {
-        if (i > selectedValues.size() - 1) {
+        if (selectedValues.size() > 0 && i > selectedValues.size() - 1) {
             selectedValues.emplace_back(0);
         } else {
             if (selectedValues[i] >= options[i].rangeResult.size()) {
@@ -616,7 +622,7 @@ void JSTextPickerParser::ParseMultiTextArrayValueInternal(
     const std::vector<NG::TextCascadePickerOptions>& options, std::vector<std::string>& values)
 {
     for (uint32_t i = 0; i < options.size(); i++) {
-        if (i > values.size() - 1) {
+        if (values.size() > 0 && i > values.size() - 1) {
             if (options[i].rangeResult.size() > 0) {
                 values.emplace_back(options[i].rangeResult[0]);
             } else {
@@ -682,6 +688,9 @@ bool JSTextPickerParser::ParseMultiTextArray(const JSRef<JSObject>& paramObject,
     if (getRange->IsNull() || getRange->IsUndefined()) {
         return false;
     }
+    if (!getRange->IsArray()) {
+        return false;
+    }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(getRange);
     if (!ParseMultiTextArrayRange(array, param.options)) {
         return false;
@@ -725,7 +734,7 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
             }
         }
     }
-    if (index > values.size() - 1) {
+    if (index + 1 > values.size()) {
         if (resultStr.size() > 0) {
             values.emplace_back(resultStr.front());
         } else {
@@ -742,7 +751,23 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
         }
     }
 
-    if (index > selectedValues.size() - 1) {
+    SetSelectedValues(selectedValues, values, index, isHasSelectAttr, resultStr);
+
+    if (!jsRangeValue->GetValueAt(selectedValues[index])->IsObject()) {
+        return false;
+    }
+    auto jsObj = JSRef<JSObject>::Cast(jsRangeValue->GetValueAt(selectedValues[index]));
+    auto getChildren = jsObj->GetProperty("children");
+    if (getChildren->IsArray()) {
+        ParseInternalArray(getChildren, selectedValues, values, index + 1, isHasSelectAttr);
+    }
+    return true;
+}
+
+void JSTextPickerParser::SetSelectedValues(std::vector<uint32_t>& selectedValues, std::vector<std::string>& values,
+    uint32_t index, bool isHasSelectAttr, std::vector<std::string>& resultStr)
+{
+    if (index + 1 > selectedValues.size()) {
         selectedValues.emplace_back(0);
     } else {
         if (selectedValues[index] >= resultStr.size()) {
@@ -756,12 +781,6 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
             selectedValues[index] = std::distance(resultStr.begin(), valueIterator);
         }
     }
-    auto jsObj = JSRef<JSObject>::Cast(jsRangeValue->GetValueAt(selectedValues[index]));
-    auto getChildren = jsObj->GetProperty("children");
-    if (getChildren->IsArray()) {
-        ParseInternalArray(getChildren, selectedValues, values, index + 1, isHasSelectAttr);
-    }
-    return true;
 }
 
 bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObject,
@@ -1042,13 +1061,14 @@ void JSTextPicker::ProcessCascadeSelected(
         rangeResultValue.emplace_back(options[i].rangeResult[0]);
     }
 
-    if (index > selectedValues.size() - 1) {
+    if (static_cast<int32_t>(index) > static_cast<int32_t>(selectedValues.size()) - 1) {
         selectedValues.emplace_back(0);
     }
     if (selectedValues[index] >= rangeResultValue.size()) {
         selectedValues[index] = 0;
     }
-    if (selectedValues[index] <= options.size() - 1 && options[selectedValues[index]].children.size() > 0) {
+    if (static_cast<int32_t>(selectedValues[index]) <= static_cast<int32_t>(options.size()) - 1 &&
+        options[selectedValues[index]].children.size() > 0) {
         ProcessCascadeSelected(options[selectedValues[index]].children, index + 1, selectedValues);
     }
 }
@@ -1057,7 +1077,7 @@ void JSTextPicker::SetSelectedInternal(
     uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     for (uint32_t i = 0; i < count; i++) {
-        if (i > selectedValues.size() - 1) {
+        if (selectedValues.size() > 0 && i > selectedValues.size() - 1) {
             selectedValues.emplace_back(0);
         } else {
             if (selectedValues[i] >= options[i].rangeResult.size()) {
@@ -1285,6 +1305,9 @@ void TextPickerDialogAppearEvent(const JSCallbackInfo& info, TextPickerDialogEve
 {
     std::function<void()> didAppearEvent;
     std::function<void()> willAppearEvent;
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
@@ -1315,6 +1338,9 @@ void TextPickerDialogDisappearEvent(const JSCallbackInfo& info, TextPickerDialog
 {
     std::function<void()> didDisappearEvent;
     std::function<void()> willDisappearEvent;
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");

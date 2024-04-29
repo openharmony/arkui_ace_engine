@@ -1791,6 +1791,10 @@ class PersistentStorage {
                 returnValue = this.readFromPersistentStorage(propName);
             }
             link = AppStorage.setAndLink(propName, returnValue, this);
+            if (link === undefined) {
+                
+                return false;
+            }
             this.links_.set(propName, link);
             
         }
@@ -5865,7 +5869,6 @@ class ViewPU extends PUV2ViewBase {
         // flag for initial rendering being done
         this.isInitialRenderDone = false;
         this.runReuse_ = false;
-        this.hasBeenRecycled_ = false;
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
         // @Provide'd variables by this class and its ancestors
@@ -6075,9 +6078,6 @@ class ViewPU extends PUV2ViewBase {
                 childViewPU.setActiveInternal(this.isActive_);
             }
         }
-        if (this.hasRecycleManager()) {
-            this.getRecycleManager().setActive(this.isActive_);
-        }
     }
     onInactiveInternal() {
         if (this.isActive_) {
@@ -6094,9 +6094,6 @@ class ViewPU extends PUV2ViewBase {
             if (childViewPU) {
                 childViewPU.setActiveInternal(this.isActive_);
             }
-        }
-        if (this.hasRecycleManager()) {
-            this.getRecycleManager().setActive(this.isActive_);
         }
     }
     initialRenderView() {
@@ -6526,7 +6523,7 @@ class ViewPU extends PUV2ViewBase {
         const newElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         const oldElmtId = node.id__();
         this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
-        this.hasBeenRecycled_ = true;
+        this.addChild(node);
         this.rebuildUpdateFunc(oldElmtId, compilerAssignedUpdateFunc);
         recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
     }
@@ -6554,9 +6551,7 @@ class ViewPU extends PUV2ViewBase {
             const child = weakRefChild.deref();
             if (child) {
                 if (child instanceof ViewPU) {
-                    if (!child.hasBeenRecycled_) {
-                        child.aboutToReuseInternal();
-                    }
+                    child.aboutToReuseInternal();
                 }
                 else {
                     // FIXME fix for mixed V2 - V3 Hierarchies
@@ -6575,9 +6570,7 @@ class ViewPU extends PUV2ViewBase {
             const child = weakRefChild.deref();
             if (child) {
                 if (child instanceof ViewPU) {
-                    if (!child.hasBeenRecycled_) {
-                        child.aboutToRecycleInternal();
-                    }
+                    child.aboutToRecycleInternal();
                 }
                 else {
                     // FIXME fix for mixed V2 - V3 Hierarchies
@@ -6592,7 +6585,8 @@ class ViewPU extends PUV2ViewBase {
         if (this.getParent() && this.getParent() instanceof ViewPU && !this.getParent().isDeleting_) {
             const parentPU = this.getParent();
             parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
-            this.hasBeenRecycled_ = true;
+            this.parent_.removeChild(this);
+            this.setActiveInternal(false);
         }
         else {
             this.resetRecycleCustomNode();

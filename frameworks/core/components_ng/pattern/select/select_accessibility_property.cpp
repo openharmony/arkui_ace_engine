@@ -51,7 +51,7 @@ int32_t SelectAccessibilityProperty::GetEndIndex() const
     if (options.empty()) {
         return -1;
     }
-    return options.size() - 1;
+    return static_cast<int32_t>(options.size()) - 1;
 }
 
 std::string SelectAccessibilityProperty::GetText() const

@@ -52,6 +52,7 @@ struct TouchPointSnapshot {
     OffsetF screenPoint;
     TouchType type = TouchType::UNKNOWN;
     int64_t timestamp = 0;
+    bool isInjected = false;
 };
 
 struct EventTree {

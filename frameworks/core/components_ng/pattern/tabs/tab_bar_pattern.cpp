@@ -46,7 +46,11 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
-
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components/toast/toast_theme.h"
+#include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int8_t LEFT_GRADIENT = 0;
@@ -65,8 +69,93 @@ constexpr float NEAR_FULL_OPACITY = 0.99f;
 constexpr float NO_OPACITY = 0.0f;
 constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
 
+constexpr double BIG_FONT_SIZE_SCALE = 1.75f;
+constexpr double LARGE_FONT_SIZE_SCALE = 2.0f;
+constexpr double MAX_FONT_SIZE_SCALE = 3.2f;
+constexpr double BIG_DIALOG_WIDTH = 216.0f;
+constexpr double MAX_DIALOG_WIDTH = 256.0f;
+constexpr int8_t GRIDCOUNT = 2;
+constexpr int8_t MAXLINES = 6;
+constexpr uint16_t DIALOG_DEFAULT_FONT_SIZE = 32;
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 } // namespace
+
+void findTextAndImageNode(
+    const RefPtr<FrameNode>& columnNode, RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& imageNode)
+{
+    if (columnNode->GetTag() == V2::TEXT_ETS_TAG) {
+        textNode = columnNode;
+    } else if (columnNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        imageNode = columnNode;
+    } else {
+        std::list<RefPtr<UINode>> children = columnNode->GetChildren();
+        for (auto child : children) {
+            findTextAndImageNode(AceType::DynamicCast<FrameNode>(child), textNode, imageNode);
+        }
+    }
+}
+
+void CreateDialogIconNode(const RefPtr<FrameNode> &columnNode, const RefPtr<PipelineBase> &pipelineContext,
+    const RefPtr<FrameNode>& imageNode)
+{
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    auto color = tabTheme->GetDialogIconColor();
+    imageSourceInfo.SetFillColor(Color(color.GetValue()));
+    auto iconNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(iconProps);
+    iconProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(64.0_vp), CalcLength(64.0_vp)));
+    iconProps->UpdateImageFit(ImageFit::FILL);
+    iconProps->UpdateImageSourceInfo(imageSourceInfo);
+    // add image margin
+    MarginProperty margin = {
+        .top = CalcLength(48.0_vp),
+        .bottom = CalcLength(16.0_vp),
+    };
+    iconProps->UpdateMargin(margin);
+    iconNode->MountToParent(columnNode);
+    iconNode->MarkModifyDone();
+}
+
+void CreateDialogTextNode(const RefPtr<FrameNode>& columnNode, const RefPtr<PipelineBase> &pipelineContext,
+    const RefPtr<FrameNode>& textNode)
+{
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto textValue = textLayoutProperty->GetContent();
+    
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto dialogTextNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(dialogTextNode);
+    auto titleProp = AceType::DynamicCast<TextLayoutProperty>(dialogTextNode->GetLayoutProperty());
+    CHECK_NULL_VOID(titleProp);
+    titleProp->UpdateContent(textValue.value_or(""));
+    float scale = pipelineContext->GetFontScale();
+    if (scale == BIG_FONT_SIZE_SCALE) {
+        titleProp->UpdateFontSize(Dimension(DIALOG_DEFAULT_FONT_SIZE, DimensionUnit::FP));
+    } else if (scale == LARGE_FONT_SIZE_SCALE || scale == MAX_FONT_SIZE_SCALE) {
+        titleProp->UpdateFontSize(Dimension(DIALOG_DEFAULT_FONT_SIZE / BIG_FONT_SIZE_SCALE * scale, DimensionUnit::FP));
+    }
+    titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    titleProp->UpdateMaxLines(MAXLINES);
+    MarginProperty margin = {
+        .left = CalcLength(8.0_vp),
+        .right = CalcLength(8.0_vp),
+        .bottom = CalcLength(24.0_vp),
+    };
+    titleProp->UpdateMargin(margin);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto color = tabTheme->GetDialogFontColor();
+    titleProp->UpdateTextColor(Color(color.GetValue()));
+    columnNode->AddChild(dialogTextNode);
+}
 
 void TabBarPattern::OnAttachToFrameNode()
 {
@@ -106,9 +195,9 @@ void TabBarPattern::InitSurfaceChangedCallback()
                 if (!pattern) {
                     return;
                 }
-                if (type == WindowSizeChangeReason::UNDEFINED) {
-                    pattern->windowSizeChangeReason_ = type;
-                }
+
+                pattern->windowSizeChangeReason_ = type;
+                pattern->prevRootSize_ = std::make_pair(prevWidth, prevHeight);
 
                 if (type == WindowSizeChangeReason::ROTATION) {
                     pattern->windowSizeChangeReason_ = type;
@@ -132,6 +221,48 @@ void TabBarPattern::InitClick(const RefPtr<GestureEventHub>& gestureHub)
     };
     clickEvent_ = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gestureHub->AddClickEvent(clickEvent_);
+}
+
+void TabBarPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (longPressEvent_) {
+        return;
+    }
+
+    auto longPressTask = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto tabBar = weak.Upgrade();
+        if (tabBar) {
+            tabBar->HandleLongPressEvent(info);
+        }
+    };
+    longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>(std::move(longPressTask));
+    gestureHub->SetLongPressEvent(longPressEvent_);
+}
+
+void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID(!dragEvent_);
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto tabBar = weak.Upgrade();
+        auto index = tabBar->CalculateSelectedIndex(info.GetLocalLocation());
+        auto host = tabBar->GetHost();
+        CHECK_NULL_VOID(host);
+        auto totalCount = host->TotalChildCount() - MASK_COUNT;
+        if (tabBar && tabBar->dialogNode_ && index >= 0 && index < totalCount) {
+            if (!tabBar->moveIndex_.has_value()) {
+                tabBar->moveIndex_ = index;
+            }
+
+            if (tabBar->moveIndex_ != index) {
+                tabBar->CloseDialog(tabBar->dialogNode_);
+                tabBar->moveIndex_ = index;
+                tabBar->ShowDialogWithNode(index);
+            }
+        }
+    };
+    dragEvent_ = MakeRefPtr<DragEvent>(nullptr, std::move(actionUpdateTask), nullptr, nullptr);
+    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
+    gestureHub->SetDragEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
@@ -567,6 +698,19 @@ void TabBarPattern::OnModifyDone()
 
     InitClick(gestureHub);
     InitTurnPageRateEvent();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    float scale = pipelineContext->GetFontScale();
+    if (scale >= BIG_FONT_SIZE_SCALE) {
+        InitLongPressEvent(gestureHub);
+        InitDragEvent(gestureHub);
+    } else {
+        gestureHub->RemoveDragEvent();
+        gestureHub->SetLongPressEvent(nullptr);
+        longPressEvent_ = nullptr;
+        dragEvent_ = nullptr;
+    }
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -618,6 +762,7 @@ void TabBarPattern::OnModifyDone()
         auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         gestureHub->AddClickEvent(tabBarPattern->clickEvent_);
+        gestureHub->SetLongPressEvent(tabBarPattern->longPressEvent_);
         if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             gestureHub->AddScrollableEvent(tabBarPattern->scrollableEvent_);
         }
@@ -714,13 +859,14 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             animationTargetIndex_ != indicator) {
             swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
             animationTargetIndex_.reset();
-        } else if (*windowSizeChangeReason_ == WindowSizeChangeReason::UNDEFINED ||
-            *windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
+            windowSizeChangeReason_.reset();
+        } else if (prevRootSize_.first != PipelineContext::GetCurrentRootWidth() ||
+            prevRootSize_.second != PipelineContext::GetCurrentRootHeight()) {
             // UNDEFINED currently implies window change on foldable
             PlayTabBarTranslateAnimation(indicator_);
             UpdateIndicator(indicator_);
+            windowSizeChangeReason_.reset();
         }
-        windowSizeChangeReason_.reset();
     }
     UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
     if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&
@@ -728,6 +874,74 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         ApplyTurnPageRateToIndicator(turnPageRate_);
     }
     return false;
+}
+
+void TabBarPattern::HandleLongPressEvent(const GestureEvent& info)
+{
+    auto index = CalculateSelectedIndex(info.GetLocalLocation());
+    HandleClick(info);
+    ShowDialogWithNode(index);
+}
+
+void TabBarPattern::ShowDialogWithNode(int32_t index)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto columnNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
+    RefPtr<FrameNode> imageNode = nullptr;
+    RefPtr<FrameNode> textNode = nullptr;
+    findTextAndImageNode(columnNode, textNode, imageNode);
+    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(textNode);
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    RefPtr<FrameNode> dialogColumnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_VOID(dialogColumnNode);
+    CreateDialogIconNode(dialogColumnNode, pipelineContext, imageNode);
+    CreateDialogTextNode(dialogColumnNode, pipelineContext, textNode);
+
+    DialogProperties dialogProperties;
+    dialogProperties.alignment = DialogAlignment::CENTER;
+    dialogProperties.gridCount = GRIDCOUNT;
+    dialogProperties.isModal = false;
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = static_cast<BlurStyle>(
+        dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+    auto renderContext = dialogColumnNode->GetRenderContext();
+    renderContext->UpdateBackBlurStyle(styleOption);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    BorderRadiusProperty radius;
+    radius.SetRadius(tabTheme->GetDialogRadiusLevel10());
+    renderContext->UpdateBorderRadius(radius);
+    renderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::OuterDefaultLG));
+    float scale = pipelineContext->GetFontScale();
+    if (scale == BIG_FONT_SIZE_SCALE || scale == LARGE_FONT_SIZE_SCALE) {
+        dialogProperties.width = CalcDimension(BIG_DIALOG_WIDTH, DimensionUnit::VP);
+    } else if (scale == MAX_FONT_SIZE_SCALE) {
+        dialogProperties.width = CalcDimension(MAX_DIALOG_WIDTH, DimensionUnit::VP);
+    }
+    dialogNode_ = overlayManager->ShowDialogWithNode(dialogProperties, dialogColumnNode, false);
+}
+
+void TabBarPattern::CloseDialog(int32_t index)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    overlayManager->CloseDialog(dialogNode_);
+    dialogNode_.Reset();
 }
 
 void TabBarPattern::HandleClick(const GestureEvent& info)
@@ -1154,22 +1368,31 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
 
 void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto touchType = info.GetTouchType();
+    auto index = CalculateSelectedIndex(info.GetLocalLocation());
+    if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && dialogNode_) {
+        TabBarClickEvent(index);
+        ClickTo(host, index);
+        CloseDialog(index);
+    }
+
     if (IsContainsBuilder()) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+
     auto totalCount = host->TotalChildCount() - MASK_COUNT;
     if (totalCount < 0) {
         return;
     }
-    auto touchType = info.GetTouchType();
-    auto index = CalculateSelectedIndex(info.GetLocalLocation());
+   
     if (touchType == TouchType::DOWN && index >= 0 && index < totalCount) {
         HandleTouchDown(index);
         touchingIndex_ = index;
         return;
     }
+
     if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && touchingIndex_.has_value()) {
         HandleTouchUp(index);
         touchingIndex_.reset();

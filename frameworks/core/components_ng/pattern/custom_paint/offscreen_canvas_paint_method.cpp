@@ -123,73 +123,6 @@ void OffscreenCanvasPaintMethod::ImageObjFailed()
     skiaDom_ = nullptr;
 }
 
-void OffscreenCanvasPaintMethod::DrawImage(
-    PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
-{
-    std::string::size_type tmp = canvasImage.src.find(".svg");
-    if (tmp != std::string::npos) {
-        DrawSvgImage(paintWrapper, canvasImage);
-        return;
-    }
-
-    ContainerScope scope(canvasImage.instanceId);
-    auto context = PipelineBase::GetCurrentContext();
-    auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                     ? Ace::ImageProvider::GetDrawingImage(canvasImage.src, context, Size(width, height))
-                     : Ace::ImageProvider::GetDrawingImage(canvasImage.src, context);
-    CHECK_NULL_VOID(image);
-
-    const auto rsCanvas = rsCanvas_.get();
-    RSBrush compositeOperationpBrush;
-    InitPaintBlend(compositeOperationpBrush);
-    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
-        rsCanvas_->SaveLayer(slo);
-    }
-    InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
-    if (globalState_.HasGlobalAlpha()) {
-        imageBrush_.SetAlphaF(globalState_.GetAlpha());
-    }
-    if (HasShadow()) {
-        RSRect rsRect = RSRect(
-            canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
-        RSPath path;
-        path.AddRect(rsRect);
-        RosenDecorationPainter::PaintShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr);
-    }
-
-    switch (canvasImage.flag) {
-        case 0:
-            rsCanvas->DrawImage(*image, canvasImage.dx, canvasImage.dy, RSSamplingOptions());
-            break;
-        case 1: {
-            RSRect rect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            rsCanvas->AttachBrush(imageBrush_);
-            rsCanvas->DrawImageRect(*image, rect, sampleOptions_);
-            rsCanvas->DetachBrush();
-            break;
-        }
-        case 2: {
-            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
-                canvasImage.sHeight + canvasImage.sy);
-            rsCanvas->AttachBrush(imageBrush_);
-            rsCanvas->DrawImageRect(*image, srcRect, dstRect, sampleOptions_,
-                RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
-            rsCanvas->DetachBrush();
-            break;
-        }
-        default:
-            break;
-    }
-    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-        rsCanvas_->Restore();
-    }
-}
-
 void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
     // get Image form pixelMap
@@ -202,59 +135,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     // Step2: Create Image and draw it, using gpu or cpu
     auto image = std::make_shared<RSImage>();
     CHECK_NULL_VOID(image->BuildFromBitmap(*rsBitmap));
-
-    const auto rsCanvas = rsCanvas_.get();
-    RSBrush compositeOperationpBrush;
-    InitPaintBlend(compositeOperationpBrush);
-    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
-        rsCanvas_->SaveLayer(slo);
-    }
-
-    InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
-
-    if (globalState_.HasGlobalAlpha()) {
-        imageBrush_.SetAlphaF(globalState_.GetAlpha());
-    }
-
-    if (HasShadow()) {
-        RSRect rsRect = RSRect(canvasImage.dx, canvasImage.dy,
-            canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
-        RSPath path;
-        path.AddRect(rsRect);
-        RosenDecorationPainter::PaintShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr);
-    }
-
-    switch (canvasImage.flag) {
-        case 0:
-            rsCanvas->DrawImage(*image, canvasImage.dx, canvasImage.dy, RSSamplingOptions());
-            break;
-        case 1: {
-            RSRect rect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            rsCanvas->AttachBrush(imageBrush_);
-            rsCanvas->DrawImageRect(*image, rect, sampleOptions_);
-            rsCanvas->DetachBrush();
-            break;
-        }
-        case 2: {
-            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
-                canvasImage.sHeight + canvasImage.sy);
-            rsCanvas->AttachBrush(imageBrush_);
-            rsCanvas->DrawImageRect(
-                *image, srcRect, dstRect, sampleOptions_, RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
-            rsCanvas->DetachBrush();
-            break;
-        }
-        default:
-            break;
-    }
-    if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-        rsCanvas_->Restore();
-    }
+    DrawImageInternal(canvasImage, image);
 }
 
 std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
@@ -569,7 +450,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
             RSBrush brush;
             RSSamplingOptions options;
             InitImagePaint(nullptr, &brush, options);
-            UpdatePaintShader(OffsetF(0, 0), nullptr, &brush, fillState_.GetGradient());
+            UpdatePaintShader(nullptr, &brush, fillState_.GetGradient());
             txtStyle.foregroundBrush = brush;
         }
         if (globalState_.HasGlobalAlpha()) {
@@ -594,7 +475,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
         ConvertTxtStyle(strokeState_.GetTextStyle(), txtStyle);
         txtStyle.fontSize = strokeState_.GetTextStyle().GetFontSize().Value();
         if (strokeState_.GetGradient().IsValid()) {
-            UpdatePaintShader(OffsetF(0, 0), &pen, nullptr, strokeState_.GetGradient());
+            UpdatePaintShader(&pen, nullptr, strokeState_.GetGradient());
         }
         if (hasShadow) {
             pen.SetColor(shadow_.GetColor().GetValue());
@@ -613,10 +494,10 @@ void OffscreenCanvasPaintMethod::PaintShadow(const RSPath& path,
     RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
 }
 
-void OffscreenCanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
+void OffscreenCanvasPaintMethod::Path2DRect(const PathArgs& args)
 {
-    double left = args.para1 + offset.GetX();
-    double top = args.para2 + offset.GetY();
+    double left = args.para1;
+    double top = args.para2;
     double right = args.para3 + args.para1;
     double bottom = args.para4 + args.para2;
     rsPath2d_.AddRect(RSRect(left, top, right, bottom));

@@ -81,6 +81,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
+#ifdef WEB_SUPPORTED
+#include "core/components_ng/pattern/web/web_pattern.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -98,6 +101,9 @@ constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;
 constexpr int32_t SHEET_HALF_SIZE = 2;
 // dialog animation params
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.38f, 1.33f, 0.6f, 1.0f);
+
+constexpr int32_t ROOT_MIN_NODE = 1;
+constexpr int32_t TOAST_MIN_NODE = 2;
 
 // custom keyboard animation params
 const RefPtr<Curve> SHOW_CUSTOM_KEYBOARD_ANIMATION_CURVE =
@@ -1221,6 +1227,12 @@ RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, co
         return nullptr;
     }
     CHECK_NULL_RETURN(popupInfo.popupNode, nullptr);
+    auto bubbleRenderProp = popupInfo.popupNode->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_RETURN(bubbleRenderProp, nullptr);
+    auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
+    if (!autoCancel) {
+        return nullptr;
+    }
     popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
     CHECK_NULL_RETURN(popupInfo.isCurrentOnShow, nullptr);
     popupMap_[targetId].isCurrentOnShow = false;
@@ -1569,7 +1581,7 @@ void OverlayManager::DeleteMenu(int32_t targetId)
             RemoveMenuNotInSubWindow(WeakClaim(RawPtr(node)), rootNodeWeak_, WeakClaim(this));
         }
     }
-    menuMap_.erase(it);
+    EraseMenuInfo(targetId);
 }
 
 void OverlayManager::CleanMenuInSubWindowWithAnimation()
@@ -2285,50 +2297,13 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     RemoveIndexerPopup();
-    if (rootNode->GetChildren().size() > 1) {
+    if (rootNode->GetChildren().size() > ROOT_MIN_NODE) {
         // stage node is at index 0, remove overlay at last
         auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
         CHECK_NULL_RETURN(overlay, false);
-        // close dialog with animation
-        auto pattern = overlay->GetPattern();
-        if (InstanceOf<ToastPattern>(pattern)) {
-            // still have nodes on root expect stage and toast node.
-            if (rootNode->GetChildren().size() > 2) {
-                // If the current node is a toast, the last second overlay's node should be processed.
-                overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(rootNode->GetChildren().size() - 2));
-                CHECK_NULL_RETURN(overlay, false);
-                pattern = overlay->GetPattern();
-            } else {
-                return false;
-            }
-        }
-        if (overlay->GetTag() == V2::OVERLAY_ETS_TAG) {
-            return false;
-        }
-        if (InstanceOf<DialogPattern>(pattern)) {
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {
-                return false;
-            }
-            auto dialogPattern = DynamicCast<DialogPattern>(pattern);
-            CHECK_NULL_RETURN(dialogPattern, false);
-            if (dialogPattern->ShouldDismiss()) {
-                SetDismissDialogId(0);
-                dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
-                TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
-                return true;
-            }
-            return RemoveDialog(overlay, isBackPressed, isPageRouter);
-        }
-        if (InstanceOf<BubblePattern>(pattern)) {
-            return RemoveBubble(overlay);
-        }
-        if (InstanceOf<MenuWrapperPattern>(pattern)) {
-            return RemoveMenu(overlay);
-        }
-        if (InstanceOf<VideoFullScreenPattern>(pattern)) {
-            auto videoPattern = DynamicCast<VideoFullScreenPattern>(pattern);
-            CHECK_NULL_RETURN(videoPattern, false);
-            return videoPattern->ExitFullScreen();
+        // page crash when function return false
+        if (ExceptComponent(rootNode, overlay, isBackPressed, isPageRouter)) {
+            return true;
         }
 
         // remove navDestination in navigation first
@@ -2347,6 +2322,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
                 return RemoveModalInOverlay();
             }
         }
+        auto pattern = overlay->GetPattern();
         if (!InstanceOf<KeyboardPattern>(pattern)) {
             if (overlay->GetTag() != V2::SHEET_WRAPPER_TAG) {
                 rootNode->RemoveChild(overlay);
@@ -2356,6 +2332,94 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         }
     }
     return false;
+}
+
+bool OverlayManager::ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
+    bool isBackPressed, bool isPageRouter)
+{
+    // close dialog with animation
+    auto pattern = overlay->GetPattern();
+    if (InstanceOf<ToastPattern>(pattern)) {
+        // still have nodes on root expect stage and toast node.
+        if (rootNode->GetChildren().size() > TOAST_MIN_NODE) {
+            // If the current node is a toast, the last second overlay's node should be processed.
+            overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(rootNode->GetChildren().size()
+                                                                                            - TOAST_MIN_NODE));
+            CHECK_NULL_RETURN(overlay, false);
+            pattern = overlay->GetPattern();
+        } else {
+            return false;
+        }
+    }
+
+    CHECK_EQUAL_RETURN(overlay->GetTag(),  V2::OVERLAY_ETS_TAG, false);
+
+    if (InstanceOf<DialogPattern>(pattern)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {
+            return false;
+        }
+        auto dialogPattern = DynamicCast<DialogPattern>(pattern);
+        CHECK_NULL_RETURN(dialogPattern, false);
+        if (dialogPattern->ShouldDismiss()) {
+            SetDismissDialogId(0);
+            dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
+            return true;
+        }
+        return RemoveDialog(overlay, isBackPressed, isPageRouter);
+    }
+    if (InstanceOf<BubblePattern>(pattern)) {
+        return RemoveBubble(overlay);
+    }
+    if (InstanceOf<MenuWrapperPattern>(pattern)) {
+        return RemoveMenu(overlay);
+    }
+    if (InstanceOf<VideoFullScreenPattern>(pattern)) {
+        auto videoPattern = DynamicCast<VideoFullScreenPattern>(pattern);
+        CHECK_NULL_RETURN(videoPattern, false);
+        return videoPattern->ExitFullScreen();
+    }
+
+    if (overlay->GetTag() == V2::SHEET_WRAPPER_TAG) {
+        return WebBackward(overlay);
+    }
+    return false;
+}
+
+bool OverlayManager::WebBackward(RefPtr<NG::FrameNode>& overlay)
+{
+#ifdef WEB_SUPPORTED
+    RefPtr<NG::FrameNode> webNode;
+    FindWebNode(overlay, webNode);
+    if (webNode && InstanceOf<WebPattern>(webNode->GetPattern())) {
+        auto webPattern = DynamicCast<WebPattern>(webNode->GetPattern());
+        CHECK_NULL_RETURN(webPattern, false);
+        webPattern->Backward();
+        return true;
+    }
+#endif
+    return false;
+}
+
+void OverlayManager::FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode)
+{
+    CHECK_NULL_VOID(node);
+
+    if (webNode) {
+        return;
+    }
+
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    if (frameNode && !frameNode->IsInternal() && frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        webNode = frameNode;
+        return;
+    }
+
+    if (!node->GetChildren().empty()) {
+        for (const auto& child : node->GetChildren()) {
+            FindWebNode(child, webNode);
+        }
+    }
 }
 
 bool OverlayManager::RemoveModalInOverlay()
@@ -3970,35 +4034,11 @@ RefPtr<FrameNode> OverlayManager::GetSheetMask(const RefPtr<FrameNode>& sheetNod
     return sheetChildFrameNode;
 }
 
-void OverlayManager::SetCustomKeybroadHeight(float customHeight)
-{
-    if (!keyboardAvoidance_) {
-        return;
-    }
-}
-
 void OverlayManager::SetCustomKeyboardOption(bool supportAvoidance)
 {
     auto pipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
     keyboardAvoidance_ = supportAvoidance;
-}
-
-void OverlayManager::SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
-    RefPtr<FrameNode> customKeyboard)
-{
-    option.SetOnFinishEvent([weak = WeakClaim(this), customKeyboard] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto customHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
-        pattern->SetCustomKeybroadHeight(customHeight);
-    });
-
-    AnimationUtils::Animate(option, [context]() {
-    if (context) {
-        context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-    }
-    }, option.GetOnFinishEvent());
 }
 
 void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn)
@@ -4026,7 +4066,11 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     auto keyboardHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
-        SupportCustomKeyboardAvoidance(context, option, customKeyboard);
+        AnimationUtils::Animate(option, [context]() {
+            if (context) {
+                context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            }
+        });
     } else {
         context->UpdateOpacity(1.0);
         option.SetOnFinishEvent([customKeyboard] {

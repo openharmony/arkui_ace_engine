@@ -1627,4 +1627,11 @@ uint32_t TextFieldModelNG::GetMaxLines(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, MaxLines, value, frameNode, value);
     return value;
 }
+    
+void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetPadding(newPadding);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
+}
 } // namespace OHOS::Ace::NG

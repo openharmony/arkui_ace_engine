@@ -57,6 +57,8 @@ public:
         std::vector<NG::TextCascadePickerOptions>& options);
     static bool ParseInternalArray(const JSRef<JSArray>& jsRangeValue, std::vector<uint32_t>& selecteds,
         std::vector<std::string>& values, uint32_t index, bool isHasSelectAttr);
+    static void SetSelectedValues(std::vector<uint32_t>& selectedValues, std::vector<std::string>& values,
+        uint32_t index, bool isHasSelectAttr, std::vector<std::string>& resultStr);
     static bool ParseMultiTextArrayValue(const JsiRef<JsiValue>& jsValue, ParseTextArrayParam& param);
     static bool ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSelectedValue, ParseTextArrayParam& param);
     static void ParseMultiTextArraySelectInternal(const std::vector<NG::TextCascadePickerOptions>& options,

@@ -56,6 +56,7 @@ const char INSPECTOR_ENABLED[] = "enabled";
 const char INSPECTOR_OPACITY[] = "opacity";
 const char INSPECTOR_ZINDEX[] = "zindex";
 const char INSPECTOR_VISIBILITY[] = "visibility";
+const char INSPECTOR_COMPONENT_TYPE[] = "type";
 
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
@@ -181,6 +182,11 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
+    if (parent->GetTag() == "__Common__") {
+        jsonNode->Put(INSPECTOR_COMPONENT_TYPE, "custom");
+    } else {
+        jsonNode->Put(INSPECTOR_COMPONENT_TYPE, "build-in");
+    }
     auto node = AceType::DynamicCast<FrameNode>(parent);
     if (node) {
         RectF rect;
@@ -290,6 +296,11 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
+    if (parent->GetTag() == "__Common__") {
+        jsonNode->Put(INSPECTOR_COMPONENT_TYPE, "custom");
+    } else {
+        jsonNode->Put(INSPECTOR_COMPONENT_TYPE, "build-in");
+    }
     auto node = AceType::DynamicCast<FrameNode>(parent);
 
     RectF rect;
