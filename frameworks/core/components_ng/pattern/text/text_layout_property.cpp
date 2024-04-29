@@ -124,8 +124,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("fontStyle", GetFontStyleInJson(GetItalicFontStyle()).c_str(), filter);
     json->PutExtAttr("fontWeight", GetFontWeightInJson(GetFontWeight()).c_str(), filter);
     json->PutExtAttr("fontFamily", GetFontFamilyInJson(GetFontFamily()).c_str(), filter);
-    json->PutExtAttr("renderingStrategy",
-        GetSymbolRenderingStrategyInJson(GetSymbolRenderingStrategy()).c_str(), filter);
+    json->PutExtAttr(
+        "renderingStrategy", GetSymbolRenderingStrategyInJson(GetSymbolRenderingStrategy()).c_str(), filter);
     json->PutExtAttr("effectStrategy", GetSymbolEffectStrategyInJson(GetSymbolEffectStrategy()).c_str(), filter);
 
     auto jsonDecoration = JsonUtil::Create(true);
@@ -137,35 +137,43 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     jsonDecoration->Put("style", style.c_str());
     json->PutExtAttr("decoration", jsonDecoration->ToString().c_str(), filter);
 
-    json->PutExtAttr("textCase",
-        V2::ConvertWrapTextCaseToStirng(GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
+    json->PutExtAttr(
+        "textCase", V2::ConvertWrapTextCaseToStirng(GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
     json->PutExtAttr("minFontSize", GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
     json->PutExtAttr("maxFontSize", GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
     json->PutExtAttr("letterSpacing", GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
     json->PutExtAttr("lineHeight", GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
     json->PutExtAttr("textBaseline",
-        TEXT_BASE_LINE_TO_STRING.at(static_cast<int32_t>(GetTextBaseline().value_or(TextBaseline::ALPHABETIC)))
-            .c_str(), filter);
+        TEXT_BASE_LINE_TO_STRING.at(static_cast<int32_t>(GetTextBaseline().value_or(TextBaseline::ALPHABETIC))).c_str(),
+        filter);
     json->PutExtAttr("baselineOffset",
         std::to_string(static_cast<int32_t>(GetBaselineOffset().value_or(0.0_vp).Value())).c_str(), filter);
-    json->PutExtAttr("textAlign",
-        V2::ConvertWrapTextAlignToString(GetTextAlign().value_or(TextAlign::START)).c_str(), filter);
+    json->PutExtAttr(
+        "textAlign", V2::ConvertWrapTextAlignToString(GetTextAlign().value_or(TextAlign::START)).c_str(), filter);
     json->PutExtAttr("textOverflow",
         V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
     json->PutExtAttr("maxLines", std::to_string(GetMaxLines().value_or(UINT32_MAX)).c_str(), filter);
 
+    ToJsonValueForOption(json, filter);
+}
+
+void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
     auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
     // Determines if there are multiple textShadows
     auto jsonShadow = (shadow.size() == 1) ? CovertShadowToJson(shadow.front()) : CovertShadowsToJson(shadow);
     json->PutExtAttr("textShadow", jsonShadow, filter);
-    json->PutExtAttr("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
-        GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str(), filter);
+    json->PutExtAttr("heightAdaptivePolicy",
+        V2::ConvertWrapTextHeightAdaptivePolicyToString(
+            GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))
+            .c_str(),
+        filter);
     json->PutExtAttr("copyOption", GetCopyOptionString().c_str(), filter);
-    json->PutExtAttr("wordBreak",
-        V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str(), filter);
+    json->PutExtAttr(
+        "wordBreak", V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str(), filter);
     json->PutExtAttr("ellipsisMode",
         V2::ConvertEllipsisModeToString(GetEllipsisMode().value_or(EllipsisMode::TAIL)).c_str(), filter);
-    json->Put("marqueeOptions", GetTextMarqueeOptionsString().c_str());
+    json->PutExtAttr("marqueeOptions", GetTextMarqueeOptionsString().c_str(), filter);
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
