@@ -45,6 +45,7 @@ public:
     static std::vector<RefPtr<SpanBase>> ParseJsSpanBaseVector(const JSRef<JSObject>& obj, int32_t maxLength);
 
     static JSRef<JSObject> CreateJsSpanBaseObject(const RefPtr<SpanBase>& spanObject);
+    static JSRef<JSObject> CreateJsSpanObject(const RefPtr<SpanBase>& spanObject);
     static RefPtr<SpanBase> ParseJsSpanBase(int32_t start, int32_t length, SpanType type, const JSRef<JSObject>& obj);
     static RefPtr<SpanBase> ParseJsSpanBaseWithoutSpecialSpan(
         int32_t start, int32_t length, SpanType type, const JSRef<JSObject>& obj, const JSCallbackInfo& info);
@@ -66,6 +67,9 @@ public:
 
     static JSRef<JSObject> CreateJsTextShadowSpan(const RefPtr<SpanBase>& spanObject);
     static RefPtr<SpanBase> ParseJsTextShadowSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
+
+    static JSRef<JSObject> CreateJsLineHeightSpan(const RefPtr<SpanBase>& spanObject);
+    static RefPtr<SpanBase> ParseJsLineHeightSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
 
     static JSRef<JSObject> CreateJsImageSpan(const RefPtr<SpanBase>& spanObject);
     static RefPtr<SpanBase> GetImageAttachment(int32_t start, int32_t length, const JSRef<JSObject>& obj);
