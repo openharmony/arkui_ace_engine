@@ -95,6 +95,21 @@ public:
         data_ = data;
     }
 
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
+    double GetDensity()
+    {
+        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+    }
+
 private:
     int32_t x_ = 0;
     int32_t y_ = 0;
@@ -103,7 +118,7 @@ private:
     int32_t dirtyWidth_ = 0;
     int32_t dirtyHeight_ = 0;
     std::vector<Color> data_;
-
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasImageData);
 };
 

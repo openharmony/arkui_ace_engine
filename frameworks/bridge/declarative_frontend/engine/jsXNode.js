@@ -968,6 +968,11 @@ var LengthUnit;
     LengthUnit[LengthUnit["PERCENT"] = 3] = "PERCENT";
     LengthUnit[LengthUnit["LPX"] = 4] = "LPX";
 })(LengthUnit || (LengthUnit = {}));
+var LengthMetricsUnit;
+(function (LengthMetricsUnit) {
+    LengthMetricsUnit[LengthMetricsUnit["DEFAULT"] = 0] = "DEFAULT";
+    LengthMetricsUnit[LengthMetricsUnit["PX"] = 1] = "PX";
+})(LengthMetricsUnit || (LengthMetricsUnit = {}));
 class LengthMetrics {
     constructor(value, unit) {
         if (unit in LengthUnit) {
@@ -1607,6 +1612,6 @@ class NodeContent extends Content {
 
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
-    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, ShapeMask,
+    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent, TypedNode
 };

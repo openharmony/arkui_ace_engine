@@ -45,12 +45,28 @@ public:
         path2d_ = path2d;
     }
 
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
+    double GetDensity()
+    {
+        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasPath);
 protected:
     void SetPathSize(const JSCallbackInfo& info);
     size_t lastPathSize_ = 0;
     panda::CopyableGlobal<panda::JSValueRef> pathCmdObj_;
     RefPtr<CanvasPath2D> path2d_;
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 
 } // namespace OHOS::Ace::Framework
