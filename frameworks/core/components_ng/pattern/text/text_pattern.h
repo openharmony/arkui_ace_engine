@@ -570,6 +570,10 @@ public:
         CopySelectionMenuParams(selectInfo, textResponseType_.value_or(TextResponseType::NONE));
     }
 
+    void OnSensitiveStyleChange(bool isSensitive) override;
+
+    bool IsSensitiveEnalbe();
+
     void InitCustomSpanPlaceholderInfo(const std::vector<CustomSpanPlaceholderInfo>& customSpanPlaceholder)
     {
         customSpanPlaceholder_ = customSpanPlaceholder;
@@ -735,6 +739,7 @@ private:
     bool isDoubleClick_ = false;
     bool isSpanStringMode_ = false;
     bool showSelected_ = false;
+    bool isSensitive_ = false;
     int32_t clickedSpanPosition_ = -1;
     TimeStamp lastClickTimeStamp_;
     bool leftFadeout_ = false;

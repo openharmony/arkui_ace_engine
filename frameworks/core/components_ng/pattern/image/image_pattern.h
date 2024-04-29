@@ -187,6 +187,7 @@ public:
     }
     void EnableAnalyzer(bool value);
     bool hasSceneChanged();
+    void OnSensitiveStyleChange(bool isSensitive) override;
 
     //animation
     struct CacheImageStruct {
@@ -413,6 +414,7 @@ private:
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
+    bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     OffsetF parentGlobalOffset_;
 

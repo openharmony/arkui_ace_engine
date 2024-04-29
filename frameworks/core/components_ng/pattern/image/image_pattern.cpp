@@ -54,6 +54,9 @@ constexpr int32_t DEFAULT_ITERATIONS = 1;
 } // namespace
 
 constexpr float BOX_EPSILON = 0.5f;
+constexpr float IMAGE_SENSITIVE_RADIUS = 80.0f;
+constexpr double IMAGE_SENSITIVE_SATURATION = 1.0;
+constexpr double IMAGE_SENSITIVE_BRIGHTNESS = 1.08;
 
 ImagePattern::ImagePattern()
 {
@@ -443,15 +446,21 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
 
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
+    bool sensitive = false;
+    if (isSensitive_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        sensitive = host->IsPrivacySensitive();
+    }
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_, interpolationDefault_);
+        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_, sensitive, interpolationDefault_);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_, interpolationDefault_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_, sensitive, interpolationDefault_);
     }
     CreateObscuredImage();
     if (obscuredImage_) {
-        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_, interpolationDefault_);
+        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_, sensitive, interpolationDefault_);
     }
     return nullptr;
 }
@@ -1822,6 +1831,32 @@ void ImagePattern::SetDuration(int32_t duration)
         CHECK_NULL_VOID(imageAnimator);
         imageAnimator->animator_->SetDuration(finalDuration);
     });
+}
+
+void ImagePattern::OnSensitiveStyleChange(bool isSensitive)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto privacySensitive = host->IsPrivacySensitive();
+    if (isSensitive && privacySensitive) {
+        isSensitive_ = true;
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CalcDimension radius;
+        radius.SetValue(IMAGE_SENSITIVE_RADIUS);
+        Color color = Color::FromARGB(13, 255, 255, 255);
+        EffectOption option = { radius, IMAGE_SENSITIVE_SATURATION, IMAGE_SENSITIVE_BRIGHTNESS, color };
+        if (renderContext->GetBackBlurRadius().has_value()) {
+            renderContext->UpdateBackBlurRadius(Dimension());
+        }
+        if (renderContext->GetBackBlurStyle().has_value()) {
+            renderContext->UpdateBackBlurStyle(std::nullopt);
+        }
+        renderContext->UpdateBackgroundEffect(option);
+    } else {
+        isSensitive_ = false;
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void ImagePattern::ResetImageProperties()

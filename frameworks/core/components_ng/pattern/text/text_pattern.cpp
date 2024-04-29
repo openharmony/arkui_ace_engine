@@ -3149,6 +3149,21 @@ void TextPattern::ProcessSpanString()
     }
 }
 
+void TextPattern::OnSensitiveStyleChange(bool isSensitive)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isSensitive_ = isSensitive;
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+bool TextPattern::IsSensitiveEnalbe()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return isSensitive_ && host->IsPrivacySensitive();
+}
+
 Offset TextPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
 {
     auto localPoint = OffsetF(globalOffset.GetX(), globalOffset.GetY());

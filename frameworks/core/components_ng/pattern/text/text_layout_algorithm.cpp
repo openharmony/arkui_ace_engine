@@ -280,6 +280,11 @@ bool TextLayoutAlgorithm::CreateParagraph(
     paragraphManager_->Reset();
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    if (pattern->IsSensitiveEnalbe()) {
+        UpdateSensitiveContent(content);
+    }
     // default paragraph style
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spans_.empty()) {
@@ -618,6 +623,15 @@ bool TextLayoutAlgorithm::AdaptMaxTextSize(TextStyle& textStyle, const std::stri
 std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
 {
     return textStyle_;
+}
+
+void TextLayoutAlgorithm::UpdateSensitiveContent(std::string& content)
+{
+    std::replace_if(
+        content.begin(), content.end(),
+        [](char c) {
+            return c != '\n';
+        }, '-');
 }
 
 size_t TextLayoutAlgorithm::GetLineCount() const
