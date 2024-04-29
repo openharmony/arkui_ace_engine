@@ -1347,6 +1347,7 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
                     tabBarPattern->SetChangeByClick(false);
                 }
             } else {
+                tabBarPattern->SetNeedSetCentered();
                 tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             }
         }
