@@ -547,7 +547,8 @@ float TitleBarLayoutAlgorithm::GetFullModeTitleOffsetY(float titleHeight, float 
         return offsetY;
     }
     if (titleRealHeight <= titleSpace) {
-        offsetY = (titleSpace - titleRealHeight) / dividerOffset;
+        offsetY = (titleSpace - titleRealHeight +
+            static_cast<float>(paddingTopTwolines_.ConvertToPx())) / dividerOffset;
     } else {
         offsetY = titleSpace - titleRealHeight;
     }
@@ -688,6 +689,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
             // custom title margin is (0.0f, menuHeight_)
             auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
             float customOffsetX = 0.0f;
+            customOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, customOffsetX);
             geometryNode->SetMarginFrameOffset(OffsetF { customOffsetX, customOffsetY});
             titleWrapper->Layout();
             return;
