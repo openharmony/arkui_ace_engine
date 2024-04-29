@@ -89,13 +89,14 @@ void DataPanelPattern::FireBuilder()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChildAtIndex(0);
     if (!makeFunc_.has_value()) {
+        host->RemoveChildAndReturnIndex(contentModifierNode_);
         contentModifierNode_ = nullptr;
         host->AddChild(nullptr, 0);
         host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
+    host->RemoveChildAtIndex(0);
     CHECK_NULL_VOID(makeFunc_);
     contentModifierNode_ = BuildContentModifierNode();
     CHECK_NULL_VOID(contentModifierNode_);
