@@ -23,13 +23,14 @@ void NavDestinationEventHub::FireOnDisappear()
     CHECK_NULL_VOID(navDestination);
     if (navDestination->GetIsAnimated()) {
         FireDisappearCallback();
+        auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetCustomNode(nullptr);
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddAfterLayoutTask([weakDestination = WeakPtr<NavDestinationGroupNode>(navDestination)]() {
-        auto destination = weakDestination.Upgrade();
-        CHECK_NULL_VOID(destination);
+    pipelineContext->AddAfterLayoutTask([destination = navDestination]() {
         auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDisappearCallback();

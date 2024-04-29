@@ -245,7 +245,6 @@ void NavigationGroupNode::RemoveRedundantNavDestination(
                 navDestination->GetContentNode()->Clean();
             }
             navigationContentNode->RemoveChild(navDestination, true);
-            navDestinationPattern->SetCustomNode(nullptr);
             hasChanged = true;
         } else {
             // remain the last child for pop animation
@@ -462,7 +461,6 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto parent = preNavDesNode->GetParent();
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(preNavDesNode);
-            preNavDesPattern->SetCustomNode(nullptr);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
@@ -833,7 +831,6 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
     auto parent = AceType::DynamicCast<FrameNode>(preNode->GetParent());
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(preNode);
-    navDestinationPattern->SetCustomNode(nullptr);
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
