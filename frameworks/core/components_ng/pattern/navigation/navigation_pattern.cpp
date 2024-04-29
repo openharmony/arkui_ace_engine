@@ -1015,6 +1015,13 @@ RefPtr<UINode> NavigationPattern::GenerateUINodeByIndex(int32_t index)
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
         NavigationGroupNode::GetNavDestinationNode(node));
     CHECK_NULL_RETURN(navDestinationNode, node);
+    // set navigation id
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestinationNode->GetPattern());
+    if (navigationNode && navDestinationPattern) {
+        navDestinationPattern->SetNavigationNode(navigationNode);
+        navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
+    }
     auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, node);
     eventHub->FireOnWillAppear();
