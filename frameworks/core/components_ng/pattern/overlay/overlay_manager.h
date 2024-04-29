@@ -444,11 +444,6 @@ public:
 
     void SetCustomKeyboardOption(bool supportAvoidance);
 
-    void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
-        RefPtr<FrameNode> customKeyboard);
-
-    void SetCustomKeybroadHeight(float customHeight = 0.0);
-
     void SetFilterActive(bool actived)
     {
         hasFilterActived = actived;
