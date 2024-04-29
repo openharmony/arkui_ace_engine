@@ -623,5 +623,14 @@ RefPtr<ImagePattern> ImageModelNG::GetImagePattern()
     CHECK_NULL_RETURN(frameNode, nullptr);
     return AceType::DynamicCast<ImagePattern>(frameNode->GetPattern());
 }
+
+ImageResizableSlice ImageModelNG::GetResizableSlice(FrameNode *frameNode)
+{
+    ImageResizableSlice resizable;
+    CHECK_NULL_RETURN(frameNode, resizable);
+    auto renderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(renderProperty, resizable);
+    return renderProperty->GetImageResizableSlice().value_or(resizable);
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

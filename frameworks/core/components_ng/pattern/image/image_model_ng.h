@@ -100,6 +100,7 @@ public:
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
     static void SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice);
+    static ImageResizableSlice GetResizableSlice(FrameNode *frameNode);
     static void SetDynamicRangeMode(FrameNode *frameNode, DynamicRangeMode dynamicRangeMode);
     static void SetEnhancedImageQuality(FrameNode *frameNode, AIImageQuality imageQuality);
 private:

@@ -571,6 +571,41 @@ void ResetEnhancedImageQuality(ArkUINodeHandle node)
     ImageModelNG::SetEnhancedImageQuality(frameNode, AIImageQuality::NONE);
 }
 
+void SetImageResizable(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
+    ArkUI_Float32 right, ArkUI_Float32 bottom)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageResizableSlice resizable;
+    Dimension leftDimension(left, DimensionUnit::VP);
+    resizable.SetEdgeSlice(ResizableOption::LEFT, leftDimension);
+    Dimension topDimension(top, DimensionUnit::VP);
+    resizable.SetEdgeSlice(ResizableOption::TOP, topDimension);
+    Dimension rightDimension(right, DimensionUnit::VP);
+    resizable.SetEdgeSlice(ResizableOption::RIGHT, rightDimension);
+    Dimension bottomDimension(bottom, DimensionUnit::VP);
+    resizable.SetEdgeSlice(ResizableOption::BOTTOM, bottomDimension);
+    ImageModelNG::SetResizableSlice(frameNode, resizable);
+}
+
+void GetImageResizable(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto resizable = ImageModelNG::GetResizableSlice(frameNode);
+    if (0 < size) {
+        arrayValue[0] = resizable.left.Value();
+    }
+    if (NUM_1 < size) {
+        arrayValue[NUM_1] = resizable.top.Value();
+    }
+    if (NUM_2 < size) {
+        arrayValue[NUM_2] = resizable.right.Value();
+    }
+    if (NUM_3 < size) {
+        arrayValue[NUM_3] = resizable.bottom.Value();
+    }
+}
 } // namespace
 
 namespace NodeModifier {
@@ -586,7 +621,7 @@ const ArkUIImageModifier* GetImageModifier()
         ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
         ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality, ResetEnhancedImageQuality,
         GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
-        GetImageDraggable, GetRenderMode };
+        GetImageDraggable, GetRenderMode, SetImageResizable, GetImageResizable};
     return &modifier;
 }
 
