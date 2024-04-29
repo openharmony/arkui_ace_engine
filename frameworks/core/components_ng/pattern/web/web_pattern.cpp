@@ -1272,6 +1272,9 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     if (GreatOrEqual(drawSize.Height(), Infinity<double>())) {
         drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
     }
+    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
+        drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
+    }
 
     drawSize_ = drawSize;
     drawSizeCache_ = drawSize_;
