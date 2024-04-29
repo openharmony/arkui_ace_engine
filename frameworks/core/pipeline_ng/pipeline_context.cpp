@@ -3618,17 +3618,21 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
 
 void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
 {
-    if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0) {
+    auto windowManager = GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto mode = windowManager->GetWindowMode();
+    if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
+        mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
         auto percent = SystemProperties::GetDarkModeBrightnessPercent();
         auto stage = stageManager_->GetStageNode();
         CHECK_NULL_VOID(stage);
         auto renderContext = stage->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         CalcDimension dimension;
-        if (isFocus) {
-            dimension.SetValue(1 + percent.front());
-        } else {
+        if (!isFocus && mode == WindowMode::WINDOW_MODE_FLOATING) {
             dimension.SetValue(1 + percent.back());
+        } else {
+            dimension.SetValue(1 + percent.front());
         }
         renderContext->UpdateFrontBrightness(dimension);
     }
