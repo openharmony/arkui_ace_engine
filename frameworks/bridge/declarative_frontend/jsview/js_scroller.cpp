@@ -129,11 +129,12 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
         bool hasDuration = true;
         if (!ConvertFromJSValue(animationObj->GetProperty("duration"), duration) || Negative(duration)) {
             duration = DEFAULT_DURATION;
+            hasDuration = false;
         }
-        if (!hasDuration && !ParseCurveParams(curve, curveArgs) &&
-            !ConvertFromJSValue(animationObj->GetProperty("canOverScroll"), canOverScroll)) {
-            smooth = true;
-        }
+        bool hasCurve = ParseCurveParams(curve, curveArgs);
+        bool hasCanOverScroll =
+            ConvertFromJSValue(animationObj->GetProperty("canOverScroll"), canOverScroll) ? true : false;
+        smooth = !hasDuration && !hasCurve && !hasCanOverScroll ? true : false;
     } else if (animationValue->IsBoolean()) {
         smooth = animationValue->ToBoolean();
     }
