@@ -1694,6 +1694,18 @@ RefPtr<FrameNode> FrameNode::GetPageNode()
     return AceType::DynamicCast<FrameNode>(parent);
 }
 
+RefPtr<FrameNode> FrameNode::GetFirstAutoFillContainerNode()
+{
+    if (IsAutoFillContainerNode()) {
+        return Claim(this);
+    }
+    auto parent = GetParent();
+    while (parent && !parent->IsAutoFillContainerNode()) {
+        parent = parent->GetParent();
+    }
+    return AceType::DynamicCast<FrameNode>(parent);
+}
+
 void FrameNode::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
 {
     if (pattern_) {

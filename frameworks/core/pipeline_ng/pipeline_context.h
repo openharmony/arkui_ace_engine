@@ -541,7 +541,8 @@ public:
     void RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback);
     void DumpJsInfo(const std::vector<std::string>& params) const;
 
-    bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
+    bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
+        bool skipSubAutoFillContainer = false);
     bool CheckNeedAutoSave();
     bool CheckPageFocus();
     bool CheckOverlayFocus();

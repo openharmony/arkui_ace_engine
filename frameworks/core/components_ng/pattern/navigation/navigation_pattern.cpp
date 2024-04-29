@@ -1750,6 +1750,11 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     // fire onWillHide
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    if (!isPopPage && !preDestination && navigationMode_ == NavigationMode::STACK) {
+        // NavBar will be covered in STACK mode
+        auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+        ProcessAutoSave(navBarNode);
+    }
     if (isPopPage || (preDestination && hostNode->GetLastStandardIndex() > preDestination->GetIndex())) {
         NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
     }
@@ -1777,6 +1782,17 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         navigationPattern->FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, true);
         navigationPattern->TransitionWithAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
     });
+}
+
+void NavigationPattern::ProcessAutoSave(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    if (!node->NeedRequestAutoSave()) {
+        return;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    container->RequestAutoSave(node);
 }
 
 void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,

@@ -29,6 +29,7 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -1298,7 +1299,9 @@ private:
     void InitDragDropEventWithOutDragStart();
     void UpdateBlurReason();
     AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
-    bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType);
+    bool CheckAutoFillType(const AceAutoFillType& autoFillType);
+    bool GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
+    void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     AceAutoFillType GetAutoFillType();
     bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
     void DoProcessAutoFill();

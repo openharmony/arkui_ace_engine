@@ -784,6 +784,7 @@ public:
     OffsetF GetOffsetInScreen();
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
+    RefPtr<FrameNode> GetFirstAutoFillContainerNode();
     RefPtr<FrameNode> GetNodeContainer();
     RefPtr<ContentModifier> GetContentModifier();
 

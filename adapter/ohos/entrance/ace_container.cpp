@@ -1159,7 +1159,8 @@ bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
     CHECK_NULL_RETURN(uiContentImpl, false);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    uiContentImpl->DumpViewData(node, viewDataWrap);
+    auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
+    uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
@@ -1180,7 +1181,8 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     CHECK_NULL_RETURN(uiContentImpl, false);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     CHECK_NULL_RETURN(viewDataWrap, false);
-    uiContentImpl->DumpViewData(node, viewDataWrap);
+    auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
+    uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
 
     auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
