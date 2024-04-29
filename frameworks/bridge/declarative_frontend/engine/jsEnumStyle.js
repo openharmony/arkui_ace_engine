@@ -2882,6 +2882,7 @@ var DragPreviewMode;
 (function (DragPreviewMode) {
   DragPreviewMode["AUTO"] = 1;
   DragPreviewMode["DISABLE_SCALE"] = 2;
+  DragPreviewMode["ENABLE_DEFAULT_SHADOW"] = 3;
 })(DragPreviewMode || (DragPreviewMode = {}));
 
 var FoldStatus;

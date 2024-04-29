@@ -351,6 +351,20 @@ bool ParseMotionPath(const JSRef<JSVal>& jsValue, MotionPathOption& option)
     return true;
 }
 
+void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
+{
+    if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::AUTO)) {
+        previewOption.ResetDragPreviewMode();
+        isAuto = true;
+        return;
+    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
+        previewOption.isScaleEnabled = false;
+    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
+        previewOption.isDefaultShadowEnabled = true;
+    }
+    isAuto = false;
+}
+
 void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
     BackgroundImagePosition& bgImgPosition)
 {
@@ -5746,11 +5760,19 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
     NG::DragPreviewOption previewOption;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
+    bool isAuto = true;
     if (mode->IsNumber()) {
-        int32_t modeValue = mode->ToNumber<int>();
-        if (modeValue >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
-            modeValue <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
-            previewOption.mode = static_cast<NG::DragPreviewMode>(modeValue);
+        ParseDragPreviewMode(previewOption, mode->ToNumber<int>(), isAuto);
+    } else if (mode->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(mode);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            if (value->IsNumber()) {
+                ParseDragPreviewMode(previewOption, value->ToNumber<int>(), isAuto);
+            }
+            if (isAuto) {
+                break;
+            }
         }
     }
 
@@ -5779,7 +5801,7 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
             previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
         }
     }
-    
+
     JSViewAbstract::SetDragPreviewOptionApply(info, previewOption);
 
     return previewOption;
