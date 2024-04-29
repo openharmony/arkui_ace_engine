@@ -629,7 +629,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
             if (renderContext) {
-                renderContext->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
+                renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
                 ref->property_->Set(ref->height_ + ref->sheetHeightUp_);
             }
         },
@@ -932,7 +932,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
             if (sheetType_ == SheetType::SHEET_POPUP) {
                 auto renderContext = GetRenderContext();
                 CHECK_NULL_VOID(renderContext);
-                renderContext->OnTransformTranslateUpdate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
+                renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
                 renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
             }
             overlayManager->PlaySheetTransition(host, true, false, true);
@@ -1129,7 +1129,7 @@ void SheetPresentationPattern::StartOffsetEnteringAnimation()
             CHECK_NULL_VOID(pattern);
             auto renderContext = pattern->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            renderContext->OnTransformTranslateUpdate({ 0.0f, Dimension(pattern->sheetOffsetY_), 0.0f });
+            renderContext->UpdateTransformTranslate({ 0.0f, Dimension(pattern->sheetOffsetY_), 0.0f });
         },
         nullptr);
 }
@@ -1163,7 +1163,7 @@ void SheetPresentationPattern::StartOffsetExitingAnimation()
             CHECK_NULL_VOID(pattern);
             auto renderContext = pattern->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            renderContext->OnTransformTranslateUpdate(
+            renderContext->UpdateTransformTranslate(
                 { 0.0f, Dimension(pattern->sheetOffsetY_ - SHEET_INVISIABLE_OFFSET), 0.0f });
         },
         nullptr);
@@ -1207,7 +1207,7 @@ void SheetPresentationPattern::ResetToInvisible()
     auto renderContext = GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateOpacity(SHEET_INVISIABLE_ALPHA);
-    renderContext->OnTransformTranslateUpdate({ 0.0f, Dimension(sheetOffsetY_ - SHEET_INVISIABLE_OFFSET), 0.0f });
+    renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_ - SHEET_INVISIABLE_OFFSET), 0.0f });
 }
 
 bool SheetPresentationPattern::IsFold()
@@ -1244,7 +1244,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             option,
             [context, offset]() {
                 if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
+                    context->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
                 }
             },
             option.GetOnFinishEvent());
@@ -1254,7 +1254,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             [context, this]() {
                 if (context) {
                     DismissSheetShadow(context);
-                    context->OnTransformTranslateUpdate({ 0.0f, pageHeight_, 0.0f });
+                    context->UpdateTransformTranslate({ 0.0f, pageHeight_, 0.0f });
                 }
             },
             option.GetOnFinishEvent());
@@ -1342,7 +1342,7 @@ void SheetPresentationPattern::TranslateTo(float height)
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
+    context->UpdateTransformTranslate({ 0.0f, height, 0.0f });
 }
 
 void SheetPresentationPattern::ScrollTo(float height)

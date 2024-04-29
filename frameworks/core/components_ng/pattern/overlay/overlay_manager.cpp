@@ -3567,7 +3567,7 @@ void OverlayManager::PlaySheetTransition(
             offset = sheetMaxHeight - sheetHeight_;
         }
         if (isFirstTransition) {
-            context->OnTransformTranslateUpdate({ 0.0f, sheetMaxHeight, 0.0f });
+            context->UpdateTransformTranslate({ 0.0f, sheetMaxHeight, 0.0f });
             if (NearZero(sheetHeight_)) {
                 return;
             }
@@ -3602,7 +3602,7 @@ void OverlayManager::PlaySheetTransition(
             option,
             [context, offset]() {
                 if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
+                    context->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
                 }
             },
             option.GetOnFinishEvent());
@@ -3630,7 +3630,7 @@ void OverlayManager::PlaySheetTransition(
             option,
             [context, sheetMaxHeight]() {
                 if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, sheetMaxHeight, 0.0f });
+                    context->UpdateTransformTranslate({ 0.0f, sheetMaxHeight, 0.0f });
                 }
             },
             option.GetOnFinishEvent());
