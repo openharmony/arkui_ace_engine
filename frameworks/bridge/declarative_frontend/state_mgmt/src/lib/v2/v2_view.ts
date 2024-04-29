@@ -30,16 +30,16 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
         super(parent, elmtId, extraInfo);
-        stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
+        stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 
     protected finalizeConstruction(): void {
 
-        ProvideConsumeUtilV3.setupConsumeVarsV3(this);
+        ProviderConsumerUtilV2.setupConsumeVarsV2(this);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
 
-        // Always use ID_REFS in ViewPU
+        // Always use ID_REFS in ViewV2
         this[ObserveV2.ID_REFS] = {};
     }
 

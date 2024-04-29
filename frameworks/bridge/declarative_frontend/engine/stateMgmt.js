@@ -7770,9 +7770,9 @@ const trackInternal = (target, propertyKey) => {
  *
  * This file includes only framework internal classes and functions
  * non are part of SDK. Do not access from app.
- */
-/**
- * Helper class for handling V3 decorated variables
+ *
+ *
+ * Helper class for handling V2 decorated variables
  */
 class VariableUtilV3 {
     /**
@@ -7829,10 +7829,19 @@ class VariableUtilV3 {
         }
     }
 }
-class ProvideConsumeUtilV3 {
+class ProviderConsumerUtilV2 {
     /**
-     * Helper function to add meta data about @provide and @consume decorators to ViewV2
-     * similar to @see addVariableDecoMeta, but adds the alias to allow search from @consume for @provide counterpart
+     *  meta added to the ViewV2
+     *  varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
+     *  prefix_@Provider_aliasName: {'varName': ..., 'aliasName': ...., 'deco': '@Provider' | '@Consumer'
+     */
+    static metaAliasKey(aliasName, deco) {
+        return `${ProviderConsumerUtilV2.ALIAS_PREFIX}_${deco}_${aliasName}`;
+        ;
+    }
+    /**
+     * Helper function to add meta data about @Provider and @Consumer decorators to ViewV2
+     * similar to @see addVariableDecoMeta, but adds the alias to allow search from @Consumer for @Provider counterpart
      * @param proto prototype object of application class derived from ViewV2
      * @param varName decorated variable
      * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
@@ -7845,64 +7854,59 @@ class ProvideConsumeUtilV3 {
         // note: aliasName is the actual alias not the prefixed version
         meta[varName] = { 'deco': deco, 'aliasName': aliasName };
         // prefix to avoid name collisions with variable of same name as the alias!
-        const aliasProp = ProvideConsumeUtilV3.ALIAS_PREFIX + aliasName;
-        meta[aliasProp] = { 'varName': varName, 'deco': deco };
-        // FIXME
-        // when splitting ViewPU and ViewV2
-        // use instanceOf. Until then, this is a workaround.
-        // any @state, @track, etc V3 event handles this function to return false
-        Reflect.defineProperty(proto, 'isViewV3', {
-            get() { return true; },
-            enumerable: false
-        });
+        const aliasProp = ProviderConsumerUtilV2.metaAliasKey(aliasName, deco);
+        meta[aliasProp] = { 'varName': varName, 'aliasName': aliasName, 'deco': deco };
     }
-    static setupConsumeVarsV3(view) {
+    static setupConsumeVarsV2(view) {
         const meta = view && view[ObserveV2.V2_DECO_META];
         if (!meta) {
             return;
         }
         for (const [key, value] of Object.entries(meta)) {
-            if (value.deco === '@consume' && value.varName) {
-                const prefixedAliasName = key;
-                let result = ProvideConsumeUtilV3.findProvide(view, prefixedAliasName);
+            // check all entries of this format varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
+            // do not check alias entries
+            // 'varName' is only in alias entries, see addProvideConsumeVariableDecoMeta
+            if (typeof value == 'object' && value['deco'] === '@Consumer' && !('varName' in value)) {
+                let result = ProviderConsumerUtilV2.findProvider(view, value['aliasName']);
                 if (result && result[0] && result[1]) {
-                    ProvideConsumeUtilV3.connectConsume2Provide(view, value.varName, result[0], result[1]);
+                    ProviderConsumerUtilV2.connectConsumer2Provider(view, key, result[0], result[1]);
                 }
                 else {
-                    ProvideConsumeUtilV3.defineConsumeWithoutProvide(view, value.varName);
+                    ProviderConsumerUtilV2.defineConsumerWithoutProvider(view, key);
                 }
             }
         }
     }
     /**
-    * v3: find a @provide'ed variable from its nearest ancestor ViewV2.
+    * find a @Provider'ed variable from its nearest ancestor ViewV2.
     * @param searchingAliasName The key name to search for.
     * @returns A tuple containing the ViewPU instance where the provider is found
     * and the provider name
     * If root @Component reached without finding, returns undefined.
     */
-    static findProvide(view, searchingPrefixedAliasName) {
+    static findProvider(view, aliasName) {
         var _a;
         let checkView = view === null || view === void 0 ? void 0 : view.getParent();
+        const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, "@Provider");
+        
         while (checkView) {
             const meta = (_a = checkView.constructor) === null || _a === void 0 ? void 0 : _a.prototype[ObserveV2.V2_DECO_META];
             if (checkView instanceof ViewV2 && meta && meta[searchingPrefixedAliasName]) {
                 const aliasMeta = meta[searchingPrefixedAliasName];
-                const providedVarName = aliasMeta && (aliasMeta.deco === '@provide' ? aliasMeta.varName : undefined);
+                const providedVarName = (aliasMeta && (aliasMeta.deco === '@Provider') ? aliasMeta.varName : undefined);
                 if (providedVarName) {
                     
                     return [checkView, providedVarName];
                 }
             }
-            checkView = checkView.getParent(); // FIXME IView
+            checkView = checkView.getParent();
         }
         ; // while
-        
+        stateMgmtConsole.warn(`findProvider: ${view.debugInfo__()} @Consumer('${aliasName}'), no matching @Provider found amongst ancestor @ComponentV2's!`);
         return undefined;
     }
-    static connectConsume2Provide(consumeView, consumeVarName, provideView, provideVarName) {
+    static connectConsumer2Provider(consumeView, consumeVarName, provideView, provideVarName) {
         var _a;
-        
         const weakView = new WeakRef(provideView);
         const provideViewName = (_a = provideView.constructor) === null || _a === void 0 ? void 0 : _a.name;
         Reflect.defineProperty(consumeView, consumeVarName, {
@@ -7911,7 +7915,7 @@ class ProvideConsumeUtilV3 {
                 ObserveV2.getObserve().addRef(this, consumeVarName);
                 const view = weakView.deref();
                 if (!view) {
-                    const error = `${this.debugInfo__()}: get() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`;
+                    const error = `${this.debugInfo__()}: get() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
                     stateMgmtConsole.error(error);
                     throw new Error(error);
                 }
@@ -7922,7 +7926,7 @@ class ProvideConsumeUtilV3 {
                 
                 const view = weakView.deref();
                 if (!view) {
-                    const error = `${this.debugInfo__()}: set() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`;
+                    const error = `${this.debugInfo__()}: set() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
                     stateMgmtConsole.error(error);
                     throw new Error(error);
                 }
@@ -7937,7 +7941,7 @@ class ProvideConsumeUtilV3 {
             enumerable: true
         });
     }
-    static defineConsumeWithoutProvide(consumeView, consumeVarName) {
+    static defineConsumerWithoutProvider(consumeView, consumeVarName) {
         
         const storeProp = ObserveV2.OB_PREFIX + consumeVarName;
         consumeView[storeProp] = consumeView[consumeVarName]; // use local init value, also as backing store
@@ -7958,7 +7962,7 @@ class ProvideConsumeUtilV3 {
         });
     }
 }
-ProvideConsumeUtilV3.ALIAS_PREFIX = '___pc_alias_';
+ProviderConsumerUtilV2.ALIAS_PREFIX = '___pc_alias_';
 /*
   Internal decorator for @Trace without usingV2ObservedTrack call.
   Real @Trace decorator function is in v2_decorators.ts
@@ -8315,10 +8319,10 @@ class ViewV2 extends PUV2ViewBase {
         
     }
     finalizeConstruction() {
-        ProvideConsumeUtilV3.setupConsumeVarsV3(this);
+        ProviderConsumerUtilV2.setupConsumeVarsV2(this);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
-        // Always use ID_REFS in ViewPU
+        // Always use ID_REFS in ViewV2
         this[ObserveV2.ID_REFS] = {};
     }
     debugInfo__() {
@@ -8344,7 +8348,6 @@ class ViewV2 extends PUV2ViewBase {
         Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId) => {
             // FIXME split View: enable delete  this purgeDeleteElmtId(elmtId);
         });
-
         // unregistration of ElementIDs
         
         // it will unregister removed elementids from all the viewpu, equals purgeDeletedElmtIdsRecursively
@@ -8451,7 +8454,6 @@ class ViewV2 extends PUV2ViewBase {
             this.markNeedUpdate();
             this.restoreInstanceId();
         }
-
         this.dirtDescendantElementIds_.add(elmtId);
         
         
@@ -8707,7 +8709,7 @@ const Event = (target, propertyKey) => {
 const Provider = (aliasName) => {
     return (proto, varName) => {
         const providedUnderName = aliasName || varName;
-        ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, '@provide');
+        ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, '@Provider');
         trackInternal(proto, varName);
     };
 }; // @Provider
@@ -8715,7 +8717,7 @@ const Provider = (aliasName) => {
  * @Consumer variable decorator of @ComponentV2 variable
  *
  * @Consumer(alias? : string) varName : typeName = defaultValue
- *
+*
  * @param alias defaults to varName
  *
  * allowed value: simple or object type value allowed. Objects must be instances of
@@ -8733,7 +8735,7 @@ const Consumer = (aliasName) => {
         const searchForProvideWithName = aliasName || varName;
         // redefining the property happens when owning ViewV2 gets constructed
         // and @Consumer gets connected to @provide counterpart
-        ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@consume');
+        ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
     };
 }; // @Consumer
 /**
