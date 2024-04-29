@@ -4034,35 +4034,11 @@ RefPtr<FrameNode> OverlayManager::GetSheetMask(const RefPtr<FrameNode>& sheetNod
     return sheetChildFrameNode;
 }
 
-void OverlayManager::SetCustomKeybroadHeight(float customHeight)
-{
-    if (!keyboardAvoidance_) {
-        return;
-    }
-}
-
 void OverlayManager::SetCustomKeyboardOption(bool supportAvoidance)
 {
     auto pipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
     keyboardAvoidance_ = supportAvoidance;
-}
-
-void OverlayManager::SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
-    RefPtr<FrameNode> customKeyboard)
-{
-    option.SetOnFinishEvent([weak = WeakClaim(this), customKeyboard] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto customHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
-        pattern->SetCustomKeybroadHeight(customHeight);
-    });
-
-    AnimationUtils::Animate(option, [context]() {
-    if (context) {
-        context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-    }
-    }, option.GetOnFinishEvent());
 }
 
 void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn)
@@ -4090,7 +4066,11 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     auto keyboardHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
-        SupportCustomKeyboardAvoidance(context, option, customKeyboard);
+        AnimationUtils::Animate(option, [context]() {
+            if (context) {
+                context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            }
+        });
     } else {
         context->UpdateOpacity(1.0);
         option.SetOnFinishEvent([customKeyboard] {
