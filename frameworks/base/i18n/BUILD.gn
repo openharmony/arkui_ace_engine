@@ -51,7 +51,10 @@ template("ace_base_i18n") {
     }
 
     # add base source file here
-    sources = [ "localization.cpp" ]
+    sources = [
+      "date_time_sequence.cpp",
+      "localization.cpp",
+    ]
 
     if (use_hilog) {
       external_deps = [ "hilog:libhilog" ]
