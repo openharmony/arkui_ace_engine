@@ -51,8 +51,8 @@ struct SingleSegmentGradientInfo {
     float shadowRadius = 0.0f;
     ColorStopArray colorStopArray;
 };
-class GaugeModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(GaugeModifier, ContentModifier);
+class GaugeModifier : public ForegroundModifier {
+    DECLARE_ACE_TYPE(GaugeModifier, ForegroundModifier);
 public:
     GaugeModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern): pattern_(pattern)
     {
