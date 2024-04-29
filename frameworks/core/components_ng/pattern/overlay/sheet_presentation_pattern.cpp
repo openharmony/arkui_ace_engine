@@ -348,7 +348,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     auto currentSheetHeight =
         GreatNotEqual((height - currentOffset_), sheetMaxHeight_) ? sheetMaxHeight_ : (height - currentOffset_);
     start_ = currentSheetHeight;
-    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet HandleDragEnd is: %{public}f", currentSheetHeight);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet HandleDragEnd, current height is: %{public}f", currentSheetHeight);
     auto lowerIter = std::lower_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
     auto upperIter = std::upper_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
     if (lowerIter == sheetDetentHeight_.end()) {
@@ -512,7 +512,7 @@ void SheetPresentationPattern::AvoidSafeArea()
     CHECK_NULL_VOID(host->GetFocusHub()->IsCurrentFocus());
     auto heightUp = GetSheetHeightChange();
     sheetHeightUp_ = heightUp;
-    TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, sheet will go up %{public}f.", heightUp);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, sheet height increase %{public}f.", heightUp);
     auto parentOffsetY = GetRootOffsetYToWindow();
     auto offset = pageHeight_ - height_ - heightUp - parentOffsetY;
     auto renderContext = host->GetRenderContext();
@@ -789,7 +789,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
 void SheetPresentationPattern::UpdateCloseIconStatus()
 {
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        TAG_LOGI(AceLogTag::ACE_SHEET, "PlatformVersion less or equal to ten");
+        TAG_LOGI(AceLogTag::ACE_SHEET, "PlatformVersion less or equal to version 10");
         return;
     }
     auto host = GetHost();
@@ -1308,7 +1308,7 @@ void SheetPresentationPattern::ClipSheetNode()
 
 void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet get WindowSizeChangeReason type is: %{public}d", type);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet WindowSizeChangeReason type is: %{public}d", type);
     auto sheetType = GetSheetType();
     if ((type == WindowSizeChangeReason::ROTATION) &&
         ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMLANDSPACE))) {
