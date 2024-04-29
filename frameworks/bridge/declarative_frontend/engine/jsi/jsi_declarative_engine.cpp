@@ -1538,7 +1538,21 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<p
     if (!pagePath->IsString()) {
         return;
     }
-    NamedRouterProperty namedRouterProperty({ pageGenerator, bundleName->ToString(vm)->ToString(),
+    auto name = bundleName->ToString(vm)->ToString();
+    std::string integratedHspName = "false";
+    // Integrated hsp adaptation
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
+        auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
+        if (!integratedHsp->IsString()) {
+            return;
+        }
+        integratedHspName = integratedHsp->ToString(vm)->ToString();
+    }
+    if (integratedHspName == "true") {
+        LocalScope scope(vm);
+        name = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
+    }
+    NamedRouterProperty namedRouterProperty({ pageGenerator, name,
         moduleName->ToString(vm)->ToString(), pagePath->ToString(vm)->ToString() });
     auto ret = namedRouterRegisterMap_.insert(std::make_pair(namedRoute, namedRouterProperty));
     if (!ret.second) {
