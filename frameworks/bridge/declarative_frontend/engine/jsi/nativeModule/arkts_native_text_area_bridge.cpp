@@ -1055,7 +1055,8 @@ ArkUINativeModuleValue TextAreaBridge::SetInputFilter(ArkUIRuntimeCallInfo* runt
     std::string inputFilter = inputFilterArg->ToString(vm)->ToString();
     if (errorCallbackArg->IsUndefined() || errorCallbackArg->IsNull() ||
         !errorCallbackArg->IsFunction()) {
-        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaInputFilter(nativeNode, inputFilter.c_str(), nullptr);
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaInputFilter(
+            nativeNode, inputFilter.c_str(), nullptr);
     } else {
         panda::Local<panda::FunctionRef> func = errorCallbackArg->ToObject(vm);
         std::function<void(const std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
