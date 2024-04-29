@@ -1727,6 +1727,36 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg056, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SideBarPatternTestNg057
+ * @tc.desc: Test SideBar OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg057, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    /**
+     * @tc.steps: step1. set to RightToLeft mode, call OnLanguageConfigurationUpdate, then get current isRightToLeft_.
+     * @tc.expected: check whether the pattern->isRightToLeft_ is correct.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(pattern->isRightToLeft_, true);
+
+    /**
+     * @tc.steps: step2. set to LeftToRight mode, call OnLanguageConfigurationUpdate, then get current isRightToLeft_.
+     * @tc.expected: check whether the pattern->isRightToLeft_ is correct.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(pattern->isRightToLeft_, false);
+}
+
+/**
  * @tc.name: SideBarContainerPaintMethodNg001
  * @tc.desc: Test SideBarContainerPaintMethod ClipPadding
  * @tc.type: FUNC

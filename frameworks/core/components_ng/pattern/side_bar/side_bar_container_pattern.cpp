@@ -1116,8 +1116,8 @@ void SideBarContainerPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(host);
     if (isRightToLeft_ != AceApplicationInfo::GetInstance().IsRightToLeft()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
     }
-    isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
 RefPtr<NodePaintMethod> SideBarContainerPattern::CreateNodePaintMethod()
