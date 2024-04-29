@@ -74,6 +74,7 @@ void CheckBoxPattern::UpdateIndicator()
 void CheckBoxPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     UpdateIndicator();
     UpdateState();
     auto host = GetHost();
@@ -115,7 +116,6 @@ void CheckBoxPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
-    FireBuilder();
 }
 
 void CheckBoxPattern::SetAccessibilityAction()
@@ -781,12 +781,20 @@ void CheckBoxPattern::FireBuilder()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
-        host->RemoveChildAtIndex(0);
+        host->RemoveChildAndReturnIndex(contentModifierNode_);
+        contentModifierNode_ = nullptr;
         host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
-    host->RemoveChildAtIndex(0);
-    contentModifierNode_ = BuildContentModifierNode();
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
