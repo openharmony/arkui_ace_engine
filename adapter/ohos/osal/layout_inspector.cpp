@@ -240,18 +240,14 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         auto windowId = jsonTree->GetValue("WindowID");
         auto content = jsonTree->GetValue("content");
         auto children = content->GetValue("$children");
-        while (children) {
-            auto child = children->GetArrayItem(0);
-            auto type = child->GetValue("$type");
-            LOGI("GetInspectorTreeJsonStr tag:%{public}s, type:%{public}s", type->GetString().c_str(),
-                child->GetValue("type")->GetString().c_str());
-            if (type->GetString() == "__Common__") {
-                break;
-            }
-            children = child->GetValue("$children");
-        }
-        LOGI("GetInspectorTreeJsonStr VsyncID:%{public}d, ProcessID:%{public}d, WindowID:%{public}d", vsyncId->GetInt(),
-            processId->GetInt(), windowId->GetInt());
+        auto child = children->GetArrayItem(0);
+        auto type = child->GetValue("type");
+        TAG_LOGD(AceLogTag::ACE_STATE_MGMT,
+            "Json tree info : [type:%{public}s, vsyncId:%{public}d, processId:%{public}d, windowId:%{public}d]",
+            type->ToString().c_str(),
+            vsyncId->GetInt(),
+            processId->GetInt(),
+            windowId->GetInt());
     }
 }
 
