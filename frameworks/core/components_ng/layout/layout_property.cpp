@@ -136,10 +136,6 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
         VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str(), filter);
     json->PutExtAttr("direction", TextDirectionToString(GetLayoutDirection()).c_str(), filter);
     json->PutExtAttr("pixelRound", PixelRoundToJsonValue().c_str(), filter);
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);
 }
 
 void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
