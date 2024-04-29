@@ -37,9 +37,13 @@ Render3D::HapInfo ModelAdapterWrapper::SetHapInfo()
     return hapInfo;
 }
 
-ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key, Render3D::SurfaceType surfaceType,
-    const std::string& bundleName, const std::string& moduleName) : key_(key), surfaceType_(surfaceType),
-    bundleName_(bundleName), moduleName_(moduleName)
+ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key, const ModelViewContext& context) : key_(key),
+    surfaceType_(context.surfaceType_), bundleName_(context.bundleName_),
+#if defined(KIT_3D_ENABLE)
+    moduleName_(context.moduleName_), sceneAdapter_(context.sceneAdapter_)
+#else
+    moduleName_(context.moduleName_)
+#endif
 {
     touchHandler_ = MakeRefPtr<ModelTouchHandler>();
     touchHandler_->SetCameraEventCallback([weak = WeakClaim(this)]
@@ -63,6 +67,12 @@ ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key, Render3D::SurfaceType sur
 void ModelAdapterWrapper::Deinit()
 {
     ACE_SCOPED_TRACE("ModelAdapterWrapper::Deinit");
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        sceneAdapter_->Deinit();
+        return;
+    }
+#endif
     Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
         ACE_SCOPED_TRACE("ModelAdapterWrapper::Deinit render");
         auto adapter = weak.Upgrade();
@@ -81,6 +91,11 @@ void ModelAdapterWrapper::Deinit()
 
 void ModelAdapterWrapper::CreateTextureLayer()
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
@@ -88,12 +103,17 @@ void ModelAdapterWrapper::CreateTextureLayer()
         auto& gfxManager = Render3D::GraphicsManager::GetInstance();
         const auto& key = adapter->GetKey();
         gfxManager.Register(key);
-        adapter->textureLayer_ = std::make_unique<Render3D::TextureLayer>(key);
+        adapter->textureLayer_ = std::make_shared<Render3D::TextureLayer>(key);
     });
 }
 
 void ModelAdapterWrapper::CreateWidgetAdapter()
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     auto key = GetKey();
     Render3D::HapInfo hapInfo = SetHapInfo();
     // init engine in async manager sometimes crash on screen rotation
@@ -111,6 +131,14 @@ void ModelAdapterWrapper::CreateWidgetAdapter()
 
 void ModelAdapterWrapper::OnAttachToFrameNode(const RefPtr<RenderContext>& context)
 {
+#if defined(KIT_3D_ENABLE)
+    // scene adapter toutine
+    if (sceneAdapter_) {
+        sceneAdapter_->LoadPluginsAndInit();
+        textureLayer_ = sceneAdapter_->CreateTextureLayer();
+        return;
+    }
+#endif
     CreateTextureLayer();
     CreateWidgetAdapter();
 
@@ -123,26 +151,15 @@ void ModelAdapterWrapper::OnAttachToFrameNode(const RefPtr<RenderContext>& conte
 #endif
 }
 
-void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(float offsetX, float offsetY, float width, float height,
-    float scale, bool recreateWindow)
-{
-    needsSyncPaint_ = true;
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), offsetX, offsetY,
-        width, height, scale, recreateWindow] {
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-        CHECK_NULL_VOID(adapter->textureLayer_);
-        CHECK_NULL_VOID(adapter->widgetAdapter_);
-
-        adapter->textureLayer_->OnWindowChange(offsetX, offsetY, width, height, scale, recreateWindow,
-            adapter->surfaceType_);
-        adapter->widgetAdapter_->OnWindowChange(adapter->textureLayer_->GetTextureInfo());
-    });
-}
-
 void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeInfo& windowChangeInfo)
 {
     needsSyncPaint_ = true;
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        sceneAdapter_->OnWindowChange(windowChangeInfo);
+        return;
+    }
+#endif
     Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &windowChangeInfo] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
@@ -212,14 +229,15 @@ void ModelAdapterWrapper::OnPaint3D(const RefPtr<ModelPaintProperty>& modelPaint
     DrawFrame();
 }
 
-void ModelAdapterWrapper::OnPaint3DSceneTexture(SkCanvas* skCanvas)
-{
-    textureLayer_->OnDraw(skCanvas);
-}
-
 void ModelAdapterWrapper::DrawFrame()
 {
     ACE_FUNCTION_TRACE();
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        sceneAdapter_->RenderFrame();
+        return;
+    }
+#endif
     Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
@@ -255,6 +273,11 @@ void ModelAdapterWrapper::OnPaintFinish()
 
 void ModelAdapterWrapper::UnloadSceneAndBackground()
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
@@ -300,6 +323,11 @@ bool ModelAdapterWrapper::HandleTouchEvent(const TouchEventInfo& info,
 
 void ModelAdapterWrapper::UpdateScene(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     if (!modelPaintProperty->GetModelSource().has_value()) {
         LOGW("UpdateScene invalid model source");
         return;
@@ -317,6 +345,11 @@ void ModelAdapterWrapper::UpdateScene(const RefPtr<ModelPaintProperty>& modelPai
 
 void ModelAdapterWrapper::UpdateEnviroment(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     if (!modelPaintProperty->GetModelBackground().has_value()) {
         LOGW("UpdateEnviroment invalid model background");
         return;
@@ -338,6 +371,11 @@ void ModelAdapterWrapper::UpdateEnviroment(const RefPtr<ModelPaintProperty>& mod
 
 void ModelAdapterWrapper::HandleCameraMove(const Render3D::PointerEvent& event)
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &event] {
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
@@ -409,6 +447,11 @@ void ExtractCameraProperty(const RefPtr<ModelPaintProperty>& modelPaintProperty,
 
 void ModelAdapterWrapper::UpdateCamera(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     CameraProperty camera;
     ExtractCameraProperty(modelPaintProperty, camera);
     Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &camera] {
@@ -462,6 +505,11 @@ void ExtractLightsProperty(const RefPtr<ModelPaintProperty>& modelPaintProperty,
 
 void ModelAdapterWrapper::UpdateLights(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     if (!modelPaintProperty->GetModelLights().has_value()) {
         LOGW("MODEL_NG: UpdateLights invalid lights");
         return;
@@ -481,6 +529,11 @@ void ModelAdapterWrapper::UpdateLights(const RefPtr<ModelPaintProperty>& modelPa
 
 void ModelAdapterWrapper::UpdateGLTFAnimations(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     if (!modelPaintProperty->GetModelAnimations().has_value()) {
         LOGW("UpdateGLTFAnimations invalid animation");
         return;
@@ -498,6 +551,11 @@ void ModelAdapterWrapper::UpdateGLTFAnimations(const RefPtr<ModelPaintProperty>&
 
 void ModelAdapterWrapper::UpdateGeometries(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     if (!modelPaintProperty->GetModelGeometries().has_value()) {
         LOGW("UpdateGeometries invalid geometries");
         return;
@@ -516,6 +574,11 @@ void ModelAdapterWrapper::UpdateGeometries(const RefPtr<ModelPaintProperty>& mod
 
 void ModelAdapterWrapper::UpdateCustomRender(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     if (!modelPaintProperty->GetModelCustomRender().has_value()) {
         LOGW("UpdateCustomRender invalid custom render");
         return;
@@ -537,6 +600,11 @@ void ModelAdapterWrapper::UpdateCustomRender(const RefPtr<ModelPaintProperty>& m
 
 void ModelAdapterWrapper::UpdateShaderPath(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     if (!modelPaintProperty->GetShaderPath().has_value()) {
         LOGW("UpdateShaderPath invalid shader path");
         return;
@@ -555,6 +623,11 @@ void ModelAdapterWrapper::UpdateShaderPath(const RefPtr<ModelPaintProperty>& mod
 
 void ModelAdapterWrapper::UpdateImageTexturePaths(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     if (!modelPaintProperty->GetModelImageTexturePaths().has_value()) {
         LOGW("UpdateImageTexturePaths invalid image texture");
         return;
@@ -573,6 +646,11 @@ void ModelAdapterWrapper::UpdateImageTexturePaths(const RefPtr<ModelPaintPropert
 
 void ModelAdapterWrapper::UpdateShaderInputBuffers(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        return;
+    }
+#endif
     if (!modelPaintProperty->GetModelShaderInputBuffer().has_value()) {
         LOGW("UpdateShaderInputBuffers invalid shader input buffer");
         return;

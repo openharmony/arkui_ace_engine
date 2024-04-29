@@ -34,6 +34,7 @@ public:
     // override TextBaseSelectOverlay
     bool PreProcessOverlay(const OverlayRequest& request) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
+    bool CheckAndAdjustHandle(RectF& paintRect);
     void OnResetTextSelection() override;
     void AfterCloseOverlay() override;
 
@@ -52,6 +53,10 @@ public:
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
+
+protected:
+    virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
+    bool selectTextUseTopHandle = false;
 
 private:
     void RemoveAreaChangeInner();

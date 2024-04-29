@@ -355,5 +355,21 @@ const ArkUIGridModifier* GetGridModifier()
 
     return &modifier;
 }
+
+void SetOnGridScrollIndex(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](int32_t first, int32_t last) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_GRID_SCROLL_TO_INDEX;
+        event.componentAsyncEvent.data[0].i32 = first;
+        event.componentAsyncEvent.data[1].i32 = last;
+        SendArkUIAsyncEvent(&event);
+    };
+    GridModelNG::SetOnScrollIndex(frameNode, std::move(onEvent));
+}
 }
 } // namespace OHOS::Ace::NG

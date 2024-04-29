@@ -65,6 +65,15 @@ public:
             theme->draggable_ = StringUtils::StringToInt(draggable);
             constexpr double childMinSize = 20.0;
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
+            theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
+            theme->fadeoutWidth_ = pattern->GetAttr<Dimension>("text_fadeout_width", 16.0_vp);
+            RefPtr<ThemeStyle> textfieldPattern = themeConstants->GetPatternByName("textfield_pattern");
+            if (!textfieldPattern) {
+                LOGW("find pattern of textfield fail");
+                return;
+            }
+            auto textfieldShowHandle = textfieldPattern->GetAttr<std::string>("textfield_show_handle", "0");
+            theme->isShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
         }
     };
 
@@ -90,6 +99,21 @@ public:
         return linearSplitChildMinSize_;
     }
 
+    bool GetIsTextFadeout() const
+    {
+        return isTextFadeout_;
+    }
+
+    const Dimension& GetFadeoutWidth() const
+    {
+        return fadeoutWidth_;
+    }
+
+    bool IsShowHandle() const
+    {
+        return isShowHandle_;
+    }
+
 protected:
     TextTheme() = default;
 
@@ -98,6 +122,9 @@ private:
     Color selectedColor_;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
+    bool isTextFadeout_ = false;
+    Dimension fadeoutWidth_;
+    bool isShowHandle_ = false;
 };
 
 } // namespace OHOS::Ace

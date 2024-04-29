@@ -98,6 +98,8 @@ public:
     void ExecutePendingJob() override;
     void DumpHeapSnapshot(bool isPrivate) override;
     void DestroyHeapProfiler() override;
+    bool IsExecuteModuleInAbcFile(
+        const std::string &bundleName, const std::string &moduleName, const std::string &ohmurl);
     bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename, bool needUpdate = false);
 
     int32_t LoadDestinationFile(const std::string& bundleName, const std::string& moduleName,

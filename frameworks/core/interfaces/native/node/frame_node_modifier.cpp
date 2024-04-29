@@ -14,9 +14,13 @@
  */
 #include "core/interfaces/native/node/frame_node_modifier.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 
 namespace OHOS::Ace::NG {
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
@@ -26,6 +30,28 @@ ArkUI_Bool IsModifiable(ArkUINodeHandle node)
     auto* frameNode = AceType::DynamicCast<UINode>(currentNode);
     CHECK_NULL_RETURN(frameNode, false);
     return frameNode->GetTag() == "CustomFrameNode";
+}
+
+ArkUINodeHandle CreateFrameNode()
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    node->SetExclusiveEventForChild(true);
+    node->SetIsArkTsFrameNode(true);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
+}
+
+void InvalidateInFrameNode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(AceType::InstanceOf<CustomFrameNode>(frameNode));
+    auto pattern = frameNode->GetPattern<CustomFrameNodePattern>();
+    CHECK_NULL_VOID(pattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    pattern->Invalidate();
+    renderContext->RequestNextFrame();
 }
 
 RefPtr<FrameNode> GetParentNode(UINode* node)
@@ -105,9 +131,8 @@ ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index)
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->GetAllChildrenWithBuild(false);
-    auto child = frameNode->GetChildByIndex(index);
-    auto childNode = AceType::DynamicCast<FrameNode>(child);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+    auto child = frameNode->GetFrameNodeChildByIndex(index);
+    return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
 ArkUINodeHandle GetFirst(ArkUINodeHandle node)
@@ -116,10 +141,8 @@ ArkUINodeHandle GetFirst(ArkUINodeHandle node)
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->GetAllChildrenWithBuild(false);
-    auto child = frameNode->GetChildByIndex(0);
-    auto childNode = AceType::DynamicCast<FrameNode>(child);
-    CHECK_NULL_RETURN(childNode, nullptr);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+    auto child = frameNode->GetFrameNodeChildByIndex(0);
+    return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
 ArkUINodeHandle GetNextSibling(ArkUINodeHandle node)
@@ -130,9 +153,8 @@ ArkUINodeHandle GetNextSibling(ArkUINodeHandle node)
     CHECK_NULL_RETURN(parent, nullptr);
     parent->GetAllChildrenWithBuild(false);
     auto index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
-    auto sibling = parent->GetChildByIndex(index + 1);
-    auto childNode = AceType::DynamicCast<FrameNode>(sibling);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+    auto sibling = parent->GetFrameNodeChildByIndex(index + 1);
+    return reinterpret_cast<ArkUINodeHandle>(sibling);
 }
 
 ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node)
@@ -143,9 +165,8 @@ ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node)
     CHECK_NULL_RETURN(parent, nullptr);
     parent->GetAllChildrenWithBuild(false);
     auto index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
-    auto sibling = parent->GetChildByIndex(index - 1);
-    auto childNode = AceType::DynamicCast<FrameNode>(sibling);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+    auto sibling = parent->GetFrameNodeChildByIndex(index - 1);
+    return reinterpret_cast<ArkUINodeHandle>(sibling);
 }
 
 ArkUINodeHandle GetParent(ArkUINodeHandle node)
@@ -164,27 +185,59 @@ ArkUI_Int32 GetIdByNodePtr(ArkUINodeHandle node)
     return nodeId;
 }
 
-ArkUI_Float32* GetPositionToParent(ArkUINodeHandle node)
+void GetPositionToParent(ArkUINodeHandle node, ArkUI_Float32* parentOffset)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
+    CHECK_NULL_VOID(currentNode);
     auto currFrameRect = currentNode->GetRectWithRender();
     auto offset = currFrameRect.GetOffset();
-    ArkUI_Float32* ret = new ArkUI_Float32[2];
-    ret[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    ret[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return ret;
+    parentOffset[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    parentOffset[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
 }
 
-ArkUI_Float32* GetPositionToWindow(ArkUINodeHandle node)
+void GetPositionToScreen(ArkUINodeHandle node, ArkUI_Float32* screenPosition)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
+    CHECK_NULL_VOID(currentNode);
+    auto offset = currentNode->GetPositionToScreen();
+    screenPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    screenPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+}
+
+void GetPositionToWindow(ArkUINodeHandle node, ArkUI_Float32* windowOffset)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(currentNode);
     auto offset = currentNode->GetOffsetRelativeToWindow();
-    ArkUI_Float32* ret = new ArkUI_Float32[2];
-    ret[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    ret[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return ret;
+    windowOffset[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    windowOffset[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+}
+
+void GetPositionToParentWithTransform(ArkUINodeHandle node, ArkUI_Float32* parentPosition)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto offset = currentNode->GetPositionToParentWithTransform();
+    parentPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    parentPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+}
+
+void GetPositionToScreenWithTransform(ArkUINodeHandle node, ArkUI_Float32* screenPosition)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto offset = currentNode->GetPositionToScreenWithTransform();
+    screenPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    screenPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+}
+
+void GetPositionToWindowWithTransform(ArkUINodeHandle node, ArkUI_Float32* windowPosition)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto offset = currentNode->GetPositionToWindowWithTransform();
+    windowPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    windowPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
 }
 
 ArkUI_Float32* GetMeasuredSize(ArkUINodeHandle node)
@@ -308,19 +361,20 @@ ArkUINodeHandle GetLast(ArkUINodeHandle node)
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto size = frameNode->GetAllChildrenWithBuild(false).size();
-    auto child = frameNode->GetChildByIndex(size - 1);
-    auto childNode = AceType::DynamicCast<FrameNode>(child);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+    auto child = frameNode->GetFrameNodeChildByIndex(size - 1);
+    return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
-    static const ArkUIFrameNodeModifier modifier = { IsModifiable, AppendChildInFrameNode, InsertChildAfterInFrameNode,
-        RemoveChildInFrameNode, ClearChildrenInFrameNode, GetChildrenCount, GetChild, GetFirst, GetNextSibling,
-        GetPreviousSibling, GetParent, GetIdByNodePtr, GetPositionToParent, GetPositionToWindow, GetMeasuredSize,
-        GetLayoutPosition, GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById,
-        GetFrameNodeByUniqueId, GetFrameNodeByKey, PropertyUpdate, GetLast };
+    static const ArkUIFrameNodeModifier modifier = { IsModifiable, CreateFrameNode, InvalidateInFrameNode,
+        AppendChildInFrameNode, InsertChildAfterInFrameNode, RemoveChildInFrameNode, ClearChildrenInFrameNode,
+        GetChildrenCount, GetChild, GetFirst, GetNextSibling, GetPreviousSibling, GetParent, GetIdByNodePtr,
+        GetPositionToParent, GetPositionToScreen, GetPositionToWindow, GetPositionToParentWithTransform,
+        GetPositionToScreenWithTransform, GetPositionToWindowWithTransform, GetMeasuredSize, GetLayoutPosition,
+        GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId,
+        GetFrameNodeByKey, PropertyUpdate, GetLast };
     return &modifier;
 }
 } // namespace NodeModifier

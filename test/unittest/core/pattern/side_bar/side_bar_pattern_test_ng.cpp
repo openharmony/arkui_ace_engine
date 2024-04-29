@@ -881,6 +881,14 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg029, TestSize.Level1)
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
     EXPECT_TRUE(newShowSideBar);
 
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton1 = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton3 = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<SideBarContainerPattern>());
+    frameNode->children_.push_back(backButton);
+    frameNode->children_.push_back(backButton1);
+    frameNode->children_.push_back(backButton2);
+    frameNode->children_.push_back(backButton3);
     EXPECT_TRUE(pattern->showSideBar_);
     pattern->showSideBar_ = false;
     EXPECT_FALSE(pattern->showSideBar_);
@@ -1559,6 +1567,14 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg050, TestSize.Level1)
     pattern->frameNode_ = frameNode;
     auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton1 = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton3 = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<SideBarContainerPattern>());
+    frameNode->children_.push_back(backButton);
+    frameNode->children_.push_back(backButton1);
+    frameNode->children_.push_back(backButton2);
+    frameNode->children_.push_back(backButton3);
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
     EXPECT_TRUE(newShowSideBar);
     EXPECT_TRUE(pattern->showSideBar_);
@@ -1708,6 +1724,36 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg056, TestSize.Level1)
     frameNode->children_.push_back(uINode);
     auto sideBarNode = pattern->GetControlButtonNode();
     EXPECT_EQ(sideBarNode, nullptr);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg057
+ * @tc.desc: Test SideBar OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg057, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    /**
+     * @tc.steps: step1. set to RightToLeft mode, call OnLanguageConfigurationUpdate, then get current isRightToLeft_.
+     * @tc.expected: check whether the pattern->isRightToLeft_ is correct.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(pattern->isRightToLeft_, true);
+
+    /**
+     * @tc.steps: step2. set to LeftToRight mode, call OnLanguageConfigurationUpdate, then get current isRightToLeft_.
+     * @tc.expected: check whether the pattern->isRightToLeft_ is correct.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(pattern->isRightToLeft_, false);
 }
 
 /**

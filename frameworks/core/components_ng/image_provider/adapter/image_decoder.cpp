@@ -101,7 +101,7 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
     return canvasImage;
 }
 
-RefPtr<CanvasImage> ImageDecoder::MakePixmapImage()
+RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality)
 {
     CHECK_NULL_RETURN(obj_ && data_, nullptr);
 #ifndef USE_ROSEN_DRAWING
@@ -118,9 +118,11 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage()
         obj_->GetSourceInfo().ToString().c_str(), sourceSize.first, sourceSize.second,
         static_cast<int32_t>(width),
         static_cast<int32_t>(height));
-    auto pixmap = source->CreatePixelMap({ width, height });
+    auto pixmap = source->CreatePixelMap({ width, height }, imageQuality);
+
     CHECK_NULL_RETURN(pixmap, nullptr);
     auto image = PixelMapImage::Create(pixmap);
+
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE,
             "decode to pixmap, src=%{public}s, desiredSize = %{public}s, pixmap size = %{public}d x %{public}d",
@@ -319,7 +321,10 @@ void ImageDecoder::TryCompress(const RefPtr<DrawingImage>& image)
     CHECK_NULL_VOID(rsImage);
     RSBitmapFormat rsBitmapFormat { rsImage->GetColorType(), rsImage->GetAlphaType() };
     RSBitmap rsBitmap;
-    rsBitmap.Build(rsImage->GetWidth(), rsImage->GetHeight(), rsBitmapFormat);
+    if (!rsBitmap.Build(rsImage->GetWidth(), rsImage->GetHeight(), rsBitmapFormat)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "rsBitmap build fail.");
+        return;
+    }
     CHECK_NULL_VOID(rsImage->ReadPixels(rsBitmap, 0, 0));
     auto width = rsBitmap.GetWidth();
     auto height = rsBitmap.GetHeight();
@@ -341,9 +346,11 @@ void ImageDecoder::TryCompress(const RefPtr<DrawingImage>& image)
         auto taskExecutor = Container::CurrentTaskExecutor();
         auto releaseTask = ImageCompressor::GetInstance()->ScheduleReleaseTask();
         if (taskExecutor) {
-            taskExecutor->PostDelayedTask(releaseTask, TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
+            taskExecutor->PostDelayedTask(
+                releaseTask, TaskExecutor::TaskType::UI,
+                ImageCompressor::releaseTimeMs, "ArkUIImageCompressorGetInstance");
         } else {
-            ImageUtils::PostToBg(std::move(releaseTask));
+            ImageUtils::PostToBg(std::move(releaseTask), "ArkUIImageDecoderTryCompress");
         }
     }
     SkGraphics::PurgeResourceCache();

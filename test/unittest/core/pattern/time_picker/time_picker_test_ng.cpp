@@ -93,6 +93,7 @@ TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr double TOSS_DELTA = 20.0;
 const int CURRENT_VALUE1 = 3;
 const int CURRENT_VALUE2 = 10;
@@ -104,6 +105,7 @@ const std::string PM = "下午";
 const std::string COLON = ":";
 const std::string ZERO = "0";
 const PickerTime TIME_PICKED = PickerTime(14, 9, 10);
+const PickerTime TIME_PICKED_PREFIXZERO = PickerTime(3, 3, 3);
 const int32_t AM_PM_PICKED = 1;
 const int32_t HOUR_PICKED = 1;
 const int32_t HOUR24_PICKED = 14;
@@ -611,8 +613,9 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow001, TestSize.Level1)
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
 
-    auto dialogNode =
-        TimePickerDialogView::Show(dialogProperties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
     EXPECT_NE(dialogNode, nullptr);
 }
 
@@ -632,7 +635,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyToJsonValue001, TestSi
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto disappearFont = JsonUtil::Create(true);
-    pickerProperty->ToJsonValue(disappearFont);
+    pickerProperty->ToJsonValue(disappearFont, filter);
     EXPECT_NE(disappearFont, nullptr);
 }
 
@@ -808,7 +811,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg004, Test
 
     options[minuteColumnNode] = DEFAULT_VALUE.size();
     minuteColumnPattern->SetOptions(options);
-    EXPECT_EQ(accessibilityProperty->GetText(), "08:00:00");
+    EXPECT_EQ(accessibilityProperty->GetText(), "03");
 
     options.erase(minuteColumnNode);
     minuteColumnPattern->SetOptions(options);
@@ -940,6 +943,108 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg007, Test
     amPmPickerColumnPattern->SetCurrentIndex(1);
     EXPECT_EQ(accessibilityProperty->GetText(),
         PM + std::to_string(CURRENT_VALUE2 + 1) + COLON + std::to_string(CURRENT_VALUE2));
+}
+
+/**
+ * @tc.name: TimePickerAccessibilityPropertyTestNg008
+ * @tc.desc: Test the Text property for leading zero of TimePickerRowPattern when time is MilitaryTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg008, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    ZeroPrefixType showType = ZeroPrefixType::SHOW;
+    ZeroPrefixType hideType = ZeroPrefixType::HIDE;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED_PREFIXZERO);
+    TimePickerModelNG::GetInstance()->SetDateTimeOptions(hideType, showType, hideType);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    hourColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+
+    auto secondColumn = allChildNode["second"].Upgrade();
+    ASSERT_NE(secondColumn, nullptr);
+    auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+    secondColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        std::to_string(CURRENT_VALUE1) + COLON +
+        ZERO + std::to_string(CURRENT_VALUE1) + COLON +
+        std::to_string(CURRENT_VALUE1));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerAccessibilityPropertyTestNg009
+ * @tc.desc: Test the Text property for leading zero of TimePickerRowPattern when time is not MilitaryTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg009, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    ZeroPrefixType showType = ZeroPrefixType::SHOW;
+    ZeroPrefixType hideType = ZeroPrefixType::HIDE;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, false);
+    TimePickerModelNG::GetInstance()->SetHour24(false);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED_PREFIXZERO);
+    TimePickerModelNG::GetInstance()->SetDateTimeOptions(showType, hideType, showType);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    hourColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+
+    auto amPmColumn = allChildNode["amPm"].Upgrade();
+    ASSERT_NE(amPmColumn, nullptr);
+    auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    amPmPickerColumnPattern->SetCurrentIndex(0);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE1 + 1) + COLON + std::to_string(CURRENT_VALUE1));
+
+    amPmPickerColumnPattern->SetCurrentIndex(1);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        PM + ZERO + std::to_string(CURRENT_VALUE1 + 1) + COLON + std::to_string(CURRENT_VALUE1));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -2605,5 +2710,89 @@ HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1
 
     pickerPattern->OnColorConfigurationUpdate();
     ASSERT_EQ(Color::BLACK, dialogTheme->GetBackgroundColor());
+}
+/**
+ * @tc.name: TimePickerDialogView001
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogView001, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.type = std::make_optional<ButtonType>(ButtonType::CAPSULE);
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    auto testval = buttonLayoutProperty->GetTypeValue();
+    EXPECT_EQ(testval, ButtonType::CAPSULE);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow003
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow003, TestSize.Level1)
+{
+    TimePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(0);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.isUseMilitaryTime = false;
+
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(1, 1, 1);
+
+    DialogProperties dialogProperties;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.type = std::make_optional<ButtonType>(ButtonType::CAPSULE);
+    buttonInfos.push_back(info1);
+
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

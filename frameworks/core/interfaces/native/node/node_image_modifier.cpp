@@ -457,9 +457,22 @@ int32_t GetImageDraggable(ArkUINodeHandle node)
  * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
  * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
  */
-void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, ArkUI_Int32 length) {}
+void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, ArkUI_Int32 length)
+{
+    GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(node, values, units, length);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
 
-void ResetImageBorderRadius(ArkUINodeHandle node) {}
+
+void ResetImageBorderRadius(ArkUINodeHandle node)
+{
+    GetArkUINodeModifiers()->getCommonModifier()->resetBorderRadius(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
 
 void SetImageBorder(ArkUINodeHandle node)
 {
@@ -576,6 +589,20 @@ void SetImageOnError(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     ImageModelNG::SetOnError(frameNode, std::move(onEvent));
+}
+
+void SetImageOnSvgPlayFinish(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onSvgPlayFinishEvent = [node, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_SVG_PLAY_FINISH;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onSvgPlayFinishEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

@@ -67,6 +67,7 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   ratingNode: BuilderNode<[RatingConfiguration]> | null = null;
   modifier: ContentModifier<RatingConfiguration>;
+  needRebuild: boolean = false;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -95,16 +96,25 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     throw new Error('Method not implemented.');
   }
   setContentModifier(modifier: ContentModifier<RatingConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, this);
   }
   makeContentModifierNode(context: UIContext, ratingConfiguration: RatingConfiguration): FrameNode | null {
     ratingConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.ratingNode)) {
+    if (isUndefined(this.ratingNode || this.needRebuild)) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.ratingNode = new xNode.BuilderNode(context);
       this.ratingNode.build(this.builder, ratingConfiguration);
+      this.needRebuild = false;
     } else {
       this.ratingNode.update(ratingConfiguration);
     }

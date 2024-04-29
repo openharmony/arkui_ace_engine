@@ -194,6 +194,17 @@ void ToggleModelNG::OnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 
 void ToggleModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
+    if (checkboxPattern) {
+        checkboxPattern->SetToggleBuilderFunc(std::move(makeFunc));
+        return;
+    }
+    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    if (buttonPattern) {
+        buttonPattern->SetToggleBuilderFunc(std::move(makeFunc));
+        return;
+    }
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
@@ -201,6 +212,17 @@ void ToggleModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&
 
 void ToggleModelNG::SetChangeValue(FrameNode* frameNode, bool value)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
+    if (checkboxPattern) {
+        checkboxPattern->SetCheckBoxSelect(std::move(value));
+        return;
+    }
+    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    if (buttonPattern) {
+        buttonPattern->SetButtonPress(std::move(value));
+        return;
+    }
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwitchIsOn(value);
@@ -582,6 +604,14 @@ bool ToggleModelNG::GetSwitchIsOn(FrameNode* frameNode)
     bool value = false;
     CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SwitchPaintProperty, IsOn, value, frameNode, value);
+    return value;
+}
+
+Color ToggleModelNG::GetUnselectedColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SwitchPaintProperty, UnselectedColor, value, frameNode, Color(DEFAULT_COLOR));
     return value;
 }
 } // namespace OHOS::Ace::NG

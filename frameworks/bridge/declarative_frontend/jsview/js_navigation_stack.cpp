@@ -62,6 +62,7 @@ void JSNavigationStack::SetDataSourceObj(const JSRef<JSObject>& dataSourceObj)
     UpdateCheckNavDestinationExistsFunc(dataSourceObj_, nullptr);
     dataSourceObj_ = dataSourceObj;
     // add callback to new JSNavPathStack
+    RemoveStack();
     UpdateOnStateChangedCallback(dataSourceObj_, onStateChangedCallback_);
     auto checkNavDestinationExistsFunc = [weakStack = WeakClaim(this)](const JSRef<JSObject>& info) -> int32_t {
         auto stack = weakStack.Upgrade();
@@ -244,14 +245,21 @@ std::vector<int32_t> JSNavigationStack::GetAllPathIndex()
     return pathIndex;
 }
 
-void JSNavigationStack::InitNavPathIndex()
+void JSNavigationStack::InitNavPathIndex(const std::vector<std::string>& pathNames)
 {
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
 
+    JSRef<JSArray> nameArray = JSRef<JSArray>::New();
+    JSRef<JSVal> params[1];
+    for (size_t i = 0; i < pathNames.size(); i++) {
+        JSRef<JSVal> info = JSRef<JSVal>::Make(ToJSValue(pathNames[i]));
+        nameArray->SetValueAt(i, info);
+    }
+    params[0] = nameArray;
     auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("initNavPathIndex"));
-    func->Call(dataSourceObj_);
+    func->Call(dataSourceObj_, 1, params);
 }
 
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode)
@@ -269,8 +277,8 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
     params[1] = param;
     RefPtr<NG::UINode> node;
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
-    if (LoadCurrentDestinationBuilder(name, param, customNode) != 0) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "load current destination builder failed: %{public}s", name.c_str());
+    if (LoadCurrentDestinationBuilder(name, param, customNode) != ERROR_CODE_NO_ERROR) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load current destination builder failed: %{public}s", name.c_str());
         return AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
     }
     node = NG::ViewStackProcessor::GetInstance()->Finish();
@@ -278,6 +286,7 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
     if (GetNavDestinationNodeInUINode(node, desNode)) {
         auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
         if (pattern) {
+            pattern->SetName(name);
             auto onPop = GetOnPopByIndex(index);
             auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
             pattern->SetNavPathInfo(pathInfo);
@@ -304,8 +313,8 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Rou
     params[1] = param;
     RefPtr<NG::UINode> node;
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
-    if (LoadCurrentDestinationBuilder(name, param, customNode) != 0) {
-        TAG_LOGI(
+    if (LoadCurrentDestinationBuilder(name, param, customNode) != ERROR_CODE_NO_ERROR) {
+        TAG_LOGE(
             AceLogTag::ACE_NAVIGATION, "load destination builder failed: %{public}s", jsRouteInfo->GetName().c_str());
             return DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
     }
@@ -368,6 +377,9 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
             auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "render current custom node: %{public}s",
                 customNode->GetCustomTag().c_str());
+            // record parent navigationNode before customNode is rendered in case of navDestinationNode
+            auto navigationNode = GetNavigationNode();
+            customNode->SetNavigationNode(navigationNode);
             // render, and find deep further
             customNode->Render();
         } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
@@ -539,6 +551,7 @@ void JSNavigationStack::UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::f
     CHECK_NULL_VOID(stack);
     stack->SetOnStateChangedCallback(callback);
     // When switching the navigation stack, it is necessary to immediately trigger a refresh
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation necessary to immediately trigger a refresh");
     stack->OnStateChanged();
 }
 
@@ -616,20 +629,22 @@ void JSNavigationStack::ClearPreBuildNodeList()
 
 int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo)
 {
-    if (navDestBuilderFunc_->IsEmpty()) {
-        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "navDestBuilderFunc_ is empty.");
-        return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
-    }
-
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, ERROR_CODE_INTERNAL_ERROR);
-    NG::ScopedViewStackProcessor scopedViewStackProcessor;
-
     auto pathName = navPathInfo->GetProperty("name");
     auto param = navPathInfo->GetProperty("param");
     JSRef<JSVal> params[ARGC_COUNT_TWO] = { pathName, param };
-    navDestBuilderFunc_->Call(JSRef<JSObject>(), ARGC_COUNT_TWO, params);
-
-    auto node = NG::ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<NG::UINode> node;
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
+    auto navigationNode = AceType::DynamicCast<NG::NavigationGroupNode>(navigationNode_.Upgrade());
+    CHECK_NULL_RETURN(navigationNode, ERROR_CODE_INTERNAL_ERROR);
+    auto navigationPattern = AceType::DynamicCast<NG::NavigationPattern>(navigationNode->GetPattern());
+    CHECK_NULL_RETURN(navigationPattern, ERROR_CODE_INTERNAL_ERROR);
+    int32_t ret = LoadCurrentDestinationBuilder(pathName->ToString(), param, navigationPattern->GetParentCustomNode());
+    if (ret != ERROR_CODE_NO_ERROR) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load current destination builder failed: %{public}s",
+            pathName->ToString().c_str());
+        return ret;
+    }
+    node = NG::ViewStackProcessor::GetInstance()->Finish();
     RefPtr<NG::NavDestinationGroupNode> desNode;
     if (GetNavDestinationNodeInUINode(node, desNode)) {
         auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
@@ -747,8 +762,8 @@ bool JSNavigationStack::CheckAndGetInterceptionFunc(const std::string& name, JSR
 int32_t JSNavigationStack::LoadCurrentDestinationBuilder(
     const std::string& name, const JSRef<JSVal>& param, const WeakPtr<NG::UINode>& customNode)
 {
-    int res = 0;
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    int res = ERROR_CODE_NO_ERROR;
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, ERROR_CODE_INTERNAL_ERROR);
     const int8_t paramSize = 2;
     if (!navDestBuilderFunc_->IsEmpty()) {
         JSRef<JSVal> params[paramSize];
@@ -768,21 +783,21 @@ int32_t JSNavigationStack::LoadCurrentDestinationBuilder(
         }
     }
     auto node = AceType::DynamicCast<NG::CustomNode>(customNode.Upgrade());
-    CHECK_NULL_RETURN(node, res);
+    CHECK_NULL_RETURN(node, ERROR_CODE_INTERNAL_ERROR);
     auto thisObjTmp = node->FireThisFunc();
-    CHECK_NULL_RETURN(thisObjTmp, res);
+    CHECK_NULL_RETURN(thisObjTmp, ERROR_CODE_INTERNAL_ERROR);
     JSRef<JSObject> thisObj = *(JSRef<JSObject>*)(thisObjTmp);
     auto engine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(EngineHelper::GetCurrentEngine());
-    CHECK_NULL_RETURN(engine, res);
+    CHECK_NULL_RETURN(engine, ERROR_CODE_INTERNAL_ERROR);
     JSRef<JSObject> wrapBuilder = JSRef<JSObject>::Make(engine->GetNavigationBuilder(name).ToLocal());
     if (wrapBuilder->IsEmpty()) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "wrap builder is empty: %{public}s", name.c_str());
-        return res;
+        return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
     }
     auto builderProp = wrapBuilder->GetProperty("builder");
     if (!builderProp->IsFunction()) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get builder failed: %{public}s", name.c_str());
-        return res;
+        return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
     }
     auto builderObj = JSRef<JSObject>::Cast(builderProp);
     auto lengthProp = builderObj->GetProperty("length");

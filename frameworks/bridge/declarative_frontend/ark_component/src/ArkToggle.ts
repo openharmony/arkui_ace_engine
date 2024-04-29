@@ -18,6 +18,7 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   toggleNode: BuilderNode<[ToggleConfiguration]> | null = null;
   modifier: ContentModifier<ToggleConfiguration>;
+  needRebuild: boolean = false;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -57,16 +58,25 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     return this;
   }
   setContentModifier(modifier: ContentModifier<ToggleConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().toggle.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().toggle.setContentModifierBuilder(this.nativePtr, this);
   }
   makeContentModifierNode(context: UIContext, toggleConfiguration: ToggleConfiguration): FrameNode | null {
     toggleConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.toggleNode)) {
+    if (isUndefined(this.toggleNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.toggleNode = new xNode.BuilderNode(context);
       this.toggleNode.build(this.builder, toggleConfiguration);
+      this.needRebuild = false;
     } else {
       this.toggleNode.update(toggleConfiguration);
     }

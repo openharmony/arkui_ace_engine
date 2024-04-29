@@ -71,6 +71,7 @@ var TextDataDetectorType;
   TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
   TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
   TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
+  TextDataDetectorType[TextDataDetectorType["DATETIME"] = 4] = "DATETIME";
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;
@@ -103,6 +104,13 @@ var EllipsisMode;
   EllipsisMode[EllipsisMode["CENTER"] = 1] = "center";
   EllipsisMode[EllipsisMode["END"] = 2] = "end";
 })(EllipsisMode || (EllipsisMode = {}));
+
+var LineBreakStrategy;
+(function (LineBreakStrategy) {
+  LineBreakStrategy[LineBreakStrategy["GREEDY"] = 0] = "greedy";
+  LineBreakStrategy[LineBreakStrategy["HIGH_QUALITY"] = 1] = "highquality";
+  LineBreakStrategy[LineBreakStrategy["BALANCED"] = 2] = "balanced";
+})(LineBreakStrategy || (LineBreakStrategy = {}));
 
 var Curve;
 (function (Curve) {
@@ -182,6 +190,13 @@ var ImageFit;
   ImageFit[ImageFit["None"] = 5] = "None";
   ImageFit[ImageFit["ScaleDown"] = 6] = "ScaleDown";
 })(ImageFit || (ImageFit = {}));
+
+var DynamicRangeMode ;
+(function (DynamicRangeMode ) {
+  DynamicRangeMode [DynamicRangeMode ["HIGH"] = 0] = "HIGH";
+  DynamicRangeMode [DynamicRangeMode ["CONSTRAINT"] = 1] = "CONSTRAINT";
+  DynamicRangeMode [DynamicRangeMode ["STANDARD"] = 2] = "STANDARD";
+})(DynamicRangeMode  || (DynamicRangeMode  = {}));
 
 var ImageRepeat;
 (function (ImageRepeat) {
@@ -655,6 +670,12 @@ var FormDimension;
   FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
 
+var FormShape;
+(function (FormShape) {
+  FormShape["RECT"] = 1;
+  FormShape["CIRCLE"] = 2;
+})(FormShape || (FormShape = {}));
+
 let FormRenderingMode;
 (function (FormRenderingMode) {
   FormRenderingMode.FULL_COLOR = 0;
@@ -919,6 +940,11 @@ var NavigationTitleMode;
   NavigationTitleMode[NavigationTitleMode["Mini"] = 2] = "Mini";
 })(NavigationTitleMode || (NavigationTitleMode = {}));
 
+var BarStyle;
+(function (BarStyle) {
+  BarStyle[BarStyle["STANDARD"] = 0] = "STANDARD";
+  BarStyle[BarStyle["STACK"] = 1] = "STACK";
+})(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
   NavigationMode[NavigationMode["Stack"] = 0] = "Stack";
@@ -982,6 +1008,7 @@ let DismissReason;
   DismissReason[DismissReason.PRESS_BACK = 0] = "PRESS_BACK";
   DismissReason[DismissReason.TOUCH_OUTSIDE = 1] = "TOUCH_OUTSIDE";
   DismissReason[DismissReason.CLOSE_BUTTON = 2] = "CLOSE_BUTTON";
+  DismissReason[DismissReason.SLIDE_DOWN = 3] = "SLIDE_DOWN";
 })(DismissReason || (DismissReason = {}));
 
 var HoverEffect;
@@ -1191,6 +1218,111 @@ var SymbolEffectStrategy;
   SymbolEffectStrategy[SymbolEffectStrategy["SCALE"] = 1] = "SCALE";
   SymbolEffectStrategy[SymbolEffectStrategy["HIERARCHICAL"] = 2] = "HIERARCHICAL";
 })(SymbolEffectStrategy || (SymbolEffectStrategy = {}));
+
+var EffectDirection;
+(function (EffectDirection) {
+  EffectDirection[EffectDirection["DOWN"] = 0] = "DOWN";
+  EffectDirection[EffectDirection["UP"] = 1] = "UP";
+})(EffectDirection || (EffectDirection = {}));
+
+var EffectScope;
+(function (EffectScope) {
+  EffectScope[EffectScope["LAYER"] = 0] = "LAYER";
+  EffectScope[EffectScope["WHOLE"] = 1] = "WHOLE";
+})(EffectScope || (EffectScope = {}));
+
+var EffectFillStyle;
+(function (EffectFillStyle) {
+  EffectFillStyle[EffectFillStyle["CUMULATIVE"] = 0] = "CUMULATIVE";
+  EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
+})(EffectFillStyle || (EffectFillStyle = {}));
+
+class SymbolEffect {
+}
+
+class ScaleSymbolEffect extends SymbolEffect {
+  constructor(scope, direction) {
+    super();
+    this.type = "ScaleSymbolEffect";
+    this.scope = scope;
+    this.direction = direction;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+  direction(value) {
+    this.direction = value;
+    return this;
+  }
+}
+
+class HierarchicalSymbolEffect extends SymbolEffect {
+  constructor(fillStyle) {
+    super();
+    this.type = "HierarchicalSymbolEffect";
+    this.fillStyle = fillStyle;
+  }
+}
+
+class AppearSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "AppearSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+class DisappearSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "DisappearSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class BounceSymbolEffect extends SymbolEffect {
+  constructor(scope, direction) {
+    super();
+    this.type = "BounceSymbolEffect";
+    this.scope = scope;
+    this.direction = direction;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+  direction(value) {
+    this.direction = value;
+    return this;
+  }
+}
+
+class ReplaceSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "ReplaceSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class PulseSymbolEffect extends SymbolEffect {
+  constructor() {
+    super();
+    this.type = "PulseSymbolEffect";
+  }
+}
 
 var RichEditorSpanType;
 (function (RichEditorSpanType) {
@@ -1402,6 +1534,11 @@ var FunctionKey;
   FunctionKey[FunctionKey["F10"] = 10] = "F10";
   FunctionKey[FunctionKey["F11"] = 11] = "F11";
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
+  FunctionKey[FunctionKey["TAB"] = 13] = "TAB";
+  FunctionKey[FunctionKey["DPAD_UP"] = 14] = "DPAD_UP";
+  FunctionKey[FunctionKey["DPAD_DOWN"] = 15] = "DPAD_DOWN";
+  FunctionKey[FunctionKey["DPAD_LEFT"] = 16] = "DPAD_LEFT";
+  FunctionKey[FunctionKey["DPAD_RIGHT"] = 17] = "DPAD_RIGHT";
 })(FunctionKey || (FunctionKey = {}));
 
 var ContentType;
@@ -1815,10 +1952,12 @@ class NavPathStack {
     }
     return -1;
   }
-  initNavPathIndex() {
+  initNavPathIndex(pathName) {
     this.popArray = [];
-    for (let i = 0; i < this.pathArray.length; i++) {
-      this.pathArray[i].index = i;
+    for (let i = 0; i < this.pathArray.length && i < pathName.length; i++) {
+      if (pathName[i] === this.pathArray[i].name && this.isReplace !== 1) {
+        this.pathArray[i].index = i;
+      }
     }
   }
   getAllPathIndex() {
@@ -2306,7 +2445,7 @@ class WaterFlowSections {
   }
 
   clearChanges() {
-    this.changeArray = [];
+    this.changeArray.splice(0);
   }
 }
 
@@ -2324,8 +2463,10 @@ class ChildrenMainSize {
       throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
     }
     this.defaultMainSize = childDefaultSize;
+    this.sizeArray = [];
     this.changeFlag = true;
-    this.changeArray = [];
+    // -1: represent newly created.
+    this.changeArray = [ { start: -1 } ];
   }
 
   set childDefaultSize(value) {
@@ -2347,11 +2488,27 @@ class ChildrenMainSize {
     }
     let startValue = Math.trunc(start);
     let deleteCountValue = deleteCount && !(this.isInvalid(deleteCount)) ? Math.trunc(deleteCount) : 0;
-    if (paramCount == 1) {
+    if (paramCount === 1) {
+      this.sizeArray.splice(startValue);
       this.changeArray.push({ start: startValue });
-    } else if (paramCount == 2) {
+    } else if (paramCount === 2) {
+      this.sizeArray.splice(startValue, deleteCountValue);
       this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
-    } else if (paramCount == 3) {
+    } else if (paramCount === 3) {
+      let childrenSizeLength = childrenSize ? childrenSize.length : 0;
+      if (childrenSizeLength === 0) {
+        childrenSize = [];
+      }
+      for (let i = 0; i < childrenSizeLength; i++) {
+        if (this.isInvalid(childrenSize[i])) {
+          // -1: represent default size.
+          childrenSize[i] = -1;
+        }
+      }
+      while (startValue >= this.sizeArray.length) {
+        this.sizeArray.push(-1);
+      }
+      this.sizeArray.splice(startValue, deleteCountValue, ...childrenSize);
       this.changeArray.push({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
     }
     this.changeFlag = !this.changeFlag;
@@ -2360,17 +2517,25 @@ class ChildrenMainSize {
   update(index, childSize) {
     if (this.isInvalid(index)) {
       throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    } else if (this.isInvalid(childSize)) {
+      // -1: represent default size.
+      childSize = -1;
     }
-    this.changeArray.push({ start: Math.trunc(index), deleteCount: 1, childrenSize: [childSize] });
+    let startValue = Math.trunc(index);
+    while (startValue >= this.sizeArray.length) {
+      this.sizeArray.push(-1);
+    }
+    this.sizeArray.splice(startValue, 1, childSize);
+    this.changeArray.push({ start: startValue, deleteCount: 1, childrenSize: [childSize] });
     this.changeFlag = !this.changeFlag;
   }
 
   isInvalid(input) {
-    return !(Number.isFinite(input) && (Math.sign(input) == 1 || Math.sign(input) == 0));
+    return !(Number.isFinite(input) && input >= 0);
   }
 
   clearChanges() {
-    this.changeArray = [];
+    this.changeArray.splice(0);
   }
 }
 
@@ -2466,6 +2631,7 @@ var SaveDescription;
   SaveDescription[SaveDescription["DOWNLOAD_AND_SHARE"] = 5] = "DOWNLOAD_AND_SHARE";
   SaveDescription[SaveDescription["RECEIVE"] = 6] = "RECEIVE";
   SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
+  SaveDescription[SaveDescription["SAVE_TO_GALLERY"] = 8] = "SAVE_TO_GALLERY";
 })(SaveDescription || (SaveDescription = {}));
 
 var SaveButtonOnClickResult;
@@ -2621,12 +2787,25 @@ var ParticleEmitterShape;
   ParticleEmitterShape[ParticleEmitterShape["ELLIPSE"] = 2] = "ELLIPSE";
 })(ParticleEmitterShape || (ParticleEmitterShape = {}));
 
+var DistributionType;
+(function (DistributionType) {
+  DistributionType[DistributionType["UNIFORM"] = 0] = "UNIFORM";
+  DistributionType[DistributionType["GAUSSIAN"] = 1] = "GAUSSIAN";
+})(DistributionType || (DistributionType = {}));
+
 var ParticleUpdater;
 (function (ParticleUpdater) {
   ParticleUpdater[ParticleUpdater["NONE"] = 0] = "NONE";
   ParticleUpdater[ParticleUpdater["RANDOM"] = 1] = "RANDOM";
   ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
 })(ParticleUpdater || (ParticleUpdater = {}));
+
+var DisturbanceFieldShape;
+(function (DisturbanceFieldShape) {
+  DisturbanceFieldShape[DisturbanceFieldShape["RECT"] = 0] = "RECT";
+  DisturbanceFieldShape[DisturbanceFieldShape["CIRCLE"] = 1] = "CIRCLE";
+  DisturbanceFieldShape[DisturbanceFieldShape["ELLIPSE"] = 2] = "ELLIPSE";
+})(DisturbanceFieldShape || (DisturbanceFieldShape = {}));
 
 var SwiperNestedScrollMode;
 (function (SwiperNestedScrollMode) {
@@ -2780,6 +2959,12 @@ let MarqueeState;
   MarqueeState[MarqueeState['FINISH'] = 2] = 'FINISH';
 })(MarqueeState || (MarqueeState = {}));
 
+let MarqueeStartPolicy;
+(function (MarqueeStartPolicy) {
+  MarqueeStartPolicy[MarqueeStartPolicy['DEFAULT'] = 0] = 'DEFAULT';
+  MarqueeStartPolicy[MarqueeStartPolicy['ON_FOCUS'] = 1] = 'ON_FOCUS';
+})(MarqueeStartPolicy || (MarqueeStartPolicy = {}));
+
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {
   NativeEmbedStatus['CREATE'] = 0;
@@ -2802,8 +2987,8 @@ let ButtonRole;
 let MenuPolicy;
 (function (MenuPolicy) {
   MenuPolicy['DEFAULT'] = 0;
-  MenuPolicy['NEVER'] = 1;
-  MenuPolicy['ALWAYS'] = 2;
+  MenuPolicy['HIDE'] = 1;
+  MenuPolicy['SHOW'] = 2;
 })(MenuPolicy || (MenuPolicy = {}));
 
 let PreDragStatus;
@@ -2834,7 +3019,26 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
   StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
   StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
-  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 5] = "PARAGRAPH_STYLE";
+  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
-  StyledStringKey[StyledStringKey["GESTURE"] = 7] = "GESTURE";
+  StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
+  StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
+  StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
 })(StyledStringKey || (StyledStringKey = {}));
+
+class CustomSpan {
+  type_ = "CustomSpan"
+}
+
+let FocusPriority;
+(function (FocusPriority) {
+  FocusPriority[FocusPriority["AUTO"] = 0] = "AUTO";
+  FocusPriority[FocusPriority["PRIOR"] = 2000] = "PRIOR";
+  FocusPriority[FocusPriority["PREVIOUS"] = 3000] = "PREVIOUS";
+})(FocusPriority || (FocusPriority = {}));
+var SubMenuExpandingMode;
+(function (SubMenuExpandingMode) {
+  SubMenuExpandingMode[SubMenuExpandingMode["SIDE_EXPAND"] = 0] = "SIDE";
+  SubMenuExpandingMode[SubMenuExpandingMode["EMBEDDED_EXPAND"] = 1] = "EMBEDDED";
+  SubMenuExpandingMode[SubMenuExpandingMode["STACK_EXPAND"] = 2] = "STACK";
+})(SubMenuExpandingMode || (SubMenuExpandingMode = {}));

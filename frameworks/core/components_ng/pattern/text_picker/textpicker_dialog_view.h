@@ -19,6 +19,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_base_component.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 
@@ -27,13 +28,15 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, const TextPickerSettingData& settingData,
-        std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static RefPtr<FrameNode> RangeShow(const DialogProperties& dialogProperties,
-        const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+        const TextPickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
+        std::map<std::string, NG::DialogTextEvent>& dialogEvent,
         std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
     static RefPtr<FrameNode> OptionsShow(const DialogProperties& dialogProperties,
-        const TextPickerSettingData& settingData, std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+        const TextPickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
+        std::map<std::string, NG::DialogTextEvent>& dialogEvent,
         std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
     static void SetSelected(const RefPtr<TextPickerPattern>& textPickerPattern, uint32_t value = 0);
     static void SetSelectedValues(const RefPtr<TextPickerPattern>& textPickerPattern,
@@ -46,15 +49,13 @@ public:
     static void SetDefaultPickerItemHeight(const Dimension& value);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
-        std::map<std::string, NG::DialogTextEvent> dialogEvent,
-        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-        GestureEventFunc callback);
+        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent, GestureEventFunc callback);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
-        const RefPtr<FrameNode>& textPickerNode,
-        DialogEvent& acceptEvent);
+        const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos, DialogEvent& acceptEvent);
     static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
-        const RefPtr<FrameNode>& textPickerNode);
+        const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos);
 
 private:
     static RefPtr<FrameNode> CreateStackNode(RefPtr<PickerTheme> pickerTheme);
@@ -77,6 +78,19 @@ private:
     static bool OnKeyEvent(const KeyEvent& event);
     static void UpdateButtonConfirmLayoutProperty(const RefPtr<FrameNode>& buttonConfirmNode,
         RefPtr<PickerTheme> pickerTheme);
+    static void UpdateConfirmButtonTextLayoutProperty(
+        const RefPtr<FrameNode>& textConfirmNode, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateConfirmButtonMargin(
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
+    static void UpdateCancelButtonMargin(
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    static void UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
+        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
+    static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
+        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+        const RefPtr<ButtonTheme>& buttonTheme);
+    static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
+        const RefPtr<FrameNode>& buttonNode, bool isConfirm);
     static WeakPtr<FrameNode> dialogNode_;
 };
 } // namespace OHOS::Ace::NG

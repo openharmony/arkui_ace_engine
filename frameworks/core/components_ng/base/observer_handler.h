@@ -34,6 +34,10 @@ enum class NavDestinationState {
     ON_HIDDEN = 1,
     ON_APPEAR = 2,
     ON_DISAPPEAR = 3,
+    ON_WILL_SHOW = 4,
+    ON_WILL_HIDE = 5,
+    ON_WILL_APPEAR = 6,
+    ON_WILL_DISAPPEAR = 7,
     ON_BACKPRESS = 100,
 };
 
@@ -89,9 +93,12 @@ struct RouterPageInfoNG {
     std::string name;
     std::string path;
     RouterPageState state;
+    std::string pageId;
 
-    RouterPageInfoNG(napi_value context, int32_t index, std::string name, std::string path, RouterPageState state)
-        : context(context), index(index), name(std::move(name)), path(std::move(path)), state(state)
+    RouterPageInfoNG(napi_value context, int32_t index, std::string name, std::string path, RouterPageState state,
+        std::string pageId)
+        : context(context), index(index), name(std::move(name)), path(std::move(path)), state(state),
+          pageId(std::move(pageId))
     {}
 };
 
@@ -126,8 +133,7 @@ public:
         std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
     using ScrollEventHandleFunc = void (*)(const std::string&, ScrollEventType, float);
-    using RouterPageHandleFunc = void (*)(
-        AbilityContextInfo&, napi_value, int32_t, const std::string&, const std::string&, RouterPageState);
+    using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();
     using NavDestinationSwitchHandleFunc = std::function<void(const AbilityContextInfo&, NavDestinationSwitchInfo&)>;

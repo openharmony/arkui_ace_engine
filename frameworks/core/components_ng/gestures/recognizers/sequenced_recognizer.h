@@ -40,6 +40,7 @@ public:
     void OnBlocked() override;
 
     bool HandleEvent(const TouchEvent& point) override;
+    bool HandleEvent(const AxisEvent& point) override;
     GestureMode GetGestureMode() const override
     {
         return GestureMode::Sequence;

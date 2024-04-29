@@ -78,7 +78,8 @@ ProgressModifier::ProgressModifier()
       paintShadow_(AceType::MakeRefPtr<PropertyBool>(false)),
       progressStatus_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressStatus::PROGRESSING))),
       isItalic_(AceType::MakeRefPtr<PropertyBool>(false)),
-      smoothEffect_(AceType::MakeRefPtr<PropertyBool>(true))
+      smoothEffect_(AceType::MakeRefPtr<PropertyBool>(true)),
+      useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false))
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -107,7 +108,17 @@ ProgressModifier::ProgressModifier()
 
 void ProgressModifier::onDraw(DrawingContext& context)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     ContentDrawWithFunction(context);
+}
+
+void ProgressModifier::SetUseContentModifier(bool useContentModifier)
+{
+    if (useContentModifier_) {
+        useContentModifier_->Set(useContentModifier);
+    }
 }
 
 void ProgressModifier::SetStrokeWidth(float width)
@@ -1077,7 +1088,9 @@ void ProgressModifier::PaintEndHalf(RSCanvas& canvas, RSBrush& brush, const Ring
 
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
-    colors.emplace_back(gradientColors[gradientColors.size() - 1].GetLinearColor().GetValue());
+    if (gradientColors.size() != 0) {
+        colors.emplace_back(gradientColors[gradientColors.size() - 1].GetLinearColor().GetValue());
+    }
     pos.emplace_back(additionalAngle / ANGLE_360);
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
@@ -1635,13 +1648,13 @@ Gradient ProgressModifier::CreateCapsuleGradient() const
     return gradient;
 }
 
-bool ProgressModifier::PostTask(const TaskExecutor::Task& task)
+bool ProgressModifier::PostTask(const TaskExecutor::Task& task, const std::string& name)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
-    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void ProgressModifier::SetStrokeRadius(float strokeRaidus)

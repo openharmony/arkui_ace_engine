@@ -58,6 +58,13 @@ public:
         return axis == Axis::HORIZONTAL ? y_ : x_;
     }
 
+    T GetDistance(const OffsetT& offset) const
+    {
+        T dx = x_ - offset.x_;
+        T dy = y_ - offset.y_;
+        return std::sqrt(dx * dx + dy * dy);
+    }
+
     void SetX(T x)
     {
         x_ = x;
@@ -128,6 +135,11 @@ public:
     bool NonNegative() const
     {
         return GreatOrEqual(x_, 0) && GreatOrEqual(y_, 0);
+    }
+
+    bool IsNegative() const
+    {
+        return LessNotEqual(x_, 0) && LessNotEqual(y_, 0);
     }
 
     bool NonOffset() const

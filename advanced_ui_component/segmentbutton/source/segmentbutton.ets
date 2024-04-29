@@ -371,6 +371,9 @@ struct SelectItem {
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
         .shadow(ShadowStyle.OUTER_DEFAULT_XS)
+        .pixelRound({
+          top:PixelRoundCalcPolicy.FORCE_FLOOR
+        })
     }
   }
 }

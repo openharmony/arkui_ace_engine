@@ -77,21 +77,27 @@ struct AxisEvent final : public UIInputEvent {
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
-    int32_t touchEventId;
+    int32_t touchEventId = 0;
 
     // Coordinates relative to the upper-left corner of the current component
     float localX = 0.0;
     float localY = 0.0;
 
+    int32_t targetDisplayId = 0;
+    int32_t originalId = 0;
+    bool isInjected = false;
+
     AxisEvent() {}
 
     AxisEvent(int32_t id, float x, float y, float screenX, float screenY, double verticalAxis, double horizontalAxis,
         double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent, AxisAction action, TimeStamp timestamp,
-        int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent)
+        int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent,
+        int32_t targetDisplayId, int32_t originalId, bool isInjected)
         : id(id), x(x), y(y), screenX(screenX), screenY(screenY), verticalAxis(verticalAxis),
           horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale), rotateAxisAngle(rotateAxisAngle),
           isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
-          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent))
+          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)), targetDisplayId(targetDisplayId),
+          originalId(originalId), isInjected(isInjected)
     {
         time = timestamp;
     }
@@ -100,11 +106,12 @@ struct AxisEvent final : public UIInputEvent {
     {
         if (NearZero(scale)) {
             return { id, x, y, screenX, screenY, verticalAxis, horizontalAxis, pinchAxisScale, rotateAxisAngle,
-                isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent };
+                isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent, targetDisplayId,
+                originalId, isInjected };
         }
         return { id, x / scale, y / scale, screenX / scale, screenY / scale, verticalAxis, horizontalAxis,
             pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId, sourceType, sourceTool,
-            pointerEvent };
+            pointerEvent, targetDisplayId, originalId, isInjected };
     }
 
     Offset GetOffset() const

@@ -122,7 +122,7 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitInputEvent();
     void InitCurrentInputEvent();
-    void InitChildInputEvent();
+    void InitChildInputEvent(RefPtr<FrameNode>& itemNode, int32_t childIndex);
     void InitPopupInputEvent();
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
@@ -177,6 +177,7 @@ private:
     void UpdateBubbleListItemContext(
         const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme, uint32_t pos);
     void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
+    void StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration = INDEXER_COLLAPSE_WAIT_DURATION);
     
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -220,6 +221,7 @@ private:
     bool isNewHeightCalculated_ = false;
     IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;
     CancelableCallback<void()> delayTask_;
+    CancelableCallback<void()> delayCollapseTask_;
 };
 } // namespace OHOS::Ace::NG
 

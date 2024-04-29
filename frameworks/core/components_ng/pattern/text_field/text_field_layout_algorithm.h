@@ -50,6 +50,7 @@ public:
     }
 
     const RefPtr<Paragraph>& GetParagraph() const override;
+    void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override;
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
 
@@ -87,6 +88,7 @@ public:
     void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength, LayoutWrapper* layoutWrapper);
     void UpdateCounterNode(uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
+    bool IsAdaptExceedLimit(const SizeF& maxSize) override;
 
 protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
@@ -114,15 +116,18 @@ protected:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         RefPtr<Paragraph>& paragraph, float removeValue = 0.0f);
     SizeF GetConstraintSize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    std::optional<SizeF> InlineMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    std::optional<SizeF> InlineMeasureContent(const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper);
     SizeF PlaceHolderMeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth = 0.0f);
-    SizeF TextInputMeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth);
+    SizeF TextInputMeasureContent(const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper, float imageWidth);
     SizeF TextAreaMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     bool AddAdaptFontSizeAndAnimations(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     virtual bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) = 0;
 
@@ -139,7 +144,8 @@ protected:
 
     float unitWidth_ = 0.0f;
     bool autoWidth_ = false;
-
+    Dimension textIndent_ = 0.0_px;
+    float indent_ = 0.0f;
 private:
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
@@ -147,9 +153,13 @@ private:
     static void UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& placeholderTextStyle, bool isDisabled);
+    void UpdateTextStyleTextOverflowAndWordBreak(TextStyle& textStyle, bool isTextArea,
+        bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
     float GetVisualTextWidth() const;
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
-
+    void ApplyIndent(double width);
+    bool IsInlineFocusAdaptExceedLimit(const SizeF& maxSize);
+    LayoutConstraintF BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

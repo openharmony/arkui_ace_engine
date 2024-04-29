@@ -33,10 +33,11 @@ public:
 
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
 
-private:
+protected:
     WeakPtr<Pattern> pattern_;
     RefPtr<TextDragOverlayModifier> overlayModifier_;
 
+private:
     ACE_DISALLOW_COPY_AND_MOVE(TextDragPaintMethod);
 };
 } // namespace OHOS::Ace::NG

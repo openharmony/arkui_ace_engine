@@ -567,6 +567,9 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest010, TestSize.Level1)
     displaySync->AddToPipelineOnContainer();
     EXPECT_TRUE(displaySync->IsOnPipeline());
 
+    int32_t matchedRate = displaySync->FindMatchedRefreshRate(120, 70);
+    EXPECT_EQ(60, matchedRate);
+
     displaySync->SetExpectedFrameRateRange({0, 120, 60});
     int32_t matchedRate1 = displaySync->SearchMatchedRate(90);
     EXPECT_EQ(90, matchedRate1);

@@ -242,8 +242,8 @@ public:
     std::string GetParams() override;
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 
-    void PostJsTask(std::function<void()>&& task) override;
-    void PostUITask(std::function<void()>&& task) override;
+    void PostJsTask(std::function<void()>&& task, const std::string& name) override;
+    void PostUITask(std::function<void()>&& task, const std::string& name) override;
 
     const std::string& GetAppID() const override;
     const std::string& GetAppName() const override;
@@ -282,7 +282,7 @@ public:
     void WaitTimer(const std::string& callbackId, const std::string& delay, bool isInterval, bool isFirst) override;
     void ClearTimer(const std::string& callbackId) override;
 
-    void PostSyncTaskToPage(std::function<void()>&& task) override;
+    void PostSyncTaskToPage(std::function<void()>&& task, const std::string& name) override;
     void AddTaskObserver(std::function<void()>&& task) override;
     void RemoveTaskObserver() override;
 
@@ -409,6 +409,8 @@ private:
     void BackImplement(const std::string& uri, const std::string& params);
 
     void ClearAlertCallback(PageInfo pageInfo);
+
+    void GetAssetFromI18n(const std::string& fileFullPath, std::unique_ptr<JsonValue>& data);
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;

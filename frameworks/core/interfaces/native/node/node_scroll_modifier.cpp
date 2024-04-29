@@ -347,7 +347,7 @@ void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32* values)
     Dimension yOffset(values[2], static_cast<OHOS::Ace::DimensionUnit>(values[3]));
     float duration = values[4];
     RefPtr<Curve> curve = Curves::EASE;
-    if (static_cast<int>(values[SCROLL_TO_INDEX_CURVE]) < CurvesVector.size()) {
+    if (static_cast<int>(values[SCROLL_TO_INDEX_CURVE]) < static_cast<int>(CurvesVector.size())) {
         curve = CurvesVector[static_cast<int>(values[SCROLL_TO_INDEX_CURVE])];
     }
     auto smooth = static_cast<bool>(values[6]);

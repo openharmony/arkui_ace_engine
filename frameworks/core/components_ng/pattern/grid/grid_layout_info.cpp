@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include <numeric>
 
 #include "base/utils/utils.h"
 
@@ -222,9 +223,10 @@ int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
 
     int32_t maxIdx = 0;
     // maxIdx might not be in the last position if hasBigItem_
-    for (auto it : lastLine->second) {
+    for (const auto& it : lastLine->second) {
         maxIdx = std::max(maxIdx, it.second);
     }
+    maxIdx = std::max(maxIdx, FindEndIdx(endLine).itemIdx);
     return maxIdx - minIdx + 1;
 }
 
@@ -364,7 +366,7 @@ std::pair<int32_t, int32_t> GridLayoutInfo::FindItemInRange(int32_t target) cons
     }
     for (int r = startMainLineIndex_; r <= endMainLineIndex_; ++r) {
         const auto& row = gridMatrix_.at(r);
-        for (auto it : row) {
+        for (const auto& it : row) {
             if (it.second == target) {
                 return { r, it.first };
             }
@@ -551,22 +553,83 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
             }
         }
     }
-    return {};
+    return { .itemIdx = 0, .y = 0, .x = 0 };
 }
 
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
 {
+    if (hasMultiLineItem_) {
+        ClearMapsToEndContainsMultiLineItem(idx - 1);
+        return;
+    }
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridIt, gridMatrix_.end());
     ClearHeightsToEnd(idx);
 }
 
+void GridLayoutInfo::ClearMapsToEndContainsMultiLineItem(int32_t idx)
+{
+    int32_t maxIndex = INT_MIN;
+    for (const auto& col : gridMatrix_[idx]) {
+        maxIndex = std::max(maxIndex, col.second);
+    }
+
+    int targetLine = idx;
+    while (targetLine < gridMatrix_.rbegin()->first) {
+        int32_t minIndex = INT_MAX;
+        for (const auto& col : gridMatrix_[targetLine + 1]) {
+            minIndex = std::min(minIndex, col.second);
+        }
+        if (maxIndex < minIndex) {
+            break;
+        }
+        targetLine++;
+    }
+    gridMatrix_.erase(gridMatrix_.find(targetLine + 1), gridMatrix_.end());
+
+    auto lineIt = lineHeightMap_.find(targetLine + 1);
+    if (lineIt != lineHeightMap_.end()) {
+        lineHeightMap_.erase(lineIt, lineHeightMap_.end());
+    }
+}
+
 void GridLayoutInfo::ClearMapsFromStart(int32_t idx)
 {
+    if (hasMultiLineItem_) {
+        ClearMapsFromStartContainsMultiLineItem(idx);
+        return;
+    }
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridMatrix_.begin(), gridIt);
     auto lineIt = lineHeightMap_.lower_bound(idx);
     lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
+}
+
+void GridLayoutInfo::ClearMapsFromStartContainsMultiLineItem(int32_t idx)
+{
+    int32_t minIndex = INT_MAX;
+    for (const auto& col : gridMatrix_[idx]) {
+        minIndex = std::min(minIndex, col.second);
+    }
+
+    auto iter = gridMatrix_.begin();
+    int targetLine = idx;
+    while (targetLine > iter->first) {
+        int32_t maxIndex = INT_MIN;
+        for (const auto& col : gridMatrix_[targetLine - 1]) {
+            maxIndex = std::max(maxIndex, col.second);
+        }
+        if (maxIndex < minIndex) {
+            break;
+        }
+        targetLine--;
+    }
+    gridMatrix_.erase(gridMatrix_.begin(), gridMatrix_.find(targetLine));
+
+    auto lineIt = lineHeightMap_.find(targetLine);
+    if (lineIt != lineHeightMap_.end()) {
+        lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
+    }
 }
 
 void GridLayoutInfo::ClearHeightsToEnd(int32_t idx)
@@ -591,5 +654,96 @@ void GridLayoutInfo::ClearMatrixToEnd(int32_t idx, int32_t lineIdx)
         }
     }
     gridMatrix_.erase(it, gridMatrix_.end());
+}
+
+float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool regular) const
+{
+    float len = 0.0f;
+    auto it = lineHeightMap_.find(startMainLineIndex_);
+    if (!regular) {
+        // skip adding starting lines that are outside viewport in LayoutIrregular
+        float offset = currentOffset_;
+        while (it != lineHeightMap_.end() && Negative(it->second + offset + mainGap)) {
+            offset += it->second + mainGap;
+            ++it;
+        }
+    }
+    auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
+    for (; it != endIt; ++it) {
+        len += it->second + mainGap;
+    }
+    return len - mainGap;
+}
+
+float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, float mainGap) const
+{
+    if (lineHeightMap_.empty() || endIndex_ < childrenCount_ - 1 ||
+        endMainLineIndex_ < lineHeightMap_.rbegin()->first) {
+        return Infinity<float>();
+    }
+
+    float offset = currentOffset_;
+    // currentOffset_ is relative to startMainLine, which might be entirely above viewport
+    auto it = lineHeightMap_.find(startMainLineIndex_);
+    while (it != lineHeightMap_.end() && Negative(offset + it->second + mainGap)) {
+        offset += it->second + mainGap;
+        ++it;
+    }
+    float bottomPos = offset + heightInView;
+    return bottomPos - mainSize;
+}
+
+void GridLayoutInfo::ClearHeightsFromMatrix(int32_t lineIdx)
+{
+    auto lineIt = lineHeightMap_.find(lineIdx);
+    if (lineIt == lineHeightMap_.end()) {
+        return;
+    }
+    if (gridMatrix_.find(lineIdx) != gridMatrix_.end()) {
+        lineIt++;
+    }
+    lineHeightMap_.erase(lineIt, lineHeightMap_.end());
+}
+
+MatIter GridLayoutInfo::FindStartLineInMatrix(MatIter iter, int32_t index) const
+{
+    if (iter == gridMatrix_.end() || iter == gridMatrix_.begin()) {
+        return iter;
+    }
+
+    --iter;
+    int32_t maxValue = 0;
+    while (CheckRow(maxValue, iter->second, index)) {
+        if (iter == gridMatrix_.begin()) {
+            return iter;
+        }
+        --iter;
+    }
+    return ++iter;
+}
+
+float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float mainGap) const
+{
+    if (endLine <= startLine) {
+        return 0.0f;
+    }
+    float totalHeight = 0.0f;
+    auto endIt = lineHeightMap_.find(endLine);
+    for (auto it = lineHeightMap_.find(startLine); it != endIt; ++it) {
+        totalHeight += it->second + mainGap;
+    }
+    return totalHeight;
+}
+
+bool GridLayoutInfo::HeightSumSmaller(float other, float mainGap) const
+{
+    other += mainGap;
+    for (const auto& it : lineHeightMap_) {
+        other -= it.second + mainGap;
+        if (NonPositive(other)) {
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

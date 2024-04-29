@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 
+#include "input_manager.h"
 #include "key_event.h"
 #include "pointer_event.h"
 
@@ -117,6 +118,23 @@ int32_t WindowSceneHelper::GetFocusSystemWindowId(RefPtr<FrameNode> focusedFrame
     return focusSystemWindowId;
 }
 
+int32_t WindowSceneHelper::GetWindowIdForWindowScene(RefPtr<FrameNode> windowSceneNode)
+{
+    int32_t windowId = 0;
+    CHECK_NULL_RETURN(windowSceneNode, windowId);
+    if (windowSceneNode->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        return windowId;
+    }
+    auto windowScenePattern = windowSceneNode->GetPattern<SystemWindowScene>();
+    CHECK_NULL_RETURN(windowScenePattern, windowId);
+
+    auto window2patternSession = windowScenePattern->GetSession();
+    CHECK_NULL_RETURN(window2patternSession, windowId);
+
+    windowId = static_cast<int32_t>(window2patternSession->GetPersistentId());
+    return windowId;
+}
+
 bool WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(RefPtr<FrameNode> focusedFrameNode)
 {
     bool isWindowSceneSaveKeyboardFlag = false;
@@ -190,7 +208,6 @@ void WindowSceneHelper::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
             frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            inputMethod->RequestHideInput();
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
         }
@@ -213,50 +230,78 @@ void CaculatePoint(const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MM
         renderContext->GetPointTransform(tmp);
         item.SetWindowX(static_cast<int32_t>(std::round(tmp.GetX())));
         item.SetWindowY(static_cast<int32_t>(std::round(tmp.GetY())));
+        if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
+            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+            // CaculatePoint for double XY Position.
+            PointF tmpPos(item.GetWindowXPos() + rect.GetX(), item.GetWindowYPos() + rect.GetY());
+            renderContext->GetPointTransform(tmpPos);
+            item.SetWindowXPos(tmpPos.GetX());
+            item.SetWindowYPos(tmpPos.GetY());
+        }
         pointerEvent->UpdatePointerItem(pointerId, item);
     }
 }
 
-void WindowSceneHelper::InjectPointerEvent(const std::string& targetNodeName,
-    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+void WindowSceneHelper::InjectPointerEvent(
+    const std::string& targetNodeName, const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    CHECK_NULL_VOID(pointerEvent);
+    if (!pointerEvent) {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent pointerEvent is null return.");
+        return;
+    }
     if (targetNodeName == "") {
-        pointerEvent->MarkProcessed();
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d targetNodeName is null return.",
+            pointerEvent->GetId());
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (!pipelineContext) {
-        pointerEvent->MarkProcessed();
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d pipelineContext is null return.",
+            pointerEvent->GetId());
         return;
     }
 
     auto rootNode = pipelineContext->GetRootElement();
     if (!rootNode) {
-        pointerEvent->MarkProcessed();
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d rootNode is null return.",
+            pointerEvent->GetId());
         return;
     }
     auto targetNode = FrameNode::FindChildByName(rootNode, targetNodeName);
     if (!targetNode && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-            "PointerEvent Process to inject, targetNode is null. targetNodeName:%{public}s",
-            targetNodeName.c_str());
+            "PointerEvent Process to inject, targetNode is null. targetNodeName:%{public}s", targetNodeName.c_str());
     }
     InjectPointerEvent(targetNode, pointerEvent);
 }
 
-void WindowSceneHelper::InjectPointerEvent(RefPtr<FrameNode> node,
-    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+void WindowSceneHelper::InjectPointerEvent(
+    RefPtr<FrameNode> node, const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    CHECK_NULL_VOID(pointerEvent);
+    if (!pointerEvent) {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent pointerEvent is null return.");
+        return;
+    }
     if (!node) {
-        pointerEvent->MarkProcessed();
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d node is null return.",
+            pointerEvent->GetId());
         return;
     }
 
     auto container = Container::Current();
     if (!container) {
-        pointerEvent->MarkProcessed();
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d container is null return.",
+            pointerEvent->GetId());
         return;
     }
     CaculatePoint(node, pointerEvent);
@@ -266,16 +311,19 @@ void WindowSceneHelper::InjectPointerEvent(RefPtr<FrameNode> node,
             "WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
             "ViewPosX = %{public}d, ViewPosY = %{public}d. node: id:%{public}d, type:%{public}s, "
             "inspectorId:%{public}s",
-            pointerEvent->GetId(), container->GetWindowId(), container->GetViewWidth(),
-            container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY(),
-            node->GetId(), node->GetTag().c_str(), node->GetInspectorIdValue("").c_str());
+            pointerEvent->GetId(), container->GetWindowId(), container->GetViewWidth(), container->GetViewHeight(),
+            container->GetViewPosX(), container->GetViewPosY(), node->GetId(), node->GetTag().c_str(),
+            node->GetInspectorIdValue("").c_str());
     }
     auto aceView = static_cast<OHOS::Ace::Platform::AceViewOhos*>(container->GetView());
     if (!aceView) {
-        pointerEvent->MarkProcessed();
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d aceView is null return.",
+            pointerEvent->GetId());
         return;
     }
-    OHOS::Ace::Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, node);
+    OHOS::Ace::Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, node, nullptr, true);
 }
 
 bool WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)

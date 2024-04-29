@@ -59,6 +59,10 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     return this;
   }
   setContentModifier(modifier: ContentModifier<RadioConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, this);

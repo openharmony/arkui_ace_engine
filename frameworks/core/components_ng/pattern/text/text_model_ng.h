@@ -41,11 +41,13 @@ public:
     void SetMaxLines(uint32_t value) override;
     void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
+    void SetLineSpacing(const Dimension& value) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetBaselineOffset(const Dimension& value) override;
     void SetWordBreak(WordBreak value) override;
+    void SetLineBreakStrategy(LineBreakStrategy value) override;
     void SetEllipsisMode(EllipsisMode modal) override;
     void SetTextCase(TextCase value) override;
     void SetLetterSpacing(const Dimension& value) override;
@@ -55,7 +57,7 @@ public:
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
     // TODO: add extra event for text.
-    void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
+    void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
@@ -71,8 +73,8 @@ public:
         SelectMenuParam& menuParam) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     RefPtr<TextControllerBase> GetTextController() override;
-    void SetClipEdge() override;
-    void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+    void SetClipEdge(bool clip) override;
+    void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetMarqueeOptions(const TextMarqueeOptions& options) override;
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
 
@@ -84,6 +86,7 @@ public:
     static void SetTextColor(FrameNode* frameNode, const Color& value);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetLineSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetTextOverflow(FrameNode* frameNode, TextOverflow value);
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -104,17 +107,20 @@ public:
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
-    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
+    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
+    static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);
     static TextHeightAdaptivePolicy GetHeightAdaptivePolicy(FrameNode* frameNode);
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
     static Font GetFont(FrameNode* frameNode);
     static std::string GetContent(FrameNode* frameNode);
     static float GetLineHeight(FrameNode* frameNode);
+    static float GetLineSpacing(FrameNode* frameNode);
     static TextDecoration GetDecoration(FrameNode* frameNode);
     static Color GetTextDecorationColor(FrameNode* frameNode);
+    static TextDecorationStyle GetTextDecorationStyle(FrameNode* frameNode);
     static TextCase GetTextCase(FrameNode* frameNode);
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);

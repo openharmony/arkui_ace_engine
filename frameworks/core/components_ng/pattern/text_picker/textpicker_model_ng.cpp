@@ -58,6 +58,9 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     if (textPickerDialog.backgroundBlurStyle.has_value()) {
         properties.backgroundBlurStyle = textPickerDialog.backgroundBlurStyle.value();
     }
+    if (textPickerDialog.shadow.has_value()) {
+        properties.shadow = textPickerDialog.shadow.value();
+    }
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
@@ -585,7 +588,8 @@ RefPtr<AceType> TextPickerDialogModelNG::CreateObject()
 void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerText,
     NG::TextPickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent)
+    TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent,
+    const std::vector<ButtonInfo>& buttonInfos)
 {
     auto container = Container::Current();
     if (!container) {
@@ -620,20 +624,19 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     dialogLifeCycleEvent["willAppearId"] = textPickerDialogEvent.onWillAppear;
     dialogLifeCycleEvent["willDisappearId"] = textPickerDialogEvent.onWillDisappear;
     DialogProperties properties;
-    ButtonInfo buttonInfo;
     SetDialogProperties(properties, textPickerDialog, theme);
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTextDialog(
-                properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+                properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowTextPicker");
 }
 
 void TextPickerModelNG::SetCanLoop(FrameNode* frameNode, const bool value)
@@ -883,7 +886,7 @@ void TextPickerModelNG::SetValues(FrameNode* frameNode, const std::vector<std::s
     std::vector<std::string> selectedValues;
     std::vector<uint32_t> valuesIndex;
     for (uint32_t i = 0; i < options_.size(); i++) {
-        if (i > values.size() - 1) {
+        if (values.size() > 0 && i > values.size() - 1) {
             if (options_[i].rangeResult.size() > 0) {
                 selectedValues.emplace_back(options_[i].rangeResult[0]);
             } else {
@@ -1016,14 +1019,14 @@ std::string TextPickerModelNG::getTextPickerRange(FrameNode* frameNode)
             result.append(range.text_ + ";");
         }
         if (result.length() > 0) {
-            result = result.substr(0, result.length() - 1);
+            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
         }
     } else {
         for (auto option : options_) {
             for (auto range : option.rangeResult) {
                 result.append(range + ",");
             }
-            result = result.substr(0, result.length() - 1);
+            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
             result.append(";");
         }
         if (result.length() > 0) {
@@ -1061,5 +1064,13 @@ void TextPickerModelNG::SetGradientHeight(FrameNode* frameNode, const Dimension&
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetGradientHeight(value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, GradientHeight, value, frameNode);
+}
+
+void TextPickerModelNG::SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
 }
 } // namespace OHOS::Ace::NG

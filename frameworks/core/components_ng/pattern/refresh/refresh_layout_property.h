@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_LAYOUT_PROPERTY_H
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "frameworks/core/components_ng/layout/layout_property.h"
 #include "frameworks/core/components_ng/property/property.h"
 
@@ -53,6 +54,7 @@ public:
         value->propLoadingText_ = CloneLoadingText();
         value->propPullToRefresh_ = ClonePullToRefresh();
         value->propRefreshOffset_ = CloneRefreshOffset();
+        value->propPullDownRatio_ = ClonePullDownRatio();
         return value;
     }
 
@@ -66,17 +68,25 @@ public:
         ResetLoadingText();
         ResetPullToRefresh();
         ResetRefreshOffset();
+        ResetPullDownRatio();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
 
-        json->Put("offset", propIndicatorOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("refreshOffset", propRefreshOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("pullToRefresh", propPullToRefresh_.value_or(true));
-        json->Put("friction", propFriction_.value_or(1));
-        json->Put("promptText", propLoadingText_.value_or(std::string()).c_str());
+        json->PutExtAttr(
+            "offset", propIndicatorOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr(
+            "refreshOffset", propRefreshOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("pullToRefresh", propPullToRefresh_.value_or(true), filter);
+        json->PutExtAttr("friction", propFriction_.value_or(1), filter);
+        json->PutExtAttr("promptText", propLoadingText_.value_or(std::string()).c_str(), filter);
+        if (propPullDownRatio_.has_value()) {
+            json->PutExtAttr("pullDownRatio", propPullDownRatio_.value(), filter);
+        } else {
+            json->PutExtAttr("pullDownRatio", "", filter);
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsRefreshing, bool, PROPERTY_UPDATE_LAYOUT);
@@ -86,6 +96,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LoadingText, std::string, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PullToRefresh, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RefreshOffset, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PullDownRatio, float, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RefreshLayoutProperty);

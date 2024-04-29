@@ -15,7 +15,9 @@
 
 #include "adapter/ohos/osal/resource_theme_style.h"
 
+#include <regex>
 #include <set>
+#include <string>
 
 namespace OHOS::Ace {
 namespace {
@@ -35,6 +37,8 @@ constexpr char RES_PATH_TAG[] = "file:///";
 // resource manager hap absolute path, as resource manager api don't return
 constexpr char RES_HAP_PATH[] = "/data/storage/el1/bundle/ohos.global.systemres/ohos.global.systemres/assets/";
 #endif
+
+const std::string DIMENSION_PATTERN = R"(^([+-]?\d+(\.\d+)?)(px|fp|lpx|vp|%)?)";
 
 static const std::set<std::string> stringAttrs = {
     "attribute_text_font_family_regular",
@@ -59,6 +63,7 @@ static const std::set<std::string> stringAttrs = {
     "description_download_and_share",
     "description_receive",
     "description_continue_to_receive",
+    "description_save_to_gallery",
     "draggable",
     "divider_shadow_enable",
     "camera_input",
@@ -74,21 +79,24 @@ static const std::set<std::string> stringAttrs = {
     "popup_inner_border_color",
     "dialog_expand_display",
     "show_password_directly",
-    "textfield_show_handle"
+    "textfield_show_handle",
+    "list_fadeout_enable",
+    "text_fadeout_enable",
+    "dialog_radius_level10",
+    "dialog_icon_primary",
+    "dialog_font_primary"
 };
 
-double ParseDoubleUnit(const std::string& value, std::string& unit)
+void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
 {
-    for (size_t i = 0; i < value.length(); i++) {
-        if (i == 0 && (value[i] == '-' || value[i] == '+')) {
-            continue;
-        }
-        if (value[i] != '.' && (value[i] < '0' || value[i] > '9')) {
-            unit = value.substr(i);
-            return std::atof(value.substr(0, i).c_str());
-        }
+    std::regex regex(DIMENSION_PATTERN);
+    std::smatch results;
+    if (std::regex_search(value, results, regex)) {
+        number = results[1];
+        // The unit is in the 3rd sub-match. If the value doesn't have unit,
+        // the 3rd match result is empty.
+        unit = results[3];
     }
-    return std::atof(value.c_str());
 }
 
 DimensionUnit ParseDimensionUnit(const std::string& unit)
@@ -124,14 +132,19 @@ void ResourceThemeStyle::ParseContent()
         } else if (attrValue.find(REF_ATTR_VALUE_KEY_WORD) != std::string::npos) {
             attributes_[attrName] = { .type = ThemeConstantsType::REFERENCE_ATTR, .value = attrValue };
         } else {
-            // double & dimension
-            std::string unit = "";
-            auto doubleValue = ParseDoubleUnit(attrValue, unit);
-            if (unit.empty()) {
-                attributes_[attrName] = { .type = ThemeConstantsType::DOUBLE, .value = doubleValue };
-            } else {
+            // int & double & dimension
+            std::string number;
+            std::string unit;
+            ParseNumberUnit(attrValue, number, unit);
+            if (number.empty()) {
+                continue;
+            } else if (!unit.empty()) {
                 attributes_[attrName] = { .type = ThemeConstantsType::DIMENSION,
-                    .value = Dimension(doubleValue, ParseDimensionUnit(unit)) };
+                    .value = Dimension(std::atof(number.c_str()), ParseDimensionUnit(unit)) };
+            } else if (number.find(".") == std::string::npos) {
+                attributes_[attrName] = { .type = ThemeConstantsType::INT, .value = std::atoi(number.c_str()) };
+            } else {
+                attributes_[attrName] = { .type = ThemeConstantsType::DOUBLE, .value = std::atof(number.c_str()) };
             }
         }
     }
@@ -159,7 +172,15 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
         if (attrValue.find(RES_HAP_PREFIX) == std::string::npos) {
             mediaPath.append(RES_HAP_PATH);
         }
+#ifdef PREVIEW
+        auto pos = attrValue.find(MEDIA_VALUE_PREFIX);
+        if (pos == std::string::npos) {
+            return;
+        }
+        mediaPath += attrValue.substr(pos + 1);
+#else
         mediaPath += attrValue;
+#endif
     } else {
         // hap is not unzip, should use resource name to read file
         auto pos = attrValue.find_last_of(MEDIA_VALUE_PREFIX);

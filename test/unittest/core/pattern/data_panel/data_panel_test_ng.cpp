@@ -20,6 +20,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/data_panel/data_panel_modifier.h"
@@ -36,6 +37,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::vector<double> VALUES = { 1.0, 2.0, 3.0, 4.0 };
 constexpr double MAX = 200.0;
+const double MAX_DEFAULT = 100.0;
+const std::vector<double> LONG_VALUES = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
 constexpr size_t TYPE_CYCLE = 0;
 constexpr size_t TYPE_LINE = 1;
 constexpr bool CLOSE_EFFECT = true;
@@ -1334,5 +1337,222 @@ HWTEST_F(DataPanelTestNg, DataPanelUpdateContentModifierTest001, TestSize.Level1
     ASSERT_NE(paintWrapper2, nullptr);
     dataPanelPaintMethod->UpdateContentModifier(paintWrapper2);
     EXPECT_EQ(dataPanelPaintProperty2->GetShadowOptionValue(), shadowOption2);
+}
+
+/**
+ * @tc.name: DataPanelLineTypeBorderRadiusTest001
+ * @tc.desc: Test line DataPanel's default Border Radius
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode, renderContext, pipeline and select theme.
+     * @tc.expected: Objects are created successfully.
+     */
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = AceType::MakeRefPtr<OHOS::Ace::DataPanelTheme>();
+    dataPanelTheme->defaultBorderRadius_ = Dimension(4.0, DimensionUnit::VP);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_LINE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. get border radius.
+     * @tc.expected: the border radius is the same as the default setting.
+     */
+    Dimension defaultDimension = Dimension(8.0, DimensionUnit::VP);
+    BorderRadiusProperty borderRadiusDefault = { defaultDimension, defaultDimension, defaultDimension,
+        defaultDimension };
+    auto getRadius = renderContext->GetBorderRadiusValue(borderRadiusDefault);
+
+    if (getRadius.radiusTopLeft.has_value()) {
+        EXPECT_EQ(getRadius.radiusTopLeft.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+        EXPECT_EQ(getRadius.radiusTopLeft.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    }
+
+    if (getRadius.radiusTopRight.has_value()) {
+        EXPECT_EQ(getRadius.radiusTopRight.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+        EXPECT_EQ(getRadius.radiusTopRight.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    }
+
+    if (getRadius.radiusBottomLeft.has_value()) {
+        EXPECT_EQ(getRadius.radiusBottomLeft.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+        EXPECT_EQ(getRadius.radiusBottomLeft.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    }
+
+    if (getRadius.radiusBottomRight.has_value()) {
+        EXPECT_EQ(getRadius.radiusBottomRight.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+        EXPECT_EQ(getRadius.radiusBottomRight.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    }
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: DataPanelLineTypeBorderRadiusTest002
+ * @tc.desc: Test line DataPanel's Customized Border Radius
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode, renderContext, pipeline and select theme.
+     * @tc.expected: Objects are created successfully.
+     */
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = AceType::MakeRefPtr<OHOS::Ace::DataPanelTheme>();
+    dataPanelTheme->defaultBorderRadius_ = Dimension(4.0, DimensionUnit::VP);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
+
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_LINE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. get border radius.
+     * @tc.expected: the border radius is the same as the customized setting.
+     */
+
+    Dimension setRadiusDimension = Dimension(10.0, DimensionUnit::VP);
+    ViewAbstract::SetBorderRadius(setRadiusDimension);
+    ViewAbstract::SetClipEdge(true);
+
+    Dimension defaultDimension = Dimension(8.0, DimensionUnit::VP);
+    BorderRadiusProperty borderRadiusDefault = { defaultDimension, defaultDimension, defaultDimension,
+        defaultDimension };
+    auto getRadius = renderContext->GetBorderRadiusValue(borderRadiusDefault);
+
+    if (getRadius.radiusTopLeft.has_value()) {
+        auto tlRadius = getRadius.radiusTopLeft.value();
+        EXPECT_EQ(tlRadius.Value(), setRadiusDimension.Value());
+        EXPECT_EQ(tlRadius.Unit(), setRadiusDimension.Unit());
+    }
+
+    if (getRadius.radiusTopRight.has_value()) {
+        auto trRadius = getRadius.radiusTopRight.value();
+        EXPECT_EQ(trRadius.Value(), setRadiusDimension.Value());
+        EXPECT_EQ(trRadius.Unit(), setRadiusDimension.Unit());
+    }
+
+    if (getRadius.radiusBottomLeft.has_value()) {
+        auto blRadius = getRadius.radiusBottomLeft.value();
+        EXPECT_EQ(blRadius.Value(), setRadiusDimension.Value());
+        EXPECT_EQ(blRadius.Unit(), setRadiusDimension.Unit());
+    }
+
+    if (getRadius.radiusBottomRight.has_value()) {
+        auto brRadius = getRadius.radiusBottomRight.value();
+        EXPECT_EQ(brRadius.Value(), setRadiusDimension.Value());
+        EXPECT_EQ(brRadius.Unit(), setRadiusDimension.Unit());
+    }
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest013
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelPatternTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init DataPanel node
+     */
+    DataPanelModelNG dataPanelModelNG;
+    dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DataPanelPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto node = [](DataPanelConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(VALUES, config.values_);
+        EXPECT_EQ(MAX, config.maxValue_);
+        return nullptr;
+    };
+
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: DataPanelPatternTes个itt014
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelPatternTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init DataPanel node
+     */
+    DataPanelModelNG dataPanelModelNG;
+    dataPanelModelNG.Create(VALUES, MAX_DEFAULT, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DataPanelPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto node = [](DataPanelConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(VALUES, config.values_);
+        EXPECT_EQ(MAX_DEFAULT, config.maxValue_);
+        return nullptr;
+    };
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: DataPanelPatternTest015
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelPatternTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init DataPanel node
+     */
+    DataPanelModelNG dataPanelModelNG;
+
+    dataPanelModelNG.Create(LONG_VALUES, MAX, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DataPanelPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto node = [](DataPanelConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(LONG_VALUES, config.values_);
+        EXPECT_EQ(MAX, config.maxValue_);
+        return nullptr;
+    };
+
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
 }
 } // namespace OHOS::Ace::NG

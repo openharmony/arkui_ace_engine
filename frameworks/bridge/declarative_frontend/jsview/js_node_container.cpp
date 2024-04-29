@@ -15,18 +15,23 @@
 
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 
+#include <functional>
+#include <mutex>
 #include <unistd.h>
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h"
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/node_container/node_container_model_ng.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
-#include "frameworks/core/common/container_scope.h"
-#include "frameworks/core/components_ng/pattern/node_container/node_container_model_ng.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -76,11 +81,15 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     JSObject firstArg = JSRef<JSObject>::Cast(info[0]).Get();
     auto nodeContainerId = frameNode->GetId();
     // check if it's the same object, and if it is, return it;
-    auto insideId = firstArg->GetProperty(NODE_CONTAINER_ID);
-    if (insideId->IsNumber()) {
-        auto id = insideId->ToNumber<int32_t>();
-        if (id == nodeContainerId) {
-            return;
+    auto internalField = firstArg->GetProperty(NODE_CONTAINER_ID);
+    if (internalField->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(internalField);
+        auto insideId = obj->GetProperty(INTERNAL_FIELD_VALUE);
+        if (insideId->IsNumber()) {
+            auto id = insideId->ToNumber<int32_t>();
+            if (id == nodeContainerId) {
+                return;
+            }
         }
     }
     // clear the _nodeContainerId in pre controller;
@@ -97,9 +106,9 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     };
     NodeContainerModel::GetInstance()->BindController(std::move(resetFunc));
     auto execCtx = info.GetExecutionContext();
+
     SetNodeController(object, execCtx);
     // set the _nodeContainerId to nodeController
-    auto internalField = firstArg->GetProperty(NODE_CONTAINER_ID);
     if (internalField->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(internalField);
         obj->SetProperty(INTERNAL_FIELD_VALUE, nodeContainerId);
@@ -123,12 +132,8 @@ void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecut
         [func = std::move(jsMake), containerId, execCtx]() -> RefPtr<NG::UINode> {
             JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             ContainerScope scope(containerId);
-            auto container = Container::Current();
-            CHECK_NULL_RETURN(container, nullptr);
-            auto frontend = container->GetFrontend();
-            CHECK_NULL_RETURN(frontend, nullptr);
-            auto context = frontend->GetContextValue();
-            auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
+            panda::Local<panda::JSValueRef> uiContext = NG::UIContextHelper::GetUIContext(execCtx.vm_, containerId);
+            auto jsVal = JSRef<JSVal>::Make(uiContext);
             JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
             if (result.IsEmpty() || !result->IsObject()) {
                 return nullptr;

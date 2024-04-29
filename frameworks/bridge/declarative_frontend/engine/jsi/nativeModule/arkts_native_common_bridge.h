@@ -100,6 +100,8 @@ public:
     static ArkUINativeModuleValue ResetBorder(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundImagePosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundImagePosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBackgroundImageResizable(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBackgroundImageResizable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundImageSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundImageSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundImage(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -130,6 +132,8 @@ public:
     static ArkUINativeModuleValue ResetForegroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMotionPath(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMotionPath(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetMotionBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetMotionBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetGroupDefaultFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetGroupDefaultFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFocusOnTouch(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -196,10 +200,16 @@ public:
     static ArkUINativeModuleValue ResetTabIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetObscured(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetObscured(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetForegroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetForegroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBackgroundBrightnessInternal(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBackgroundBrightnessInternal(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetForegroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetForegroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -304,6 +314,7 @@ public:
     static ArkUINativeModuleValue AttachGestureGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RemoveGestureByTag(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ClearGestures(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetWindowName(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

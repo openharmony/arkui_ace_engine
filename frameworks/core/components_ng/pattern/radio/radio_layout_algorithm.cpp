@@ -43,7 +43,8 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<RadioPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        return BoxLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+        host->GetGeometryNode()->Reset();
+        return std::nullopt;
     }
     InitializeParam();
     // Case 1: Width and height are set in the front end.

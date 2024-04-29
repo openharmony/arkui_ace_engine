@@ -22,6 +22,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/animator_info.h"
 #include "core/animation/page_transition_common.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
@@ -44,8 +45,8 @@ enum class RouterPageState {
 };
 
 // PagePattern is the base class for page root render node.
-class ACE_EXPORT PagePattern : public ContentRootPattern, public FocusView {
-    DECLARE_ACE_TYPE(PagePattern, ContentRootPattern, FocusView);
+class ACE_EXPORT PagePattern : public ContentRootPattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(PagePattern, ContentRootPattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     explicit PagePattern(const RefPtr<PageInfo>& pageInfo) : pageInfo_(pageInfo) {}
@@ -161,26 +162,6 @@ public:
         isRenderDone_ = true;
     }
 
-    void SetAutoFillPasswordTriggered(bool value)
-    {
-        autoFillPasswordTriggered_ = value;
-    }
-
-    bool IsAutoFillPasswordTriggered() const
-    {
-        return autoFillPasswordTriggered_;
-    }
-
-    void SetAutoFillNewPasswordTriggered(bool value)
-    {
-        autoFillNewPasswordTriggered_ = value;
-    }
-
-    bool IsAutoFillNewPasswordTriggered() const
-    {
-        return autoFillNewPasswordTriggered_;
-    }
-
     void SetDynamicPageSizeCallback(DynamicPageSizeCallback&& dynamicPageSizeCallback)
     {
         dynamicPageSizeCallback_ = std::move(dynamicPageSizeCallback);
@@ -205,6 +186,12 @@ public:
 
     bool RemoveOverlay();
     void MarkDirtyOverlay();
+
+    bool IsOnShow()
+    {
+        return isOnShow_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -241,8 +228,6 @@ private:
     bool isFirstLoad_ = true;
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
-    bool autoFillPasswordTriggered_ = false;
-    bool autoFillNewPasswordTriggered_ = false;
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;

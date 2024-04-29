@@ -223,7 +223,7 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                 onFinish();
                 return;
             }
-            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI);
+            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI, "ArkUIMarqueePlayAnimation");
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -265,7 +265,7 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
                     pattern->StartMarqueeAnimation();
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIMarqueeStartAnimation");
     } else {
         lastAnimationParam_.lastStartMilliseconds = ANIMATION_INITIAL_TIME;
         lastAnimationParam_.lastAnimationPosition = 0.0f;
@@ -368,8 +368,7 @@ void MarqueePattern::RegistVisibleAreaChangeCallback()
 
 void MarqueePattern::OnVisibleAreaChange(bool visible)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(!playStatus_);
     CHECK_NULL_VOID(animation_);
     if (visible) {
         AnimationUtils::ResumeAnimation(animation_);
@@ -516,7 +515,11 @@ float MarqueePattern::CalculateEnd()
 
 void MarqueePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    measureChanged_ = true;
+    if (width != lastWindowWidth_ || height != lastWindowHeight_) {
+        measureChanged_ = true;
+    }
+    lastWindowHeight_ = height;
+    lastWindowWidth_ = width;
 }
 
 void MarqueePattern::RegistOritationListener()
@@ -611,6 +614,14 @@ bool MarqueePattern::IsRunMarquee()
     auto textGeoNode = textNode->GetGeometryNode();
     CHECK_NULL_RETURN(textGeoNode, false);
     auto textWidth = textGeoNode->GetFrameSize().Width();
-    return GreatOrEqual(textWidth, marqueeSize.Width());
+    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    float padding = 0.0f;
+    if (layoutProperty->GetPaddingProperty()) {
+        const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+        padding = paddingProperty->left.value_or(CalcLength(0.0)).GetDimension().ConvertToPx() +
+            paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().ConvertToPx();
+    }
+    return GreatOrEqual(textWidth + padding, marqueeSize.Width());
 }
 } // namespace OHOS::Ace::NG

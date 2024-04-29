@@ -41,7 +41,11 @@ public:
     void UpdateUIStatus(bool checked)
     {
         if (checked != radioModifier_->GetIsCheck()) {
-            radioModifier_->SetUIStatus(UIStatus::SELECTED);
+            if (!enabled_ && !checked && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                radioModifier_->SetUIStatus(UIStatus::UNSELECTED);
+            } else {
+                radioModifier_->SetUIStatus(UIStatus::SELECTED);
+            }
             if (!isFirstCreated_) {
                 if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                     radioModifier_->UpdateIndicatorAnimation(checked);
@@ -49,6 +53,8 @@ public:
                     radioModifier_->UpdateIsOnAnimatableProperty(checked);
                 }
             }
+        } else if (!checked && isFirstCreated_) {
+            radioModifier_->InitOpacityScale(checked);
         }
     }
 

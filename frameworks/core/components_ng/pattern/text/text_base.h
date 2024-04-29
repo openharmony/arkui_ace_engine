@@ -25,11 +25,9 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>;
 
 enum class MouseStatus { PRESSED, RELEASED, MOVE, NONE };
 
@@ -161,20 +159,36 @@ public:
 
     virtual void ScrollToSafeArea() const {}
 
-    static void UpdateKeyboardOffset(double positionY, double height)
+    static bool UpdateKeyboardOffset(double positionY, double height, bool foreChange = false)
     {
         auto container = Container::Current();
-        CHECK_NULL_VOID(container);
+        CHECK_NULL_RETURN(container, false);
         if (container->IsUIExtensionWindow()) {
-            return;
+            return false;
         }
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
+        CHECK_NULL_RETURN(context, false);
         auto keyboardArea = container->GetKeyboardSafeArea();
         auto keyboardLength = keyboardArea.bottom_.Length();
         Rect keyboardRect;
         keyboardRect.SetRect(0, keyboardArea.bottom_.start, 0, keyboardLength);
-        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
+        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, nullptr, foreChange);
+        return true;
+    }
+
+    static bool AvoidKeyboard(float offsetY, float height)
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(context, false);
+        auto safeAreaManager = context->GetSafeAreaManager();
+        CHECK_NULL_RETURN(safeAreaManager, false);
+        auto keyboardInset = safeAreaManager->GetKeyboardInset();
+        CHECK_NULL_RETURN(keyboardInset.Length() != 0, false);
+        if (LessOrEqual(offsetY + height, keyboardInset.start)) {
+            return false;
+        }
+        auto keyboardOffset = safeAreaManager->GetKeyboardOffset();
+        return UpdateKeyboardOffset(offsetY - keyboardOffset, height, true);
     }
 
     virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
@@ -182,6 +196,11 @@ public:
     virtual void OnVirtualKeyboardAreaChanged() {}
 
     const RectF& GetContentRect() const
+    {
+        return contentRect_;
+    }
+
+    virtual RectF GetPaintContentRect()
     {
         return contentRect_;
     }
@@ -225,13 +244,26 @@ public:
     {
         return textSelector_;
     }
-    
+
+    virtual bool CaretAvoidSoftKeyboard()
+    {
+        auto caretRect = GetCaretRect();
+        return AvoidKeyboard(caretRect.Top() + GetTextPaintOffset().GetY(),
+            caretRect.Height() + GetAvoidSoftKeyboardOffset().ConvertToPx());
+    }
+
+    virtual const Dimension& GetAvoidSoftKeyboardOffset() const
+    {
+        return avoidKeyboardOffset_;
+    }
+
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;
     std::vector<std::string> dragContents_;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     RectF contentRect_;
+    Dimension avoidKeyboardOffset_ = 24.0_vp;
     ACE_DISALLOW_COPY_AND_MOVE(TextBase);
 };
 } // namespace OHOS::Ace::NG

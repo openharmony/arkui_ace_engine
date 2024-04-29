@@ -30,6 +30,7 @@
 #include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 #define ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(name, type)     \
     static std::optional<type> Get##name##FromTheme()             \
@@ -101,6 +102,12 @@ public:
 
     void SetBuilderFunc(RatingMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
     }
 
@@ -155,7 +162,7 @@ private:
     void HandleTouchDown(const Offset& localPosition);
     void HandleTouchUp();
     void HandleClick(const GestureEvent& info);
-    void FireChangeEvent() const;
+    void FireChangeEvent();
     void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX, bool isDrag);
     bool IsIndicator();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag);
@@ -199,7 +206,7 @@ private:
     bool isSecondaryImageInfoFromTheme_ = false;
     bool isBackgroundImageInfoFromTheme_ = false;
     // get XTS inspector value
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPattern);
 };
 

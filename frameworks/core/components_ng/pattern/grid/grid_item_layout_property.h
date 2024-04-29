@@ -19,6 +19,7 @@
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT GridItemLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(GridItemLayoutProperty, LayoutProperty);
@@ -47,7 +48,7 @@ public:
         ResetColumnEnd();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RowStart, int32_t);
     void OnRowStartUpdate(int32_t /*rowStart*/) const

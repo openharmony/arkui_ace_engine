@@ -576,7 +576,7 @@ void Terminate(const shared_ptr<JsRuntime>& runtime)
         if (pipelineContext) {
             pipelineContext->Finish();
         }
-    });
+    }, "ArkUIJsTerminate");
 }
 
 void GetPackageInfoCallback(
@@ -662,7 +662,7 @@ void RequestFullWindow(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
         if (pipelineContext) {
             pipelineContext->RequestFullWindow(duration);
         }
-    });
+    }, "ArkUIJsRequestFullWindow");
 }
 
 void SetScreenOnVisible(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
@@ -2243,8 +2243,9 @@ std::shared_ptr<JsValue> AppClearData(const shared_ptr<JsRuntime>& runtime, cons
             return runtime->NewBoolean(true);
         }
     }
-    if (JsiEngineInstance::dataMap_.count(argv[0]->ToString(runtime)) == 1) {
-        JsiEngineInstance::dataMap_.erase(argv[0]->ToString(runtime));
+    auto iter = JsiEngineInstance::dataMap_.find(argv[0]->ToString(runtime));
+    if (iter != JsiEngineInstance::dataMap_.end()) {
+        JsiEngineInstance::dataMap_.erase(iter);
         std::string strResult;
         strResult.append("{");
         std::map<const std::string, std::string>::iterator iter = JsiEngineInstance::dataMap_.begin();
@@ -3057,7 +3058,7 @@ void JsiEngineInstance::SetDebuggerPostTask(std::string& library_path)
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask(std::move(task));
+        delegate->PostJsTask(std::move(task), "ArkUIDebuggerTask");
     };
     std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
 }
@@ -3127,7 +3128,7 @@ void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
             }
             ContainerScope scope(id);
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
-        });
+        }, "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
 }
@@ -3207,8 +3208,8 @@ void JsiEngine::RegisterOffWorkerFunc()
 void JsiEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
-    auto && assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize, std::string& ami,
-        bool& useSecureMem, bool isRestricted) {
+    auto && assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
+        std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, bool isRestricted) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
@@ -3219,10 +3220,7 @@ void JsiEngine::RegisterAssetFunc()
         if (index == std::string::npos) {
             LOGE("invalid uri");
         } else {
-            std::vector<uint8_t> content;
             delegate->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
-            *buff = content.data();
-            *buffSize = content.size();
             useSecureMem = false;
         }
     };

@@ -43,6 +43,8 @@ public:
 
     static int32_t GetFocusSystemWindowId(RefPtr<FrameNode> focusedFrameNode);
 
+    static int32_t GetWindowIdForWindowScene(RefPtr<FrameNode> windowSceneNode);
+
     static bool IsFocusWindowSceneCloseKeyboard(RefPtr<FrameNode> focusedFrameNode);
 
     static void IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode);

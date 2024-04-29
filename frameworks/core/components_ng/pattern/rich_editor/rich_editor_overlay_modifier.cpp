@@ -163,9 +163,6 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
     if (!showSelect_->Get()) {
         PaintScrollBar(drawingContext);
         PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
-        auto pattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
-        CHECK_NULL_VOID(pattern);
-        pattern->SetShowSelect(true);
         return;
     }
     drawingContext.canvas.Save();
@@ -182,10 +179,10 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
     PaintCaret(drawingContext);
     SetSelectedColor(selectedBackgroundColor_->Get());
     TextOverlayModifier::onDraw(drawingContext);
-    magnifierPainter_.PaintMagnifier(drawingContext.canvas);
     drawingContext.canvas.Restore();
     PaintScrollBar(drawingContext);
     PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
+    magnifierPainter_.PaintMagnifier(drawingContext.canvas);
 }
 
 void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)

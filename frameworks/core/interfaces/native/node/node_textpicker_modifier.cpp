@@ -33,6 +33,7 @@ constexpr int32_t POS_2 = 2;
 constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
 const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
+constexpr uint32_t MAX_SIZE = 12;
 std::string g_strValue;
 
 void SetTextPickerBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -274,7 +275,7 @@ ArkUI_CharPtr GetTextPickerSelectedTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
@@ -303,7 +304,7 @@ ArkUI_CharPtr GetTextPickerTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
@@ -332,7 +333,7 @@ ArkUI_CharPtr GetTextPickerDisappearTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
@@ -499,7 +500,8 @@ void SetSelectedInternal(
     uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     for (uint32_t i = 0; i < count; i++) {
-        if (i > selectedValues.size() - 1) {
+        uint32_t val = selectedValues.size() > 0 ? selectedValues.size() - 1 : 0;
+        if (i > val) {
             selectedValues.emplace_back(0);
         } else {
             if (selectedValues[i] >= options[i].rangeResult.size()) {
@@ -534,8 +536,8 @@ void ProcessCascadeSelected(
     for (size_t i = 0; i < options.size(); i++) {
         rangeResultValue.emplace_back(options[i].rangeResult[0]);
     }
-
-    if (index > selectedValues.size() - 1) {
+    uint32_t val = selectedValues.size() > 0 ? selectedValues.size() - 1 : 0;
+    if (index > val) {
         selectedValues.emplace_back(0);
     }
     if (selectedValues[index] >= rangeResultValue.size()) {
@@ -544,6 +546,24 @@ void ProcessCascadeSelected(
     if (selectedValues[index] <= options.size() - 1 && options[selectedValues[index]].children.size() > 0) {
         ProcessCascadeSelected(options[selectedValues[index]].children, index + 1, selectedValues);
     }
+}
+
+void SetTextPickerOnChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChangeEvent = [node, extraParam](const std::vector<std::string>& value,
+        const std::vector<double>& indexVector) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXT_PICKER_CHANGE;
+        for (size_t i = 0; i < indexVector.size() && i < MAX_SIZE; i++) {
+            event.componentAsyncEvent.data[i].i32 = static_cast<int32_t>(indexVector[i]);
+        }
+        SendArkUIAsyncEvent(&event);
+    };
+    TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(onChangeEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

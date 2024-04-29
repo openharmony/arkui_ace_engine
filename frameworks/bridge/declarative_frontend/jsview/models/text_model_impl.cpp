@@ -206,6 +206,8 @@ void TextModelImpl::SetLetterSpacing(const Dimension& value)
     component->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::SetLineSpacing(const Dimension& value) {}
+
 void TextModelImpl::SetAdaptMinFontSize(const Dimension& value)
 {
     auto component = GetComponent();
@@ -275,7 +277,7 @@ void TextModelImpl::OnSetAlign()
     }
 }
 
-void TextModelImpl::SetOnClick(std::function<void(const BaseEventInfo*)>&& click)
+void TextModelImpl::SetOnClick(std::function<void(BaseEventInfo*)>&& click)
 {
     auto clickId = EventMarker(std::move(click));
     auto gesture = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();

@@ -21,7 +21,6 @@
         "src/flex_modifier.ts",
         "src/form_component_modifier.ts",
         "src/gauge_modifier.ts",
-        "src/gesture_modifier.ts",
         "src/grid_modifier.ts",
         "src/grid_col_modifier.ts",
         "src/griditem_modifier.ts",
@@ -79,7 +78,8 @@
         "src/time_picker_modifier.ts",
         "src/toggle_modifier.ts",
         "src/video_modifier.ts",
-        "src/water_flow_modifier.ts"
+        "src/water_flow_modifier.ts",
+        "src/symbol_glyph_modifier.ts"
     ],
     "compilerOptions": {
         "module": "none",

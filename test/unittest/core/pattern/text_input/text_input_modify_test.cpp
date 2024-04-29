@@ -1123,6 +1123,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave001, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetEnableAutoFill(false);
+        model.SetMaxLength(DEFAULT_TEXT.size());
     });
     GetFocus();
 
@@ -1214,7 +1215,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave004, TestSize.Level1)
      * @tc.steps: step4. set PasswordTextValue ne textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1247,7 +1248,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave005, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1280,7 +1281,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave006, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return true
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1313,7 +1314,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave007, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1346,7 +1347,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave008, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1379,7 +1380,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave009, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1412,7 +1413,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0010, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1445,7 +1446,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0011, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1478,7 +1479,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0012, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1511,7 +1512,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0013, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1544,7 +1545,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0014, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1577,7 +1578,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0015, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1610,7 +1611,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0016, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1643,7 +1644,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0017, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1676,7 +1677,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0018, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1709,7 +1710,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0019, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1742,7 +1743,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0020, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1775,7 +1776,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0021, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1808,7 +1809,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0022, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1841,7 +1842,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0023, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1874,7 +1875,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0024, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1907,7 +1908,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0025, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1940,7 +1941,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0026, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -1973,7 +1974,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0027, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -2006,7 +2007,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0028, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -2039,7 +2040,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0029, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -2072,7 +2073,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0030, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -2105,7 +2106,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0031, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -2138,7 +2139,7 @@ HWTEST_F(TextFieldModifyTest, CheckAutoSave0032, TestSize.Level1)
      * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
      * @tc.expected: return false
      */
-    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwx";
+    pattern_->lastAutoFillPasswordTextValue_ = "abcdefghijklmnopqrstuvwxyz";
     EXPECT_FALSE(pattern_->CheckAutoSave());
 }
 
@@ -2240,23 +2241,104 @@ HWTEST_F(TextFieldModifyTest, UpdateOverlayModifier001, TestSize.Level1)
 
     paintProperty->ResetSelectedBackgroundColor();
     EXPECT_FALSE(paintProperty->HasSelectedBackgroundColor());
-    int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
-    Color cursorColor = Color::RED;
-    double defaultOpacity = 0.2;
-    auto expectedSelectedColor = cursorColor.ChangeOpacity(defaultOpacity);
-    paintProperty->UpdateCursorColor(cursorColor);
-    paintMethod->UpdateOverlayModifier(paintWrapper);
-    EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == expectedSelectedColor);
 
-    /**
-     * @tc.steps: step3. set select background color and call UpdateContentModifier
-     * tc.expected: step3. selected color equals setting select background.
-     */
     paintProperty->UpdateSelectedBackgroundColor(Color::BLUE);
     paintMethod->UpdateOverlayModifier(paintWrapper);
     EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == Color::BLUE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: HandleOnDragStatusCallback
+ * @tc.desc: Test cursor drag status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, HandleOnDragStatusCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    const RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
+    std::vector<DragEventType> dragEventType = {
+        DragEventType::MOVE,
+        DragEventType::LEAVE,
+        DragEventType::DROP
+    };
+
+    /**
+     * @tc.steps: step2. set handle cursor on drag moved
+     */
+    pattern_->HandleOnDragStatusCallback(dragEventType[0], notifyDragEvent);
+    EXPECT_TRUE(pattern_->isCursorAlwaysDisplayed_);
+    pattern_->HandleOnDragStatusCallback(dragEventType[0], notifyDragEvent);
+
+    /**
+     * @tc.steps: step3. set handle cursor on drag leaved
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    pattern_->HandleOnDragStatusCallback(dragEventType[1], notifyDragEvent);
+    EXPECT_FALSE(pattern_->isCursorAlwaysDisplayed_);
+
+    /**
+     * @tc.steps: step3. set handle cursor on drag ended
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    pattern_->isCursorAlwaysDisplayed_ = true;
+    pattern_->HandleOnDragStatusCallback(dragEventType[2], notifyDragEvent);
+    EXPECT_FALSE(pattern_->isCursorAlwaysDisplayed_);
+}
+
+/**
+ * @tc.name: CheckTextAlignByDirection
+ * @tc.desc: Test the effect of using TextAlign with direction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, CheckTextAlignByDirection, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. set direction RTL
+     */
+    auto direction = TextDirection::RTL;
+    auto textAlign = TextAlign::START;
+    pattern_->CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(textAlign, TextAlign::END);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    textAlign = TextAlign::END;
+    pattern_->CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(textAlign, TextAlign::START);
+}
+
+/**
+ * @tc.name: CheckTextAlignByDirection
+ * @tc.desc: Test the methods for obtaining caret metrics.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, GetCaretMetrics, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call function GetCaretMetrics
+     */
+    CaretMetricsF caretMetrics;
+    pattern_->GetCaretMetrics(caretMetrics);
+    EXPECT_EQ(caretMetrics.offset, OffsetF(0, 0));
+    EXPECT_EQ(caretMetrics.height, 50);
 }
 } // namespace OHOS::Ace::NG

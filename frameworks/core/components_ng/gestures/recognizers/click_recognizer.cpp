@@ -56,7 +56,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     if (!frameNode.Invalid()) {
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
-        NGGestureRecognizer::Transform(localPoint, frameNode, false, isPostEventResult_);
+        NGGestureRecognizer::Transform(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto paintRect = renderContext->GetPaintRectWithoutTransform();
@@ -102,7 +102,8 @@ ClickInfo ClickRecognizer::GetClickInfo()
     }
     ClickInfo info(touchPoint.id);
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
@@ -111,6 +112,12 @@ ClickInfo ClickRecognizer::GetClickInfo()
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }
@@ -147,7 +154,8 @@ void ClickRecognizer::OnAccepted()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
         ClickInfo info = GetClickInfo();
@@ -179,6 +187,10 @@ void ClickRecognizer::OnRejected()
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
+        "%{public}d, %{public}d",
+        event.id, equalsToFingers_, currentTouchPointsNum_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -188,13 +200,15 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         touchDownTime_ = event.time;
     }
     if (IsRefereeFinished()) {
+        auto node = GetAttachedNode().Upgrade();
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "Click recognizer handle touch down event refereeState is %{public}d, node tag = %{public}s, id = "
+            "%{public}s",
+            refereeState_, node ? node->GetTag().c_str() : "null",
+            node ? std::to_string(node->GetId()).c_str() : "invalid");
         return;
     }
     InitGlobalValue(event.sourceType);
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
-        "%{public}d, %{public}d",
-        event.id, equalsToFingers_, currentTouchPointsNum_);
     if (!IsInAttachedNode(event)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
@@ -292,6 +306,10 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (refereeState_ != RefereeState::PENDING && refereeState_ != RefereeState::FAIL) {
         Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
     }
+
+    if (currentTouchPointsNum_ < fingers_ && equalsToFingers_) {
+        DeadlineTimer(fingerDeadlineTimer_, MULTI_FINGER_TIMEOUT);
+    }
 }
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
@@ -347,7 +365,7 @@ void ClickRecognizer::DeadlineTimer(CancelableCallback<void()>& deadlineTimer, i
 
     deadlineTimer.Reset(callback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    taskExecutor.PostDelayedTask(deadlineTimer, time);
+    taskExecutor.PostDelayedTask(deadlineTimer, time, "ArkUIGestureClickDeadlineTimer");
 }
 
 Offset ClickRecognizer::ComputeFocusPoint()
@@ -391,7 +409,8 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         }
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
@@ -399,6 +418,13 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
+    
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }

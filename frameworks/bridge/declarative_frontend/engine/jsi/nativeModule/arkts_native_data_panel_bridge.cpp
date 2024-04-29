@@ -23,10 +23,17 @@
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
+
+namespace {
+const char* DATA_PANEL_NODEPTR_OF_UINODE = "nodePtr_";
+} // namespace
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
+constexpr int32_t NUM_0 = 0;
+constexpr int32_t NUM_1 = 1;
+constexpr int32_t NUM_2 = 2;
 
 void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors)
 {
@@ -312,6 +319,58 @@ ArkUINativeModuleValue DataPanelBridge::ResetDataPanelStrokeWidth(ArkUIRuntimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getDataPanelModifier()->resetDataPanelStrokeWidth(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue DataPanelBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (!secondArg->IsObject()) {
+        DataPanelModelNG::SetBuilderFunc(frameNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::CopyableGlobal<panda::ObjectRef> globalObj(vm, secondArg);
+    auto containerId = Container::CurrentId();
+    DataPanelModelNG::SetBuilderFunc(frameNode,
+        [vm, frameNode, globalObj = std::move(globalObj), containerId](
+            DataPanelConfiguration config) -> RefPtr<FrameNode> {
+            ContainerScope scope(containerId);
+            CHECK_NULL_RETURN(Container::Current(), nullptr);
+            CHECK_NULL_RETURN(Container::Current()->GetFrontend(), nullptr);
+            auto context = NapiValueToLocalValue(Container::Current()->GetFrontend()->GetContextValue());
+            auto obj = panda::ObjectRef::New(vm);
+            auto valueArray = panda::ArrayRef::New(vm, config.values_.size());
+            for (int i = 0; i<config.values_.size(); i++) {
+                panda::ArrayRef::SetValueAt(vm, valueArray, i, panda::NumberRef::New(vm, config.values_[i]));
+            }
+            obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "values"), valueArray);
+            obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "maxValue"), panda::NumberRef::New(vm, config.maxValue_));
+            obj->SetNativePointerFieldCount(vm, 1);
+            obj->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            panda::Local<panda::JSValueRef> params[NUM_2] = { context, obj };
+            LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            auto jsObject = globalObj.ToLocal();
+            auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
+            if (!makeFunc->IsFunction()) { return nullptr; }
+            panda::Local<panda::FunctionRef> func = makeFunc;
+            auto result = func->Call(vm, jsObject, params, 2);
+            JSNApi::ExecutePendingJob(vm);
+            if (result.IsEmpty() || trycatch.HasCaught() || !result->IsObject()) { return nullptr; }
+            auto resultObj = result->ToObject(vm);
+            panda::Local<panda::JSValueRef> nodeptr = resultObj->Get(vm,
+                panda::StringRef::NewFromUtf8(vm, DATA_PANEL_NODEPTR_OF_UINODE));
+            if (nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull()) { return nullptr; }
+            auto* node = nodeptr->ToNativePointer(vm)->Value();
+            auto* frameNode = reinterpret_cast<FrameNode*>(node);
+            CHECK_NULL_RETURN(frameNode, nullptr);
+            return AceType::Claim(frameNode);
+        });
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -76,10 +76,21 @@ public:
 void RadioTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
+        radioTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
+        radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
+        radioTheme->defaultWidth_ = DEFAULT_WIDTH_DIMENSION;
+        radioTheme->defaultHeight_ = DEFAULT_HEIGHT_DIMENSION;
+        return radioTheme;
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void RadioTestNg::TearDownTestSuite()
 {
+    MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
 }
 
@@ -302,13 +313,6 @@ HWTEST_F(RadioTestNg, RadioEventTest003, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioPatternTest004, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
-    radioTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
-    radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(radioTheme));
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -316,14 +320,10 @@ HWTEST_F(RadioTestNg, RadioPatternTest004, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->left.value(),
-        CalcLength(radioTheme->hotZoneHorizontalPadding_.Value()));
-    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->right.value(),
-        CalcLength(radioTheme->hotZoneHorizontalPadding_.Value()));
-    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->top.value(),
-        CalcLength(radioTheme->hotZoneVerticalPadding_.Value()));
-    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->bottom.value(),
-        CalcLength(radioTheme->hotZoneVerticalPadding_.Value()));
+    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->left.value(), CalcLength(HORIZONTAL_PADDING));
+    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->right.value(), CalcLength(HORIZONTAL_PADDING));
+    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->top.value(), CalcLength(VERTICAL_PADDING));
+    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->bottom.value(), CalcLength(VERTICAL_PADDING));
     pattern->SetPreGroup(GROUP_NAME);
     frameNode->MarkModifyDone();
     pattern->SetPreGroup(GROUP_NAME_CHANGE);
@@ -711,36 +711,25 @@ HWTEST_F(RadioTestNg, RadioPatternTest021, TestSize.Level1)
     EXPECT_NE(radioPattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty();
 
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(radioTheme));
-
     MarginProperty margin;
-    margin.left = CalcLength(HORIZONTAL_PADDING.ConvertToPx());
+    margin.left = CalcLength(HORIZONTAL_PADDING);
     layoutProperty->UpdateMargin(margin); // GetMarginProperty
 
     radioPattern->OnModifyDone();
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(HORIZONTAL_PADDING.ConvertToPx()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
-        CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value()));
-    EXPECT_EQ(
-        layoutProperty->GetMarginProperty()->top.value(), CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
-        CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(HORIZONTAL_PADDING));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(HORIZONTAL_PADDING));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(), CalcLength(VERTICAL_PADDING));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(), CalcLength(VERTICAL_PADDING));
 
     MarginProperty margin1;
-    margin1.right = CalcLength(HORIZONTAL_PADDING.ConvertToPx());
+    margin1.right = CalcLength(HORIZONTAL_PADDING);
     layoutProperty->UpdateMargin(margin1); // GetMarginProperty
 
     radioPattern->OnModifyDone();
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(HORIZONTAL_PADDING.ConvertToPx()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
-        CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value()));
-    EXPECT_EQ(
-        layoutProperty->GetMarginProperty()->top.value(), CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
-        CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(HORIZONTAL_PADDING));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(HORIZONTAL_PADDING));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(), CalcLength(VERTICAL_PADDING));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(), CalcLength(VERTICAL_PADDING));
 }
 
 /**
@@ -764,7 +753,7 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest001, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(4);
     radioPaintMethod.radioModifier_->PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
 }
 
@@ -789,7 +778,7 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest002, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(4);
     radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(false);
     radioPaintMethod.radioModifier_->PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
     radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
@@ -816,7 +805,7 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest003, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(4);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(5);
     radioPaintMethod.radioModifier_->uiStatus_ =
         AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::SELECTED));
     radioPaintMethod.radioModifier_->PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
@@ -845,7 +834,7 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest004, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(4);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(5);
     radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(false);
     radioPaintMethod.radioModifier_->uiStatus_ =
         AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::SELECTED));
@@ -1018,12 +1007,12 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest010, TestSize.Level1)
     auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
     radioModifier->isOnAnimationFlag_->Set(true);
     radioModifier->UpdateIndicatorAnimation(true);
-    EXPECT_EQ(radioModifier->pointScale_->Get(), 0.5);
-    EXPECT_EQ(radioModifier->ringPointScale_->Get(), 0);
+    EXPECT_EQ(radioModifier->opacityScale_->Get(), 1);
+    EXPECT_EQ(radioModifier->borderOpacityScale_->Get(), 0);
     radioModifier->isOnAnimationFlag_->Set(false);
     radioModifier->UpdateIndicatorAnimation(false);
-    EXPECT_EQ(radioModifier->pointScale_->Get(), 0);
-    EXPECT_EQ(radioModifier->ringPointScale_->Get(), 1);
+    EXPECT_EQ(radioModifier->opacityScale_->Get(), 0);
+    EXPECT_EQ(radioModifier->borderOpacityScale_->Get(), 1);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
@@ -1034,15 +1023,6 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest010, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest001, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
-    radioTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
-    radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
-    radioTheme->defaultWidth_ = DEFAULT_WIDTH_DIMENSION;
-    radioTheme->defaultHeight_ = DEFAULT_HEIGHT_DIMENSION;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(radioTheme));
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     radioLayoutAlgorithm.InitializeParam();
     EXPECT_EQ(radioLayoutAlgorithm.horizontalPadding_, HORIZONTAL_PADDING.ConvertToPx());
@@ -1057,16 +1037,10 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest001, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest002, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
-    /**
-    //     corresponding ets code:
-    //         Radio().width(200).height(210)
-    //     size = (200, 200)
-    */
-    LayoutWrapperNode layoutWrapper(nullptr, nullptr, nullptr);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, nullptr);
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
@@ -1084,16 +1058,10 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest002, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
-    /**
-    //     corresponding ets code:
-    //         Radio().width(200)
-    //     size = (200, 200)
-    */
-    LayoutWrapperNode layoutWrapper(nullptr, nullptr, nullptr);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, nullptr);
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
@@ -1110,16 +1078,10 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest004, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
-    /**
-    //     corresponding ets code:
-    //         Radio().height(210)
-    //     size = (210, 210)
-    */
-    LayoutWrapperNode layoutWrapper(nullptr, nullptr, nullptr);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, nullptr);
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT);
@@ -1136,23 +1098,10 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest004, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
-    radioTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
-    radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
-    radioTheme->defaultWidth_ = DEFAULT_WIDTH_DIMENSION;
-    radioTheme->defaultHeight_ = DEFAULT_HEIGHT_DIMENSION;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(radioTheme));
-    /**
-    //     corresponding ets code:
-    //         Radio()
-    //     length = min(theme.Width(), theme.Height()), size = (length, length)
-    */
-
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = SizeF(1000.0, 1000.0);
@@ -1171,12 +1120,11 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest006, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+        LayoutWrapperNode(frameNode, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
@@ -1194,12 +1142,11 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest006, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest007, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+        LayoutWrapperNode(frameNode, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
@@ -1216,12 +1163,11 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest007, TestSize.Level1)
  */
 HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest008, TestSize.Level1)
 {
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RadioTheme>()));
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+        LayoutWrapperNode(frameNode, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT_INVALID);
@@ -1644,4 +1590,206 @@ HWTEST_F(RadioTestNg, RadioPatternTest031, TestSize.Level1)
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
+/**
+ * @tc.name: RadioPatternTest032
+ * @tc.desc: SetRadioChecked and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern radioChecked
+     */
+    pattern->SetRadioChecked(true);
+    /**
+     * @tc.steps: step3. Get paint property
+     * @tc.expected: Check the Radio property value
+     */
+   
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    bool isChecked = false;
+    if (radioPaintProperty->HasRadioCheck()) {
+        isChecked = radioPaintProperty->GetRadioCheckValue();
+    } else {
+        isChecked = false;
+    }
+    EXPECT_EQ(isChecked, true);
+}
+
+/**
+ * @tc.name: RadioPatternTest033
+ * @tc.desc: SetRadioChecked and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern radioChecked
+     */
+    pattern->SetRadioChecked(false);
+    /**
+     * @tc.steps: step3. Get paint property
+     * @tc.expected: Check the Radio property value
+     */
+   
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    bool isChecked = false;
+    if (radioPaintProperty->HasRadioCheck()) {
+        isChecked = radioPaintProperty->GetRadioCheckValue();
+    } else {
+        isChecked = false;
+    }
+    EXPECT_EQ(isChecked, false);
+}
+
+/**
+ * @tc.name: RadioPatternTest034
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetRadioChecked(true);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(true, config.checked_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RadioPatternTest035
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetRadioChecked(false);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(false, config.checked_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RadioPatternTest036
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create("", GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetRadioChecked(false);
+
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ("", config.value_);
+                EXPECT_EQ(false, config.checked_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RadioPatternTest037
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create("", GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetRadioChecked(false);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(false, config.checked_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
 } // namespace OHOS::Ace::NG

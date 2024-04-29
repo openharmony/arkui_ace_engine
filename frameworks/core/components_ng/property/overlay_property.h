@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -39,7 +40,7 @@ struct OverlayOptions {
                (x == value.x) && (y == value.y);
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         auto jsonOverlay = JsonUtil::Create(true);
         jsonOverlay->Put("title", content.c_str());
@@ -51,7 +52,7 @@ struct OverlayOptions {
         jsonOffset->Put("y", y.ToString().c_str());
         jsonOptions->Put("offset", jsonOffset);
         jsonOverlay->Put("options", jsonOptions);
-        json->Put("overlay", jsonOverlay);
+        json->PutExtAttr("overlay", jsonOverlay, filter);
     }
 };
 

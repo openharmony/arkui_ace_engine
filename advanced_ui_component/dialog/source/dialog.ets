@@ -294,7 +294,7 @@ export struct SelectDialog{
 
   @Builder
   buildContent() : void {
-    Scroll() {
+    Scroll(this.contentScroller) {
       Column() {
         if (this.content) {
           Row() {
@@ -305,7 +305,7 @@ export struct SelectDialog{
               .textOverflow({overflow: TextOverflow.Ellipsis})
           }.paddingContentStyle().width('100%')
         }
-        List({ space: 1, scroller: this.contentScroller }) {
+        List({ space: 1 }) {
           ForEach(this.radioContent, (item: SheetInfo, index?: number) => {
             ListItem() {
               Column() {
@@ -323,8 +323,9 @@ export struct SelectDialog{
                       .id(String(index))
                       .onFocus(() => {
                         if (index == FIRST_ITEM_INDEX) {
-                          // fix no buttons not to scroll to first item when first item reGet focus
-                          this.contentScroller.scrollToIndex(FIRST_ITEM_INDEX);
+                          this.contentScroller.scrollEdge(Edge.Top);
+                        } else if (index == this.radioContent.length - 1) {
+                          this.contentScroller.scrollEdge(Edge.Bottom);
                         }
                       })
                   }.constraintSize({ minHeight: LIST_MIN_HEIGHT }).clip(false)
@@ -343,8 +344,10 @@ export struct SelectDialog{
           })
         }.width('100%').clip(false)
         .onFocus(() => {
-          this.contentScroller.scrollToIndex(FIRST_ITEM_INDEX);
-          focusControl.requestFocus(String(FIRST_ITEM_INDEX));
+          if (!this.contentScroller.isAtEnd()) {
+            this.contentScroller.scrollEdge(Edge.Top);
+            focusControl.requestFocus(String(FIRST_ITEM_INDEX));
+          }
         })
         .defaultFocus(this.buttons?.length == 0 ? true : false)
       }
@@ -762,7 +765,7 @@ struct CustomDialogContentComponent {
           Divider()
             .width($r('sys.float.alert_divider_width'))
             .height($r('sys.float.alert_divider_height'))
-            .color($r('sys.color.alert_divider_color'))
+            .color(this.getDividerColor())
             .vertical(true)
             .margin({
               left: $r('sys.float.alert_button_horizontal_space'),
@@ -808,6 +811,25 @@ struct CustomDialogContentComponent {
       this.titleHeight = getNumberByResource('alert_title_secondary_height');
     }
     this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
+  }
+
+  /**
+   * get divider color
+   *
+   * @returns divider color
+   */
+  private getDividerColor(): ResourceColor {
+    if (!this.buttons || this.buttons.length === 0 || !getNumberByResource('dialog_divider_show')) {
+      return Color.Transparent;
+    }
+
+    if (this.buttons[0].buttonStyle === ButtonStyleMode.TEXTUAL || this.buttons[0].buttonStyle === undefined) {
+      if (this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === ButtonStyleMode.TEXTUAL ||
+        this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
+        return $r('sys.color.alert_divider_color');
+      }
+    }
+    return Color.Transparent;
   }
 
   /**

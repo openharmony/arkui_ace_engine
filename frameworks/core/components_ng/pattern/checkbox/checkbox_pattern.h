@@ -21,7 +21,9 @@
 #include "base/utils/utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
@@ -57,9 +59,6 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (UseContentModifier()) {
-            return nullptr;
-        }
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
@@ -86,6 +85,7 @@ public:
             checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
         }
         checkboxModifier_->SetCheckboxStyle(checkboxStyle);
+        checkboxModifier_->SetUseContentModifier(UseContentModifier());
         checkboxModifier_->SetHasBuilder(builder_.has_value());
         host->SetCheckboxFlag(true);
         auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(checkboxModifier_);
@@ -160,6 +160,17 @@ public:
         makeFunc_ = std::move(makeFunc);
     }
 
+    void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
+    {
+        if (toggleMakeFunc == nullptr) {
+            toggleMakeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
+        toggleMakeFunc_ = std::move(toggleMakeFunc);
+    }
+
     bool UseContentModifier()
     {
         return contentModifierNode_ != nullptr;
@@ -177,20 +188,20 @@ public:
         builder_ = buildFunc.value_or(nullptr);
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        Pattern::ToJsonValue(json);
+        Pattern::ToJsonValue(json, filter);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxEventHub>();
         auto name = checkBoxEventHub ? checkBoxEventHub->GetName() : "";
         auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
-        json->Put("name", name.c_str());
-        json->Put("group", group.c_str());
-        json->Put("type", "ToggleType.Checkbox");
+        json->PutExtAttr("name", name.c_str(), filter);
+        json->PutExtAttr("group", group.c_str(), filter);
+        json->PutExtAttr("type", "ToggleType.Checkbox", filter);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
         auto select = paintProperty->GetCheckBoxSelectValue(false);
-        json->Put("select", select ? "true" : "false");
+        json->PutExtAttr("select", select ? "true" : "false", filter);
     }
 
     void SetOriginalCheckboxStyle(OriginalCheckBoxStyle style)
@@ -210,6 +221,8 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
     void OnAttachToMainTree() override;
+    void StartCustomNodeAnimation(bool select);
+    RefPtr<GroupManager> GetGroupManager();
 
 private:
     void OnAttachToFrameNode() override;
@@ -227,7 +240,6 @@ private:
     void HandleFocusEvent();
     void HandleBlurEvent();
     void CheckPageNode();
-    void StartCustomNodeAnimation(bool select);
     void LoadBuilder();
     void UpdateIndicator();
     void SetBuilderNodeHidden();
@@ -259,12 +271,13 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode();
 
     std::optional<CheckBoxMakeCallback> makeFunc_;
+    std::optional<SwitchMakeCallback> toggleMakeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
-    std::string navId_ = "";
     int32_t prePageId_ = 0;
     bool lastSelect_ = false;
+    std::optional<std::string> currentNavId_ = std::nullopt;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;

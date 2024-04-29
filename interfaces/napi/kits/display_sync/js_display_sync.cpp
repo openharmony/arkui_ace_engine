@@ -140,7 +140,9 @@ napi_value ParseExpectedFrameRateRange(napi_env env, napi_callback_info info, Fr
         return NapiGetUndefined(env);
     }
 
-    int32_t minFPS, maxFPS, expectedFPS;
+    int32_t minFPS = 0;
+    int32_t maxFPS = 0;
+    int32_t expectedFPS = 0;
     ParseJsValue(env, nativeObj, "min", minFPS);
     ParseJsValue(env, nativeObj, "max", maxFPS);
     ParseJsValue(env, nativeObj, "expected", expectedFPS);
@@ -160,6 +162,7 @@ napi_value JSSetExpectedFrameRateRange(napi_env env, napi_callback_info info)
 
     RefPtr<UIDisplaySync> uiDisplaySync = GetDisplaySync(env, info)->GetUIDisplaySync();
     if (!uiDisplaySync) {
+        TAG_LOGW(AceLogTag::ACE_DISPLAY_SYNC, "JSSetExpectedFrameRateRange: cannot get uiDisplaySync.");
         return NapiGetUndefined(env);
     }
 
@@ -171,6 +174,7 @@ napi_value JSStart(napi_env env, napi_callback_info info)
 {
     RefPtr<UIDisplaySync> uiDisplaySync = GetDisplaySync(env, info)->GetUIDisplaySync();
     if (!uiDisplaySync) {
+        TAG_LOGW(AceLogTag::ACE_DISPLAY_SYNC, "JSStart: cannot get uiDisplaySync when starting.");
         return NapiGetUndefined(env);
     }
 
@@ -182,6 +186,7 @@ napi_value JSStop(napi_env env, napi_callback_info info)
 {
     RefPtr<UIDisplaySync> uiDisplaySync = GetDisplaySync(env, info)->GetUIDisplaySync();
     if (!uiDisplaySync) {
+        TAG_LOGW(AceLogTag::ACE_DISPLAY_SYNC, "JSStop: cannot get uiDisplaySync when stopping.");
         return NapiGetUndefined(env);
     }
 

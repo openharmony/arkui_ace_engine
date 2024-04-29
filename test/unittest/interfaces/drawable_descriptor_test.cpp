@@ -242,4 +242,230 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest006, TestSize.Level1)
     EXPECT_EQ(layeredDrawableDescriptor.foreground_, std::nullopt);
     EXPECT_EQ(layeredDrawableDescriptor.background_, std::nullopt);
 }
+
+/**
+ * @tc.name: DrawableDescTest007
+ * @tc.desc: test DrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DrawableDescriptor and call GetDrawableType()
+     * @tc.expected:return BASE.
+     */
+    Napi::DrawableDescriptor drawableDescriptor;
+    auto res = drawableDescriptor.GetDrawableType();
+    EXPECT_EQ(res, Napi::DrawableDescriptor::DrawableType::BASE);
+}
+
+/**
+ * @tc.name: DrawableDescTest008
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layeredDrawableDescriptor and call GetDrawableType()
+     * @tc.expected:return LAYERED.
+     */
+    std::unique_ptr<uint8_t[]> jsonBuf;
+    size_t len = 0;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr;
+    std::string path = "path";
+    uint32_t iconType = 1;
+    uint32_t density = 2;
+    auto layeredDrawableDescriptor = Napi::LayeredDrawableDescriptor(
+        std::move(jsonBuf), len, std::move(resourceMgr), path, iconType, density);
+
+    /**
+     * @tc.steps: step2. check
+     */
+    auto res = layeredDrawableDescriptor.GetDrawableType();
+    EXPECT_EQ(res, Napi::DrawableDescriptor::DrawableType::LAYERED);
+}
+
+/**
+ * @tc.name: DrawableDescTest009
+ * @tc.desc: test AnimatedDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create AnimatedDrawableDescriptor and call GetDrawableType()
+     * @tc.expected:return ANIMATED.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    int32_t duration = -1;
+    int32_t iterations = 2;
+    auto* animatedDrawable = new Napi::AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
+    auto res = animatedDrawable->GetDrawableType();
+    EXPECT_EQ(res, Napi::DrawableDescriptor::DrawableType::ANIMATED);
+
+    /**
+     * @tc.steps: step2.  call GetPixelMap()
+     * @tc.expected:return nullptr.
+     */
+    auto pixelMap = animatedDrawable->GetPixelMap();
+    EXPECT_EQ(pixelMap, nullptr);
+
+    /**
+     * @tc.steps: step3. call GetPixelMapList()
+     * @tc.expected: pixelMaps.size().
+     */
+    auto pixelMapList = animatedDrawable->GetPixelMapList();
+    EXPECT_EQ(pixelMapList.size(), pixelMaps.size());
+
+    /**
+     * @tc.steps: step4. create AnimatedDrawableDescriptor and call GetDuration()
+     * @tc.expected:return 1000.
+     */
+    duration = 1000;
+    iterations = 1;
+    animatedDrawable = new Napi::AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
+    EXPECT_EQ(animatedDrawable->GetDuration(), 1000);
+
+    /**
+     * @tc.steps: step5. create AnimatedDrawableDescriptor and call GetIterations()
+     * @tc.expected:return 2.
+     */
+    EXPECT_EQ(animatedDrawable->GetIterations(), 1);
+
+    /**
+     * @tc.steps: step6. create AnimatedDrawableDescriptor and call GetDuration()
+     * @tc.expected:return 0.
+     */
+    duration = -1;
+    iterations = -2;
+    animatedDrawable = new Napi::AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
+    EXPECT_EQ(animatedDrawable->GetDuration(), 0);
+
+    /**
+     * @tc.steps: step7. create AnimatedDrawableDescriptor and call GetIterations()
+     * @tc.expected:return 1.
+     */
+    EXPECT_EQ(animatedDrawable->GetIterations(), 1);
+}
+
+/**
+ * @tc.name: DrawableDescTest0010
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layeredDrawableDescriptor and init mask only
+     */
+    std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+    auto layeredDrawable = Napi::LayeredDrawableDescriptor();
+    /**
+     * @tc.steps: step2. init resource name and data
+     */
+    layeredDrawable.InitialMask(resMgr);
+    /**
+     * @tc.steps: step2. check creating mask ok
+     */
+    EXPECT_TRUE(layeredDrawable.GetDefaultMask());
+}
+
+/**
+ * @tc.name: DrawableDescTest0011
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. pixelMap param not exist in pixelMapDrawable 
+     */
+    std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+    auto layeredDrawable = Napi::LayeredDrawableDescriptor();
+    /**
+     * @tc.steps: step2. init resource name and data
+     */
+    layeredDrawable.InitialMask(resMgr);
+    /**
+     * @tc.steps: step3. update foreground into layeredDrawable
+     */
+    std::shared_ptr<Media::PixelMap> foreground = std::make_shared<Media::PixelMap>();
+    layeredDrawable.SetForeground(foreground);
+    auto composedResult = layeredDrawable.GetPixelMap();
+    /**
+     * @tc.steps: step3. check pixelMap should not be null since this layeredDrawable is customized
+     */
+    EXPECT_NE(composedResult, nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest0012
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init drawble
+     */
+    auto layeredDrawable = Napi::LayeredDrawableDescriptor();
+    /**
+     * @tc.steps: step2. get pixelMap directly from layeredDrawable
+     */
+    auto composedResult = layeredDrawable.GetPixelMap();
+    /**
+     * @tc.steps: step3. check pixelMap should be null since this layeredDrawable is not customized
+     * therefore foreground, background does not exist when create
+     */
+    EXPECT_EQ(composedResult, nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest0013
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init layeredDrawble
+     */
+    auto drawable = Napi::DrawableDescriptor();
+
+    /**
+     * @tc.steps: step2. set pixelMap to drawable
+     */
+    drawable.SetPixelMap(std::make_shared<Media::PixelMap>());
+    /**
+     * @tc.steps: step3. check drawable has pixelMap
+     */
+    EXPECT_TRUE(drawable.HasPixelMap());
+    drawable.ResetPixelMap();
+    EXPECT_FALSE(drawable.HasPixelMap());
+}
+
+/**
+ * @tc.name: DrawableDescTest0014
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init layeredDrawble
+     */
+    auto drawable = Napi::LayeredDrawableDescriptor();
+
+    /**
+     * @tc.steps: step2. set param to layeredDrawable
+     */
+    drawable.SetForeground(std::make_shared<Media::PixelMap>());
+    drawable.SetBackground(std::make_shared<Media::PixelMap>());
+    drawable.SetMask(std::make_shared<Media::PixelMap>());
+    /**
+     * @tc.steps: step3. check layeredDrawable is customized 
+     */
+    EXPECT_TRUE(drawable.Customized());
+}
 } // namespace OHOS::Ace

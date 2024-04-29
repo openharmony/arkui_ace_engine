@@ -85,7 +85,7 @@ std::shared_ptr<RSData> DrawingImageData::GetRSData() const
 #ifndef USE_ROSEN_DRAWING
 RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFillColor)
 #else
-RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const std::optional<Color>& svgFillColor)
+RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
 #endif
 {
     return nullptr;

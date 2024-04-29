@@ -43,6 +43,8 @@ constexpr float EXPECT_MOCK_LONGEST_LINE = 460.f;
 constexpr float EXPECT_MOCK_MAX_TEXT_WIDTH = 460.f;
 constexpr float EXPECT_MOCK_LINE_COUNT = 1;
 constexpr float EXPECT_MOCK_TEXT_WIDTH  = 120.f;
+constexpr int32_t PARAGRAPHSIZE_START = -1;
+constexpr int32_t PARAGRAPHSIZE_END = 1000;
 const RectF DEFAULT_TEXT_CONTENT_RECTF(80.f, 80.f, 100.f, 200.f);
 } // namespace
 
@@ -142,7 +144,12 @@ void TextDragTestNg::GetInstance()
 {
     frameNode_ = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     pattern_ = frameNode_->GetPattern<TextPattern>();
-    pattern_->paragraph_ = paragraph_;
+    std::list<ParagraphManager::ParagraphInfo> paragraphInfo;
+    ParagraphManager::ParagraphInfo pInfo = {
+        .paragraph = paragraph_, .start = PARAGRAPHSIZE_START, .end = PARAGRAPHSIZE_END
+    };
+    paragraphInfo.emplace_back(pInfo);
+    pattern_->pManager_->SetParagraphs(paragraphInfo);
     // set textPattern content rect default value.
     pattern_->contentRect_ = DEFAULT_TEXT_CONTENT_RECTF;
     dragNode_ = TextDragPattern::CreateDragNode(frameNode_);

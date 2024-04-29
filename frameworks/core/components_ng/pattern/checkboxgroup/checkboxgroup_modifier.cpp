@@ -62,6 +62,7 @@ CheckBoxGroupModifier::CheckBoxGroupModifier(const Parameters& parameters)
     inactivePointColor_ = parameters.inactivePointColor;
     hoverRadius_ = parameters.hoverRadius;
     hotZoneHorizontalPadding_ = parameters.hotZoneHorizontalPadding;
+    defaultPaddingSize_ = parameters.defaultPaddingSize;
     hotZoneVerticalPadding_ = parameters.hotZoneVerticalPadding;
     shadowWidth_ = parameters.shadowWidth;
     hoverDuration_ = parameters.hoverDuration;
@@ -190,21 +191,7 @@ void CheckBoxGroupModifier::DrawUnselected(
     RSRect rect(originX, originY, endX, endY);
     auto rrect = RSRoundRect(rect, borderRadius_, borderRadius_);
     canvas.AttachPen(pen);
-    if (CheckBoxStyle::SQUARE_STYLE == checkBoxGroupStyle_) {
-        canvas.DrawRoundRect(rrect);
-    } else {
-        RSScalar halfDenominator = 2.0f;
-        RSScalar radius = 0.0f;
-        RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
-        RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
-        RSPoint centerPt(x, y);
-        if (rect.GetWidth() > rect.GetHeight()) {
-            radius = rect.GetHeight() / halfDenominator;
-        } else {
-            radius = rect.GetWidth() / halfDenominator;
-        }
-        canvas.DrawCircle(centerPt, radius);
-    }
+    DrawRectOrCircle(canvas, rrect);
 #ifdef USE_ROSEN_DRAWING
     canvas.DetachPen();
 #endif
@@ -220,21 +207,7 @@ void CheckBoxGroupModifier::DrawActiveBorder(
     RSRect rect(originX, originY, endX, endY);
     auto rrect = RSRoundRect(rect, borderRadius_, borderRadius_);
     canvas.AttachBrush(brush);
-    if (CheckBoxStyle::SQUARE_STYLE == checkBoxGroupStyle_) {
-        canvas.DrawRoundRect(rrect);
-    } else {
-        RSScalar halfDenominator = 2.0f;
-        RSScalar radius = 0.0f;
-        RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
-        RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
-        RSPoint centerPt(x, y);
-        if (rect.GetWidth() > rect.GetHeight()) {
-            radius = rect.GetHeight() / halfDenominator;
-        } else {
-            radius = rect.GetWidth() / halfDenominator;
-        }
-        canvas.DrawCircle(centerPt, radius);
-    }
+    DrawRectOrCircle(canvas, rrect);
     canvas.DetachBrush();
 }
 
@@ -248,21 +221,7 @@ void CheckBoxGroupModifier::DrawUnselectedBorder(
     RSRect rect(originX, originY, endX, endY);
     auto rrect = RSRoundRect(rect, borderRadius_, borderRadius_);
     canvas.AttachBrush(brush);
-    if (CheckBoxStyle::SQUARE_STYLE == checkBoxGroupStyle_) {
-        canvas.DrawRoundRect(rrect);
-    } else {
-        RSScalar halfDenominator = 2.0f;
-        RSScalar radius = 0.0f;
-        RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
-        RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
-        RSPoint centerPt(x, y);
-        if (rect.GetWidth() > rect.GetHeight()) {
-            radius = rect.GetHeight() / halfDenominator;
-        } else {
-            radius = rect.GetWidth() / halfDenominator;
-        }
-        canvas.DrawCircle(centerPt, radius);
-    }
+    DrawRectOrCircle(canvas, rrect);
 #ifdef USE_ROSEN_DRAWING
     canvas.DetachBrush();
 #endif
@@ -311,30 +270,41 @@ void CheckBoxGroupModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF
     RSBrush brush;
     brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);
-    float originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
-    float originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
-    float endX = size.Width() + originX + CHECKBOX_GROUP_DOUBLE_RATIO * hotZoneHorizontalPadding_.ConvertToPx();
-    float endY = size.Height() + originY + CHECKBOX_GROUP_DOUBLE_RATIO * hotZoneVerticalPadding_.ConvertToPx();
+    float originX;
+    float originY;
+    float endX;
+    float endY;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        originX = offset.GetX() - defaultPaddingSize_.ConvertToPx();
+        originY = offset.GetY() - defaultPaddingSize_.ConvertToPx();
+        endX = size.Width() + originX + CHECKBOX_GROUP_DOUBLE_RATIO * defaultPaddingSize_.ConvertToPx();
+        endY = size.Height() + originY + CHECKBOX_GROUP_DOUBLE_RATIO * defaultPaddingSize_.ConvertToPx();
+    } else {
+        originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
+        originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
+        endX = size.Width() + originX + CHECKBOX_GROUP_DOUBLE_RATIO * hotZoneHorizontalPadding_.ConvertToPx();
+        endY = size.Height() + originY + CHECKBOX_GROUP_DOUBLE_RATIO * hotZoneVerticalPadding_.ConvertToPx();
+    }
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
+    DrawRectOrCircle(canvas, rrect);
+#ifdef USE_ROSEN_DRAWING
+    canvas.DetachBrush();
+#endif
+}
+
+void CheckBoxGroupModifier::DrawRectOrCircle(RSCanvas& canvas, const RSRoundRect& rrect) const
+{
     if (CheckBoxStyle::SQUARE_STYLE == checkBoxGroupStyle_) {
         canvas.DrawRoundRect(rrect);
     } else {
         RSScalar halfDenominator = 2.0f;
-        RSScalar radius = 0.0f;
         RSRect rect = rrect.GetRect();
         RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
         RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
         RSPoint centerPt(x, y);
-        if (rect.GetWidth() > rect.GetHeight()) {
-            radius = rect.GetHeight() / halfDenominator;
-        } else {
-            radius = rect.GetWidth() / halfDenominator;
-        }
+        RSScalar radius = std::min(rect.GetWidth(), rect.GetHeight()) / halfDenominator;
         canvas.DrawCircle(centerPt, radius);
     }
-#ifdef USE_ROSEN_DRAWING
-    canvas.DetachBrush();
-#endif
 }
 } // namespace OHOS::Ace::NG

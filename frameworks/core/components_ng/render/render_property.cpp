@@ -17,6 +17,7 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -75,54 +76,56 @@ std::string BasicShapeTypeToString(BasicShapeType type)
         json##name->Put("y", "");                                    \
     }
 
-void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ACE_OFFSET_API_TEN_TO_JSON(Position);
-    json->Put("position", jsonPosition);
+    json->PutExtAttr("position", jsonPosition, filter);
 
     auto context = PipelineContext::GetCurrentContext();
     // add version protection, null as default start from API 10 or higher
     if (context && context->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
         ACE_OFFSET_API_TEN_TO_JSON(Offset);
-        json->Put("offset", jsonOffset);
+        json->PutExtAttr("offset", jsonOffset, filter);
 
         ACE_OFFSET_API_TEN_TO_JSON(Anchor);
-        json->Put("markAnchor", jsonAnchor);
+        json->PutExtAttr("markAnchor", jsonAnchor, filter);
     } else {
         ACE_OFFSET_API_NINE_TO_JSON(Offset);
-        json->Put("offset", jsonOffset);
+        json->PutExtAttr("offset", jsonOffset, filter);
 
         ACE_OFFSET_API_NINE_TO_JSON(Anchor);
-        json->Put("markAnchor", jsonAnchor);
+        json->PutExtAttr("markAnchor", jsonAnchor, filter);
     }
 }
 
-void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("grayscale", propFrontGrayScale.has_value() ? propFrontGrayScale->Value() : 0.0);
-    json->Put("brightness", propFrontBrightness.has_value() ? propFrontBrightness->Value() : 1.0);
-    json->Put("saturate", propFrontSaturate.has_value() ? propFrontSaturate->Value() : 1.0);
-    json->Put("contrast", propFrontContrast.has_value() ? propFrontContrast->Value() : 1.0);
-    json->Put("sepia", propFrontSepia.has_value() ? propFrontSepia->Value() : 0.0);
-    json->Put("hueRotate", propFrontHueRotate.has_value() ? propFrontHueRotate.value() : 0.0);
-    json->Put("colorBlend", propFrontColorBlend.has_value() ? propFrontColorBlend->ColorToString().c_str() : "");
-    json->Put("blendMode", propBackBlendMode.has_value() ? static_cast<uint16_t>(propBackBlendMode.value()) : 0);
-    json->Put("dynamicDimming", propDynamicDimDegree.has_value() ?
-        static_cast<float_t>(propDynamicDimDegree.value()) : 1.0f);
+    json->PutExtAttr("grayscale", propFrontGrayScale.has_value() ? propFrontGrayScale->Value() : 0.0, filter);
+    json->PutExtAttr("brightness", propFrontBrightness.has_value() ? propFrontBrightness->Value() : 1.0, filter);
+    json->PutExtAttr("saturate", propFrontSaturate.has_value() ? propFrontSaturate->Value() : 1.0, filter);
+    json->PutExtAttr("contrast", propFrontContrast.has_value() ? propFrontContrast->Value() : 1.0, filter);
+    json->PutExtAttr("sepia", propFrontSepia.has_value() ? propFrontSepia->Value() : 0.0, filter);
+    json->PutExtAttr("hueRotate", propFrontHueRotate.has_value() ? propFrontHueRotate.value() : 0.0, filter);
+    json->PutExtAttr("colorBlend",
+        propFrontColorBlend.has_value() ? propFrontColorBlend->ColorToString().c_str() : "", filter);
+    json->PutExtAttr("blendMode",
+        propBackBlendMode.has_value() ? static_cast<uint16_t>(propBackBlendMode.value()) : 0, filter);
+    json->PutExtAttr("dynamicDimming", propDynamicDimDegree.has_value() ?
+        static_cast<float_t>(propDynamicDimDegree.value()) : 1.0f, filter);
     auto jsonShadow = JsonUtil::Create(true);
     auto shadow = propBackShadow.value_or(Shadow());
     if (shadow.GetStyle() == ShadowStyle::OuterDefaultXS) {
-        json->Put("shadow", "ShadowStyle.OuterDefaultXS");
+        json->PutExtAttr("shadow", "ShadowStyle.OuterDefaultXS", filter);
     } else if (shadow.GetStyle() == ShadowStyle::OuterDefaultSM) {
-        json->Put("shadow", "ShadowStyle.OuterDefaultSM");
+        json->PutExtAttr("shadow", "ShadowStyle.OuterDefaultSM", filter);
     } else if (shadow.GetStyle() == ShadowStyle::OuterDefaultMD) {
-        json->Put("shadow", "ShadowStyle.OuterDefaultMD");
+        json->PutExtAttr("shadow", "ShadowStyle.OuterDefaultMD", filter);
     } else if (shadow.GetStyle() == ShadowStyle::OuterDefaultLG) {
-        json->Put("shadow", "ShadowStyle.OuterDefaultLG");
+        json->PutExtAttr("shadow", "ShadowStyle.OuterDefaultLG", filter);
     } else if (shadow.GetStyle() == ShadowStyle::OuterFloatingSM) {
-        json->Put("shadow", "ShadowStyle.OuterFloatingSM");
+        json->PutExtAttr("shadow", "ShadowStyle.OuterFloatingSM", filter);
     } else if (shadow.GetStyle() == ShadowStyle::OuterFloatingMD) {
-        json->Put("shadow", "ShadowStyle.OuterFloatingMD");
+        json->PutExtAttr("shadow", "ShadowStyle.OuterFloatingMD", filter);
     } else {
         jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
         if (shadow.GetShadowColorStrategy() == ShadowColorStrategy::AVERAGE) {
@@ -136,11 +139,11 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
         jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
         jsonShadow->Put("fill", std::to_string(shadow.GetIsFilled()).c_str());
-        json->Put("shadow", jsonShadow);
+        json->PutExtAttr("shadow", jsonShadow, filter);
     }
     if (propFrontInvert.has_value()) {
         if (propFrontInvert->index() == 0) {
-            json->Put("invert", std::get<float>(propFrontInvert.value()));
+            json->PutExtAttr("invert", std::get<float>(propFrontInvert.value()), filter);
         } else {
             InvertOption option = std::get<InvertOption>(propFrontInvert.value());
             auto jsonInvert = JsonUtil::Create(true);
@@ -148,51 +151,63 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
             jsonInvert->Put("high", option.high_);
             jsonInvert->Put("threshold", option.threshold_);
             jsonInvert->Put("thresholdRange", option.thresholdRange_);
-            json->Put("invert", jsonInvert);
+            json->PutExtAttr("invert", jsonInvert, filter);
         }
     }
 }
 
-void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     std::string backgroundImage = "NONE";
     if (propBackgroundImage.has_value()) {
         backgroundImage = propBackgroundImage->GetSrc() + ", " +
                           ImageRepeatToString(propBackgroundImageRepeat.value_or(ImageRepeat::NO_REPEAT));
     }
-    json->Put("backgroundImage", backgroundImage.c_str());
+    json->PutExtAttr("backgroundImage", backgroundImage.c_str(), filter);
 
-    json->Put("backgroundImageSize",
-        !propBackgroundImageSize.has_value() ? "ImageSize.Auto" : propBackgroundImageSize->ToString().c_str());
+    json->PutExtAttr("backgroundImageSize", !propBackgroundImageSize.has_value() ?
+        "ImageSize.Auto" : propBackgroundImageSize->ToString().c_str(), filter);
 
     if (propBackgroundImagePosition.has_value()) {
-        json->Put("backgroundImagePosition", propBackgroundImagePosition->ToString().c_str());
+        json->PutExtAttr("backgroundImagePosition", propBackgroundImagePosition->ToString().c_str(), filter);
     } else {
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("x", 0.0);
         jsonValue->Put("y", 0.0);
-        json->Put("backgroundImagePosition", jsonValue);
+        json->PutExtAttr("backgroundImagePosition", jsonValue, filter);
     }
-    json->Put("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
+    json->PutExtAttr("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx(), filter);
 }
 
-void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     std::string backgroundPixelMap = "NONE";
     if (propBackgroundPixelMap.has_value()) {
         backgroundPixelMap = std::to_string(propBackgroundPixelMap.value()->GetWidth()) + ", " +
                              std::to_string(propBackgroundPixelMap.value()->GetHeight());
     }
-    json->Put("backgroundPixelMap", backgroundPixelMap.c_str());
-    json->Put("backgroundAlign", propBackgroundAlign.value().ToString().c_str());
+    json->PutExtAttr("backgroundPixelMap", backgroundPixelMap.c_str(), filter);
+    json->PutExtAttr("backgroundAlign", propBackgroundAlign.value().ToString().c_str(), filter);
 }
 
-void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
+    json->PutExtAttr("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx(), filter);
+    auto jsonOption = JsonUtil::Create(true);
+    jsonOption->Put("radius", std::to_string(propForegroundEffect.value_or(0.0f)).c_str());
+    json->PutExtAttr("foregroundEffect", jsonOption, filter);
+    if (propMotionBlur.has_value()) {
+        auto motionBlur = JsonUtil::Create(true);
+        motionBlur->Put("radius", propMotionBlur->radius.Value());
+        auto motionBlurAnchor = JsonUtil::Create(true);
+        motionBlurAnchor->Put("x", propMotionBlur->anchor.x);
+        motionBlurAnchor->Put("y", propMotionBlur->anchor.y);
+        motionBlur->Put("anchor", motionBlurAnchor);
+        json->Put("motionBlur", motionBlur);
+    }
 }
 
-void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     if (propClipShape.has_value()) {
         auto jsonClip = JsonUtil::Create(true);
@@ -201,9 +216,9 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         if (!shapeType.empty()) {
             jsonClip->Put("shape", shapeType.c_str());
         }
-        json->Put("clip", jsonClip->ToString().c_str());
+        json->PutExtAttr("clip", jsonClip->ToString().c_str(), filter);
     } else {
-        json->Put("clip", propClipEdge.value_or(false) ? "true" : "false");
+        json->PutExtAttr("clip", propClipEdge.value_or(false) ? "true" : "false", filter);
     }
 
     auto jsonMask = JsonUtil::Create(true);
@@ -214,31 +229,31 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
             jsonMask->Put("shape", shapeType.c_str());
         }
     }
-    json->Put("mask", jsonMask);
+    json->PutExtAttr("mask", jsonMask, filter);
 }
 
-void GradientProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void GradientProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     if (propLinearGradient.has_value()) {
-        json->Put("linearGradient", propLinearGradient->LinearGradientToJson());
+        json->PutExtAttr("linearGradient", propLinearGradient->LinearGradientToJson(), filter);
     } else {
-        json->Put("linearGradient", JsonUtil::Create(true));
+        json->PutExtAttr("linearGradient", JsonUtil::Create(true), filter);
     }
 
     if (propSweepGradient.has_value()) {
-        json->Put("sweepGradient", propSweepGradient->SweepGradientToJson());
+        json->PutExtAttr("sweepGradient", propSweepGradient->SweepGradientToJson(), filter);
     } else {
-        json->Put("sweepGradient", JsonUtil::Create(true));
+        json->PutExtAttr("sweepGradient", JsonUtil::Create(true), filter);
     }
 
     if (propRadialGradient.has_value()) {
-        json->Put("radialGradient", propRadialGradient->RadialGradientToJson());
+        json->PutExtAttr("radialGradient", propRadialGradient->RadialGradientToJson(), filter);
     } else {
-        json->Put("radialGradient", JsonUtil::Create(true));
+        json->PutExtAttr("radialGradient", JsonUtil::Create(true), filter);
     }
 }
 
-void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     const double halfDimension = 50.0;
     auto center = propTransformCenter.value_or(DimensionOffset(
@@ -255,11 +270,11 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         if (center.GetZ().has_value()) {
             jsonValue->Put("centerZ", center.GetZ().value().ToString().c_str());
         } else {
-            json->Put("centerZ", JsonUtil::Create(true));
+            json->PutExtAttr("centerZ", JsonUtil::Create(true), filter);
         }
-        json->Put("rotate", jsonValue);
+        json->PutExtAttr("rotate", jsonValue, filter);
     } else {
-        json->Put("rotate", JsonUtil::Create(true));
+        json->PutExtAttr("rotate", JsonUtil::Create(true), filter);
     }
 
     if (propTransformScale.has_value()) {
@@ -268,9 +283,9 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonValue->Put("y", std::to_string(propTransformScale->y).c_str());
         jsonValue->Put("centerX", center.GetX().ToString().c_str());
         jsonValue->Put("centerY", center.GetY().ToString().c_str());
-        json->Put("scale", jsonValue);
+        json->PutExtAttr("scale", jsonValue, filter);
     } else {
-        json->Put("scale", JsonUtil::Create(true));
+        json->PutExtAttr("scale", JsonUtil::Create(true), filter);
     }
 
     if (propTransformTranslate.has_value()) {
@@ -278,48 +293,47 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonValue->Put("x", propTransformTranslate->x.ToString().c_str());
         jsonValue->Put("y", propTransformTranslate->y.ToString().c_str());
         jsonValue->Put("z", propTransformTranslate->z.ToString().c_str());
-        json->Put("translate", jsonValue);
+        json->PutExtAttr("translate", jsonValue, filter);
     } else {
-        json->Put("translate", JsonUtil::Create(true));
+        json->PutExtAttr("translate", JsonUtil::Create(true), filter);
     }
 }
 
-void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto jsonBorder = JsonUtil::Create(true);
+    propBorderStyle.value_or(BorderStyleProperty()).ToJsonValue(json, jsonBorder, filter);
+    propBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonBorder, filter);
+    propBorderWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonBorder, filter);
+    propBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonBorder, filter);
 
-    propBorderStyle.value_or(BorderStyleProperty()).ToJsonValue(json, jsonBorder);
-    propBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonBorder);
-    propBorderWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonBorder);
-    propBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonBorder);
-
-    json->Put("border", jsonBorder->ToString().c_str());
+    json->PutExtAttr("border", jsonBorder->ToString().c_str(), filter);
 }
 
-void OuterBorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void OuterBorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto jsonOutline = JsonUtil::Create(true);
-    propOuterBorderStyle.value_or(BorderStyleProperty()).ToJsonValue(json, jsonOutline, true);
-    propOuterBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonOutline, true);
-    propOuterBorderWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonOutline, true);
-    propOuterBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonOutline, true);
-    json->Put("outline", jsonOutline->ToString().c_str());
+    propOuterBorderStyle.value_or(BorderStyleProperty()).ToJsonValue(json, jsonOutline, filter, true);
+    propOuterBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonOutline, filter, true);
+    propOuterBorderWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonOutline, filter, true);
+    propOuterBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonOutline, filter, true);
+    json->PutExtAttr("outline", jsonOutline->ToString().c_str(), filter);
 }
 
-void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto jsonLightIntensity = JsonUtil::Create(true);
     jsonLightIntensity->Put("lightIntensity", propLightIntensity.has_value() ? propLightIntensity.value() : 0.0);
-    json->Put("pointLight", jsonLightIntensity);
+    json->PutExtAttr("pointLight", jsonLightIntensity, filter);
 
     if (propLightPosition.has_value()) {
         auto jsonLightPosition = JsonUtil::Create(true);
         jsonLightPosition->Put("x", propLightPosition->x.ToString().c_str());
         jsonLightPosition->Put("y", propLightPosition->y.ToString().c_str());
         jsonLightPosition->Put("z", propLightPosition->z.ToString().c_str());
-        json->Put("LightPosition", jsonLightPosition);
+        json->PutExtAttr("LightPosition", jsonLightPosition, filter);
     } else {
-        json->Put("LightPosition", JsonUtil::Create(true));
+        json->PutExtAttr("LightPosition", JsonUtil::Create(true), filter);
     }
 }
 } // namespace OHOS::Ace::NG

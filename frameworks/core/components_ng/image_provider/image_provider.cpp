@@ -125,7 +125,7 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
                 ctx->FailCallback(errorMsg);
             };
 
-            ImageUtils::PostToUI(std::move(notifyLoadFailTask), ctx->GetContainerId());
+            ImageUtils::PostToUI(std::move(notifyLoadFailTask), "ArkUIImageProviderFail", ctx->GetContainerId());
         }
     }
 }
@@ -147,7 +147,7 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
             auto notifyLoadSuccess = [ctx, canvasImage] {
                 ctx->SuccessCallback(canvasImage->Clone());
             };
-            ImageUtils::PostToUI(std::move(notifyLoadSuccess), ctx->GetContainerId());
+            ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", ctx->GetContainerId());
         }
     }
 }
@@ -197,7 +197,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
             auto notifyDataReadyTask = [ctx, imageObj, src] {
                 ctx->DataReadyCallback(imageObj);
             };
-            ImageUtils::PostToUI(std::move(notifyDataReadyTask), ctx->GetContainerId());
+            ImageUtils::PostToUI(std::move(notifyDataReadyTask), "ArkUIImageProviderDataReady", ctx->GetContainerId());
         }
     }
 }
@@ -265,7 +265,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
         tasks_[src.GetKey()].bgTask_ = task;
         auto ctx = ctxWp.Upgrade();
         CHECK_NULL_VOID(ctx);
-        ImageUtils::PostToBg(task, ctx->GetContainerId());
+        ImageUtils::PostToBg(task, "ArkUIImageProviderCreateImageObject", ctx->GetContainerId());
     }
 }
 
@@ -308,34 +308,36 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
 }
 
 void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
-    const SizeF& size, bool forceResize, bool sync)
+    const SizeF& size, const ImageDecoderOptions& imageDecoderOptions)
 {
     auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), size);
     // check if same task is already executing
     if (!RegisterTask(key, ctxWp)) {
         return;
     }
-    if (sync) {
-        MakeCanvasImageHelper(obj, size, key, forceResize, true);
+    if (imageDecoderOptions.sync) {
+        MakeCanvasImageHelper(obj, size, key, imageDecoderOptions);
     } else {
         std::scoped_lock<std::mutex> lock(taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
-        task.Reset([key, obj, size, forceResize] { MakeCanvasImageHelper(obj, size, key, forceResize); });
+        task.Reset([key, obj, size, imageDecoderOptions] {
+            MakeCanvasImageHelper(obj, size, key, imageDecoderOptions);
+        });
         tasks_[key].bgTask_ = task;
         auto ctx = ctxWp.Upgrade();
         CHECK_NULL_VOID(ctx);
-        ImageUtils::PostToBg(task, ctx->GetContainerId());
+        ImageUtils::PostToBg(task, "ArkUIImageProviderMakeCanvasImage", ctx->GetContainerId());
     }
 }
 
-void ImageProvider::MakeCanvasImageHelper(
-    const RefPtr<ImageObject>& obj, const SizeF& size, const std::string& key, bool forceResize, bool sync)
+void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& size, const std::string& key,
+    const ImageDecoderOptions& imageDecoderOptions)
 {
-    ImageDecoder decoder(obj, size, forceResize);
+    ImageDecoder decoder(obj, size, imageDecoderOptions.forceResize);
     RefPtr<CanvasImage> image;
     if (SystemProperties::GetImageFrameworkEnabled()) {
-        image = decoder.MakePixmapImage();
+        image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality);
     } else {
 #ifndef USE_ROSEN_DRAWING
         image = decoder.MakeSkiaImage();
@@ -345,7 +347,7 @@ void ImageProvider::MakeCanvasImageHelper(
     }
 
     if (image) {
-        SuccessCallback(image, key, sync);
+        SuccessCallback(image, key, imageDecoderOptions.sync);
     } else {
         FailCallback(key, "Failed to decode image");
     }

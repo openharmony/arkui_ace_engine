@@ -41,6 +41,9 @@ declare_args() {
   # Enable test coverage
   ace_engine_feature_enable_coverage = false
 
+  # Enalbe point light
+  ace_engine_feature_enable_point_light = true
+
   # Disable in OH Core
   ace_engine_standard_fonts_enable = true
 
@@ -73,6 +76,7 @@ ace_napi = "//foundation/arkui/napi"
 arkui_root = "//foundation/arkui"
 ace_graphic = "//foundation/graphic/graphic_2d"
 ace_hitrace = "//base/hiviewdfx/hitrace"
+app_framework_root = "//foundation/appframework"
 c_utils_root = "//commonlibrary/c_utils"
 
 if (!defined(aosp_libs_dir)) {
@@ -80,6 +84,8 @@ if (!defined(aosp_libs_dir)) {
 }
 libs_root = "${aosp_libs_dir}/sdk"
 
+ability_runtime_cross_platform_path =
+    "${app_framework_root}/ability/ability_runtime/cross_platform"
 ability_runtime_path = "//foundation/ability/ability_runtime"
 ability_runtime_inner_api_path = "${ability_runtime_path}/interfaces/inner_api"
 ability_runtime_inner_kits_path = "${ability_runtime_path}/interfaces/kits"
@@ -87,6 +93,8 @@ ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
 ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi"
 ability_runtime_services_path = "${ability_runtime_path}/services"
 accessibility_path = "//foundation/barrierfree/accessibility"
+app_framework_resource_path = "${app_framework_root}/resource_management"
+app_framework_window_path = "${app_framework_root}/window_manager"
 flutter_root = "//third_party/flutter"
 ace_flutter_engine_root = "$flutter_root/build"
 expat_root = "//third_party/expat"

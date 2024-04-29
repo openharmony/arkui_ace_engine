@@ -560,8 +560,12 @@ LunarDate Localization::GetLunarDate(Date date)
     auto cal = Calendar::createInstance(locale, status);
     CHECK_RETURN(status, dateRet);
     // 0 means January,  1 means February, so month - 1
-    cal->set(date.year, date.month - 1, date.day);
-
+    if (date.month == 0u) {
+        date.month = 11u;
+        cal->set(date.year, date.month, date.day);
+    } else {
+        cal->set(date.year, date.month - 1u, date.day);
+    }
     UDate udate = cal->getTime(status);
     delete cal;
     CHECK_RETURN(status, dateRet);

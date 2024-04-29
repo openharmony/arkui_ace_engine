@@ -251,11 +251,26 @@ public:
     {
         maxMenuNums_ = maxMenu;
     }
+
+    bool GetIsTitleMoving() const
+    {
+        return isTitleMoving_;
+    }
+
+    void SetIsTitleMoving(bool isTitleMoving)
+    {
+        isTitleMoving_ = isTitleMoving;
+    }
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
 
     void SetTitlebarOptions(NavigationTitlebarOptions&& opt);
+
+    NavigationTitlebarOptions GetTitleBarOptions() const
+    {
+        return options_;
+    }
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -343,6 +358,7 @@ private:
     bool CanOverDrag_ = true;
     bool isTitleScaleChange_ = true;
     bool isTitleChanged_ = false; // navigation Non-custom title changed
+    bool isTitleMoving_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 
     bool isFreeTitleUpdated_ = false;

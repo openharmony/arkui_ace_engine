@@ -165,6 +165,9 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
     pipelineContext->SetSyncAnimationOption(option);
+    if (!info[1]->IsFunction()) {
+        return;
+    }
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
     pipelineContext->FlushBuild();
@@ -531,7 +534,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                         CHECK_NULL_VOID(pipelineContext);
                         AnimateToForStageMode(pipelineContext, option, func, onFinishEvent, immediately);
                     },
-                    TaskExecutor::TaskType::UI);
+                    TaskExecutor::TaskType::UI, "ArkUIAnimateToForStageMode");
                 return;
             }
             AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), onFinishEvent, immediately);

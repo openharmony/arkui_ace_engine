@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 struct GridItemIndexInfo {
     int32_t mainIndex = -1;
     int32_t crossIndex = -1;
@@ -140,12 +142,16 @@ public:
         gridLayoutInfo_.irregularItemsPosition_.clear();
     }
 
+    void SetIrregular(bool value) {
+        irregular_ = value;
+    }
+
     void ResetPositionFlags()
     {
         gridLayoutInfo_.ResetPositionFlags();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
@@ -160,6 +166,7 @@ public:
     }
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;
+    void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
     bool OutBoundaryCallback() override;
 
@@ -227,11 +234,16 @@ public:
 
     bool IsPredictOutOfRange(int32_t index) const;
 
+    bool IsReverse() const override;
+
 private:
+    /**
+     * @brief calculate where startMainLine_ should be after spring animation.
+     * @return main axis position relative to viewport, positive when below viewport.
+     */
     float GetEndOffset();
     float GetMainGap() const;
     float GetAllDelta();
-    void CheckRestartSpring();
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
@@ -265,7 +277,11 @@ private:
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
 
+    void SyncLayoutBeforeSpring();
+
     void FireOnScrollStart() override;
+
+    inline bool UseIrregularLayout() const;
 
     int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
@@ -287,12 +303,13 @@ private:
     bool isDownStep_ = false;
     bool isLeftEndStep_ = false;
     bool isRightEndStep_ = false;
+    bool isSmoothScrolling_ = false;
+    bool irregular_ = false;
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
     GridItemIndexInfo curFocusIndexInfo_;
-    bool isSmoothScrolling_ = false;
     GridLayoutInfo scrollGridLayoutInfo_;
     GridLayoutInfo gridLayoutInfo_;
     std::optional<GridPredictLayoutParam> predictLayoutParam_;

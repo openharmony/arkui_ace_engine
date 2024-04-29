@@ -85,6 +85,16 @@ public:
         index_ = index;
     }
 
+    int32_t GetPreIndex() const
+    {
+        return preIndex_;
+    }
+
+    void SetPreIndex(int32_t index)
+    {
+        preIndex_ = index;
+    }
+
     uint64_t GetNavDestinationId() const
     {
         return navDestinationId_;
@@ -107,6 +117,7 @@ public:
 
 protected:
     int32_t index_ = -1;
+    int32_t preIndex_ = -1;
     uint64_t navDestinationId_ = 0;
     bool isEmpty_ = false;
     RefPtr<NavPathInfo> pathInfo_;

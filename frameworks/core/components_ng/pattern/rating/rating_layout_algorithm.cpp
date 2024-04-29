@@ -29,7 +29,8 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<RatingPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        return BoxLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+        host->GetGeometryNode()->Reset();
+        return std::nullopt;
     }
     // case 1: rating component is set with valid size, return contentConstraint.selfIdealSize as component size
     if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
@@ -72,6 +73,7 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<RatingPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->UseContentModifier()) {
+        host->GetGeometryNode()->Reset();
         return;
     }
     // if layout size has not decided yet, resize target can not be calculated

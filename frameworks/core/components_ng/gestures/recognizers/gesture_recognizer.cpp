@@ -118,10 +118,14 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             }
             break;
         }
-        case TouchType::UP:
-            HandleTouchUpEvent(point);
-            currentFingers_--;
+        case TouchType::UP: {
+            auto result = AboutToMinusCurrentFingers(point.id);
+            if (result) {
+                HandleTouchUpEvent(point);
+                currentFingers_--;
+            }
             break;
+        }
         case TouchType::CANCEL:
             HandleTouchCancelEvent(point);
             currentFingers_--;
@@ -177,8 +181,8 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
     referee->Adjudicate(recognizer, disposal);
 }
 
-void NGGestureRecognizer::Transform(
-    PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime, bool isPostEventResult)
+void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime,
+    bool isPostEventResult, int32_t postEventNodeId)
 {
     if (node.Invalid()) {
         return;
@@ -209,7 +213,7 @@ void NGGestureRecognizer::Transform(
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:%{public}d", host->GetId());
             break;
         }
-        if (host->GetTag() == "NodeContainer" && isPostEventResult) {
+        if ((postEventNodeId == host->GetId()) && isPostEventResult) {
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when used in NodeContainer, id:%{public}d", host->GetId());
             break;
         }
@@ -355,13 +359,21 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event)
     if (isChildTouchTestResult) {
         return true;
     }
+
     PointF localPoint(event.x, event.y);
-    NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_,
+        isPostEventResult_, event.postEventNodeId);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     auto paintRect = renderContext->GetPaintRectWithoutTransform();
     localPoint = localPoint + paintRect.GetOffset();
     auto responseRegion = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
-    return host->InResponseRegionList(localPoint, responseRegion);
+    auto result = host->InResponseRegionList(localPoint, responseRegion);
+    if (!result) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "%{public}s IsInAttachedNode result is negative, node tag = %{public}s, id = %{public}s",
+            AceType::TypeName(this), host->GetTag().c_str(), std::to_string(host->GetId()).c_str());
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

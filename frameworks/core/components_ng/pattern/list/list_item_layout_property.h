@@ -21,6 +21,8 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT ListItemLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ListItemLayoutProperty, LayoutProperty);
 
@@ -45,7 +47,7 @@ public:
         ResetEndDeleteAreaDistance();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, V2::SwipeEdgeEffect, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, uint32_t, PROPERTY_UPDATE_MEASURE);

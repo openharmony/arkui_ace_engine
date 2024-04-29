@@ -65,7 +65,7 @@ CalendarDataAdapter::CalendarDataAdapter(
     Date currentDate = Date::Current();
     today_.day = static_cast<int32_t>(currentDate.day);
     today_.month.year = static_cast<int32_t>(currentDate.year);
-    today_.month.month = static_cast<int32_t>(currentDate.month - 1);
+    today_.month.month = static_cast<int32_t>(currentDate.month) - 1;
 }
 
 bool CalendarDataAdapter::ParseData(int32_t indexOfContainer, const std::string& source, CalendarDaysOfMonth& result)
@@ -175,7 +175,7 @@ void CalendarDataAdapter::RequestData(const CalendarDataRequest& request)
               }
               dataAdapter->RequestNextData();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUICalendarRequestData");
         return;
     }
     if (SystemProperties::GetDeviceType() == DeviceType::TV || type_ == CalendarType::NORMAL) {
@@ -243,7 +243,7 @@ void CalendarDataAdapter::SaveCacheData(const CalendarDataRequest& request, cons
             return;
         }
         outFile.write(reinterpret_cast<const char*>(result.c_str()), result.size());
-    });
+    }, "ArkUICalendarSaveCacheData");
 }
 
 void CalendarDataAdapter::ParseCardCalendarData(const std::string& source)
@@ -403,7 +403,7 @@ void CalendarDataAdapter::RequestDataInWatch(const CalendarDataRequest& request)
                 dataAdapter->NotifyDataChanged(result, request.indexOfContainer);
                 dataAdapter->RequestNextData();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUICalendarRequestDataInWatch");
     }
 }
 

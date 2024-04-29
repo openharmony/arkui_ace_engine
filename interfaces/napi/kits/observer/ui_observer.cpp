@@ -15,14 +15,13 @@
 
 #include "ui_observer.h"
 
-#include "bridge/common/utils/engine_helper.h"
-
 #include <algorithm>
 
+#include "bridge/common/utils/engine_helper.h"
+
 namespace OHOS::Ace::Napi {
-std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedNavigationListeners_;
-std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
-    UIObserver::specifiedCNavigationListeners_;
+NavListenerMap UIObserver::unspecifiedNavigationListeners_;
+SpecNavListenerMap UIObserver::specifiedCNavigationListeners_;
 
 std::list<std::shared_ptr<UIObserverListener>> UIObserver::scrollEventListeners_;
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
@@ -30,12 +29,10 @@ std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
 
 std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::abilityContextRouterPageListeners_;
-std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
-    UIObserver::specifiedRouterPageListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedRouterPageListeners_;
 std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::infosForRouterPage_;
 
-std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
-    UIObserver::specifiedDensityListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedDensityListeners_;
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedDrawListeners_;
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedLayoutListeners_;
 
@@ -45,25 +42,65 @@ std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::infosForNavDesS
 
 std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::abilityContextWillClickListeners_;
-std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
-    UIObserver::specifiedWillClickListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedWillClickListeners_;
 std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::willClickInfos_;
 
 std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::abilityContextDidClickListeners_;
-std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
-    UIObserver::specifiedDidClickListeners_;
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> UIObserver::specifiedDidClickListeners_;
 std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::didClickInfos_;
+
+namespace {
+template<class Container, class T>
+auto GetOrCreateItemByKey(std::unordered_map<T, Container>& map, T id)
+{
+    auto iter = map.find(id);
+    if (iter == map.end()) {
+        return map.emplace(id, Container({}));
+    }
+    return std::pair { iter, true };
+}
+
+template<class Container, class T>
+void InsertIfNotExist(Container& listeners, const std::shared_ptr<T>& listener)
+{
+    if (std::find_if(listeners.begin(), listeners.end(), [&listener](const std::shared_ptr<T>& other) {
+            return *(listener.get()) == *(other.get());
+        }) != listeners.end()) {
+        return;
+    }
+    listeners.emplace_back(listener);
+}
+
+void EraseCallback(std::list<ListenerPtr>& listeners, napi_value cb)
+{
+    if (cb == nullptr) {
+        listeners.clear();
+        return;
+    }
+    listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
+        [cb](const ListenerPtr& registeredListener) { return registeredListener->NapiEqual(cb); }),
+        listeners.end());
+}
+
+void NotifyCallback(const std::list<ListenerPtr>& listeners, const NG::NavDestinationInfo& info)
+{
+    for (const auto& listener : listeners) {
+        listener->OnNavigationStateChange(info);
+    }
+}
+} // namespace
 
 // UIObserver.on(type: "navDestinationUpdate", callback)
 // register a global listener without options
 void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener)
 {
-    if (std::find(unspecifiedNavigationListeners_.begin(), unspecifiedNavigationListeners_.end(), listener) !=
-        unspecifiedNavigationListeners_.end()) {
+    auto contextId = Container::CurrentId();
+    auto contextResult = GetOrCreateItemByKey(unspecifiedNavigationListeners_, contextId);
+    if (!contextResult.second) {
         return;
     }
-    unspecifiedNavigationListeners_.emplace_back(listener);
+    InsertIfNotExist(contextResult.first->second, listener);
 }
 
 // UIObserver.on(type: "navDestinationUpdate", options, callback)
@@ -71,78 +108,69 @@ void UIObserver::RegisterNavigationCallback(const std::shared_ptr<UIObserverList
 void UIObserver::RegisterNavigationCallback(
     std::string navigationId, const std::shared_ptr<UIObserverListener>& listener)
 {
-    auto iter = specifiedCNavigationListeners_.find(navigationId);
-    if (iter == specifiedCNavigationListeners_.end()) {
-        specifiedCNavigationListeners_.emplace(
-            navigationId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+    auto contextId = Container::CurrentId();
+    auto contextResult = GetOrCreateItemByKey(specifiedCNavigationListeners_, contextId);
+    if (!contextResult.second) {
         return;
     }
-    auto& holder = iter->second;
-    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+    auto specMap = contextResult.first->second;
+    auto specMapResult = GetOrCreateItemByKey(specMap, navigationId);
+    if (!specMapResult.second) {
         return;
     }
-    holder.emplace_back(listener);
+    InsertIfNotExist(specMapResult.first->second, listener);
 }
 
 // UIObserver.off(type: "navDestinationUpdate", callback)
 void UIObserver::UnRegisterNavigationCallback(napi_value cb)
 {
-    if (cb == nullptr) {
-        unspecifiedNavigationListeners_.clear();
+    auto contextId = Container::CurrentId();
+    auto contextResult = GetOrCreateItemByKey(unspecifiedNavigationListeners_, contextId);
+    if (!contextResult.second) {
         return;
     }
-
-    unspecifiedNavigationListeners_.erase(
-        std::remove_if(
-            unspecifiedNavigationListeners_.begin(),
-            unspecifiedNavigationListeners_.end(),
-            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
-                return registeredListener->NapiEqual(cb);
-            }
-        ),
-        unspecifiedNavigationListeners_.end()
-    );
+    EraseCallback(contextResult.first->second, cb);
 }
 
 // UIObserver.off(type: "navDestinationUpdate", options, callback)
 void UIObserver::UnRegisterNavigationCallback(std::string navigationId, napi_value cb)
 {
-    auto iter = specifiedCNavigationListeners_.find(navigationId);
-    if (iter == specifiedCNavigationListeners_.end()) {
+    auto contextId = Container::CurrentId();
+    auto contextResult = GetOrCreateItemByKey(specifiedCNavigationListeners_, contextId);
+    if (!contextResult.second) {
         return;
     }
-    auto& holder = iter->second;
-    if (cb == nullptr) {
-        holder.clear();
+    auto specMap = contextResult.first->second;
+    auto specMapResult = GetOrCreateItemByKey(specMap, navigationId);
+    if (!specMapResult.second) {
         return;
     }
-    holder.erase(
-        std::remove_if(
-            holder.begin(),
-            holder.end(),
-            [cb](const std::shared_ptr<UIObserverListener>& registeredListener) {
-                return registeredListener->NapiEqual(cb);
-            }
-        ),
-        holder.end()
-    );
+    EraseCallback(specMapResult.first->second, cb);
 }
 
 void UIObserver::HandleNavigationStateChange(const NG::NavDestinationInfo& info)
 {
-    for (const auto& listener : unspecifiedNavigationListeners_) {
-        listener->OnNavigationStateChange(info);
-    }
-    auto iter = specifiedCNavigationListeners_.find(info.navigationId);
-    if (iter == specifiedCNavigationListeners_.end()) {
-        return;
-    }
+    auto contextId = Container::CurrentId();
+    do {
+        auto unSpecContextResult = GetOrCreateItemByKey(unspecifiedNavigationListeners_, contextId);
+        if (!unSpecContextResult.second) {
+            break;
+        }
+        NotifyCallback(unSpecContextResult.first->second, info);
+    } while (false);
 
-    auto& holder = iter->second;
-
-    for (const auto& listener : holder) {
-        listener->OnNavigationStateChange(info);
-    }
+    do {
+        auto specContextResult = GetOrCreateItemByKey(specifiedCNavigationListeners_, contextId);
+        if (!specContextResult.second) {
+            break;
+        }
+        auto specMap = specContextResult.first->second;
+        auto specMapResult = GetOrCreateItemByKey(specMap, info.navigationId);
+        if (!specMapResult.second) {
+            break;
+        }
+        NotifyCallback(specMapResult.first->second, info);
+    } while (false);
 }
 
 // UIObserver.on(type: "scrollEvent", callback)
@@ -421,8 +449,7 @@ void UIObserver::UnRegisterLayoutCallback(int32_t uiContextInstanceId, napi_valu
         holder.end());
 }
 
-void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_value context, int32_t index,
-    const std::string& name, const std::string& path, NG::RouterPageState state)
+void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, const NG::RouterPageInfoNG& pageInfo)
 {
     for (auto listenerPair : abilityContextRouterPageListeners_) {
         auto ref = listenerPair.first;
@@ -432,9 +459,11 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_
             napi_value abilityContext = nullptr;
             napi_get_reference_value(env, ref, &abilityContext);
 
+            NG::RouterPageInfoNG abilityPageInfo(
+                abilityContext, pageInfo.index, pageInfo.name, pageInfo.path, pageInfo.state, pageInfo.pageId);
             auto& holder = abilityContextRouterPageListeners_[ref];
             for (const auto& listener : holder) {
-                listener->OnRouterPageStateChange(abilityContext, index, name, path, state);
+                listener->OnRouterPageStateChange(abilityPageInfo);
             }
             break;
         }
@@ -447,7 +476,7 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_
     }
     auto& holder = iter->second;
     for (const auto& listener : holder) {
-        listener->OnRouterPageStateChange(context, index, name, path, state);
+        listener->OnRouterPageStateChange(pageInfo);
     }
 }
 

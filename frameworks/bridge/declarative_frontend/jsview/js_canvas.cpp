@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 
 #include "base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/jsview/models/canvas_model_impl.h"
+#include "bridge/declarative_frontend/jsview/models/canvas/canvas_model_impl.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -50,16 +50,23 @@ void JSCanvas::Create(const JSCallbackInfo& info)
 {
     auto pattern = CanvasModel::GetInstance()->Create();
     CHECK_NULL_VOID(pattern);
-    auto canvasPattern = CanvasModel::GetInstance()->GetTaskPool(pattern);
-    if (info.Length() > 0 && info[0]->IsObject()) {
-        JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
-        if (jsContext) {
-            jsContext->SetInstanceId(Container::CurrentId());
-            jsContext->SetCanvasPattern(canvasPattern);
-            jsContext->SetAntiAlias();
+    if (info[0]->IsObject()) {
+        if (JSRef<JSObject>::Cast(info[0])->HasProperty("canvas")) {
+            JSDrawingRenderingContext* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSDrawingRenderingContext>();
+            if (jsContext) {
+                jsContext->SetInstanceId(Container::CurrentId());
+                jsContext->SetCanvasPattern(pattern);
+                jsContext->SetRSCanvasCallback(pattern);
+            }
+        } else {
+            JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
+            if (jsContext) {
+                jsContext->SetInstanceId(Container::CurrentId());
+                jsContext->SetCanvasPattern(pattern);
+                jsContext->SetAntiAlias();
+            }
         }
     }
-    CanvasModel::GetInstance()->PushCanvasPattern(pattern);
 }
 
 void JSCanvas::JSBind(BindingTarget globalObj)

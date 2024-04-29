@@ -96,6 +96,9 @@ bool NodeDataCache::PutString(const RefPtr<NG::FrameNode>& node, const std::stri
     if (id.empty() || value.empty() || value.length() > MAX_DATA_LENGTH) {
         return false;
     }
+    if (mergedConfig_->shareNodes.empty()) {
+        return false;
+    }
     auto pageUrl = GetPageUrlByNode(node);
     if (pageUrl.empty()) {
         return false;
@@ -166,7 +169,7 @@ bool NodeDataCache::PutMultiple(const RefPtr<NG::FrameNode>& node, const std::st
 {
     auto json = JsonUtil::Create(true);
     json->Put(KEY_TEXT, name.c_str());
-    auto jsonArray = JsonUtil::CreateArray(false);
+    auto jsonArray = JsonUtil::CreateArray(true);
     for (size_t i = 0; i < value.size(); i++) {
         jsonArray->Put(std::to_string(i).c_str(), value.at(i).c_str());
     }

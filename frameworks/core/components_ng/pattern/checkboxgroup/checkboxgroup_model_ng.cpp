@@ -166,4 +166,11 @@ void CheckBoxGroupModelNG::SetCheckboxGroupStyle(CheckBoxStyle checkboxGroupStyl
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle);
 }
+
+void CheckBoxGroupModelNG::SetCheckboxGroupStyle(FrameNode* frameNode, CheckBoxStyle checkboxGroupStyle)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

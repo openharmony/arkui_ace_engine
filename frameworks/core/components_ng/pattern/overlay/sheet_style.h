@@ -79,6 +79,7 @@ struct SheetStyle {
     std::optional<NG::BorderStyleProperty> borderStyle;  // border style
     std::optional<Shadow> shadow;
     std::optional<Dimension> width;
+    std::optional<int32_t> instanceId; // uiContext instanceId
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
@@ -90,8 +91,8 @@ struct SheetStyle {
                 sheetTitle == sheetStyle.sheetTitle && sheetSubtitle == sheetStyle.sheetSubtitle &&
                 interactive == sheetStyle.interactive && showInPage == sheetStyle.showInPage &&
                 borderWidth == sheetStyle.borderWidth && borderColor == sheetStyle.borderColor &&
-                borderStyle == sheetStyle.borderStyle && shadow == sheetStyle.shadow &&
-                width == sheetStyle.width);
+                borderStyle == sheetStyle.borderStyle && shadow == sheetStyle.shadow && width == sheetStyle.width &&
+                instanceId == sheetStyle.instanceId);
     }
 };
 } // namespace OHOS::Ace::NG

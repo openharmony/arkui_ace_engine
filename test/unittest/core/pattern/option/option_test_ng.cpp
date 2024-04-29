@@ -48,6 +48,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const std::string EMPTY_TEXT = "";
 const std::string OPTION_TEST_TEXT = "option";
 const Dimension WIDTH = 50.0_vp;
@@ -390,7 +391,7 @@ HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg004, TestSize.Level1)
      * @tc.expected: property value are as expected.
      */
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("hover"), "true");
     EXPECT_EQ(json->GetString("needDivider"), "true");
     EXPECT_EQ(json->GetString("hasIcon"), "true");
@@ -412,7 +413,7 @@ HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg005, TestSize.Level1)
      * @tc.expected: property value are as expected.
      */
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("hover"), "false");
     EXPECT_EQ(json->GetString("needDivider"), "true");
     EXPECT_EQ(json->GetString("hasIcon"), "false");

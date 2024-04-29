@@ -94,6 +94,7 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
         needResetSurface_ = false;
     }
 
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "Playback %{public}zu drawing commands.", drawCmdList->GetOpItemSize());
     if (drawCmdList->IsEmpty()) {
         return;
     }

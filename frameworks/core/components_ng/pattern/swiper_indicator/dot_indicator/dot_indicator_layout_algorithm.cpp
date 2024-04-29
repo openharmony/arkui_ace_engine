@@ -31,7 +31,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
-constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 } // namespace
 void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -44,7 +43,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    auto itemCount = swiperPattern->RealTotalCount();
+    auto itemCount = swiperPattern->TotalCount();
     auto direction = swiperPattern->GetDirection();
 
     auto paintProperty = frameNode->GetPaintProperty<DotIndicatorPaintProperty>();
@@ -68,12 +67,12 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         userSelectedItemHeight = theme->GetSize().ConvertToPx();
     }
     auto indicatorPadding = INDICATOR_PADDING_HOVER;
-
+    float scaleIndicator = theme->GetScaleSwiper();
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
-    userItemWidth *= INDICATOR_ZOOM_IN_SCALE;
-    userItemHeight *= INDICATOR_ZOOM_IN_SCALE;
-    userSelectedItemWidth *= INDICATOR_ZOOM_IN_SCALE;
-    userSelectedItemHeight *= INDICATOR_ZOOM_IN_SCALE;
+    userItemWidth *= scaleIndicator;
+    userItemHeight *= scaleIndicator;
+    userSelectedItemWidth *= scaleIndicator;
+    userSelectedItemHeight *= scaleIndicator;
 
     // The width and height of the entire indicator.
     auto indicatorHeight = static_cast<float>(((userItemHeight > userSelectedItemHeight) ?
@@ -83,8 +82,9 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         allPointDiameterSum = userItemWidth * (itemCount - 1) + userSelectedItemWidth;
     }
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1);
+    Dimension paddingSide = theme->GetIndicatorPaddingDot();
     auto indicatorWidth =
-        indicatorPadding.ConvertToPx() + allPointDiameterSum + allPointSpaceSum + indicatorPadding.ConvertToPx();
+        paddingSide.ConvertToPx() + allPointDiameterSum + allPointSpaceSum + paddingSide.ConvertToPx();
 
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;

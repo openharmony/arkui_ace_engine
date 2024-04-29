@@ -77,7 +77,7 @@ public:
     static RefPtr<JsAcePage> GetRunningPage(int32_t instanceId);
     static RefPtr<JsAcePage> GetStagingPage(int32_t instanceId);
     static shared_ptr<JsRuntime> GetCurrentRuntime();
-    static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task);
+    static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task, const std::string& name);
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineBase> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
     static void PreloadAceModule(void* runtime);
@@ -468,7 +468,7 @@ private:
     static thread_local std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
     static thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> builderMap_;
     bool isFirstCallShow_ = true;
-    static panda::Global<panda::ObjectRef> obj_;
+    static thread_local panda::Global<panda::ObjectRef> obj_;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 

@@ -85,6 +85,7 @@ public:
     virtual void SetBackgroundEffect(const EffectOption& effectOption) {}
     virtual void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) = 0;
     virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
+    virtual void SetForegroundEffect(float radius) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
     virtual void SetLightUpEffect(double radio) {}
@@ -151,6 +152,7 @@ public:
     virtual void SetPositionEdges(const EdgesParam& value) {};
     virtual void SetOffsetEdges(const EdgesParam& value) {};
     virtual void MarkAnchor(const Dimension& x, const Dimension& y) = 0;
+    virtual void ResetPosition() {};
 
     // transforms
     virtual void SetScale(float x, float y, float z) = 0;
@@ -199,8 +201,11 @@ public:
 
     virtual void SetDynamicDim(float DimDegree) = 0;
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
+    virtual void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
+    virtual void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
 
     virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
+    virtual void SetMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetBlendMode(BlendMode blendMode) = 0;
     virtual void SetBlendApplyType(BlendApplyType blendApplyType) = 0;
@@ -314,16 +319,20 @@ public:
     virtual void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
-        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange,
-        std::function<void(const float)>&& onDetentsDidChange) = 0;
+        std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) = 0;
     virtual void DismissContentCover() = 0;
     virtual void DismissSheet() = 0;
+    virtual void SheetSpringBack() = 0;
     virtual void DismissDialog() {};
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;
     virtual void SetAccessibilityText(const std::string& text) = 0;
+    virtual void SetAccessibilityTextHint(const std::string& text) = 0;
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;
@@ -350,9 +359,13 @@ public:
     virtual void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) = 0;
     virtual void SetLightIntensity(const float value) = 0;
+    virtual void SetLightColor(const Color& value) = 0;
     virtual void SetLightIlluminated(const uint32_t value) = 0;
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;
+
+    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) {};
+    virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {};
 
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;

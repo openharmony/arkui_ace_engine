@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,17 +17,17 @@
 #define FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_CANVAS_RENDERER_H
 
 #include "base/memory/referenced.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_image_data.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_matrix2d.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/core/components_ng/pattern/canvas_renderer/canvas_renderer_model.h"
+#include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/bindings_defines.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_gradient.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_path.h"
+#include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/jsview/js_matrix2d.h"
+#include "bridge/declarative_frontend/jsview/js_path2d.h"
+#include "bridge/declarative_frontend/jsview/js_render_image.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components_ng/pattern/canvas/rendering_context_2d_model.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -144,31 +144,23 @@ public:
     void SetCanvasPattern(const RefPtr<AceType>& canvas)
     {
         canvasPattern_ = canvas;
-        isOffscreen_ = false;
         if (isInitializeShadow_) {
             return;
         }
-        BaseInfo baseInfo;
-        baseInfo.canvasPattern = canvasPattern_;
-        baseInfo.offscreenPattern = offscreenPattern_;
-        baseInfo.isOffscreen = isOffscreen_;
-        CanvasRendererModel::GetInstance()->SetShadowColor(baseInfo, Color::TRANSPARENT);
         isInitializeShadow_ = true;
+        renderingContext2DModel_->SetPattern(canvas);
+        renderingContext2DModel_->SetShadowColor(Color::TRANSPARENT);
     }
 
     void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas)
     {
         offscreenPattern_ = offscreenCanvas;
-        isOffscreen_ = true;
         if (isOffscreenInitializeShadow_) {
             return;
         }
-        BaseInfo baseInfo;
-        baseInfo.canvasPattern = canvasPattern_;
-        baseInfo.offscreenPattern = offscreenPattern_;
-        baseInfo.isOffscreen = isOffscreen_;
-        CanvasRendererModel::GetInstance()->SetShadowColor(baseInfo, Color::TRANSPARENT);
         isOffscreenInitializeShadow_ = true;
+        renderingContext2DModel_->SetPattern(offscreenCanvas);
+        renderingContext2DModel_->SetShadowColor(Color::TRANSPARENT);
     }
 
     std::vector<uint32_t> GetLineDash() const
@@ -197,7 +189,7 @@ public:
     }
 
     void SetTransform(unsigned int id, const TransformParam&);
-    
+
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasRenderer);
 
 protected:
@@ -208,6 +200,7 @@ protected:
     JSRenderImage* UnwrapNapiImage(const JSRef<JSObject> jsObject);
 
 protected:
+    RefPtr<RenderingContext2DModel> renderingContext2DModel_;
     bool anti_ = false;
 
     RefPtr<AceType> canvasPattern_;
@@ -224,8 +217,6 @@ private:
     std::weak_ptr<Ace::Pattern> GetPatternNG(int32_t id);
     Pattern GetPattern(unsigned int id);
     std::vector<uint32_t> lineDash_;
-    ImageData imageData_;
-    bool isOffscreen_ = false;
     std::shared_ptr<Pattern> GetPatternPtr(int32_t id);
     bool isInitializeShadow_ = false;
     bool isOffscreenInitializeShadow_ = false;

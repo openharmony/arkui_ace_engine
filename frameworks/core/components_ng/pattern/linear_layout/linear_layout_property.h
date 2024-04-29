@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/property/flex_property.h"
@@ -59,9 +60,9 @@ public:
         return isVertical_;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
         std::string alignItems;
         auto flexAlignItems = GetCrossAxisAlign().value_or(FlexAlign::CENTER);
         if (isVertical_) {
@@ -83,10 +84,10 @@ public:
                 alignItems = "VerticalAlign.Bottom";
             }
         }
-        json->Put("space", GetSpaceValue(Dimension(0.0f)).ToString().c_str());
-        json->Put("alignItems", alignItems.c_str());
+        json->PutExtAttr("space", GetSpaceValue(Dimension(0.0f)).ToString().c_str(), filter);
+        json->PutExtAttr("alignItems", alignItems.c_str(), filter);
         auto justifyContent = V2::ConvertFlexAlignToStirng(GetMainAxisAlign().value_or(FlexAlign::FLEX_START));
-        json->Put("justifyContent", justifyContent.c_str());
+        json->PutExtAttr("justifyContent", justifyContent.c_str(), filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
@@ -105,7 +106,12 @@ public:
         if (pos != std::string::npos) {
             ++pos;
             alignItems = alignItems.substr(pos, alignItems.length() - pos);
-            UpdateCrossAxisAlign(uMap.count(alignItems) ? uMap.at(alignItems) : FlexAlign::CENTER);
+            FlexAlign flexAlign = FlexAlign::CENTER;
+            auto iter = uMap.find(alignItems);
+            if (iter != uMap.end()) {
+                flexAlign = iter->second;
+            }
+            UpdateCrossAxisAlign(flexAlign);
         }
         UpdateMainAxisAlign(V2::ConvertStringToFlexAlign(json->GetString("justifyContent")));
 

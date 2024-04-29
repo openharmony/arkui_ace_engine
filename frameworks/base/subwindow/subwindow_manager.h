@@ -89,10 +89,7 @@ public:
         std::function<void(int32_t)>&& callback);
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
-    void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
-    void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId = -1, int32_t instanceId = -1);
-    void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
-    void DeletePopupHotAreas(int32_t overlayId, int32_t instanceId);
+    void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId = -1, int32_t instanceId = -1);
     int32_t GetDialogSubWindowId()
     {
         return dialogSubWindowId_;
@@ -107,7 +104,7 @@ public:
     const RefPtr<Subwindow> GetDialogSubwindow(int32_t instanceId);
     void SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow);
     const RefPtr<Subwindow>& GetCurrentDialogWindow();
-    void DeleteHotAreas(int32_t subwindowid, int32_t overlayid);
+    void DeleteHotAreas(int32_t subwindowId, int32_t nodeId);
 
     void ClearToastInSubwindow();
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
@@ -129,7 +126,7 @@ public:
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
 private:
-    RefPtr<Subwindow> GetOrCreateSubWindow();
+    RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
 
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;

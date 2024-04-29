@@ -63,6 +63,7 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr int32_t TARGET_ID = 3;
 constexpr MenuType TYPE = MenuType::MENU;
 constexpr int32_t SELECTED_INDEX = 10;
@@ -2485,7 +2486,7 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg015, TestSize.Level1)
     property.UpdateLabelFontWeight(FontWeight::LIGHTER);
 
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     auto labelFontJson = json->GetObject("labelFont");
     auto contentFontJson = json->GetObject("contentFont");
     EXPECT_EQ(json->GetString("startIcon"), IMAGE_SRC_URL);
@@ -2513,7 +2514,7 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg016, TestSize.Level1)
     property.UpdateSelectIconSrc("select.png");
 
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("selectIcon"), "false");
 }
 
@@ -2528,7 +2529,7 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg017, TestSize.Level1)
     property.UpdateSelectIcon(true);
 
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("selectIcon"), "true");
 }
 
@@ -2549,7 +2550,7 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg018, TestSize.Level1)
     ASSERT_NE(itemProperty, nullptr);
 
     auto json = JsonUtil::Create(true);
-    itemProperty->ToJsonValue(json);
+    itemProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("selectIcon"), "true");
 }
 
@@ -2573,7 +2574,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon001, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -2609,13 +2610,14 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
 
     EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
     // call AddSelectIcon
@@ -2657,13 +2659,14 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
 
     EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
     // call AddSelectIcon
@@ -2706,12 +2709,13 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon004, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
     EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
     // call AddSelectIcon
@@ -2748,7 +2752,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon001, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2787,7 +2791,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2837,7 +2841,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2874,7 +2878,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2921,7 +2925,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Level1)
     itemPattern->OnModifyDone();
 
     EXPECT_FALSE(itemEventHub->IsEnabled());
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 2u);
     auto startIconNode = AceType::DynamicCast<FrameNode>(leftRow->GetChildAtIndex(0));
@@ -2967,7 +2971,9 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestEvent001, TestSize.Level1)
      */
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
-    auto gestureHub = itemNode->GetOrCreateGestureEventHub();
+    auto clickableNode = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(CLICKABLE_AREA_VIEW_INDEX));
+    ASSERT_NE(clickableNode, nullptr);
+    auto gestureHub = clickableNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     auto clickEventActuator = gestureHub->clickEventActuator_;
     ASSERT_NE(clickEventActuator, nullptr);
@@ -3365,7 +3371,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNg009, TestSize.Level1)
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
     mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
-    auto position = menuItemPattern->GetSubMenuPostion(mainMenu);
+    auto position = menuItemPattern->GetSubMenuPosition(mainMenu);
     EXPECT_EQ(position, OffsetF(100, 0));
 }
 
@@ -5054,7 +5060,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg037, TestSize.Level1)
     position = OffsetF(POSITION_OFFSET, OFFSET_FIFTH);
     menuLayoutAlgorithm->placement_ = Placement::TOP_LEFT;
     result = menuLayoutAlgorithm->CheckPosition(position, size);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.steps: step4. the placement of menuLayoutAlgorithm is Placement::LEFT_TOP and menu position is normal
@@ -5063,7 +5069,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg037, TestSize.Level1)
     position = OffsetF(OFFSET_FIFTH, OFFSET_THIRD);
     menuLayoutAlgorithm->placement_ = Placement::LEFT_TOP;
     result = menuLayoutAlgorithm->CheckPosition(position, size);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.steps: step5. the placement of menuLayoutAlgorithm is Placement::NONE
@@ -5259,6 +5265,13 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg041, TestSize.Level1)
      * @tc.steps: step1. create menuLayoutAlgorithm
      * @tc.expected: menuLayoutAlgorithm is not null
      */
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU);
+    auto menu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* layoutWrapper = new LayoutWrapperNode(menu, geometryNode, layoutProp);
+
     auto menuAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(NODEID, TEXT_TAG);
     ASSERT_TRUE(menuAlgorithm);
     const SizeF menuSize = SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
@@ -5271,25 +5284,21 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg041, TestSize.Level1)
     std::unordered_set<Placement> positionCondition3 = { Placement::LEFT, Placement::LEFT_TOP, Placement::LEFT_BOTTOM };
     std::unordered_set<Placement> positionCondition4 = { Placement::RIGHT, Placement::RIGHT_TOP,
         Placement::RIGHT_BOTTOM };
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    auto radius = selectTheme->GetMenuBorderRadius().ConvertToPx();
+    auto arrowMinLimit = radius + ARROW_WIDTH.ConvertToPx() / 2.0;
     /**
      * @tc.steps: step2. execute GetArrowPositionWithPlacement
      * @tc.expected: arrowPosition is as expected.
      */
-    float arrowOffsetMax = 0.0f;
     for (Placement placementValue : placements) {
-        if (menuAlgorithm->setHorizontal_.find(placementValue) != menuAlgorithm->setHorizontal_.end()) {
-            arrowOffsetMax = menuSize.Height() - menuAlgorithm->menuRadius_ * 2 - menuAlgorithm->arrowWidth_;
-        }
-        if (menuAlgorithm->setVertical_.find(placementValue) != menuAlgorithm->setVertical_.end()) {
-            arrowOffsetMax = menuSize.Width() - menuAlgorithm->menuRadius_ * 2 - menuAlgorithm->arrowWidth_;
-        }
-
         menuAlgorithm->propArrowOffset_ = Dimension(0.5, DimensionUnit::PX);
         menuAlgorithm->arrowPlacement_ = placementValue;
-        auto result = menuAlgorithm->GetArrowPositionWithPlacement(menuSize);
+        auto result = menuAlgorithm->GetArrowPositionWithPlacement(menuSize, layoutWrapper);
         EXPECT_EQ(menuAlgorithm->propArrowOffset_, Dimension(0.5, DimensionUnit::PX));
         auto arrowOffsetValue = (menuAlgorithm->propArrowOffset_).ConvertToPx();
         EXPECT_EQ(menuAlgorithm->arrowOffset_, arrowOffsetValue);
+        arrowOffsetValue  = arrowMinLimit + arrowOffsetValue;
         if (positionCondition1.find(placementValue) != positionCondition1.end()) {
             EXPECT_EQ(result, OffsetF(arrowOffsetValue, menuSize.Height() + ARROW_HIGHT.ConvertToPx()));
         }
@@ -6806,7 +6815,7 @@ HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg009, TestSize.Level1)
     property.UpdateFontWeight(FontWeight::BOLD);
 
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     auto fontJsonObject = json->GetObject("font");
     EXPECT_EQ(json->GetString("title"), "title");
     EXPECT_EQ(json->GetString("offset"), OffsetF(25.0f, 30.0f).ToString());
@@ -6835,7 +6844,7 @@ HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg010, TestSize.Level1)
     ASSERT_NE(property, nullptr);
 
     auto json = JsonUtil::Create(true);
-    property->ToJsonValue(json);
+    property->ToJsonValue(json, filter);
     auto itemArray = json->GetValue("bindMenu");
     ASSERT_EQ(itemArray->GetArraySize(), 2u);
     auto item1 = itemArray->GetArrayItem(0);
@@ -7515,7 +7524,7 @@ HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg007, TestSize.Level1)
      * @tc.expected: property jsonValue are as expected.
      */
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("enableArrow"), V2::ConvertBoolToString(true).c_str());
     EXPECT_EQ(json->GetString("arrowOffset"), Dimension(10.0f).ToString().c_str());
     EXPECT_EQ(json->GetString("arrowPosition"), OffsetF(10.0f, 10.0f).ToString().c_str());
@@ -7538,7 +7547,7 @@ HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg008, TestSize.Level1)
      * @tc.expected: property jsonValue are as expected.
      */
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("enableArrow"), V2::ConvertBoolToString(false).c_str());
     EXPECT_EQ(json->GetString("arrowOffset"), Dimension(0.0, DimensionUnit::VP).ToString().c_str());
     EXPECT_EQ(json->GetString("arrowPosition"), OffsetF(0.0f, 0.0f).ToString().c_str());
@@ -7823,12 +7832,12 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
      */
     algorithm->hierarchicalParameters_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
-    selectTheme->outPadding_ = 10.0_vp;
+    selectTheme->menuMediumMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
     ASSERT_EQ(algorithm->paddingStart_, 10.0f);
     ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
-    ASSERT_EQ(algorithm->paddingTop_, 10.0f);
-    ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
 }
 
 /**
@@ -7900,15 +7909,12 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
      */
     algorithm->hierarchicalParameters_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
-    selectTheme->maxPaddingStart_ = 10.0_vp;
-    selectTheme->maxPaddingEnd_ = 10.0_vp;
-    selectTheme->defaultPaddingTop_ = 10.0_vp;
-    selectTheme->defaultPaddingBottomFixed_ = 10.0_vp;
+    selectTheme->menuLargeMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
     ASSERT_EQ(algorithm->paddingStart_, 10.0f);
     ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
-    ASSERT_EQ(algorithm->paddingTop_, 10.0f);
-    ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
 }
 
 /**
@@ -8217,12 +8223,12 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest1, TestSize.Level1)
      */
     algorithm->hierarchicalParameters_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
-    selectTheme->outPadding_ = 10.0_vp;
+    selectTheme->menuMediumMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
     ASSERT_EQ(algorithm->paddingStart_, 10.0f);
     ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
-    ASSERT_EQ(algorithm->paddingTop_, 10.0f);
-    ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
 }
 /**
  * @tc.name: MenuLayoutAlgorithmAPI11PaddingTest2
@@ -8286,12 +8292,13 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest2, TestSize.Level1)
     algorithm->hierarchicalParameters_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
+    selectTheme->menuLargeMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
     ASSERT_EQ(algorithm->optionPadding_, 10.0f);
-    ASSERT_EQ(algorithm->paddingStart_, static_cast<float>(theme->GetMaxPaddingStart().ConvertToPx()));
-    ASSERT_EQ(algorithm->paddingEnd_, static_cast<float>(theme->GetMaxPaddingEnd().ConvertToPx()));
-    ASSERT_EQ(algorithm->paddingTop_, static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx()));
-    ASSERT_EQ(algorithm->paddingBottom_, static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx()));
+    ASSERT_EQ(algorithm->paddingStart_, 10.0f);
+    ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
 }
 /**
  * @tc.name: MenuLayoutAlgorithmAvoidWithPreview

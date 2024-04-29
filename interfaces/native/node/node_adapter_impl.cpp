@@ -78,7 +78,7 @@ void OH_ArkUI_NodeAdapter_UnregisterEventReceiver(ArkUI_NodeAdapterHandle handle
     fullImpl->getNodeAdapterAPI()->unregisterEventReceiver(reinterpret_cast<ArkUINodeAdapterHandle>(handle));
 }
 
-int32_t OH_ArkUI_NodeAdapter_NotifyItemReloaded(ArkUI_NodeAdapterHandle handle)
+int32_t OH_ArkUI_NodeAdapter_ReloadAllItems(ArkUI_NodeAdapterHandle handle)
 {
     CHECK_NULL_RETURN(handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -86,7 +86,7 @@ int32_t OH_ArkUI_NodeAdapter_NotifyItemReloaded(ArkUI_NodeAdapterHandle handle)
     return fullImpl->getNodeAdapterAPI()->notifyItemReloaded(reinterpret_cast<ArkUINodeAdapterHandle>(handle));
 }
 
-int32_t OH_ArkUI_NodeAdapter_NotifyItemChanged(
+int32_t OH_ArkUI_NodeAdapter_ReloadItem(
     ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount)
 {
     CHECK_NULL_RETURN(handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
@@ -96,7 +96,7 @@ int32_t OH_ArkUI_NodeAdapter_NotifyItemChanged(
         reinterpret_cast<ArkUINodeAdapterHandle>(handle), startPosition, itemCount);
 }
 
-int32_t OH_ArkUI_NodeAdapter_NotifyItemRemoved(
+int32_t OH_ArkUI_NodeAdapter_RemoveItem(
     ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount)
 {
     CHECK_NULL_RETURN(handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
@@ -106,7 +106,7 @@ int32_t OH_ArkUI_NodeAdapter_NotifyItemRemoved(
         reinterpret_cast<ArkUINodeAdapterHandle>(handle), startPosition, itemCount);
 }
 
-int32_t OH_ArkUI_NodeAdapter_NotifyItemInserted(
+int32_t OH_ArkUI_NodeAdapter_InsertItem(
     ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount)
 {
     CHECK_NULL_RETURN(handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
@@ -116,7 +116,7 @@ int32_t OH_ArkUI_NodeAdapter_NotifyItemInserted(
         reinterpret_cast<ArkUINodeAdapterHandle>(handle), startPosition, itemCount);
 }
 
-int32_t OH_ArkUI_NodeAdapter_NotifyItemMoved(ArkUI_NodeAdapterHandle handle, uint32_t from, uint32_t to)
+int32_t OH_ArkUI_NodeAdapter_MoveItem(ArkUI_NodeAdapterHandle handle, uint32_t from, uint32_t to)
 {
     CHECK_NULL_RETURN(handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -124,7 +124,7 @@ int32_t OH_ArkUI_NodeAdapter_NotifyItemMoved(ArkUI_NodeAdapterHandle handle, uin
     return fullImpl->getNodeAdapterAPI()->notifyItemMoved(reinterpret_cast<ArkUINodeAdapterHandle>(handle), from, to);
 }
 
-int32_t OH_ArkUI_NodeAdapter_GetAllItem(ArkUI_NodeAdapterHandle handle, ArkUI_NodeHandle** items, uint32_t* size)
+int32_t OH_ArkUI_NodeAdapter_GetAllItems(ArkUI_NodeAdapterHandle handle, ArkUI_NodeHandle** items, uint32_t* size)
 {
     CHECK_NULL_RETURN(handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -187,7 +187,7 @@ uint32_t OH_ArkUI_NodeAdapterEvent_GetItemIndex(ArkUI_NodeAdapterEvent* event)
     return innerEvent->index;
 }
 
-int32_t OH_ArkUI_NodeAdapterEvent_SetAddedItem(ArkUI_NodeAdapterEvent* event, ArkUI_NodeHandle handle)
+int32_t OH_ArkUI_NodeAdapterEvent_SetItem(ArkUI_NodeAdapterEvent* event, ArkUI_NodeHandle handle)
 {
     CHECK_NULL_RETURN(event, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(handle, OHOS::Ace::ERROR_CODE_PARAM_INVALID);

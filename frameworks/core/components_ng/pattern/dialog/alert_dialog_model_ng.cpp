@@ -68,7 +68,7 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             if (arg.isShowInSubWindow) {
                 dialog = SubwindowManager::GetInstance()->ShowDialogNG(arg, nullptr);
                 CHECK_NULL_VOID(dialog);
-                if (arg.isModal) {
+                if (arg.isModal && !container->IsUIExtensionWindow()) {
                     DialogProperties Maskarg;
                     Maskarg.isMask = true;
                     Maskarg.autoCancel = arg.autoCancel;
@@ -88,6 +88,6 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             CHECK_NULL_VOID(pattern);
             pattern->SetOnWillDismiss(arg.onWillDismiss);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowAlertDialog");
 }
 } // namespace OHOS::Ace::NG

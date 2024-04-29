@@ -18,6 +18,7 @@
 
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -36,6 +37,10 @@ public:
     void MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size);
     void ChangeTextStyle(uint32_t index, uint32_t showOptionCount, const SizeF& size,
         const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper);
+    void GetColumnSize(const RefPtr<TextPickerLayoutProperty>& LayoutProperty, const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<DialogTheme>& dialogTheme, SizeF& frameSize, const RefPtr<FrameNode>& pickerNode);
+    float GetGradientPercent(const RefPtr<TextPickerLayoutProperty>& LayoutProperty,
+        const RefPtr<TextPickerPattern>& textPickerPattern, SizeF& frameSize, const RefPtr<PickerTheme>& pickerTheme);
 
     std::vector<int32_t> GetCurrentOffset() const
     {

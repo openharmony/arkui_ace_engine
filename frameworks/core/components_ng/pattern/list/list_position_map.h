@@ -77,9 +77,14 @@ public:
         dirty_ = LIST_NO_CHANGE;
     }
 
-    float GetTotalHeight()
+    float GetTotalHeight() const
     {
         return totalHeight_;
+    }
+
+    float GetPrevTotalHeight() const
+    {
+        return prevTotalHeight_;
     }
 
     ListPosMapUpdate CheckPosMapUpdateRule()
@@ -106,6 +111,7 @@ public:
         if (it == posMap_.begin() || it == posMap_.end()) {
             return;
         }
+        startPos = it->second.mainPos;
         it--;
         float prevPos = it->second.mainPos + it->second.mainSize + space;
         int32_t prevIndex = it->first;
@@ -318,8 +324,11 @@ public:
     void UpdatePosMap(LayoutWrapper* layoutWrapper, int32_t lanes, float space,
         RefPtr<ListChildrenMainSize>& childrenSize)
     {
-        totalItemCount_ = layoutWrapper->GetTotalChildCount();
         childrenSize_ = childrenSize;
+        if (totalItemCount_ != layoutWrapper->GetTotalChildCount()) {
+            dirty_ |= LIST_UPDATE_ITEM_COUNT;
+            totalItemCount_ = layoutWrapper->GetTotalChildCount();
+        }
         if (lanes != lanes_) {
             dirty_ |= LIST_UPDATE_LANES;
             lanes_ = lanes;
@@ -344,8 +353,12 @@ public:
     void UpdateGroupPosMap(int32_t totalCount, int32_t lanes, float space,
         RefPtr<ListChildrenMainSize>& childrenSize, float headerSize, float footerSize)
     {
-        totalItemCount_ = totalCount;
         childrenSize_ = childrenSize;
+        prevTotalHeight_ = totalHeight_;
+        if (totalCount != totalItemCount_) {
+            dirty_ |= LIST_UPDATE_ITEM_COUNT;
+            totalItemCount_ = totalCount;
+        }
         if (lanes != lanes_) {
             dirty_ |= LIST_UPDATE_LANES;
             lanes_ = lanes;
@@ -378,9 +391,9 @@ public:
         ClearDirty();
     }
 
-    float GetPos(int32_t startIndex, float startPos)
+    float GetPos(int32_t index, float offset = 0.0f)
     {
-        return posMap_[startIndex].mainPos - startPos;
+        return posMap_[index].mainPos - offset;
     }
 
     float GetGroupLayoutOffset(int32_t startIndex, float startPos)
@@ -431,6 +444,18 @@ public:
         return startIndex;
     }
 
+    int32_t GetRowEndIndex(const int32_t input)
+    {
+        std::pair<int32_t, float> rowInfo = GetRowEndIndexAndHeight(input);
+        return rowInfo.first;
+    }
+
+    float GetRowHeight(int32_t input)
+    {
+        std::pair<int32_t, float> rowInfo = GetRowEndIndexAndHeight(input);
+        return rowInfo.second;
+    }
+
     std::pair<int32_t, float> GetRowEndIndexAndHeight(const int32_t input)
     {
         int32_t endIndex = input;
@@ -440,7 +465,7 @@ public:
             endIndex++;
         }
         if (endIndex == totalItemCount_ - 1) {
-            rowHeight = totalHeight_ - posMap_[endIndex].mainPos;
+            rowHeight = totalHeight_ - posMap_[endIndex].mainPos - footerSize_;
         } else {
             rowHeight = posMap_[endIndex + 1].mainPos  - posMap_[endIndex].mainPos - space_;
         }
@@ -456,6 +481,7 @@ private:
     int32_t curLine_ = 0;
     int32_t curIndex_ = 0;
     float totalHeight_ = 0.0f;
+    float prevTotalHeight_ = 0.0f;
     float curRowHeight_ = 0.0f;
     float space_ = 0.0f;
     float headerSize_ = 0.0f;

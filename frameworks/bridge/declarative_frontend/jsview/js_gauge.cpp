@@ -307,7 +307,6 @@ void JSGauge::SetShadowOptions(const JSCallbackInfo& info)
 
     if (!info[0]->IsObject()) {
         GaugeModel::GetInstance()->ResetShadowOptions();
-        GaugeModel::GetInstance()->SetIsShowIndicator(true);
         return;
     }
 
@@ -349,7 +348,7 @@ void JSGauge::SetDescription(const JSCallbackInfo& info)
         GaugeModel::GetInstance()->SetIsShowDescription(false);
         return;
     }
-    if (info[0]->IsUndefined()) {
+    if (info[0]->IsUndefined() || !info[0]->IsObject()) {
         GaugeModel::GetInstance()->SetIsShowLimitValue(true);
         GaugeModel::GetInstance()->SetIsShowDescription(false);
         return;
@@ -360,7 +359,7 @@ void JSGauge::SetDescription(const JSCallbackInfo& info)
         GaugeModel::GetInstance()->SetIsShowLimitValue(false);
         GaugeModel::GetInstance()->SetIsShowDescription(true);
         ViewStackModel::GetInstance()->NewScope();
-        JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+        JsFunction jsBuilderFunc(info.This(), JSRef<JSFunc>::Cast(builderObject));
         ACE_SCORING_EVENT("Gauge.description.builder");
         jsBuilderFunc.Execute();
         auto customNode = ViewStackModel::GetInstance()->Finish();

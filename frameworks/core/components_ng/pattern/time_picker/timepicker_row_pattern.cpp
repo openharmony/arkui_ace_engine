@@ -87,12 +87,13 @@ void TimePickerRowPattern::SetButtonIdeaSize()
 
 void TimePickerRowPattern::OnModifyDone()
 {
-    if (isFiredTimeChange_ && !isForceUpdate_) {
+    if (isFiredTimeChange_ && !isForceUpdate_ && !isDateTimeOptionUpdate_) {
         isFiredTimeChange_ = false;
         return;
     }
 
     isForceUpdate_ = false;
+    isDateTimeOptionUpdate_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
@@ -232,7 +233,7 @@ void TimePickerRowPattern::CreateOrDeleteSecondNode()
         }
     } else {
         if (!hasSecond_) {
-            host->RemoveChildAtIndex(host->GetChildren().size() - 1);
+            host->RemoveChildAtIndex(static_cast<int32_t>(host->GetChildren().size()) - 1);
             secondId_.reset();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }

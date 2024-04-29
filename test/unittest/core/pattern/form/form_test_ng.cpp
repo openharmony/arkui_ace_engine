@@ -41,6 +41,8 @@
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
 
+#include "form_constants.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -937,5 +939,148 @@ HWTEST_F(FormTestNg, GetOrCreateFormNode001, TestSize.Level1)
     formNode = FormNode::GetOrCreateFormNode("FormComponent", FORM_ID_OF_TDD, nullptr);
     auto pattrn = formNode->pattern_;
     ASSERT_EQ(AceType::TypeName(pattrn), "Pattern");
+}
+
+/**
+ * @tc.name: GetFormDimensionHeight
+ * @tc.desc: Test function GetFormDimensionHeight in FormPattern with different params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, GetFormDimensionHeight, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t dimensionHeight = pattern->GetFormDimensionHeight(0);
+    EXPECT_EQ(dimensionHeight, 0);
+
+    dimensionHeight = pattern->GetFormDimensionHeight(0xFFFFFFFF);
+    EXPECT_EQ(dimensionHeight, 0);
+
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1);
+    dimensionHeight = pattern->GetFormDimensionHeight(pattern->cardInfo_.dimension);
+    EXPECT_EQ(dimensionHeight, 1);
+
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_2);
+    dimensionHeight = pattern->GetFormDimensionHeight(pattern->cardInfo_.dimension);
+    EXPECT_EQ(dimensionHeight, 1);
+
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_2_2);
+    dimensionHeight = pattern->GetFormDimensionHeight(pattern->cardInfo_.dimension);
+    EXPECT_EQ(dimensionHeight, 2);
+
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_2_4);
+    dimensionHeight = pattern->GetFormDimensionHeight(pattern->cardInfo_.dimension);
+    EXPECT_EQ(dimensionHeight, 2);
+
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_4_4);
+    dimensionHeight = pattern->GetFormDimensionHeight(pattern->cardInfo_.dimension);
+    EXPECT_EQ(dimensionHeight, 4);
+
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_6_4);
+    dimensionHeight = pattern->GetFormDimensionHeight(pattern->cardInfo_.dimension);
+    EXPECT_EQ(dimensionHeight, 6);
+}
+
+/**
+ * @tc.name: FormSkeletonTest001
+ * @tc.desc: Verify the form skeleton related interfaces of FormPattern work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormSkeletonTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a FormPattern.
+     */
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set size information for 2x4 cards.
+     */
+    double cardWidth = 300.0;
+    double cardHeight = 140.0;
+    pattern->cardInfo_.width = Dimension(cardWidth);
+    pattern->cardInfo_.height = Dimension(cardHeight);
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_2_4);
+
+    /**
+     * @tc.steps: step3. Create a colume node of form skeleton by CreateColumnNode.
+     * @tc.expected: Create node success and mount to form node.
+     */
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto columnNode = pattern->CreateColumnNode();
+    ASSERT_EQ(host->GetLastChild(), columnNode);
+
+    /**
+     * @tc.steps: step4. Create a rect node of form skeleton by CreateRectNode.
+     * @tc.expected: Create node success and mount to colume node.
+     */
+    CalcSize idealSize = { CalcLength(cardWidth), CalcLength(cardHeight / 10.0) };
+    MarginProperty marginProp;
+    marginProp.top = CalcLength(0.0f);
+    marginProp.left = CalcLength(0.0f);
+    auto rectNode = pattern->CreateRectNode(columnNode, idealSize, marginProp, 0x00000000, 0.0f);
+    ASSERT_EQ(columnNode->GetLastChild(), rectNode);
+
+    /**
+     * @tc.steps: step5. Remove form skeleton node form form.
+     * @tc.expected: Remove node success.
+     */
+    pattern->RemoveFormSkeleton();
+    ASSERT_EQ(host->GetLastChild(), nullptr);
+}
+
+/**
+ * @tc.name: FormSkeletonTest002
+ * @tc.desc: Verify the form skeleton load and remove function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a FormPattern.
+     */
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern->OnAttachToFrameNode();
+
+    /**
+     * @tc.steps: step2. Set size information for 2x4 cards.
+     */
+    double cardWidth = 300.0;
+    double cardHeight = 140.0;
+    pattern->cardInfo_.width = Dimension(cardWidth);
+    pattern->cardInfo_.height = Dimension(cardHeight);
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_2_4);
+    
+    /**
+     * @tc.steps: step3. Create a form skeleton view by LoadFormSkeleton.
+     * @tc.expected: Create view success and mount to form node.
+     */
+    pattern->LoadFormSkeleton();
+    ASSERT_NE(host->GetLastChild(), nullptr);
+
+    /**
+     * @tc.steps: step4. Test when form RSSurfaceNode created.
+     * @tc.expected: The form skeleton view was removed successfully.
+     */
+    std::string surfaceNodeName = "ArkTSCardNode";
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
+    rsSurfaceNode = std::make_shared<OHOS::Rosen::RSSurfaceNode>(surfaceNodeConfig, true);
+    ASSERT_NE(rsSurfaceNode, nullptr);
+    auto externalRenderContext = pattern->GetExternalRenderContext();
+    ASSERT_NE(externalRenderContext, nullptr);
+    auto renderContext = host->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, true, false);
+    ASSERT_EQ(host->GetLastChild(), nullptr);
 }
 } // namespace OHOS::Ace::NG

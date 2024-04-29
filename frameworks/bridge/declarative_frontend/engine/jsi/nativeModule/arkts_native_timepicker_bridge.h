@@ -31,6 +31,8 @@ public:
     static ArkUINativeModuleValue ResetTimepickerBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTimepickerUseMilitaryTime(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTimepickerUseMilitaryTime(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTimepickerDateTimeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTimepickerDateTimeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

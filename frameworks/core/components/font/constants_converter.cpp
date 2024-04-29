@@ -29,8 +29,16 @@
 #include "base/i18n/localization.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 
 namespace OHOS::Ace::Constants {
+namespace {
+const std::string FONTWEIGHT = "wght";
+constexpr float DEFAULT_MULTIPLE = 100.0f;
+constexpr uint32_t SCALE_EFFECT = 2;
+constexpr uint32_t NONE_EFFECT = 0;
+} // namespace
 
 #ifndef USE_GRAPHIC_TEXT_GINE
 txt::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
@@ -409,11 +417,17 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
 {
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
     txtStyle.font_weight = ConvertTxtFontWeight(textStyle.GetFontWeight());
-    // Font size must be px when transferring to txt::TextStyle
+    auto fontWeightValue = (static_cast<int32_t>(
+            ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
     if (pipelineContext) {
+        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    // Font size must be px when transferring to txt::TextStyle
+    if (pipelineContext) {
         txtStyle.font_size = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
             txtStyle.font_size =
                 pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
         }
@@ -491,6 +505,48 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
 }
 
 void ConvertTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle) {}
+
+void ConvertSymbolTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle)
+{
+    if (!textStyle.isSymbolGlyph_) {
+        return;
+    }
+
+    txtStyle.isSymbolGlyph = true;
+    const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
+    std::vector<Rosen::Drawing::Color> symbolColors;
+    for (size_t i = 0; i < symbolColor.size(); i++) {
+        symbolColors.emplace_back(ConvertSkColor(symbolColor[i]));
+    }
+    txtStyle.symbol.SetRenderColor(symbolColors);
+    txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
+    if (textStyle.GetSymbolEffectOptions().has_value()) {
+        auto options = textStyle.GetSymbolEffectOptions().value();
+        auto effectType = options.GetEffectType();
+        txtStyle.symbol.SetSymbolEffect(static_cast<uint32_t>(effectType));
+        if (effectType == SymbolEffectType::HIERARCHICAL && options.GetFillStyle().has_value()) {
+            txtStyle.symbol.SetAnimationMode(static_cast<uint16_t>(options.GetFillStyle().value()));
+        } else {
+            if (options.GetScopeType().has_value()) {
+                txtStyle.symbol.SetAnimationMode(static_cast<uint16_t>(options.GetScopeType().value()));
+            }
+        }
+        if (options.GetCommonSubType().has_value()) {
+            auto commonType = static_cast<uint16_t>(options.GetCommonSubType().value());
+            txtStyle.symbol.SetCommonSubType(commonType == 1 ? Rosen::Drawing::DrawingCommonSubType::UP
+                                                             : Rosen::Drawing::DrawingCommonSubType::DOWN);
+        }
+        txtStyle.symbol.SetAnimationStart(options.GetIsTxtActive());
+    } else {
+        auto effectStrategy = textStyle.GetEffectStrategy();
+        if (effectStrategy < NONE_EFFECT || effectStrategy > SCALE_EFFECT) {
+            effectStrategy = NONE_EFFECT;
+        }
+        txtStyle.symbol.SetSymbolEffect(effectStrategy);
+        txtStyle.symbol.SetAnimationStart(true);
+    }
+    txtStyle.fontFamilies.push_back("HM Symbol");
+}
 #else
 double NormalizeToPx(const Dimension& dimension)
 {
@@ -516,22 +572,13 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
     }
 
     txtStyle.letterSpacing = NormalizeToPx(textStyle.GetLetterSpacing());
-
-    if (textStyle.isSymbolGlyph_) {
-        txtStyle.isSymbolGlyph = true;
-        const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
-        std::vector<Rosen::Drawing::Color> symbolColors;
-        for (size_t i = 0; i < symbolColor.size(); i++) {
-            symbolColors.emplace_back(ConvertSkColor(symbolColor[i]));
-        }
-        txtStyle.symbol.SetRenderColor(symbolColors);
-        txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
-        txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
-    }
+    txtStyle.baseLineShift = -NormalizeToPx(textStyle.GetBaselineOffset());
+    txtStyle.fontFamilies = textStyle.GetFontFamilies();
+    ConvertSymbolTxtStyle(textStyle, txtStyle);
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
     txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
-    txtStyle.fontFamilies = textStyle.GetFontFamilies();
+    txtStyle.decorationStyle = ConvertTxtTextDecorationStyle(textStyle.GetTextDecorationStyle());
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     txtStyle.halfLeading = textStyle.GetHalfLeading();
 
@@ -595,11 +642,17 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
 {
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
     txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
-    // Font size must be px when transferring to Rosen::TextStyle
+    auto fontWeightValue = (static_cast<int32_t>(
+            ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
     if (pipelineContext) {
+        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    // Font size must be px when transferring to Rosen::TextStyle
+    if (pipelineContext) {
         txtStyle.fontSize = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
             txtStyle.fontSize =
                 pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
         }
@@ -619,23 +672,15 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
     if (pipelineContext) {
         txtStyle.letterSpacing = pipelineContext->NormalizeToPx(textStyle.GetLetterSpacing());
+        txtStyle.baseLineShift = -pipelineContext->NormalizeToPx(textStyle.GetBaselineOffset());
     }
 
-    if (textStyle.isSymbolGlyph_) {
-        txtStyle.isSymbolGlyph = true;
-        const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
-        std::vector<Rosen::Drawing::Color> symbolColors;
-        for (int i = 0; i < symbolColor.size(); i++) {
-            symbolColors.emplace_back(ConvertSkColor(symbolColor[i]));
-        }
-        txtStyle.symbol.SetRenderColor(symbolColors);
-        txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
-        txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
-    }
+    txtStyle.fontFamilies = textStyle.GetFontFamilies();
+    ConvertSymbolTxtStyle(textStyle, txtStyle);
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
     txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
-    txtStyle.fontFamilies = textStyle.GetFontFamilies();
+    txtStyle.decorationStyle = ConvertTxtTextDecorationStyle(textStyle.GetTextDecorationStyle());
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     txtStyle.halfLeading = textStyle.GetHalfLeading();
 
@@ -648,26 +693,60 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtStyle.shadows.emplace_back(txtShadow);
     }
 
+    double lineHeightScale = 0.0;
+    double lineSpacingScale = 0.0;
+    bool lineHeightOnly = false;
+    bool lineSpacingOnly = false;
     if (textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT) {
-        txtStyle.heightOnly = true;
-        txtStyle.heightScale = textStyle.GetLineHeight().Value();
+        lineHeightOnly = true;
+        lineHeightScale = textStyle.GetLineHeight().Value();
     } else {
         double fontSize = txtStyle.fontSize;
         double lineHeight = textStyle.GetLineHeight().Value();
         if (pipelineContext) {
             lineHeight = pipelineContext->NormalizeToPx(textStyle.GetLineHeight());
         }
-        txtStyle.heightOnly = textStyle.HasHeightOverride();
+        lineHeightOnly = textStyle.HasHeightOverride();
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
-            txtStyle.heightScale = lineHeight / fontSize;
+            lineHeightScale = lineHeight / fontSize;
         } else {
-            txtStyle.heightScale = 1;
+            lineHeightScale = 1;
             static const int32_t BEGIN_VERSION = 6;
             auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;
             if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, fontSize))) {
-                txtStyle.heightOnly = false;
+                lineHeightOnly = false;
             }
         }
+    }
+    if (textStyle.GetLineSpacing().Unit() == DimensionUnit::PERCENT) {
+        lineSpacingOnly = true;
+        lineSpacingScale = textStyle.GetLineSpacing().Value();
+    } else {
+        double fontSize = txtStyle.fontSize;
+        double lineSpacing = textStyle.GetLineSpacing().Value();
+        if (pipelineContext) {
+            lineSpacing = pipelineContext->NormalizeToPx(textStyle.GetLineSpacing());
+        }
+        lineSpacingOnly = true;
+        if (!NearEqual(lineSpacing, fontSize) && (lineSpacing > 0.0) && (!NearZero(fontSize))) {
+            lineSpacingScale = lineSpacing / fontSize;
+        } else {
+            lineSpacingScale = 1;
+            if (NearZero(lineSpacing) || NearEqual(lineSpacing, fontSize)) {
+                lineSpacingOnly = false;
+            }
+        }
+    }
+
+    txtStyle.heightOnly = lineHeightOnly || lineSpacingOnly;
+    if (lineHeightOnly && lineSpacingOnly) {
+        txtStyle.heightScale = lineHeightScale + lineSpacingScale;
+    } else if (lineHeightOnly && !lineSpacingOnly) {
+        txtStyle.heightScale = lineHeightScale;
+    } else if (!lineHeightOnly && lineSpacingOnly) {
+        txtStyle.heightScale = 1 + lineSpacingScale;
+    } else {
+        txtStyle.heightScale = 1;
     }
 
     // set font variant
@@ -696,6 +775,48 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.backgroundRect.rightTopRadius = radiusConverter(radius->radiusTopRight);
     txtStyle.backgroundRect.leftBottomRadius = radiusConverter(radius->radiusBottomLeft);
     txtStyle.backgroundRect.rightBottomRadius = radiusConverter(radius->radiusBottomRight);
+}
+
+void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
+{
+    if (!textStyle.isSymbolGlyph_) {
+        return;
+    }
+
+    txtStyle.isSymbolGlyph = true;
+    txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
+    const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
+    std::vector<Rosen::Drawing::Color> symbolColors;
+    for (size_t i = 0; i < symbolColor.size(); i++) {
+        symbolColors.emplace_back(ConvertSkColor(symbolColor[i]));
+    }
+    txtStyle.symbol.SetRenderColor(symbolColors);
+    if (textStyle.GetSymbolEffectOptions().has_value()) {
+        auto options = textStyle.GetSymbolEffectOptions().value();
+        auto effectType = options.GetEffectType();
+        txtStyle.symbol.SetSymbolEffect(static_cast<uint32_t>(effectType));
+        txtStyle.symbol.SetAnimationStart(options.GetIsTxtActive());
+        if (options.GetCommonSubType().has_value()) {
+            auto commonType = static_cast<uint16_t>(options.GetCommonSubType().value());
+            txtStyle.symbol.SetCommonSubType(commonType == 1 ? Rosen::Drawing::DrawingCommonSubType::UP
+                                                             : Rosen::Drawing::DrawingCommonSubType::DOWN);
+        }
+        if (effectType == SymbolEffectType::HIERARCHICAL && options.GetFillStyle().has_value()) {
+            txtStyle.symbol.SetAnimationMode(static_cast<uint16_t>(options.GetFillStyle().value()));
+        } else {
+            if (options.GetScopeType().has_value()) {
+                txtStyle.symbol.SetAnimationMode(static_cast<uint16_t>(options.GetScopeType().value()));
+            }
+        }
+    } else {
+        auto effectStrategyValue = textStyle.GetEffectStrategy();
+        if (effectStrategyValue < NONE_EFFECT || effectStrategyValue > SCALE_EFFECT) {
+            effectStrategyValue = NONE_EFFECT;
+        }
+        txtStyle.symbol.SetSymbolEffect(effectStrategyValue);
+        txtStyle.symbol.SetAnimationStart(true);
+    }
+    txtStyle.fontFamilies.push_back("HM Symbol");
 }
 #endif
 

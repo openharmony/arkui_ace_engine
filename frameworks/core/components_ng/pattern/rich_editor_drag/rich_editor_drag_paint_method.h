@@ -20,20 +20,24 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_content_modifier.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorDragPaintMethod : public TextDragPaintMethod {
     DECLARE_ACE_TYPE(RichEditorDragPaintMethod, TextDragPaintMethod)
 public:
     RichEditorDragPaintMethod(const WeakPtr<Pattern>& pattern,
-        const RefPtr<TextDragOverlayModifier>& overlayMod, const RefPtr<RichEditorDragContentModifier>& contentMod);
+        const RefPtr<TextDragOverlayModifier>& overlayMod, const RefPtr<RichEditorDragContentModifier>& contentMod,
+        const RichEditorDragInfo& info);
 
     ~RichEditorDragPaintMethod() override = default;
 
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
 private:
     RefPtr<RichEditorDragContentModifier> contentModifier_;
+    RichEditorDragInfo info_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragPaintMethod);
 };
 } // namespace OHOS::Ace::NG

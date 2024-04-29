@@ -42,6 +42,12 @@ constexpr int32_t WEEK_DAYS = 7;
 constexpr int32_t MAX_MONTH = 12;
 constexpr int32_t MIN_YEAR = 1;
 constexpr int32_t MAX_YEAR = 5000;
+constexpr size_t CANCEL_BUTTON_FONT_COLOR_INDEX = 0;
+constexpr size_t CANCEL_BUTTON_BACKGROUND_COLOR_INDEX = 1;
+constexpr size_t ACCEPT_BUTTON_FONT_COLOR_INDEX = 2;
+constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
+constexpr size_t OPTION_CANCEL_BUTTON_INDEX = 0;
+constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
 } // namespace
 void CalendarDialogPattern::OnModifyDone()
 {
@@ -119,14 +125,22 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
 
+    size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
     for (const auto& child : options->GetChildren()) {
         CHECK_NULL_VOID(child);
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
             auto button = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(button);
-            button->GetRenderContext()->UpdateBackgroundColor(SystemProperties::GetDeviceType() == DeviceType::PHONE
-                                                                  ? Color::TRANSPARENT
-                                                                  : calendarTheme->GetDialogButtonBackgroundColor());
+            bool cancelNotUpdateBGColor =
+                buttonIndex == OPTION_CANCEL_BUTTON_INDEX && !updateColorFlags[CANCEL_BUTTON_BACKGROUND_COLOR_INDEX];
+            bool acceptNotUpdateBGColor =
+                buttonIndex == OPTION_ACCEPT_BUTTON_INDEX && !updateColorFlags[ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX];
+            if (!(cancelNotUpdateBGColor || acceptNotUpdateBGColor)) {
+                auto defaultBGColor = SystemProperties::GetDeviceType() == DeviceType::PHONE
+                                          ? Color::TRANSPARENT
+                                          : calendarTheme->GetDialogButtonBackgroundColor();
+                button->GetRenderContext()->UpdateBackgroundColor(defaultBGColor);
+            }
             button->MarkModifyDone();
 
             auto text = button->GetChildren().front();
@@ -134,10 +148,27 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
             auto textNode = AceType::DynamicCast<FrameNode>(text);
             auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+            bool cancelNotUpdateFontColor =
+                buttonIndex == OPTION_CANCEL_BUTTON_INDEX && !updateColorFlags[CANCEL_BUTTON_FONT_COLOR_INDEX];
+            bool acceptNotUpdateFontColor =
+                buttonIndex == OPTION_ACCEPT_BUTTON_INDEX && !updateColorFlags[ACCEPT_BUTTON_FONT_COLOR_INDEX];
+            if (!(cancelNotUpdateFontColor || acceptNotUpdateFontColor)) {
+                textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+            }
             textNode->MarkModifyDone();
+
+            buttonIndex++;
         }
     }
+}
+
+void CalendarDialogPattern::SetOptionsButtonUpdateColorFlags(size_t index, bool isUpdate)
+{
+    if (index >= updateColorFlags.size()) {
+        return;
+    }
+
+    updateColorFlags[index] = isUpdate;
 }
 
 void CalendarDialogPattern::InitHoverEvent()
@@ -648,8 +679,8 @@ void CalendarDialogPattern::PaintNonCurrentMonthFocusState(int32_t focusedDayInd
     calendarPattern->SetCurrentMonthData(currentMonthData);
 
     if (focusedDayIndex == -1) {
-        focusedDay_ = preMonthData.days[preMonthData.days.size() - 1];
-        preMonthData.days[preMonthData.days.size() - 1].isKeyFocused = true;
+        focusedDay_ = preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0];
+        preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0].isKeyFocused = true;
         calendarPattern->SetPreMonthData(preMonthData);
         swiperPattern->ShowPrevious();
         return;

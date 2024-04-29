@@ -37,8 +37,7 @@ ModelViewNG::ModelViewNG()
     }
 }
 
-void ModelViewNG::Create(const std::string& bundleName, const std::string& moduleName,
-    Render3D::SurfaceType surfaceType)
+void ModelViewNG::Create(const ModelViewContext& context)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -46,9 +45,8 @@ void ModelViewNG::Create(const std::string& bundleName, const std::string& modul
 
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::MODEL_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MODEL_ETS_TAG, nodeId, [&nodeId, surfaceType, &bundleName, &moduleName]() {
-            return AceType::MakeRefPtr<ModelPattern>(staticKey++, surfaceType,
-                bundleName, moduleName);
+        V2::MODEL_ETS_TAG, nodeId, [&context]() {
+            return AceType::MakeRefPtr<ModelPattern>(staticKey++, context);
         });
 
     stack->Push(frameNode);

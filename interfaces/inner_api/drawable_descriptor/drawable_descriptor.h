@@ -57,6 +57,8 @@ public:
     enum class DrawableType {
         BASE,
         LAYERED,
+        ANIMATED,
+        PIXELMAP,
     };
     DrawableDescriptor() = default;
     explicit DrawableDescriptor(std::shared_ptr<Media::PixelMap> pixelMap) : pixelMap_(std::move(pixelMap)) {};
@@ -64,6 +66,19 @@ public:
         : mediaData_(std::move(mediaData)), len_(len) {};
     virtual ~DrawableDescriptor() = default;
     virtual std::shared_ptr<Media::PixelMap> GetPixelMap();
+    virtual DrawableType GetDrawableType();
+    void SetPixelMap(std::shared_ptr<Media::PixelMap> pixelMap)
+    {
+        pixelMap_ = pixelMap;
+    }
+    bool HasPixelMap()
+    {
+        return pixelMap_.has_value();
+    }
+    void ResetPixelMap()
+    {
+        pixelMap_.reset();
+    }
 
 private:
     bool GetPixelMapFromBuffer();
@@ -75,6 +90,7 @@ private:
 
 class ACE_EXPORT LayeredDrawableDescriptor : public DrawableDescriptor {
 public:
+    LayeredDrawableDescriptor() = default;
     LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
         : jsonBuf_(std::move(jsonBuf)), len_(len)
@@ -103,9 +119,35 @@ public:
     std::unique_ptr<DrawableDescriptor> GetBackground();
     std::unique_ptr<DrawableDescriptor> GetMask();
     std::shared_ptr<Media::PixelMap> GetPixelMap() override;
+    DrawableType GetDrawableType() override;
     static std::string GetStaticMaskClipPath();
     void InitLayeredParam(std::pair<std::unique_ptr<uint8_t[]>, size_t> &foregroundInfo,
         std::pair<std::unique_ptr<uint8_t[]>, size_t> &backgroundInfo);
+    void SetForeground(std::shared_ptr<Media::PixelMap> foreground)
+    {
+        foreground_ = foreground;
+        customized_ = true;
+    }
+
+    void SetBackground(std::shared_ptr<Media::PixelMap> background)
+    {
+        background_ = background;
+        customized_ = true;
+    }
+
+    void SetMask(std::shared_ptr<Media::PixelMap> mask)
+    {
+        mask_ = mask;
+        customized_ = true;
+    }
+
+    bool Customized()
+    {
+        return customized_;
+    }
+
+    void InitialMask(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
+    bool GetDefaultMask();
 
 private:
     friend class ImageConverter;
@@ -116,7 +158,6 @@ private:
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, const char* item);
     std::unique_ptr<Media::ImageSource> CreateImageSource(DrawableItem& drawableItem, uint32_t& errorCode);
     bool GetPixelMapFromJsonBuf(bool isBackground);
-    bool GetDefaultMask();
     bool GetMaskByName(std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, const std::string& name);
     bool CreatePixelMap();
     bool GetMaskByPath();
@@ -141,6 +182,23 @@ private:
     OptionalPixelMap background_;
     OptionalPixelMap mask_;
     OptionalPixelMap layeredPixelMap_;
+    bool customized_ = false;
+};
+
+class ACE_EXPORT AnimatedDrawableDescriptor : public DrawableDescriptor {
+public:
+    AnimatedDrawableDescriptor(std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps, int32_t duration,
+        int32_t iterations): pixelMapList_(std::move(pixelMaps)), duration_(duration), iterations_(iterations) {};
+    ~AnimatedDrawableDescriptor() override = default;
+    std::shared_ptr<Media::PixelMap> GetPixelMap() override;
+    DrawableType GetDrawableType() override;
+    std::vector<std::shared_ptr<Media::PixelMap>> GetPixelMapList();
+    int32_t GetDuration();
+    int32_t GetIterations();
+private:
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList_;
+    int32_t duration_ = -1;
+    int32_t iterations_ = 1;
 };
 
 class DrawableDescriptorFactory {

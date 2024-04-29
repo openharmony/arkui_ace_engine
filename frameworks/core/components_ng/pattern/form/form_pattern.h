@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "form_skeleton_params.h"
 
 namespace OHOS {
 namespace MMI {
@@ -112,7 +113,7 @@ private:
     void FireOnLoadEvent() const;
     void FireOnErrorEvent(const std::string& code, const std::string& msg) const;
     void FireOnUninstallEvent(int64_t id) const;
-    void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic);
+    void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover);
     void FireFormSurfaceChangeCallback(float width, float height);
     void FireFormSurfaceDetachCallback();
     void UpdateBackgroundColorWhenUnTrustForm();
@@ -133,12 +134,23 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DeleteImageNode();
+    void DelayDeleteImageNode();
+    void DeleteImageNodeAfterRecover();
     RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
 
     void InitClickEvent();
     void HandleTouchDownEvent(const TouchEventInfo& event);
     void HandleTouchUpEvent(const TouchEventInfo& event);
+
+    void LoadFormSkeleton();
+    int32_t GetFormDimensionHeight(int32_t dimension);
+    void RemoveFormSkeleton();
+    RefPtr<FrameNode> CreateColumnNode();
+    RefPtr<FrameNode> CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
+        const MarginProperty& margin, uint32_t fillColor, double opacity);
+    void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
+        int32_t dimensionHeight);
 
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;

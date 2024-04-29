@@ -403,7 +403,7 @@ void DatePickerColumnPattern::UpdatePickerTextProperties(uint32_t index, uint32_
     if (index == selectedIndex) {
         UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
-    } else if ((index == selectedIndex + 1) || (index == selectedIndex - 1)) {
+    } else if ((index == selectedIndex + 1) || (index == static_cast<int32_t>(selectedIndex) - 1)) {
         UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);
     } else {
         UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);
@@ -683,7 +683,8 @@ bool DatePickerColumnPattern::InnerHandleScroll(
     if (isDown) {
         currentIndex = (totalOptionCount + currentIndex + 1) % totalOptionCount; // index add one
     } else {
-        currentIndex = (totalOptionCount + currentIndex - 1) % totalOptionCount; // index reduce one
+        auto totalCountAndIndex = totalOptionCount + currentIndex;
+        currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
     FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
@@ -1194,6 +1195,9 @@ void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> p
             CHECK_NULL_VOID(column);
             column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
         });
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->RequestFrame();
     }
 }
 

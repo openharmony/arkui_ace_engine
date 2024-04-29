@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "native_compatible.h"
 #include "native_node.h"
 #include "native_type.h"
 
@@ -49,4 +50,8 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event);
 void HandleInnerEvent(ArkUINodeEvent* innerEvent);
 int32_t ConvertToCTouchActionType(int32_t originActionType);
 int32_t ConvertToCInputEventToolType(int32_t originSourceType);
+
+bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_CompatibleNodeEvent* event);
+bool ConvertEventResult(ArkUI_CompatibleNodeEvent* event, ArkUINodeEvent* origin);
+
 }; // namespace OHOS::Ace::NodeModel

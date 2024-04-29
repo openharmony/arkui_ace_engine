@@ -292,8 +292,8 @@ class SearchIdModifier extends ModifierWithKey<string> {
   }
 }
 
-class SearchDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
-  constructor(value: { type: TextDecorationType; color?: ResourceColor }) {
+class SearchDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
   static identity: Symbol = Symbol('searchDecoration');
@@ -301,12 +301,12 @@ class SearchDecorationModifier extends ModifierWithKey<{ type: TextDecorationTyp
     if (reset) {
       getUINativeModule().search.resetDecoration(node);
     } else {
-      getUINativeModule().search.setDecoration(node, this.value!.type, this.value!.color);
+      getUINativeModule().search.setDecoration(node, this.value!.type, this.value!.color, this.value!.style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (isResource(this.stageValue.color) && isResource(this.value.color)) {
@@ -399,6 +399,54 @@ class SearchFontFeatureModifier extends ModifierWithKey<FontFeature> {
       getUINativeModule().search.resetFontFeature(node);
     } else {
       getUINativeModule().search.setFontFeature(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchSelectedBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSelectedBackgroundColor(node);
+    } else {
+      getUINativeModule().search.setSelectedBackgroundColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchInputFilterModifier extends ModifierWithKey<ArkSearchInputFilter> {
+  constructor(value: ArkSearchInputFilter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchInputFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetInputFilter(node);
+    } else {
+      getUINativeModule().search.setInputFilter(node, this.value.value, this.value.error);
+    }
+  }
+}
+
+class SearchTextIndentModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchTextIndent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetTextIndent(node);
+    } else {
+      getUINativeModule().search.setTextIndent(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -543,6 +591,21 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   maxFontSize(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, SearchMaxFontSizeModifier.identity, SearchMaxFontSizeModifier, value);
+    return this;
+  }
+  selectedBackgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, SearchSelectedBackgroundColorModifier.identity, SearchSelectedBackgroundColorModifier, value);
+    return this;
+  }
+  textIndent(value: Dimension): this {
+    modifierWithKey(this._modifiersWithKeys, SearchTextIndentModifier.identity, SearchTextIndentModifier, value);
+    return this;
+  }
+  inputFilter(value: ResourceStr, error?: (value: string) => void): this {
+    let searchInputFilter = new ArkSearchInputFilter();
+    searchInputFilter.value = value;
+    searchInputFilter.error = error;
+    modifierWithKey(this._modifiersWithKeys, SearchInputFilterModifier.identity, SearchInputFilterModifier, searchInputFilter);
     return this;
   }
 }

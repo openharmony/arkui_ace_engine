@@ -72,6 +72,10 @@ void CustomNode::Render()
                 child->MountToParent(Claim(this));
             }
         }
+        {
+            ACE_SCOPED_TRACE("CustomNode::DidBuild");
+            FireDidBuild();
+        }
     }
     {
         FireRecycleRenderFunc();
@@ -160,6 +164,9 @@ void CustomNode::MarkNeedSyncRenderTree(bool needRebuild)
 
 RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
 {
+    if (!isCache) {
+        SetJSViewActive(true);
+    }
     Render();
     return UINode::GetFrameChildByIndex(index, needBuild, isCache);
 }

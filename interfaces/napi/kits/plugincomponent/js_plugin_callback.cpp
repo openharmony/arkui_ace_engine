@@ -148,7 +148,7 @@ void JSPluginCallback::SendRequestEventResult(napi_value jsObject)
             PluginComponentManager::GetInstance()->ReturnRequest(
                 data->want, data->strTemplate, data->strDate, data->strExtraData);
         },
-        TaskExecutor::TaskType::BACKGROUND);
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIPluginReturnRequest");
 }
 
 napi_value JSPluginCallback::MakeCallbackParamForRequest(
@@ -266,7 +266,7 @@ void JSPluginCallback::OnPushEvent(const AAFwk::Want& want, const PluginComponen
                 jsCallback->OnPushEventInner(&uvWorkData);
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginPushEventInner");
 }
 
 void JSPluginCallback::OnRequestEventInner(const OnPluginUvWorkData* workData)
@@ -331,7 +331,7 @@ void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string
                 jsCallback->OnRequestEventInner(&uvWorkData);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginRequestEventInner");
 }
 
 void JSPluginCallback::OnRequestCallBackInner(const OnPluginUvWorkData* workData)
@@ -405,7 +405,7 @@ void JSPluginCallback::OnRequestCallBack(
                         resultData->cv.notify_all();
                     }
                 },
-                TaskExecutor::TaskType::JS);
+                TaskExecutor::TaskType::JS, "ArkUIPluginRequestCallbackInner");
 
             {
                 std::unique_lock<std::mutex> lock(resultData->mtx);

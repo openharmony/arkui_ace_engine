@@ -46,15 +46,16 @@ struct ExtraInfo {
 
 enum class NodeStatus : char {
     NORMAL_NODE = 0,               // Indicates it is a normal node;
-    BUILDER_NODE_OFF_MAINTREE = 1, // Indicates it is a BuilderNode and is detach from the maintreee;
-    BUILDER_NODE_ON_MAINTREE = 2   // Indicates it is a BuilderNode and is attach to the maintreee;
+    BUILDER_NODE_OFF_MAINTREE = 1, // Indicates it is a BuilderNode and is detach from the mainTree;
+    BUILDER_NODE_ON_MAINTREE = 2   // Indicates it is a BuilderNode and is attach to the mainTree;
 };
 
+class InspectorFilter;
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
 
 // UINode is the base class of FrameNode and SyntaxNode.
-class ACE_EXPORT UINode : public virtual AceType {
+class ACE_FORCE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
 
 public:
@@ -65,8 +66,8 @@ public:
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
     virtual bool IsAtomicNode() const = 0;
 
-    void AttachContext(PipelineContext* context, bool recursive = false);
-    void DetachContext(bool recursive = false);
+    virtual void AttachContext(PipelineContext* context, bool recursive = false);
+    virtual void DetachContext(bool recursive = false);
 
     virtual int32_t FrameCount() const;
 
@@ -84,6 +85,7 @@ public:
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false);
+    RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
@@ -162,10 +164,12 @@ public:
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
     virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout);
 
-    void DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap);
+    bool IsAutoFillContainerNode();
+    void DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false);
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
+    virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id);
 
@@ -339,7 +343,7 @@ public:
         return useOffscreenProcess_;
     }
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
@@ -396,6 +400,7 @@ public:
     }
     virtual void FastPreviewUpdateChildDone() {}
     virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false);
+    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node);
 
     void SetDebugLine(const std::string& line)
     {
@@ -535,8 +540,21 @@ public:
     std::string GetCurrentCustomNodeInfo();
     static int64_t GenerateAccessibilityId();
 
+    // used by BuilderNode
     NodeStatus GetNodeStatus() const;
     void UpdateNodeStatus(NodeStatus nodeStatus);
+    void SetIsRootBuilderNode(bool isRootBuilderNode);
+    bool GetIsRootBuilderNode() const;
+
+    bool IsArkTsFrameNode() const
+    {
+        return isArkTsFrameNode_;
+    }
+
+    void SetIsArkTsFrameNode(bool isArkTsFrameNode)
+    {
+        isArkTsFrameNode_ = isArkTsFrameNode;
+    }
 
     const RefPtr<ExportTextureInfo>& GetExportTextureInfo() const
     {
@@ -585,7 +603,17 @@ public:
     }
 
     void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
-    
+
+    virtual void RegisterUpdateJSInstanceCallback(std::function<void(int32_t)>&& callback)
+    {
+        updateJSInstanceCallback_ = std::move(callback);
+    }
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -640,6 +668,8 @@ protected:
 
     virtual void PaintDebugBoundary(bool flag) {}
 
+    PipelineContext* context_ = nullptr;
+
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -663,24 +693,24 @@ private:
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;
     bool isBuildByJS_ = false;
+    bool isRootBuilderNode_ = false;
+    bool isArkTsFrameNode_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
     uint32_t nodeFlag_ { 0 };
 
     int32_t childrenUpdatedFrom_ = -1;
-    static thread_local int64_t currentAccessibilityId_;
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;
 
     std::list<std::function<void()>> attachToMainTreeTasks_;
+    std::function<void(int32_t)> updateJSInstanceCallback_;
 
     std::string debugLine_;
     std::string viewId_;
     void* externalData_ = nullptr;
-
-    PipelineContext* context_ = nullptr;
 
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

@@ -88,6 +88,8 @@ constexpr uint64_t TIMESTAMP_1 = 100;
 constexpr uint64_t TIMESTAMP_2 = 101;
 constexpr uint64_t TIMESTAMP_3 = 102;
 constexpr uint64_t TIMESTAMP_4 = 103;
+
+const InspectorFilter filter;
 } // namespace
 class FrameNodeTestNg : public testing::Test {
 public:
@@ -172,7 +174,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg003, TestSize.Level1)
 {
     auto jsonValue = std::make_unique<JsonValue>();
     FRAME_NODE->GetOrCreateFocusHub();
-    FRAME_NODE->FocusToJsonValue(jsonValue);
+    FRAME_NODE->FocusToJsonValue(jsonValue, filter);
     EXPECT_FALSE(jsonValue->GetBool("enabled", false));
 }
 
@@ -336,17 +338,23 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg009, TestSize.Level1)
     EXPECT_TRUE(FRAME_NODE->IsSupportDrawModifier());
 
     /**
-     * @tc.steps: step 3. call GetContentModifier when drawModifier is null .
+     * @tc.steps: step 3. call GetContentModifier when drawModifier is null.
      * @tc.expect: expect the return value to be correct.
      */
     EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
 
     /**
-     * @tc.steps: step 4. Nodes created by virtual classes, call GetContentModifier when drawModifier is null .
+     * @tc.steps: step 4. Nodes created by virtual classes, call GetContentModifier when drawModifier is null.
      * @tc.expect: expect the return value to be correct.
      */
     FRAME_NODE->SetDrawModifier(drawModifier);
     EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
+
+    /**
+     * @tc.steps: step 5. Nodes created by virtual classes, call SetRemoveCustomProperties.
+     * @tc.expect: expect call successfully.
+     */
+    FRAME_NODE->SetRemoveCustomProperties([]()->void {});
 }
 
 /**
@@ -623,7 +631,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeToJsonValue007, TestSize.Level1)
     gestureEventHub->SetResponseRegion(responseRegion);
 
     auto jsonValue = JsonUtil::Create(true);
-    FRAME_NODE->ToJsonValue(jsonValue);
+    FRAME_NODE->ToJsonValue(jsonValue, filter);
     EXPECT_TRUE(jsonValue);
 
     /**
@@ -634,7 +642,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeToJsonValue007, TestSize.Level1)
     FRAME_NODE->renderContext_ = nullptr;
     FRAME_NODE->eventHub_->focusHub_ = nullptr;
     auto jsonValue2 = JsonUtil::Create(true);
-    FRAME_NODE->ToJsonValue(jsonValue2);
+    FRAME_NODE->ToJsonValue(jsonValue2, filter);
     FRAME_NODE->FromJson(jsonValue2);
     EXPECT_TRUE(jsonValue2);
 }
@@ -1738,7 +1746,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
      * @tc.steps: step2. construct parameters.
      * @tc.expected: expect cover branch layoutProperty_ is nullptr.
      */
-    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
     EXPECT_EQ(FRAME_NODE2->layoutProperty_, nullptr);
 
     /**
@@ -1747,7 +1755,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
      */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     FRAME_NODE2->layoutProperty_ = layoutProperty;
-    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
     EXPECT_NE(FRAME_NODE2->layoutProperty_, nullptr);
 
     /**
@@ -1756,7 +1764,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
      */
     FRAME_NODE2->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
 
-    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
     EXPECT_NE(FRAME_NODE2->layoutProperty_->calcLayoutConstraint_, nullptr);
 
     /**
@@ -1765,7 +1773,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
      */
     std::optional<CalcLength> len = CalcLength("auto");
     FRAME_NODE2->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize(len, len);
-    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
     EXPECT_NE(FRAME_NODE2->renderContext_, nullptr);
 
     FRAME_NODE2->layoutProperty_ = nullptr;
@@ -2309,6 +2317,33 @@ HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeTestNg_GetPreviewApplyVal001
+ * @tc.desc: Test frame node method GetPreviewApplyVal001
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewApplyVal001, TestSize.Level1)
+{
+    auto frameNode = FRAME_NODE;
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    /**
+     * @tc.steps: step2. set drag preview options and call GetDragPreviewOption.
+     * @tc.expected: expect GetDragPreviewOption return apply .
+     */
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {};
+    frameNode->SetDragPreviewOptions(previewOption);
+    EXPECT_NE(frameNode->GetDragPreviewOption().onApply, nullptr);
+}
+
+/**
  * @tc.name: FrameNodeTestNg_GetPreviewScaleVal003
  * @tc.desc: Test frame node method GetPreviewScaleVal
  * @tc.type: FUNC
@@ -2670,5 +2705,26 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0040, TestSize.Level1)
     frameNode->SetAllowDrop(allowDropSet);
     std::set<std::string> allowDrop = frameNode->GetAllowDrop();
     EXPECT_TRUE(allowDrop.empty());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg0050
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0050, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    node->GetOrCreateGestureEventHub();
+    node->AttachContext(AceType::RawPtr(context));
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    EXPECT_EQ(node->context_, AceType::RawPtr(context));
+
+    node->DetachContext(true);
+    EXPECT_EQ(node->context_, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -64,6 +64,8 @@ void SvgFilter::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, con
 
 void SvgFilter::OnAsPaint()
 {
+    auto declaration = Ace::AceType::DynamicCast<SvgFilterDeclaration>(declaration_);
+    CHECK_NULL_VOID(declaration);
 #ifndef USE_ROSEN_DRAWING
     filterPaint_.setAntiAlias(true);
     sk_sp<SkImageFilter> imageFilter = nullptr;
@@ -75,12 +77,20 @@ void SvgFilter::OnAsPaint()
 
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
 
+    Rect filterEffectsRegion = GetEffectFilterArea();
+    Rect effectFilterArea = {
+        filterEffectsRegion.Left() + filterEffectsRegion.Width() * x_.Value(),
+        filterEffectsRegion.Top() + filterEffectsRegion.Height() * y_.Value(),
+        filterEffectsRegion.Width() * width_.Value(),
+        filterEffectsRegion.Height() * height_.Value()
+    };
+
     for (const auto& item : children_) {
         auto nodeFe = AceType::DynamicCast<SvgFe>(item);
         if (!nodeFe) {
             continue;
         }
-        nodeFe->GetImageFilter(imageFilter, currentColor, resultHash);
+        nodeFe->GetImageFilter(imageFilter, currentColor, resultHash, effectFilterArea);
     }
 
     SvgFe::ConverImageFilterColor(imageFilter, currentColor, ColorInterpolationType::SRGB);

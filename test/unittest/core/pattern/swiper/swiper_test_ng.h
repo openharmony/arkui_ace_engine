@@ -30,6 +30,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -74,6 +75,9 @@ const SwiperArrowParameters ARROW_PARAMETERS = {
 const Color HOVER_ARROW_COLOR = Color::GRAY;
 const Color CLICK_ARROW_COLOR = Color::FromString("#19182431");
 constexpr double ARROW_DISABLED_ALPHA = 0.5;
+const Color INDICATOR_TEXT_FONT_COLOR = Color::FromString("#ff182431");
+const Dimension INDICATOR_TEXT_FONT_SIZE = Dimension(14.f);
+const FontWeight INDICATOR_TEXT_FONT_WEIGHT = FontWeight::W800;
 
 class SwiperTestNg : public TestNG {
 public:
@@ -101,6 +105,10 @@ public:
     RefPtr<SwiperPaintProperty> paintProperty_;
     RefPtr<SwiperAccessibilityProperty> accessibilityProperty_;
     RefPtr<SwiperController> controller_;
+
+    RefPtr<FrameNode> indicatorNode_;
+    RefPtr<FrameNode> leftArrowNode_;
+    RefPtr<FrameNode> rightArrowNode_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class CheckBoxGroupPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(CheckBoxGroupPaintProperty, PaintProperty)
@@ -101,7 +102,7 @@ public:
         isCheckBoxCallbackDealed_ = true;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelect, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelectedColor, Color, PROPERTY_UPDATE_RENDER);

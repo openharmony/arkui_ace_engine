@@ -16,9 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ROOT_ROOT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ROOT_ROOT_PATTERN_H
 
+#include "interfaces/inner_api/ace/arkui_rect.h"
+
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/root/root_layout_algorithm.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 // RootPattern is the base class for root render node.
@@ -59,6 +65,45 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*unused*/, const DirtySwapConfig& /*unused*/) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto children = host->GetChildren();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto iter = std::find_if(children.begin(), children.end(),
+            [](const RefPtr<UINode>& node) { return node->GetTag() == V2::STAGE_ETS_TAG; });
+        if (iter == children.end() || (*iter) == children.back()) {
+            if (!pipeline->GetOverlayNodePositions().empty()) {
+                pipeline->TriggerOverlayNodePositionsUpdateCallback({});
+            }
+            pipeline->SetOverlayNodePositions({});
+            return false;
+        }
+        std::vector<Ace::RectF> positions;
+        for (++iter; iter != children.end(); iter++) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(*iter);
+            if (!frameNode) {
+                continue;
+            }
+            auto frameRect = frameNode->GetGeometryNode()->GetFrameRect();
+            auto item = Ace::RectF(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
+            positions.emplace_back(item);
+        }
+        auto funcEqual = [](const Ace::RectF& newRect, const Ace::RectF& rect) {
+            return NearEqual(newRect.GetX(), rect.GetX()) && NearEqual(newRect.GetY(), rect.GetY()) &&
+                   NearEqual(newRect.Width(), rect.Width()) && NearEqual(newRect.Height(), rect.Height());
+        };
+        auto oldPositions = pipeline->GetOverlayNodePositions();
+        if (std::equal(positions.begin(), positions.end(), oldPositions.begin(), oldPositions.end(), funcEqual)) {
+            return false;
+        }
+        pipeline->TriggerOverlayNodePositionsUpdateCallback(positions);
+        pipeline->SetOverlayNodePositions(positions);
+        return false;
     }
 
 private:

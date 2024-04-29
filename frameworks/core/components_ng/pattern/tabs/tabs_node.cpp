@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
@@ -59,12 +60,12 @@ void TabsNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
     }
 }
 
-void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    FrameNode::ToJsonValue(json);
-    json->Put("index", std::to_string(GetIndex()).c_str());
-    json->Put("scrollable", Scrollable());
-    json->Put("animationDuration", GetAnimationDuration());
+    FrameNode::ToJsonValue(json, filter);
+    json->PutExtAttr("index", std::to_string(GetIndex()).c_str(), filter);
+    json->PutFixedAttr("scrollable", Scrollable(), filter, FIXED_ATTR_SCROLLABLE);
+    json->PutExtAttr("animationDuration", GetAnimationDuration(), filter);
     if (GetTabBarMode() == TabBarMode::SCROLLABLE) {
         auto optionsJson = JsonUtil::Create(true);
         auto options = GetScrollableBarModeOptions();
@@ -77,15 +78,17 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
             optionsJson->Put("nonScrollableLayoutStyle", "LayoutStyle.ALWAYS_CENTER");
         }
         std::string barMode = "BarMode.Scrollable," + optionsJson->ToString();
-        json->Put("barMode", barMode.c_str());
+        json->PutExtAttr("barMode", barMode.c_str(), filter);
     } else {
-        json->Put("barMode", "BarMode.Fixed");
+        json->PutExtAttr("barMode", "BarMode.Fixed", filter);
     }
-    json->Put("barWidth", std::to_string(GetBarWidth().Value()).c_str());
-    json->Put("barHeight", GetBarAdaptiveHeight() ? "auto" : std::to_string(GetBarHeight().Value()).c_str());
-    json->Put("fadingEdge", GetFadingEdge() ? "true" : "false");
-    json->Put("barBackgroundColor", GetBarBackgroundColor().ColorToString().c_str());
-    json->Put("barBackgroundBlurStyle", BAR_BLURSTYLE[static_cast<int32_t>(GetBarBackgroundBlurStyle())].c_str());
+    json->PutExtAttr("barWidth", std::to_string(GetBarWidth().Value()).c_str(), filter);
+    json->PutExtAttr("barHeight",
+        GetBarAdaptiveHeight() ? "auto" : std::to_string(GetBarHeight().Value()).c_str(), filter);
+    json->PutExtAttr("fadingEdge", GetFadingEdge() ? "true" : "false", filter);
+    json->PutExtAttr("barBackgroundColor", GetBarBackgroundColor().ColorToString().c_str(), filter);
+    json->PutExtAttr("barBackgroundBlurStyle",
+        BAR_BLURSTYLE[static_cast<int32_t>(GetBarBackgroundBlurStyle())].c_str(), filter);
 
     auto barGridAlignJson = JsonUtil::Create(true);
     auto barGridAlign = GetBarGridAlign();
@@ -95,7 +98,7 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     barGridAlignJson->Put("md", std::to_string(barGridAlign.md).c_str());
     barGridAlignJson->Put("lg", std::to_string(barGridAlign.lg).c_str());
 
-    json->Put("barGridAlign", barGridAlignJson);
+    json->PutExtAttr("barGridAlign", barGridAlignJson, filter);
 }
 
 bool TabsNode::Scrollable() const

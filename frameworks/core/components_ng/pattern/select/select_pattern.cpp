@@ -31,6 +31,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -64,6 +65,8 @@ constexpr Dimension CALIBERATE_X = 4.0_vp;
 constexpr Dimension CALIBERATE_Y = 4.0_vp;
 
 constexpr Dimension SELECT_SMALL_PADDING_VP = 4.0_vp;
+
+constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
 
 static std::string ConvertControlSizeToString(ControlSize controlSize)
 {
@@ -119,6 +122,11 @@ void SelectPattern::OnModifyDone()
     if (!eventHub->IsEnabled()) {
         SetDisabledStyle();
     }
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->UpdateSelectIndex(selected_);
 }
 
 void SelectPattern::OnAfterModifyDone()
@@ -130,6 +138,36 @@ void SelectPattern::OnAfterModifyDone()
         return;
     }
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, selectValue_, selected_);
+}
+
+void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    isSelected_ = true;
+    menuPattern->UpdateSelectIndex(index);
+    CHECK_NULL_VOID(text_);
+    auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProps);
+    SetSelected(index);
+    textProps->UpdateContent(value);
+    text_->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    menuPattern->HideMenu();
+    auto hub = host->GetEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(hub);
+
+    auto onSelect = hub->GetSelectEvent();
+    TAG_LOGD(
+        AceLogTag::ACE_SELECT_COMPONENT, "select choice index %{public}d value %{public}s", index, value.c_str());
+    if (onSelect) {
+        onSelect(index, value);
+    }
+    RecordChange(host, index, value);
 }
 
 void SelectPattern::ShowSelectMenu()
@@ -411,6 +449,16 @@ void SelectPattern::SetDisabledStyle()
     CHECK_NULL_VOID(spinnerRenderProperty);
     spinnerRenderProperty->UpdateSvgFillColor(theme->GetDisabledSpinnerColor());
     spinner_->MarkModifyDone();
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(renderContext->GetBackgroundColor()
+                                                 .value_or(theme->GetButtonBackgroundColor())
+                                                 .BlendOpacity(theme->GetDisabledFontColorAlpha()));
+    }
 }
 
 void SelectPattern::SetSelected(int32_t index)
@@ -857,32 +905,33 @@ void SelectPattern::InitSpinner(
 }
 
 // XTS inspector code
-void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("options", InspectorGetOptions().c_str());
-    json->Put("selected", std::to_string(selected_).c_str());
-    ToJsonArrowAndText(json);
-    json->Put("selectedOptionBgColor", selectedBgColor_->ColorToString().c_str());
-    json->Put("selectedOptionFont", InspectorGetSelectedFont().c_str());
-    json->Put("selectedOptionFontColor", selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str());
+    json->PutExtAttr("options", InspectorGetOptions().c_str(), filter);
+    json->PutExtAttr("selected", std::to_string(selected_).c_str(), filter);
+    ToJsonArrowAndText(json, filter);
+    json->PutExtAttr("selectedOptionBgColor", selectedBgColor_->ColorToString().c_str(), filter);
+    json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
+    json->PutExtAttr("selectedOptionFontColor",
+        selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
 
     if (options_.empty()) {
-        json->Put("optionBgColor", "");
-        json->Put("optionFont", "");
-        json->Put("optionFontColor", "");
+        json->PutExtAttr("optionBgColor", "", filter);
+        json->PutExtAttr("optionFont", "", filter);
+        json->PutExtAttr("optionFontColor", "", filter);
     } else {
         auto optionPattern = options_[0]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(optionPattern);
-        json->Put("optionBgColor", optionPattern->GetBgColor().ColorToString().c_str());
-        json->Put("optionFont", optionPattern->InspectorGetFont().c_str());
-        json->Put("optionFontColor", optionPattern->GetFontColor().ColorToString().c_str());
+        json->PutExtAttr("optionBgColor", optionPattern->GetBgColor().ColorToString().c_str(), filter);
+        json->PutExtAttr("optionFont", optionPattern->InspectorGetFont().c_str(), filter);
+        json->PutExtAttr("optionFontColor", optionPattern->GetFontColor().ColorToString().c_str(), filter);
     }
-    ToJsonOptionAlign(json);
+    ToJsonOptionAlign(json, filter);
     for (size_t i = 0; i < options_.size(); ++i) {
         auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
         std::string optionWidth = std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
-        json->Put("optionWidth", optionWidth.c_str());
+        json->PutExtAttr("optionWidth", optionWidth.c_str(), filter);
     }
     
     auto menu = GetMenuNode();
@@ -890,11 +939,11 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProps);
     std::string optionHeight =  std::to_string(menuLayoutProps->GetSelectModifiedHeightValue(0.0f));
-    json->Put("optionHeight", optionHeight.c_str());
-    ToJsonMenuBackgroundStyle(json);
+    json->PutExtAttr("optionHeight", optionHeight.c_str(), filter);
+    ToJsonMenuBackgroundStyle(json, filter);
 }
 
-void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json) const
+void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -903,45 +952,48 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json) const
         CHECK_NULL_VOID(row);
         auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
         CHECK_NULL_VOID(rowProps);
-        json->Put("space", rowProps->GetSpace()->ToString().c_str());
+        json->PutExtAttr("space", rowProps->GetSpace()->ToString().c_str(), filter);
 
         if (rowProps->GetFlexDirection().value() == FlexDirection::ROW) {
-            json->Put("arrowPosition", "ArrowPosition.END");
+            json->PutExtAttr("arrowPosition", "ArrowPosition.END", filter);
         } else {
-            json->Put("arrowPosition", "ArrowPosition.START");
+            json->PutExtAttr("arrowPosition", "ArrowPosition.START", filter);
         }
     }
 
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    json->Put("value", props->GetContent().value_or("").c_str());
+    json->PutExtAttr("value", props->GetContent().value_or("").c_str(), filter);
     Color fontColor = props->GetTextColor().value_or(Color::BLACK);
-    json->Put("fontColor", fontColor.ColorToString().c_str());
-    json->Put("font", props->InspectorGetTextFont().c_str());
+    json->PutExtAttr("fontColor", fontColor.ColorToString().c_str(), filter);
+    json->PutExtAttr("font", props->InspectorGetTextFont().c_str(), filter);
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        json->Put("controlSize", ConvertControlSizeToString(controlSize_).c_str());
+        json->PutExtAttr("controlSize", ConvertControlSizeToString(controlSize_).c_str(), filter);
     }
 }
 
-void SelectPattern::ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json) const
+void SelectPattern::ToJsonMenuBackgroundStyle(
+    std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto menuRenderContext = menu->GetRenderContext();
     CHECK_NULL_VOID(menuRenderContext);
-    json->Put("menuBackgroundColor", menuRenderContext->GetBackgroundColor()->ColorToString().c_str());
+    json->PutExtAttr("menuBackgroundColor",
+        menuRenderContext->GetBackgroundColor()->ColorToString().c_str(), filter);
     if (menuRenderContext->GetBackBlurStyle().has_value()) {
         BlurStyleOption blurStyleOption = menuRenderContext->GetBackBlurStyle().value();
         auto jsonValue = JsonUtil::Create(true);
-        blurStyleOption.ToJsonValue(jsonValue);
-        json->Put("menuBackgroundBlurStyle", jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"));
+        blurStyleOption.ToJsonValue(jsonValue, filter);
+        json->PutExtAttr("menuBackgroundBlurStyle",
+            jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"), filter);
     } else {
-        json->Put("menuBackgroundBlurStyle", "");
+        json->PutExtAttr("menuBackgroundBlurStyle", "", filter);
     }
 }
 
-void SelectPattern::ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const
+void SelectPattern::ToJsonOptionAlign(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto optionAlignJson = JsonUtil::Create(true);
     std::string alignTypeString = "MenuAlignType.Start";
@@ -959,7 +1011,7 @@ void SelectPattern::ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const
     offsetValueJson->Put("dY", menuAlign_.offset.GetY().Value());
     optionAlignJson->Put("offset", offsetValueJson);
 
-    json->Put("menuAlign", optionAlignJson);
+    json->PutExtAttr("menuAlign", optionAlignJson, filter);
 }
 
 std::string SelectPattern::InspectorGetOptions() const
@@ -1142,7 +1194,7 @@ void SelectPattern::OnLanguageConfigurationUpdate()
             }
             
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUISelectLanguageConfigUpdate");
 }
 
 Dimension SelectPattern::GetFontSize()
@@ -1295,8 +1347,13 @@ void SelectPattern::ResetParams()
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
     paddings.bottom = std::nullopt;
-    paddings.left = NG::CalcLength(SELECT_SMALL_PADDING_VP);
-    paddings.right = NG::CalcLength(SELECT_SMALL_PADDING_VP);
+    if (controlSize_ == ControlSize::SMALL) {
+        paddings.left = NG::CalcLength(SELECT_SMALL_PADDING_VP);
+        paddings.right = NG::CalcLength(SELECT_SMALL_PADDING_VP);
+    } else {
+        paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
+        paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
+    }
     ViewAbstract::SetPadding(paddings);
 }
 

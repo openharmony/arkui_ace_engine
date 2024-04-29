@@ -625,4 +625,29 @@ void WebModelImpl::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
     webComponent->SetNativeVideoPlayerConfig(enable, shouldOverlay);
 }
 
+void WebModelImpl::SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
+}
+
+void WebModelImpl::SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+
+    webComponent->SetRenderProcessNotRespondingId(eventMarker);
+}
+
+void WebModelImpl::SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+
+    webComponent->SetRenderProcessRespondingId(eventMarker);
+}
+
 } // namespace OHOS::Ace::Framework

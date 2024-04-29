@@ -55,7 +55,7 @@ Texture::~Texture()
                 return;
             }
             resRegister->UnregisterEvent(eventHash);
-        });
+        }, "ArkUIVideoUnregisterEvent");
     }
 }
 
@@ -74,7 +74,7 @@ void Texture::Create(const std::function<void(int64_t)>& onCreate)
         if (texture) {
             texture->CreateTexture(onCreate);
         }
-    });
+    }, "ArkUIVideoCreateTexture");
 }
 
 void Texture::CreateTexture(const std::function<void(int64_t)>& onCreate)

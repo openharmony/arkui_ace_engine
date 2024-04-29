@@ -102,14 +102,18 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
 #if defined(PIXEL_MAP_SUPPORTED)
-    auto callback = [id = Container::CurrentId(), pipeline, info, weak = WeakClaim(this)](
+    auto callback = [weakHost = WeakClaim(RawPtr(host)), info, weak = WeakClaim(this)](
                         std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t /*arg*/,
                         const std::function<void()>& /*unused*/) {
-        ContainerScope scope(id);
+        auto host = weakHost.Upgrade();
+        CHECK_NULL_VOID(host);
+        ContainerScope scope(host->GetInstanceId());
         if (!mediaPixelMap) {
             TAG_LOGE(AceLogTag::ACE_DRAG, "listItem drag start failed, custom component screenshot is empty.");
             return;
         }
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
         DragDropInfo dragDropInfo;
         dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
         auto taskScheduler = pipeline->GetTaskExecutor();
@@ -120,7 +124,7 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
                 CHECK_NULL_VOID(eventHub);
                 eventHub->OnItemDragStart(info, dragDropInfo);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIListItemDragStart");
     };
     NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
 #else

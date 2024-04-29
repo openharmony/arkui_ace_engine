@@ -84,11 +84,11 @@ void MagnifierPainter::PaintMagnifier(RSCanvas& canvas)
 
     auto cursorOffsetY = magnifierRect_.cursorOffset.GetY();
     auto localOffsetX = magnifierRect_.localOffset.GetX();
+    auto textPaintOffset = textBasePattern->GetTextPaintOffset();
     RectF dstRect;
-    dstRect.SetRect(
-        localOffsetX - localOffsetX * magnifierGain - textBasePattern->GetTextPaintOffset().GetX() * magnifierGain,
-        magnifierRect_.startY - textBasePattern->GetTextPaintOffset().GetY() * magnifierGain
-            - cursorOffsetY * magnifierGain + pixelMapImageOffset,
+    dstRect.SetRect(localOffsetX - localOffsetX * magnifierGain - textPaintOffset.GetX() * magnifierGain,
+        magnifierRect_.startY - textPaintOffset.GetY() * magnifierGain - cursorOffsetY * magnifierGain +
+            pixelMapImageOffset,
         pixelMap->GetWidth() * magnifierGain, pixelMap->GetHeight() * magnifierGain);
     pixelMapImage.DrawRect(canvas, ToRSRect(dstRect));
 
@@ -115,24 +115,11 @@ bool MagnifierPainter::GetMagnifierRect(
     auto magnifierWidth = MAGNIFIER_WIDTH.ConvertToPx();
     auto magnifierHeight = MAGNIFIER_HEIGHT.ConvertToPx();
     auto magnifierOffsetY = MAGNIFIER_OFFSET_Y.ConvertToPx();
-    auto localOffsetY = magnifierRect_.localOffset.GetY();
     localOffsetX = std::max(localOffsetX, magnifierRect_.contentOffset.GetX());
     localOffsetX = std::min(localOffsetX, magnifierRect_.contentSize.Width() + magnifierRect_.contentOffset.GetX());
     auto textBoxesLeft = 0.0f;
     if (!textDragBasePattern->GetTextBoxes().empty()) {
         textBoxesLeft = textDragBasePattern->GetTextBoxes()[0].Left();
-    }
-    auto firstHandleOffsetY = textBasePattern->GetFirstHandleOffset().GetY();
-    auto secondHandleOffsetY = textBasePattern->GetSecondHandleOffset().GetY();
-    if (textBasePattern->IsSelected() && firstHandleOffsetY != secondHandleOffsetY &&
-        localOffsetY < firstHandleOffsetY + textDragBasePattern->GetLineHeight() &&
-        localOffsetY < secondHandleOffsetY + textDragBasePattern->GetLineHeight()) {
-        cursorOffsetY = std::min(firstHandleOffsetY, secondHandleOffsetY);
-        if (!textBasePattern->GetTextSelector().MoveSelectionLeft()) {
-            auto OffsetY =
-                std::max(firstHandleOffsetY, secondHandleOffsetY) - std::min(firstHandleOffsetY, secondHandleOffsetY);
-            magnifierRect_.cursorOffset.SetY(magnifierRect_.cursorOffset.GetY() - OffsetY);
-        }
     }
     startY = cursorOffsetY - magnifierHeight - magnifierOffsetY;
     if ((textDragBasePattern->GetParentGlobalOffset().GetY() + startY) < DEFAULT_STATUS_BAR_HEIGHT.ConvertToPx()) {

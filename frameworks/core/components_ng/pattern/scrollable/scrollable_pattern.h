@@ -42,6 +42,7 @@
 #include "core/event/mouse_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double NEW_FRICTION = 0.7;
@@ -77,7 +78,7 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void OnWindowHide() override;
 
     // scrollable
@@ -236,6 +237,12 @@ public:
     void GetParentNavigation();
     void GetParentModalSheet();
 
+    /**
+     * @brief Return the portion of delta that's in overScroll range.
+     *
+     * @param delta incoming offset change.
+     * @return the portion of delta in overScroll range. Both top overScroll and bottom overScroll.
+     */
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
     {
         return { 0, 0 };
@@ -475,9 +482,8 @@ public:
     
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
-        CHECK_NULL_VOID(scrollableEvent_);
-        auto canScroll = scrollableEvent_->GetEnable();
-        animateCanOverScroll_ = canScroll && animateCanOverScroll;
+        bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
+        animateCanOverScroll_ = isScrollable && animateCanOverScroll;
     }
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent(GestureEvent& info);
@@ -508,6 +514,11 @@ public:
     {
         return nullptr;
     }
+
+    void CheckRestartSpring(bool sizeDiminished);
+
+    void HandleMoveEventInComp(const PointF& point);
+    void HandleLeaveHotzoneEvent();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -745,8 +756,6 @@ private:
     void HotZoneScroll(const float offset);
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
-    void HandleMoveEventInComp(const PointF& point);
-    void HandleLeaveHotzoneEvent();
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);
     RefPtr<InputEvent> mouseEvent_;

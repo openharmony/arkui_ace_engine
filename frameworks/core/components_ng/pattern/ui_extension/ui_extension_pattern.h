@@ -84,6 +84,10 @@ public:
     FocusPattern GetFocusPattern() const override;
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
+    void SetPlaceholderNode(const RefPtr<FrameNode>& placeholderNode)
+    {
+        placeholderNode_ = placeholderNode;
+    }
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     void UpdateWant(const AAFwk::Want& want);
 
@@ -152,6 +156,10 @@ public:
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
     void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     RefPtr<OHOS::Ace::WantWrap> GetWantWrap();
+    bool IsShowPlaceholder()
+    {
+        return isShowPlaceholder_;
+    }
 
     virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
@@ -206,6 +214,8 @@ private:
     void DispatchDisplayArea(bool isForce = false);
 
     void RegisterVisibleAreaChange();
+    void MountPlaceholderNode();
+    void RemovePlaceholderNode();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -223,6 +233,7 @@ private:
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void()> bindModalCallback_;
+    RefPtr<FrameNode> placeholderNode_ = nullptr;
 
     RefPtr<OHOS::Ace::WantWrap> curWant_;
     RefPtr<FrameNode> contentNode_;
@@ -235,9 +246,11 @@ private:
     bool isVisible_ = true;
     bool isModal_ = false;
     bool isAsyncModalBinding_ = false;
+    bool isShowPlaceholder_ = false;
     int32_t uiExtensionId_ = 0;
     int32_t callbackId_ = 0;
     RectF displayArea_;
+    bool isKeyAsync_ = false;
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;

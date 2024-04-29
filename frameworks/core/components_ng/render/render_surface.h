@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 // RenderSurface is used for SurfaceNode
-class RenderSurface : public virtual AceType {
+class ACE_FORCE_EXPORT RenderSurface : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderSurface, AceType)
 
 public:
@@ -76,6 +76,8 @@ public:
         return "";
     }
 
+    virtual void UpdateSurfaceSizeInUserData(uint32_t width, uint32_t height) {}
+
     virtual void SetExtSurfaceBounds(int32_t left, int32_t top, int32_t width, int32_t height) {}
 
     virtual bool SetExtSurfaceBoundsSync(int32_t left, int32_t top, int32_t width, int32_t height)
@@ -86,6 +88,8 @@ public:
     virtual void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) {}
 
     virtual void SetTransformHint(Rotation dmRotation) {}
+
+    virtual void DumpInfo() {}
 
     virtual void SetIsTexture(bool isTexture) {}
 

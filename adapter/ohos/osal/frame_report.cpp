@@ -86,6 +86,10 @@ bool FrameReport::LoadLibrary()
         CHECK_NULL_RETURN(flushEndFunc_, false);
         setFrameParamFunc_ = (SetFrameParamFunc)LoadSymbol("SetFrameParam");
         CHECK_NULL_RETURN(setFrameParamFunc_, false);
+        enableSelfRenderFunc_ = (EnableSelfRenderFunc)LoadSymbol("EnableSelfRender");
+        CHECK_NULL_RETURN(enableSelfRenderFunc_, false);
+        disableSelfRenderFunc_ = (DisableSelfRenderFunc)LoadSymbol("DisableSelfRender");
+        CHECK_NULL_RETURN(disableSelfRenderFunc_, false);
         frameSchedSoLoaded_ = true;
     }
     return true;
@@ -262,5 +266,21 @@ void FrameReport::SetFrameParam(int requestId, int load, int schedFrameNum, int 
         return;
     }
     setFrameParamFunc_(requestId, load, schedFrameNum, value);
+}
+
+void FrameReport::EnableSelfRender()
+{
+    if (!enable_) {
+        return;
+    }
+    enableSelfRenderFunc_();
+}
+
+void FrameReport::DisableSelfRender()
+{
+    if (!enable_) {
+        return;
+    }
+    disableSelfRenderFunc_();
 }
 } // namespace OHOS::Ace

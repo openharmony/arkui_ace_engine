@@ -171,10 +171,12 @@ public:
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
     void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
+    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override;
     void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
+    void OnForegroundEffectUpdate(float radius) override;
     void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
@@ -210,6 +212,7 @@ public:
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
+    float GetStatusBarHeight();
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
@@ -237,6 +240,7 @@ public:
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
     bool StopTextureExport() override;
+    void SetSurfaceRotation(bool isLock) override;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -273,12 +277,14 @@ public:
     void ClearAccessibilityFocus() override;
 
     void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
+    void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) override;
 
     void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) override;
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnPositionEdgesUpdate(const EdgesParam& value) override;
+    void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
@@ -299,6 +305,7 @@ public:
 
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnOpacityUpdate(double opacity) override;
+    void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) override;
     void SetAlphaOffscreen(bool isOffScreen) override;
     void MarkContentChanged(bool isChanged) override;
     void MarkDrivenRender(bool flag) override;
@@ -324,7 +331,7 @@ public:
     void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
-    void SetUsingContentRectForRenderFrame(bool value) override;
+    void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) override;
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
@@ -416,12 +423,15 @@ private:
     void OnDynamicLightUpRateUpdate(const float rate) override;
     void OnDynamicDimDegreeUpdate(const float degree) override;
     void OnDynamicLightUpDegreeUpdate(const float degree) override;
+    void OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
+    void OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
     void OnLightPositionUpdate(const TranslateOptions& position) override;
     void OnLightIntensityUpdate(const float lightIntensity) override;
+    void OnLightColorUpdate(const Color& lightColor) override;
     void OnLightIlluminatedUpdate(const uint32_t lightIlluminated) override;
     void OnIlluminatedBorderWidthUpdate(const Dimension& illuminatedBorderWidth) override;
     void OnBloomUpdate(const float bloomIntensity) override;
@@ -445,6 +455,7 @@ private:
     {
         return transitionEffect_ != nullptr && transitionEffect_->HasDisappearTransition();
     }
+    bool HasValidBgImageResizable();
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
@@ -629,6 +640,7 @@ private:
     bool isTouchUpFinished_ = true;
 
     bool useContentRectForRSFrame_;
+    bool adjustRSFrameByContentRect_ = false;
 
     RectF paintRect_;
 

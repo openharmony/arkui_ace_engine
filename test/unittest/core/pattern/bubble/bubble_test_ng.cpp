@@ -546,12 +546,22 @@ HWTEST_F(BubbleTestNg, BubblePatternTest006, TestSize.Level1)
     bubblePattern->InitTouchEvent();
 
     // test HandleTouchEvent
-    TouchEventInfo touchEventInfo = TouchEventInfo("touch");
-    TouchLocationInfo touchLocationInfo = TouchLocationInfo(1);
-    touchLocationInfo.SetLocalLocation(Offset(100.0, 100.0));
-    touchLocationInfo.SetTouchType(TouchType::DOWN);
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    TouchEventInfo touchEventInfo = TouchEventInfo("");
     bubblePattern->HandleTouchEvent(touchEventInfo);
+
+    TouchEventInfo touchEventInfo1 = TouchEventInfo("");
+    TouchLocationInfo touchLocationInfo1 = TouchLocationInfo(1);
+    touchLocationInfo1.SetLocalLocation(Offset(100.0, 100.0));
+    touchLocationInfo1.SetTouchType(TouchType::UP);
+    touchEventInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
+    bubblePattern->HandleTouchEvent(touchEventInfo1);
+
+    TouchEventInfo touchEventInfo2 = TouchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo2 = TouchLocationInfo(1);
+    touchLocationInfo2.SetLocalLocation(Offset(100.0, 100.0));
+    touchLocationInfo2.SetTouchType(TouchType::DOWN);
+    touchEventInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
+    bubblePattern->HandleTouchEvent(touchEventInfo2);
 
     bubblePaintProperty->UpdateAutoCancel(BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_TRUE);
 }
@@ -1752,7 +1762,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
     textLayoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
     frameNode->AddChild(textFrameNode);
     layoutWrapper->AppendChild(textLayoutWrapper);
-    auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     EXPECT_FALSE(children.empty());
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
@@ -2328,5 +2338,109 @@ HWTEST_F(BubbleTestNg, BubblePatternTest018, TestSize.Level1)
     bubblePattern->OnWindowSizeChanged(20, 10, WindowSizeChangeReason::TRANSFORM);
     bubblePattern->OnWindowHide();
     EXPECT_TRUE(layoutProp->GetShowInSubWindow().value_or(false));
+}
+
+/**
+ * @tc.name: BubblePatternTest019
+ * @tc.desc: Test bubble pattern InitTouchEvent HandleTouchEvent HandleTouchDOWN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubblePatternTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create pattern and update paintProperty gestureHub and test InitTouchEvent.
+     * @tc.expected: step2. check whether the gestureEvent info is correct.
+     */
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    EXPECT_NE(bubblePattern, nullptr);
+    auto paintProperty = bubblePattern->CreatePaintProperty();
+    EXPECT_NE(paintProperty, nullptr);
+    auto bubblePaintProperty = AceType::DynamicCast<BubbleRenderProperty>(paintProperty);
+    EXPECT_NE(bubblePaintProperty, nullptr);
+    bubblePaintProperty->UpdateAutoCancel(BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_FALSE);
+
+    /**
+     * @tc.steps: step3. create gestureHub and test InitTouchEvent HandleTouchEvent.
+     * @tc.expected: step3. check whether the function is executed.
+     */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<GestureEventHub> gestureHub =
+        AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    bubblePattern->InitTouchEvent();
+
+    bubblePattern->SetInteractiveDismiss(false);
+    TouchEventInfo touchEventInfo = TouchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo = TouchLocationInfo(1);
+    touchLocationInfo.SetLocalLocation(Offset(100.0, 100.0));
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    bubblePattern->HandleTouchEvent(touchEventInfo);
+
+    bubblePattern->touchRegion_ = RectF(0, 0, 200, 200);
+    TouchEventInfo touchEventInfo1 = TouchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo1 = TouchLocationInfo(1);
+    touchLocationInfo1.SetLocalLocation(Offset(100.0, 100.0));
+    touchLocationInfo1.SetTouchType(TouchType::DOWN);
+    touchEventInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
+    bubblePattern->HandleTouchEvent(touchEventInfo1);
+
+    bubblePaintProperty->UpdateAutoCancel(BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_TRUE);
+}
+
+/**
+ * @tc.name: BubblePatternTest020
+ * @tc.desc: Test bubble GetButtonRowNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubblePatternTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set value to popupParam.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    ButtonProperties buttonProperties { true, "Button" };
+    buttonProperties.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    popupParam->SetPrimaryButtonProperties(buttonProperties);
+    popupParam->SetSecondaryButtonProperties(buttonProperties);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    /**
+     * @tc.steps: step2. create bubble and get popupNode.
+     * @tc.expected: Check the popupNode were created successfully.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto pattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProps = pattern->GetPaintProperty<BubbleRenderProperty>();
+    ASSERT_NE(paintProps, nullptr);
+    /**
+     * @tc.steps: step3. set properties and call MarkModifyDone function.
+     */
+    paintProps->UpdateUseCustom(false);
+    paintProps->UpdatePrimaryButtonShow(true);
+    paintProps->UpdateSecondaryButtonShow(true);
+    popupNode->MarkModifyDone();
+    /**
+     * @tc.steps: step4. call hover, touch callback.
+     * @tc.expected: after hover callback, isHover_ equal to true.
+     */
+    auto buttonRowNode = pattern->GetButtonRowNode();
 }
 } // namespace OHOS::Ace::NG

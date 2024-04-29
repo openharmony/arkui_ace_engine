@@ -68,6 +68,9 @@ private:
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     void OnResetStatus() override;
 
+    void DispatchEventToActiveRecognizers(const TouchEvent& point);
+    void DispatchEventToAllRecognizers(const TouchEvent& point);
+
     RefPtr<NGGestureRecognizer> activeRecognizer_;
 };
 

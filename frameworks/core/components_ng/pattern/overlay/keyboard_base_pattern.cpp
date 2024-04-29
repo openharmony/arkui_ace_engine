@@ -42,10 +42,21 @@ void KeyboardPattern::BeforeCreateLayoutWrapper()
             }
             auto dimension = Dimension(1.0f, DimensionUnit::PERCENT);
             layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dimension), height));
+            if (CheckChildPosition(childFrameNode)) {
+                host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+            }
             break;
         }
         child = child->GetChildAtIndex(0);
     }
+}
+
+bool KeyboardPattern::CheckChildPosition(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto childRender = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(childRender, false);
+    return childRender->HasPosition();
 }
 
 void KeyboardPattern::DumpInfo()
@@ -63,6 +74,9 @@ void KeyboardPattern::OnModifyDone()
 
 void KeyboardPattern::OnAreaChangedInner()
 {
+    if (!supportAvoidance_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentGlobal = host->GetTransformRectRelativeToWindow();

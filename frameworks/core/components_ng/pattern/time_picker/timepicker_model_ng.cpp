@@ -234,6 +234,11 @@ void TimePickerModelNG::SetDateTimeOptions(ZeroPrefixType& hourType,
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    if ((timePickerRowPattern->GetPrefixHour() != hourType) ||
+        (timePickerRowPattern->GetPrefixMinute() != minuteType) ||
+        (timePickerRowPattern->GetPrefixSecond() != secondType)) {
+        timePickerRowPattern->SetDateTimeOptionUpdate(true);
+    }
     timePickerRowPattern->SetPrefixHour(hourType);
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixHour, static_cast<int32_t>(hourType));
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixMinute, static_cast<int32_t>(minuteType));
@@ -343,7 +348,7 @@ void TimePickerModelNG::SetChangeEvent(TimeChangeEvent&& onChange)
 void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDialog,
     NG::TimePickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    TimePickerDialogEvent& timePickerDialogEvent)
+    TimePickerDialogEvent& timePickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     auto container = Container::Current();
     if (!container) {
@@ -361,7 +366,6 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
-    ButtonInfo buttonInfo;
     std::map<std::string, NG::DialogEvent> dialogEvent;
     dialogEvent["changeId"] = onChange;
     dialogEvent["acceptId"] = onAccept;
@@ -395,6 +399,9 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     if (pickerDialog.backgroundBlurStyle.has_value()) {
         properties.backgroundBlurStyle = pickerDialog.backgroundBlurStyle.value();
     }
+    if (pickerDialog.shadow.has_value()) {
+        properties.shadow = pickerDialog.shadow.value();
+    }
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
@@ -412,14 +419,14 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+        [properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(
-                properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+            overlayManager->ShowTimeDialog(properties, settingData, buttonInfos, timePickerProperty, dialogEvent,
+                dialogCancelEvent, dialogLifeCycleEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowTimePicker");
 }
 
 void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& value)
@@ -544,6 +551,24 @@ void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     timePickerRowPattern->ClearOptionsHour();
     timePickerRowPattern->SetHour24(isUseMilitaryTime);
+}
+
+void TimePickerModelNG::SetDateTimeOptions(FrameNode* frameNode, ZeroPrefixType& hourType,
+    ZeroPrefixType& minuteType, ZeroPrefixType& secondType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetPrefixHour(hourType);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixHour, static_cast<int32_t>(hourType), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixMinute,
+        static_cast<int32_t>(minuteType), frameNode);
+    if (timePickerRowPattern->GetHasSecond()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixSecond,
+            static_cast<int32_t>(secondType), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixSecond,
+            static_cast<int32_t>(ZeroPrefixType::OFF), frameNode);
+    }
 }
 
 PickerTextStyle TimePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)

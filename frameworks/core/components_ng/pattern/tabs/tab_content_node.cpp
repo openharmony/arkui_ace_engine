@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
@@ -109,9 +110,9 @@ RefPtr<TabContentNode> TabContentNode::GetOrCreateTabContentNode(
     return tabContentNode;
 }
 
-void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    FrameNode::ToJsonValue(json);
+    FrameNode::ToJsonValue(json, filter);
     auto tabBar = JsonUtil::Create(true);
     auto tabContentPattern = GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(tabContentPattern);
@@ -184,7 +185,7 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         "symmetricExtensible", tabContentPattern->GetBottomTabBarStyle().symmetricExtensible ? "true" : "false");
     tabBar->Put("id", tabContentPattern->GetId().c_str());
 
-    json->Put("tabBar", tabBar);
+    json->PutExtAttr("tabBar", tabBar, filter);
 }
 
 std::string TabContentNode::ConvertFlexAlignToString(FlexAlign verticalAlign) const

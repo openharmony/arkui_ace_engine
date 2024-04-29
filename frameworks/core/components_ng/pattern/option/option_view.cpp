@@ -142,7 +142,7 @@ void OptionView::CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr
     pasteLayoutProperty->UpdateFontSize(theme->GetMenuFontSize());
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
     pastePaintProperty->UpdateFontColor(theme->GetMenuFontColor());
-    pastePaintProperty->UpdateBackgroundColor(theme->GetBackgroundColor());
+    pastePaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     pasteLayoutProperty->UpdateBackgroundBorderRadius(theme->GetInnerBorderRadius());
     pasteNode->MountToParent(row);
     pasteNode->MarkModifyDone();

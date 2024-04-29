@@ -541,7 +541,7 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     NG::DatePickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
     std::function<void(const std::string&)>&& onDateAccept, std::function<void(const std::string&)>&& onDateChange,
-    DatePickerType pickerType, PickerDialogEvent& pickerDialogEvent)
+    DatePickerType pickerType, PickerDialogEvent& pickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     auto container = Container::Current();
     if (!container) {
@@ -577,7 +577,6 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     dialogLifeCycleEvent["didDisappearId"] = pickerDialogEvent.onDidDisappear;
     dialogLifeCycleEvent["willAppearId"] = pickerDialogEvent.onWillAppear;
     dialogLifeCycleEvent["willDisappearId"] = pickerDialogEvent.onWillDisappear;
-    ButtonInfo buttonInfo;
     DialogProperties properties;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
@@ -594,6 +593,9 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     }
     if (pickerDialog.backgroundBlurStyle.has_value()) {
         properties.backgroundBlurStyle = pickerDialog.backgroundBlurStyle.value();
+    }
+    if (pickerDialog.shadow.has_value()) {
+        properties.shadow = pickerDialog.shadow.value();
     }
 
     properties.customStyle = false;
@@ -621,14 +623,14 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowDateDialog(
-                properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+                properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowDatePicker");
 }
 
 void DatePickerModelNG::SetSelectedTextStyle(

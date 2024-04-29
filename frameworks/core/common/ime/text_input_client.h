@@ -162,6 +162,11 @@ public:
 
     virtual void HandleOnDelete(bool backward) {}
 
+    virtual bool HandleOnDeleteComb(bool backward)
+    {
+        return false;
+    }
+
     static std::map<KeyComb, std::function<bool(TextInputClient*)>> functionKeys_;
 
     static std::map<KeyComb, std::function<void(TextInputClient*)>> keyboardShortCuts_;

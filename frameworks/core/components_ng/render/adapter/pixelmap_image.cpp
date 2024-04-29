@@ -216,29 +216,6 @@ void PixelMapImage::DrawToRSCanvas(
     const auto& config = GetPaintConfig();
 
 #ifdef ENABLE_ROSEN_BACKEND
-#ifndef USE_ROSEN_DRAWING
-    if (config.frameCount_ == 1 && config.resizableSlice_.Valid() &&
-        DrawImageNine(canvas, srcRect, dstRect, radiusXY)) {
-        return;
-    }
-    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    CHECK_NULL_VOID(rsCanvas);
-    auto skCanvas = rsCanvas->ExportSkCanvas();
-    CHECK_NULL_VOID(skCanvas);
-    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    CHECK_NULL_VOID(recordingCanvas);
-    SkPaint paint;
-
-    SkSamplingOptions options;
-    ImagePainterUtils::AddFilter(paint, options, config);
-    auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
-    recordingCanvas->ClipAdaptiveRRect(radii.get());
-    recordingCanvas->scale(config.scaleX_, config.scaleY_);
-
-    Rosen::RsImageInfo rsImageInfo(
-        static_cast<int>(config.imageFit_), static_cast<int>(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
-    recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
-#else
     if (config.frameCount_ == 1 &&config.resizableSlice_.Valid() &&
         DrawImageNine(canvas, srcRect, dstRect, radiusXY)) {
         return;
@@ -263,7 +240,7 @@ void PixelMapImage::DrawToRSCanvas(
     }
     Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
-        1.0, 0, 0, 0 };
+        1.0, 0, 0, 0, static_cast<int32_t>(config.dynamicMode) };
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, sourceInfo:%{public}s ,width=%{public}d * height=%{public}d",
@@ -272,7 +249,6 @@ void PixelMapImage::DrawToRSCanvas(
     }
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
-#endif
 #endif
 }
 

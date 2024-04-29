@@ -88,6 +88,7 @@ template("ace_core_source_set") {
       "common/platform_bridge.cpp",
       "common/render_boundary_manager.cpp",
       "common/resource/resource_manager.cpp",
+      "common/resource/resource_wrapper.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
       "common/task_executor_impl.cpp",
@@ -138,6 +139,7 @@ template("ace_core_source_set") {
       "components/declaration/svg/svg_fe_offset_declaration.cpp",
       "components/declaration/svg/svg_filter_declaration.cpp",
       "components/declaration/svg/svg_gradient_declaration.cpp",
+      "components/declaration/svg/svg_image_declaration.cpp",
       "components/declaration/svg/svg_line_declaration.cpp",
       "components/declaration/svg/svg_mask_declaration.cpp",
       "components/declaration/svg/svg_path_declaration.cpp",
@@ -444,6 +446,10 @@ template("ace_core_source_set") {
       }
       if (is_arkui_x) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+        include_dirs += [
+          "//foundation/graphic/graphic_2d/utils/color_manager/export",
+          "//foundation/multimedia/image_framework/interfaces/innerkits/include",
+        ]
       } else {
         if (ace_use_rosen_drawing) {
           include_dirs += [
@@ -540,6 +546,8 @@ template("ace_core_source_set") {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
+        "//foundation/graphic/graphic_2d/utils/color_manager/export",
+        "//foundation/multimedia/image_framework/interfaces/innerkits/include",
       ]
     }
     if (!is_wearable_product) {
@@ -655,6 +663,7 @@ template("ace_core_ng_source_set") {
       "common/platform_bridge.cpp",
       "common/render_boundary_manager.cpp",
       "common/resource/resource_manager.cpp",
+      "common/resource/resource_wrapper.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
       "common/task_executor_impl.cpp",
@@ -808,6 +817,8 @@ template("ace_core_ng_source_set") {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
+        "//foundation/graphic/graphic_2d/utils/color_manager/export",
+        "//foundation/multimedia/image_framework/interfaces/innerkits/include",
       ]
       sources -= [ "components/declaration/common/declaration.cpp" ]
       sources += [

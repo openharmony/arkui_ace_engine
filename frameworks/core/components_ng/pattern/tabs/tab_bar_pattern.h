@@ -38,6 +38,7 @@
 #include "frameworks/core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 const auto TabBarPhysicalCurve = AceType::MakeRefPtr<InterpolatingSpring>(-1.0f, 1.0f, 228.0f, 30.f);
 
@@ -335,7 +336,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     void SetFirstFocus(bool isFirstFocus)
@@ -394,6 +395,8 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void InitClick(const RefPtr<GestureEventHub>& gestureHub);
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
     void InitHoverEvent();
@@ -407,6 +410,9 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     bool OnKeyEventWithoutClick(const KeyEvent& event);
     bool OnKeyEventWithoutClick(const RefPtr<FrameNode>& host, const KeyEvent& event);
+    void HandleLongPressEvent(const GestureEvent& info);
+    void ShowDialogWithNode(int32_t index);
+    void CloseDialog(int32_t index);
     void HandleClick(const GestureEvent& info);
     void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(const TouchLocationInfo& info);
@@ -461,12 +467,15 @@ private:
     bool IsNeedUpdateFontWeight(int32_t index);
 
     RefPtr<ClickEvent> clickEvent_;
+    RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<SwiperController> swiperController_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
+    RefPtr<FrameNode> dialogNode_;
+    RefPtr<DragEvent> dragEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
@@ -496,6 +505,7 @@ private:
     std::optional<int32_t> imageColorOnIndex_;
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
+    std::optional<int32_t> moveIndex_;
     TabBarStyle tabBarStyle_;
     float currentIndicatorOffset_ = 0.0f;
     std::vector<SelectedMode> selectedModes_;
@@ -522,6 +532,7 @@ private:
     std::optional<int32_t> animationTargetIndex_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;
+    std::pair<double, double> prevRootSize_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

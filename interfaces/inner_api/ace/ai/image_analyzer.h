@@ -26,6 +26,7 @@
 
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/matrix4.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
@@ -45,7 +46,8 @@ enum class ImageAnalyzerHolder {
     IMAGE = 0,
     CANVAS,
     XCOMPONENT,
-    VIDEO,
+    VIDEO_CUSTOM,
+    VIDEO_DEFAULT,
     WEB,
     OTHERS,
 };
@@ -67,6 +69,10 @@ struct ImageAnalyzerConfig {
 struct ImageAnalyzerInnerConfig {
     float contentWidth = 0.0f;
     float contentHeight = 0.0f;
+    float pixelMapWidth = 0.0f;
+    float pixelMapHeight = 0.0f;
+    NG::OffsetF overlayOffset = { 0.0f, 0.0f };
+    ImageAnalyzerHolder holder = ImageAnalyzerHolder::OTHERS;
     ImageFit imageFit = ImageFit::COVER;
     Matrix4 transformMat = Matrix4::CreateIdentity();
     onAnalyzedCallback onAnalyzed;

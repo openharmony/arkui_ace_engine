@@ -30,6 +30,7 @@ constexpr int32_t ERROR_CODE_INTERNAL_ERROR = 100001;    // Internal error.
 constexpr int32_t ERROR_CODE_URI_ERROR = 100002;         // Uri error.
 constexpr int32_t ERROR_CODE_PAGE_STACK_FULL = 100003;   // The pages are pushed too much.
 constexpr int32_t ERROR_CODE_NAMED_ROUTE_ERROR = 100004; // Named route error.
+constexpr int32_t ERROR_CODE_LOAD_PAGE_ERROR = 100007;   // Load page root component failed.
 constexpr int32_t ERROR_CODE_URI_ERROR_LITE = 200002;    // Uri error for lite.
 
 // push destination error code
@@ -49,6 +50,8 @@ constexpr int32_t ERROR_CODE_UIEXTENSION_EXITED_ABNORMALLY = 100014;
 constexpr int32_t ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT = 100015;
 // The uiextension ability has timed out processing the key event.
 constexpr int32_t ERROR_CODE_UIEXTENSION_EVENT_TIMEOUT = 100016;
+// The component not supported prevent function.
+constexpr int32_t ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION = 100017;
 
 // C-API errors
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND = 106101;

@@ -61,6 +61,7 @@ using namespace OHOS::Ace;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float COLUMN_HEIGHT = 200.0f;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
@@ -74,8 +75,16 @@ constexpr int32_t BUTTON_INDEX = 4;
 const std::string EMPTY_VALUE;
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
 const std::string SEARCH_SVG = "resource:///ohos_search.svg";
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const Color DEFAULT_SELECTED_BACKFROUND_COLOR_BLUE = Color::BLUE;
+const Color DEFAULT_SELECTED_BACKFROUND_COLOR_RED = Color::RED;
+const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::string DEFAULT_FILTER_TEXT = "CabcdefgABhCDEFG0123a456A789";
+const std::string NUMBER_FILTER = "^[0-9]*$";
+const std::string NUM_FILTER = "[0-9]";
+const std::string FILTER_NUM_TEXT = "0123456789";
+const Dimension DEFAULT_INDENT_SIZE = Dimension(5, DimensionUnit::VP);
 } // namespace
 
 class SearchTestNg : public testing::Test {
@@ -709,15 +718,15 @@ HWTEST_F(SearchTestNg, Pattern003, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     pattern->UpdateChangeEvent("search");
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle(), CancelButtonStyle::CONSTANT);
 
     searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INPUT);
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INPUT);
     searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INVISIBLE);
     pattern->UpdateChangeEvent("");
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INVISIBLE);
 }
 
@@ -2033,6 +2042,142 @@ HWTEST_F(SearchTestNg, testCaretStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testSelectedBackgroundColor001
+ * @tc.desc: test search selectedBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, testSelectedBackgroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+
+    /**
+     * @tc.step: step2. Set selectedBackgroundColor
+     */
+    searchModelInstance.SetSelectedBackgroundColor(DEFAULT_SELECTED_BACKFROUND_COLOR_BLUE);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::BLUE);
+
+    /**
+     * @tc.step: step3. Set selectedBackgroundColor
+     */
+    paintProperty->UpdateSelectedBackgroundColor(DEFAULT_SELECTED_BACKFROUND_COLOR_RED);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::RED);
+}
+
+/**
+ * @tc.name: testInputFilter001
+ * @tc.desc: Test Search input filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, testInputFilter001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto layoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. assign filter as number filter
+     */
+    layoutProperty->UpdateInputFilter(NUMBER_FILTER);
+    auto numStr = "1";
+
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    textFieldPattern->InsertValue(numStr);
+    EXPECT_EQ(textFieldPattern->GetInputFilter(), NUMBER_FILTER);
+}
+
+/**
+ * @tc.name: testInputFilter002
+ * @tc.desc: Test Search input filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, testInputFilter002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto layoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    /**
+     * @tc.steps: step2. assign filter as number filter
+     */
+    searchModelInstance.SetInputFilter(NUM_FILTER, nullptr);
+    auto textFieldController = textFieldPattern->contentController_;
+    textFieldController->InsertValue(0, DEFAULT_FILTER_TEXT);
+    /**
+     * @tc.expected: Check if the text filter patterns for the input box are compliant
+     */
+    EXPECT_EQ(textFieldPattern->GetTextValue().compare(FILTER_NUM_TEXT), 0);
+}
+
+/**
+ * @tc.name: testOnEditChange001
+ * @tc.desc: Test Search OnEditChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, testOnEditChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    textFieldEventHub->SetOnEditChanged([](bool isChanged) {
+        isChanged = true;
+    });
+
+    /**
+     * @tc.expected: Check if the text patterns for the input box are compliant
+     */
+    EXPECT_EQ(textFieldPattern->GetTextValue().compare(DEFAULT_TEXT), 0);
+}
+
+/**
+ * @tc.name: testTextIndent001
+ * @tc.desc: Test Search input TextIndent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, testTextIndent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto layoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2. Set textIndent
+     */
+    layoutProperty->UpdateTextIndent(DEFAULT_INDENT_SIZE);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(layoutProperty->GetTextIndent(), DEFAULT_INDENT_SIZE);
+}
+
+/**
  * @tc.name: testFontColor001
  * @tc.desc: test search fontColor
  * @tc.type: FUNC
@@ -2807,6 +2952,65 @@ HWTEST_F(SearchTestNg, PackInnerRecognizerr001, TestSize.Level1)
     clickEventActuator->SetUserCallback(std::move(callback));
     searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
     searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
+}
+
+/**
+ * @tc.name: MinFontSize001
+ * @tc.desc: test search minFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, MinFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set minFontSize 1.0 fp.
+     */
+    searchModelInstance.SetAdaptMinFontSize(1.0_fp);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. test minFontSize
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetAdaptMinFontSize(), 1.0_fp);
+}
+
+/**
+ * @tc.name: MaxFontSize001
+ * @tc.desc: test search maxFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, MaxFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set maxFontSize 2.0 fp.
+     */
+    searchModelInstance.SetAdaptMaxFontSize(2.0_fp);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. test maxFontSize
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetAdaptMaxFontSize(), 2.0_fp);
 }
 
 /**

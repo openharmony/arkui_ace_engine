@@ -51,12 +51,11 @@ ListItemGroupModel* ListItemGroupModel::GetInstance()
 namespace OHOS::Ace::Framework {
 
 namespace {
-void ParseChange(const JSRef<JSObject>& changeObject, const float defaultSize, int32_t& start,
+bool ParseChange(const JSRef<JSObject>& changeObject, const float defaultSize, int32_t& start,
     int32_t& deleteCount, std::vector<float>& newChildrenSize)
 {
     if (!JSViewAbstract::ParseJsInteger<int32_t>(changeObject->GetProperty("start"), start) || start < 0) {
-        LOGW("JSListItemGroup input parameter start check failed.");
-        return;
+        return false;
     }
     if (!(changeObject->HasProperty("deleteCount"))) {
         // If only input one parameter, set -1 to deleteCount for deleting elements after index 'start' in the array.
@@ -70,14 +69,39 @@ void ParseChange(const JSRef<JSObject>& changeObject, const float defaultSize, i
         auto childrenSize = JSRef<JSArray>::Cast(childrenSizeValue);
         auto childrenSizeCount = childrenSize->Length();
         for (size_t j = 0; j < childrenSizeCount; ++j) {
-            double childSize = 0.0f;
-            if (!JSViewAbstract::ParseJsDouble(childrenSize->GetValueAt(j), childSize) ||
-                !NonNegative(childSize) || std::isinf(childSize)) {
-                childSize = defaultSize;
+            // -1.0: represent default size.
+            double childSize = -1.0;
+            if (!JSViewAbstract::ParseJsDouble(childrenSize->GetValueAt(j), childSize) || Negative(childSize)) {
+                // -1.0f: represent default size.
+                newChildrenSize.emplace_back(-1.0f);
+            } else {
+                newChildrenSize.emplace_back(Dimension(childSize, DimensionUnit::VP).ConvertToPx());
             }
-            newChildrenSize.emplace_back(Dimension(childSize, DimensionUnit::VP).ConvertToPx());
         }
     }
+    return true;
+}
+
+void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChildrenMainSize> childrenSize)
+{
+    auto sizeArray = childrenSizeObj->GetProperty("sizeArray");
+    if (!sizeArray->IsArray()) {
+        return;
+    }
+    childrenSize->ResizeChildrenSize(0);
+    auto childrenSizeJSArray = JSRef<JSArray>::Cast(sizeArray);
+    auto length = childrenSizeJSArray->Length();
+    for (size_t i = 0; i < length; ++i) {
+        // -1.0: represent default size.
+        double childSize = -1.0;
+        if (!JSViewAbstract::ParseJsDouble(childrenSizeJSArray->GetValueAt(i), childSize) || Negative(childSize)) {
+            // -1.0f: represent default size.
+            childrenSize->SyncChildrenSize(-1.0f);
+        } else {
+            childrenSize->SyncChildrenSize(Dimension(childSize, DimensionUnit::VP).ConvertToPx());
+        }
+    }
+    childrenSize->SyncChildrenSizeOver();
 }
 } // namespace
 
@@ -96,22 +120,31 @@ void JSListItemGroup::SetChildrenMainSize(const JSCallbackInfo& args)
     CHECK_NULL_VOID(listChildrenMainSize);
     listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
 
-    auto changes = childrenSizeObj->GetProperty("changeArray");
-    if (!changes->IsArray()) {
-        return;
+    if (listChildrenMainSize->NeedSync()) {
+        SyncChildrenSize(childrenSizeObj, listChildrenMainSize);
+    } else {
+        auto changes = childrenSizeObj->GetProperty("changeArray");
+        if (!changes->IsArray()) {
+            return;
+        }
+        auto changeArray = JSRef<JSArray>::Cast(changes);
+        auto length = changeArray->Length();
+        for (size_t i = 0; i < length; ++i) {
+            auto change = changeArray->GetValueAt(i);
+            if (!change->IsObject()) {
+                continue;
+            }
+            auto changeObject = JSRef<JSObject>::Cast(change);
+            int32_t start = 0;
+            int32_t deleteCount = 0;
+            std::vector<float> newChildrenSize;
+            if (!ParseChange(changeObject, defaultSize, start, deleteCount, newChildrenSize)) {
+                SyncChildrenSize(childrenSizeObj, listChildrenMainSize);
+                break;
+            }
+            listChildrenMainSize->ChangeData(start, deleteCount, newChildrenSize);
+        }
     }
-    auto changeArray = JSRef<JSArray>::Cast(changes);
-    auto length = changeArray->Length();
-    for (size_t i = 0; i < length; ++i) {
-        auto change = changeArray->GetValueAt(i);
-        auto changeObject = JSRef<JSObject>::Cast(change);
-        int32_t start = 0;
-        int32_t deleteCount = 0;
-        std::vector<float> newChildrenSize;
-        ParseChange(changeObject, defaultSize, start, deleteCount, newChildrenSize);
-        listChildrenMainSize->ChangeData(start, deleteCount, newChildrenSize);
-    }
-
     auto clearFunc = childrenSizeObj->GetProperty("clearChanges");
     if (!clearFunc->IsFunction()) {
         return;
@@ -135,7 +168,7 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
         Dimension space;
-        if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsValid()) {
+        if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsNonNegative()) {
             ListItemGroupModel::GetInstance()->SetSpace(space);
         }
 

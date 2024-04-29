@@ -36,6 +36,7 @@ const char INSPECTOR_RECT[] = "$rect";
 const char INSPECTOR_Z_INDEX[] = "$z-index";
 const char INSPECTOR_ATTRS[] = "$attrs";
 const char INSPECTOR_DEBUGLINE[] = "$debugLine";
+constexpr int32_t INSPECTOR_DELAY_TIME = 1000;
 
 RefPtr<V2::InspectorComposedElement> GetInspectorByKey(const RefPtr<RootElement>& root, const std::string& key)
 {
@@ -250,14 +251,15 @@ bool Inspector::SendEventByKey(
                     inspectorTimer.Reset(callback);
                     auto taskExecutor =
                         SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-                    taskExecutor.PostDelayedTask(inspectorTimer, 1000);
+                    taskExecutor.PostDelayedTask(
+                        inspectorTimer, INSPECTOR_DELAY_TIME, "ArkUIInspectorLongPressTouchEvent");
                     break;
                 }
                 default:
                     break;
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIInspectorSendEventByKey");
 
     return true;
 }
@@ -271,6 +273,7 @@ bool Inspector::SendKeyEvent(const RefPtr<PipelineContext>& context, const JsKey
     keyEvent.SetTimeStamp(event.timeStamp);
     keyEvent.sourceType = static_cast<SourceType>(event.sourceDevice);
     return context->GetTaskExecutor()->PostTask(
-        [context, keyEvent]() { context->OnKeyEvent(keyEvent); }, TaskExecutor::TaskType::UI);
+        [context, keyEvent]() { context->OnKeyEvent(keyEvent); },
+        TaskExecutor::TaskType::UI, "ArkUIInspectorSendKeyEvent");
 }
 } // namespace OHOS::Ace::V2

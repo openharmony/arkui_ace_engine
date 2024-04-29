@@ -31,8 +31,8 @@ class TextAreaFontStyleModifier extends ModifierWithKey<FontStyle> {
   }
 }
 
-class TextAreaDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
-  constructor(value: { type: TextDecorationType; color?: ResourceColor }) {
+class TextAreaDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
   static identity: Symbol = Symbol('textAreaDecoration');
@@ -40,12 +40,12 @@ class TextAreaDecorationModifier extends ModifierWithKey<{ type: TextDecorationT
     if (reset) {
       getUINativeModule().textArea.resetDecoration(node);
     } else {
-      getUINativeModule().textArea.setDecoration(node, this.value!.type, this.value!.color);
+      getUINativeModule().textArea.setDecoration(node, this.value!.type, this.value!.color, this.value!.style);
     }
   }
   
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (isResource(this.stageValue.color) && isResource(this.value.color)) {
@@ -68,6 +68,26 @@ class TextAreaLetterSpacingModifier extends ModifierWithKey<number | string> {
       getUINativeModule().textArea.resetLetterSpacing(node);
     } else {
       getUINativeModule().textArea.setLetterSpacing(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetLineSpacing(node);
+    } else if (!isObject(this.value)) {
+      getUINativeModule().textArea.resetLineSpacing(node);
+    } else {
+      getUINativeModule().textArea.setLineSpacing(node, this.value.value, this.value.unit);
     }
   }
 
@@ -461,12 +481,121 @@ class TextAreaFontFeatureModifier extends ModifierWithKey<FontFeature> {
   }
 }
 
+class TextAreaSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaSelectedBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectedBackgroundColor(node);
+    } else {
+      getUINativeModule().textArea.setSelectedBackgroundColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaCaretStyleModifier extends ModifierWithKey<CaretStyle> {
+  constructor(value: CaretStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaCaretStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetCaretStyle(node);
+    } else {
+      getUINativeModule().textArea.setCaretStyle(node, this.value.width!,
+        this.value.color);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class TextAreaTextOverflowModifier extends ModifierWithKey<TextOverflow> {
+  constructor(value: TextOverflow) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaTextOverflow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetTextOverflow(node);
+    } else {
+      getUINativeModule().textArea.setTextOverflow(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class TextAreaTextIndentModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaTextIndent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetTextIndent(node);
+    } else {
+      getUINativeModule().textArea.setTextIndent(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaTypeModifier extends ModifierWithKey<TextAreaType> {
+  constructor(value: TextAreaType) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetType(node);
+    }
+    else {
+      getUINativeModule().textArea.setType(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaPaddingModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetPadding(node);
+    }
+    else {
+      getUINativeModule().textArea.setPadding(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   type(value: TextAreaType): TextAreaAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextAreaTypeModifier.identity, TextAreaTypeModifier, value);
+    return this;
   }
   placeholderColor(value: ResourceColor): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaPlaceholderColorModifier.identity, TextAreaPlaceholderColorModifier, value);
@@ -585,6 +714,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaLineHeightModifier.identity, TextAreaLineHeightModifier, value);
     return this;
   }
+  lineSpacing(value: LengthMetrics): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaLineSpacingModifier.identity, TextAreaLineSpacingModifier, value);
+    return this;
+  }
   wordBreak(value: WordBreak): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
     return this;
@@ -599,6 +732,44 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaHeightAdaptivePolicyModifier.identity, TextAreaHeightAdaptivePolicyModifier, value);
+    return this;
+  }
+  selectedBackgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaSelectedBackgroundColorModifier.identity, TextAreaSelectedBackgroundColorModifier, value);
+    return this;
+  }
+  caretStyle(value: CaretStyle): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaCaretStyleModifier.identity, TextAreaCaretStyleModifier, value);
+    return this;
+  }
+  textOverflow(value: TextOverflow): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaTextOverflowModifier.identity, TextAreaTextOverflowModifier, value);
+    return this;
+  }
+  textIndent(value: Dimension): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaTextIndentModifier.identity, TextAreaTextIndentModifier, value);
+    return this;
+  }
+  padding(value) {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = value;
+        arkValue.right = value;
+        arkValue.bottom = value;
+        arkValue.left = value;
+      }
+      else {
+        arkValue.top = value.top;
+        arkValue.right = value.right;
+        arkValue.bottom = value.bottom;
+        arkValue.left = value.left;
+      }
+      modifierWithKey(this._modifiersWithKeys, TextAreaPaddingModifier.identity, TextAreaPaddingModifier, arkValue);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, TextAreaPaddingModifier.identity, TextAreaPaddingModifier, undefined);
+    }
     return this;
   }
 }

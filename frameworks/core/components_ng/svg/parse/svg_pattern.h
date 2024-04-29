@@ -27,6 +27,8 @@ public:
     SvgPattern();
     ~SvgPattern() override = default;
     static RefPtr<SvgNode> Create();
+    void OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
+    void OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
 };
 
 } // namespace OHOS::Ace::NG

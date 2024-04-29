@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-
+#include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
@@ -35,6 +35,7 @@ namespace {
 const int32_t SHOW_DIALOG_BUTTON_NUM_MAX = -1;
 const int32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
 const int32_t CUSTOM_DIALOG_PARAM_NUM = 2;
+const int32_t BG_BLUR_STYLE_MAX_INDEX = 12;
 constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
@@ -270,7 +271,13 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    delegate->ShowToast(messageString, duration, bottomString, NG::ToastShowMode::DEFAULT, alignment, offset);
+    if (showMode == NG::ToastShowMode::DEFAULT) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
+        delegate->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before subwindow manager show toast");
+        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
+    }
 #endif
     return nullptr;
 }
@@ -289,6 +296,7 @@ struct PromptAsyncContext {
     napi_value builder = nullptr;
     napi_value onWillDismiss = nullptr;
     napi_value backgroundColorApi = nullptr;
+    napi_value backgroundBlurStyleApi = nullptr;
     napi_value borderWidthApi = nullptr;
     napi_value borderColorApi = nullptr;
     napi_value borderStyleApi = nullptr;
@@ -344,9 +352,11 @@ void DeleteContextAndThrowError(
 bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, int32_t maxButtonNum)
 {
     uint32_t buttonsLen = 0;
+    bool isPrimaryButtonSet = false;
     napi_value buttonArray = nullptr;
     napi_value textNApi = nullptr;
     napi_value colorNApi = nullptr;
+    napi_value primaryButtonNApi = nullptr;
     napi_valuetype valueType = napi_undefined;
     int32_t index = 0;
     napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
@@ -381,6 +391,16 @@ bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, in
             }
         }
         ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
+        if (!isPrimaryButtonSet) {
+            napi_get_named_property(env, buttonArray, "primary", &primaryButtonNApi);
+            napi_typeof(env, primaryButtonNApi, &valueType);
+            if (valueType == napi_boolean) {
+                napi_get_value_bool(env, primaryButtonNApi, &buttonInfo.isPrimary);
+            }
+            if (buttonInfo.isPrimary) {
+                isPrimaryButtonSet = true;
+            }
+        }
         context->buttons.emplace_back(buttonInfo);
     }
     return true;
@@ -437,6 +457,22 @@ void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>&
         ParseNapiDimension(env, height, heightApi, DimensionUnit::VP);
         DimensionOffset dimensionOffset = { x, y };
         maskRect = DimensionRect { width, height, dimensionOffset };
+    }
+}
+
+void GetNapiDialogbackgroundBlurStyleProps(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
+    std::optional<int32_t>& backgroundBlurStyle)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "get napi dialog backgroundBlurStyle props enter");
+    napi_valuetype valueType = napi_undefined;
+
+    napi_typeof(env, asyncContext->backgroundBlurStyleApi, &valueType);
+    if (valueType == napi_number) {
+        int32_t num;
+        napi_get_value_int32(env, asyncContext->backgroundBlurStyleApi, &num);
+        if (num >= 0 && num < BG_BLUR_STYLE_MAX_INDEX) {
+            backgroundBlurStyle = num;
+        }
     }
 }
 
@@ -796,9 +832,10 @@ void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>
     shadowType =
         std::clamp(shadowType, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(shadowType));
+    valueType = GetValueType(env, fillApi);
     bool isFilled = false;
-    if (napi_get_value_bool(env, fillApi, &isFilled) == napi_ok) {
-        isFilled = true;
+    if (valueType == napi_boolean) {
+        napi_get_value_bool(env, fillApi, &isFilled);
     }
     shadow.SetIsFilled(isFilled);
 }
@@ -880,6 +917,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     if (index == 0) {
         napi_get_named_property(env, argv[index], "builder", &asyncContext->builder);
         napi_get_named_property(env, argv[index], "backgroundColor", &asyncContext->backgroundColorApi);
+        napi_get_named_property(env, argv[index], "backgroundBlurStyle", &asyncContext->backgroundBlurStyleApi);
         napi_get_named_property(env, argv[index], "cornerRadius", &asyncContext->borderRadiusApi);
         napi_get_named_property(env, argv[index], "borderWidth", &asyncContext->borderWidthApi);
         napi_get_named_property(env, argv[index], "borderColor", &asyncContext->borderColorApi);
@@ -1010,6 +1048,9 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
+    std::optional<Shadow> shadowProps;
+    std::optional<Color> backgroundColor;
+    std::optional<int32_t> backgroundBlurStyle;
 
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
@@ -1028,9 +1069,15 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "alignment", &asyncContext->alignmentApi);
             napi_get_named_property(env, argv[0], "offset", &asyncContext->offsetApi);
             napi_get_named_property(env, argv[0], "maskRect", &asyncContext->maskRectApi);
+            napi_get_named_property(env, argv[0], "shadow", &asyncContext->shadowApi);
+            napi_get_named_property(env, argv[0], "backgroundColor", &asyncContext->backgroundColorApi);
+            napi_get_named_property(env, argv[0], "backgroundBlurStyle", &asyncContext->backgroundBlurStyleApi);
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString, valueType);
             GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
+            GetNapiDialogbackgroundBlurStyleProps(env, asyncContext, backgroundBlurStyle);
+            backgroundColor = GetColorProps(env, asyncContext->backgroundColorApi);
+            shadowProps = GetShadowProps(env, asyncContext);
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
@@ -1039,6 +1086,16 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     return nullptr;
                 }
             }
+            bool isPrimaryButtonSet = false;
+            for (auto btn : asyncContext->buttons) {
+                if (btn.isPrimary) {
+                    isPrimaryButtonSet = true;
+                    break;
+                }
+            }
+            ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
+                .textColor = "", .isPrimary = !isPrimaryButtonSet};
+            asyncContext->buttons.emplace_back(buttonInfo);
             napi_typeof(env, asyncContext->autoCancel, &valueType);
             if (valueType == napi_boolean) {
                 napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
@@ -1136,7 +1193,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContent");
         asyncContext = nullptr;
     };
 
@@ -1149,6 +1206,9 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .alignment = alignment,
         .offset = offset,
         .maskRect = maskRect,
+        .shadow = shadowProps,
+        .backgroundColor = backgroundColor,
+        .backgroundBlurStyle = backgroundBlurStyle,
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1356,7 +1416,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuResults");
         asyncContext = nullptr;
     };
 
@@ -1547,10 +1607,12 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
+    std::optional<int32_t> backgroundBlurStyle;
     GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
     auto borderWidthProps = GetBorderWidthProps(env, asyncContext);
     std::optional<NG::BorderColorProperty> borderColorProps;
     std::optional<NG::BorderStyleProperty> borderStyleProps;
+    GetNapiDialogbackgroundBlurStyleProps(env, asyncContext, backgroundBlurStyle);
     ParseBorderColorAndStyle(env, asyncContext, borderWidthProps, borderColorProps, borderStyleProps);
     auto borderRadiusProps = GetBorderRadiusProps(env, asyncContext);
     auto backgroundColorProps = GetColorProps(env, asyncContext->backgroundColorApi);
@@ -1575,6 +1637,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .borderRadius = borderRadiusProps,
         .borderStyle = borderStyleProps,
         .backgroundColor = backgroundColorProps,
+        .backgroundBlurStyle = backgroundBlurStyle,
         .shadow = shadowProps,
         .width = widthProps,
         .height = heightProps,
@@ -1665,7 +1728,7 @@ void ParseCustomDialogContentCallback(std::shared_ptr<PromptAsyncContext>& async
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContent");
         asyncContext = nullptr;
     };
 }
@@ -1717,7 +1780,7 @@ void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncConte
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogId");
         asyncContext = nullptr;
     };
 }

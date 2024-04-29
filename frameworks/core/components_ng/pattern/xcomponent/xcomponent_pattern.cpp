@@ -15,10 +15,12 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
-#include "interfaces/native/native_event.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
+#include "interfaces/native/ui_input_event.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
+#include "base/log/frame_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/ressched/ressched_report.h"
@@ -53,6 +55,24 @@ namespace {
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
+std::string XComponentTypeToString(XComponentType type)
+{
+    switch (type) {
+        case XComponentType::UNKNOWN:
+            return "unknown";
+        case XComponentType::SURFACE:
+            return "surface";
+        case XComponentType::COMPONENT:
+            return "component";
+        case XComponentType::TEXTURE:
+            return "texture";
+        case XComponentType::NODE:
+            return "node";
+        default:
+            return "unknown";
+    }
+}
+
 OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType)
 {
     switch (touchType) {
@@ -268,6 +288,9 @@ void XComponentPattern::OnAttachToFrameNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EnableSelfRender();
+    }
 }
 
 void XComponentPattern::OnModifyDone()
@@ -370,6 +393,9 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().DisableSelfRender();
+    }
 }
 
 void XComponentPattern::SetMethodCall()
@@ -384,7 +410,7 @@ void XComponentPattern::SetMethodCall()
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 pattern->ConfigSurface(surfaceWidth, surfaceHeight);
-            });
+            }, "ArkUIXComponentSurfaceConfigChange");
         });
 
     xcomponentController_->SetSurfaceId(surfaceId_);
@@ -395,35 +421,39 @@ void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHei
     renderSurface_->ConfigSurface(surfaceWidth, surfaceHeight);
 }
 
-void XComponentPattern::BeforeCreateLayoutWrapper()
+void XComponentPattern::SetRotation()
 {
-    Pattern::BeforeCreateLayoutWrapper();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
     auto dmRotation = displayInfo->GetRotation();
-    CHECK_NULL_VOID(renderSurface_);
-    renderSurface_->SetTransformHint(dmRotation);
+    if (rotation_ != dmRotation) {
+        rotation_ = dmRotation;
+        CHECK_NULL_VOID(renderSurface_);
+        renderSurface_->SetTransformHint(dmRotation);
+    }
 }
 
-bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
-    if (type_ == XComponentType::COMPONENT || type_ == XComponentType::NODE
-        || config.skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
+    if (type_ == XComponentType::COMPONENT || type_ == XComponentType::NODE || config.skipMeasure) {
+        return;
     }
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     drawSize_ = geometryNode->GetContentSize();
     if (!drawSize_.IsPositive()) {
-        return false;
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s size is not positive", id_.c_str());
+        return;
     }
     globalPosition_ = geometryNode->GetFrameOffset();
     localPosition_ = geometryNode->GetContentOffset();
 
     if (IsSupportImageAnalyzerFeature()) {
-        UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
+        UpdateAnalyzerUIConfig(geometryNode);
     }
 
     if (!hasXComponentInit_) {
@@ -437,8 +467,6 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
 #ifndef RENDER_EXTRACT_SUPPORTED
     if (SystemProperties::GetExtSurfaceEnabled()) {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, false);
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
         renderSurface_->SetExtSurfaceBounds(
             static_cast<int32_t>(transformRelativeOffset.GetX() + localPosition_.GetX()),
@@ -455,18 +483,24 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {
         AddAfterLayoutTaskForExportTexture();
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();
-    return false;
+    AddAfterLayoutTaskForRotation();
 }
 
-void XComponentPattern::OnPaint()
+void XComponentPattern::DumpInfo()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    renderContext->UpdateBackgroundColor(Color::BLACK);
+    DumpLog::GetInstance().AddDesc(std::string("xcomponentId: ").append(id_));
+    DumpLog::GetInstance().AddDesc(std::string("xcomponentType: ").append(XComponentTypeToString(type_)));
+    DumpLog::GetInstance().AddDesc(std::string("libraryName: ").append(libraryname_));
+}
+
+void XComponentPattern::DumpAdvanceInfo()
+{
+    DumpLog::GetInstance().AddDesc(
+        std::string("surfaceRect: ").append(RectF { localPosition_, surfaceSize_ }.ToString()));
+    if (renderSurface_) {
+        renderSurface_->DumpInfo();
+    }
 }
 
 void XComponentPattern::NativeXComponentChange(float width, float height)
@@ -555,6 +589,8 @@ void XComponentPattern::XComponentSizeInit()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
+    TAG_LOGI(
+        AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] triggers onLoad and OnSurfaceCreated callback", id_.c_str());
     eventHub->FireSurfaceInitEvent(id_, host->GetId());
     eventHub->FireLoadEvent(id_);
     eventHub->FireControllerCreatedEvent(surfaceId_);
@@ -572,6 +608,8 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
             static_cast<uint32_t>(surfaceRect.Height() * viewScale));
         NativeXComponentChange(surfaceRect.Width(), surfaceRect.Height());
     }
+    renderSurface_->UpdateSurfaceSizeInUserData(
+        static_cast<uint32_t>(surfaceRect.Width()), static_cast<uint32_t>(surfaceRect.Height()));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();
@@ -724,12 +762,17 @@ void XComponentPattern::InitAxisEvent(const RefPtr<InputEventHub>& inputHub)
 void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub)
 {
     gestureHub->SetOnTouchIntercept(
-        [pattern = Claim(this)](
+        [weak = WeakClaim(this)](
             const TouchEventInfo& touchEvent) -> HitTestMode {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, NG::HitTestMode::HTMDEFAULT);
+            auto hostNode = pattern->GetHost();
+            CHECK_NULL_RETURN(hostNode, NG::HitTestMode::HTMDEFAULT);
+            CHECK_NULL_RETURN(pattern->nativeXComponentImpl_, hostNode->GetHitTestMode());
+            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
+            CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
             auto event = touchEvent.ConvertToTouchEvent();
             ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event };
-            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
-            CHECK_NULL_RETURN(onTouchInterceptCallback, NG::HitTestMode::HTMDEFAULT);
             return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
         });
 }
@@ -1138,6 +1181,17 @@ void XComponentPattern::AddAfterLayoutTaskForExportTexture()
     });
 }
 
+void XComponentPattern::AddAfterLayoutTaskForRotation()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetRotation();
+    });
+}
+
 bool XComponentPattern::ExportTextureAvailable()
 {
     auto host = GetHost();
@@ -1355,7 +1409,7 @@ void XComponentPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onA
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-    });
+    }, "ArkUIXComponentCreateAnalyzerOverlay");
 }
 
 void XComponentPattern::StopImageAnalyzer()
@@ -1486,5 +1540,16 @@ float XComponentPattern::RoundValueToPixelGrid(float value, bool isRound, bool f
         }
     }
     return value;
+}
+
+void XComponentPattern::SetSurfaceRotation(bool isLock)
+{
+    if (type_ != XComponentType::SURFACE) {
+        return;
+    }
+    isSurfaceLock_ = isLock;
+
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    handlingSurfaceRenderContext_->SetSurfaceRotation(isLock);
 }
 } // namespace OHOS::Ace::NG

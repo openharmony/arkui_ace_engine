@@ -33,6 +33,7 @@ bool GaugePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 void GaugePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -72,6 +73,49 @@ void GaugePattern::OnModifyDone()
             InitDescriptionNode();
         }
     }
+}
+
+void GaugePattern::FireBuilder()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value()) {
+        host->RemoveChildAndReturnIndex(contentModifierNode_);
+        contentModifierNode_ = nullptr;
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = node;
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> GaugePattern::BuildContentModifierNode()
+{
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto gaugePaintProperty = GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_RETURN(gaugePaintProperty, nullptr);
+    auto min = gaugePaintProperty->GetMin().value_or(0.0f);
+    auto max = gaugePaintProperty->GetMax().value_or(100.0f);
+    auto value = gaugePaintProperty->GetValue().value_or(min);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    GaugeConfiguration gaugeConfiguration(value, min, max, enabled);
+    return (makeFunc_.value())(gaugeConfiguration);
 }
 
 void GaugePattern::InitTitleContent()

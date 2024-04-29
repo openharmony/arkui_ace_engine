@@ -49,7 +49,6 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
 RefPtr<ImageSource> ImageSource::Create(const std::string& filePath)
 {
     Media::SourceOptions opts;
-    opts.formatHint = "image/svg+xml";
     uint32_t errorCode = 0;
     auto src = Media::ImageSource::CreateImageSource(filePath, opts, errorCode);
     if (errorCode != Media::SUCCESS) {
@@ -82,15 +81,16 @@ std::string ImageSourceOhos::GetProperty(const std::string& key)
     return value;
 }
 
-RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const Size& size)
+RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const Size& size, AIImageQuality imageQuality)
 {
-    return CreatePixelMap(0, size);
+    return CreatePixelMap(0, size, imageQuality);
 }
 
-RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(uint32_t index, const Size& size)
+RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(uint32_t index, const Size& size, AIImageQuality imageQuality)
 {
     Media::DecodeOptions options;
     options.preferDma = true;
+    // Pass imageQuality to imageFramework
     if (size.first > 0 && size.second > 0) {
         options.desiredSize = { size.first, size.second };
     }
@@ -137,5 +137,16 @@ uint32_t ImageSourceOhos::GetFrameCount()
         return 0;
     }
     return frameCount;
+}
+
+std::string ImageSourceOhos::GetEncodedFormat()
+{
+    uint32_t errorCode;
+    auto sourceInfo = imageSource_->GetSourceInfo(errorCode);
+    if (errorCode != Media::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Get image source info failed, errorCode = %{public}u", errorCode);
+        return "";
+    }
+    return sourceInfo.encodedFormat;
 }
 } // namespace OHOS::Ace

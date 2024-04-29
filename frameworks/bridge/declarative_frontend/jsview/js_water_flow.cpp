@@ -57,15 +57,20 @@ const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDi
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
 
 namespace {
-void ParseChanges(const JSCallbackInfo& args, const JSRef<JSArray>& changeArray)
+void ParseChanges(
+    const JSCallbackInfo& args, const JSRef<JSArray>& changeArray, RefPtr<NG::WaterFlowSections>& waterFlowSections)
 {
-    auto waterFlowSections = WaterFlowModel::GetInstance()->GetOrCreateWaterFlowSections();
-    CHECK_NULL_VOID(waterFlowSections);
     auto length = changeArray->Length();
     for (size_t i = 0; i < length; ++i) {
         auto change = changeArray->GetValueAt(i);
+        if (!change->IsObject()) {
+            continue;
+        }
         auto changeObject = JSRef<JSObject>::Cast(change);
         auto sectionValue = changeObject->GetProperty("sections");
+        if (!sectionValue->IsArray()) {
+            continue;
+        }
         auto sectionArray = JSRef<JSArray>::Cast(sectionValue);
         auto sectionsCount = sectionArray->Length();
         std::vector<NG::WaterFlowSections::Section> newSections;
@@ -80,24 +85,46 @@ void ParseChanges(const JSCallbackInfo& args, const JSRef<JSArray>& changeArray)
             changeObject->GetProperty("deleteCount")->ToNumber<int32_t>(), newSections);
     }
 }
+
+void ParseSections(
+    const JSCallbackInfo& args, const JSRef<JSArray>& sectionArray, RefPtr<NG::WaterFlowSections>& waterFlowSections)
+{
+    auto length = sectionArray->Length();
+    std::vector<NG::WaterFlowSections::Section> newSections;
+    for (size_t j = 0; j < length; ++j) {
+        NG::WaterFlowSections::Section section;
+        auto newSection = sectionArray->GetValueAt(j);
+        if (JSWaterFlowSections::ParseSectionOptions(args, newSection, section)) {
+            newSections.emplace_back(section);
+        }
+    }
+    waterFlowSections->ChangeData(0, waterFlowSections->GetSectionInfo().size(), newSections);
+}
 } // namespace
 
 void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)
 {
     auto sectionsObject = JSRef<JSObject>::Cast(sections);
     auto changes = sectionsObject->GetProperty("changeArray");
-    if (!changes->IsArray()) {
-        return;
-    }
+    CHECK_NULL_VOID(changes->IsArray());
     auto changeArray = JSRef<JSArray>::Cast(changes);
-    ParseChanges(args, changeArray);
+    auto waterFlowSections = WaterFlowModel::GetInstance()->GetOrCreateWaterFlowSections();
+    CHECK_NULL_VOID(waterFlowSections);
+    ParseChanges(args, changeArray, waterFlowSections);
+
+    auto lengthFunc = sectionsObject->GetProperty("length");
+    CHECK_NULL_VOID(lengthFunc->IsFunction());
+    auto sectionLength = (JSRef<JSFunc>::Cast(lengthFunc))->Call(sectionsObject);
+    if (waterFlowSections->GetSectionInfo().size() != sectionLength->ToNumber<uint32_t>()) {
+        auto allSections = sectionsObject->GetProperty("sectionArray");
+        CHECK_NULL_VOID(allSections->IsArray());
+        ParseSections(args, JSRef<JSArray>::Cast(allSections), waterFlowSections);
+    }
 
     auto clearFunc = sectionsObject->GetProperty("clearChanges");
-    if (!clearFunc->IsFunction()) {
-        return;
-    }
+    CHECK_NULL_VOID(clearFunc->IsFunction());
     auto func = JSRef<JSFunc>::Cast(clearFunc);
-    JSRef<JSVal>::Cast(func->Call(sectionsObject));
+    func->Call(sectionsObject);
 }
 } // namespace
 
@@ -396,9 +423,15 @@ void JSWaterFlow::SetCachedCount(const JSCallbackInfo& info)
 
 void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)
 {
-    auto edgeEffect = JSScrollable::ParseEdgeEffect(info, WaterFlowModel::GetInstance()->GetEdgeEffect());
-    auto alwaysEnabled =
-        JSScrollable::ParseAlwaysEnable(info, WaterFlowModel::GetInstance()->GetAlwaysEnableEdgeEffect());
+    auto edgeEffect = WaterFlowModel::GetInstance()->GetEdgeEffect();
+    if (info.Length() > 0) {
+        edgeEffect = JSScrollable::ParseEdgeEffect(info[0], edgeEffect);
+    }
+    auto alwaysEnabled = WaterFlowModel::GetInstance()->GetAlwaysEnableEdgeEffect();
+    if (info.Length() > 1) {
+        alwaysEnabled =
+            JSScrollable::ParseAlwaysEnable(info[1], alwaysEnabled);
+    }
     WaterFlowModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 

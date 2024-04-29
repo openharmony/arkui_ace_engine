@@ -20,7 +20,10 @@
 
 #include "base/geometry/offset.h"
 #include "base/memory/referenced.h"
+#include "core/animation/animator.h"
+#include "core/animation/picture_animation.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
@@ -38,8 +41,9 @@ class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
-class ACE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
+class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
@@ -114,6 +118,16 @@ public:
         return true;
     }
 
+    void SetImageQuality(AIImageQuality imageQuality)
+    {
+        imageQuality_ = imageQuality;
+    }
+
+    AIImageQuality GetImageQuality()
+    {
+        return imageQuality_;
+    }
+
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
@@ -149,6 +163,11 @@ public:
         syncLoad_ = value;
     }
 
+    bool GetSyncLoad() const
+    {
+        return syncLoad_;
+    }
+
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
     void BeforeCreatePaintWrapper() override;
@@ -168,6 +187,95 @@ public:
     }
     void EnableAnalyzer(bool value);
     bool hasSceneChanged();
+    void OnSensitiveStyleChange(bool isSensitive) override;
+
+    //animation
+    struct CacheImageStruct {
+        CacheImageStruct() = default;
+        CacheImageStruct(const RefPtr<FrameNode>& imageNode) : imageNode(imageNode) {}
+        virtual ~CacheImageStruct() = default;
+        RefPtr<FrameNode> imageNode;
+        int32_t index = 0;
+        bool isLoaded = false;
+    };
+
+    void ImageAnimatorPattern();
+    void SetImages(std::vector<ImageProperties>&& images)
+    {
+        images_ = std::move(images);
+        durationTotal_ = 0;
+        for (const auto& childImage : images_) {
+            if ((!childImage.src.empty() || childImage.pixelMap != nullptr) && childImage.duration > 0) {
+                durationTotal_ += childImage.duration;
+            }
+        }
+        imagesChangedFlag_ = true;
+        RegisterVisibleAreaChange();
+    }
+
+    void ResetImages()
+    {
+        images_.clear();
+    }
+
+    void ResetImageProperties();
+
+    void ResetImageAndAlt();
+
+    void ResetPictureSize();
+
+    bool GetHasSizeChanged()
+    {
+        return hasSizeChanged;
+    }
+
+    void StartAnimation()
+    {
+        status_ = Animator::Status::RUNNING;
+    }
+
+    void StopAnimation()
+    {
+        status_ = Animator::Status::STOPPED;
+        OnAnimatedModifyDone();
+    }
+
+    void SetIsAnimation(bool isAnimation)
+    {
+        isAnimation_ = isAnimation;
+    }
+
+    bool GetIsAnimation() const
+    {
+        return isAnimation_;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    void OnInActive() override
+    {
+        if (status_ == Animator::Status::RUNNING) {
+            animator_->Pause();
+        }
+    }
+
+    void OnActive() override
+    {
+        if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
+            animator_->Forward();
+        }
+    }
+
+    void SetDuration(int32_t duration);
+    void SetIteration(int32_t iteration);
+
+    void SetImageAnimator(bool isImageAnimator)
+    {
+        isImageAnimator_ = isImageAnimator;
+    }
 
 protected:
     void RegisterWindowStateChangedCallback();
@@ -208,7 +316,7 @@ private:
      * @param dstSize The size of the image to be decoded.
      */
     void StartDecoding(const SizeF& dstSize);
-    bool CheckIfNeeedLayout();
+    bool CheckIfNeedLayout();
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
@@ -229,7 +337,7 @@ private:
     void UpdateFillColorIfForegroundColor();
     void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     RectF CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode);
 
@@ -258,6 +366,27 @@ private:
     bool IsSupportImageAnalyzerFeature();
     void InitDefaultValue();
 
+    //animation
+    RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
+    void AdaptSelfSize();
+    void SetShowingIndex(int32_t index);
+    void UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNode, int32_t index);
+    void UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t index);
+    std::list<CacheImageStruct>::iterator FindCacheImageNode(const RefPtr<PixelMap>& src);
+    int32_t GetNextIndex(int32_t preIndex);
+    void GenerateCachedImages();
+    void AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameNode);
+    static bool IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode, const RefPtr<PixelMap>& src);
+    bool IsFormRender();
+    void UpdateFormDurationByRemainder();
+    void ResetFormAnimationStartTime();
+    void ResetFormAnimationFlag();
+    void OnAnimatedModifyDone();
+    void OnImageModifyDone();
+    void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
+    void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
+    void ControlAnimation(int32_t index);
+
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;
 
@@ -282,12 +411,33 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
+    bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     OffsetF parentGlobalOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
+
+    //animation
+    bool isAnimation_ = false;
+    RefPtr<Animator> animator_;
+    std::vector<ImageProperties> images_;
+    std::list<CacheImageStruct> cacheImages_;
+    Animator::Status status_ = Animator::Status::IDLE;
+    int32_t durationTotal_ = 0;
+    int32_t nowImageIndex_ = 0;
+    uint64_t repeatCallbackId_ = 0;
+    bool imagesChangedFlag_ = false;
+    bool firstUpdateEvent_ = true;
+    bool isLayouted_ = false;
+    int64_t formAnimationStartTime_ = 0;
+    int32_t formAnimationRemainder_ = 0;
+    bool isFormAnimationStart_ = true;
+    bool isFormAnimationEnd_ = false;
+    bool isImageAnimator_ = false;
+    bool hasSizeChanged = false;
 };
 
 } // namespace OHOS::Ace::NG

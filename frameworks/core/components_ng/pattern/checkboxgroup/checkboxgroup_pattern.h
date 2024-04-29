@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
@@ -68,16 +69,13 @@ public:
             UpdateModifierParam(paintParameters);
             checkBoxGroupModifier_ = AceType::MakeRefPtr<CheckBoxGroupModifier>(paintParameters);
         }
-        CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
-        } else {
-            checkboxStyle = CheckBoxStyle::SQUARE_STYLE;
+            auto checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+            if (paintProperty->HasCheckBoxGroupSelectedStyle()) {
+                checkboxStyle = paintProperty->GetCheckBoxGroupSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
+            }
+            checkBoxGroupModifier_->SetCheckboxGroupStyle(checkboxStyle);
         }
-        if (paintProperty->HasCheckBoxGroupSelectedStyle()) {
-            checkboxStyle = paintProperty->GetCheckBoxGroupSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
-        }
-        checkBoxGroupModifier_->SetCheckboxGroupStyle(checkboxStyle);
         auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(checkBoxGroupModifier_);
         paintMethod->SetEnabled(enabled);
         paintMethod->SetUiStatus(uiStatus_);
@@ -147,14 +145,14 @@ public:
         skipFlag_ = skipFlag;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        Pattern::ToJsonValue(json);
+        Pattern::ToJsonValue(json, filter);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxGroupEventHub>();
         auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
-        json->Put("group", group.c_str());
+        json->PutExtAttr("group", group.c_str(), filter);
     }
 
     void ResetUIStatus()
@@ -162,10 +160,7 @@ public:
         uiStatus_ = UIStatus::UNSELECTED;
     }
 
-    RefPtr<GroupManager> GetGroupManager() const
-    {
-        return groupManager_.Upgrade();
-    }
+    RefPtr<GroupManager> GetGroupManager();
 
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
@@ -208,6 +203,9 @@ private:
         CheckBoxStyle checkBoxGroupStyle);
     void GetCheckBoxGroupStyle(const RefPtr<FrameNode>& frameNode, CheckBoxStyle& checkboxGroupStyle);
     void InnerFocusPaintCircle(RoundRect& paintRect);
+    void GetCheckBoxNameList(const RefPtr<FrameNode>& frameNode,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, const std::string& group,
+        bool select, std::vector<std::string>& vec);
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
     RefPtr<ClickEvent> clickListener_;
@@ -229,7 +227,7 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool initSelected_ = false;
-    std::string navId_ = "";
+    std::optional<std::string> currentNavId_ = std::nullopt;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

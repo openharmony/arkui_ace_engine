@@ -24,6 +24,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
 #include "core/components_ng/property/property.h"
@@ -172,9 +173,6 @@ void RatingPattern::UpdatePaintConfig()
 
 RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
 {
-    if (UseContentModifier()) {
-        return nullptr;
-    }
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     if (!ratingModifier_) {
         ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
@@ -208,6 +206,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
             backgroundImageCanvas_->IsStatic())) {
         ratingModifier_->SetNeedDraw(true);
     }
+    ratingModifier_->SetUseContentModifier(UseContentModifier());
     auto reverse = ratingLayoutProperty->GetLayoutDirection() == TextDirection::RTL;
     auto paintMethod = MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_, reverse);
     paintMethod->UpdateFocusState(isfocus_, focusRatingScore_);
@@ -357,7 +356,7 @@ void RatingPattern::HandleDragUpdate(const GestureEvent& info)
     RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX(), true);
 }
 
-void RatingPattern::FireChangeEvent() const
+void RatingPattern::FireChangeEvent()
 {
     auto ratingEventHub = GetEventHub<RatingEventHub>();
     CHECK_NULL_VOID(ratingEventHub);
@@ -367,6 +366,7 @@ void RatingPattern::FireChangeEvent() const
     ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue();
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating score %{public}s", ss.str().c_str());
     ratingEventHub->FireChangeEvent(ss.str());
+    lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
 
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;
@@ -450,9 +450,6 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RatingPattern::HandleTouchUp()
 {
-    if (UseContentModifier()) {
-        return;
-    }
     CHECK_NULL_VOID(!IsIndicator());
     state_ = isHover_ ? RatingModifier::RatingAnimationType::PRESSTOHOVER : RatingModifier::RatingAnimationType::NONE;
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -460,9 +457,6 @@ void RatingPattern::HandleTouchUp()
 
 void RatingPattern::HandleTouchDown(const Offset& localPosition)
 {
-    if (UseContentModifier()) {
-        return;
-    }
     CHECK_NULL_VOID(!IsIndicator());
 
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
@@ -481,9 +475,6 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
 
 void RatingPattern::HandleClick(const GestureEvent& info)
 {
-    if (UseContentModifier()) {
-        return;
-    }
     CHECK_NULL_VOID(!IsIndicator());
     auto eventPointX = info.GetLocalLocation().GetX();
     if (Negative(eventPointX)) {
@@ -837,6 +828,7 @@ void RatingPattern::LoadBackground()
 void RatingPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     // Reset image state code.
     imageReadyStateCode_ = 0;
     imageSuccessStateCode_ = 0;
@@ -860,33 +852,32 @@ void RatingPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
-    FireBuilder();
 }
 
 // XTS inspector code
-void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     if (isForegroundImageInfoFromTheme_) {
-        json->Put("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str());
+        json->PutExtAttr("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str(), filter);
     } else {
         auto foregroundImageSourceInfo =
             ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo(""));
-        json->Put("foregroundImageSourceInfo", foregroundImageSourceInfo.ToString().c_str());
+        json->PutExtAttr("foregroundImageSourceInfo", foregroundImageSourceInfo.ToString().c_str(), filter);
     }
     if (isSecondaryImageInfoFromTheme_) {
-        json->Put("secondaryImageSourceInfo", ImageSourceInfo("").ToString().c_str());
+        json->PutExtAttr("secondaryImageSourceInfo", ImageSourceInfo("").ToString().c_str(), filter);
     } else {
         auto secondaryImageSourceInfo =
             ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo(""));
-        json->Put("secondaryImageSourceInfo", secondaryImageSourceInfo.ToString().c_str());
+        json->PutExtAttr("secondaryImageSourceInfo", secondaryImageSourceInfo.ToString().c_str(), filter);
     }
     if (isBackgroundImageInfoFromTheme_) {
-        json->Put("backgroundImageSourceInfo", ImageSourceInfo("").ToString().c_str());
+        json->PutExtAttr("backgroundImageSourceInfo", ImageSourceInfo("").ToString().c_str(), filter);
     } else {
         auto backgroundImageSourceInfo =
             ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
-        json->Put("backgroundImageSourceInfo", backgroundImageSourceInfo.ToString().c_str());
+        json->PutExtAttr("backgroundImageSourceInfo", backgroundImageSourceInfo.ToString().c_str(), filter);
     }
 }
 
@@ -931,11 +922,19 @@ void RatingPattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
 
 void RatingPattern::FireBuilder()
 {
-    CHECK_NULL_VOID(makeFunc_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value()) {
+        host->RemoveChildAtIndex(0);
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
     host->RemoveChildAtIndex(0);
-    contentModifierNode_ = BuildContentModifierNode();
+    contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
@@ -943,7 +942,9 @@ void RatingPattern::FireBuilder()
 
 RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
 {
-    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto property = GetLayoutProperty<RatingLayoutProperty>();

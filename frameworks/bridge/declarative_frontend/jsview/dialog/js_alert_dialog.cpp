@@ -68,7 +68,7 @@ void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
 }
 
 void ParseButtonObj(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSVal> jsVal,
-    const std::string& property)
+    const std::string& property, bool& isPrimaryButtonSet)
 {
     if (!jsVal->IsObject()) {
         return;
@@ -124,13 +124,27 @@ void ParseButtonObj(const JsiExecutionContext& execContext, DialogProperties& pr
         AlertDialogModel::GetInstance()->SetParseButtonObj(eventFunc, buttonInfo, properties, property);
     }
 
+    if (!buttonInfo.defaultFocus && !isPrimaryButtonSet) {
+        if (strcmp(property.c_str(), "confirm") == 0 ||
+        strcmp(property.c_str(), "primaryButton") == 0) {
+            buttonInfo.isPrimary = true;
+            isPrimaryButtonSet = true;
+        } else {
+            auto primaryButton = objInner->GetProperty("primary");
+            if (primaryButton->IsBoolean()) {
+                buttonInfo.isPrimary = true;
+                isPrimaryButtonSet = true;
+            }
+        }
+    }
+
     if (buttonInfo.IsValid()) {
         properties.buttons.emplace_back(buttonInfo);
     }
 }
 
 void ParseButtonArray(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj,
-    const std::string& property)
+    const std::string& property, bool& isPrimaryButtonSet)
 {
     auto jsVal = obj->GetProperty(property.c_str());
     if (!jsVal->IsArray()) {
@@ -146,26 +160,27 @@ void ParseButtonArray(const JsiExecutionContext& execContext, DialogProperties& 
         if (!buttonItem->IsObject()) {
             break;
         }
-        ParseButtonObj(execContext, properties, buttonItem, property + std::to_string(i));
+        ParseButtonObj(execContext, properties, buttonItem, property + std::to_string(i), isPrimaryButtonSet);
     }
 }
 
 void ParseButtons(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj)
 {
     properties.buttons.clear();
+    bool isPrimaryButtonSet = false;
     if (obj->GetProperty("confirm")->IsObject()) {
         // Parse confirm.
         auto objInner = obj->GetProperty("confirm");
-        ParseButtonObj(execContext, properties, objInner, "confirm");
+        ParseButtonObj(execContext, properties, objInner, "confirm", isPrimaryButtonSet);
     } else if (obj->GetProperty("buttons")->IsArray()) {
         // Parse buttons array.
-        ParseButtonArray(execContext, properties, obj, "buttons");
+        ParseButtonArray(execContext, properties, obj, "buttons", isPrimaryButtonSet);
     } else {
         // Parse primaryButton and secondaryButton.
         auto objInner = obj->GetProperty("primaryButton");
-        ParseButtonObj(execContext, properties, objInner, "primaryButton");
+        ParseButtonObj(execContext, properties, objInner, "primaryButton", isPrimaryButtonSet);
         objInner = obj->GetProperty("secondaryButton");
-        ParseButtonObj(execContext, properties, objInner, "secondaryButton");
+        ParseButtonObj(execContext, properties, objInner, "secondaryButton", isPrimaryButtonSet);
     }
 
     // Parse buttons direction.

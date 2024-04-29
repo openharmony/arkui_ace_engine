@@ -52,6 +52,8 @@ public:
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
     static bool ParseJsFontFamiliesFromResource(
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
+    static bool ParseJsLengthMetrics(
+        const EcmaVM *vm, const Local<JSValueRef> &obj, CalcDimension &result);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
@@ -76,6 +78,7 @@ public:
     static uint32_t parseShadowType(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId);
     static void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
         std::optional<CalcDimension>& optionalDimension);
     static void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim,

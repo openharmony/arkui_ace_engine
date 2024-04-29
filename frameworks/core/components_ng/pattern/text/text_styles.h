@@ -18,13 +18,137 @@
 
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/utils.h"
 
+namespace OHOS::Ace {
+
+struct CustomSpanMeasureInfo {
+    float fontSize;
+};
+
+struct CustomSpanOptions {
+    float x;
+    float lineTop;
+    float lineBottom;
+    float baseline;
+};
+
+struct CustomSpanMetrics {
+    float width;
+    std::optional<float> height;
+};
+
+struct UserGestureOptions {
+    GestureEventFunc onClick;
+    GestureEventFunc onLongPress;
+};
+
+struct ImageSpanSize {
+    std::optional<CalcDimension> width;
+    std::optional<CalcDimension> height;
+
+    bool operator==(const ImageSpanSize& other) const
+    {
+        return width == other.width && height == other.height;
+    }
+
+    NG::CalcSize GetSize() const
+    {
+        std::optional<NG::CalcLength> tmpWidth = std::nullopt;
+        if (width.has_value()) {
+            tmpWidth = NG::CalcLength(width->ConvertToPx());
+        }
+        std::optional<NG::CalcLength> tmpHeight = std::nullopt;
+        if (height.has_value()) {
+            tmpHeight = NG::CalcLength(height->ConvertToPx());
+        }
+        return {tmpWidth, tmpHeight};
+    }
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, width);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, height);
+        return jsonValue->ToString();
+    }
+};
+
+struct ImageSpanAttribute {
+    std::optional<ImageSpanSize> size;
+    std::optional<VerticalAlign> verticalAlign;
+    std::optional<ImageFit> objectFit;
+    std::optional<OHOS::Ace::NG::MarginProperty> marginProp;
+    std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
+    std::optional<OHOS::Ace::NG::PaddingProperty> paddingProp;
+
+    bool operator==(const ImageSpanAttribute& attribute) const
+    {
+        return size == attribute.size && verticalAlign == attribute.verticalAlign && objectFit == attribute.objectFit &&
+               marginProp == attribute.marginProp && borderRadius == attribute.borderRadius &&
+               paddingProp == attribute.paddingProp;
+    }
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, size);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, verticalAlign);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, objectFit);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, marginProp);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, borderRadius);
+        return jsonValue->ToString();
+    }
+};
+
+struct SpanOptionBase {
+    std::optional<int32_t> offset;
+    UserGestureOptions userGestureOption;
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, offset);
+        return jsonValue->ToString();
+    }
+};
+
+struct ImageSpanOptions : SpanOptionBase {
+    std::optional<int32_t> offset;
+    std::optional<std::string> image;
+    std::optional<std::string> bundleName;
+    std::optional<std::string> moduleName;
+    std::optional<RefPtr<PixelMap>> imagePixelMap;
+    std::optional<ImageSpanAttribute> imageAttribute;
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, offset);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, image);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, bundleName);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, moduleName);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, image);
+        if (imagePixelMap && *imagePixelMap) {
+            std::string pixSize = "[";
+            pixSize += std::to_string((*imagePixelMap)->GetWidth());
+            pixSize += "*";
+            pixSize += std::to_string((*imagePixelMap)->GetHeight());
+            pixSize += "]";
+            jsonValue->Put("pixelMapSize", pixSize.c_str());
+        }
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, imageAttribute);
+        return jsonValue->ToString();
+    }
+};
+} // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
-using FONT_FEATURES_MAP = std::unordered_map<std::string, int32_t>;
+using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
@@ -32,7 +156,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_MAP);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, TextDecoration);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationStyle, TextDecorationStyle);
@@ -44,6 +168,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolColorList, std::vector<Color>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolRenderingStrategy, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectStrategy, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectOptions, SymbolEffectOptions);
 };
 
 struct TextLineStyle {
@@ -59,6 +184,8 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LeadingMargin, LeadingMargin);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WordBreak, WordBreak);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EllipsisMode, EllipsisMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LineSpacing, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LineBreakStrategy, LineBreakStrategy);
 };
 
 struct HandleInfoNG {
@@ -106,6 +233,8 @@ std::string GetFontWeightInJson(const std::optional<FontWeight>& value);
 std::string GetFontSizeInJson(const std::optional<Dimension>& value);
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value);
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value);
+std::string GetLineBreakStrategyInJson(const std::optional<Ace::LineBreakStrategy>& value);
+std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H

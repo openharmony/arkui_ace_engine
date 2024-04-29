@@ -66,6 +66,7 @@ public:
     void SetIsItalic(bool isItalic);
     void SetSmoothEffect(bool value);
     void SetStrokeRadius(float strokeRaidus);
+    void SetUseContentModifier(bool useContentModifier);
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -114,7 +115,7 @@ private:
     void GenerateLinearSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     void GenerateRingSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     Gradient CreateCapsuleGradient() const;
-    bool PostTask(const TaskExecutor::Task& task);
+    bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
     bool IsSweepEffectOn();
 
@@ -145,6 +146,7 @@ private:
     RefPtr<PropertyInt> progressStatus_;
     RefPtr<PropertyBool> isItalic_;
     RefPtr<PropertyBool> smoothEffect_;
+    RefPtr<PropertyBool> useContentModifier_;
 
     bool isVisible_ = true;
     float valueBackup_ = 0.0f;

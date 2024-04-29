@@ -164,13 +164,15 @@ void SpanModelImpl::SetLetterSpacing(const Dimension& value)
     }
 }
 
+void SpanModelImpl::SetBaselineOffset(const Dimension& value) {}
+
 RefPtr<TextSpanComponent> SpanModelImpl::GetComponent()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     return AceType::DynamicCast<TextSpanComponent>(stack->GetMainComponent());
 }
 
-void SpanModelImpl::SetOnClick(std::function<void(const BaseEventInfo*)>&& click)
+void SpanModelImpl::SetOnClick(std::function<void(BaseEventInfo*)>&& click)
 {
     auto component = GetComponent();
     if (component) {

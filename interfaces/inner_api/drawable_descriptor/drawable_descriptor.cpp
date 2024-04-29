@@ -19,8 +19,8 @@
 #include <memory>
 #include <string>
 
-#include "third_party/cJSON/cJSON.h"
 #include "include/core/SkSamplingOptions.h"
+#include "third_party/cJSON/cJSON.h"
 
 #ifndef PREVIEW
 #include "image_source.h"
@@ -46,14 +46,16 @@ const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
 #endif
 constexpr float SIDE = 192.0f;
+const int DEFAULT_DURATION = 1000;
+const std::string DEFAULT_MASK = "ohos_icon_mask";
 
 // define for get resource path in preview scenes
 const static char PREVIEW_LOAD_RESOURCE_ID[] = "ohos_drawable_descriptor_path";
 #ifdef PREVIEW
 #ifdef WINDOWS_PLATFORM
-constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "\\resources\\entry\\resources.index";
+constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "\\resources\\resources.index";
 #else
-constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "/resources/entry/resources.index";
+constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "/resources/resources.index";
 #endif
 
 #ifdef LINUX_PLATFORM
@@ -128,9 +130,7 @@ void LayeredDrawableDescriptor::InitialResource(const std::shared_ptr<Global::Re
         HILOGE("Global resource manager is null!");
         return;
     }
-    // preprocess get default mask
-    const std::string defaultMaskName = "ohos_icon_mask";
-    resourceMgr->GetMediaDataByName(defaultMaskName.c_str(), defaultMaskDataLength_, defaultMaskData_);
+    InitialMask(resourceMgr);
     // preprocess get background and foreground
     if (!PreGetPixelMapFromJsonBuf(resourceMgr, true)) {
         HILOGE("Create background Item imageSource from json buffer failed");
@@ -138,6 +138,11 @@ void LayeredDrawableDescriptor::InitialResource(const std::shared_ptr<Global::Re
     if (!PreGetPixelMapFromJsonBuf(resourceMgr, false)) {
         HILOGE("Create foreground Item imageSource from json buffer failed");
     }
+}
+
+void LayeredDrawableDescriptor::InitialMask(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
+{
+    resourceMgr->GetMediaDataByName(DEFAULT_MASK.c_str(), defaultMaskDataLength_, defaultMaskData_);
 }
 
 bool DrawableDescriptor::GetPixelMapFromBuffer()
@@ -174,6 +179,11 @@ std::shared_ptr<Media::PixelMap> DrawableDescriptor::GetPixelMap()
     }
     HILOGE("Failed to GetPixelMap!");
     return nullptr;
+}
+
+DrawableDescriptor::DrawableType DrawableDescriptor::GetDrawableType()
+{
+    return DrawableType::BASE;
 }
 
 std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource(
@@ -221,6 +231,11 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
     } else {
         HILOGE("Get background from json buffer failed");
         return false;
+    }
+    if (isBackground) {
+        backgroundItem_.data_.reset();
+    } else {
+        foregroundItem_.data_.reset();
     }
     return true;
 #else
@@ -451,10 +466,16 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
 #else
 bool LayeredDrawableDescriptor::CreatePixelMap()
 {
+    // if customizedParam_.HasParamCustomized() true,
+    // meaning this descriptor is not created by resource manager,
+    // therefore some params might not be valid.
+    // Otherwise if HasParamCustomized() false,
+    // meaning this descriptor is created by resource manager or 
+    // napi directly but has no param passed in, then we should return if any param is missing
     std::shared_ptr<Rosen::Drawing::Bitmap> foreground;
     if (foreground_.has_value() || GetPixelMapFromJsonBuf(false)) {
         foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
-    } else {
+    } else if (!customized_) {
         HILOGI("Get pixelMap of foreground failed.");
         return false;
     }
@@ -462,7 +483,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     std::shared_ptr<Rosen::Drawing::Bitmap> background;
     if (background_.has_value() || GetPixelMapFromJsonBuf(true)) {
         background = ImageConverter::PixelMapToBitmap(background_.value());
-    } else {
+    } else if (!customized_) {
         HILOGE("Get pixelMap of background failed.");
         return false;
     }
@@ -470,7 +491,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     std::shared_ptr<Rosen::Drawing::Bitmap> mask;
     if (mask_.has_value() || GetMaskByPath() || GetDefaultMask()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
-    } else {
+    } else if (!customized_) {
         HILOGE("Get pixelMap of mask failed.");
         return false;
     }
@@ -485,20 +506,26 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     Rosen::Drawing::Canvas bitmapCanvas;
     bitmapCanvas.Bind(tempCache);
 
-    brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC);
-    bitmapCanvas.AttachBrush(brush);
-    DrawOntoCanvas(background, SIDE, SIDE, bitmapCanvas);
-    bitmapCanvas.DetachBrush();
-    brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
-    bitmapCanvas.AttachBrush(brush);
-    DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas);
-    bitmapCanvas.DetachBrush();
-    brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_ATOP);
-    bitmapCanvas.AttachBrush(brush);
-    DrawOntoCanvas(foreground, SIDE, SIDE, bitmapCanvas);
-    bitmapCanvas.DetachBrush();
+    // if developer uses customized param, foreground, background, mask might be null
+    if (background) {
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC);
+        bitmapCanvas.AttachBrush(brush);
+        DrawOntoCanvas(background, SIDE, SIDE, bitmapCanvas);
+        bitmapCanvas.DetachBrush();
+    }
+    if (mask) {
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+        bitmapCanvas.AttachBrush(brush);
+        DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas);
+        bitmapCanvas.DetachBrush();
+    }
+    if (foreground) {
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_ATOP);
+        bitmapCanvas.AttachBrush(brush);
+        DrawOntoCanvas(foreground, SIDE, SIDE, bitmapCanvas);
+        bitmapCanvas.DetachBrush();
+    }
     bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
-
     // convert bitmap back to pixelMap
     Media::InitializationOptions opts;
     opts.alphaType = background_.value()->GetAlphaType();
@@ -520,6 +547,11 @@ std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
 
     HILOGE("Failed to GetPixelMap!");
     return nullptr;
+}
+
+DrawableDescriptor::DrawableType LayeredDrawableDescriptor::GetDrawableType()
+{
+    return DrawableType::LAYERED;
 }
 
 std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
@@ -559,5 +591,39 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 #endif
     resMgr->GetStringByName(PREVIEW_LOAD_RESOURCE_ID, data);
     return data;
+}
+
+std::shared_ptr<Media::PixelMap> AnimatedDrawableDescriptor::GetPixelMap()
+{
+    if (pixelMapList_.empty()) {
+        return nullptr;
+    }
+    return pixelMapList_[0];
+}
+
+DrawableDescriptor::DrawableType AnimatedDrawableDescriptor::GetDrawableType()
+{
+    return DrawableType::ANIMATED;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> AnimatedDrawableDescriptor::GetPixelMapList()
+{
+    return pixelMapList_;
+}
+
+int32_t AnimatedDrawableDescriptor::GetDuration()
+{
+    if (duration_ <= 0) {
+        duration_ = DEFAULT_DURATION * static_cast<int32_t>(pixelMapList_.size());
+    }
+    return duration_;
+}
+
+int32_t AnimatedDrawableDescriptor::GetIterations()
+{
+    if (iterations_ < -1) {
+        iterations_ = 1;
+    }
+    return iterations_;
 }
 } // namespace OHOS::Ace::Napi

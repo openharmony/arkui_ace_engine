@@ -275,19 +275,19 @@ shared_ptr<JsValue> SetPolyToPoly(const shared_ptr<JsRuntime>& runtime, const sh
     int32_t srcIndex = argv[0]->GetProperty(runtime, "srcIndex")->ToInt32(runtime);
     int32_t dstIndex = argv[0]->GetProperty(runtime, "dstIndex")->ToInt32(runtime);
     int32_t pointCount = srcJsValue->GetArrayLength(runtime)/2;
-    if (!pointCountJSValue->IsUndefined(runtime)) {
+    if (pointCountJSValue->IsInt32(runtime)) {
         pointCount = pointCountJSValue->ToInt32(runtime);
     }
-    std::vector<OHOS::Ace::NG::PointT<int32_t>> srcPoint;
-    std::vector<OHOS::Ace::NG::PointT<int32_t>> dstPoint;
+    std::vector<OHOS::Ace::NG::PointT<int32_t>> srcPoint, dstPoint;
     ParsePoint(srcJsValue, srcPoint, runtime);
     ParsePoint(dstJsValue, dstPoint, runtime);
-    if (pointCount <= 0 || pointCount > srcPoint.size() || pointCount > dstPoint.size()) {
+    if (pointCount <= 0 || pointCount > static_cast<int32_t>(srcPoint.size()) ||
+        pointCount > static_cast<int32_t>(dstPoint.size())) {
         LOGE("setpPolyToPoly pointCount out of range pointCount:%{public}d, src size:%{public}d, dst size:%{public}d",
             pointCount, static_cast<int>(srcPoint.size()), static_cast<int>(dstPoint.size()));
         return thisObj;
     }
-    if (srcIndex < 0 || (pointCount + srcIndex) > srcPoint.size()) {
+    if (srcIndex < 0 || (pointCount + srcIndex) > static_cast<int32_t>(srcPoint.size())) {
         LOGE("setpPolyToPoly srcIndex out of range srcIndex:%{public}d, pointCount:%{public}d, src size%{public}d",
             srcIndex, pointCount, static_cast<int>(srcPoint.size()));
         return thisObj;
@@ -302,7 +302,7 @@ shared_ptr<JsValue> SetPolyToPoly(const shared_ptr<JsRuntime>& runtime, const sh
     for (int i = srcIndex; i < srcLastIndex; i++) {
         totalPoint.push_back(srcPoint[i]);
     }
-    int dstLastIndex = pointCount + srcIndex;
+    int dstLastIndex = pointCount + dstIndex;
     for (int i = dstIndex; i < dstLastIndex; i++) {
         totalPoint.push_back(dstPoint[i]);
     }

@@ -477,6 +477,11 @@ public:
         ViewAbstract::SetPositionEdges(value);
     }
 
+    void ResetPosition() override
+    {
+        ViewAbstract::ResetPosition();
+    }
+
     void SetOffset(const Dimension& x, const Dimension& y) override
     {
         ViewAbstract::SetOffset({ x, y });
@@ -669,10 +674,25 @@ public:
     {
         ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
     }
+    
+    void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) override
+    {
+        ViewAbstract::SetBgDynamicBrightness(brightnessOption);
+    }
+
+    void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) override
+     {
+        ViewAbstract::SetFgDynamicBrightness(brightnessOption);
+     }
 
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override
     {
         ViewAbstract::SetFrontBlur(radius, blurOption);
+    }
+
+    void SetMotionBlur(const MotionBlurOption& motionBlurOption) override
+    {
+        ViewAbstract::SetMotionBlur(motionBlurOption);
     }
 
     void SetBackShadow(const std::vector<Shadow>& shadows) override
@@ -1065,14 +1085,20 @@ public:
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t info)>&& onWillDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
         std::function<void(const float)>&& onHeightDidChange,
-        std::function<void(const float)>&& onDetentsDidChange) override;
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) override;
+    RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
     void DismissSheet() override;
     void DismissContentCover() override;
+    void SheetSpringBack() override;
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
+    void SetAccessibilityTextHint(const std::string& text) override;
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
@@ -1086,7 +1112,12 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
-
+    
+    void SetForegroundEffect(float radius) override
+    {
+        ViewAbstract::SetForegroundEffect(radius);
+    }
+    
     void DisableOnClick() override
     {
         ViewAbstract::DisableOnClick();
@@ -1157,6 +1188,11 @@ public:
         ViewAbstract::SetLightIntensity(value);
     }
 
+    void SetLightColor(const Color& value) override
+    {
+        ViewAbstract::SetLightColor(value);
+    }
+
     void SetLightIlluminated(const uint32_t value) override
     {
         ViewAbstract::SetLightIlluminated(value);
@@ -1175,6 +1211,16 @@ public:
     void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override
     {
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+    }
+
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) override
+    {
+        ViewAbstract::SetFocusScopeId(focusScopeId, isGroup);
+    }
+
+    void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) override
+    {
+        ViewAbstract::SetFocusScopePriority(focusScopeId, focusPriority);
     }
 
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);

@@ -30,6 +30,8 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "base/json/json_util.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
@@ -154,6 +156,13 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
     layoutInspectorStatus_ = layoutInspectorStatus;
 }
 
+void LayoutInspector::SetArkUIStateProfilerStatus(bool status)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->setProfilerStatus(status);
+}
+
 void LayoutInspector::SetCallback(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -167,6 +176,9 @@ void LayoutInspector::SetCallback(int32_t instanceId)
             [](int32_t containerId) { return CreateLayoutInfo(containerId); },
             [](bool status) { return SetStatus(status); });
     }
+
+    OHOS::AbilityRuntime::ConnectServerManager::Get().SetStateProfilerCallback(
+        [](bool status) { return SetArkUIStateProfilerStatus(status); });
 }
 
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
@@ -192,13 +204,16 @@ void LayoutInspector::CreateLayoutInfo(int32_t containerId)
         };
         BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendResultTask));
     };
-    context->GetTaskExecutor()->PostTask(std::move(getInspectorTask), TaskExecutor::TaskType::UI);
+    context->GetTaskExecutor()->PostTask(
+        std::move(getInspectorTask), TaskExecutor::TaskType::UI, "ArkUIGetInspectorTreeJson");
 }
 
 void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)
 {
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
 #ifdef NG_BUILD
     treeJsonStr = NG::Inspector::GetInspector(true);
 #else
@@ -214,6 +229,30 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
 #endif
+    auto jsonTree = JsonUtil::ParseJsonString(treeJsonStr);
+    jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
+    jsonTree->Put("ProcessID", getpid());
+    jsonTree->Put("WindowID", (int32_t)pipeline->GetWindowId());
+    treeJsonStr = jsonTree->ToString();
+    if (SystemProperties::GetDebugEnabled()) {
+        auto vsyncId = jsonTree->GetValue("VsyncID");
+        auto processId = jsonTree->GetValue("ProcessID");
+        auto windowId = jsonTree->GetValue("WindowID");
+        auto content = jsonTree->GetValue("content");
+        auto children = content->GetValue("$children");
+        while (children) {
+            auto child = children->GetArrayItem(0);
+            auto type = child->GetValue("$type");
+            LOGI("GetInspectorTreeJsonStr tag:%{public}s, type:%{public}s", type->GetString().c_str(),
+                child->GetValue("type")->GetString().c_str());
+            if (type->GetString() == "__Common__") {
+                break;
+            }
+            children = child->GetValue("$children");
+        }
+        LOGI("GetInspectorTreeJsonStr VsyncID:%{public}d, ProcessID:%{public}d, WindowID:%{public}d", vsyncId->GetInt(),
+            processId->GetInt(), windowId->GetInt());
+    }
 }
 
 void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)

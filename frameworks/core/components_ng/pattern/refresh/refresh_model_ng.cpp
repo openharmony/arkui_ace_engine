@@ -63,6 +63,7 @@ RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(
         V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
+    CHECK_NULL_RETURN(frameNode, frameNode);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pattern = frameNode->GetPattern<RefreshPattern>();
         CHECK_NULL_RETURN(pattern, frameNode);
@@ -155,6 +156,15 @@ void RefreshModelNG::ResetOnOffsetChange()
     auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ResetOnOffsetChange();
+}
+
+void RefreshModelNG::SetPullDownRatio(const std::optional<float>& pullDownRatio)
+{
+    if (pullDownRatio.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullDownRatio, pullDownRatio.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(RefreshLayoutProperty, PullDownRatio);
+    }
 }
 
 void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)

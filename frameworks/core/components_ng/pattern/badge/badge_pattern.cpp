@@ -108,9 +108,12 @@ void BadgePattern::OnModifyDone()
     borderColor.SetColor(color);
     textRenderContext->UpdateBorderColor(borderColor);
     if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        if (lastState_ != badgeVisible) {
+        if (!lastBadgeVisible_ && !badgeVisible) {
+            textRenderContext->SetScale(0, 0);
+        }
+        if (lastBadgeVisible_ != badgeVisible) {
             BadgeAnimation(lastFrameNode, badgeVisible);
-            lastState_ = badgeVisible;
+            lastBadgeVisible_ = badgeVisible;
         }
     } else {
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
@@ -119,7 +122,7 @@ void BadgePattern::OnModifyDone()
     lastFrameNode->MarkModifyDone();
 }
 
-void BadgePattern::BadgeAnimation(RefPtr<FrameNode>& frameNode, bool isShowBadge)
+void BadgePattern::BadgeAnimation(RefPtr<FrameNode>& frameNode, bool isShowBadge) const
 {
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

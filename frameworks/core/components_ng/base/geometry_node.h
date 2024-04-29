@@ -35,6 +35,8 @@
 #include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 // GeometryNode acts as a physical property of the size and position of the component
 class ACE_EXPORT GeometryNode : public AceType {
     DECLARE_ACE_TYPE(GeometryNode, AceType)
@@ -71,6 +73,17 @@ public:
             offset -= OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
         }
         return offset;
+    }
+
+    RectF GetMarginFrameRect() const
+    {
+        auto offset = frame_.rect_.GetOffset();
+        auto size = frame_.rect_.GetSize();
+        if (margin_) {
+            offset -= OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
+            AddPaddingToSize(*margin_, size);
+        }
+        return RectF(offset, size);
     }
 
     void SetMarginFrameOffset(const OffsetF& translate)
@@ -337,7 +350,7 @@ public:
     bool RestoreCache();
     void Save();
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
 private:
     // the layoutConstraint of prev measure task.

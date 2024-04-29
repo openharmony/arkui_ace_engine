@@ -98,7 +98,9 @@ struct MouseEvent final {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
-    int32_t touchEventId;
+    int32_t touchEventId = 0;
+    int32_t originalId = 0;
+    bool isInjected = false;
 
     Offset GetOffset() const
     {
@@ -117,6 +119,14 @@ struct MouseEvent final {
         } else {
             return (int32_t)button + MOUSE_BASE_ID;
         }
+    }
+
+    int32_t GetPointerId(int32_t pointerId) const
+    {
+        if (pressedButtons > 0) {
+            return pressedButtons + MOUSE_BASE_ID + pointerId;
+        }
+        return static_cast<int32_t>(button) + MOUSE_BASE_ID + pointerId;
     }
 
     MouseEvent CreateScaleEvent(float scale) const
@@ -141,7 +151,9 @@ struct MouseEvent final {
                 .deviceId = deviceId,
                 .targetDisplayId = targetDisplayId,
                 .sourceType = sourceType,
-                .pointerEvent = pointerEvent
+                .pointerEvent = pointerEvent,
+                .originalId = originalId,
+                .isInjected = isInjected
             };
         }
 
@@ -165,6 +177,8 @@ struct MouseEvent final {
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
             .pointerEvent = pointerEvent,
+            .originalId = originalId,
+            .isInjected = isInjected
         };
     }
 
@@ -182,7 +196,7 @@ struct MouseEvent final {
         }
         int32_t pointId = id;
         if (sourceType == SourceType::MOUSE) {
-            pointId = GetId();
+            pointId = GetPointerId(pointId);
         }
         TouchPoint point { .id = pointId,
             .x = x,
@@ -204,7 +218,9 @@ struct MouseEvent final {
             .SetDeviceId(deviceId)
             .SetTargetDisplayId(targetDisplayId)
             .SetSourceType(sourceType)
-            .SetPointerEvent(pointerEvent);
+            .SetPointerEvent(pointerEvent)
+            .SetOriginalId(GetId())
+            .SetIsInjected(isInjected);
         event.pointers.emplace_back(std::move(point));
         return event;
     }
@@ -229,7 +245,9 @@ struct MouseEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
-            .pointerEvent = pointerEvent
+            .pointerEvent = pointerEvent,
+            .originalId = originalId,
+            .isInjected = isInjected
         };
     }
 };

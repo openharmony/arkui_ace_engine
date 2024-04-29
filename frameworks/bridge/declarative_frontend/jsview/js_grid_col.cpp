@@ -49,6 +49,12 @@ GridColModel* GridColModel::GetInstance()
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 namespace {
+constexpr size_t XS = 0;
+constexpr size_t SM = 1;
+constexpr size_t MD = 2;
+constexpr size_t LG = 3;
+constexpr size_t XL = 4;
+constexpr size_t XXL = 5;
 constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
 
 void InheritGridContainerSize(const RefPtr<V2::GridContainerSize>& gridContainerSize,
@@ -70,6 +76,48 @@ void InheritGridContainerSize(const RefPtr<V2::GridContainerSize>& gridContainer
     gridContainerSize->xxl = containerSizeArray[5].value();
 }
 
+void ParseGridContainerSizeArray(const JSRef<JSVal>& jsValue,
+    std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT])
+{
+    auto gridParam = JSRef<JSObject>::Cast(jsValue);
+    auto xs = gridParam->GetProperty("xs");
+    if (xs->IsNumber() && xs->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[XS] = xs->ToNumber<int32_t>();
+    } else {
+        containerSizeArray[XS] = 0;
+    }
+    auto sm = gridParam->GetProperty("sm");
+    if (sm->IsNumber() && sm->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[SM] = sm->ToNumber<int32_t>();
+    } else {
+        containerSizeArray[SM] = 0;
+    }
+    auto md = gridParam->GetProperty("md");
+    if (md->IsNumber() && md->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[MD] = md->ToNumber<int32_t>();
+    } else {
+        containerSizeArray[MD] = 0;
+    }
+    auto lg = gridParam->GetProperty("lg");
+    if (lg->IsNumber() && lg->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[LG] = lg->ToNumber<int32_t>();
+    } else {
+        containerSizeArray[LG] = 0;
+    }
+    auto xl = gridParam->GetProperty("xl");
+    if (xl->IsNumber() && xl->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[XL] = xl->ToNumber<int32_t>();
+    } else {
+        containerSizeArray[XL] = 0;
+    }
+    auto xxl = gridParam->GetProperty("xxl");
+    if (xxl->IsNumber() && xxl->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[XXL] = xxl->ToNumber<int32_t>();
+    } else {
+        containerSizeArray[XXL] = 0;
+    }
+}
+
 RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValue, int32_t defaultVal)
 {
     if (jsValue->IsNumber()) {
@@ -80,32 +128,8 @@ RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValu
         return gridContainerSize;
     } else if (jsValue->IsObject()) {
         auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
-        auto gridParam = JSRef<JSObject>::Cast(jsValue);
         std::optional<int32_t> containerSizeArray[MAX_NUMBER_BREAKPOINT];
-        auto xs = gridParam->GetProperty("xs");
-        if (xs->IsNumber() && xs->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[0] = xs->ToNumber<int32_t>();
-        }
-        auto sm = gridParam->GetProperty("sm");
-        if (sm->IsNumber() && sm->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[1] = sm->ToNumber<int32_t>();
-        }
-        auto md = gridParam->GetProperty("md");
-        if (md->IsNumber() && md->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[2] = md->ToNumber<int32_t>();
-        }
-        auto lg = gridParam->GetProperty("lg");
-        if (lg->IsNumber() && lg->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[3] = lg->ToNumber<int32_t>();
-        }
-        auto xl = gridParam->GetProperty("xl");
-        if (xl->IsNumber() && xl->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[4] = xl->ToNumber<int32_t>();
-        }
-        auto xxl = gridParam->GetProperty("xxl");
-        if (xxl->IsNumber() && xxl->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[5] = xxl->ToNumber<int32_t>();
-        }
+        ParseGridContainerSizeArray(jsValue, containerSizeArray);
         InheritGridContainerSize(gridContainerSize, containerSizeArray, defaultVal);
         return gridContainerSize;
     } else {

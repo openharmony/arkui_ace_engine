@@ -30,8 +30,13 @@
 namespace OHOS::Ace::NG {
 using BorderRadiusArray = std::array<PointF, 4>;
 struct ImageColorFilter {
-    std::shared_ptr<std::vector<float>> colorFilterMatrix_ = nullptr;
-    RefPtr<DrawingColorFilter> colorFilterDrawing_ = nullptr;
+    std::shared_ptr<std::vector<float>> colorFilterMatrix_;
+    RefPtr<DrawingColorFilter> colorFilterDrawing_;
+    void Reset()
+    {
+        colorFilterMatrix_.reset();
+        colorFilterDrawing_.Reset();
+    }
 };
 struct ImagePaintConfig {
     RectF srcRect_;
@@ -45,6 +50,7 @@ struct ImagePaintConfig {
     ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
     float smoothEdge_ = 0.0f;
+    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     bool flipHorizontally_ = false;
     bool isSvg_ = false;
     int32_t frameCount_ = 1;

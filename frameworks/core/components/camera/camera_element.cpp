@@ -92,7 +92,7 @@ void CameraElement::ReleasePlatformResource()
                 camera_.Reset();
             } else {
                 // Make sure it's destroyed when it's release task done.
-                platformTaskExecutor.PostTask([camera = camera_]() {});
+                platformTaskExecutor.PostTask([camera = camera_]() {}, "ArkUICameraResourceRelease");
             }
         }
 
@@ -103,7 +103,7 @@ void CameraElement::ReleasePlatformResource()
 #if defined(ENABLE_NATIVE_VIEW)
             texture_->Release();
             // Make sure it's destroyed when it's release task done.
-            platformTaskExecutor.PostTask([texture = texture_]() {});
+            platformTaskExecutor.PostTask([texture = texture_]() {}, "ArkUICameraTextureRelease");
 #else
             auto gpuTaskExecutor =
                 SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::GPU);
@@ -117,8 +117,8 @@ void CameraElement::ReleasePlatformResource()
                 }
                 texture->Release();
                 // Make sure it's destroyed when it's release task done.
-                platformTaskExecutor.PostTask([texture]() {});
-            });
+                platformTaskExecutor.PostTask([texture]() {}, "ArkUICameraTextureRelease");
+            }, "ArkUICameraTextureRelease");
 #endif
         }
     }
@@ -374,7 +374,7 @@ void CameraElement::CloseRecorder(const std::string& params)
                     cameraElement->CloseRecorder();
                 }
             },
-            TaskExecutor::TaskType::PLATFORM);
+            TaskExecutor::TaskType::PLATFORM, "ArkUICameraCloseRecorder");
         isRecording_ = false;
     }
 }
@@ -426,7 +426,7 @@ void CameraElement::CreateTexture()
             if (cameraElement) {
                 cameraElement->OnError(errorcode, errormsg);
             }
-        });
+            }, "ArkUICameraErrorCallback");
     };
     texture_ = AceType::MakeRefPtr<Texture>(context_, errorCallback);
 
@@ -563,7 +563,7 @@ void CameraElement::CreatePlatformResource()
                 cameraElement->CreateCamera();
             }
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUICameraCreatePlatformResource");
 #else
     CreateTexture();
 #endif
@@ -587,7 +587,7 @@ void CameraElement::SetMethodCall(const RefPtr<CameraComponent>& cameraComponent
                         if (cameraElement) {
                             cameraElement->TakePhoto(params);
                         }
-                    });
+                    }, "ArkUICameraTakePhoto");
         });
 #ifdef OHOS_STANDARD_SYSTEM
         cameraController->SetStartRecordImpl(
@@ -597,7 +597,7 @@ void CameraElement::SetMethodCall(const RefPtr<CameraComponent>& cameraComponent
                         if (cameraElement) {
                             cameraElement->StartRecord();
                         }
-                    });
+                    }, "ArkUICameraStartRecord");
         });
 
         cameraController->SetCloseRecorderImpl(
@@ -608,7 +608,7 @@ void CameraElement::SetMethodCall(const RefPtr<CameraComponent>& cameraComponent
                         if (cameraElement) {
                             cameraElement->CloseRecorder(params);
                         }
-                    });
+                    }, "ArkUICameraCloseRecorder");
         });
 #endif
     }
@@ -634,7 +634,7 @@ void CameraElement::InitListener()
                 if (camera) {
                     camera->OnTakePhotoCallBack(result);
                 }
-            });
+            }, "ArkUICameraTakePhoto");
     };
     camera_->AddTakePhotoListener(takePhotoListener);
 
@@ -644,7 +644,7 @@ void CameraElement::InitListener()
             if (camera) {
                 camera->OnError(errorcode, errormsg);
             }
-        });
+        }, "ArkUICameraError");
     };
     camera_->AddErrorListener(onError);
 
@@ -654,7 +654,7 @@ void CameraElement::InitListener()
                 if (camera) {
                     camera->OnPrepared();
                 }
-            });
+            }, "ArkUICameraPrepared");
     };
     camera_->AddPrepareEventListener(preparedCallBack);
 
@@ -666,7 +666,7 @@ void CameraElement::InitListener()
                 if (camera) {
                     camera->OnRecorderCallBack(result);
                 }
-            });
+            }, "ArkUICameraRecorder");
     };
     camera_->AddRecordListener(recorderCallBack);
 #else
@@ -677,7 +677,7 @@ void CameraElement::InitListener()
                 if (camera) {
                     camera->OnPreViewSizeChange(preViewWidth, preViewHeight);
                 }
-            });
+            }, "ArkUICameraPreviewSizeChange");
     };
     camera_->AddPreViewSizeChang(onSizeChangeListener);
 
@@ -688,7 +688,7 @@ void CameraElement::InitListener()
                 if (camera) {
                     camera->OnTextureRefresh();
                 }
-            });
+            }, "ArkUICameraTextureRefresh");
         };
         texture_->SetRefreshListener(onTextureRefresh);
     }
@@ -791,7 +791,7 @@ void CameraElement::TakePhoto(const TakePhotoParams& params)
                 cameraElement->TakePhoto(Size());
             }
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUICameraTakePhoto");
 #else
         camera_->TakePhoto(GetSizeFromQuality(params.quality));
 #endif

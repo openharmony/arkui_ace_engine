@@ -33,6 +33,9 @@ void RenderRowSplit::HandleDragStart(const Offset& startPoint)
 {
     dragedSplitIndex_ = DEFAULT_DRAG_INDEX;
     isDragedMoving_ = true;
+    if (splitRects_.size() < 1) {
+        return;
+    }
     for (std::size_t i = 0; i < splitRects_.size() - 1; i++) {
         if (splitRects_[i].IsInRegion(Point(startPoint.GetX(), startPoint.GetY()))) {
             auto context = GetContext().Upgrade();

@@ -104,9 +104,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         totalMainSize_ = posMap_->GetTotalHeight();
     }
     MeasureListItem(layoutWrapper, childLayoutConstraint_);
-    AdjustItemPosition();
-    AdjustByPosMap();
-    SetActiveChildRange(layoutWrapper);
+    childrenSize_ ? AdjustByPosMap() : AdjustItemPosition();
 
     auto crossSize = contentIdealSize.CrossSize(axis_);
     if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
@@ -132,6 +130,7 @@ float ListItemGroupLayoutAlgorithm::GetListItemGroupMaxWidth(
 
 void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    SetActiveChildRange(layoutWrapper);
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -178,11 +177,13 @@ void ListItemGroupLayoutAlgorithm::MeasureHeaderFooter(LayoutWrapper* layoutWrap
     headerFooterLayoutConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
     if (headerIndex_ >= 0) {
         auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
+        CHECK_NULL_VOID(headerWrapper);
         headerWrapper->Measure(headerFooterLayoutConstraint);
         headerMainSize_ = GetMainAxisSize(headerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     }
     if (footerIndex_ >= 0) {
         auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
+        CHECK_NULL_VOID(footerWrapper);
         footerWrapper->Measure(headerFooterLayoutConstraint);
         footerMainSize_ = GetMainAxisSize(footerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     }
@@ -253,9 +254,13 @@ float ListItemGroupLayoutAlgorithm::UpdateReferencePos(
     return referencePos;
 }
 
-bool ListItemGroupLayoutAlgorithm::NeedMeasureItem() const
+bool ListItemGroupLayoutAlgorithm::NeedMeasureItem()
 {
     if (forwardLayout_) {
+        if (childrenSize_ && needAdjustRefPos_) {
+            referencePos_ -= (totalMainSize_ - posMap_->GetPrevTotalHeight());
+            refPos_ -= (totalMainSize_ - posMap_->GetPrevTotalHeight());
+        }
         if (GreatNotEqual(headerMainSize_, endPos_ - referencePos_)) {
             return false;
         }
@@ -263,6 +268,10 @@ bool ListItemGroupLayoutAlgorithm::NeedMeasureItem() const
             return false;
         }
     } else {
+        if (childrenSize_ && needAdjustRefPos_) {
+            referencePos_ += (totalMainSize_ - posMap_->GetPrevTotalHeight());
+            refPos_ += (totalMainSize_ - posMap_->GetPrevTotalHeight());
+        }
         if (GreatNotEqual(headerMainSize_, endPos_ - (referencePos_ - totalMainSize_))) {
             return false;
         }
@@ -356,6 +365,11 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
             }
         }
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
+        if (forwardLayout_) {
+            ModifyReferencePos(GetLanesFloor(startIndex), startPos);
+        } else {
+            ModifyReferencePos(GetLanesCeil(endIndex), endPos);
+        }
         itemPosition_.clear();
     } else if (!NeedMeasureItem()) {
         itemPosition_.clear();
@@ -671,7 +685,7 @@ void ListItemGroupLayoutAlgorithm::MeasureEnd(LayoutWrapper* layoutWrapper,
 void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos)
 {
-    float currentEndPos = startPos;
+    float currentEndPos = childrenSize_ ? posMap_->GetPos(startIndex) : startPos;
     float currentStartPos = 0.0f;
     int32_t currentIndex = startIndex - 1;
     while (LessOrEqual(currentEndPos, endPos_ - referencePos_)) {
@@ -691,8 +705,8 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
         }
     }
 
-    currentStartPos = startPos - spaceWidth_;
-    currentIndex = startIndex;
+    currentStartPos = GetStartPosition();
+    currentIndex = GetStartIndex();
     float th = std::max(startPos_ - referencePos_, headerMainSize_);
     while (currentIndex > 0  && GreatNotEqual(currentStartPos, th)) {
         currentEndPos = currentStartPos;
@@ -710,7 +724,7 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
 void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos)
 {
-    float currentStartPos = endPos;
+    float currentStartPos = childrenSize_ ? posMap_->GetPos(endIndex) + posMap_->GetRowHeight(endIndex) : endPos;
     float currentEndPos = 0.0f;
     auto currentIndex = endIndex + 1;
     while (GreatOrEqual(currentStartPos, startPos_ - (referencePos_ - totalMainSize_))) {
@@ -729,15 +743,48 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
             targetIndex_.reset();
         }
     }
+    currentIndex = GetEndIndex();
+    currentEndPos = GetEndPosition();
+    while (childrenSize_ && LessOrEqual(currentEndPos, endPos_ - (referencePos_ - totalMainSize_))) {
+        currentStartPos = currentEndPos;
+        int32_t count = MeasureALineForward(layoutWrapper, layoutConstraint, currentIndex,
+            currentStartPos, currentEndPos);
+        if (count == 0) {
+            break;
+        }
+        if (currentIndex < (totalItemCount_ - 1)) {
+            currentEndPos += spaceWidth_;
+        }
+    }
+}
+
+void ListItemGroupLayoutAlgorithm::ModifyReferencePos(int32_t index, float pos)
+{
+    if (!childrenSize_ || !needAdjustRefPos_) {
+        return;
+    }
+    if (forwardLayout_ && Negative(referencePos_)) {
+        float offset = referencePos_ + pos;
+        float newReferencePos = offset - posMap_->GetPos(index);
+        refPos_ = refPos_ + newReferencePos - referencePos_;
+        referencePos_ = newReferencePos;
+    } else if (!forwardLayout_ && GreatNotEqual(referencePos_, prevContentMainSize_)) {
+        float offset = referencePos_ - posMap_->GetPrevTotalHeight() + pos - prevContentMainSize_;
+        float newReferencePos = offset + endPos_ - startPos_ + totalMainSize_ -
+            (posMap_->GetPos(index) + posMap_->GetRowHeight(index));
+        refPos_ = refPos_ + newReferencePos - referencePos_;
+        referencePos_ = newReferencePos;
+    }
 }
 
 void ListItemGroupLayoutAlgorithm::AdjustByPosMap()
 {
-    if (!childrenSize_) {
+    totalMainSize_ = posMap_->GetTotalHeight();
+    if (itemPosition_.empty()) {
         return;
     }
-    totalMainSize_ = posMap_->GetTotalHeight();
-    float offset = posMap_->GetGroupLayoutOffset(GetStartIndex(), itemPosition_.begin()->second.startPos);
+    float startPos = itemPosition_.begin()->second.startPos;
+    float offset = posMap_->GetGroupLayoutOffset(GetStartIndex(), startPos);
     for (auto& pos : itemPosition_) {
         pos.second.startPos += offset;
         pos.second.endPos += offset;

@@ -50,6 +50,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float VALUE = 50.0f;
 constexpr float STEP = 1.0f;
 constexpr float MIN = 0.0f;
@@ -1849,7 +1850,7 @@ HWTEST_F(SliderTestNg, SliderPaintPropertyTest001, TestSize.Level1)
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     sliderPaintProperty->UpdateTrackBorderRadius(SLIDER_MODEL_NG_TRACK_BORDER_RADIUS);
     sliderPaintProperty->UpdateSelectedBorderRadius(SLIDER_MODEL_NG_SELECTED_BORDER_RADIUS);
-    sliderPaintProperty->ToJsonValue(json);
+    sliderPaintProperty->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
     sliderPaintProperty->UpdateBlockBorderColor(TEST_COLOR);
     EXPECT_EQ(sliderPaintProperty->GetBlockBorderColorValue(Color::TRANSPARENT), TEST_COLOR);
@@ -1900,11 +1901,11 @@ HWTEST_F(SliderTestNg, SliderLayoutPropertyTest001, TestSize.Level1)
      * @tc.steps: step3. call ToJsonValue when SliderMode = OUTSET/INSET
      */
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    sliderLayoutProperty->ToJsonValue(json);
+    sliderLayoutProperty->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
     sliderLayoutProperty->ResetBlockSize();
-    sliderLayoutProperty->ToJsonValue(json);
+    sliderLayoutProperty->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
 }
 
@@ -4892,5 +4893,41 @@ HWTEST_F(SliderTestNg, SliderModelNgTest003, TestSize.Level2)
     sliderModelNG.SetThickness(rawPtr, Dimension(-1));
     sliderModelNG.SetThickness(rawPtr, Dimension(1));
     EXPECT_TRUE(sliderLayoutProperty->GetBlockSize().has_value());
+}
+
+/**
+ * @tc.name: SliderPatternTest014
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderPatternTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    sliderPattern->AttachToFrameNode(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    sliderPaintProperty->UpdateValue(VALUE);
+    sliderPaintProperty->UpdateMin(MIN);
+    sliderPaintProperty->UpdateMax(MAX);
+    sliderPaintProperty->UpdateStep(STEP);
+    auto node = [](SliderConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(VALUE, config.value_);
+        EXPECT_EQ(MIN, config.min_);
+        EXPECT_EQ(MAX, config.max_);
+        EXPECT_EQ(STEP, config.step_);
+        return nullptr;
+    };
+
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    sliderPattern->SetBuilderFunc(node);
+    sliderPattern->BuildContentModifierNode();
 }
 } // namespace OHOS::Ace::NG

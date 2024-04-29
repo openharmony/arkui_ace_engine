@@ -18,6 +18,7 @@
 #include <cstddef>
 
 #include "core/components/common/layout/grid_container_info.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/grid_container/grid_container_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -131,18 +132,18 @@ OffsetF GridProperty::GetContainerPosition()
     return OffsetF();
 }
 
-void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     const char* GRID_SIZE_TYPE[] = { "default", "sx", "sm", "md", "lg" };
     if (!gridInfo_) {
         auto item = std::find_if(typedPropertySet_.begin(), typedPropertySet_.end(),
             [](const GridTypedProperty& p) { return p.type_ == GridSizeType::UNDEFINED; });
         if (item == typedPropertySet_.end()) {
-            json->Put("gridSpan", 1);
-            json->Put("gridOffset", 0);
+            json->PutExtAttr("gridSpan", 1, filter);
+            json->PutExtAttr("gridOffset", 0, filter);
         } else {
-            json->Put("gridSpan", item->span_);
-            json->Put("gridOffset", item->offset_);
+            json->PutExtAttr("gridSpan", item->span_, filter);
+            json->PutExtAttr("gridOffset", item->offset_, filter);
         }
 
         auto useSizeType = JsonUtil::Create(true);
@@ -152,13 +153,13 @@ void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
             jsonValue->Put("offset", item.offset_);
             useSizeType->Put(GRID_SIZE_TYPE[static_cast<int32_t>(item.type_)], jsonValue);
         }
-        json->Put("useSizeType", useSizeType);
+        json->PutExtAttr("useSizeType", useSizeType, filter);
         return;
     }
 
     auto gridOffset = gridInfo_->GetOffset(GridSizeType::UNDEFINED);
-    json->Put("gridSpan", static_cast<int32_t>(gridInfo_->GetColumns()));
-    json->Put("gridOffset", gridOffset == -1 ? 0 : gridOffset);
+    json->PutExtAttr("gridSpan", static_cast<int32_t>(gridInfo_->GetColumns()), filter);
+    json->PutExtAttr("gridOffset", gridOffset == -1 ? 0 : gridOffset, filter);
 
     auto useSizeType = JsonUtil::Create(true);
     auto index = static_cast<int32_t>(GridSizeType::XS);
@@ -169,7 +170,7 @@ void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonValue->Put("offset", gridInfo_->GetOffset(type));
         useSizeType->Put(GRID_SIZE_TYPE[index], jsonValue);
     }
-    json->Put("useSizeType", useSizeType);
+    json->PutExtAttr("useSizeType", useSizeType, filter);
 }
 
 } // namespace OHOS::Ace::NG

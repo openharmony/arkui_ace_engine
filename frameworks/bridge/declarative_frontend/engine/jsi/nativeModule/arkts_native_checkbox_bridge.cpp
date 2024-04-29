@@ -24,7 +24,7 @@ const char* CHECKBOX_NODEPTR_OF_UINODE = "nodePtr_";
 panda::Local<panda::JSValueRef> JsCheckboxChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     auto vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -72,8 +72,8 @@ ArkUINativeModuleValue CheckboxBridge::SetMark(ArkUIRuntimeCallInfo* runtimeCall
         strokeWidth = theme->GetCheckStroke();
     }
 
-    GetArkUINodeModifiers()->getCheckboxModifier()->setMark(
-        nativeNode, strokeColor.GetValue(), size.Value(), strokeWidth.Value());
+    GetArkUINodeModifiers()->getCheckboxModifier()->setMark(nativeNode, strokeColor.GetValue(), size.Value(),
+        static_cast<int>(size.Unit()), strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 

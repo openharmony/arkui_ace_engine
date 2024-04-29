@@ -53,7 +53,7 @@ void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, value);
 }
 
-void TextClockModelNG::SetFontFeature(const FONT_FEATURES_MAP& value)
+void TextClockModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFeature, value);
 }
@@ -154,5 +154,12 @@ void TextClockModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
 void TextClockModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFamily, value, frameNode);
+}
+
+void TextClockModelNG::SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
 }
 } // namespace OHOS::Ace::NG

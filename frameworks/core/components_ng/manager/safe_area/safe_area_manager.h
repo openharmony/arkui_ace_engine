@@ -184,6 +184,16 @@ public:
         return safeDistance.ConvertToPx();
     }
 
+    void SetLastKeyboardPoistion(float position)
+    {
+        lastKeyboardY_ = position;
+    }
+
+    float GetLastKeyboardPoistion() const
+    {
+        return lastKeyboardY_;
+    }
+
 private:
     bool isAtomicService_ = false;
 
@@ -240,6 +250,8 @@ private:
     std::set<WeakPtr<FrameNode>, DepthCompare> needExpandNodes_;
     // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
+
+    float lastKeyboardY_ = 0.0f;
 
     int32_t rootMeasureNodeId_ = 0;
 

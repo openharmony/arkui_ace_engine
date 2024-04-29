@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SYMBOL_SYMBOL_MODEL_NG_H
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/symbol/symbol_model.h"
 
 namespace OHOS::Ace::NG {
@@ -29,6 +30,14 @@ public:
     void SetFontColor(std::vector<Color>& symbolColor) override;
     void SetSymbolEffect(const std::uint32_t effectStrategy) override;
     void SetClipEdge() override;
+    void SetSymbolEffectOptions(NG::SymbolEffectOptions& symbolEffectOptions) override;
+
+    static void SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
+    static void SetRenderingStrategy(FrameNode* frameNode, const std::uint32_t renderingStrategy);
+    static void SetSymbolEffect(FrameNode* frameNode, const std::uint32_t effectStrategy);
+    static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode);
 };
 } // namespace OHOS::Ace::NG
 

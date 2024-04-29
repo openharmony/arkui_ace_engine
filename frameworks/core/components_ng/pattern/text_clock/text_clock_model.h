@@ -39,7 +39,7 @@ public:
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
-    virtual void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) = 0;
+    virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void InitFontDefault(const TextStyle& textStyle) = 0;
     
 private:

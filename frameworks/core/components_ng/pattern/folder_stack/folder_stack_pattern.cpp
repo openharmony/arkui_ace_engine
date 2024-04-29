@@ -170,7 +170,8 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
     });
     lastFoldStatus_ = currentFoldStatus_;
     TAG_LOGD(AceLogTag::ACE_FOLDER_STACK, "the last folding state was:%{public}d", lastFoldStatus_);
-    taskExecutor->PostDelayedTask(foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME);
+    taskExecutor->PostDelayedTask(
+        foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIFolderStackStatusChange");
 }
 
 void FolderStackPattern::OnFolderStateChangeSend(FoldStatus foldStatus)

@@ -210,8 +210,9 @@ void JSTabs::Create(const JSCallbackInfo& info)
     RefPtr<SwiperController> swiperController;
     int32_t index = -1;
     JSRef<JSVal> changeEventVal;
-    if (info[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto jsValue = info[0];
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> val = obj->GetProperty("barPosition");
         if (val->IsNumber()) {
             auto barPositionVal = val->ToNumber<int32_t>();
@@ -294,8 +295,9 @@ void JSTabs::SetBarMode(const JSCallbackInfo& info)
         TabsModel::GetInstance()->SetTabBarMode(barMode);
         return;
     }
-    if (info[0]->IsString()) {
-        barMode = ConvertStrToTabBarMode(info[0]->ToString());
+    auto barModeInfo = info[0];
+    if (barModeInfo->IsString()) {
+        barMode = ConvertStrToTabBarMode(barModeInfo->ToString());
     }
     if (barMode == TabBarMode::SCROLLABLE) {
         if (info.Length() > 1 && info[1]->IsObject()) {
@@ -335,15 +337,16 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
     }
     CalcDimension height = Dimension(-1.0, DimensionUnit::VP);
     bool adaptiveHeight = false;
-    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+    auto barHeightInfo = info[0];
+    if (barHeightInfo->IsString() && barHeightInfo->ToString() == "auto") {
         adaptiveHeight = true;
     } else {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            if (!ParseJsDimensionVpNG(info[0], height)) {
+            if (!ParseJsDimensionVpNG(barHeightInfo, height)) {
                 height = Dimension(-1.0, DimensionUnit::VP);
             }
         } else {
-            ParseJsDimensionVp(info[0], height);
+            ParseJsDimensionVp(barHeightInfo, height);
         }
     }
     TabsModel::GetInstance()->SetBarAdaptiveHeight(adaptiveHeight);
@@ -356,10 +359,11 @@ void JSTabs::SetWidth(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsString() && info[0]->ToString().empty()) {
+    auto widthInfo = info[0];
+    if (widthInfo->IsString() && widthInfo->ToString().empty()) {
         return;
     }
-    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+    if (widthInfo->IsString() && widthInfo->ToString() == "auto") {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         TabsModel::GetInstance()->SetWidthAuto(true);
         return;
@@ -374,10 +378,11 @@ void JSTabs::SetHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsString() && info[0]->ToString().empty()) {
+    auto heightInfo = info[0];
+    if (heightInfo->IsString() && heightInfo->ToString().empty()) {
         return;
     }
-    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+    if (heightInfo->IsString() && heightInfo->ToString() == "auto") {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         TabsModel::GetInstance()->SetHeightAuto(true);
         return;
@@ -393,12 +398,17 @@ void JSTabs::SetIndex(int32_t index)
 
 void JSTabs::SetAnimationDuration(const JSCallbackInfo& info)
 {
-    if (info.Length() <= 0 || (!info[0]->IsNull() && !info[0]->IsNumber()) ||
-        (info[0]->IsNull() && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+    if (info.Length() <= 0) {
         TabsModel::GetInstance()->SetAnimationDuration(-1);
         return;
     }
-    auto value = info[0]->IsNumber() ? info[0]->ToNumber<int32_t>() : 0;
+    auto animationDurationInfo = info[0];
+    if ((!animationDurationInfo->IsNull() && !animationDurationInfo->IsNumber()) ||
+        (animationDurationInfo->IsNull() && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+        TabsModel::GetInstance()->SetAnimationDuration(-1);
+        return;
+    }
+    auto value = animationDurationInfo->IsNumber() ? animationDurationInfo->ToNumber<int32_t>() : 0;
     TabsModel::GetInstance()->SetAnimationDuration(value);
 }
 
@@ -451,26 +461,30 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
     CHECK_NULL_VOID(tabTheme);
 
     if (info.Length() > 0) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        if (info[0]->IsNull()) {
+        auto dividerInfo = info[0];
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        if (dividerInfo->IsObject()) {
+            obj = JSRef<JSObject>::Cast(dividerInfo);
+        }
+        if (dividerInfo->IsNull()) {
             divider.isNull = true;
         } else {
-            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("strokeWidth"), dividerStrokeWidth) ||
+            if (!dividerInfo->IsObject() || !ParseJsDimensionVp(obj->GetProperty("strokeWidth"), dividerStrokeWidth) ||
                 dividerStrokeWidth.Value() < 0.0f || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
                 divider.strokeWidth.Reset();
             } else {
                 divider.strokeWidth = dividerStrokeWidth;
             }
-            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            if (!dividerInfo->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
                 divider.color = tabTheme->GetDividerColor();
             }
-            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("startMargin"), dividerStartMargin) ||
+            if (!dividerInfo->IsObject() || !ParseJsDimensionVp(obj->GetProperty("startMargin"), dividerStartMargin) ||
                 dividerStartMargin.Value() < 0.0f || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.startMargin.Reset();
             } else {
                 divider.startMargin = dividerStartMargin;
             }
-            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("endMargin"), dividerEndMargin) ||
+            if (!dividerInfo->IsObject() || !ParseJsDimensionVp(obj->GetProperty("endMargin"), dividerEndMargin) ||
                 dividerEndMargin.Value() < 0.0f || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.endMargin.Reset();
             } else {
@@ -554,12 +568,14 @@ void JSTabs::SetCustomContentTransition(const JSCallbackInfo& info)
         return;
     }
 
-    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+    auto customContentTransitionInfo = info[0];
+    if (customContentTransitionInfo->IsUndefined() || !customContentTransitionInfo->IsFunction()) {
         TabsModel::GetInstance()->SetIsCustomAnimation(false);
         return;
     }
 
-    RefPtr<JsTabsFunction> jsCustomAnimationFunc = AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    RefPtr<JsTabsFunction> jsCustomAnimationFunc =
+        AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(customContentTransitionInfo));
     auto onCustomAnimation = [execCtx = info.GetExecutionContext(), func = std::move(jsCustomAnimationFunc)](
                                  int32_t from, int32_t to) -> TabContentAnimatedTransition {
         TabContentAnimatedTransition transitionInfo;

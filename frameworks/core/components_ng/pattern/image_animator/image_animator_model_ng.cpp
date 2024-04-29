@@ -32,6 +32,9 @@ void ImageAnimatorModelNG::Create()
     if (frameNode->GetChildren().empty()) {
         auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(imageNode);
+        auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+        CHECK_NULL_VOID(imagePattern);
+        imagePattern->SetImageAnimator(true);
         auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);

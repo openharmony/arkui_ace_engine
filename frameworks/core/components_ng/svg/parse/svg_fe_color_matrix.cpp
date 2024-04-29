@@ -63,12 +63,11 @@ SvgFeColorMatrix::SvgFeColorMatrix() : SvgFe()
 void SvgFeColorMatrix::MakeMatrix(const std::string& value)
 {
     std::vector<float> matrix;
-    StringUtils::StringSplitter(value, ' ', matrix);
-    if (matrix.empty()) {
-        StringUtils::StringSplitter(value, ',', matrix);
+    if (!StringUtils::ParseStringToArray(value, matrix)) {
+        return;
     }
-    // when matrix length < 20, then return
-    if (matrix.size() < matrix_.size()) {
+    // when matrix length not equal 20, then return
+    if (matrix.size() != matrix_.size()) {
         return;
     }
     matrix_ = matrix;

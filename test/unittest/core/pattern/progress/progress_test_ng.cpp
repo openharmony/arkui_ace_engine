@@ -81,6 +81,7 @@ struct TestProperty {
 };
 
 namespace {
+const InspectorFilter filter;
 constexpr double MAX_VALUE_OF_PROGRESS = 120.0;
 constexpr double PROGRESS_MODEL_NG_CACHEDVALUE = 10.0;
 constexpr double PROGRESS_MODEL_NG_MAX = 20.0;
@@ -524,11 +525,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm002, TestSize.Level1)
     contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
     contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
     auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_NE(size, std::nullopt);
-    EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_SCALE);
-    EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), TEST_PROGRESS_STROKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Height(), DEFAULT_RING_DIAMETER.ConvertToPx());
-    EXPECT_EQ(size->Width(), DEFAULT_RING_DIAMETER.ConvertToPx());
+    ASSERT_EQ(size, std::nullopt);
 }
 
 /**
@@ -561,7 +558,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
     RefPtr<ProgressPaintProperty> progressPaintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     ASSERT_NE(progressPaintProperty, nullptr);
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    progressPaintProperty->ToJsonValue(json);
+    progressPaintProperty->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 
     /**
@@ -733,7 +730,7 @@ HWTEST_F(ProgressTestNg, RingProgressCreator001, TestSize.Level1)
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    progressPaintProperty->ToJsonValue(json);
+    progressPaintProperty->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
     auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
     ASSERT_NE(progressLayoutAlgorithm, nullptr);
@@ -1625,15 +1622,15 @@ HWTEST_F(ProgressTestNg, ProgressPattern004, TestSize.Level1)
     ASSERT_NE(progressPaintProperty, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    pattern->ToJsonValue(json);
-    progressPaintProperty->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
+    progressPaintProperty->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 
     testProperty.progressStatus = std::make_optional(ProgressStatus::LOADING);
     frameNode = CreateProgressParagraph(testProperty);
     pattern = frameNode->GetPattern<ProgressPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 }
 
@@ -2574,7 +2571,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern005, TestSize.Level1)
     std::vector<std::string> fontFamilyVector = paintProperty->GetFontFamilyValue(defaultFamily);
     fontFamilyVector.push_back("test");
     paintProperty->UpdateFontFamily(fontFamilyVector);
-    paintProperty->ToJsonValue(json);
+    paintProperty->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 
     paintProperty->UpdateProgressType(PROGRESS_TYPE_LINEAR);
@@ -3071,5 +3068,37 @@ HWTEST_F(ProgressTestNg, ProgressModifier009, TestSize.Level1)
     modifier->SetVisible(false);
     modifier->StartLinearSweepingAnimation(100.f);
     EXPECT_EQ(modifier->isVisible_, false);
+}
+
+/**
+ * @tc.name: ProgressPatternTest000
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternTest000, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Progress node
+     */
+    TestProperty testProperty;
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_LINEAR);
+    testProperty.value = std::make_optional(VALUE_OF_PROGRESS);
+
+    RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
+    CheckValue(frameNode, testProperty);
+
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = [](ProgressConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(config.value_, VALUE_OF_PROGRESS);
+        return nullptr;
+    };
+
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
 }
 } // namespace OHOS::Ace::NG

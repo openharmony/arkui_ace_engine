@@ -25,6 +25,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr uint32_t DELAY_TIME = 3000;
+}
 SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : session_(session)
 {
     boundsChangedCallback_ = [weakThis = WeakClaim(this)](const Rosen::Vector4f& bounds) {
@@ -59,6 +62,21 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
     session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+}
+
+void SystemWindowScene::OnVisibleChange(bool visible)
+{
+    CHECK_NULL_VOID(session_);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "system window scene will change visible to %{public}s",
+            visible ? "true" : "false");
+    if (visible && session_->NeedCheckContextTransparent()) {
+        PostCheckContextTransparentTask();
+    } else if (session_->NeedCheckContextTransparent()) {
+        checkContextTransparentTask_.Cancel();
+    }
+    if (SystemProperties::GetFaultInjectEnabled() && session_->NeedCheckContextTransparent()) {
+        PostFaultInjectTask();
+    }
 }
 
 void SystemWindowScene::OnAttachToFrameNode()
@@ -105,6 +123,18 @@ void SystemWindowScene::OnAttachToFrameNode()
     RegisterFocusCallback();
     RegisterEventCallback();
     RegisterResponseRegionCallback();
+
+    if (session_->NeedCheckContextTransparent()) {
+        PostCheckContextTransparentTask();
+    }
+}
+
+void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(session_);
+    if (session_->NeedCheckContextTransparent()) {
+        checkContextTransparentTask_.Cancel();
+    }
 }
 
 void SystemWindowScene::RegisterEventCallback()
@@ -136,8 +166,7 @@ void SystemWindowScene::RegisterEventCallback()
                 return;
             }
                 WindowSceneHelper::InjectPointerEvent(host, PointerEvent);
-            },
-                TaskExecutor::TaskType::UI);
+            }, "ArkUIWindowInjectPointerEvent", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifySystemSessionPointerEventFunc(std::move(pointerEventCallback));
 
@@ -204,12 +233,24 @@ void SystemWindowScene::RegisterFocusCallback()
             auto self = weakThis.Upgrade();
             CHECK_NULL_VOID(self);
             self->FocusViewShow();
-        },
-            TaskExecutor::TaskType::UI);
+        }, "ArkUIWindowFocusViewShow", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
 
-    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {};
+    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis]() {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            CHECK_NULL_VOID(self->GetSession());
+            pipeline->RestoreDefault(self->GetSession()->GetPersistentId());
+        },
+            "ArkUIWindowUnfocus", TaskExecutor::TaskType::UI);
+    };
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }
 
@@ -217,6 +258,10 @@ void SystemWindowScene::LostViewFocus()
 {
     TAG_LOGI(
         AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d lost focus", GetFrameName().c_str(), GetFrameId());
+    auto focusHub = GetFocusHub();
+    if (!focusHub || !focusHub->IsCurrentFocus()) {
+        return;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto screenNode = pipeline->GetScreenNode();
@@ -224,5 +269,45 @@ void SystemWindowScene::LostViewFocus()
     auto screenNodeFocusHub = screenNode->GetFocusHub();
     CHECK_NULL_VOID(screenNodeFocusHub);
     screenNodeFocusHub->LostFocus(BlurReason::VIEW_SWITCH);
+}
+
+void SystemWindowScene::PostCheckContextTransparentTask()
+{
+    checkContextTransparentTask_.Reset([weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        CHECK_NULL_VOID(self->GetHost());
+        CHECK_NULL_VOID(self->session_);
+        if (self->session_->NeedCheckContextTransparent() && self->GetHost()->IsContextTransparent()) {
+            self->session_->NotifyContextTransparent();
+        }
+    });
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(std::move(checkContextTransparentTask_), TaskExecutor::TaskType::UI,
+        DELAY_TIME, "ArkUIWindowCheckContextTransparent");
+}
+
+void SystemWindowScene::PostFaultInjectTask()
+{
+    auto task = ([weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+        renderContext->SetOpacity(0.0f);
+        host->MarkDirtyNode();
+    });
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        std::move(task), TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIWindowFaultInject");
 }
 } // namespace OHOS::Ace::NG

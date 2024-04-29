@@ -83,6 +83,16 @@ public:
         return imageSize_;
     }
 
+    void SetContextId(uint32_t id)
+    {
+        contextId_ = id;
+    }
+    
+    uint32_t GetContextId()
+    {
+        return contextId_;
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderImage);
 private:
     napi_value OnClose();
@@ -111,6 +121,7 @@ private:
     double width_ = 0;
     double height_ = 0;
     int32_t instanceId_ = 0;
+    uint32_t contextId_ = 0;
 };
 
 } // namespace OHOS::Ace::Framework

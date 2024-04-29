@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -98,49 +99,16 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
     switch (point.type) {
         case TouchType::MOVE:
         case TouchType::DOWN:
-        case TouchType::UP:
         case TouchType::CANCEL: {
             if (activeRecognizer_ && activeRecognizer_->CheckTouchId(point.id)) {
-                auto saveRecognizer = activeRecognizer_;
-                activeRecognizer_->SetEventImportGestureGroup(WeakClaim(this));
-                activeRecognizer_->HandleEvent(point);
-                AddGestureProcedure(point, saveRecognizer);
-                int32_t count = 0;
-                // if activeRecognizer_ change to another recognizer, call the handleEvent function of the new
-                // recognizer.
-                while (activeRecognizer_ && saveRecognizer != activeRecognizer_ &&
-                       activeRecognizer_->CheckTouchId(point.id) &&
-                       count < static_cast<int32_t>(recognizers_.size()) - 1) {
-                    saveRecognizer = activeRecognizer_;
-                    activeRecognizer_->SetEventImportGestureGroup(WeakClaim(this));
-                    activeRecognizer_->HandleEvent(point);
-                    AddGestureProcedure(point, saveRecognizer);
-                    count++;
-                }
-                // if activeRecognizer_ has changed or be empty, do not dispatch to other recognizers
-                if (count > 0) {
-                    break;
-                }
-                auto blockRecognizer = UnBlockGesture();
-                // ensure do not dispatch same recognizer twice
-                if (!blockRecognizer || blockRecognizer == saveRecognizer ||
-                    !blockRecognizer->CheckTouchId(point.id)) {
-                    break;
-                }
-                blockRecognizer->SetEventImportGestureGroup(WeakClaim(this));
-                blockRecognizer->HandleEvent(point);
-                AddGestureProcedure(point, blockRecognizer);
+                DispatchEventToActiveRecognizers(point);
             } else {
-                auto copyRecognizers = recognizers_;
-                for (const auto& recognizer : copyRecognizers) {
-                    if (recognizer && recognizer->CheckTouchId(point.id)) {
-                        auto saveRecognizer = recognizer;
-                        recognizer->SetEventImportGestureGroup(WeakClaim(this));
-                        recognizer->HandleEvent(point);
-                        AddGestureProcedure(point, saveRecognizer);
-                    }
-                }
+                DispatchEventToAllRecognizers(point);
             }
+            break;
+        }
+        case TouchType::UP: {
+            DispatchEventToAllRecognizers(point);
             break;
         }
         default:
@@ -339,5 +307,75 @@ void ExclusiveRecognizer::CleanRecognizerState()
         disposal_ = GestureDisposal::NONE;
     }
     activeRecognizer_ = nullptr;
+}
+
+void ExclusiveRecognizer::DispatchEventToActiveRecognizers(const TouchEvent& point)
+{
+    if (point.type == TouchType::DOWN) {
+        auto node = activeRecognizer_->GetAttachedNode().Upgrade();
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "ExclusiveRecognizer receive down event has activeRecognizer, type: %{public}s, refereeState: "
+            "%{public}d, node tag = %{public}s, id = %{public}s",
+            AceType::TypeName(activeRecognizer_), activeRecognizer_->GetRefereeState(),
+            node ? node->GetTag().c_str() : "null",
+            node ? std::to_string(node->GetId()).c_str() : "invalid");
+    }
+    auto saveRecognizer = activeRecognizer_;
+    activeRecognizer_->SetEventImportGestureGroup(WeakClaim(this));
+    activeRecognizer_->HandleEvent(point);
+    AddGestureProcedure(point, saveRecognizer);
+    int32_t count = 0;
+    // if activeRecognizer_ change to another recognizer, call the handleEvent function of the new
+    // recognizer.
+    while (activeRecognizer_ && saveRecognizer != activeRecognizer_ &&
+            activeRecognizer_->CheckTouchId(point.id) &&
+            count < static_cast<int32_t>(recognizers_.size()) - 1) {
+        saveRecognizer = activeRecognizer_;
+        activeRecognizer_->SetEventImportGestureGroup(WeakClaim(this));
+        activeRecognizer_->HandleEvent(point);
+        AddGestureProcedure(point, saveRecognizer);
+        count++;
+    }
+    // if activeRecognizer_ has changed or be empty, do not dispatch to other recognizers
+    if (count > 0) {
+        return;
+    }
+    auto blockRecognizer = UnBlockGesture();
+    // ensure do not dispatch same recognizer twice
+    if (!blockRecognizer || blockRecognizer == saveRecognizer ||
+        !blockRecognizer->CheckTouchId(point.id)) {
+        return;
+    }
+    blockRecognizer->SetEventImportGestureGroup(WeakClaim(this));
+    blockRecognizer->HandleEvent(point);
+    AddGestureProcedure(point, blockRecognizer);
+    return;
+}
+
+void ExclusiveRecognizer::DispatchEventToAllRecognizers(const TouchEvent& point)
+{
+    auto copyRecognizers = recognizers_;
+    for (const auto& recognizer : copyRecognizers) {
+        if (recognizer && recognizer->CheckTouchId(point.id)) {
+            auto saveRecognizer = recognizer;
+            recognizer->SetEventImportGestureGroup(WeakClaim(this));
+            recognizer->HandleEvent(point);
+            AddGestureProcedure(point, saveRecognizer);
+        } else if (!recognizer) {
+            if (point.type == TouchType::DOWN) {
+                TAG_LOGI(AceLogTag::ACE_GESTURE,
+                    "ExclusiveRecognizer receive down event has no activeRecognizer recognizer is invalid");
+            }
+        } else {
+            if (point.type == TouchType::DOWN) {
+                auto node = recognizer->GetAttachedNode().Upgrade();
+                TAG_LOGI(AceLogTag::ACE_GESTURE,
+                    "ExclusiveRecognizer receive down event has no activeRecognizer recognizer is not in id: "
+                    "%{public}d touchTestResult, node tag = %{public}s, id = %{public}s",
+                    point.id, node ? node->GetTag().c_str() : "null",
+                    node ? std::to_string(node->GetId()).c_str() : "invalid");
+            }
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

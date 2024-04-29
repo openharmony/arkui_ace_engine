@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class SearchPattern : public Pattern {
     DECLARE_ACE_TYPE(SearchPattern, Pattern);
@@ -100,7 +101,7 @@ public:
 
     bool HandleInputChildOnFocus() const;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     static std::string ConvertCopyOptionsToString(CopyOptions copyOptions)
     {
@@ -149,6 +150,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
+    void SetAccessibilityAction();
     void InitButtonAndImageClickEvent();
     void InitCancelButtonClickEvent();
     void InitTextFieldClickEvent();
@@ -184,11 +186,11 @@ private:
     void HandleButtonMouseEvent(bool isHover, int32_t childId);
     void ClearButtonStyle(int32_t childId);
 
-    void ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) const;
-    void ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) const;
-    void ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json) const;
-    void ToJsonValueForSearchButtonOption(std::unique_ptr<JsonValue>& json) const;
-    void ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueForSearchButtonOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueForCursor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
         int32_t duration, const RefPtr<Curve>& curve);

@@ -54,7 +54,7 @@
 
 
 // define just once to get just one Symbol
-const __IS_OBSERVED_PROXIED = Symbol("_____is_observed_proxied__");
+const __IS_OBSERVED_PROXIED = Symbol('_____is_observed_proxied__');
 
 type Constructor = { new(...args: any[]): any };
 
@@ -62,7 +62,7 @@ function Observed<T extends Constructor>(BaseClass: T): Constructor {
   stateMgmtConsole.debug(`@Observed class decorator: Overwriting constructor for '${BaseClass.name}', gets wrapped inside ObservableObject proxy.`);
 
   // prevent use of V3 @track inside V2 @Observed class
-  if (BaseClass.prototype && Reflect.has(BaseClass.prototype, ObserveV3.SYMBOL_REFS)) {
+  if (BaseClass.prototype && Reflect.has(BaseClass.prototype, ObserveV2.SYMBOL_REFS)) {
     const error = `'@Observed class ${BaseClass?.name}': invalid use of V3 @track decorator inside V2 @Observed class. Need to fix class definition to use @Track.`;
     stateMgmtConsole.error(error);
     throw new Error(error);
@@ -104,11 +104,11 @@ function Observed<T extends Constructor>(BaseClass: T): Constructor {
 type PropertyReadCbFunc = (readObject: Object, readPropName: string, isTracked: boolean) => void;
 
 class SubscribableHandler {
-  static readonly SUBSCRIBE = Symbol("_____subscribe__");
-  static readonly UNSUBSCRIBE = Symbol("_____unsubscribe__")
-  static readonly COUNT_SUBSCRIBERS = Symbol("____count_subscribers__")
-  static readonly SET_ONREAD_CB = Symbol("_____set_onread_cb__");
-  static readonly RAW_THIS = Symbol("_____raw_this");
+  static readonly SUBSCRIBE = Symbol('_____subscribe__');
+  static readonly UNSUBSCRIBE = Symbol('_____unsubscribe__');
+  static readonly COUNT_SUBSCRIBERS = Symbol('____count_subscribers__');
+  static readonly SET_ONREAD_CB = Symbol('_____set_onread_cb__');
+  static readonly RAW_THIS = Symbol('_____raw_this');
 
   private owningProperties_: Set<number>;
   private readCbFunc_?: PropertyReadCbFunc;
@@ -131,7 +131,7 @@ class SubscribableHandler {
 
   addOwningProperty(subscriber: IPropertySubscriber): void {
     if (subscriber) {
-      stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
+      stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`);
       this.owningProperties_.add(subscriber.id__());
     } else {
       stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber. - Internal error?`);
@@ -146,14 +146,14 @@ class SubscribableHandler {
   }
 
   public removeOwningPropertyById(subscriberId: number): void {
-    stateMgmtConsole.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`)
+    stateMgmtConsole.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`);
     this.owningProperties_.delete(subscriberId);
   }
 
   protected notifyObjectPropertyHasChanged(propName: string, newValue: any) {
-    stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`)
+    stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`);
     this.owningProperties_.forEach((subscribedId) => {
-      var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
+      const owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId);
       if (!owningProperty) {
         stateMgmtConsole.warn(`SubscribableHandler: notifyObjectPropertyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
         return;
@@ -176,9 +176,9 @@ class SubscribableHandler {
   }
 
   protected notifyTrackedObjectPropertyHasChanged(propName: string): void {
-    stateMgmtConsole.debug(`SubscribableHandler: notifyTrackedObjectPropertyHasChanged '@Track ${propName}'.`)
+    stateMgmtConsole.debug(`SubscribableHandler: notifyTrackedObjectPropertyHasChanged '@Track ${propName}'.`);
     this.owningProperties_.forEach((subscribedId) => {
-      var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
+      const owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId);
       if (owningProperty && 'onTrackedObjectPropertyHasChangedPU' in owningProperty) {
         // PU code path with observed object property change tracking optimization
         (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).onTrackedObjectPropertyHasChangedPU(this, propName);
@@ -200,10 +200,10 @@ class SubscribableHandler {
         return target;
         break;
       case SubscribableHandler.COUNT_SUBSCRIBERS:
-        return this.owningProperties_.size
+        return this.owningProperties_.size;
         break;
-      case ObserveV3.SYMBOL_REFS:
-      case ObserveV3.V3_DECO_META:
+      case ObserveV2.SYMBOL_REFS:
+      case ObserveV2.V2_DECO_META:
         // return result unmonitored
         return Reflect.get(target, property, receiver);
         break;
@@ -212,7 +212,7 @@ class SubscribableHandler {
         let propertyStr : string = String(property);
         if (this.readCbFunc_ && typeof result !== 'function' && this.obSelf_ != undefined) {
           let isTracked = this.isPropertyTracked(target, propertyStr);
-          stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${isTracked ? "@Track " : ""}${propertyStr}' notifying read.`);
+          stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${isTracked ? '@Track ' : ''}${propertyStr}' notifying read.`);
           this.readCbFunc_.call(this.obSelf_, receiver, propertyStr, isTracked);
         } else {
           // result is function or in compatibility mode (in compat mode cbFunc will never be set)
@@ -252,7 +252,7 @@ class SubscribableHandler {
             return true;
           }
         } catch (error) {
-          ArkTools.print("SubscribableHandler: set", target);
+          ArkTools.print('SubscribableHandler: set', target);
           stateMgmtConsole.error(`An error occurred in SubscribableHandler set, target type is: ${typeof target}, ${error.message}`);
           throw error;
         }
@@ -286,15 +286,15 @@ class SubscribableMapSetHandler extends SubscribableHandler {
   // In-place Map/Set modification functions
   mutatingFunctions = new Set([
     /*Map functions*/
-    "set", "clear", "delete",
+    'set', 'clear', 'delete',
     /*Set functions*/
-    "add", "clear", "delete",
+    'add', 'clear', 'delete',
   ]);
   proxiedFunctions = new Set([
     /*Map functions*/
-    "set",
+    'set',
     /*Set functions*/
-    "add"
+    'add'
   ]);
 
   /**
@@ -343,9 +343,9 @@ class SubscribableDateHandler extends SubscribableHandler {
     super(owningProperty);
   }
 
-  dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
-    "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
-    "setUTCSeconds", "setUTCMilliseconds"]);
+  dateSetFunctions = new Set(['setFullYear', 'setMonth', 'setDate', 'setHours', 'setMinutes', 'setSeconds',
+    'setMilliseconds', 'setTime', 'setUTCFullYear', 'setUTCMonth', 'setUTCDate', 'setUTCHours', 'setUTCMinutes',
+    'setUTCSeconds', 'setUTCMilliseconds']);
 
   /**
    * Get trap for Date type proxy
@@ -358,7 +358,7 @@ class SubscribableDateHandler extends SubscribableHandler {
   public get(target, property): any {
     let ret = super.get(target, property);
 
-    if (typeof ret === "function") {
+    if (typeof ret === 'function') {
       if (this.dateSetFunctions.has(property)) {
         const self = this;
         return function () {
@@ -366,7 +366,7 @@ class SubscribableDateHandler extends SubscribableHandler {
           let result = ret.apply(this, arguments);
           self.notifyObjectPropertyHasChanged(property.toString(), this);
           return result;
-          // bind "this" to target inside the function
+          // bind 'this' to target inside the function
         }.bind(target)
       }
       return ret.bind(target);
@@ -381,10 +381,10 @@ class SubscribableArrayHandler extends SubscribableHandler {
   }
 
   // In-place array modification functions
-  mutatingFunctions = new Set(["splice", "copyWithin", "fill", "reverse", "sort"]);
+  mutatingFunctions = new Set(['splice', 'copyWithin', 'fill', 'reverse', 'sort']);
   // 'splice' and 'pop' self modifies the array, returns deleted array items
   // means, alike other self-modifying functions, splice does not return the array itself.
-  specialFunctions = new Set(["splice", "pop"]);
+  specialFunctions = new Set(['splice', 'pop']);
 
   /**
    * Get trap for Array type proxy
@@ -401,7 +401,7 @@ class SubscribableArrayHandler extends SubscribableHandler {
     }
 
     let ret = super.get(target, property, receiver);
-    if (ret && typeof ret === "function") {
+    if (ret && typeof ret === 'function') {
       const self = this;
       const prop = property.toString();
       if (self.mutatingFunctions.has(prop)) {
@@ -494,7 +494,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    * this static function instead.
    */
   static IsObservedObject(obj: any): boolean {
-    return (obj && (typeof obj === "object") && Reflect.has(obj, ObservedObject.__IS_OBSERVED_OBJECT));
+    return (obj && (typeof obj === 'object') && Reflect.has(obj, ObservedObject.__IS_OBSERVED_OBJECT));
   }
 
   /**
@@ -573,12 +573,12 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    */
   public static tracePrototypeChainOfObject(object: Object | undefined): string {
     let proto = Object.getPrototypeOf(object);
-    let result = "";
-    let sepa = "";
+    let result = '';
+    let sepa = '';
     while (proto) {
       result += `${sepa}${ObservedObject.tracePrototype(proto)}`;
       proto = Object.getPrototypeOf(proto);
-      sepa = ",\n";
+      sepa = ',\n';
     }
 
     return result;
@@ -590,14 +590,14 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    */
   public static tracePrototype(proto: any) {
     if (!proto) {
-      return "";
+      return '';
     }
 
     let result = `${proto.constructor && proto.constructor.name ? proto.constructor.name : '<no class>'}: `;
-    let sepa = "";
+    let sepa = '';
     for (let name of Object.getOwnPropertyNames(proto)) {
       result += `${sepa}${name}`;
-      sepa = ", ";
+      sepa = ', ';
     };
     return result;
   }
@@ -609,7 +609,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    * @returns prototype of the @Observed decorated class or 'proto' parameter if not  @Observed decorated
    */
   public static getPrototypeOfObservedClass(proto: Object): Object {
-    return (proto.constructor && proto.constructor.name == "ObservedClass")
+    return (proto.constructor && proto.constructor.name === 'ObservedClass')
       ? Object.getPrototypeOf(proto.constructor.prototype)
       : proto;
   }
@@ -627,13 +627,13 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     super(obj, handler);
 
     if (ObservedObject.IsObservedObject(obj)) {
-      stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+      stateMgmtConsole.error('ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already');
     }
     if (objectOwningProperty != undefined) {
       this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
     }
   } // end of constructor
 
-  public static readonly __IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
-  public static readonly __OBSERVED_OBJECT_RAW_OBJECT = Symbol("_____raw_object__");
+  public static readonly __IS_OBSERVED_OBJECT = Symbol('_____is_observed_object__');
+  public static readonly __OBSERVED_OBJECT_RAW_OBJECT = Symbol('_____raw_object__');
 }

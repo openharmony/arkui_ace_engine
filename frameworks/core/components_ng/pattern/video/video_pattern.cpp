@@ -27,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
+#include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/constants.h"
@@ -68,6 +69,7 @@ constexpr uint32_t DURATION_POS = 3;
 constexpr uint32_t FULL_SCREEN_POS = 4;
 constexpr int32_t AVERAGE_VALUE = 2;
 const Dimension LIFT_HEIGHT = 28.0_vp;
+const std::string PNG_FILE_EXTENSION = "png";
 
 // Default error, empty string.
 const std::string ERROR = "";
@@ -244,7 +246,7 @@ void VideoPattern::PrepareMediaPlayer()
         auto targetPattern = video->GetTargetVideoPattern();
         CHECK_NULL_VOID(targetPattern);
         targetPattern->ResetMediaPlayer();
-    });
+    }, "ArkUIVideoMediaPlayerReset");
 }
 
 bool VideoPattern::SetSourceForMediaPlayer()
@@ -273,25 +275,25 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnCurrentTimeChange(currentPos);
-        });
+        }, "ArkUIVideoCurrentTimeChange");
     };
 
     auto&& stateChangedEvent = [videoPattern, uiTaskExecutor](PlaybackStatus status) {
-        uiTaskExecutor.PostSyncTask([&videoPattern, status] {
+        uiTaskExecutor.PostTask([videoPattern, status] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnPlayerStatus(status);
-        });
+        }, "ArkUIVideoPlayerStatusChange");
     };
 
     auto&& errorEvent = [videoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostTask([&videoPattern] {
+        uiTaskExecutor.PostTask([videoPattern] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnError("");
-        });
+        }, "ArkUIVideoError");
     };
 
     auto&& resolutionChangeEvent = [videoPattern, uiTaskExecutor]() {
@@ -300,7 +302,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnResolutionChange();
-        });
+        }, "ArkUIVideoResolutionChange");
     };
 
     auto&& startRenderFrameEvent = [videoPattern, uiTaskExecutor]() {
@@ -309,7 +311,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnStartRenderFrameCb();
-        });
+        }, "ArkUIVideoStartRenderFrame");
     };
 
     mediaPlayer_->RegisterMediaPlayerEvent(
@@ -326,7 +328,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
                 return;
             }
             video->OnTextureRefresh(nativeWindow);
-        });
+        }, "ArkUIVideoTextureRefresh");
     };
     mediaPlayer_->RegisterTextureEvent(textureRefreshEvent);
 #endif
@@ -628,7 +630,7 @@ void VideoPattern::UpdateLooping()
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetLooping(loop);
-        });
+        }, "ArkUIVideoUpdateLooping");
     }
 }
 
@@ -643,7 +645,7 @@ void VideoPattern::UpdateSpeed()
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetPlaybackSpeed(static_cast<float>(progress));
-        });
+        }, "ArkUIVideoUpdateSpeed");
     }
 }
 
@@ -659,7 +661,7 @@ void VideoPattern::UpdateMuted()
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetVolume(videoVolume, videoVolume);
-        });
+        }, "ArkUIVideoUpdateMuted");
     }
 }
 
@@ -844,7 +846,7 @@ void VideoPattern::OnModifyDone()
             CHECK_NULL_VOID(videoPattern);
             ContainerScope scope(videoPattern->instanceId_);
             videoPattern->UpdateMediaPlayerOnBg();
-        });
+        }, "ArkUIVideoUpdateMediaPlayer");
     }
 
     if (SystemProperties::GetExtSurfaceEnabled()) {
@@ -1002,6 +1004,12 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
             (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
             videoFrameSize.Height());
     }
+
+    auto padding  = layoutProperty->CreatePaddingAndBorder();
+    contentRect_ = Rect((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE + padding.left.value_or(0),
+                        (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE + padding.top.value_or(0),
+                        videoFrameSize.Width(), videoFrameSize.Height());
+
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();
@@ -1243,7 +1251,7 @@ void VideoPattern::SetMethodCall()
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Start();
-        });
+        }, "ArkUIVideoStart");
     });
     videoController->SetPausetImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
@@ -1253,7 +1261,7 @@ void VideoPattern::SetMethodCall()
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Pause();
-        });
+        }, "ArkUIVideoPause");
     });
     videoController->SetStopImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
@@ -1263,7 +1271,7 @@ void VideoPattern::SetMethodCall()
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Stop();
-        });
+        }, "ArkUIVideoStop");
     });
     videoController->SetSeekToImpl([weak = WeakClaim(this), uiTaskExecutor](float pos, SeekMode seekMode) {
         uiTaskExecutor.PostTask([weak, pos, seekMode]() {
@@ -1273,7 +1281,7 @@ void VideoPattern::SetMethodCall()
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->SetCurrentTime(pos, seekMode);
-        });
+        }, "ArkUIVideoSetCurrentTime");
     });
     videoController->SetRequestFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isFullScreen) {
         uiTaskExecutor.PostTask([weak, isFullScreen]() {
@@ -1290,7 +1298,7 @@ void VideoPattern::SetMethodCall()
                 CHECK_NULL_VOID(fullScreenPattern);
                 fullScreenPattern->ExitFullScreen();
             }
-        });
+        }, "ArkUIVideoFullScreen");
     });
     videoController->SetExitFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isSync) {
         if (isSync) {
@@ -1313,7 +1321,7 @@ void VideoPattern::SetMethodCall()
             auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(targetPattern);
             CHECK_NULL_VOID(fullScreenPattern);
             fullScreenPattern->ExitFullScreen();
-        });
+        }, "ArkUIVideoExitFullScreen");
     });
     CHECK_NULL_VOID(videoControllerV2_);
     videoControllerV2_->AddVideoController(videoController);
@@ -1333,13 +1341,15 @@ void VideoPattern::Start()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
+    DestroyAnalyzerOverlay();
+
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
         auto mediaPlayer = weak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         TAG_LOGI(AceLogTag::ACE_VIDEO, "trigger mediaPlayer play");
         mediaPlayer->Play();
-    });
+    }, "ArkUIVideoPlay");
 }
 
 void VideoPattern::Pause()
@@ -1347,7 +1357,10 @@ void VideoPattern::Pause()
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         return;
     }
-    mediaPlayer_->Pause();
+    auto ret = mediaPlayer_->Pause();
+    if (ret != -1) {
+        StartImageAnalyzer();
+    }
 }
 
 void VideoPattern::Stop()
@@ -1374,7 +1387,7 @@ void VideoPattern::FireError()
         CHECK_NULL_VOID(videoPattern);
         ContainerScope scope(videoPattern->instanceId_);
         videoPattern->OnError("");
-    });
+    }, "ArkUIVideoError");
 }
 
 void VideoPattern::ChangePlayButtonTag()
@@ -1553,7 +1566,9 @@ void VideoPattern::EnableDrag()
             videoSrc = json->GetString(key);
         }
 
-        if (videoSrc == videoPattern->GetSrc()) {
+        std::regex extensionRegex("\\.(" + PNG_FILE_EXTENSION + ")$");
+        bool isPng = std::regex_search(videoSrc, extensionRegex);
+        if (videoSrc == videoPattern->GetSrc() || isPng) {
             return;
         }
 
@@ -1644,5 +1659,86 @@ RefPtr<VideoPattern> VideoPattern::GetTargetVideoPattern()
     auto fullScreenNode = GetFullScreenNode();
     CHECK_NULL_RETURN(fullScreenNode, nullptr);
     return fullScreenNode->GetPattern<VideoPattern>();
+}
+
+void VideoPattern::EnableAnalyzer(bool enable)
+{
+    isEnableAnalyzer_ = enable;
+    if (!isEnableAnalyzer_) {
+        DestroyAnalyzerOverlay();
+        return;
+    }
+
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::VIDEO_CUSTOM);
+    }
+}
+
+void VideoPattern::SetImageAnalyzerConfig(void* config)
+{
+    if (isEnableAnalyzer_) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->SetImageAnalyzerConfig(config);
+    }
+}
+
+bool VideoPattern::IsSupportImageAnalyzer()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    bool needControlBar = layoutProperty->GetControlsValue(true);
+    return isEnableAnalyzer_ && !needControlBar && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
+}
+
+void VideoPattern::StartImageAnalyzer()
+{
+    if (!IsSupportImageAnalyzer() || !imageAnalyzerManager_) {
+        return;
+    }
+
+    if (imageAnalyzerManager_->IsOverlayCreated()) {
+        DestroyAnalyzerOverlay();
+    }
+
+    ContainerScope scope(instanceId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->CreateAnalyzerOverlay();
+    }, "ArkUIVideoCreateAnalyzerOverlay");
+}
+
+void VideoPattern::CreateAnalyzerOverlay()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto nailPixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(nailPixelMap);
+    auto pixelMap = nailPixelMap->GetCropPixelMap(contentRect_);
+    OffsetF contentOffset = {contentRect_.Left(), contentRect_.Top()};
+    imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap, contentOffset);
+}
+
+void VideoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
+{
+    if (IsSupportImageAnalyzer()) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
+    }
+}
+
+void VideoPattern::DestroyAnalyzerOverlay()
+{
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->DestroyAnalyzerOverlay();
 }
 } // namespace OHOS::Ace::NG

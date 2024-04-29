@@ -489,7 +489,7 @@ void TimePickerColumnPattern::ChangeTextStyle(uint32_t index, uint32_t showOptio
     CHECK_NULL_VOID(pickerTheme);
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     if (index != selectedIndex) {
-        if ((index == selectedIndex + 1) || (index == selectedIndex - 1)) {
+        if ((index == selectedIndex + 1) || (index == static_cast<int32_t>(selectedIndex) - 1)) {
             UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, timePickerLayoutProperty);
         } else {
             UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, timePickerLayoutProperty);
@@ -606,7 +606,7 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
     }
     Dimension startFontSize = animationProperties_[index].fontSize;
     Color startColor = animationProperties_[index].currentColor;
-    if ((!index && isDown) || ((index == (showCount - 1)) && !isDown)) {
+    if ((!index && isDown) || ((index == (showCount - 1)) && !isDown && scale)) {
         textLayoutProperty->UpdateFontSize(startFontSize);
         textLayoutProperty->UpdateTextColor(startColor);
         return;
@@ -1073,7 +1073,8 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
     if (isDown) {
         currentIndex = (totalOptionCount + currentIndex + 1) % totalOptionCount; // index add one
     } else {
-        currentIndex = (totalOptionCount + currentIndex - 1) % totalOptionCount; // index reduce one
+        auto totalCountAndIndex = totalOptionCount + currentIndex;
+        currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
     FlushCurrentOptions(isDown, isUpatePropertiesOnly);
@@ -1243,6 +1244,9 @@ void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> p
             CHECK_NULL_VOID(column);
             column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
         });
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->RequestFrame();
     }
 }
 void TimePickerColumnPattern::TossAnimationStoped()

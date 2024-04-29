@@ -65,8 +65,8 @@ public:
     void SetIndicatorStyle(const SwiperParameters& swiperParameters) override;
     void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) override;
     void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) override;
-    void SetPreviousMargin(const Dimension& prevMargin) override;
-    void SetNextMargin(const Dimension& nextMargin) override;
+    void SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank) override;
+    void SetNextMargin(const Dimension& nextMargi, bool ignoreBlankn) override;
     void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent) override;
     void SetIndicatorIsBoolean(bool isBoolean) override;
     void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) override;
@@ -77,8 +77,9 @@ public:
     void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin);
-    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin);
+    static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
+    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
+    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlankn = false);
     static void SetIndex(FrameNode* frameNode, uint32_t index);
     static void SetAutoPlayInterval(FrameNode* frameNode, uint32_t interval);
     static void SetDuration(FrameNode* frameNode, uint32_t duration);
