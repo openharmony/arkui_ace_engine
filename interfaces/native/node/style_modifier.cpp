@@ -3770,11 +3770,11 @@ int32_t SetScrollScrollBarWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         auto width = std::to_string(attrVal) + LENGTH_METRIC_UNIT[unit];
         fullImpl->getNodeModifiers()->getListModifier()->setListScrollBarWidth(node->uiNodeHandle, width.c_str());
     } else if (node->type == ARKUI_NODE_SCROLL) {
-        fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollBarWidth(
-            node->uiNodeHandle, attrVal, unit);
+        fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollBarWidth(node->uiNodeHandle, attrVal, unit);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         auto width = std::to_string(attrVal) + LENGTH_METRIC_UNIT[unit];
-        fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarWidth(node->uiNodeHandle, width.c_str());
+        fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarWidth(
+            node->uiNodeHandle, width.c_str());
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -8309,7 +8309,7 @@ const ArkUI_AttributeItem* GetLineHeight(ArkUI_NodeHandle node)
             g_numberValues[NUM_0].f32 =
                 fullImpl->getNodeModifiers()->getTextAreaModifier()->getTextAreaLineHeight(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
-            break;            
+            break;
         default:
             break;
     }

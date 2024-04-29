@@ -677,6 +677,10 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_SetSize"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_WaterFlowSectionOption_SetItemCount"
     },    
     {

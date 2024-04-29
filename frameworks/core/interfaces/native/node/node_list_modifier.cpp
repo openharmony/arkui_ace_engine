@@ -634,7 +634,7 @@ void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam)
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_WILL_SCROLL;
+        event.componentAsyncEvent.subKind = ON_LIST_WILL_SCROLL;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int32_t>(state);
         SendArkUIAsyncEvent(&event);

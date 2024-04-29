@@ -43,6 +43,11 @@ void OH_ArkUI_WaterFlowSectionOption_Destroy(ArkUI_WaterFlowSectionOption* optio
     }
 }
 
+void OH_ArkUI_WaterFlowSectionOption_SetSize(ArkUI_WaterFlowSectionOption* option, int32_t size)
+{
+    option->sections.resize(size);
+}
+
 void OH_ArkUI_WaterFlowSectionOption_SetItemCount(
     ArkUI_WaterFlowSectionOption* option, int32_t index, int32_t itemCount)
 {

@@ -87,6 +87,8 @@ typedef enum {
     ARKUI_NODE_CALENDAR_PICKER = 16,
     /** Slider. */
     ARKUI_NODE_SLIDER = 17,
+    /** Radio */
+    ARKUI_NODE_RADIO = 18,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
     /** Swiper. */
@@ -1248,11 +1250,13 @@ typedef enum {
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: alignment mode of the child components along the cross axis of the parent container.\n
-     * The parameter type is {@link ArkUI_ItemAlignment}. The default value is <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
+     * The parameter type is {@link ArkUI_ItemAlignment}.
+     * The default value is <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: alignment mode of the child components along the cross axis of the parent container.\n
-     * The parameter type is {@link ArkUI_ArkUI_ItemAlignment}. The default value is <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
+     * The parameter type is {@link ArkUI_ArkUI_ItemAlignment}. The default value is
+     * <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
      *
      */
     NODE_ALIGN_SELF,
@@ -1669,17 +1673,6 @@ typedef enum {
      */
     NODE_TEXT_ELLIPSIS_MODE,
     /**
-     * @brief 设置文本特性效果，支持属性设置，属性重置，属性获取接口。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .string 符合文本特性格式的字符串，格式为<string> [ <integer> | on | off ], 多个文本特性之间使用逗号分隔。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .string 表示文本特性的内容，多个文本特性之间使用逗号分隔。\n
-     *
-     */
-    NODE_FONT_FEATURE,
-    /**    
      * @brief Defines the text line spacing attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -1690,6 +1683,23 @@ typedef enum {
      *
      */
     NODE_TEXT_LINE_SPACING,
+    /**
+     * @brief  Set the text feature effect and the NODE_FONT_FEATURE attribute,
+     * NODE_FONT_FEATURE is the advanced typesetting capability of OpenType
+     * Features such as ligatures and equal-width digits are generally used in customized fonts. \n
+     * The capabilities need to be supported by the fonts, \n
+     * Interfaces for setting, resetting, and obtaining attributes are supported. \n
+     * Attribute setting method parameter {@Link ArkUI_AttributeItem} format: \n
+     * .string: complies with the text feature format. The format is normal | \n
+     * is in the format of [ | on | off],\n.
+     * There can be multiple values separated by commas (,). \n
+     * For example, the input format of a number with the same width is ss01 on. \n
+     * \n
+     * Attribute obtaining method return value {@Link ArkUI_AttributeItem} format:\n
+     * .string indicates the content of the text feature. Multiple text features are separated by commas (,). \n
+     */
+    NODE_FONT_FEATURE,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -3132,6 +3142,35 @@ typedef enum {
     NODE_SLIDER_STYLE,
 
     /**
+     * @brief Set the selection status of an option button. Attribute setting,
+     * attribute resetting, and attribute obtaining are supported.
+     * Attribute setting method {@Link ArkUI_AttributeItem} Parameter format:\n
+     * .value[0].i32: check status of an option button. The default value is false.
+     * Attribute obtaining method return value {@Link ArkUI_AttributeItem} format:\n
+     * .value[0].i32: selection status of an option button.
+     */
+    NODE_RADIO_CHECKED = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RADIO,
+    /**
+     * @brief Set the styles of the selected and deselected states of the option button.
+     * The attribute setting, attribute resetting, and attribute obtaining are supported.
+     * Attribute setting method {@Link ArkUI_AttributeItem} Parameter format:\n
+     * .value[0]?. u32: color of the mother board in enabled state. \n
+     * The type is 0xARGB, and the default value is 0xFF007DFF. \n
+     * .value[1]?. u32: stroke color in the close state. \n
+     * The type is 0xARGB, and the default value is 0xFF182431. \n
+     * .value[2]?. u32: color of the internal round pie in the enabled state. \n
+     * The type is 0xARGB, and the default value is 0xFFFFFFFF. \n
+     * Attribute obtaining method return value {@Link ArkUI_AttributeItem} format:\n
+     * .value[0]?. u32: color of the mother board in enabled state. \n
+     * The type is 0xARGB, and the default value is 0xFF007DFF. \n
+     * .value[1]?. u32: stroke color in the close state. \n
+     * The type is 0xARGB, and the default value is 0xFF182431. \n
+     * .value[2]?. u32: color of the internal round pie in the enabled state. \n
+     * The type is 0xARGB, and the default value is 0xFFFFFFF. \n
+     */
+    NODE_RADIO_STYLE,
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *
@@ -3839,8 +3878,7 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].f32: gap between lines, in vp.\n
-     * .value[1].f32: gap between lines, in vp.\n
+     * .value[0].i32: 从0开始计算的索引，会转换为整数，表示要开始改变分组的位置.\n
      * .object: {@ArkUI_WaterFlowSectionOption} object.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
@@ -4269,6 +4307,15 @@ typedef enum {
     NODE_SLIDER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SLIDER,
 
     /**
+     * @brief Defines the event callback function triggered when an object is dragged or clicked by ARKUI_NODE_RADIO.
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * ArkUI_NodeComponentEvent.data[0].i32: option button status. \n
+     */
+    NODE_RADIO_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RADIO,
+
+    /**
      * @brief Defines the event triggered when the index of the currently displayed element of this
      * <b>ARKUI_NODE_SWIPER</b> instance changes.
      *
@@ -4393,17 +4440,74 @@ typedef enum {
      */
     NODE_SCROLL_EVENT_ON_SCROLL_EDGE,
     /**
-     * @brief 定义ARKUI_NODE_LIST有子组件划入或划出List显示区域时触发事件枚举值。
-     *
-     * 触发该事件的条件 ：\n
-     * 列表初始化时会触发一次，List显示区域内第一个子组件的索引值或最后一个子组件的索引值有变化时会触发。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含3个参数: \n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: List显示区域内第一个子组件的索引值. \n
-     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: List显示区域内最后一个子组件的索引值. \n
-     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: List显示区域内中间位置子组件的索引值. \n     
+     * @brief Define that a callback is triggered
+     * when the scrolling container component reaches the start position.
+     * Condition for triggering the event: \n
+     * Triggered when the component reaches the start position. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is 
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains no parameters. \n
+     */
+    NODE_SCROLL_EVENT_ON_REACH_START,
+    /**
+     * @brief Define that a callback is triggered when the scrolling container component ends. \n
+     * Condition for triggering the event: \n
+     * Triggered when the component reaches the end. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains no parameters. \n
+     */
+    NODE_SCROLL_EVENT_ON_REACH_END,
+
+    /**
+     * @brief Defines the enumerated values of the event triggered, \n
+     * when a subcomponent of ARKUI_NODE_LIST is moved into or out of the list display area. \n
+     * Condition for triggering the event: \n
+     * This method is triggered once during list initialization. \n
+     * It is triggered when the index value of the first or last subcomponent in the list display area changes. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is 
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains three parameters: \n
+     * ArkUI_NodeComponentEvent.data[0].i32: List Displays \n
+     * the index value of the first child component in the region. \n
+     * ArkUI_NodeComponentEvent.data[1].i32: List Displays \n
+     * the index value of the last child component in the region. \n
+     * ArkUI_NodeComponentEvent.data[2].i32: List Displays \n
+     * the index value of the subcomponent in the middle of the area. \n
      */
     NODE_LIST_ON_SCROLL_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
+    /**
+     * @brief Defines the enumerated values of the event triggered \n
+     * before the sliding of the ARKUI_NODE_LIST component. \n
+     * Condition for triggering the event: \n
+     * This event is triggered when the scrolling component triggers scrolling. \n
+     * Other inputs that trigger scrolling, such as keyboard and mouse operations, can be set. \n
+     * Called through the scroll controller API. \n
+     * Out-of-bounds rebound. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * ArkUI_NodeComponentEvent.data[0].f32: offset of each frame scrolling. \n
+     * The offset is positive when the list content is \n
+     * scrolled up and is negative when the list content is scrolled down. \n
+     * ArkUI_NodeComponentEvent.data[1].i32: Current sliding state. \n
+     */
+    NODE_LIST_ON_WILL_SCROLL,
+    /**
+     * @brief Define the enumerated values of the event triggered when the ARKUI_NODE_LIST component is flicked.
+     * Condition for triggering the event: \n
+     * This event is triggered when the scrolling component triggers scrolling. \n
+     * Other inputs that trigger scrolling, such as keyboard and mouse operations, can be set. \n
+     * Called through the scroll controller API. \n
+     * Out-of-bounds rebound. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * ArkUI_NodeComponentEvent.data[0].f32: offset of each frame scrolling. 
+     * The offset is positive when the list content is scrolled up and is negative when the list content is scrolled down. \n
+     * ArkUI_NodeComponentEvent.data[1].i32: Current sliding state. \n
+     */
+    NODE_LIST_ON_DID_SCROLL,
     /**
      * @brief Defines the event triggered when the refresh state of the <b>ARKUI_NODE_REFRESH</b> object changes.
      *
@@ -4437,37 +4541,35 @@ typedef enum {
      * component is scrolled up and negative when the component is scrolled down. \n
      * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. \n
      */
-    NODE_ON_WILL_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
+    NODE_WATER_FLOW_ON_WILL_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
     /**
-     * @brief Defines the event triggered when the <b>ARKUI_NODE_WATER_FLOW</b> component reaches the end edge.
-     *
-     * \n
-     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is {@link ArkUI_NodeComponentEvent}. \n
-     * {@link ArkUI_NodeComponentEvent} does not contain parameters. \n
+     * @brief Define the enumerated values of the event triggered when the ARKUI_NODE_WATER_FLOW component slides.
+     * Condition for triggering the event: \n
+     * This event is triggered when the scrolling component triggers scrolling.
+     * Other inputs that trigger scrolling, such as keyboard and mouse operations, can be set. \n
+     * Called through the scroll controller API. \n
+     * Out-of-bounds rebound. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * ArkUI_NodeComponentEvent.data[0].f32: offset of each frame scrolling. 
+     * The offset is positive when the content is scrolled up and is negative when the content is scrolled down. \n
+     * ArkUI_NodeComponentEvent.data[1].i32: Current sliding state. \n
      */
-    NODE_ON_REACH_END,
+    NODE_WATER_FLOW_ON_DID_SCROLL,
     /**
-     * @brief 定义ARKUI_NODE_SCROLL滚动组件的滑动时触发事件枚举值。
-     *
-     * 触发该事件的条件 ：\n
-     * 1、滚动组件触发滚动时触发，支持键鼠操作等其他触发滚动的输入设置。\n
-     * 2、通过滚动控制器API接口调用。\n
-     * 3、越界回弹。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含2个参数: \n
-     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: 每帧滚动的偏移量，内容向上滚动时偏移量为正，向下滚动时偏移量为负. \n
-     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: 当前滑动状态. \n
-     */
-    NODE_ON_DID_SCROLL,
-    /**
-     * @brief 定义ARKUI_NODE_WATER_FLOW当前瀑布流显示的起始位置/终止位置的子组件发生变化时触发事件枚举值。
-     *
-     * 触发该事件的条件 ：\n
-     * 瀑布流显示区域上第一个子组件/最后一个组件的索引值有变化就会触发。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含3个参数: \n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: 当前显示的WaterFlow起始位置的索引值. \n
-     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: 当前显示的瀑布流终止位置的索引值. \n
+     * @brief Defines the enumerated values of the event triggered,
+     * when the subcomponent of the start position or end position displayed in the current waterfall changes.
+     * Condition for triggering the event: \n
+     * This event is triggered when the index value of the first or last subcomponent \n
+     * in the waterfall display area changes. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains three parameters: \n
+     * ArkUI_NodeComponentEvent.data[0].i32: The index value of \n
+     * the start position of the currently displayed WaterFlow. \n
+     * ArkUI_NodeComponentEvent.data[1].i32: The index value of \n
+     * the end position of the currently displayed waterfall. \n
      */
     NODE_WATER_FLOW_ON_SCROLL_INDEX,
 } ArkUI_NodeEventType;
@@ -4670,7 +4772,7 @@ uint32_t OH_ArkUI_NodeAdapter_GetTotalNodeCount(ArkUI_NodeAdapterHandle handle);
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapter_RegisterEventReceiver(
-ArkUI_NodeAdapterHandle handle, void* userData, void (*receiver)(ArkUI_NodeAdapterEvent* event));
+    ArkUI_NodeAdapterHandle handle, void* userData, void (*receiver)(ArkUI_NodeAdapterEvent* event));
 
 /**
 * @brief Deregisters an event callback for the adapter.
@@ -4700,8 +4802,7 @@ int32_t OH_ArkUI_NodeAdapter_ReloadAllItems(ArkUI_NodeAdapterHandle handle);
 * Returns 401 if a parameter exception occurs.
 * @since 12
 */
-int32_t OH_ArkUI_NodeAdapter_ReloadItem(
-ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
+int32_t OH_ArkUI_NodeAdapter_ReloadItem(ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
 
 /**
 * @brief Instructs the specified adapter to remove certain elements.
@@ -4713,8 +4814,7 @@ ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
 * Returns 401 if a parameter exception occurs.
 * @since 12
 */
-int32_t OH_ArkUI_NodeAdapter_RemoveItem(
-ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
+int32_t OH_ArkUI_NodeAdapter_RemoveItem(ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
 
 /**
 * @brief Instructs the specified adapter to insert certain elements.
@@ -4726,8 +4826,7 @@ ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
 * Returns 401 if a parameter exception occurs.
 * @since 12
 */
-int32_t OH_ArkUI_NodeAdapter_InsertItem(
-ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
+int32_t OH_ArkUI_NodeAdapter_InsertItem(ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
 
 /**
 * @brief Instructs the specified adapter to move certain elements.
@@ -5390,8 +5489,7 @@ typedef void (*ArkUI_NodeContentCallback)(ArkUI_NodeContentEvent* event);
  * @return Returns the status code 
  * @since 12
  */
-int32_t OH_ArkUI_NodeContent_RegisterCallback(
-    ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback);
+int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback);
 
 /**
  * @brief Obtains the type of a node content.

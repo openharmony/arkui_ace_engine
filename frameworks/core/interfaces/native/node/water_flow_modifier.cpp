@@ -548,7 +548,7 @@ void SetOnWillScroll(ArkUINodeHandle node, void* extraParam)
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_WILL_SCROLL;
+        event.componentAsyncEvent.subKind = ON_WATER_FLOW_WILL_SCROLL;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
         SendArkUIAsyncEvent(&event);
@@ -564,7 +564,7 @@ void SetOnReachEnd(ArkUINodeHandle node, void* extraParam)
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_REACH_END;
+        event.componentAsyncEvent.subKind = ON_WATER_FLOW_REACH_END;
         SendArkUIAsyncEvent(&event);
     };
     ScrollableModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
@@ -579,28 +579,12 @@ void SetOnDidScroll(ArkUINodeHandle node, void* extraParam)
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_WILL_SCROLL;
+        event.componentAsyncEvent.subKind = ON_WATER_FLOW_DID_SCROLL;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
         SendArkUIAsyncEvent(&event);
     };
     ScrollableModelNG::SetOnDidScroll(frameNode, std::move(SetOnDidScroll));
-}
-
-void SetOnWaterFlowScroll(ArkUINodeHandle node, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto onScroll = [node, extraParam](Dimension scrollOffset, ScrollState scrollState) {
-        ArkUINodeEvent event;
-        event.kind = COMPONENT_ASYNC_EVENT;
-        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL;
-        event.componentAsyncEvent.data[0].f32 = static_cast<float>(scrollOffset.Value());
-        event.componentAsyncEvent.data[1].i32 = static_cast<int>(scrollState);
-        SendArkUIAsyncEvent(&event);
-    };
-    WaterFlowModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
 
 void SetOnWaterFlowScrollStart(ArkUINodeHandle node, void* extraParam)

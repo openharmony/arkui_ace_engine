@@ -1669,6 +1669,16 @@ ArkUI_WaterFlowSectionOption* OH_ArkUI_WaterFlowSectionOption_Create();
 void OH_ArkUI_WaterFlowSectionOption_Dispose(ArkUI_WaterFlowSectionOption* option);
 
 /**
+* @brief Sets the FlowItem block configuration information array length.
+*
+* @param option FlowItem Indicates the packet configuration.
+* @param size Array Length.
+* @since 12
+*/
+void OH_ArkUI_WaterFlowSectionOption_SetSize(ArkUI_WaterFlowSectionOption* option,
+    int32_t size);
+
+/**
 * @brief Sets the number of items in a water flow section.
 *
 * @param option Indicates the pointer to a water flow section configuration.

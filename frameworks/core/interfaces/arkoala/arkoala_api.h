@@ -599,6 +599,8 @@ enum ArkUIEventSubKind {
     ON_LIST_SCROLL_FRAME_BEGIN,
     ON_LIST_WILL_SCROLL,
     ON_LIST_DID_SCROLL,
+    ON_LIST_REACH_END,
+    ON_LIST_REACH_START,
 
     ON_TOGGLE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TOGGLE,
 
@@ -628,6 +630,8 @@ enum ArkUIEventSubKind {
     ON_SCROLL_START,
     ON_SCROLL_STOP,
     ON_SCROLL_EDGE,
+    ON_SCROLL_REACH_END,
+    ON_SCROLL_REACH_START,
 
     ON_TABS_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TABS,
     ON_NAVIGATOR_CLICK = ARKUI_MAX_EVENT_NUM * ARKUI_NAVIGATOR,
@@ -653,15 +657,16 @@ enum ArkUIEventSubKind {
     ON_TIME_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TIME_PICKER,
     ON_TEXT_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT_PICKER,
     ON_CALENDAR_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_CALENDAR_PICKER,
-    ON_WILL_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_WATER_FLOW,
-    ON_REACH_END,
-    ON_DID_SCROLL,
+    ON_WATER_FLOW_WILL_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_WATER_FLOW,
+    ON_WATER_FLOW_REACH_END,
+    ON_WATER_FLOW_DID_SCROLL,
     ON_WATER_FLOW_SCROLL,
     ON_WATER_FLOW_SCROLL_START,
     ON_WATER_FLOW_SCROLL_STOP,
     ON_WATER_FLOW_SCROLL_FRAME_BEGIN,
     ON_WATER_FLOW_SCROLL_INDEX,
-    
+    ON_WATER_FLOW_REACH_START,
+
     ON_ALPHABET_INDEXER_SELECTED = ARKUI_MAX_EVENT_NUM * ARKUI_ALPHABET_INDEXER,
     ON_ALPHABET_INDEXER_REQUEST_POPUP_DATA,
     ON_ALPHABET_INDEXER_POPUP_SELECTED,
@@ -2188,7 +2193,6 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaLineSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextAreaLineSpacing)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextAreaSelectionMenuHidden)(ArkUINodeHandle node);
-    ArkUI_CharPtr (*getTextAreaFontFeature)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextAreaAdaptMinFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextAreaAdaptMaxFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextAreaLineHeight)(ArkUINodeHandle node);
@@ -2196,6 +2200,7 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaPadding)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetTextAreaPadding)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getTextAreaFontFeature)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2343,11 +2348,11 @@ struct ArkUITextInputModifier {
     void (*setTextInputShowPassword)(ArkUINodeHandle node, ArkUI_Uint32 showPassword);
     void (*resetTextInputShowPassword)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextInputShowPassword)(ArkUINodeHandle node);
-    ArkUI_CharPtr (*getTextInputFontFeature)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputAdaptMinFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputAdaptMaxFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputLineHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputMaxLines)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getTextInputFontFeature)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

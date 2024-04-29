@@ -24,7 +24,6 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier();
 void SetOnWillScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnReachEnd(ArkUINodeHandle node, void* extraParam);
 void SetOnDidScroll(ArkUINodeHandle node, void* extraParam);
-void SetOnWaterFlowScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowScrollStart(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowScrollStop(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowScrollFrameBegin(ArkUINodeHandle node, void* extraParam);

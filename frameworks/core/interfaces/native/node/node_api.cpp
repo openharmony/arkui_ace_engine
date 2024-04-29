@@ -354,11 +354,10 @@ const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
     NodeModifier::SetOnReachEnd,
     NodeModifier::SetOnDidScroll,
-    NodeModifier::SetOnWaterFlowScroll,
     NodeModifier::SetOnWaterFlowScrollStart,
     NodeModifier::SetOnWaterFlowScrollStop,
     NodeModifier::SetOnWaterFlowScrollFrameBegin,
-    NodeModifier::SetOnWaterFlowScrollIndex,           
+    NodeModifier::SetOnWaterFlowScrollIndex,
 };
 
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {

@@ -1401,8 +1401,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputOnTextSelectionChange, ResetTextInputOnTextSelectionChange, SetTextInputOnContentScroll,
         ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy, SetTextInputOnCut, ResetTextInputOnCut,
         SetTextInputOnPaste, ResetTextInputOnPaste, GetTextInputSelectionMenuHidden, SetTextInputShowPassword,
-        ResetTextInputShowPassword, GetTextInputShowPassword, GetTextInputFontFeature, GetTextInputAdaptMinFontSize,
-        GetTextInputAdaptMaxFontSize, GetTextInputLineHeight, GetTextInputMaxLines };
+        ResetTextInputShowPassword, GetTextInputShowPassword, GetTextInputAdaptMinFontSize,
+        GetTextInputAdaptMaxFontSize, GetTextInputLineHeight, GetTextInputMaxLines, GetTextInputFontFeature };
     return &modifier;
 }
 

@@ -861,7 +861,7 @@ ArkUI_Int32 GetgetTextAreaMaxLines(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return TextFieldModelNG::GetMaxLines(frameNode);
-}    
+}
 void SetTextAreaPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
 {
@@ -934,15 +934,16 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         GetTextAreaText, GetTextAreaCaretColor, GetTextAreaMaxLength, GetTextAreaPlaceholderColor,
         GetTextAreaPlaceholderFont, GetTextAreaEditing, SetTextAreaBackgroundColor, ResetTextAreaBackgroundColor,
         SetTextAreaType, ResetTextAreaType, GetTextAreaType, GetTextAreaTextAlign, SetTextAreaShowCounterOptions,
-        ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration,
-        ResetTextAreaDecoration, SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight,
-        ResetTextAreaLineHeight, SetTextAreaFontFeature, ResetTextAreaFontFeature, SetTextAreaWordBreak,
-        ResetTextAreaWordBreak, SetTextAreaAdaptMinFontSize, ResetTextAreaAdaptMinFontSize,
-        SetTextAreaAdaptMaxFontSize, ResetTextAreaAdaptMaxFontSize, SetTextAreaHeightAdaptivePolicy,
-        ResetTextAreaHeightAdaptivePolicy, SetTextAreaSelectedBackgroundColor, ResetTextAreaSelectedBackgroundColor,
-        SetTextAreaCaretStyle, ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow,
-        SetTextAreaTextIndent, ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing,
-        GetTextAreaSelectionMenuHidden, SetTextAreaPadding, ResetTextAreaPadding };
+        ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration, ResetTextAreaDecoration,
+        SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight, ResetTextAreaLineHeight,
+        SetTextAreaFontFeature, ResetTextAreaFontFeature, SetTextAreaWordBreak, ResetTextAreaWordBreak,
+        SetTextAreaAdaptMinFontSize, ResetTextAreaAdaptMinFontSize, SetTextAreaAdaptMaxFontSize,
+        ResetTextAreaAdaptMaxFontSize, SetTextAreaHeightAdaptivePolicy, ResetTextAreaHeightAdaptivePolicy,
+        SetTextAreaSelectedBackgroundColor, ResetTextAreaSelectedBackgroundColor, SetTextAreaCaretStyle,
+        ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow, SetTextAreaTextIndent,
+        ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing, GetTextAreaSelectionMenuHidden,
+        GetTextAreaAdaptMinFontSize, GetTextAreaAdaptMaxFontSize, GetTextAreaLineHeight, GetgetTextAreaMaxLines,
+        SetTextAreaPadding, ResetTextAreaPadding, GetTextAreaFontFeature };
     return &modifier;
 }
 
