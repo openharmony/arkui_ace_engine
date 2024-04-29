@@ -80,11 +80,12 @@ void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
         }
         return;
     }
-
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[1]);
-    TransformParam param = JSMatrix2d::GetTransformInfo(jsObj);
-    path2d_->SetTransform(param.scaleX, param.skewX, param.skewY, param.scaleY, param.translateX, param.translateY);
-    SetPathSize(args);
+    if (args[1]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[1]);
+        TransformParam param = JSMatrix2d::GetTransformInfo(jsObj);
+        path2d_->SetTransform(param.scaleX, param.skewX, param.skewY, param.scaleY, param.translateX, param.translateY);
+        SetPathSize(args);
+    }
 }
 
 } // namespace OHOS::Ace::Framework
