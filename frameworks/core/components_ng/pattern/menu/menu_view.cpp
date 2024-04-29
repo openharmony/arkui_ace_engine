@@ -217,6 +217,16 @@ bool GetHasIcon(const std::vector<OptionParam>& params)
     return false;
 }
 
+bool GetHasSymbol(const std::vector<OptionParam>& params)
+{
+    for (size_t i = 0; i < params.size(); ++i) {
+        if (params[i].symbol != nullptr) {
+            return true;
+        }
+    }
+    return false;
+}
+
 OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
 {
     auto offsetToWindow = frameNode->GetPaintRectOffset();
@@ -472,10 +482,17 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
     bool optionsHasIcon = GetHasIcon(params);
+    bool optionsHasSymbol = GetHasSymbol(params);
+    RefPtr<FrameNode> optionNode = nullptr;
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::CreateMenuOption(
-            optionsHasIcon, params[i].value, params[i].action, i, params[i].icon);
+        if (params[i].symbol != nullptr) {
+            optionNode = OptionView::CreateMenuOption(
+                optionsHasSymbol, params[i].value, params[i].action, i, params[i].symbol);
+        } else {
+            optionNode = OptionView::CreateMenuOption(
+                optionsHasIcon, params[i].value, params[i].action, i, params[i].icon);
+        }
         if (!optionNode) {
             continue;
         }

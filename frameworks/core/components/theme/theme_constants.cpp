@@ -34,6 +34,7 @@ const ResValueWrapper ERROR_VALUE = { .type = ThemeConstantsType::ERROR };
 const Color ERROR_VALUE_COLOR = Color(0xff000000);
 constexpr Dimension ERROR_VALUE_DIMENSION = 0.0_vp;
 constexpr int32_t ERROR_VALUE_INT = 0;
+constexpr uint32_t ERROR_VALUE_UINT = 0;
 constexpr double ERROR_VALUE_DOUBLE = 0.0;
 constexpr double BLEND_ALPHA_MAX = 1.0;
 constexpr InternalResource::ResourceId ERROR_VALUE_RESOURCE_ID = InternalResource::ResourceId::NO_ID;
@@ -341,6 +342,14 @@ bool ThemeConstants::GetBooleanByName(const std::string& resName) const
         return false;
     }
     return resAdapter_->GetBooleanByName(resName);
+}
+
+uint32_t ThemeConstants::GetSymbolByName(const char* name) const
+{
+    if (!resAdapter_) {
+        return ERROR_VALUE_UINT;
+    }
+    return resAdapter_->GetSymbolByName(name);
 }
 
 std::vector<uint32_t> ThemeConstants::GetIntArray(uint32_t key) const
