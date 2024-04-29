@@ -2027,13 +2027,13 @@ class CustomDialogContentComponent extends ViewPU {
     if (!this.buttons || this.buttons.length === 0 || !getNumberByResource('dialog_divider_show')) {
       return Color.Transparent;
     }
-    if (this.buttons[0].buttonStyle !== ButtonStyleMode.TEXTUAL ||
-      this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle !== ButtonStyleMode.TEXTUAL) {
-      return Color.Transparent;
+    if (this.buttons[0].buttonStyle === ButtonStyleMode.TEXTUAL || this.buttons[0].buttonStyle === undefined) {
+      if (this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === ButtonStyleMode.TEXTUAL ||
+        this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
+        return { 'id': -1, 'type': 10001, params: ['sys.color.alert_divider_color'], 'bundleName': '', 'moduleName': '' };
+      }
     }
-    else {
-      return { 'id': -1, 'type': 10001, params: ['sys.color.alert_divider_color'], 'bundleName': '', 'moduleName': '' };
-    }
+    return Color.Transparent;
   }
   getButtonsHeight() {
     if (!this.buttons || this.buttons.length === 0) {
