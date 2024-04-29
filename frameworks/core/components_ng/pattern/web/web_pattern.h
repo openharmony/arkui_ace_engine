@@ -578,6 +578,7 @@ private:
     void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
     void InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleFlingMove(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(int32_t x, int32_t y);

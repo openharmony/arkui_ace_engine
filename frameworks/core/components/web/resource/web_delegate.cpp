@@ -5350,6 +5350,13 @@ void WebDelegate::HandleTouchCancel()
     }
 }
 
+void WebDelegate::HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy)
+{
+    if (nweb_) {
+        nweb_->SendTouchpadFlingEvent(x, y, vx, vy);
+    }
+}
+
 void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY)
 {
     if (nweb_) {
