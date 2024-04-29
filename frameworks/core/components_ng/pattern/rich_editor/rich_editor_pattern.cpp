@@ -1637,7 +1637,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     bool isCaretTwinkling = caretTwinkling_;
     auto position = paragraphs_.GetIndex(textOffset);
     AdjustCursorPosition(position);
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    auto focusHub = GetFocusHub();
     if (focusHub) {
         SetCaretPosition(position);
         if (focusHub->RequestFocusImmediately()) {
@@ -1688,7 +1688,7 @@ void RichEditorPattern::MoveCaretAndStartFocus(const Offset& textOffset)
     auto position = paragraphs_.GetIndex(textOffset);
     AdjustCursorPosition(position);
 
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    auto focusHub = GetFocusHub();
     if (focusHub) {
         SetCaretPosition(position);
         if (focusHub->RequestFocusImmediately()) {
@@ -5020,7 +5020,9 @@ void RichEditorPattern::DumpInfo()
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));
     }
-    auto context = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto richEditorTheme = context->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
@@ -5034,7 +5036,7 @@ void RichEditorPattern::DumpInfo()
 
 bool RichEditorPattern::HasFocus() const
 {
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    auto focusHub = GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsCurrentFocus();
 }
