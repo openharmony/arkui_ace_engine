@@ -88,6 +88,7 @@ const float SURFACE_HEIGHT = 150.0f;
 const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
 bool isAxis = false;
+bool isLock = true;
 
 TouchType ConvertXComponentTouchType(const OH_NativeXComponent_TouchEventType& type)
 {
@@ -1879,6 +1880,22 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
         SetBounds(newSurfaceOffsetX, newSurfaceOffsetY, SURFACE_WIDTH, SURFACE_HEIGHT))
         .WillOnce(Return());
     xcomponentController->UpdateSurfaceBounds();
+
+    /**
+     * @tc.steps: step5. call XcomponentController's interface relative to SetSurfaceRotation
+     * @tc.expected: handlingSurfaceRenderContext_->SetSurfaceRotation(isLock) is called
+     */    
+    EXPECT_CALL(
+        *AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_), SetSurfaceRotation(isLock))
+        .WillOnce(Return());
+    xcomponentController->SetSurfaceRotation(isLock);
+
+    /**
+     * @tc.steps: step6. call XcomponentController's interface relative to GetSurfaceRotation
+     * @tc.expected: the lock status get from GetSurfaceRotation equals the lock status set by SetSurfaceRotation
+     */
+    auto lock = xcomponentController->GetSurfaceRotation();
+    EXPECT_EQ(lock, isLock);
 }
 
 /**
