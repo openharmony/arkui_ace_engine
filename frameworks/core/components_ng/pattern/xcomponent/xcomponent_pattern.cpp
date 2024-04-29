@@ -160,11 +160,10 @@ XComponentPattern::XComponentPattern(const std::string& id, XComponentType type,
     SetLibraryName(libraryname);
 }
 
-void XComponentPattern::Initialize(int32_t instanceId)
+void XComponentPattern::Initialize()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    instanceId_ = (instanceId <= 0) ? Container::CurrentIdSafely() : instanceId;
     auto renderContext = host->GetRenderContext();
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         renderContext->SetClipToFrame(true);
@@ -174,7 +173,7 @@ void XComponentPattern::Initialize(int32_t instanceId)
 #else
         renderSurface_ = RenderSurface::Create();
 #endif
-        renderSurface_->SetInstanceId(instanceId_);
+        renderSurface_->SetInstanceId(GetHostInstanceId());
         if (type_ == XComponentType::SURFACE) {
             InitializeRenderContext();
             if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -280,9 +279,7 @@ void XComponentPattern::RequestFocus()
 
 void XComponentPattern::OnAttachToFrameNode()
 {
-    instanceId_ = Container::CurrentIdSafely();
-    Initialize(instanceId_);
-
+    Initialize();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -419,6 +416,24 @@ void XComponentPattern::SetMethodCall()
 void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
 {
     renderSurface_->ConfigSurface(surfaceWidth, surfaceHeight);
+}
+
+void XComponentPattern::OnAttachContext(PipelineContext* context)
+{
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    context->AddWindowStateChangedCallback(host->GetId());
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->SetInstanceId(context->GetInstanceId());
+}
+
+void XComponentPattern::OnDetachContext(PipelineContext* context)
+{
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    context->RemoveWindowStateChangedCallback(host->GetId());
 }
 
 void XComponentPattern::SetRotation()
@@ -576,7 +591,7 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 void XComponentPattern::XComponentSizeInit()
 {
     CHECK_RUN_ON(UI);
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(GetHostInstanceId());
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
@@ -600,7 +615,7 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
 {
     // do not trigger when the size is first initialized
     if (needFireNativeEvent) {
-        ContainerScope scope(instanceId_);
+        ContainerScope scope(GetHostInstanceId());
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto viewScale = context->GetViewScale();
@@ -1027,13 +1042,13 @@ void XComponentPattern::FireExternalEvent(RefPtr<NG::PipelineContext> context,
 
 ExternalEvent XComponentPattern::CreateExternalEvent()
 {
-    return [weak = AceType::WeakClaim(this), instanceId = instanceId_](
+    return [weak = AceType::WeakClaim(this)](
                const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
-        ContainerScope scope(instanceId);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        ContainerScope scope(pattern->GetHostInstanceId());
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
         pattern->FireExternalEvent(context, componentId, nodeId, isDestroy);
     };
 }
@@ -1402,7 +1417,7 @@ void XComponentPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onA
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto* context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
