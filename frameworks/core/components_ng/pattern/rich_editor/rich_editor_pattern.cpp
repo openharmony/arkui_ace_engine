@@ -5792,7 +5792,25 @@ bool RichEditorPattern::NeedAiAnalysis(
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis IsClickBoundary, return!");
         return false;
     }
+
+    if (IsIndexAfterOrInSymbolOrEmoji(pos)) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis IsIndexAfterOrInSymbolOrEmoji, return!");
+        return false;
+    }
+
     return true;
+}
+
+bool RichEditorPattern::IsIndexAfterOrInSymbolOrEmoji(int32_t index) {
+    auto it = GetSpanIter(index);
+    CHECK_NULL_RETURN((it != spans_.end()), false);
+    auto spanItem = *it;
+    CHECK_NULL_RETURN(spanItem, false);
+    auto spanEnd = spanItem->position;
+    auto spanStart = spanEnd - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
+    bool isIndexAfterOrInSymbol = spanItem->unicode != 0 && index > spanStart && index <= spanEnd;
+    bool isIndexAfterOrInEmoji = TextEmojiProcessor::IsIndexAfterOrInEmoji(index - spanStart, spanItem->content);
+    return isIndexAfterOrInSymbol || isIndexAfterOrInEmoji;
 }
 
 void RichEditorPattern::AdjustCursorPosition(int32_t& pos)

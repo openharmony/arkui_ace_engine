@@ -44,6 +44,8 @@ public:
     static bool IsTagSpec(uint32_t codePoint);
     static bool IsKeycapBase(uint32_t codePoint);
     static bool IsIndexInEmoji(int32_t index, std::string content, int32_t& startIndex, int32_t& endIndex);
+    static bool IsIndexBeforeOrInEmoji(int32_t index, std::string content);
+    static bool IsIndexAfterOrInEmoji(int32_t index, std::string content);
 
 private:
     static void OnBeginState(uint32_t codePoint, int& state, int& deleteCount, bool isBackward);
