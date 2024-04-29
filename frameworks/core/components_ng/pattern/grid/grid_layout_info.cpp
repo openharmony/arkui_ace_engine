@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+
 #include <numeric>
 
 #include "base/utils/utils.h"
@@ -334,6 +335,45 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
     totalHeight += AddLinesInBetween(lastIndex, endIdx, crossCount_, regularHeight);
     totalHeight -= mainGap;
     return totalHeight;
+}
+
+float GridLayoutInfo::GetIrregularOffset(float mainGap) const
+{
+    // need to calculate total line height before startMainLine_
+    // gridMatrix ready up to endLine, so lineCnt is known.
+    // get sum of existing lines
+    // use average to estimate unknown lines
+    if (lineHeightMap_.empty() || childrenCount_ == 0) {
+        return 0.0f;
+    }
+
+    auto it = lineHeightMap_.lower_bound(startMainLineIndex_);
+    auto knownLineCnt = static_cast<float>(std::distance(lineHeightMap_.begin(), it));
+    float knownHeight = GetHeightInRange(lineHeightMap_.begin()->first, startMainLineIndex_, 0.0f);
+    float avgHeight = synced_ ? avgLineHeight_ : GetTotalLineHeight(0.0f) / static_cast<float>(lineHeightMap_.size());
+
+    auto startLine = static_cast<float>(startMainLineIndex_);
+    float estTotal = knownHeight + avgHeight * (startLine - knownLineCnt);
+    return estTotal + startLine * mainGap - currentOffset_;
+}
+
+float GridLayoutInfo::GetIrregularHeight(float mainGap) const
+{
+    // count current number of lines
+    // estimate total number of lines based on {known item / total item}
+    // get sum of existing lines
+    // use average to estimate unknown lines
+    if (lineHeightMap_.empty() || childrenCount_ == 0) {
+        return 0.0f;
+    }
+    float lastItem = static_cast<float>(FindEndIdx(lineHeightMap_.rbegin()->first).itemIdx);
+    float itemRatio = (lastItem + 1) / static_cast<float>(childrenCount_);
+    float estTotalLines = std::round(static_cast<float>(gridMatrix_.size()) / itemRatio);
+
+    float knownHeight = GetTotalLineHeight(0.0f);
+    auto knownLineCnt = static_cast<float>(lineHeightMap_.size());
+    float avgHeight = synced_ ? avgLineHeight_ : knownHeight / knownLineCnt;
+    return knownHeight + (estTotalLines - knownLineCnt) * avgHeight + (estTotalLines - 1) * mainGap;
 }
 
 float GridLayoutInfo::GetCurrentLineHeight() const
@@ -757,7 +797,7 @@ std::pair<int32_t, float> GridLayoutInfo::FindItemCenter(int32_t startLine, int3
         len += it->second + mainGap;
         ++it;
     }
-    return {it->first, halfLen - len};
+    return { it->first, halfLen - len };
 }
 
 void GridLayoutInfo::PrepareJumpToBottom()

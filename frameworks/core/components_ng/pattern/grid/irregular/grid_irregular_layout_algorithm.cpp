@@ -326,6 +326,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 
     info.lastMainSize_ = mainSize;
     info.totalHeightOfItemsInView_ = info.GetTotalHeightOfItemsInView(mainGap_, false);
+    info.avgLineHeight_ = info.GetTotalLineHeight(0.0f) / static_cast<float>(info.lineHeightMap_.size());
 
     if (info.reachEnd_) {
         info.offsetEnd_ = NonPositive(info.GetDistanceToBottom(mainSize, info.totalHeightOfItemsInView_, mainGap_));
@@ -335,7 +336,6 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     info.prevOffset_ = info.currentOffset_;
 
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
-    info.hasBigItem_ = !props->GetLayoutOptions()->irregularIndexes.empty();
 }
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)

@@ -1335,6 +1335,9 @@ float GridPattern::EstimateHeight() const
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+    if (UseIrregularLayout()) {
+        return info.GetIrregularOffset(mainGap);
+    }
     if (!layoutProperty->GetLayoutOptions().has_value()) {
         return info.GetContentOffset(mainGap);
     }
@@ -1386,6 +1389,9 @@ float GridPattern::GetTotalHeight() const
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, gridLayoutInfo_.axis_);
+    if (UseIrregularLayout()) {
+        return gridLayoutInfo_.GetIrregularHeight(mainGap);
+    }
     return gridLayoutInfo_.GetContentHeight(mainGap);
 }
 
@@ -1408,9 +1414,12 @@ void GridPattern::UpdateScrollBarOffset()
         auto viewScopeSize = geometryNode->GetPaddingSize();
         auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
         auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
-        if (!layoutProperty->GetLayoutOptions().has_value()) {
-            offset = gridLayoutInfo_.GetContentOffset(mainGap);
-            estimatedHeight = gridLayoutInfo_.GetContentHeight(mainGap);
+        if (UseIrregularLayout()) {
+            offset = info.GetIrregularOffset(mainGap);
+            estimatedHeight = info.GetIrregularHeight(mainGap);
+        } else if (!layoutProperty->GetLayoutOptions().has_value()) {
+            offset = info.GetContentOffset(mainGap);
+            estimatedHeight = info.GetContentHeight(mainGap);
         } else {
             offset = info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
             estimatedHeight =
@@ -1634,8 +1643,8 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
     }
     if (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
         float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
-        if (GreatNotEqual(GetMainContentSize(),
-            gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
+        if (GreatNotEqual(
+                GetMainContentSize(), gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
             endPos = gridLayoutInfo_.currentOffset_ + GetMainContentSize();
         }
         float newEndPos = endPos + delta;
@@ -1928,7 +1937,7 @@ bool GridPattern::IsPredictOutOfRange(int32_t index) const
 inline bool GridPattern::UseIrregularLayout() const
 {
     return irregular_ || (SystemProperties::GetGridIrregularLayoutEnabled() &&
-           GetLayoutProperty<GridLayoutProperty>()->HasLayoutOptions());
+                             GetLayoutProperty<GridLayoutProperty>()->HasLayoutOptions());
 }
 
 bool GridPattern::IsReverse() const

@@ -272,6 +272,15 @@ struct GridLayoutInfo {
     float GetContentHeight(const GridLayoutOptions& options, int32_t endIdx, float mainGap) const;
     float GetCurrentLineHeight() const;
 
+    /**
+     * @brief Get Content Offset when using irregular layout.
+     */
+    float GetIrregularOffset(float mainGap) const;
+    /**
+     * @brief Get total content height when using irregular layout.
+     */
+    float GetIrregularHeight(float mainGap) const;
+
     bool GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const;
     float GetTotalHeightFromZeroIndex(int32_t targetLineIndex, float mainGap) const;
 
@@ -300,6 +309,7 @@ struct GridLayoutInfo {
     float lastMainSize_ = 0.0f;
     float lastCrossSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
+    float avgLineHeight_ = 0.0f;
 
     // additional padding to accommodate navigation bar when SafeArea is expanded
     float contentEndPadding_ = 0.0f;
