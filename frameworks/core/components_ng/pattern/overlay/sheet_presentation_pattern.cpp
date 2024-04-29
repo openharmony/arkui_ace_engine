@@ -1028,15 +1028,11 @@ SheetType SheetPresentationPattern::GetSheetType()
         return SHEET_BOTTOM;
     }
     SheetType sheetType = SheetType::SHEET_BOTTOM;
-    auto rootHeight = PipelineContext::GetCurrentRootHeight();
-    auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto windowRect = pipelineContext->GetCurrentWindowRect();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
 
-    auto windowManager = pipelineContext->GetWindowManager();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     if (windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
         return SheetType::SHEET_BOTTOM;
@@ -1045,34 +1041,54 @@ SheetType SheetPresentationPattern::GetSheetType()
         return SheetType::SHEET_BOTTOM;
     }
     if (sheetThemeType_ == "auto") {
-        if (IsFold()) {
-            sheetType = SheetType::SHEET_CENTER;
-        } else {
-            if (rootHeight < rootWidth) {
-                sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
-            } else {
-                sheetType = SheetType::SHEET_BOTTOM;
-            }
-        }
+        GetSheetTypeWithAuto(sheetType);
     } else if (sheetThemeType_ == "popup") {
-        if (windowRect.Width() >= SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
-            if (sheetStyle.sheetType.has_value()) {
-                sheetType = sheetStyle.sheetType.value();
-            } else {
-                sheetType = SheetType::SHEET_POPUP;
-            }
-        } else if ((windowRect.Width() >= SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
-                   (windowRect.Width() < SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
-            if (sheetStyle.sheetType.has_value()) {
-                sheetType = sheetStyle.sheetType.value();
-            } else {
-                sheetType = SheetType::SHEET_CENTER;
-            }
-        } else {
-            sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
-        }
+        GetSheetTypeWithPopup(sheetType);
     }
     return sheetType;
+}
+
+void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
+{
+    auto rootHeight = PipelineContext::GetCurrentRootHeight();
+    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    if (IsFold()) {
+        sheetType = SheetType::SHEET_CENTER;
+    } else {
+        if (LessNotEqual(rootHeight, rootWidth)) {
+            sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
+        } else {
+            sheetType = SheetType::SHEET_BOTTOM;
+        }
+    }
+}
+
+void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowRect = pipelineContext->GetCurrentWindowRect();
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+#ifdef PREVIEW
+    windowRect = pipelineContext->GetDisplayWindowRectInfo();
+#endif
+    if (GreatOrEqual(windowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+        if (sheetStyle.sheetType.has_value()) {
+            sheetType = sheetStyle.sheetType.value();
+        } else {
+            sheetType = SheetType::SHEET_POPUP;
+        }
+    } else if (GreatOrEqual(windowRect.Width(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
+               LessNotEqual(windowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+        if (sheetStyle.sheetType.has_value()) {
+            sheetType = sheetStyle.sheetType.value();
+        } else {
+            sheetType = SheetType::SHEET_CENTER;
+        }
+    } else {
+        sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    }
 }
 
 void SheetPresentationPattern::BubbleStyleSheetTransition(bool isTransitionIn)
