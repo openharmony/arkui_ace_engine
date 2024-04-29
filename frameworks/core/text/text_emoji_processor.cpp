@@ -133,6 +133,30 @@ bool TextEmojiProcessor::IsIndexInEmoji(int32_t index, std::string content, int3
     return false;
 }
 
+bool TextEmojiProcessor::IsIndexBeforeOrInEmoji(int32_t index, std::string content)
+{
+    std::u16string u16Content = StringUtils::Str8ToStr16(content);
+    if (index < 0 || index >= u16Content.length()) {
+        return false;
+    }
+
+    std::u32string u32Content;
+    int32_t forwardLen = GetEmojiLengthForward(u32Content, index, u16Content);
+    return forwardLen != 0;
+}
+
+bool TextEmojiProcessor::IsIndexAfterOrInEmoji(int32_t index, std::string content)
+{
+    std::u16string u16Content = StringUtils::Str8ToStr16(content);
+    if (index <= 0 || index > u16Content.length()) {
+        return false;
+    }
+
+    std::u32string u32Content;
+    int32_t backwardLen = GetEmojiLengthBackward(u32Content, index, u16Content);
+    return backwardLen != 0;
+}
+
 std::u16string TextEmojiProcessor::U32ToU16string(const std::u32string& u32str)
 {
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> u8ToU16converter;

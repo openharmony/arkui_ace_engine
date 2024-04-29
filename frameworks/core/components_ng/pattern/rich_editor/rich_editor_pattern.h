@@ -779,6 +779,7 @@ private:
     // ai analysis fun
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
+    bool IsIndexAfterOrInSymbolOrEmoji(int32_t index);
     void AdjustCursorPosition(int32_t& pos);
     void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
