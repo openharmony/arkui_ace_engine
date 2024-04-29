@@ -129,6 +129,8 @@ private:
     void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     static std::string ConvertProgressStatusToString(const ProgressStatus status);
+    void OnSensitiveStyleChange(bool isSensitive) override;
+    void ObscureText(bool isSensitive);
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<ProgressMakeCallback> makeFunc_;
@@ -143,7 +145,6 @@ private:
     Color fontColor_;
     bool isTextFromUser_ = false;
     bool visibilityProp_ = true;
-
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };
 } // namespace OHOS::Ace::NG

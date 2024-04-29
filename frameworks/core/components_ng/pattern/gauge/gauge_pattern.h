@@ -145,6 +145,7 @@ public:
     }
 
     void OnModifyDone() override;
+    void OnSensitiveStyleChange(bool isSensitive) override;
 
     void SetBuilderFunc(GaugeMakeCallback&& makeFunc)
     {
@@ -168,6 +169,8 @@ private:
     void InitDescriptionNode();
     void InitLimitValueText(int32_t valueTextId, bool isMin);
     void HideLimitValueText(int32_t valueTextId, bool isMin);
+    void ObscureText(int32_t valueTextId, bool isSensitive);
+    void ObscureLimitValueText(bool isSensitive);
     void InitIndicatorImage();
     void InitTitleContent();
     void FireBuilder();

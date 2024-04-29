@@ -79,7 +79,6 @@ public:
 
     void onDraw(DrawingContext& context) override;
     void UpdateValue();
-
     void SetUseContentModifier(bool useContentModifier)
     {
         if (useContentModifier_) {
@@ -150,7 +149,6 @@ private:
     RefPtr<PropertyBool> isShowIndicator_;
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyBool> indicatorChange_;
-
     ACE_DISALLOW_COPY_AND_MOVE(GaugeModifier);
 };
 } // namespace OHOS::Ace::NG
