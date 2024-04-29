@@ -343,8 +343,7 @@ void CalendarPickerPattern::ShowDialog()
     calendarData_.entryNode = AceType::DynamicCast<FrameNode>(host);
     DialogProperties properties;
     InitDialogProperties(properties);
-    std::vector<ButtonInfo> buttonInfos;
-    overlayManager->ShowCalendarDialog(properties, calendarData_, buttonInfos, dialogEvent, dialogCancelEvent);
+    overlayManager->ShowCalendarDialog(properties, calendarData_, dialogEvent, dialogCancelEvent);
     SetDialogShow(true);
 }
 

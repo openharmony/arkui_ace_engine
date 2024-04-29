@@ -2956,13 +2956,11 @@ bool WebPattern::ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChoo
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
-    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
-            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowDateDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowDateDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI, "ArkUIWebShowDateDialog");
     return true;
@@ -3005,14 +3003,12 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
-    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent,
+        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(
-                properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI, "ArkUIWebShowTimeDialog");
     return true;
@@ -3059,13 +3055,12 @@ bool WebPattern::ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDa
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
-    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
+        [properties, settingData, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTextDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI, "ArkUIWebShowTextDialog");
     return true;
