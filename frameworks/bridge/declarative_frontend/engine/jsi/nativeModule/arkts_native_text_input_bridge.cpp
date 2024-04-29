@@ -1381,12 +1381,14 @@ ArkUINativeModuleValue TextInputBridge::SetShowCounter(ArkUIRuntimeCallInfo* run
             highlightBorder = highlightBorderArg->BooleaValue();
         }
         auto thresholdArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "thresholdPercentage"));
-        auto thresholdValue = thresholdArg->Int32Value(vm);
         if (thresholdArg->IsNull() || thresholdArg->IsUndefined() || !thresholdArg->IsNumber()) {
             thresholdValue = DEFAULT_MODE;
-        } else if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
-            thresholdValue = ILLEGAL_VALUE;
-            showCounter = false;
+        } else {
+            thresholdValue = thresholdArg->Int32Value(vm);
+            if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
+                thresholdValue = ILLEGAL_VALUE;
+                showCounter = false;
+            }
         }
     }
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputShowCounter(
