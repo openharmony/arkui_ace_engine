@@ -3031,3 +3031,9 @@ let FocusPriority;
   FocusPriority[FocusPriority["PRIOR"] = 2000] = "PRIOR";
   FocusPriority[FocusPriority["PREVIOUS"] = 3000] = "PREVIOUS";
 })(FocusPriority || (FocusPriority = {}));
+var SubMenuExpandingMode;
+(function (SubMenuExpandingMode) {
+  SubMenuExpandingMode[SubMenuExpandingMode["SIDE_EXPAND"] = 0] = "SIDE";
+  SubMenuExpandingMode[SubMenuExpandingMode["EMBEDDED_EXPAND"] = 1] = "EMBEDDED";
+  SubMenuExpandingMode[SubMenuExpandingMode["STACK_EXPAND"] = 2] = "STACK";
+})(SubMenuExpandingMode || (SubMenuExpandingMode = {}));
