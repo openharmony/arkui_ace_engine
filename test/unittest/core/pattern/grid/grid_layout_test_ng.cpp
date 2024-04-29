@@ -535,6 +535,7 @@ HWTEST_F(GridLayoutTestNg, GridScrollWithOptions003, TestSize.Level1)
     pattern_->UpdateStartIndex(3);
     FlushLayoutTask(frameNode_);
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto layoutAlgorithm =
@@ -569,6 +570,7 @@ HWTEST_F(GridLayoutTestNg, GridScrollWithOptions004, TestSize.Level1)
     pattern_->UpdateStartIndex(3);
     FlushLayoutTask(frameNode_);
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr 1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto layoutAlgorithm =

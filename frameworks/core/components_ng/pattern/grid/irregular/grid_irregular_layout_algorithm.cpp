@@ -281,6 +281,12 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 {
     auto& info = gridLayoutInfo_;
 
+    if (info.jumpIndex_ == JUMP_TO_BOTTOM_EDGE) {
+        GridIrregularFiller filler(&info, wrapper_);
+        filler.FillMatrixOnly(info.childrenCount_ - 1);
+        info.PrepareJumpToBottom();
+    }
+
     if (info.jumpIndex_ == LAST_ITEM) {
         info.jumpIndex_ = info.childrenCount_ - 1;
     }
@@ -294,18 +300,18 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     }
 
     int32_t jumpLineIdx = FindJumpLineIdx(info.jumpIndex_);
-    info.jumpIndex_ = EMPTY_JUMP_INDEX;
 
     PrepareLineHeight(mainSize, jumpLineIdx);
 
     GridLayoutRangeSolver solver(&info, wrapper_);
-    auto res = solver.FindRangeOnJump(jumpLineIdx, mainGap_);
+    auto res = solver.FindRangeOnJump(info.jumpIndex_, jumpLineIdx, mainGap_);
 
     info.currentOffset_ = res.pos;
     info.startMainLineIndex_ = res.startRow;
-    info.startIndex_ = info.gridMatrix_.at(res.startRow).at(0);
+    info.startIndex_ = res.startIdx;
     info.endMainLineIndex_ = res.endRow;
     info.endIndex_ = res.endIdx;
+    info.jumpIndex_ = EMPTY_JUMP_INDEX;
 }
 
 void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
@@ -320,6 +326,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 
     info.lastMainSize_ = mainSize;
     info.totalHeightOfItemsInView_ = info.GetTotalHeightOfItemsInView(mainGap_, false);
+    info.avgLineHeight_ = info.GetTotalLineHeight(0.0f) / static_cast<float>(info.lineHeightMap_.size());
 
     if (info.reachEnd_) {
         info.offsetEnd_ = NonPositive(info.GetDistanceToBottom(mainSize, info.totalHeightOfItemsInView_, mainGap_));
@@ -329,7 +336,6 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     info.prevOffset_ = info.currentOffset_;
 
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
-    info.hasBigItem_ = !props->GetLayoutOptions()->irregularIndexes.empty();
 }
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
