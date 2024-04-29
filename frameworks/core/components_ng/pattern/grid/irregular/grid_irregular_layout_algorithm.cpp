@@ -308,7 +308,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 
     info.currentOffset_ = res.pos;
     info.startMainLineIndex_ = res.startRow;
-    info.startIndex_ = info.gridMatrix_.at(res.startRow).at(0);
+    info.startIndex_ = res.startIdx;
     info.endMainLineIndex_ = res.endRow;
     info.endIndex_ = res.endIdx;
     info.jumpIndex_ = EMPTY_JUMP_INDEX;

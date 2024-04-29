@@ -206,10 +206,10 @@ HWTEST_F(GridIrregularFillerTest, CheckMultiRow001, TestSize.Level1)
     };
 
     GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
-    EXPECT_EQ(solver.CheckMultiRow(2), 2);
+    EXPECT_EQ(solver.CheckMultiRow(2), std::make_pair(1, 3));
 
-    EXPECT_EQ(solver.CheckMultiRow(0), 1);
-    EXPECT_EQ(solver.CheckMultiRow(1), 1);
+    EXPECT_EQ(solver.CheckMultiRow(0), std::make_pair(0, 0));
+    EXPECT_EQ(solver.CheckMultiRow(1), std::make_pair(1, 3));
 }
 
 /**

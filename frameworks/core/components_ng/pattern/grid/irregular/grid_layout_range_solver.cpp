@@ -51,13 +51,10 @@ RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpIdx, int32_t jumpLi
     */
     switch (info_->scrollAlign_) {
         case ScrollAlign::START: {
-            auto topRows = CheckMultiRow(jumpLineIdx);
-            float offset = 0.0f;
-            for (int i = 1; i < topRows; ++i) {
-                offset -= info_->lineHeightMap_.at(jumpLineIdx - i) + mainGap;
-            }
+            auto [startRow, startIdx] = CheckMultiRow(jumpLineIdx);
+            float offset = -info_->GetHeightInRange(startRow, jumpLineIdx, mainGap);
             auto [endLineIdx, endIdx] = SolveForwardForEndIdx(mainGap, mainSize, jumpLineIdx);
-            return { jumpLineIdx - topRows + 1, offset, endLineIdx, endIdx };
+            return { startRow, startIdx, offset, endLineIdx, endIdx };
         }
         case ScrollAlign::CENTER: {
             // align by item center
@@ -66,11 +63,11 @@ RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpIdx, int32_t jumpLi
             float halfMainSize = mainSize / 2.0f;
             auto [endLineIdx, endIdx] = SolveForwardForEndIdx(mainGap, halfMainSize + offset, centerLine);
             auto res = SolveBackward(mainGap, halfMainSize - offset, centerLine);
-            return { res.row, res.pos, endLineIdx, endIdx };
+            return { res.row, res.idx, res.pos, endLineIdx, endIdx };
         }
         case ScrollAlign::END: {
             auto res = SolveBackward(mainGap, mainSize - info_->lineHeightMap_.at(jumpLineIdx), jumpLineIdx);
-            return { res.row, res.pos, jumpLineIdx, info_->FindEndIdx(jumpLineIdx).itemIdx };
+            return { res.row, res.idx, res.pos, jumpLineIdx, info_->FindEndIdx(jumpLineIdx).itemIdx };
         }
         default:
             return {};
@@ -90,12 +87,12 @@ Result GridLayoutRangeSolver::SolveForward(float mainGap, float targetLen, const
     if (it == info_->lineHeightMap_.end()) {
         len -= (--it)->second + mainGap;
     }
-    auto topRows = CheckMultiRow(it->first);
-    for (int32_t i = 1; i < topRows; ++i) {
+    auto [startRow, startIdx] = CheckMultiRow(it->first);
+    for (int32_t i = it->first; i > startRow; --i) {
         --it;
         len -= it->second + mainGap;
     }
-    return { it->first, FindStartingItem(it->first), len - targetLen + mainGap };
+    return { startRow, startIdx, len - targetLen + mainGap };
 }
 
 std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int32_t idx)
@@ -156,42 +153,46 @@ Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int3
         len += info_->lineHeightMap_.at(--idx) + mainGap;
     }
 
-    auto rowCnt = CheckMultiRow(idx);
-    idx -= rowCnt - 1;
-
+    auto [startLine, startItem] = CheckMultiRow(idx);
     float newOffset = targetLen - len + mainGap;
-    for (int i = 0; i < rowCnt - 1; ++i) {
-        newOffset -= info_->lineHeightMap_.at(idx + i) + mainGap;
-    }
-    return { idx, FindStartingItem(idx), newOffset };
+    newOffset -= info_->GetHeightInRange(startLine, idx, mainGap);
+    return { startLine, startItem, newOffset };
 }
 
-int32_t GridLayoutRangeSolver::CheckMultiRow(const int32_t idx)
+std::pair<int32_t, int32_t> GridLayoutRangeSolver::CheckMultiRow(const int32_t idx)
 {
     // check multi-row item that occupies Row [idx]
-    int32_t rowCnt = 1;
     const auto& mat = info_->gridMatrix_;
     const auto& row = mat.at(idx);
-    for (int c = 0; c < info_->crossCount_; ++c) {
+    if (row.empty()) {
+        return { -1, -1 };
+    }
+    int32_t startLine = idx;
+    int32_t startItem = row.begin()->second;
+    for (int32_t c = 0; c < info_->crossCount_; ++c) {
         auto it = row.find(c);
         if (it == row.end()) {
             continue;
         }
 
         int32_t r = idx;
+        if (it->second == 0) {
+            // Item 0 always start at [0, 0]
+            return { 0, 0 };
+        }
         if (it->second < 0) {
             // traverse upwards to find the first row occupied by this item
             while (r > 0 && mat.at(r).at(c) < 0) {
                 --r;
             }
-            rowCnt = std::max(rowCnt, idx - r + 1);
-        } else if (it->second == 0) {
-            // Item 0 always start at [0, 0]
-            rowCnt = idx + 1;
+            if (r < startLine) {
+                startLine = r;
+                startItem = -it->second;
+            }
         }
 
         // skip the columns occupied by this item
-        int32_t itemIdx = mat.at(r).at(c);
+        int32_t itemIdx = std::abs(it->second);
         if (opts_->irregularIndexes.find(itemIdx) != opts_->irregularIndexes.end()) {
             if (opts_->getSizeByIndex) {
                 auto size = opts_->getSizeByIndex(itemIdx);
@@ -202,23 +203,6 @@ int32_t GridLayoutRangeSolver::CheckMultiRow(const int32_t idx)
             }
         }
     }
-    return rowCnt;
-}
-
-int32_t GridLayoutRangeSolver::FindStartingItem(int32_t rowIdx)
-{
-    if (rowIdx == 0) {
-        return 0;
-    }
-    const auto& row = info_->gridMatrix_.find(rowIdx);
-    if (row == info_->gridMatrix_.end()) {
-        return -1;
-    }
-    for (auto it : row->second) {
-        if (it.second > 0) {
-            return it.second;
-        }
-    }
-    return -1;
+    return {startLine, startItem};
 }
 } // namespace OHOS::Ace::NG

@@ -49,6 +49,7 @@ public:
 
     struct RangeInfo {
         int32_t startRow; /**< Row index of the starting row. */
+        int32_t startIdx; /**< Index of the starting GridItem in layout range. */
         float pos;        /**< Main position of the starting row in ViewBox. The new currentOffset_ */
         int32_t endRow;   /**< Row index of the last row in layout range. */
         int32_t endIdx;   /**< index of the last GridItem in layout range. */
@@ -106,12 +107,10 @@ private:
     /**
      * @brief Looks for multi-row items in the row.
      *
-     * @param idx The row index.
-     * @return The maximum row count upwards of multi-row items in Row [idx].
+     * @param idx The current row index.
+     * @return [first row occupied by items in the current row, the corresponding item index].
      */
-    int32_t CheckMultiRow(int32_t idx);
-
-    int32_t FindStartingItem(int32_t rowIdx);
+    std::pair<int32_t, int32_t> CheckMultiRow(int32_t idx);
 
     const GridLayoutInfo* info_;
     const LayoutWrapper* wrapper_;
