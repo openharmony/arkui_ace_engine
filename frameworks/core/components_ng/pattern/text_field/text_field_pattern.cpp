@@ -5069,6 +5069,17 @@ void TextFieldPattern::RestorePreInlineStates()
     ApplyUnderlineTheme();
     ProcessInnerPadding();
     ProcessResponseArea();
+    ProcessRectPadding();
+}
+
+void TextFieldPattern::ProcessRectPadding()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    CHECK_NULL_VOID(paddingProperty);
+    auto top = paddingProperty->top.has_value() ? paddingProperty->top->GetDimension().ConvertToPx() : 0.0f;
+    textRect_.SetTop(top);
 }
 
 void TextFieldPattern::TextAreaInputRectUpdate(RectF& rect)
