@@ -3045,6 +3045,15 @@ void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &m
     ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
 }
 
+void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateForegroundEffect(radius);
+    }
+}
+
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
 {
     CHECK_NULL_VOID(frameNode);

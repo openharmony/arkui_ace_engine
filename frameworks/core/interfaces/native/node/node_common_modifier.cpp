@@ -3261,6 +3261,21 @@ void ResetResponseRegion(ArkUINodeHandle node)
     ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
+void SetForegroundEffect(ArkUINodeHandle node, ArkUI_Float32 radius)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    radius = std::max(radius, 0.0f);
+    ViewAbstract::SetForegroundEffect(frameNode, static_cast<float>(radius));
+}
+
+void ResetForegroundEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetForegroundEffect(frameNode, 0.0f);
+}
+
 void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Float32 saturationArg,
     ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
     ArkUI_Int32 blurValuesSize)
@@ -5066,7 +5081,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea, ResetExpandSafeArea, SetFlexBasis,
         ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription, ResetAccessibilityDescription,
         SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
-        ResetObscured, SetResponseRegion, ResetResponseRegion, SetBackgroundEffect, ResetBackgroundEffect,
+        ResetObscured, SetResponseRegion, ResetResponseRegion,
+        SetForegroundEffect, ResetForegroundEffect, SetBackgroundEffect, ResetBackgroundEffect,
         SetBackgroundBrightness, ResetBackgroundBrightness, SetBackgroundBrightnessInternal, ResetBackgroundBrightnessInternal, 
         SetForegroundBrightness, ResetForegroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions,
         SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching,
