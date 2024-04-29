@@ -311,7 +311,7 @@ void CalendarDialogPattern::InitOnKeyEvent()
         if (pattern->isFocused_ && event.action == KeyAction::DOWN) {
             return pattern->HandleKeyEvent(event);
         }
-        if (!pattern->isFocused_ && event.action == KeyAction::DOWN) {
+        if (!pattern->isFocused_ && !pattern->hasTabKeyDown_ && event.action == KeyAction::DOWN) {
             pattern->OnEnterKeyEvent(event);
         }
         return false;
@@ -522,6 +522,7 @@ bool CalendarDialogPattern::IsIndexInCurrentMonth(int32_t focusedDayIndex, const
 
 bool CalendarDialogPattern::HandleTabKeyEvent(const KeyEvent& event)
 {
+    hasTabKeyDown_ = true;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto childSize = static_cast<int32_t>(host->GetChildren().size());
