@@ -396,16 +396,12 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
         align = ParseAutoAlign(jumpIdx, inView);
     }
 
-    // If the item is within 1 full-viewport distance (approximately), we consider it close.
-    // Then we simply scroll to it instead of triggering a reset/jump, which would change the layout.
-    int32_t cntInView = info_->endIndex_ - info_->startIndex_ + 1;
-    bool closeToView =
-        jumpIdx > info_->endIndex_ ? jumpIdx - info_->endIndex_ < cntInView : info_->startIndex_ - jumpIdx < cntInView;
+    // If item is close, we simply scroll to it instead of triggering a reset/jump, which would change the layout.
+    bool closeToView = info_->ItemCloseToView(jumpIdx);
     if (closeToView) {
         MeasureToTarget(jumpIdx);
     }
     Jump(jumpIdx, align, inView || closeToView);
-
     if (!NearZero(info_->delta_)) {
         MeasureOnOffset(info_->delta_);
     } else {

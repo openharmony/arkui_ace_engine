@@ -113,6 +113,11 @@ public:
     {
         return !lanes_.empty() && idx >= StartIndex() && idx <= EndIndex();
     }
+    /**
+     * @param idx of the item.
+     * @return true the item is approximately within 1 full-viewport distance.
+     */
+    bool ItemCloseToView(int32_t idx) const;
 
     /**
      * @return maximum end position of items in lanes_.

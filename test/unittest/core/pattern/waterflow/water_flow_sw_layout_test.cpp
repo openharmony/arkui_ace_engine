@@ -85,4 +85,35 @@ HWTEST_F(WaterFlowSWTest, Jump001, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 5);
     EXPECT_EQ(info_->endIndex_, 9);
 }
+
+/**
+ * @tc.name: ChangeTemplate001
+ * @tc.desc: waterFlow change lane count
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ChangeTemplate001, TestSize.Level1)
+{
+    CreateWithItem([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(600.0f));
+        ViewAbstract::SetHeight(CalcLength(200.f));
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+    });
+    UpdateCurrentOffset(-300.0f);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 5);
+    EXPECT_EQ(info->endIndex_, 9);
+    EXPECT_EQ(GetChildOffset(frameNode_, 5), OffsetF(200.0f, -100.0f));
+    EXPECT_EQ(GetChildOffset(frameNode_, 6), OffsetF(400.0f, -100.0f));
+    EXPECT_EQ(GetChildOffset(frameNode_, 7), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(GetChildOffset(frameNode_, 8), OffsetF(400.0f, 0.0f));
+    EXPECT_EQ(GetChildOffset(frameNode_, 9), OffsetF(200.0f, 100.0f));
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr");
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 5);
+    EXPECT_EQ(info->endIndex_, 8);
+    EXPECT_EQ(GetChildOffset(frameNode_, 5), OffsetF(0.0f, -100.0f));
+    EXPECT_EQ(GetChildOffset(frameNode_, 6), OffsetF(300.0f, -100.0f));
+    EXPECT_EQ(GetChildOffset(frameNode_, 7), OffsetF(300.0f, 0.0f));
+    EXPECT_EQ(GetChildOffset(frameNode_, 8), OffsetF(0.0f, 100.0f));
+}
 } // namespace OHOS::Ace::NG

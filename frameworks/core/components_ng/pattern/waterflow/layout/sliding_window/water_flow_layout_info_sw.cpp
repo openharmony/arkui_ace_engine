@@ -304,4 +304,16 @@ std::string WaterFlowLayoutInfoSW::Lane::ToString() const
     res += "}";
     return res;
 }
+
+bool WaterFlowLayoutInfoSW::ItemCloseToView(int32_t idx) const
+{
+    if (lanes_.empty() ||
+        std::all_of(lanes_.begin(), lanes_.end(), [](const Lane& lane) { return lane.items_.empty(); })) {
+        return false;
+    }
+    int32_t startIdx = StartIndex();
+    int32_t endIdx = EndIndex();
+    using std::abs, std::min;
+    return min(abs(idx - endIdx), abs(idx - startIdx)) < endIdx - startIdx + 1;
+}
 } // namespace OHOS::Ace::NG
