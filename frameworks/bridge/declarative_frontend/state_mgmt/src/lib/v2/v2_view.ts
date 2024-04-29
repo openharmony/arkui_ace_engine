@@ -112,7 +112,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
 
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            ObserveV2.getObserve().startBind(this, elmtId);
+            ObserveV2.getObserve().startRecordDependencies(this, elmtId);
 
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
@@ -124,7 +124,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                 (node as ArkComponent).cleanStageValue();
             }
 
-            ObserveV2.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
+            ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
 
             stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
