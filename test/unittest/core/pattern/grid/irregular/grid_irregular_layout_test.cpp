@@ -259,7 +259,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
     EXPECT_EQ(info.currentOffset_, -303.5f);
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 5);
-    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.startIndex_, 1);
     EXPECT_EQ(info.endIndex_, 7);
     std::map<int32_t, float> EXPECTED_MAP = { { 0, 99.5 }, { 1, 99.5 }, { 2, 200.0f }, { 3, 200.0f }, { 4, 200.0f },
         { 5, 99.5f } };
@@ -1404,9 +1404,54 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startMainLineIndex_, 3);
     EXPECT_EQ(info.endMainLineIndex_, 8);
-    EXPECT_EQ(info.startIndex_, 2);
+    EXPECT_EQ(info.startIndex_, 3);
     EXPECT_EQ(info.GetIrregularOffset(5.0f), 3 * 305.f - info.currentOffset_);
     EXPECT_EQ(info.GetIrregularHeight(5.0f), 9 * 300.0f + 8 * 5.0f);
+}
+
+/**
+ * @tc.name: DeleteItem001
+ * @tc.desc: Test removing item from end
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, DeleteItem001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo13());
+        model.SetColumnsGap(Dimension { 1.0f });
+        model.SetRowsGap(Dimension { 5.0f });
+        CreateFixedHeightItems(1, 910.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 605.0f);
+        CreateFixedHeightItems(1, 1825.0f);
+        CreateFixedHeightItems(5, 300.0f);
+        ViewAbstract::SetHeight(CalcLength(200.0f));
+    });
+    const auto& info = pattern_->gridLayoutInfo_;
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(info.offsetEnd_);
+    for (int i = 0; i < 6; ++i) {
+        frameNode_->RemoveChildAtIndex(3);
+    }
+    frameNode_->ChildrenUpdatedFrom(3);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startMainLineIndex_, 3);
+    EXPECT_EQ(info.endMainLineIndex_, 4);
+    EXPECT_EQ(info.startIndex_, 2);
+    EXPECT_EQ(info.currentOffset_, -405.0f);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_13_AFTER_DELETE);
+    EXPECT_TRUE(info.offsetEnd_);
+
+    frameNode_->RemoveChildAtIndex(2);
+    frameNode_->ChildrenUpdatedFrom(2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startMainLineIndex_, 3);
+    EXPECT_EQ(info.endMainLineIndex_, 3);
+    EXPECT_EQ(info.currentOffset_, -100.0f);
 }
 
 /**

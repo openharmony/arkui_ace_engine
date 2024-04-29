@@ -203,6 +203,6 @@ std::pair<int32_t, int32_t> GridLayoutRangeSolver::CheckMultiRow(const int32_t i
             }
         }
     }
-    return {startLine, startItem};
+    return { startLine, startItem };
 }
 } // namespace OHOS::Ace::NG

@@ -199,5 +199,13 @@ const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_13_VARIATION = {
     { 8, { { 2, -3 }, { 3, -3 }, { 4, -3 } } },                                 // x | x | 3 | 3 | 3 | x
 };
 
+const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_13_AFTER_DELETE = {
+    { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 }, { 3, 0 }, { 4, 0 } } }, // 0 | 0 | 0 | 0 | 0
+    { 1, { { 0, 0 }, { 1, 0 }, { 2, 0 }, { 3, 0 }, { 4, 0 } } }, // 0 | 0 | 0 | 0 | 0
+    { 2, { { 0, 0 }, { 1, 0 }, { 2, 0 }, { 3, 0 }, { 4, 0 } } }, // 0 | 0 | 0 | 0 | 0
+    { 3, { { 0, 1 }, { 1, 2 }, { 2, -2 } } },                    // 1 | 2 | 2 | x | x
+    { 4, { { 1, -2 }, { 2, -2 } } },                             // x | 2 | 2 | x | x
+};
+
 } // namespace OHOS::Ace::NG
 #endif
