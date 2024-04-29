@@ -1,0 +1,5 @@
+X(SaveOp)
+X(RestoreOp)
+X(FillRectOp)
+X(FillTextOp)
+X(BezierCurveToOp)
