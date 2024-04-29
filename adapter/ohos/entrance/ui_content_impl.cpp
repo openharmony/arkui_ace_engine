@@ -1546,7 +1546,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                 rsUiDirector->SetUITaskRunner(
                     [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
                         ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIGetPipelineContext");
+                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask");
                     }, id);
                 auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context != nullptr) {
