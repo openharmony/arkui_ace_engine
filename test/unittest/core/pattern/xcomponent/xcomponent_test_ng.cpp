@@ -1884,7 +1884,7 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
     /**
      * @tc.steps: step5. call XcomponentController's interface relative to SetSurfaceRotation
      * @tc.expected: handlingSurfaceRenderContext_->SetSurfaceRotation(isLock) is called
-     */    
+     */
     EXPECT_CALL(
         *AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_), SetSurfaceRotation(isLock))
         .WillOnce(Return());
