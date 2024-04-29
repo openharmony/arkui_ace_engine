@@ -674,7 +674,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         parent->RemoveChild(preTopNavDestination, true);
         auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(preTopNavDestinationPattern);
-        preTopNavDestinationPattern->SetCustomNode(nullptr);
         navigationNode->SetNeedSetInvisible(false);
         auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
         if (navBar) {
@@ -708,7 +707,6 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
             parent->RemoveChild(preTopNavDestination);
             auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
             CHECK_NULL_VOID(preTopNavDestinationPattern);
-            preTopNavDestinationPattern->SetCustomNode(nullptr);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         return;
@@ -1379,7 +1377,6 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(preTopNavDestination);
-            preDestinationPattern->SetCustomNode(nullptr);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             break;
         }
