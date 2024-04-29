@@ -47,19 +47,18 @@ TabBarModifier::TabBarModifier()
 
 void TabBarModifier::onDraw(DrawingContext& context)
 {
-    if ((!hasIndicator_ || hasIndicator_->Get()) && !NearZero(indicator_.Height())) {
-        PaintIndicator(context, indicator_);
+    if (!hasIndicator_ || hasIndicator_->Get()) {
+        PaintIndicator(context);
     }
 }
 
-void TabBarModifier::SetIndicator(const RectF& indicator)
+void TabBarModifier::SetIndicatorOffset(const OffsetF& indicatorOffset)
 {
-    indicator_ = indicator;
     if (indicatorLeft_) {
-        indicatorLeft_->Set(indicator.GetX());
+        indicatorLeft_->Set(indicatorOffset.GetX());
     }
     if (indicatorTop_) {
-        indicatorTop_->Set(indicator.GetY());
+        indicatorTop_->Set(indicatorOffset.GetY());
     }
 }
 
@@ -98,14 +97,14 @@ void TabBarModifier::SetIndicatorMarginTop(float indicatorMarginTop)
     }
 }
 
-void TabBarModifier::SetSelectedMode(SelectedMode selectedMode)
+void TabBarModifier::SetHasIndicator(bool hasIndicator)
 {
     if (hasIndicator_) {
-        hasIndicator_->Set(selectedMode == SelectedMode::INDICATOR ? true : false);
+        hasIndicator_->Set(hasIndicator);
     }
 }
 
-void TabBarModifier::PaintIndicator(DrawingContext& context, RectF indicator)
+void TabBarModifier::PaintIndicator(DrawingContext& context)
 {
     auto& canvas = context.canvas;
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -113,6 +112,7 @@ void TabBarModifier::PaintIndicator(DrawingContext& context, RectF indicator)
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
 
+    RectF indicator;
     if (GreatNotEqual(indicatorHeight_->Get(), 0.0f)) {
         indicator.SetHeight(indicatorHeight_->Get());
     } else {

@@ -453,7 +453,8 @@ private:
     void SetSwiperCurve(const RefPtr<Curve>& curve) const;
     void AdjustOffset(double& offset) const;
     void InitTurnPageRateEvent();
-    void GetIndicatorStyle(IndicatorStyle& indicatorStyle);
+    void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
+    Color GetTabBarBackgroundColor() const;
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
     void TriggerTranslateAnimation(
