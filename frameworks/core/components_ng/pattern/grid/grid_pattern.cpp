@@ -1430,7 +1430,7 @@ void GridPattern::UpdateScrollBarOffset()
     }
     auto viewSize = geometryNode->GetFrameSize();
     auto overScroll = 0.0f;
-    if (Positive(gridLayoutInfo_.currentOffset_)) {
+    if (gridLayoutInfo_.reachStart_ && Positive(gridLayoutInfo_.currentOffset_)) {
         overScroll = gridLayoutInfo_.currentOffset_;
     } else {
         overScroll = gridLayoutInfo_.lastMainSize_ - estimatedHeight + offset;
