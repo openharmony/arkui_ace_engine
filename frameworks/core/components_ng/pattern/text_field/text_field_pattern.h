@@ -99,7 +99,9 @@ enum class InputOperation {
     CURSOR_UP,
     CURSOR_DOWN,
     CURSOR_LEFT,
-    CURSOR_RIGHT
+    CURSOR_RIGHT,
+    SET_PREVIEW_TEXT,
+    SET_PREVIEW_FINISH,
 };
 
 enum {
@@ -138,6 +140,11 @@ struct PreState {
     bool setHeight = false;
     bool saveState = false;
     bool hasBorderColor = false;
+};
+
+struct PreviewTextInfo {
+    std::string text;
+    PreviewRange range;
 };
 
 class TextFieldPattern : public ScrollablePattern,
@@ -226,6 +233,11 @@ public:
     void HandleOnDelete(bool backward) override;
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
+
+    int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
+    void FinishTextPreview() override;
+    void SetPreviewTextOperation(PreviewTextInfo info);
+    void FinishTextPreviewOperation();
 
     WeakPtr<LayoutWrapper> GetCounterNode()
     {
@@ -1135,6 +1147,34 @@ public:
         return transformContentRect;
     }
 
+    std::vector<RectF> GetPreviewTextRects() const;
+
+    bool GetIsPreviewText() const
+    {
+        return hasPreviewText;
+    }
+
+    const Color& GetPreviewDecorationColor() const
+    {
+        auto theme = GetTheme();
+        CHECK_NULL_RETURN(theme, Color::TRANSPARENT);
+        return theme->GetPreviewUnderlineColor();
+    }
+
+    bool NeedDrawPreviewText();
+
+    float GetPreviewUnderlineWidth() const
+    {
+        return static_cast<float>(previewUnderlineWidth_.Value());
+    }
+
+    void ReceivePreviewTextStyle(const std::string& style) override
+    {
+        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PreviewTextStyle, style);
+    }
+
+    PreviewTextStyle GetPreviewTextStyle() const;
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1325,6 +1365,24 @@ private:
     void HandleCountStyle();
     void HandleDeleteOnCounterScene();
 
+    void UpdatePreviewIndex(int32_t start, int32_t end)
+    {
+        previewTextStart_ = start;
+        previewTextEnd_ = end;
+    }
+
+    int32_t GetPreviewTextStart() const
+    {
+        return hasPreviewText ? previewTextStart_ : selectController_->GetCaretIndex();
+    }
+
+    int32_t GetPreviewTextEnd() const
+    {
+        return hasPreviewText ? previewTextEnd_ : selectController_->GetCaretIndex();
+    }
+
+    bool CheckPreviewTextValidate(PreviewTextInfo info) const;
+
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
@@ -1483,6 +1541,12 @@ private:
     OffsetF movingCaretOffset_;
     bool isDetachFromMainTree_ = false;
     bool isFocusTextColorSet_ = false;
+    Dimension previewUnderlineWidth_ = 2.0_px;
+    bool hasSupportedPreviewText = true;
+    bool hasPreviewText = false;
+    std::queue<PreviewTextInfo> previewTextOperation;
+    int32_t previewTextStart_ = -1;
+    int32_t previewTextEnd_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

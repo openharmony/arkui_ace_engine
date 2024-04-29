@@ -42,6 +42,11 @@ public:
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
     void NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info) override;
+    int32_t SetPreviewText(const std::u16string &text, const MiscServices::Range &range) override;
+    void FinishTextPreview() override;
+    int32_t ReceivePrivateCommand(
+        const std::unordered_map<std::string, MiscServices::PrivateDataValue> &privateCommand) override;
+
 
 private:
     void PostTaskToUI(const std::function<void()>& task, const std::string& name);

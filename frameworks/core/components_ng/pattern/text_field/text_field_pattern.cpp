@@ -142,6 +142,13 @@ const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
 const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
 constexpr int32_t DEFAULT_MODE = -1;
+constexpr int32_t PREVIEW_TEXT_RANGE_DEFAULT = -1;
+const std::string PREVIEW_STYLE_NORMAL = "normal";
+const std::string PREVIEW_STYLE_UNDERLINE = "underline";
+
+constexpr int32_t PREVIEW_NO_ERROR = 0;
+constexpr int32_t PREVIEW_NULL_POINTER = 1;
+constexpr int32_t PREVIEW_BAD_PARAMETERS = -1;
 
 static std::unordered_map<TextContentType, std::pair<AceAutoFillType, std::string>> contentTypeMap_ = {
     {TextContentType::VISIBLE_PASSWORD,
@@ -413,6 +420,13 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
                 CursorMoveRightOperation();
                 break;
             }
+            case InputOperation::SET_PREVIEW_TEXT:
+                SetPreviewTextOperation(previewTextOperation.front());
+                previewTextOperation.pop();
+                break;
+            case InputOperation::SET_PREVIEW_FINISH:
+                FinishTextPreviewOperation();
+                break;
         }
     }
 }
@@ -1501,7 +1515,7 @@ void TextFieldPattern::HandleTouchUp()
     if (isMousePressed_) {
         isMousePressed_ = false;
     }
-    if (magnifierController_->GetShowMagnifier()) {
+    if (magnifierController_->GetShowMagnifier() && !GetIsPreviewText()) {
         magnifierController_->UpdateShowMagnifier();
     }
 }
@@ -1517,7 +1531,21 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
 {
     scrollable_ = false;
     SetScrollEnable(scrollable_);
-    selectController_->UpdateCaretInfoByOffset(info.GetTouches().front().GetLocalLocation());
+    // limit move when preview text is shown
+    auto touchOffset = info.GetTouches().front().GetLocalLocation();
+    if (GetIsPreviewText()) {
+        TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
+        Offset previewTextTouchOffset;
+        double offsetLeft = GetPreviewTextRects().front().Left() + GetTextRect().GetX();
+        double offsetRight = GetPreviewTextRects().front().Right() + GetTextRect().GetX();
+        double offsetTop = GetPreviewTextRects().front().Top() + GetTextRect().GetY();
+        double offsetBottom = GetPreviewTextRects().front().Bottom() + GetTextRect().GetY();
+        previewTextTouchOffset.SetX(std::clamp(touchOffset.GetX(), offsetLeft, offsetRight));
+        previewTextTouchOffset.SetY(std::clamp(touchOffset.GetY(), offsetTop, offsetBottom));
+        selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset);
+    } else {
+        selectController_->UpdateCaretInfoByOffset(touchOffset);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1932,7 +1960,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
             ProcessOverlay({ .menuIsShow = false, .animation = true, .hideHandleLine = true });
         }
     }
-    if (needCloseOverlay) {
+    if (needCloseOverlay || GetIsPreviewText()) {
         CloseSelectOverlay(true);
     }
     DoProcessAutoFill();
@@ -2050,6 +2078,11 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup)
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
+    if (GetIsPreviewText()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "refuse double click when has preview text.");
+        return;
+    }
+
     if (showSelect_) {
         SetIsSingleHandle(true);
         CloseSelectOverlay();
@@ -2532,7 +2565,8 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(!IsDragging());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetGlobalLocation())) {
+    if (!focusHub->IsFocusable() || IsOnUnitByPosition(info.GetGlobalLocation())
+        || GetIsPreviewText()) {
         return;
     }
     isTouchCaret_ = false;
@@ -3108,7 +3142,8 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .width = theme->GetCursorWidth().ConvertToPx(),
         .height = selectController_->GetCaretRect().Height() };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
-        .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()) };
+        .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
+        .isTextPreviewSupported = hasSupportedPreviewText };
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
@@ -3237,6 +3272,16 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     auto caretStart = 0;
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+
+    if (GetIsPreviewText()) {
+        PreviewTextInfo info = {
+            .text = insertValue,
+            .range = {-1, -1}
+        };
+        SetPreviewTextOperation(info);
+        FinishTextPreview();
+    }
+
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
     if (IsSelected()) {
@@ -4149,6 +4194,9 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
     int32_t count = contentController_->Delete(selectController_->GetCaretIndex(), length, true);
     lockRecord_ = true;
     selectController_->UpdateCaretIndex(std::max(idx - count, 0));
+    if (GetIsPreviewText()) {
+        UpdatePreviewIndex(GetPreviewTextStart(), GetPreviewTextEnd() - length);
+    }
     lockRecord_ = false;
     StartTwinkling();
     UpdateEditingValueToRecord();
@@ -4157,6 +4205,9 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
 void TextFieldPattern::DeleteForwardOperation(int32_t length)
 {
     contentController_->Delete(selectController_->GetCaretIndex(), length, false);
+    if (GetIsPreviewText()) {
+        UpdatePreviewIndex(GetPreviewTextStart(), GetPreviewTextEnd() - length);
+    }
     StartTwinkling();
     UpdateEditingValueToRecord();
 }
@@ -6529,5 +6580,179 @@ Offset TextFieldPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
         localOffset.SetY(localOffsetF.GetY());
     }
     return localOffset;
+}
+
+int32_t TextFieldPattern::SetPreviewText(const std::string &previewValue, const PreviewRange range)
+{
+    PreviewTextInfo info = {
+        .text = previewValue,
+        .range = range
+    };
+    if (!CheckPreviewTextValidate(info)) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "wrong info, can't show preview text");
+        return PREVIEW_BAD_PARAMETERS;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, PREVIEW_NULL_POINTER);
+    inputOperations_.emplace(InputOperation::SET_PREVIEW_TEXT);
+    previewTextOperation.emplace(info);
+    CloseSelectOverlay(true);
+    ScrollToSafeArea();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    return PREVIEW_NO_ERROR;
+}
+
+void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto rangeStart = info.range.start;
+    auto rangeEnd = info.range.end;
+    auto start = GetPreviewTextStart();
+    auto end = GetPreviewTextEnd();
+    if (IsSelected()) {
+        start = selectController_->GetStartIndex();
+        end = selectController_->GetEndIndex();
+    } else {
+        start = (rangeStart == PREVIEW_TEXT_RANGE_DEFAULT) ? start : rangeStart;
+        end = (rangeEnd == PREVIEW_TEXT_RANGE_DEFAULT) ? end : rangeEnd;
+    }
+
+    bool hasInsertValue = false;
+    auto originLength = static_cast<int32_t>(contentController_->GetWideText().length()) - (end - start);
+    hasInsertValue = contentController_->ReplaceSelectedValue(start, end, info.text);
+    int32_t caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
+
+    int32_t delta =
+            static_cast<int32_t>(contentController_->GetWideText().length()) - originLength - (end - start);
+    int32_t newCaretPosition = std::max(end, GetPreviewTextEnd()) + delta;
+    newCaretPosition = std::clamp(newCaretPosition, 0,
+        static_cast<int32_t>(contentController_->GetWideText().length()));
+    selectController_->UpdateCaretIndex(start + caretMoveLength);
+
+    if (layoutProperty->HasMaxLength()) {
+        showCountBorderStyle_ = (originLength + StringUtils::ToWstring(info.text).length()) >
+            layoutProperty->GetMaxLengthValue(Infinity<uint32_t>());
+        HandleCountStyle();
+    }
+
+    UpdatePreviewIndex(start, newCaretPosition);
+    hasPreviewText = true;
+    cursorVisible_ = true;
+    StartTwinkling();
+}
+
+void TextFieldPattern::FinishTextPreview()
+{
+    inputOperations_.emplace(InputOperation::SET_PREVIEW_FINISH);
+    auto host = GetHost();
+    ScrollToSafeArea();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void TextFieldPattern::FinishTextPreviewOperation()
+{
+    if (!hasPreviewText) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "input state now is not at previewing text");
+        return;
+    }
+
+    UpdateEditingValueToRecord();
+    cursorVisible_ = true;
+    StartTwinkling();
+
+    hasPreviewText = false;
+    previewTextStart_ = PREVIEW_TEXT_RANGE_DEFAULT;
+    previewTextEnd_ = PREVIEW_TEXT_RANGE_DEFAULT;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+std::vector<RectF> TextFieldPattern::GetPreviewTextRects() const
+{
+    if (!GetIsPreviewText()) {
+        return {};
+    }
+    std::vector<RectF> previewTextRects;
+    CHECK_NULL_RETURN(paragraph_, previewTextRects);
+    paragraph_->GetRectsForRange(GetPreviewTextStart(), GetPreviewTextEnd(), previewTextRects);
+    return previewTextRects;
+}
+
+bool TextFieldPattern::NeedDrawPreviewText()
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+
+    auto caretInfo = selectController_->GetCaretInfo();
+    if (!paintProperty->HasPreviewTextStart() || !paintProperty->HasPreviewTextEnd()) {
+        paintProperty->UpdatePreviewTextStart(caretInfo.index);
+        paintProperty->UpdatePreviewTextEnd(caretInfo.index);
+    }
+
+    auto paintStart = paintProperty->GetPreviewTextStart();
+    auto paintEnd =paintProperty->GetPreviewTextEnd();
+    if (!GetIsPreviewText()) {
+        if (!paintStart.has_value() || paintEnd.has_value()) {
+            paintProperty->UpdatePreviewTextStart(caretInfo.index);
+            paintProperty->UpdatePreviewTextEnd(caretInfo.index);
+            return false;
+        }
+
+        // end paint
+        if (paintStart != paintEnd || paintStart.value() != caretInfo.index) {
+            paintProperty->UpdatePreviewTextStart(caretInfo.index);
+            paintProperty->UpdatePreviewTextEnd(caretInfo.index);
+            return true;
+        }
+        return false;
+    }
+    auto needDraw = paintStart.value() != GetPreviewTextStart() ||
+                     paintEnd.value() != GetPreviewTextEnd();
+    paintProperty->UpdatePreviewTextStart(GetPreviewTextStart());
+    paintProperty->UpdatePreviewTextEnd(GetPreviewTextEnd());
+    return needDraw;
+}
+
+bool TextFieldPattern::CheckPreviewTextValidate(PreviewTextInfo info) const
+{
+    auto start = info.range.start;
+    auto end = info.range.end;
+    if (start != end && (start == PREVIEW_TEXT_RANGE_DEFAULT || end == PREVIEW_TEXT_RANGE_DEFAULT)) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "range is not [-1,-1] or legal range");
+        return false;
+    }
+
+    // unsupported insert preview text when caretIndex outside of range
+    auto caretIndex = selectController_->GetCaretIndex();
+    if (start != PREVIEW_TEXT_RANGE_DEFAULT && (start > caretIndex || end < caretIndex)) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "unsupported insert preview text when caretIndex outside of range");
+        return false;
+    }
+
+    if (start != PREVIEW_TEXT_RANGE_DEFAULT && IsSelected()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "unsupported insert preview text when IsSelected");
+        return false;
+    }
+    return true;
+}
+
+PreviewTextStyle TextFieldPattern::GetPreviewTextStyle() const
+{
+    auto defaultStyle = PreviewTextStyle::UNDERLINE;
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, defaultStyle);
+    if (paintProperty->HasPreviewTextStyle()) {
+        auto style = paintProperty->GetPreviewTextStyle();
+        if (style.value() == PREVIEW_STYLE_NORMAL) {
+            return PreviewTextStyle::NORMAL;
+        } else if (style.value() == PREVIEW_STYLE_UNDERLINE) {
+            return PreviewTextStyle::UNDERLINE;
+        }
+    }
+    return defaultStyle;
 }
 } // namespace OHOS::Ace::NG
