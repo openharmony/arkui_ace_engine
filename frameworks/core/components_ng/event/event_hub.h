@@ -30,6 +30,8 @@
 namespace OHOS::Ace::NG {
 
 class FrameNode;
+class InspectorFilter;
+
 using OnAreaChangedFunc =
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
 using OnPreDragFunc = std::function<void(const PreDragStatus)>;
@@ -55,7 +57,7 @@ enum class DragFuncType {
 };
 
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
-class EventHub : public virtual AceType {
+class ACE_FORCE_EXPORT EventHub : public virtual AceType {
     DECLARE_ACE_TYPE(EventHub, AceType)
 
 public:
@@ -223,6 +225,9 @@ public:
     void FireOnSizeChanged(const RectF& oldRect, const RectF& rect);
     bool HasOnSizeChanged() const;
 
+    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged);
+    void FireJSFrameNodeOnSizeChanged(const RectF& oldRect, const RectF& rect);
+    void ClearJSFrameNodeOnSizeChange();
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
     using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
     using OnDragStartFunc = std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -387,7 +392,7 @@ public:
     }
 
     // get XTS inspector value
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
@@ -447,7 +452,6 @@ public:
         keyboardShortcut_.emplace_back(keyboardShortcut);
     }
 
-    
     void ClearSingleKeyboardShortcut()
     {
         if (keyboardShortcut_.size() == 1) {
@@ -586,6 +590,7 @@ private:
     OnAreaChangedFunc onAreaChanged_;
     std::unordered_map<int32_t, OnAreaChangedFunc> onAreaChangedInnerCallbacks_;
     OnSizeChangedFunc onSizeChanged_;
+    OnSizeChangedFunc onJsFrameNodeSizeChanged_;
 
     OnPreDragFunc onPreDragFunc_;
     OnDragStartFunc onDragStart_;

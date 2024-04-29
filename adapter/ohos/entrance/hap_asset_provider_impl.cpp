@@ -78,6 +78,30 @@ std::unique_ptr<AssetMapping> HapAssetProviderImpl::GetAsMapping(const std::stri
     return nullptr;
 }
 
+std::vector<std::unique_ptr<AssetMapping>> HapAssetProviderImpl::GetAsMappingFromI18n(
+    const std::string& assetName) const
+{
+    ACE_SCOPED_TRACE("GetAsMappingFromI18n");
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    std::vector<std::unique_ptr<AssetMapping>> i18nVector;
+    CHECK_NULL_RETURN(runtimeExtractor_, i18nVector);
+    for (const auto& basePath : assetBasePaths_) {
+        std::string fileName = basePath + assetName;
+        bool hasFile = runtimeExtractor_->HasEntry(fileName);
+        if (!hasFile) {
+            continue;
+        }
+        std::ostringstream osstream;
+        hasFile = runtimeExtractor_->GetFileBuffer(fileName, osstream);
+        if (!hasFile) {
+            continue;
+        }
+        i18nVector.push_back(std::make_unique<HapAssetImplMapping>(osstream));
+    }
+    return i18nVector;
+}
+
 std::string HapAssetProviderImpl::GetAssetPath(const std::string& assetName, bool isAddHapPath)
 {
     std::lock_guard<std::mutex> lock(mutex_);

@@ -51,6 +51,7 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
     }
     auto fd = helper_->OpenFile(uriStr, "r");
     if (fd == -1) {
+        LOGW("open file %{public}s fail.", uriStr.c_str());
         return nullptr;
     }
 
@@ -58,7 +59,7 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
     struct stat statBuf;
     auto statRes = fstat(fd, &statBuf);
     if (statRes != 0) {
-        LOGW("Get stat fail");
+        LOGW("get file %{public}s stat fail.", uriStr.c_str());
         close(fd);
         return nullptr;
     }
@@ -69,10 +70,10 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
     auto readRes = read(fd, buffer.get(), size);
     close(fd);
     if (readRes == -1) {
-        LOGW("Read file fail");
+        LOGW("read file %{public}s fail.", uriStr.c_str());
         return nullptr;
     }
-    
+
     auto result = std::make_unique<DataProviderRes>(std::move(buffer), size);
     return result;
 }
@@ -98,6 +99,14 @@ int32_t DataProviderManagerStandard::GetDataProviderFile(const std::string& uriS
     std::shared_lock lock(helperMutex_);
     CHECK_NULL_RETURN(helper_, -1);
     return helper_->OpenFile(uriStr, mode);
+}
+
+int32_t DataProviderManagerStandard::ReadMovingPhotoVideo(const std::string &uri)
+{
+    InitHelper();
+    std::shared_lock lock(helperMutex_);
+    CHECK_NULL_RETURN(helper_, -1);
+    return helper_->ReadMovingPhotoVideo(uri);
 }
 
 } // namespace OHOS::Ace

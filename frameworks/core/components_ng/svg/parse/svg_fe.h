@@ -31,31 +31,33 @@ public:
     ~SvgFe() override = default;
     static RefPtr<SvgNode> Create();
 
-#ifndef USE_ROSEN_DRAWING
-    static void ConverImageFilterColor(
-        sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& src, const ColorInterpolationType& dst);
+    void OnInitStyle() override;
 
-    static sk_sp<SkImageFilter> MakeImageFilter(const FeInType& in, sk_sp<SkImageFilter>& imageFilter);
+    void RegisterResult(const std::string& id, std::shared_ptr<RSImageFilter>& imageFilter,
+        std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const;
 
-    void GetImageFilter(sk_sp<SkImageFilter>& imageFilter, ColorInterpolationType& currentColor);
-#else
-    static void ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter,
-        const ColorInterpolationType& src, const ColorInterpolationType& dst);
+    static void ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& src,
+        const ColorInterpolationType& dst);
 
-    static std::shared_ptr<RSImageFilter> MakeImageFilter(
-        const FeInType& in, std::shared_ptr<RSImageFilter>& imageFilter);
+    static std::shared_ptr<RSImageFilter> MakeImageFilter(const FeIn& in,
+        std::shared_ptr<RSImageFilter>& imageFilter,
+        std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash);
 
-    void GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, ColorInterpolationType& currentColor);
-#endif
+    void GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, ColorInterpolationType& currentColor,
+        std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash,
+        const Rect& effectFilterArea = {});
 
 protected:
-#ifndef USE_ROSEN_DRAWING
-    virtual void OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
-        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const {}
-#else
-    virtual void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
-        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const {}
-#endif
+    virtual void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
+        ColorInterpolationType& currentColor,
+        std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
+    {}
+
+    Dimension x_;
+    Dimension y_;
+    Dimension height_;
+    Dimension width_;
+    Rect effectFilterArea_;
 };
 
 } // namespace OHOS::Ace::NG

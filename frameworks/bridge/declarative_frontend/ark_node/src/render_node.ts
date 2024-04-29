@@ -64,16 +64,28 @@ type EdgeStyles = {
   left?: BorderStyle;
 };
 
-interface Edges {
-  left: number,
-  right: number,
-  top: number,
-  bottom: number,
+interface EdgesT<T> {
+  left: T,
+  right: T,
+  top: T,
+  bottom: T,
+}
+interface SizeT<T> {
+  width: T;
+  height: T;
 }
 
-type EdgeWidths = Edges;
+enum LengthUnit {
+  PX = 0,
+  VP = 1,
+  FP = 2,
+  PERCENT = 3,
+  LPX = 4,
+}
 
-type EdgeColors = Edges;
+type EdgeWidths = EdgesT<Number>;
+
+type EdgeColors = EdgesT<Number>;
 
 interface Corners {
   topLeft: number,
@@ -111,6 +123,35 @@ interface Circle {
 
 interface CommandPath {
   commands: string
+}
+
+class LengthMetrics {
+  public unit: LengthUnit;
+  public value: number;
+  constructor(value: number, unit?: LengthUnit) {
+      if (unit in LengthUnit) {
+          this.unit = unit;
+          this.value = value;
+      } else {
+          this.unit = LengthUnit.VP;
+          this.value = unit === undefined? value : 0;
+      }
+  }
+  static px(value: number) {
+      return new LengthMetrics(value, LengthUnit.PX);
+  }
+  static vp(value: number) {
+      return new LengthMetrics(value, LengthUnit.VP);
+  }
+  static fp(value: number) {
+      return new LengthMetrics(value, LengthUnit.FP);
+  }
+  static percent(value: number) {
+      return new LengthMetrics(value, LengthUnit.PERCENT);
+  }
+  static lpx(value: number) {
+      return new LengthMetrics(value, LengthUnit.LPX);
+  }
 }
 
 class ShapeMask {
@@ -177,19 +218,21 @@ class RenderNode {
   private shadowRadiusValue: number;
   private transformValue: Transform;
   private translationValue: Vector2;
-  private baseNode_ : __JSBaseNode__;
+  private baseNode_: __JSBaseNode__;
   private borderStyleValue: EdgeStyles;
   private borderWidthValue: EdgeWidths;
   private borderColorValue: EdgeColors;
   private borderRadiusValue: BorderRadiuses;
   private shapeMaskValue: ShapeMask;
+  private _nativeRef: NativeStrongRef;
+  private _frameNode: WeakRef<FrameNode>;
 
   constructor(type: string) {
     this.nodePtr = null;
     this.childrenList = [];
     this.parentRenderNode = null;
     this.backgroundColorValue = 0;
-    this.clipToFrameValue = false;
+    this.clipToFrameValue = true;
     this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
     this.opacityValue = 1.0;
     this.pivotValue = { x: 0.5, y: 0.5 };
@@ -205,12 +248,12 @@ class RenderNode {
       0, 0, 1, 0,
       0, 0, 0, 1];
     this.translationValue = { x: 0, y: 0 };
-    if (type === 'BuilderNode' || type === 'FrameNode') {
+    if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
       return;
     }
-    this.baseNode_ = new __JSBaseNode__();
-    this.baseNode_.draw = this.draw;
-    this.nodePtr = this.baseNode_.createRenderNode(this);
+    this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
+    this.nodePtr = this._nativeRef?.getNativeHandle();
+    this.clipToFrame = true;
   }
 
   set backgroundColor(color: number) {
@@ -218,7 +261,7 @@ class RenderNode {
     getUINativeModule().renderNode.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
   }
   set clipToFrame(useClip: boolean) {
-    this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue<boolean>(useClip, false);
+    this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue<boolean>(useClip, true);
     getUINativeModule().renderNode.setClipToFrame(this.nodePtr, this.clipToFrameValue);
   }
   set frame(frame: Frame) {
@@ -304,7 +347,7 @@ class RenderNode {
       this.frameValue.width = this.checkUndefinedOrNullWithDefaultValue<number>(size.width, 0);
       this.frameValue.height = this.checkUndefinedOrNullWithDefaultValue<number>(size.height, 0);
     }
-    getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
+      getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
   }
   set transform(transform: Transform) {
     if (transform === undefined || transform === null) {
@@ -480,20 +523,33 @@ class RenderNode {
     }
     return parent.getChild(index - 1);
   }
-  setNodePtr(nodePtr: NodePtr) {
-    this.nodePtr = nodePtr;
+  setFrameNode(frameNode: WeakRef<FrameNode>) {
+    this._frameNode = frameNode;
   }
+
+  setNodePtr(nativeRef: NativeStrongRef) {
+    this._nativeRef = nativeRef;
+    this.nodePtr = this._nativeRef?.getNativeHandle();
+  }
+
   setBaseNode(baseNode: BaseNode | null) {
     this.baseNode_ = baseNode;
   }
+  resetNodePtr(): void {
+    this.nodePtr = null;
+    this._nativeRef = null;
+  }
   dispose() {
-    this.baseNode_.dispose()
+    this._nativeRef?.dispose();
+    this.baseNode_?.disposeNode();
+    this._frameNode?.deref()?.resetNodePtr();
+    this._nativeRef = null;
+    this.nodePtr = null;
   }
   getNodePtr(): NodePtr {
     return this.nodePtr;
   }
-  draw(context) {
-  }
+
   invalidate() {
     getUINativeModule().renderNode.invalidate(this.nodePtr);
   }
@@ -558,13 +614,13 @@ class RenderNode {
       const corners = reoundRect.corners;
       const rect = reoundRect.rect;
       getUINativeModule().renderNode.setRoundRectMask(
-        this.nodePtr, 
+        this.nodePtr,
         corners.topLeft.x,
-        corners.topLeft.y, 
+        corners.topLeft.y,
         corners.topRight.x,
-        corners.topRight.y, 
+        corners.topRight.y,
         corners.bottomLeft.x,
-        corners.bottomLeft.y, 
+        corners.bottomLeft.y,
         corners.bottomRight.x,
         corners.bottomRight.y,
         rect.left,

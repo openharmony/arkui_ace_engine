@@ -203,7 +203,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
                     eventHub->HandleOnItemDragEnd(info);
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIGridItemDragStart");
     };
     NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
 #else
@@ -311,9 +311,6 @@ bool GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemInde
         pattern->ClearDragState();
     }
 
-    if (draggingItem_) {
-        draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-    }
     if (onItemDrop_) {
         onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
         host->ChildrenUpdatedFrom(0);

@@ -33,11 +33,12 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
     if (arg.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNG(arg, nullptr);
         CHECK_NULL_VOID(dialog);
-        if (arg.isModal) {
+        if (arg.isModal && !container->IsUIExtensionWindow()) {
             DialogProperties Maskarg;
             Maskarg.isMask = true;
             Maskarg.autoCancel = arg.autoCancel;
             Maskarg.onWillDismiss = arg.onWillDismiss;
+            Maskarg.shadow = arg.shadow;
             auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
             CHECK_NULL_VOID(mask);
             overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());

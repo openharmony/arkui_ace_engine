@@ -22,8 +22,6 @@
 #include <utility>
 
 #include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
 #include "base/resource/ace_res_data_struct.h"
 #include "base/resource/ace_res_key_parser.h"
 #include "base/utils/linear_map.h"
@@ -242,6 +240,9 @@ bool IsOnBacktrackingPath(const std::string& bestConfigTag, const std::string& c
     FindBacktrackPath(candidateLocaleConfig, candidateConfigBacktrackPaths, candidateConfigTag);
     int32_t bestConfigIndex = -1;
     int32_t candidateConfigIndex = -1;
+    if (backtrackPath.empty()) {
+        return false;
+    }
     for (std::size_t i = 0; i < backtrackPath.size(); i++) {
         for (const auto& bestConfigPath : bestConfigBacktrackPaths) {
             if (bestConfigPath == backtrackPath[i] && bestConfigIndex == -1) {

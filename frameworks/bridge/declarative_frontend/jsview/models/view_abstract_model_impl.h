@@ -111,9 +111,9 @@ public:
     void SetOpacity(double opacity, bool passThrough = false) override;
     void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override;
     void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override {};
-    void SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+    void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY) override;
+        const std::optional<Dimension>& offsetY, NG::OverlayType type) override;
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override;
     void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override;
@@ -139,7 +139,10 @@ public:
 
     void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
+    void SetDynamicDim(float DimDegree) override {};
     void SetDynamicLightUp(float rate, float lightUpDegree) override {};
+    void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) override {};
+    void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) override {};
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetBlendMode(BlendMode blendMode) override;
@@ -238,16 +241,22 @@ public:
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
         std::function<void()>&& onWillDisappear, const NG::ContentCoverParam& contentCoverParam) override
     {}
-    void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
-        std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-        std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
-        std::function<void()>&& onWillDisappear) override {}
+    void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
+        std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) override
+    {}
     void DismissSheet() override {}
     void DismissContentCover() override {}
+    void SheetSpringBack() override {}
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
+    void SetAccessibilityTextHint(const std::string& text) override;
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
@@ -270,11 +279,14 @@ public:
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
     void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
+    void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override {};
+    void SetBackgroundImageResizableSlice(const ImageResizableSlice& Slice) override {};
 
     // global light
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};
     void SetLightIntensity(const float value) override {};
+    void SetLightColor(const Color& value) override {};
     void SetLightIlluminated(const uint32_t value) override {};
     void SetIlluminatedBorderWidth(const Dimension& value) override {};
     void SetBloom(const float value) override {};

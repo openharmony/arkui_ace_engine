@@ -28,6 +28,7 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT NavBarNode : public GroupNode {
     DECLARE_ACE_TYPE(NavBarNode, GroupNode)
@@ -162,7 +163,7 @@ public:
     std::string GetTitleString() const;
     std::string GetSubtitleString() const;
     std::string GetBarItemsString(bool isMenu) const;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     // custom node checking
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);

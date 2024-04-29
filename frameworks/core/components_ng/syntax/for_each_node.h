@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,17 +23,20 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ForEachNode : public UINode {
-    DECLARE_ACE_TYPE(ForEachNode, UINode);
+class ACE_EXPORT ForEachNode : public ForEachBaseNode {
+    DECLARE_ACE_TYPE(ForEachNode, ForEachBaseNode);
 
 public:
     static RefPtr<ForEachNode> GetOrCreateForEachNode(int32_t nodeId);
+    static RefPtr<ForEachNode> GetOrCreateRepeatNode(int32_t nodeId);
 
-    explicit ForEachNode(int32_t nodeId) : UINode(V2::JS_FOR_EACH_ETS_TAG, nodeId) {}
+    explicit ForEachNode(int32_t nodeId) : ForEachBaseNode(V2::JS_FOR_EACH_ETS_TAG, nodeId) {}
+
     ~ForEachNode() override = default;
 
     bool IsAtomicNode() const override
@@ -47,6 +50,12 @@ public:
 
     void FlushUpdateAndMarkDirty() override;
 
+    // RepeatNode only
+    void FinishRepeatRender(std::list<int32_t>& removedElmtId);
+
+    // RepeatNode only
+    void MoveChild(uint32_t fromIndex);
+
     const std::list<std::string>& GetTempIds() const
     {
         return tempIds_;
@@ -57,12 +66,23 @@ public:
         ids_ = std::move(ids);
     }
 
+    void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
+    void MoveData(int32_t from, int32_t to) override;
+    RefPtr<FrameNode> GetFrameNode(int32_t index) override;
+    void InitDragManager(const RefPtr<UINode>& childNode);
+    void InitAllChildrenDragManager(bool init);
 private:
     std::list<std::string> ids_;
 
     // temp items use to compare each update.
     std::list<std::string> tempIds_;
     std::list<RefPtr<UINode>> tempChildren_;
+
+    // RepeatNode only
+    std::vector<RefPtr<UINode>> tempChildrenOfRepeat_;
+
+    // true when this is actually RepeatNode (not "ForEach")
+    bool isThisRepeatNode_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ForEachNode);
 };

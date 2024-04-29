@@ -29,6 +29,11 @@ static constexpr float LUM_COEFF_R = 0.2126f;
 static constexpr float LUM_COEFF_G = 0.7152f;
 static constexpr float LUM_COEFF_B = 0.0722f;
 
+inline float DegreesToRadians(float degrees)
+{
+    return (degrees) * (M_PI / 180.0f);
+}
+
 const std::vector<float> luminanceMatrix_ = {
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
@@ -58,12 +63,11 @@ SvgFeColorMatrix::SvgFeColorMatrix() : SvgFe()
 void SvgFeColorMatrix::MakeMatrix(const std::string& value)
 {
     std::vector<float> matrix;
-    StringUtils::StringSplitter(value, ' ', matrix);
-    if (matrix.empty()) {
-        StringUtils::StringSplitter(value, ',', matrix);
+    if (!StringUtils::ParseStringToArray(value, matrix)) {
+        return;
     }
-    // when matrix length < 20, then return
-    if (matrix.size() < matrix_.size()) {
+    // when matrix length not equal 20, then return
+    if (matrix.size() != matrix_.size()) {
         return;
     }
     matrix_ = matrix;
@@ -71,12 +75,10 @@ void SvgFeColorMatrix::MakeMatrix(const std::string& value)
 
 void SvgFeColorMatrix::MakeHueRotate(const std::string& value)
 {
-    float theta = std::stof(value);
-    if (GreatNotEqual(theta, 360.0f) || LessNotEqual(theta, 0.0f)) {
-        return;
-    }
+    float theta = DegreesToRadians(std::stof(value));
     const float cosValue = cos(theta);
     const float sinValue = sin(theta);
+
     // The source of the formula is this website: https://www.w3.org/TR/SVG11/filters.html#FilterPrimitiveSubRegion
     matrix_ = {
         0.213f + cosValue*0.787f + sinValue*-0.213f,
@@ -104,9 +106,6 @@ void SvgFeColorMatrix::MakeHueRotate(const std::string& value)
 void SvgFeColorMatrix::MakeSaturate(const std::string& value)
 {
     float satValue = std::stof(value);
-    if (GreatNotEqual(satValue, 1.0f) || LessNotEqual(satValue, 0.0f)) {
-        return;
-    }
 
     const float RValue = HUE_R * (1 - satValue);
     const float GValue = HUE_G * (1 - satValue);
@@ -144,11 +143,12 @@ void SvgFeColorMatrix::OnInitStyle()
 }
 
 void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
-    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor,
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
     auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
-    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
+    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
 
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix_.data());
@@ -157,6 +157,7 @@ void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilt
 
     imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
+    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
 }
 
 } // namespace OHOS::Ace::NG

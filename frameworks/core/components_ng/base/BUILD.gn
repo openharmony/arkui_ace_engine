@@ -17,9 +17,11 @@ import(
 build_component_ng("base_ng") {
   sources = [
     "distributed_ui.cpp",
+    "extension_handler.cpp",
     "frame_node.cpp",
     "geometry_node.cpp",
     "inspector.cpp",
+    "inspector_filter.cpp",
     "modifier.cpp",
     "observer_handler.cpp",
     "ui_node.cpp",

@@ -31,6 +31,7 @@ using ChildIdealSize = TwoAlignedValues;
 using GuidelineParams = std::pair<LineDirection, float>;
 using BarrierParams = std::pair<BarrierDirection, std::vector<std::string>>;
 
+
 class ACE_EXPORT RelativeContainerLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(RelativeContainerLayoutAlgorithm, LayoutAlgorithm);
 
@@ -40,6 +41,13 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
+
+    struct ChildMeasureWrapper {
+        RefPtr<LayoutWrapper> layoutWrapper;
+        // used to prevent concatenating tag + id for nodes
+        // who does not have inspector id set in ets
+        std::string id;
+    };
 
     struct BarrierRect
     {
@@ -81,10 +89,10 @@ private:
     void MeasureBarrier(const std::string& barrierName);
     void CheckNodeInHorizontalChain(std::string& currentNode, std::string& nextNode,
         AlignRulesItem& currentAlignRules, std::vector<std::string>& chainNodes, AlignRule& rightAnchor);
-    void CheckHorizontalChain(const RefPtr<LayoutWrapper>& childWrapper);
+    void CheckHorizontalChain(const ChildMeasureWrapper& measureParam);
     void CheckNodeInVerticalChain(std::string& currentNode, std::string& nextNode, AlignRulesItem& currentAlignRules,
         std::vector<std::string>& chainNodes, AlignRule& bottomAnchor);
-    void CheckVerticalChain(const RefPtr<LayoutWrapper>& childWrapper);
+    void CheckVerticalChain(const ChildMeasureWrapper& measureParam);
     void CheckChain(LayoutWrapper* layoutWrapper);
     void RecordSizeInChain(const std::string& nodeName);
     bool IsNodeInHorizontalChain(const std::string& nodeName, std::string& chainName);
@@ -128,7 +136,7 @@ private:
     bool isHorizontalRelyOnContainer_ = false;
     bool isVerticalRelyOnContainer_ = false;
     std::list<std::string> renderList_;
-    std::map<std::string, RefPtr<LayoutWrapper>> idNodeMap_;
+    std::map<std::string, ChildMeasureWrapper> idNodeMap_;
     std::map<std::string, uint32_t> incomingDegreeMap_;
     std::map<std::string, std::set<std::string>> reliedOnMap_;
     std::map<std::string, OffsetF> recordOffsetMap_;

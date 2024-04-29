@@ -43,8 +43,6 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W500,
     FontWeight::W400,
 };
-constexpr Dimension ERROR_TEXT_UNDERLINE_MARGIN = 8.0_vp;
-constexpr Dimension ERROR_TEXT_CAPSULE_MARGIN = 8.0_vp;
 constexpr float ROUND_VALUE = 0.5f;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
@@ -77,12 +75,13 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowUnderlineValue(false) && showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_UNDERLINE_MARGIN.ConvertToPx();
-    } else if (textFieldPattern->NeedShowPasswordIcon() && showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
-    } else if (showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
+
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    if (showErrorState_->Get()) {
+        errorMargin = theme->GetTextInputAndErrTipsSpacing().ConvertToPx();
     } else {
         errorMargin = 0;
     }
@@ -162,6 +161,8 @@ void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
             textFieldLayoutProperty->GetPlaceholderTextLineStyle(), theme);
     }
     SetDefaultFontSize(textStyle);
+    SetDefaultAdaptMinFontSize(textStyle);
+    SetDefaultAdaptMaxFontSize(textStyle);
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
     SetDefaultFontStyle(textStyle);
@@ -220,7 +221,7 @@ void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
             fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
         }
     } else {
@@ -229,6 +230,20 @@ void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 
     fontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
+}
+
+void TextFieldContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
+{
+    float minFontSizeValue = 0.0f;
+    adaptMinFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(minFontSizeValue);
+    AttachProperty(adaptMinFontSizeFloat_);
+}
+
+void TextFieldContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
+{
+    float maxFontSizeValue = 0.0f;
+    adaptMaxFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(maxFontSizeValue);
+    AttachProperty(adaptMaxFontSizeFloat_);
 }
 
 void TextFieldContentModifier::SetDefaultFontWeight(const TextStyle& textStyle)
@@ -271,6 +286,14 @@ void TextFieldContentModifier::ModifyTextStyle(TextStyle& textStyle)
     if (fontSize_.has_value() && fontSizeFloat_) {
         textStyle.SetFontSize(Dimension(fontSizeFloat_->Get(), DimensionUnit::PX));
     }
+    if (textStyle.GetAdaptTextSize()) {
+        if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_) {
+            textStyle.SetAdaptMinFontSize(Dimension(adaptMinFontSizeFloat_->Get(), DimensionUnit::PX));
+        }
+        if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_) {
+            textStyle.SetAdaptMaxFontSize(Dimension(adaptMaxFontSizeFloat_->Get(), DimensionUnit::PX));
+        }
+    }
     if (fontWeight_.has_value() && fontWeightFloat_) {
         textStyle.SetFontWeight(static_cast<FontWeight>(std::floor(fontWeightFloat_->Get() + 0.5f)));
     }
@@ -292,6 +315,22 @@ void TextFieldContentModifier::SetFontSize(const Dimension& value)
     fontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(valPx);
+}
+
+void TextFieldContentModifier::SetAdaptMinFontSize(const Dimension& value)
+{
+    auto valPx = static_cast<float>(value.ConvertToPx());
+    adaptMinFontSize_ = Dimension(valPx);
+    CHECK_NULL_VOID(adaptMinFontSizeFloat_);
+    adaptMinFontSizeFloat_->Set(valPx);
+}
+
+void TextFieldContentModifier::SetAdaptMaxFontSize(const Dimension& value)
+{
+    auto valPx = static_cast<float>(value.ConvertToPx());
+    adaptMaxFontSize_ = Dimension(valPx);
+    CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
+    adaptMaxFontSizeFloat_->Set(valPx);
 }
 
 void TextFieldContentModifier::SetFontWeight(const FontWeight& value)
@@ -438,6 +477,14 @@ bool TextFieldContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     if (fontSize_.has_value() && fontSizeFloat_ && !NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
     }
+    if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_ &&
+        !NearEqual(adaptMinFontSize_.value().Value(), adaptMinFontSizeFloat_->Get())) {
+        flag |= PROPERTY_UPDATE_MEASURE;
+    }
+    if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_ &&
+        !NearEqual(adaptMaxFontSize_.value().Value(), adaptMaxFontSizeFloat_->Get())) {
+        flag |= PROPERTY_UPDATE_MEASURE;
+    }
     if (fontWeight_.has_value() && fontWeightFloat_ &&
         !NearEqual(static_cast<float>(fontWeight_.value()), fontWeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
@@ -474,10 +521,13 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
     }
 }
 
-void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value)
+void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value, const Color& color,
+    const TextDecorationStyle& style)
 {
     auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
-    if (oldTextDecoration == value) {
+    auto oldTextDecorationColor = textDecorationColor_.value_or(Color::BLACK);
+    auto oldTextDecorationStyle = textDecorationStyle_.value_or(TextDecorationStyle::SOLID);
+    if ((oldTextDecoration == value) && (oldTextDecorationColor == color) && (oldTextDecorationStyle == style)) {
         return;
     }
 
@@ -485,6 +535,8 @@ void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value)
                                 (oldTextDecoration == TextDecoration::UNDERLINE && value == TextDecoration::NONE);
 
     textDecoration_ = value;
+    textDecorationColor_ = color;
+    textDecorationStyle_ = style;
     CHECK_NULL_VOID(textDecorationColorAlpha_);
 
     oldColorAlpha_ = textDecorationColorAlpha_->Get();
@@ -493,16 +545,6 @@ void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value)
     } else {
         textDecorationColorAlpha_->Set(static_cast<float>(textDecorationColor_.value().GetAlpha()));
     }
-}
-
-void TextFieldContentModifier::SetTextDecorationStyle(const TextDecorationStyle value)
-{
-    textDecorationStyle_ = value;
-}
-
-void TextFieldContentModifier::SetTextDecorationColor(const Color& value)
-{
-    textDecorationColor_ = value;
 }
 
 void TextFieldContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)

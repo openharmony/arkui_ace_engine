@@ -25,6 +25,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
@@ -55,6 +56,7 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const int32_t OFFSETX = 10;
 const int32_t OFFSETY = 20;
 constexpr int32_t SELECT_ERROR = -1;
@@ -82,7 +84,6 @@ const Color BG_COLOR_VALUE = Color::FromRGB(100, 255, 100);
 const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
     { OPTION_TEXT_3, INTERNAL_SOURCE } };
 constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
-constexpr int32_t PLATFORM_VERSION_TWELVE = 12;
 } // namespace
 struct TestProperty {
     std::optional<Dimension> FontSize = std::nullopt;
@@ -1788,7 +1789,7 @@ HWTEST_F(SelectTestNg, ToJsonValue001, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     std::unique_ptr<JsonValue> jsonValue = std::make_unique<JsonValue>();
     ASSERT_NE(jsonValue, nullptr);
-    pattern->ToJsonValue(jsonValue);
+    pattern->ToJsonValue(jsonValue, filter);
     EXPECT_TRUE(pattern->options_.empty());
 }
 
@@ -1817,7 +1818,7 @@ HWTEST_F(SelectTestNg, ToJsonValue002, TestSize.Level1)
     pattern->options_.push_back(option);
     pattern->menuWrapper_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    pattern->ToJsonValue(jsonValue);
+    pattern->ToJsonValue(jsonValue, filter);
     EXPECT_FALSE(pattern->options_.empty());
 }
 
@@ -1857,6 +1858,40 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
     EXPECT_NE(layoutWrapper->GetOrCreateChildByIndex(0), nullptr);
 }
 
+
+HWTEST_F(SelectTestNg, selectMenuPatterntTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frameNode and geometryNode.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params;
+    SelectParam sparam_one;
+    sparam_one.first = "100";
+    sparam_one.second = "icon_one";
+    params.push_back(sparam_one);
+    selectModelNG.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    auto node = [params](MenuItemConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(params[0].first, config.value_);
+        EXPECT_EQ(params[0].second, config.icon_);
+    return nullptr;
+    };
+    selectModelNG.SetBuilderFunc(select, node);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    for (int i = 0; i < params.size(); i++) {
+        menuPattern->BuildContentModifierNode(i);
+    }
+}
+
 /**
  * @tc.name: SelectControlSizeTest001
  * @tc.desc: Test SelectPattern ControlSize.
@@ -1869,7 +1904,9 @@ HWTEST_F(SelectTestNg, SelectControlSizeTest001, TestSize.Level1)
      * @tc.expected: Objects are created successfully.
      */
     SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_TWELVE);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
     auto selectFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(selectFrameNode, nullptr);
     auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();

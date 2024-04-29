@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   prevLabel(value: string): this {
     throw new Error('Method not implemented.');
@@ -46,12 +46,10 @@ class NextLabelModifier extends ModifierWithKey<string> {
 }
 
 // @ts-ignore
-globalThis.StepperItem.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkStepperItemComponent(nativeNode);
+globalThis.StepperItem.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkStepperItemComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.StepperItemModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

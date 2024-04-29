@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
@@ -22,6 +23,32 @@ namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+const char* SLIDER_NODEPTR_OF_UINODE = "nodePtr_";
+panda::Local<panda::JSValueRef> JsSliderChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    auto vm = runtimeCallInfo->GetVM();
+    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
+    if (argc != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto valueArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto modeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (!valueArg->IsNumber() || !modeArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    double value = valueArg->ToNumber(vm)->Value();
+    int32_t mode = modeArg->ToNumber(vm)->Value();
+    auto ref = runtimeCallInfo->GetThisRef();
+    auto obj = ref->ToObject(vm);
+    if (obj->GetNativePointerFieldCount() < NUM_1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    SliderModelNG::SetChangeValue(frameNode, value, mode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue SliderBridge::SetShowTips(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -431,6 +458,54 @@ ArkUINativeModuleValue SliderBridge::ResetBlockStyle(ArkUIRuntimeCallInfo* runti
     SliderModelNG::ResetBlockType(frameNode);
     SliderModelNG::ResetBlockImage(frameNode);
     SliderModelNG::ResetBlockShape(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsObject()) {
+        SliderModelNG::SetBuilderFunc(frameNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::CopyableGlobal<panda::ObjectRef> obj(vm, secondArg);
+    auto containerId = Container::CurrentId();
+    SliderModelNG::SetBuilderFunc(frameNode,
+        [vm, frameNode, obj = std::move(obj), containerId](
+            SliderConfiguration config) -> RefPtr<FrameNode> {
+            ContainerScope scope(containerId);
+            auto context = ArkTSUtils::GetContext(vm);
+            const char* keyOfSlider[] = { "value", "min", "max", "step", "enabled", "triggerChange" };
+            Local<JSValueRef> valuesOfSlider[] = { panda::NumberRef::New(vm, config.value_),
+                panda::NumberRef::New(vm, config.min_), panda::NumberRef::New(vm, config.max_),
+                panda::NumberRef::New(vm, config.step_), panda::BooleanRef::New(vm, config.enabled_),
+                panda::FunctionRef::New(vm, JsSliderChangeCallback) };
+            auto slider = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keyOfSlider),
+                keyOfSlider, valuesOfSlider);
+            slider->SetNativePointerFieldCount(vm, 1);
+            slider->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            panda::Local<panda::JSValueRef> params[NUM_2] = { context, slider };
+            LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            auto jsObject = obj.ToLocal();
+            auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            panda::Local<panda::FunctionRef> func = makeFunc;
+            auto result = func->Call(vm, jsObject, params, NUM_2);
+            JSNApi::ExecutePendingJob(vm);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            auto resultObj = result->ToObject(vm);
+            panda::Local<panda::JSValueRef> nodeptr =
+                resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, SLIDER_NODEPTR_OF_UINODE));
+            CHECK_EQUAL_RETURN(nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull(), true, nullptr);
+            auto* frameNode = reinterpret_cast<FrameNode*>(nodeptr->ToNativePointer(vm)->Value());
+            CHECK_NULL_RETURN(frameNode, nullptr);
+            return AceType::Claim(frameNode);
+        });
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

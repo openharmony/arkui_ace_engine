@@ -17,8 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_AXIS_EVENT_H
 
 #include <list>
-
-#include "interfaces/native/ui_input_event.h"
+#include <utility>
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -56,10 +55,8 @@ enum class AxisAction : int32_t {
     END,
     CANCEL,
 };
-
-struct UIInputEvent : public ArkUI_UIInputEvent {
+struct UIInputEvent {
     virtual ~UIInputEvent() = default;
-    ArkUI_UIInputEvent_Type eventType = ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_UNKNOWN;
     TimeStamp time;
 };
 
@@ -80,26 +77,28 @@ struct AxisEvent final : public UIInputEvent {
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
-    int32_t touchEventId;
+    int32_t touchEventId = 0;
 
     // Coordinates relative to the upper-left corner of the current component
     float localX = 0.0;
     float localY = 0.0;
 
-    AxisEvent()
-    {
-        eventType = ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS;
-    }
+    int32_t targetDisplayId = 0;
+    int32_t originalId = 0;
+    bool isInjected = false;
+
+    AxisEvent() {}
 
     AxisEvent(int32_t id, float x, float y, float screenX, float screenY, double verticalAxis, double horizontalAxis,
         double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent, AxisAction action, TimeStamp timestamp,
-        int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent)
+        int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent,
+        int32_t targetDisplayId, int32_t originalId, bool isInjected)
         : id(id), x(x), y(y), screenX(screenX), screenY(screenY), verticalAxis(verticalAxis),
           horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale), rotateAxisAngle(rotateAxisAngle),
           isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
-          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent))
+          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)), targetDisplayId(targetDisplayId),
+          originalId(originalId), isInjected(isInjected)
     {
-        eventType = ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS;
         time = timestamp;
     }
 
@@ -107,11 +106,12 @@ struct AxisEvent final : public UIInputEvent {
     {
         if (NearZero(scale)) {
             return { id, x, y, screenX, screenY, verticalAxis, horizontalAxis, pinchAxisScale, rotateAxisAngle,
-                isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent };
+                isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent, targetDisplayId,
+                originalId, isInjected };
         }
         return { id, x / scale, y / scale, screenX / scale, screenY / scale, verticalAxis, horizontalAxis,
             pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId, sourceType, sourceTool,
-            pointerEvent };
+            pointerEvent, targetDisplayId, originalId, isInjected };
     }
 
     Offset GetOffset() const
@@ -176,6 +176,12 @@ struct AxisEvent final : public UIInputEvent {
             result = Offset(-horizontalAxis, -verticalAxis);
         }
         return result * (LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES).ConvertToPx();
+    }
+
+    // MMI has the different direction, need to check truth direction.
+    std::pair<float, float> ConvertToSummationAxisValue(const AxisEvent& event) const
+    {
+        return std::make_pair(event.horizontalAxis - horizontalAxis, event.verticalAxis - verticalAxis);
     }
 };
 

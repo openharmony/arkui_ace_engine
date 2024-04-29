@@ -17,6 +17,7 @@
 
 #include "core/components/badge/badge_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -33,18 +34,19 @@ const Dimension DEFAULT_CIRCLE_SIZE = 16.0_vp;
 
 } // namespace
 
-void BadgeLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void BadgeLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
 
-    LayoutProperty::ToJsonValue(json);
-    json->Put("position", GetBadgePositionString(GetBadgePosition().value_or(badgeTheme->GetBadgePosition())).c_str());
-    json->Put("count", std::to_string(GetBadgeCount().value_or(DEFAULT_COUNT)).c_str());
-    json->Put("maxCount", std::to_string(GetBadgeMaxCount().value_or(DEFAULT_MAX_COUNT)).c_str());
-    json->Put("value", GetBadgeValue().value_or("").c_str());
+    LayoutProperty::ToJsonValue(json, filter);
+    json->PutExtAttr("position",
+        GetBadgePositionString(GetBadgePosition().value_or(badgeTheme->GetBadgePosition())).c_str(), filter);
+    json->PutExtAttr("count", std::to_string(GetBadgeCount().value_or(DEFAULT_COUNT)).c_str(), filter);
+    json->PutExtAttr("maxCount", std::to_string(GetBadgeMaxCount().value_or(DEFAULT_MAX_COUNT)).c_str(), filter);
+    json->PutExtAttr("value", GetBadgeValue().value_or("").c_str(), filter);
 
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("x", GetBadgePositionX().value_or(DEFAULT_POSITION_SIZE).ToString().c_str());
@@ -59,7 +61,8 @@ void BadgeLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonValue->Put("borderWidth", GetBadgeBorderWidth().value_or(badgeTheme->GetBadgeBorderWidth()).ToString().c_str());
     jsonValue->Put(
         "fontWeight", V2::ConvertWrapFontWeightToStirng(GetBadgeFontWeight().value_or(FontWeight::NORMAL)).c_str());
-    json->Put("style", jsonValue->ToString().c_str());
+
+    json->PutExtAttr("style", jsonValue->ToString().c_str(), filter);
 }
 
 } // namespace OHOS::Ace::NG

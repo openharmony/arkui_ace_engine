@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   index(value: number): this {
     modifierWithKey(this._modifiersWithKeys, SwiperIndexModifier.identity, SwiperIndexModifier, value);
@@ -118,6 +118,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
   }
   nestedScroll(value: SwiperNestedScrollMode): this {
     throw new Error('Method not implemented.');
+  }
+  indicatorInteractive(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
+    return this;
   }
 }
 class SwiperNextMarginModifier extends ModifierWithKey<Length> {
@@ -624,14 +628,25 @@ class SwiperEnabledModifier extends ModifierWithKey<boolean> {
     }
   }
 }
+class SwiperIndicatorInteractiveModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('indicatorInteractive');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetIndicatorInteractive(node);
+    } else {
+      getUINativeModule().swiper.setIndicatorInteractive(node, this.value);
+    }
+  }
+}
 
 // @ts-ignore
-globalThis.Swiper.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkSwiperComponent(nativeNode);
+globalThis.Swiper.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkSwiperComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.SwiperModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

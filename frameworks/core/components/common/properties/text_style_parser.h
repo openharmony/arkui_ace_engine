@@ -18,17 +18,23 @@
 
 namespace OHOS::Ace {
 
-bool ParseFontVariantCaps(const std::string& fontVariant, std::map<std::string, int32_t>& fontFeatures);
-bool ParseFontVariantNumeric(const std::string& fontVariant, std::map<std::string, int32_t>& fontFeatures);
-bool ParseFontVariantAlternates(const std::string& fontVariant, std::map<std::string, int32_t>& fontFeatures);
-bool ParseFontVariantLigatures(const std::string& fontVariant, std::map<std::string, int32_t>& fontFeatures);
-bool ParseFontVariantEastAsian(const std::string& fontVariant, std::map<std::string, int32_t>& fontFeatures);
-void ParseFontVariant(const std::string& fontVariant, std::map<std::string, int32_t>& fontFeatures);
-std::unordered_map<std::string, int32_t> ParseFontVariants(const std::string& fontVariants);
+bool ParseFontVariantCaps(const std::string& fontVariant, std::list<std::pair<std::string, int32_t>>& fontFeatures);
+bool ParseFontVariantNumeric(const std::string& fontVariant, std::list<std::pair<std::string, int32_t>>& fontFeatures);
+bool ParseFontVariantAlternates(
+    const std::string& fontVariant, std::list<std::pair<std::string, int32_t>>& fontFeatures);
+bool ParseFontVariantLigatures(
+    const std::string& fontVariant, std::list<std::pair<std::string, int32_t>>& fontFeatures);
+bool ParseFontVariantEastAsian(
+    const std::string& fontVariant, std::list<std::pair<std::string, int32_t>>& fontFeatures);
+void ParseFontVariant(const std::string& fontVariant, std::list<std::pair<std::string, int32_t>>& fontFeatures);
+std::list<std::pair<std::string, int32_t>> ParseFontVariants(const std::string& fontVariants);
 
-void ParseFontFeatureSetting(const std::string& fontFeatureSetting, std::map<std::string, int32_t>& fontFeatures);
-std::unordered_map<std::string, int32_t> ParseFontFeatureSettings(const std::string& fontFeatureSettings);
+void ParseFontFeatureSetting(
+    const std::string& fontFeatureSetting, std::list<std::pair<std::string, int32_t>>& fontFeatures);
+std::list<std::pair<std::string, int32_t>> ParseFontFeatureSettings(const std::string& fontFeatureSettings);
 
+std::string UnParseFontFeatureSetting(const std::list<std::pair<std::string, int32_t>>& fontFeatureSettings);
+std::list<std::pair<std::string, int32_t>> ParseFontFeatureSettings(const std::string& fontFeatureSettings);
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_TEXT_STYLE_PARSER_H

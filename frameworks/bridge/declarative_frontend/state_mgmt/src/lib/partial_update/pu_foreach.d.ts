@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 /**
  * ForEach for partial update
+ * Repeat aka ForEach and LazyForEach with child update
  *
  * all definitions in this file are framework internal
  * 
@@ -32,3 +33,10 @@ declare class ForEach {
   static createNewChildFinish(id: string, parentView: NativeViewPartialUpdate): void;
 }
 
+declare class RepeatNative {
+  static startRender(): void;
+  static finishRender(removedChildElmtIds: Array<number>): void;
+  static moveChild(fromIndex: number): void;
+  static createNewChildStart(id: string): void;
+  static createNewChildFinish(id: string): void;
+}

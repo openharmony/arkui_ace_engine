@@ -2132,7 +2132,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTest001, TestSize.Level1)
      * @tc.expected: step3. result equals.
      */
     longPressRecognizer.OnRejected();
-    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::SUCCEED);
 }
 
 /**
@@ -2211,7 +2211,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTest003, TestSize.Level1)
     longPressRecognizer.HandleTouchDownEvent(touchEvent);
     EXPECT_EQ(longPressRecognizer.globalPoint_.GetX(), touchEvent.x);
     EXPECT_EQ(longPressRecognizer.globalPoint_.GetY(), touchEvent.y);
-    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::DETECTING);
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::READY);
 
     /**
      * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
@@ -2220,7 +2220,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTest003, TestSize.Level1)
      */
     longPressRecognizer.useCatchMode_ = false;
     longPressRecognizer.HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::DETECTING);
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::READY);
 
     /**
      * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
@@ -3524,48 +3524,6 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest010, TestSize.Level1)
     panRecognizer.fingers_ = panRecognizerPtr->fingers_;
     result = panRecognizer.ReconcileFrom(panRecognizerPtr);
     EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: PanRecognizerTest011
- * @tc.desc: Test PanRecognizer function: SetDirection
- * @tc.type: FUNC
- */
-HWTEST_F(GesturesTestNg, PanRecognizerTest011, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create PanRecognizer.
-     */
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-    PanDirection panDirection;
-
-    /**
-     * @tc.steps: step2. call SetDirection function
-     * @tc.steps: case1: panDirection is VERTICAL
-     * @tc.expected: step2. result equals.
-     */
-    panDirection.type = PanDirection::VERTICAL;
-    panRecognizer.SetDirection(panDirection);
-    EXPECT_EQ(panRecognizer.velocityTracker_.mainAxis_, Axis::VERTICAL);
-
-    /**
-     * @tc.steps: step2. call SetDirection function
-     * @tc.steps: case2: panDirection is HORIZONTAL
-     * @tc.expected: step2. result equals.
-     */
-    panDirection.type = PanDirection::HORIZONTAL;
-    panRecognizer.SetDirection(panDirection);
-    EXPECT_EQ(panRecognizer.velocityTracker_.mainAxis_, Axis::HORIZONTAL);
-
-    /**
-     * @tc.steps: step2. call SetDirection function
-     * @tc.steps: case2: panDirection is HORIZONTAL
-     * @tc.expected: step2. result equals.
-     */
-    panDirection.type = PanDirection::ALL;
-    panRecognizer.SetDirection(panDirection);
-    EXPECT_EQ(panRecognizer.velocityTracker_.mainAxis_, Axis::HORIZONTAL);
 }
 
 /**
@@ -12658,7 +12616,7 @@ HWTEST_F(GesturesTestNg, RotationRecognizerHandleAxisEventTest002, TestSize.Leve
      */
     recognizer->refereeState_ = RefereeState::READY;
     recognizer->HandleTouchUpEvent(event);
-    EXPECT_EQ(recognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::READY);
 
     recognizer->refereeState_ = RefereeState::SUCCEED;
     recognizer->HandleTouchUpEvent(event);

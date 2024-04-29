@@ -53,6 +53,8 @@ public:
     MOCK_METHOD0(GetShown, bool());
     MOCK_METHOD2(SetHotAreas, void(const std::vector<Rect>& rects, int32_t overlayId));
     MOCK_CONST_METHOD0(GetParentWindowRect, Rect());
+    MOCK_CONST_METHOD0(GetUIExtensionHostWindowRect, Rect());
+    MOCK_CONST_METHOD0(CheckHostWindowStatus, bool());
     MOCK_METHOD0(ClearToast, void());
     MOCK_METHOD6(ShowToast, void(const std::string& message, int32_t duration, const std::string& bottom,
         const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset));
@@ -70,11 +72,16 @@ public:
     MOCK_METHOD0(IsFocused, bool());
     MOCK_METHOD2(OpenCustomDialog, void(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback));
     MOCK_METHOD1(CloseCustomDialog, void(const int32_t dialogId));
+    MOCK_METHOD2(CloseCustomDialog, void(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback));
     MOCK_METHOD2(
         OpenCustomDialogNG, void(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback));
     MOCK_METHOD1(CloseCustomDialogNG, void(int32_t dialogId));
+    MOCK_METHOD2(CloseCustomDialogNG, void(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD3(UpdateCustomDialogNG, void(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback));
     MOCK_METHOD0(ResizeWindowForFoldStatus, void());
     MOCK_METHOD1(ResizeWindowForFoldStatus, void(int32_t parentContainerId));
+    MOCK_METHOD0(MarkDirtyDialogSafeArea, void());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

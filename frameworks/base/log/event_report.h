@@ -139,7 +139,7 @@ enum class FormExcepType {
 
 #ifdef VSYNC_TIMEOUT_CHECK
 enum class VsyncExcepType {
-    VSYNC_TIMEOUT
+    UI_VSYNC_TIMEOUT
 };
 #endif
 
@@ -171,7 +171,7 @@ public:
     static void SendAccessibilityException(AccessibilityExcepType type);
     static void SendFormException(FormExcepType type);
 #ifdef VSYNC_TIMEOUT_CHECK
-    static void SendVsyncException(VsyncExcepType type);
+    static void SendVsyncException(VsyncExcepType type, uint32_t windowId, int32_t instanceId, uint64_t timeStamp);
 #endif
 
     static void JsEventReport(int32_t eventType, const std::string& jsonStr);
@@ -189,6 +189,11 @@ public:
     static void ReportJankFrameFiltered(JankInfo& info);
     static void ReportDoubleClickTitle(int32_t stateChange);
     static void ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange);
+    static void ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold);
+    static void ReportPageDepthOverflow(const std::string& pageUrl, int32_t depth, int32_t threshold);
+    static void ReportFunctionTimeout(const std::string& functionName, int64_t time, int32_t threshold);
+    static void ReportHoverStatusChange(int32_t foldStatus, int32_t time, bool isHoverMode,
+        int32_t appRotation, int32_t windowMode);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);

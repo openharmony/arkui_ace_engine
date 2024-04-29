@@ -20,9 +20,8 @@ using namespace std::chrono;
 ScopedMonitor::ScopedMonitor(MonitorTag tag) : tag_(tag)
 {
     begin_ = steady_clock::now();
-    if (tag_ == MonitorTag::STATIC_API) {
-        ArkUIPerfMonitor::GetInstance().SetRecordingStatus(tag, MonitorStatus::RUNNING);
-    }
+    end_ = steady_clock::now();
+    ArkUIPerfMonitor::GetInstance().SetRecordingStatus(tag_, MonitorStatus::RUNNING);
 }
 
 ScopedMonitor::~ScopedMonitor() = default;
@@ -41,7 +40,11 @@ void ArkUIPerfMonitor::FinishPerf() {}
 
 void ArkUIPerfMonitor::RecordTimeSlice(MonitorTag tag, int64_t duration) {}
 
-void ArkUIPerfMonitor::RecordNodeNum(uint64_t num) {}
+void ArkUIPerfMonitor::RecordStateMgmtNode(int64_t num) {}
+
+void ArkUIPerfMonitor::RecordLayoutNode(int64_t num) {}
+
+void ArkUIPerfMonitor::RecordRenderNode(int64_t num) {}
 
 void ArkUIPerfMonitor::SetRecordingStatus(MonitorTag tag, MonitorStatus status) {}
 
@@ -55,7 +58,9 @@ void ArkUIPerfMonitor::ClearPerfMonitor()
     timeSlice_[MonitorTag::JS_CALLBACK] = 0;
     timeSlice_[MonitorTag::STATIC_API] = 0;
     propertyNum_ = 0;
-    nodeNum_ = 0;
+    stateMgmtNodeNum_ = 0;
+    layoutNodeNum_ = 0;
+    renderNodeNum_ = 0;
     monitorStatus_ = 0;
 }
 

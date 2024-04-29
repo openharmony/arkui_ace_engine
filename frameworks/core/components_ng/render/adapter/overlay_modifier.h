@@ -26,6 +26,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
 #include "base/memory/referenced.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/render/drawing.h"
@@ -153,6 +154,15 @@ public:
             overlayOffset = OffsetF(dx, dy);
         }
         return overlayOffset;
+    }
+
+    bool IsCustomFont()
+    {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        auto fontManager = pipelineContext->GetFontManager();
+        CHECK_NULL_RETURN(fontManager, false);
+        return fontManager->IsDefaultFontChanged();
     }
 
 private:

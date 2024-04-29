@@ -970,7 +970,7 @@ void RenderWeb::OnTouchSelectionChanged(
     }
 }
 
-bool RenderWeb::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
+bool RenderWeb::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
     (void)info;
     auto context = GetContext().Upgrade();
@@ -1310,12 +1310,18 @@ void RenderWeb::OnSelectPopupMenu(
         callback->Cancel();
     });
 
-    OHOS::NWeb::SelectMenuBound bounds = params->GetSelectMenuBound();
-    Offset leftTop = { bounds.x + GetGlobalOffset().GetX(),
-                       bounds.y + GetGlobalOffset().GetY() };
-    Offset rightBottom = { bounds.x + GetGlobalOffset().GetX() + bounds.width,
-                           bounds.y + GetGlobalOffset().GetY() + bounds.height };
-    popup_->ShowDialog(stackElement, leftTop, rightBottom, false);
+    std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound = params->GetSelectMenuBound();
+    if (bound) {
+        Offset leftTop = { bound->GetX() + GetGlobalOffset().GetX(),
+                           bound->GetY() + GetGlobalOffset().GetY() };
+        Offset rightBottom = { bound->GetX() + GetGlobalOffset().GetX() + bound->GetWidth(),
+                               bound->GetY() + GetGlobalOffset().GetY() + bound->GetHeight() };
+        popup_->ShowDialog(stackElement, leftTop, rightBottom, false);
+    } else {
+        Offset leftTop = { GetGlobalOffset().GetX(), GetGlobalOffset().GetY() };
+        Offset rightBottom = { GetGlobalOffset().GetX(), GetGlobalOffset().GetY() };
+        popup_->ShowDialog(stackElement, leftTop, rightBottom, false);
+    }
 }
 #endif
 } // namespace OHOS::Ace

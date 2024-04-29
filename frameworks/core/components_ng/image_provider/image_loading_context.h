@@ -87,6 +87,7 @@ public:
     void ResizableCalcDstSize();
     void DownloadImage();
     void PerformDownload();
+    void CacheDownloadedImage();
     bool Downloadable();
     void OnDataReady();
 
@@ -94,6 +95,26 @@ public:
     int32_t GetContainerId()
     {
         return containerId_;
+    }
+
+    void SetDynamicRangeMode(DynamicRangeMode dynamicMode)
+    {
+        dynamicMode_ = dynamicMode;
+    }
+
+    DynamicRangeMode GetDynamicRangeMode()
+    {
+        return dynamicMode_;
+    }
+
+    void SetImageQuality(AIImageQuality imageQuality)
+    {
+        imageQuality_ = imageQuality;
+    }
+
+    AIImageQuality GetImageQuality()
+    {
+        return imageQuality_;
     }
 
 private:
@@ -131,6 +152,7 @@ private:
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
     RefPtr<CanvasImage> canvasImage_;
+    std::string imageDataCopy_;
 
     // [LoadNotifier] contains 3 tasks to notify whom uses [ImageLoadingContext] of loading results
     LoadNotifier notifiers_;
@@ -140,6 +162,9 @@ private:
 
     bool autoResize_ = true;
     bool syncLoad_ = false;
+
+    DynamicRangeMode dynamicMode_ = DynamicRangeMode::STANDARD;
+    AIImageQuality imageQuality_ = AIImageQuality::NONE;
 
     RectF srcRect_;
     RectF dstRect_;

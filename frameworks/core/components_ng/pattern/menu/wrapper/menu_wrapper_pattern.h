@@ -23,7 +23,9 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
@@ -124,6 +126,19 @@ public:
         auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_RETURN(preview, nullptr);
         return preview;
+    }
+
+    // used to obtain the Badge node and delete it.
+    RefPtr<FrameNode> GetBadgeNode() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto badgeNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+        CHECK_NULL_RETURN(badgeNode, nullptr);
+        if (badgeNode->GetTag() != V2::TEXT_ETS_TAG) {
+            return nullptr;
+        }
+        return badgeNode;
     }
 
     OffsetT<Dimension> GetAnimationOffset();
@@ -239,6 +254,51 @@ public:
         hasPreviewTransitionEffect_ = hasPreviewTransitionEffect;
     }
 
+    void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
+    {
+        filterColumnNode_ = columnNode;
+    }
+
+    RefPtr<FrameNode> GetFilterColumnNode()
+    {
+        return filterColumnNode_;
+    }
+    
+    void DumpInfo() override;
+
+    MenuDumpInfo GetDumpInfo() const
+    {
+        return dumpInfo_;
+    }
+
+    void SetDumpInfo(const MenuDumpInfo& dumpInfo)
+    {
+        dumpInfo_.menuPreviewMode = dumpInfo.menuPreviewMode;
+        dumpInfo_.menuType = dumpInfo.menuType;
+        dumpInfo_.enableArrow = dumpInfo.enableArrow;
+        dumpInfo_.targetNode = dumpInfo.targetNode;
+        dumpInfo_.targetOffset = dumpInfo.targetOffset;
+        dumpInfo_.targetSize = dumpInfo.targetSize;
+        dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
+        dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
+        dumpInfo_.top = dumpInfo.top;
+        dumpInfo_.bottom = dumpInfo.bottom;
+        dumpInfo_.globalLocation = dumpInfo.globalLocation;
+        dumpInfo_.originPlacement = dumpInfo.originPlacement;
+        dumpInfo_.finalPosition = dumpInfo.finalPosition;
+        dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
+    }
+
+    bool GetHasCustomRadius() const
+    {
+        return hasCustomRadius_;
+    }
+
+    void SetHasCustomRadius(bool hasCustomRadius)
+    {
+        hasCustomRadius_ = hasCustomRadius;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -277,6 +337,9 @@ private:
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
+    RefPtr<FrameNode> filterColumnNode_;
+    MenuDumpInfo dumpInfo_;
+    bool hasCustomRadius_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

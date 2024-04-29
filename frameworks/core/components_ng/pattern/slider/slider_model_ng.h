@@ -16,11 +16,24 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_MODEL_NG_H
 
+#include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
 
 namespace OHOS::Ace::NG {
+class SliderConfiguration : public CommonConfiguration {
+public:
+    SliderConfiguration(double value, double min, double max, double step, bool enabled)
+        : CommonConfiguration(enabled), value_(value), min_(min), max_(max), step_(step)
+    {}
+    double value_;
+    double min_;
+    double max_;
+    double step_;
+};
+using SliderMakeCallback =
+    std::function<RefPtr<FrameNode>(const SliderConfiguration& sliderConfiguration)>;
 class ACE_EXPORT SliderModelNG : public SliderModel {
 public:
     void Create(float value, float step, float min, float max) override;
@@ -29,7 +42,7 @@ public:
     void SetReverse(bool value) override;
     void SetBlockColor(const Color& value) override;
     void SetTrackBackgroundColor(const Color& value) override {};
-    void SetTrackBackgroundColor(const Gradient& value) override;
+    void SetTrackBackgroundColor(const Gradient& value, bool isResourceColor = false) override;
     void SetSelectColor(const Color& value) override;
     void SetMinLabel(float value) override;
     void SetMaxLabel(float value) override;
@@ -40,11 +53,15 @@ public:
     void SetBlockBorderWidth(const Dimension& value) override;
     void SetStepColor(const Color& value) override;
     void SetTrackBorderRadius(const Dimension& value) override;
+    void SetSelectedBorderRadius(const Dimension& value) override;
     void SetBlockSize(const Dimension& width, const Dimension& height) override;
     void SetBlockType(BlockStyleType value) override;
     void SetBlockImage(const std::string& value, const std::string& bundleName, const std::string& moduleName) override;
     void SetBlockShape(const RefPtr<BasicShape>& value) override;
     void SetStepSize(const Dimension& value) override;
+    void SetSliderInteractionMode(SliderInteraction mode) override;
+    void SetMinResponsiveDistance(float value) override;
+
     void SetOnChange(SliderOnChangeEvent&& eventOnChange) override;
     void SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent) override;
 
@@ -52,11 +69,14 @@ public:
     void ResetBlockBorderWidth() override;
     void ResetStepColor() override;
     void ResetTrackBorderRadius() override;
+    void ResetSelectedBorderRadius() override;
     void ResetBlockSize() override;
     void ResetBlockType() override;
     void ResetBlockImage() override;
     void ResetBlockShape() override;
     void ResetStepSize() override;
+    void ResetSliderInteractionMode() override;
+    void ResetMinResponsiveDistance() override;
 
     static void SetShowTips(FrameNode* frameNode, bool value, const std::optional<std::string>& content);
     static void SetThickness(FrameNode* frameNode, const Dimension& value);
@@ -69,9 +89,11 @@ public:
     static void SetBlockBorderColor(FrameNode* frameNode, const Color& value);
     static void SetBlockBorderWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBlockColor(FrameNode* frameNode, const Color& value);
-    static void SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value);
+    static void SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
     static void SetSelectColor(FrameNode* frameNode, const Color& value);
     static void SetShowSteps(FrameNode* frameNode, bool value);
+    static void SetSliderInteractionMode(FrameNode* frameNode, SliderInteraction mode);
+    static void SetMinResponsiveDistance(FrameNode* frameNode, float value);
     static void SetBlockImage(
         FrameNode* frameNode, const std::string& value, const std::string& bundleName, const std::string& moduleName);
 
@@ -111,6 +133,8 @@ public:
     static std::string GetBlockImageValue(FrameNode* frameNode);
     static RefPtr<BasicShape> GetBlockShape(FrameNode* frameNode);
     static Gradient CreateSolidGradient(Color value);
+    static void SetBuilderFunc(FrameNode* frameNode, SliderMakeCallback&& jsMake);
+    static void SetChangeValue(FrameNode* frameNode, double value, int32_t mode);
 
 private:
     void SetSliderValue(float value);

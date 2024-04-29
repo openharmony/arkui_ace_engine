@@ -23,24 +23,136 @@
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"
+#include "base/log/log_wrapper.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 
 extern "C" {
-int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value frameNode, ArkUI_NodeHandle* handle)
+
+int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkUI_NodeHandle* handle)
 {
-    napi_value frameNodePtr = nullptr;
-    auto result = napi_get_named_property(env, frameNode, "nodePtr_", &frameNodePtr);
+    bool hasProperty = false;
+    auto result = napi_has_named_property(env, value, "nodePtr_", &hasProperty);
+    if (result == napi_ok && hasProperty) {
+        napi_value frameNodePtr = nullptr;
+        auto result = napi_get_named_property(env, value, "nodePtr_", &frameNodePtr);
+        if (result != napi_ok) {
+            LOGE("fail to get nodePtr");
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        }
+        // BuilderNode case.
+        void* nativePtr = nullptr;
+        result = napi_get_value_external(env, frameNodePtr, &nativePtr);
+        if (result != napi_ok || nativePtr == nullptr) {
+            LOGE("fail to get nodePtr external value");
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        }
+        auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
+        uiNodePtr->IncRefCount();
+        *handle = new ArkUI_Node({ .type = -1, .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(nativePtr) });
+        return OHOS::Ace::ERROR_CODE_NO_ERROR;
+    }
+    result = napi_has_named_property(env, value, "builderNode_", &hasProperty);
+    if (result == napi_ok && hasProperty) {
+        // Component Content case.
+        napi_value builderNode = nullptr;
+        auto result = napi_get_named_property(env, value, "builderNode_", &builderNode);
+        if (result != napi_ok) {
+            LOGE("fail to get builderNode");
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        }
+        napi_value nodePtr = nullptr;
+        result = napi_get_named_property(env, builderNode, "nodePtr_", &nodePtr);
+        if (result != napi_ok) {
+            LOGE("fail to get nodePtr in builderNode");
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        }
+        void* nativePtr = nullptr;
+        result = napi_get_value_external(env, nodePtr, &nativePtr);
+        if (result != napi_ok) {
+            LOGE("fail to get nodePtr external value in builderNode");
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        }
+        auto* uiNode = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
+        OHOS::Ace::NG::FrameNode* frameNode = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::NG::FrameNode>(uiNode);
+        if (frameNode == nullptr) {
+            LOGE("fail to get frameNode value in builderNode");
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        }
+        if (frameNode->GetTag() == "BuilderProxyNode") {
+            // need to get the really frameNode.
+            auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+            if (!impl) {
+                return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND;
+            }
+            auto* child = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(
+                reinterpret_cast<ArkUINodeHandle>(frameNode), 0);
+            if (!child) {
+                LOGE("fail to get child in BuilderProxyNode");
+                return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+            }
+            frameNode = reinterpret_cast<OHOS::Ace::NG::FrameNode*>(child);
+        }
+        frameNode->IncRefCount();
+        *handle = new ArkUI_Node({ .type = -1, .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(frameNode) });
+        return OHOS::Ace::ERROR_CODE_NO_ERROR;
+    }
+    return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+}
+
+int32_t OH_ArkUI_GetContextFromNapiValue(napi_env env, napi_value value, ArkUI_ContextHandle* context)
+{
+    bool hasProperty = false;
+    auto result = napi_has_named_property(env, value, "instanceId_", &hasProperty);
+    if (result != napi_ok || !hasProperty) {
+        LOGE("fail to get Context value");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+
+    napi_value contextPtr = nullptr;
+    result = napi_get_named_property(env, value, "instanceId_", &contextPtr);
     if (result != napi_ok) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+
+    napi_valuetype valuetype;
+    if (napi_typeof(env, contextPtr, &valuetype) != napi_ok) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (valuetype != napi_number) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t instanceId = -1;
+    result = napi_get_value_int32(env, contextPtr, &instanceId);
+    if (result != napi_ok) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    *context = new ArkUI_Context({ .id = instanceId });
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, ArkUI_NodeContentHandle* content)
+{
+    bool hasProperty = false;
+    auto result = napi_has_named_property(env, value, "nativePtr_", &hasProperty);
+    if (result != napi_ok || !hasProperty) {
+        LOGE("fail to get native content value");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    napi_value nativeContent = nullptr;
+    result = napi_get_named_property(env, value, "nativePtr_", &nativeContent);
+    if (result != napi_ok) {
+        LOGE("fail to get native content");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     void* nativePtr = nullptr;
-    result = napi_get_value_external(env, frameNodePtr, &nativePtr);
+    result = napi_get_value_external(env, nativeContent, &nativePtr);
     if (result != napi_ok) {
+        LOGE("fail to get native content ptr");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
-    uiNodePtr->IncRefCount();
-    *handle = new ArkUI_Node({ .type = -1, .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(nativePtr) });
+    *content = reinterpret_cast<ArkUI_NodeContentHandle>(nativePtr);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
+
 }

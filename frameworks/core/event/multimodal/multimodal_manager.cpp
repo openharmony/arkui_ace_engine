@@ -123,7 +123,7 @@ void MultiModalManager::OpenChannel(const RefPtr<PipelineContext>& context)
                 return;
             }
             scene->OnNotifyMultimodalEvent(event);
-        }, TaskExecutor::TaskType::UI);
+        }, TaskExecutor::TaskType::UI, "ArkUINotifyMultimodalEvent");
     };
     subscriber_->RegisterCallback(callback, [weak = WeakClaim(this)]() {
         auto manager = weak.Upgrade();

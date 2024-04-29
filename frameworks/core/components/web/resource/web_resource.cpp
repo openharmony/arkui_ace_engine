@@ -69,7 +69,7 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         releaseTask();
     } else {
-        platformTaskExecutor.PostTask(releaseTask);
+        platformTaskExecutor.PostTask(releaseTask, "ArkUIWebReleaseResource");
     }
 }
 
@@ -170,7 +170,7 @@ void WebResource::CallResRegisterMethod(
         if (callback) {
             callback(result);
         }
-    });
+    }, "ArkUIWebCallResRegister");
 }
 
 std::string WebResource::GetStringParam(const std::string& param, const std::string& name) const

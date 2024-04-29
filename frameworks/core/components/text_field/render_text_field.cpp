@@ -1898,7 +1898,8 @@ void RenderTextField::ScheduleCursorTwinkling()
     });
     auto taskExecutor = context->GetTaskExecutor();
     if (taskExecutor) {
-        taskExecutor->PostDelayedTask(cursorTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval);
+        taskExecutor->PostDelayedTask(
+            cursorTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval, "ArkUITextFieldCursorTwinkling");
     } else {
         LOGE("the task executor is nullptr");
     }
@@ -2922,7 +2923,7 @@ void RenderTextField::Insert(const std::string& text)
                 textField->UpdateInsertText(text);
                 textField->UpdateEditingValue(textEditingValue, true);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUITextFieldUpdateInsertText");
     }
 }
 

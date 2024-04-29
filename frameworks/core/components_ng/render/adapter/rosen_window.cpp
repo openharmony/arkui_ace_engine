@@ -78,7 +78,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             onVsync();
             return;
         }
-        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); });
+        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync");
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
     if (window->GetSurfaceNode()) {
@@ -89,8 +89,8 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
         ContainerScope scope(id);
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-    });
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRosenWindowTask");
+    }, id);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
         CHECK_NULL_VOID(self);
@@ -127,13 +127,15 @@ void RosenWindow::RequestFrame()
         lastRequestVsyncTime_ = GetSysTimestamp();
     #ifdef VSYNC_TIMEOUT_CHECK
         if (taskExecutor) {
-            auto task = []() {
+            auto windowId = rsWindow_->GetWindowId();
+            auto instanceId = Container::CurrentIdSafely();
+            auto task = [windowId, instanceId, timeStamp = lastRequestVsyncTime_]() {
                 LOGE("VsyncCallback not executed!");
-                EventReport::SendVsyncException(VsyncExcepType::VSYNC_TIMEOUT);
+                EventReport::SendVsyncException(VsyncExcepType::UI_VSYNC_TIMEOUT, windowId, instanceId, timeStamp);
             };
             onVsyncEventCheckTimer_.Reset(task);
             taskExecutor->PostDelayedTask(onVsyncEventCheckTimer_, TaskExecutor::TaskType::JS,
-                                          VSYNC_TASK_DELAY_MILLISECOND);
+                                          VSYNC_TASK_DELAY_MILLISECOND, "ArkUIVsyncTimeoutCheck");
         }
     #endif
     }
@@ -147,7 +149,7 @@ void RosenWindow::RequestFrame()
                 CHECK_NULL_VOID(pipeline);
                 pipeline->OnIdle(0);
             },
-            TaskExecutor::TaskType::UI, IDLE_TASK_DELAY_MILLISECOND);
+            TaskExecutor::TaskType::UI, IDLE_TASK_DELAY_MILLISECOND, "ArkUIIdleTask");
     }
 }
 

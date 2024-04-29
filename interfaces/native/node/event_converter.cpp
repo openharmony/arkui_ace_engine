@@ -16,17 +16,102 @@
 
 #include <cstdint>
 
-#include "native_event.h"
 #include "native_node.h"
 #include "node/gesture_impl.h"
+#include "node/native_compatible.h"
 #include "node/node_model.h"
 #include "securec.h"
 
 #include "base/log/log_wrapper.h"
+#include "core/event/touch_event.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NodeModel {
+namespace {
+constexpr int32_t ORIGIN_TOUCH_ACTION_DOWN = 0;
+constexpr int32_t ORIGIN_TOUCH_ACTION_UP = 1;
+constexpr int32_t ORIGIN_TOUCH_ACTION_MOVE = 2;
+constexpr int32_t ORIGIN_TOUCH_ACTION_CANCEL = 3;
+constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_FINGER = 1;
+constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_PEN = 2;
+constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_MOUSE = 7;
+constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_TOUCHPAD = 9;
 
+void ConvertToTouchEvent(const ArkUITouchEvent& origin, ArkUI_NodeTouchEvent& event)
+{
+    memset_s(&event, sizeof(ArkUI_NodeTouchEvent), 0, sizeof(ArkUI_NodeTouchEvent));
+    event.actionTouch.id = origin.actionTouchPoint.id;
+    event.actionTouch.nodeX = origin.actionTouchPoint.nodeX;
+    event.actionTouch.nodeY = origin.actionTouchPoint.nodeY;
+    event.actionTouch.windowX = origin.actionTouchPoint.windowX;
+    event.actionTouch.windowY = origin.actionTouchPoint.windowY;
+    event.actionTouch.screenX = origin.actionTouchPoint.screenX;
+    event.actionTouch.screenY = origin.actionTouchPoint.screenY;
+    event.actionTouch.contactAreaHeight = origin.actionTouchPoint.contactAreaHeight;
+    event.actionTouch.contactAreaWidth = origin.actionTouchPoint.contactAreaWidth;
+    event.actionTouch.toolHeight = origin.actionTouchPoint.toolHeight;
+    event.actionTouch.toolWidth = origin.actionTouchPoint.toolWidth;
+    event.actionTouch.toolType = static_cast<ArkUI_NodeToolType>(origin.actionTouchPoint.toolType);
+    event.actionTouch.pressure = origin.actionTouchPoint.pressure;
+    event.actionTouch.tiltX = origin.actionTouchPoint.tiltX;
+    event.actionTouch.tiltY = origin.actionTouchPoint.tiltY;
+    event.actionTouch.rawX = origin.actionTouchPoint.rawX;
+    event.actionTouch.rawY = origin.actionTouchPoint.rawY;
+
+    event.timeStamp = origin.timeStamp;
+    if (origin.sourceType == UI_INPUT_EVENTT_SOURCE_TYPE_TOUCH_SCREEN) {
+        event.sourceType = NODE_SOURCE_TYPE_TOUCH_SCREEN;
+    } else {
+        event.sourceType = NODE_SOURCE_TYPE_UNKNOWN;
+    }
+
+    switch (origin.action) {
+        case static_cast<int32_t>(TouchType::DOWN):
+            event.action = NODE_ACTION_DOWN;
+            break;
+        // TouchType::UP
+        case static_cast<int32_t>(TouchType::UP):
+            event.action = NODE_ACTION_UP;
+            break;
+            // TouchType::MOVE
+        case static_cast<int32_t>(TouchType::MOVE):
+            event.action = NODE_ACTION_MOVE;
+            break;
+        case static_cast<int32_t>(TouchType::CANCEL):
+            event.action = NODE_ACTION_CANCEL;
+            break;
+        default:
+            event.action = static_cast<ArkUI_NodeTouchEventAction>(-1);
+    }
+    static ArkUI_Uint32 touchPointSize = origin.touchPointSize;
+    static ArkUITouchPoint* touchPoints = origin.touchPointes;
+    auto getTouchPoints = [](ArkUI_NodeTouchPoint** points) -> ArkUI_Int32 {
+        *points = new ArkUI_NodeTouchPoint[touchPointSize] {};
+        for (uint32_t index = 0; index < touchPointSize; index++) {
+            (*points)[index].id = touchPoints[index].id;
+            (*points)[index].nodeX = touchPoints[index].nodeX;
+            (*points)[index].nodeY = touchPoints[index].nodeY;
+            (*points)[index].windowX = touchPoints[index].windowX;
+            (*points)[index].windowY = touchPoints[index].windowY;
+            (*points)[index].screenX = touchPoints[index].screenX;
+            (*points)[index].screenY = touchPoints[index].screenY;
+            (*points)[index].contactAreaHeight = touchPoints[index].contactAreaHeight;
+            (*points)[index].contactAreaWidth = touchPoints[index].contactAreaWidth;
+            (*points)[index].toolHeight = touchPoints[index].toolHeight;
+            (*points)[index].toolWidth = touchPoints[index].toolWidth;
+            (*points)[index].toolType = static_cast<ArkUI_NodeToolType>(touchPoints[index].toolType);
+            (*points)[index].pressure = touchPoints[index].pressure;
+            (*points)[index].tiltX = touchPoints[index].tiltX;
+            (*points)[index].tiltY = touchPoints[index].tiltY;
+            (*points)[index].rawX = touchPoints[index].rawX;
+            (*points)[index].rawY = touchPoints[index].rawY;
+        }
+        return touchPointSize;
+    };
+    event.getTouches = getTouchPoints;
+}
+
+} // namespace
 ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
 {
     auto arkUINodeType = static_cast<ArkUI_NodeType>(nodeType);
@@ -79,6 +164,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_IMAGE_COMPLETE;
         case NODE_IMAGE_ON_ERROR:
             return ON_IMAGE_ERROR;
+        case NODE_IMAGE_ON_SVG_PLAY_FINISH:
+            return ON_IMAGE_SVG_PLAY_FINISH;
+        case NODE_TEXT_PICKER_EVENT_ON_CHANGE:
+            return ON_TEXT_PICKER_CHANGE;
         case NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE:
             return ON_DATE_PICKER_DATE_CHANGE;
         case NODE_TIME_PICKER_EVENT_ON_CHANGE:
@@ -99,6 +188,12 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXT_INPUT_PASTE;
         case NODE_TEXT_INPUT_ON_TEXT_SELECTION_CHANGE:
             return ON_TEXT_INPUT_TEXT_SELECTION_CHANGE;
+        case NODE_TEXT_INPUT_ON_EDIT_CHANGE:
+            return ON_TEXT_INPUT_EDIT_CHANGE;
+        case NODE_TEXT_AREA_ON_EDIT_CHANGE:
+            return ON_TEXTAREA_EDIT_CHANGE;
+        case NODE_TEXT_AREA_ON_SUBMIT:
+            return ON_TEXTAREA_ON_SUBMIT;
         case NODE_TEXT_AREA_ON_PASTE:
             return ON_TEXTAREA_PASTE;
         case NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE:
@@ -111,6 +206,15 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_SWIPER_ANIMATION_END;
         case NODE_SWIPER_EVENT_ON_GESTURE_SWIPE:
             return ON_SWIPER_GESTURE_SWIPE;
+        case NODE_ON_WILL_SCROLL:
+            if (arkUINodeType == ARKUI_NODE_LIST) {
+                return ON_LIST_WILL_SCROLL;
+            }
+            return ON_WILL_SCROLL;
+        case NODE_ON_TOUCH_INTERCEPT:
+            return ON_TOUCH_INTERCEPT;
+        case NODE_ON_REACH_END:
+            return ON_REACH_END;
         default:
             return -1;
     }
@@ -155,6 +259,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_IMAGE_ON_COMPLETE;
         case ON_IMAGE_ERROR:
             return NODE_IMAGE_ON_ERROR;
+        case ON_IMAGE_SVG_PLAY_FINISH:
+            return NODE_IMAGE_ON_SVG_PLAY_FINISH;
+        case ON_TEXT_PICKER_CHANGE:
+            return NODE_TEXT_PICKER_EVENT_ON_CHANGE;
         case ON_DATE_PICKER_DATE_CHANGE:
             return NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE;
         case ON_TIME_PICKER_CHANGE:
@@ -175,6 +283,12 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_INPUT_ON_PASTE;
         case ON_TEXT_INPUT_TEXT_SELECTION_CHANGE:
             return NODE_TEXT_INPUT_ON_TEXT_SELECTION_CHANGE;
+        case ON_TEXT_INPUT_EDIT_CHANGE:
+            return NODE_TEXT_INPUT_ON_EDIT_CHANGE;
+        case ON_TEXTAREA_EDIT_CHANGE:
+            return NODE_TEXT_AREA_ON_EDIT_CHANGE;
+        case ON_TEXTAREA_ON_SUBMIT:
+            return NODE_TEXT_AREA_ON_SUBMIT;
         case ON_TEXTAREA_PASTE:
             return NODE_TEXT_AREA_ON_PASTE;
         case ON_TEXTAREA_TEXT_SELECTION_CHANGE:
@@ -193,8 +307,16 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN;
         case ON_LIST_SCROLL_START:
             return NODE_SCROLL_EVENT_ON_SCROLL_START;
+        case ON_LIST_WILL_SCROLL:
+            return NODE_ON_WILL_SCROLL;
         case ON_LIST_SCROLL_STOP:
             return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
+        case ON_WILL_SCROLL:
+            return NODE_ON_WILL_SCROLL;
+        case ON_TOUCH_INTERCEPT:
+            return NODE_ON_TOUCH_INTERCEPT;
+        case ON_REACH_END:
+            return NODE_ON_REACH_END;
         default:
             return -1;
     }
@@ -218,6 +340,7 @@ bool IsTouchEvent(ArkUI_Int32 type)
 {
     switch (type) {
         case NODE_TOUCH_EVENT:
+        case NODE_ON_TOUCH_INTERCEPT:
             return true;
         default:
             return false;
@@ -225,6 +348,84 @@ bool IsTouchEvent(ArkUI_Int32 type)
 }
 
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
+{
+    ArkUIEventCategory eventCategory = static_cast<ArkUIEventCategory>(origin->kind);
+    switch (eventCategory) {
+        case COMPONENT_ASYNC_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->componentAsyncEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case TEXT_INPUT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_STRING_ASYNC_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->textInputEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case TOUCH_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->touchEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        default:
+            TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "failed to convert origin event data");
+            break;
+    }
+    return false;
+}
+
+void HandleInnerEvent(ArkUINodeEvent* innerEvent)
+{
+    switch (innerEvent->kind) {
+        case ArkUIEventCategory::GESTURE_ASYNC_EVENT: {
+            // handle gesture event.
+            OHOS::Ace::GestureModel::HandleGestureEvent(innerEvent);
+            break;
+        }
+        default: {
+            OHOS::Ace::NodeModel::HandleInnerNodeEvent(innerEvent);
+            break;
+        }
+    }
+}
+
+int32_t ConvertToCTouchActionType(int32_t originActionType)
+{
+    switch (originActionType) {
+        case ORIGIN_TOUCH_ACTION_DOWN:
+            return static_cast<int32_t>(UI_TOUCH_EVENT_ACTION_DOWN);
+        case ORIGIN_TOUCH_ACTION_UP:
+            return static_cast<int32_t>(UI_TOUCH_EVENT_ACTION_UP);
+        case ORIGIN_TOUCH_ACTION_MOVE:
+            return static_cast<int32_t>(UI_TOUCH_EVENT_ACTION_MOVE);
+        case ORIGIN_TOUCH_ACTION_CANCEL:
+            return static_cast<int32_t>(UI_TOUCH_EVENT_ACTION_CANCEL);
+        default:
+            break;
+    }
+    return -1;
+}
+
+int32_t ConvertToCInputEventToolType(int32_t originSourceToolType)
+{
+    switch (originSourceToolType) {
+        case ORIGIN_INPUT_EVENT_TOOL_TYPE_FINGER:
+            return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_FINGER);
+        case ORIGIN_INPUT_EVENT_TOOL_TYPE_PEN:
+            return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_PEN);
+        case ORIGIN_INPUT_EVENT_TOOL_TYPE_MOUSE:
+            return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_MOUSE);
+        case ORIGIN_INPUT_EVENT_TOOL_TYPE_TOUCHPAD:
+            return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_TOUCHPAD);
+        default:
+            break;
+    }
+    return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
+}
+
+bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_CompatibleNodeEvent* event)
 {
     ArkUIEventCategory eventCategory = static_cast<ArkUIEventCategory>(origin->kind);
     switch (eventCategory) {
@@ -246,27 +447,7 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         }
         case TOUCH_EVENT:
             event->kind = ConvertToNodeEventType(ON_TOUCH);
-            if (memcpy_sp(&(event->touchEvent), sizeof(ArkUI_NodeTouchEvent), &(origin->touchEvent),
-                    sizeof(ArkUITouchEvent)) != 0) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
-                return false;
-            }
-            switch (origin->touchEvent.action) {
-                case ACTION_DOWN:
-                    event->touchEvent.action = NODE_ACTION_DOWN;
-                    break;
-                case ACTION_UP:
-                    event->touchEvent.action = NODE_ACTION_UP;
-                    break;
-                case ACTION_MOVE:
-                    event->touchEvent.action = NODE_ACTION_MOVE;
-                    break;
-                case ACTION_CANCEL:
-                    event->touchEvent.action = NODE_ACTION_CANCEL;
-                    break;
-                default:
-                    event->touchEvent.action = NODE_ACTION_CANCEL;
-            }
+            ConvertToTouchEvent(origin->touchEvent, event->touchEvent);
             return true;
         default:
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "failed to convert origin event data");
@@ -276,7 +457,7 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
     return true;
 }
 
-bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin)
+bool ConvertEventResult(ArkUI_CompatibleNodeEvent* event, ArkUINodeEvent* origin)
 {
     if (IsTouchEvent(event->kind)) {
         origin->touchEvent.preventDefault = event->touchEvent.preventDefault;
@@ -293,18 +474,77 @@ bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin)
     return true;
 }
 
-void HandleInnerEvent(ArkUINodeEvent* innerEvent)
+}; // namespace OHOS::Ace::NodeModel
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+ArkUI_NodeEventType OH_ArkUI_NodeEvent_GetEventType(ArkUI_NodeEvent* event)
 {
-    switch (innerEvent->kind) {
-        case ArkUIEventCategory::GESTURE_ASYNC_EVENT: {
-            // handle gesture event.
-            OHOS::Ace::GestureModel::HandleGestureEvent(innerEvent);
-            break;
-        }
-        default: {
-            OHOS::Ace::NodeModel::HandleInnerNodeEvent(innerEvent);
-        }
+    if (!event || event->kind < 0) {
+        return ArkUI_NodeEventType::NODE_TOUCH_EVENT;
     }
+    return static_cast<ArkUI_NodeEventType>(event->kind);
 }
 
-}; // namespace OHOS::Ace::NodeModel
+int32_t OH_ArkUI_NodeEvent_GetTargetId(ArkUI_NodeEvent* event)
+{
+    if (!event) {
+        return -1;
+    }
+    return event->eventId;
+}
+
+ArkUI_NodeHandle OH_ArkUI_NodeEvent_GetNodeHandle(ArkUI_NodeEvent* event)
+{
+    if (!event) {
+        return nullptr;
+    }
+    return reinterpret_cast<ArkUI_NodeHandle>(event->node);
+}
+
+ArkUI_UIInputEvent* OH_ArkUI_NodeEvent_GetInputEvent(ArkUI_NodeEvent* event)
+{
+    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT)) {
+        return nullptr;
+    }
+    return reinterpret_cast<ArkUI_UIInputEvent*>(event->origin);
+}
+
+ArkUI_NodeComponentEvent* OH_ArkUI_NodeEvent_GetNodeComponentEvent(ArkUI_NodeEvent* event)
+{
+    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
+        return nullptr;
+    }
+    const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
+    if (!originNodeEvent) {
+        return nullptr;
+    }
+    return const_cast<ArkUI_NodeComponentEvent*>(
+        reinterpret_cast<const ArkUI_NodeComponentEvent*>(&(originNodeEvent->componentAsyncEvent)));
+}
+
+ArkUI_StringAsyncEvent* OH_ArkUI_NodeEvent_GetStringAsyncEvent(ArkUI_NodeEvent* event)
+{
+    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_STRING_ASYNC_EVENT)) {
+        return nullptr;
+    }
+    const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
+    if (!originNodeEvent) {
+        return nullptr;
+    }
+    return const_cast<ArkUI_StringAsyncEvent*>(
+        reinterpret_cast<const ArkUI_StringAsyncEvent*>(&(originNodeEvent->textInputEvent)));
+}
+
+void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event)
+{
+    if (!event) {
+        return nullptr;
+    }
+    return event->userData;
+}
+#ifdef __cplusplus
+};
+#endif

@@ -49,6 +49,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     selectColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.selectColor));
     blockColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.blockColor));
     trackBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.trackThickness * HALF);
+    selectedBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(trackBorderRadius_->Get());
     stepSize_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1);
     blockBorderWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0);
     stepColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT);
@@ -59,7 +60,11 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     sliderMode_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::SliderMode::OUTSET));
     directionAxis_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(Axis::HORIZONTAL));
     isShowStep_ = AceType::MakeRefPtr<PropertyBool>(false);
+    sliderInteractionMode_ =
+        AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK));
+    minResponse_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     blockType_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
+    useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     // others
     UpdateData(parameters);
     UpdateThemeColor();
@@ -76,6 +81,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(blockColor_);
     AttachProperty(boardColor_);
     AttachProperty(trackBorderRadius_);
+    AttachProperty(selectedBorderRadius_);
     AttachProperty(stepSize_);
     AttachProperty(blockBorderWidth_);
     AttachProperty(stepColor_);
@@ -85,6 +91,8 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(sliderMode_);
     AttachProperty(directionAxis_);
     AttachProperty(isShowStep_);
+    AttachProperty(sliderInteractionMode_);
+    AttachProperty(minResponse_);
     AttachProperty(blockType_);
 
     InitializeShapeProperty();
@@ -122,12 +130,30 @@ void SliderContentModifier::InitializeShapeProperty()
 
 void SliderContentModifier::onDraw(DrawingContext& context)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     DrawBackground(context);
     DrawStep(context);
     DrawSelect(context);
     DrawShadow(context);
     DrawBlock(context);
     DrawHoverOrPress(context);
+}
+
+void SetStartEndPointLocation(Axis& direction, RSRect& trackRect, RSPoint& startPoint, RSPoint& endPoint)
+{
+    if (direction == Axis::HORIZONTAL) {
+        startPoint.SetX(trackRect.GetLeft());
+        startPoint.SetY(trackRect.GetTop());
+        endPoint.SetX(trackRect.GetRight());
+        endPoint.SetY(trackRect.GetTop());
+    } else {
+        startPoint.SetX(trackRect.GetLeft());
+        startPoint.SetY(trackRect.GetTop());
+        endPoint.SetX(trackRect.GetLeft());
+        endPoint.SetY(trackRect.GetBottom());
+    }
 }
 
 void SliderContentModifier::DrawBackground(DrawingContext& context)
@@ -142,14 +168,10 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
     RSRect trackRect = GetTrackRect();
-
+    auto direction = static_cast<Axis>(directionAxis_->Get());
     RSPoint startPoint;
-    startPoint.SetX(trackRect.GetLeft());
-    startPoint.SetY(trackRect.GetTop());
     RSPoint endPoint;
-    endPoint.SetX(trackRect.GetRight());
-    endPoint.SetY(trackRect.GetBottom());
-
+    SetStartEndPointLocation(direction, trackRect, startPoint, endPoint);
     RSBrush brush;
     brush.SetAntiAlias(true);
     if (reverse_) {
@@ -232,7 +254,7 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
     auto& canvas = context.canvas;
     if (!NearEqual(selectStart_->Get().GetX(), selectEnd_->Get().GetX(), HALF) ||
         !NearEqual(selectStart_->Get().GetY(), selectEnd_->Get().GetY(), HALF)) {
-        auto trackBorderRadius = trackBorderRadius_->Get();
+        auto selectedBorderRadius = selectedBorderRadius_->Get();
         auto direction = static_cast<Axis>(directionAxis_->Get());
         auto blockCenter = GetBlockCenter();
         auto trackThickness = trackThickness_->Get();
@@ -240,7 +262,7 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
         auto rect = GetTrackRect();
         auto insetOffset = .0f;
         if (sliderMode == SliderModelNG::SliderMode::INSET) {
-            insetOffset = std::max(trackBorderRadius, trackThickness * HALF);
+            insetOffset = std::max(selectedBorderRadius, trackThickness * HALF);
         }
         if (!reverse_) {
             if (direction == Axis::HORIZONTAL) {
@@ -261,7 +283,7 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
         brush.SetColor(ToRSColor(selectColor_->Get()));
 
         canvas.AttachBrush(brush);
-        canvas.DrawRoundRect(RSRoundRect(rect, trackBorderRadius, trackBorderRadius));
+        canvas.DrawRoundRect(RSRoundRect(rect, selectedBorderRadius, selectedBorderRadius));
         canvas.DetachBrush();
     }
     canvas.Restore();
@@ -300,7 +322,9 @@ void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
 
 void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
 {
-    if (static_cast<SliderModelNG::BlockStyleType>(blockType_->Get()) != SliderModelNG::BlockStyleType::DEFAULT) {
+    auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
+    if (static_cast<SliderModelNG::BlockStyleType>(blockType_->Get()) != SliderModelNG::BlockStyleType::DEFAULT ||
+        sliderMode == SliderModelNG::SliderMode::NONE) {
         return;
     }
 
@@ -321,7 +345,9 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
 
 void SliderContentModifier::DrawShadow(DrawingContext& context)
 {
-    if (static_cast<SliderModelNG::BlockStyleType>(blockType_->Get()) != SliderModelNG::BlockStyleType::DEFAULT) {
+    auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
+    if (static_cast<SliderModelNG::BlockStyleType>(blockType_->Get()) != SliderModelNG::BlockStyleType::DEFAULT ||
+        sliderMode == SliderModelNG::SliderMode::NONE) {
         return;
     }
 
@@ -482,9 +508,12 @@ RSRect SliderContentModifier::GetTrackRect()
         if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
             rect.SetLeft(backStart.GetX() - stepSize * HALF);
             rect.SetRight(backEnd.GetX() + stepSize * HALF);
-        } else {
+        } else if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::INSET)) {
             rect.SetLeft(backStart.GetX() - trackThickness * HALF);
             rect.SetRight(backEnd.GetX() + trackThickness * HALF);
+        } else {
+            rect.SetLeft(backStart.GetX());
+            rect.SetRight(backEnd.GetX());
         }
         rect.SetTop(backStart.GetY() - trackThickness * HALF);
         rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
@@ -494,9 +523,12 @@ RSRect SliderContentModifier::GetTrackRect()
         if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
             rect.SetTop(backStart.GetY() - stepSize * HALF);
             rect.SetBottom(backEnd.GetY() + stepSize * HALF);
-        } else {
+        } else if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::INSET)) {
             rect.SetTop(backStart.GetY() - trackThickness * HALF);
             rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
+        } else {
+            rect.SetTop(backStart.GetY());
+            rect.SetBottom(backEnd.GetY());
         }
     }
     return rect;
@@ -504,18 +536,21 @@ RSRect SliderContentModifier::GetTrackRect()
 
 void SliderContentModifier::DrawBlock(DrawingContext& context)
 {
-    auto blockType = static_cast<SliderModelNG::BlockStyleType>(blockType_->Get());
-    if (blockType == SliderModelNG::BlockStyleType::DEFAULT) {
-        DrawDefaultBlock(context);
-    } else if (blockType == SliderModelNG::BlockStyleType::SHAPE) {
-        DrawBlockShape(context);
-    } else if (blockType == SliderModelNG::BlockStyleType::IMAGE) {
-        auto blockCenter = GetBlockCenter();
-        if (updateImageCenterX_) {
-            updateImageCenterX_(blockCenter.GetX());
-        }
-        if (updateImageCenterY_) {
-            updateImageCenterY_(blockCenter.GetY());
+    auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
+    if (sliderMode != SliderModelNG::SliderMode::NONE) {
+        auto blockType = static_cast<SliderModelNG::BlockStyleType>(blockType_->Get());
+        if (blockType == SliderModelNG::BlockStyleType::DEFAULT) {
+            DrawDefaultBlock(context);
+        } else if (blockType == SliderModelNG::BlockStyleType::SHAPE) {
+            DrawBlockShape(context);
+        } else if (blockType == SliderModelNG::BlockStyleType::IMAGE) {
+            auto blockCenter = GetBlockCenter();
+            if (updateImageCenterX_) {
+                updateImageCenterX_(blockCenter.GetX());
+            }
+            if (updateImageCenterY_) {
+                updateImageCenterY_(blockCenter.GetY());
+            }
         }
     }
 }

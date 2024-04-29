@@ -43,9 +43,16 @@ protected:
         return { std::to_string(index),
             AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<NG::Pattern>()) };
     }
+    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndexNew(int32_t index,
+        std::map<int32_t, NG::LazyForEachChild>& cachedItems,
+        std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
+    {
+        return { std::to_string(index),
+            AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<NG::Pattern>()) };
+    }
     void OnExpandChildrenOnInitialInNG() override {}
-    void NotifyDataChanged(size_t index, RefPtr<NG::UINode>& lazyForEachNode, bool isRebuild = true) override {};
-    void NotifyDataDeleted(RefPtr<NG::UINode>& lazyForEachNode, size_t index, bool removeIds) override {};
+    void NotifyDataChanged(size_t index, const RefPtr<NG::UINode>& lazyForEachNode, bool isRebuild = true) override {};
+    void NotifyDataDeleted(const RefPtr<NG::UINode>& lazyForEachNode, size_t index, bool removeIds) override {};
     void NotifyDataAdded(size_t index) override {};
     void KeepRemovedItemInCache(NG::LazyForEachChild node,
         std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) override {};

@@ -30,6 +30,11 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
     float GetDefaultHeightByType(LayoutWrapper* layoutWrapper);
+protected:
+    bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+    LayoutConstraintF BuildLayoutConstraintWithoutResponseArea(const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper);
 };
 } // namespace OHOS::Ace::NG
 

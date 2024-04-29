@@ -14,12 +14,20 @@
  */
 
 /// <reference path='./import.ts' />
+
+interface StackParam {
+  alignContent: Alignment
+}
+
 class ArkStackComponent extends ArkComponent implements StackAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+  initialize(value: Object[]): StackAttribute {
+    if (value[0] !== undefined) {
+      this.alignContent((value[0] as StackParam).alignContent);
+    }
+    return this
   }
   alignContent(value: Alignment): StackAttribute {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
@@ -48,12 +56,10 @@ class StackAlignContentModifier extends ModifierWithKey<number> {
   }
 }
 // @ts-ignore
-globalThis.Stack.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkStackComponent(nativeNode);
+globalThis.Stack.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkStackComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.StackModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

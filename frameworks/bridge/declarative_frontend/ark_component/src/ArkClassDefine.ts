@@ -246,12 +246,14 @@ class ArkForegroundBlurStyle {
   colorMode: number | undefined;
   adaptiveColor: number | undefined;
   scale: number | undefined;
+  blurOptions: BlurOptions | undefined;
 
   constructor() {
     this.blurStyle = undefined;
     this.colorMode = undefined;
     this.adaptiveColor = undefined;
     this.scale = undefined;
+    this.blurOptions = undefined;
   }
 
   isEqual(another: ArkForegroundBlurStyle): boolean {
@@ -259,7 +261,8 @@ class ArkForegroundBlurStyle {
       this.blurStyle === another.blurStyle &&
       this.colorMode === another.colorMode &&
       this.adaptiveColor === another.adaptiveColor &&
-      this.scale === another.scale
+      this.scale === another.scale &&
+      this.blurOptions === another.blurOptions
     );
   }
 }
@@ -453,12 +456,14 @@ class ArkBackgroundBlurStyle {
   colorMode: number | undefined;
   adaptiveColor: number | undefined;
   scale: number | undefined;
+  blurOptions: BlurOptions | undefined;
 
   constructor() {
     this.blurStyle = undefined;
     this.colorMode = undefined;
     this.adaptiveColor = undefined;
     this.scale = undefined;
+    this.blurOptions = undefined;
   }
 
   isEqual(another: ArkBackgroundBlurStyle): boolean {
@@ -466,7 +471,8 @@ class ArkBackgroundBlurStyle {
       this.blurStyle === another.blurStyle &&
       this.colorMode === another.colorMode &&
       this.adaptiveColor === another.adaptiveColor &&
-      this.scale === another.scale
+      this.scale === another.scale &&
+      this.blurOptions === another.blurOptions
     );
   }
 }
@@ -789,6 +795,18 @@ class ArkSearchButton {
       (this.fontColor === another.fontColor);
   }
 }
+
+class ArkSearchInputFilter {
+  value: ResourceStr | undefined;
+  error?: (value: string) => void;
+  constructor() {
+    this.value = undefined;
+    this.error = undefined;
+  }
+  isEqual(another: ArkSearchInputFilter): boolean {
+    return (this.value === another.value);
+  }
+}
 class ArkImageFrameInfoToArray {
   arrSrc: Array<string> | undefined;
   arrWidth: Array<number | string> | undefined;
@@ -842,6 +860,16 @@ class ArkKeyBoardShortCut {
   isEqual(another: ArkKeyBoardShortCut): boolean {
     return (this.value === another.value) && (this.keys === another.keys) &&
       (this.action === another.action);
+  }
+}
+
+class ArkCustomProperty {
+  key: string;
+  value: object;
+
+  constructor() {
+    this.key = undefined;
+    this.value = undefined;
   }
 }
 
@@ -1131,5 +1159,101 @@ class ArkGeometryTransition {
 
   isEqual(another: ArkGeometryTransition): boolean {
     return (this.id === another.id && this.options === another.options);
+  }
+}
+
+class ArkTextBackGroundStyle {
+  color: ResourceColor;
+  radius: Dimension | BorderRadiuses;
+  constructor() {
+    this.color = undefined;
+    this.radius = new ArkBorderRadius();
+  }
+  isEqual(another) {
+    return (this.color === another.color &&
+      this.radius.isEqual(another.radius));
+  }
+  checkObjectDiff(another) {
+    return !this.isEqual(another);
+  }
+  convertTextBackGroundStyleOptions(value) {
+    if (isUndefined(value)) {
+      return false;
+    }
+    if (!isUndefined(value?.color) && value?.color !== null) {
+      if (isNumber(value.color) || isString(value.color) || isResource(value.color)) {
+        this.color = value.color;
+      }
+    }
+
+    if (!isUndefined(value?.radius) && value?.radius !== null) {
+      if (isNumber(value.radius) || isString(value.radius) || isResource(value.radius)) {
+        this.radius.topLeft = value.radius;
+        this.radius.topRight = value.radius;
+        this.radius.bottomLeft = value.radius;
+        this.radius.bottomRight = value.radius;
+      }
+      else {
+        this.radius.topLeft = (value.radius as BorderRadiuses)?.topLeft;
+        this.radius.topRight = (value.radius as BorderRadiuses)?.topRight;
+        this.radius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft;
+        this.radius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight;
+      }
+    }
+    return true;
+  }
+}
+
+class ArkWaterFlowEdgeEffect {
+  value: EdgeEffect;
+  options?: EdgeEffectOptions | undefined;
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkWaterFlowEdgeEffect): boolean {
+    return (this.value === another.value) &&
+      (this.options === another.options);
+  }
+}
+
+class ArkPositionType {
+  useEdges: boolean;
+  x: Length | undefined;
+  y: Length | undefined;
+  top: Dimension | undefined;
+  left: Dimension | undefined;
+  bottom: Dimension | undefined;
+  right: Dimension | undefined;
+
+  constructor() {
+    this.useEdges = false;
+    this.x = undefined;
+    this.y = undefined;
+    this.top = undefined;
+    this.left = undefined;
+    this.right = undefined;
+    this.bottom = undefined;
+  }
+
+  parsePositionType(value: Position | Edges) {
+    if (isUndefined(value)) {
+      return false;
+    }
+    if (('x' in value) || ('y' in value)) {
+      this.useEdges = false;
+      this.x = value.x;
+      this.y = value.y;
+      return true;
+    } else if (('top' in value) || ('left' in value) || ('bottom' in value) || ('right' in value)) {
+      this.useEdges = true;
+      this.top = value.top;
+      this.left = value.left;
+      this.bottom = value.bottom;
+      this.right = value.right;
+      return true;
+    } else {
+      return false;
+    }
   }
 }

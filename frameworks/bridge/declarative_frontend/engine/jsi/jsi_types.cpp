@@ -339,6 +339,10 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
     auto vm = GetEcmaVM();
     LocalScope scope(vm);
     panda::TryCatch trycatch(vm);
+    bool traceEnabled = false;
+    if (SystemProperties::GetDebugEnabled()) {
+        traceEnabled = AceTraceBeginWithArgs("ExecuteJS[%s]", GetHandle()->GetName(vm)->ToString().c_str());
+    }
     std::vector<panda::Local<panda::JSValueRef>> arguments;
     for (int i = 0; i < argc; ++i) {
         arguments.emplace_back(argv[i].Get().GetLocalHandle());
@@ -350,6 +354,9 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
     if (result.IsEmpty() || trycatch.HasCaught()) {
         runtime->HandleUncaughtException(trycatch);
         result = JSValueRef::Undefined(vm);
+    }
+    if (traceEnabled) {
+        AceTraceEnd();
     }
     return JsiRef<JsiValue>::Make(result);
 }
@@ -413,6 +420,36 @@ void JsiCallbackInfo::ReturnSelf() const
 {
     panda::CopyableGlobal<panda::JSValueRef> thisObj(info_->GetVM(), info_->GetThisRef());
     retVal_ = thisObj;
+}
+
+bool JsiCallbackInfo::GetBooleanArg(size_t index, bool& value) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsBoolean()) {
+        return false;
+    }
+    value = arg->ToBoolean(info_->GetVM())->Value();
+    return true;
+}
+
+bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsNumber()) {
+        return false;
+    }
+    value = arg->ToNumber(info_->GetVM())->Value();
+    return true;
+}
+
+bool JsiCallbackInfo::GetStringArg(size_t index, std::string& value) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsString()) {
+        return false;
+    }
+    value = arg->ToString(info_->GetVM())->ToString();
+    return true;
 }
 
 // -----------------------

@@ -15,17 +15,35 @@
 
 #include "core/components_ng/pattern/text_clock/text_clock_layout_algorithm.h"
 
+#include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 void TextClockLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<TextClockPattern>();
+    CHECK_NULL_VOID(pattern);
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto childConstraint = layoutProperty->CreateChildConstraint();
 
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(textWrapper);
-    textWrapper->Measure(childConstraint);
+    if (pattern->UseContentModifier()) {
+        auto childList = layoutWrapper->GetAllChildrenWithBuild();
+        for (const auto& child : childList) {
+            if (child->GetHostNode()->GetId() != pattern->GetBuilderId()) {
+                child->GetGeometryNode()->SetFrameSize(SizeF());
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+                child->Measure(layoutConstraint);
+            }
+        }
+    } else {
+        auto childConstraint = layoutProperty->CreateChildConstraint();
+        textWrapper->Measure(childConstraint);
+    }
 
     auto textSize = textWrapper->GetGeometryNode()->GetFrameSize();
     OptionalSizeF textClockFrameSize = { textSize.Width(), textSize.Height() };

@@ -126,11 +126,11 @@ SelectionInfo RichEditorController::GetSelectionSpansInfo()
 }
 
 void RichEditorController::SetSelection(
-    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
 {
     auto richEditorPattern = pattern_.Upgrade();
     if (richEditorPattern) {
-        richEditorPattern->SetSelection(selectionStart, selectionEnd, options);
+        richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
     }
 }
 
@@ -162,5 +162,20 @@ std::vector<ParagraphInfo> RichEditorController::GetParagraphsInfo(int32_t start
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, {});
     return pattern->GetParagraphInfo(start, end);
+}
+
+bool RichEditorController::IsEditing()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, false);
+    return richEditorPattern->IsEditing();
+}
+
+void RichEditorController::StopEditing()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    if (richEditorPattern) {
+        richEditorPattern->StopEditing();
+    }
 }
 } // namespace OHOS::Ace::NG

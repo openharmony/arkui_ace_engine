@@ -38,9 +38,10 @@ public:
     void SetTextDecorationColor(const Color& value) override;
     void SetTextCase(TextCase value) override;
     void SetLetterSpacing(const Dimension& value) override;
+    void SetBaselineOffset(const Dimension& baselineOffset) override;
     void SetLineHeight(const Dimension& value) override;
     void SetTextShadow(const std::vector<Shadow>& value) override {};
-    void SetOnClick(std::function<void(const BaseEventInfo*)>&& click) override;
+    void SetOnClick(std::function<void(BaseEventInfo*)>&& click) override;
     void ClearOnClick() override {};
 
 private:

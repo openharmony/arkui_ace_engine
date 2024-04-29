@@ -59,7 +59,6 @@ constexpr const char* TITLE_MAIN_WITH_SUB = "MainWithSub";
 constexpr Dimension SUBTITLE_FONT_SIZE = 14.0_vp; // ohos_id_text_size_sub_title3
 constexpr Dimension SUBTITLE_HEIGHT = 26.0_vp;
 constexpr Dimension MIN_ADAPT_SUBTITLE_FONT_SIZE = 10.0_vp;
-constexpr Color SUBTITLE_COLOR = Color(0x99000000); // ohos_id_alpha_content_secondary
 // back button
 constexpr Dimension BACK_BUTTON_SIZE = 48.0_vp;
 constexpr Dimension BACK_BUTTON_ICON_SIZE = 24.0_vp;
@@ -95,6 +94,7 @@ constexpr Dimension NAV_HORIZONTAL_MARGIN_M = 8.0_vp;  // ohos_id_elements_margi
 constexpr Dimension MENU_ITEM_PADDING = 24.0_vp;
 constexpr Dimension MENU_ITEM_SIZE = 48.0_vp;
 constexpr Dimension BUTTON_PADDING = 12.0_vp;
+constexpr Dimension MENU_BUTTON_PADDING = 8.0_vp;
 constexpr Dimension BUTTON_RADIUS_SIZE = 5.0_vp;
 constexpr Dimension MAX_OVER_DRAG_OFFSET = 180.0_vp;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
@@ -192,9 +192,13 @@ enum class NavigationOperation {
 };
 
 enum NavDestinationLifecycle {
+    ON_WILL_APPEAR,
     ON_APPEAR,
+    ON_WILL_SHOW,
     ON_SHOW,
+    ON_WILL_HIDE,
     ON_HIDE,
+    ON_WILL_DISAPPEAR,
     ON_DISAPPEAR
 };
 

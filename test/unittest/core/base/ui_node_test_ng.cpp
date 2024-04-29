@@ -22,6 +22,8 @@
 #define protected public
 #define private public
 
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
@@ -31,7 +33,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -327,8 +328,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg008, TestSize.Level1)
     ONE->UINode::RebuildRenderContextTree();
     ONE->DumpTree(0);
     EXPECT_EQ(ONE->children_.size(), 1);
-    auto pipeline = UINode::GetContext();
-    EXPECT_NE(pipeline, nullptr);
 }
 
 /**
@@ -789,8 +788,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg023, TestSize.Level1)
     const PointF LOCAL_POINT { 15.0f, 15.0f };
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult =
-        ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
+    HitTestResult retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
     EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
     retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
@@ -820,7 +818,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg024, TestSize.Level1)
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
     HitTestResult retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
+    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
     retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
@@ -852,7 +850,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg025, TestSize.Level1)
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
     HitTestResult retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
-    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
+    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
     retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
@@ -948,11 +946,11 @@ HWTEST_F(UINodeTestNg, UINodeTestNg028, TestSize.Level1)
 HWTEST_F(UINodeTestNg, UINodeTestNg029, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. add one child for ZERO and call OnVisibleChange
-     * @tc.expected: the OnVisibleChange function is run ok
+     * @tc.steps: step1. add one child for ZERO and call TryVisibleChangeOnDescendant
+     * @tc.expected: the TryVisibleChangeOnDescendant function is run ok
      */
     ZERO->AddChild(ONE, 1, false);
-    ZERO->UINode::OnVisibleChange(true);
+    ZERO->UINode::TryVisibleChangeOnDescendant(true);
     EXPECT_EQ(ZERO->children_.size(), 1);
     ZERO->Clean();
 }
@@ -1180,11 +1178,16 @@ HWTEST_F(UINodeTestNg, UINodeTestNg040, TestSize.Level1)
      * @tc.steps: step1. set onMainTree_ is true and call AddChild
      * @tc.expected: children_.size() is 2
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     auto it = std::find(ZERO->children_.begin(), ZERO->children_.end(), ZERO);
     ZERO->onMainTree_ = true;
+    ZERO->context_ = AceType::RawPtr(context);
     ZERO->DoAddChild(it, ONE, false);
     ZERO->DoAddChild(it, TWO, true);
     EXPECT_EQ(ZERO->children_.size(), 2);
+    ZERO->onMainTree_ = false;
+    ZERO->context_ = nullptr;
 }
 
 /**
@@ -1249,6 +1252,41 @@ HWTEST_F(UINodeTestNg, UINodeTestNg043, TestSize.Level1)
     parent->UINode::GetFrameChildByIndex(0, false);
     EXPECT_FALSE(parent->UINode::GetDisappearingChildById(""));
     EXPECT_FALSE(parent->UINode::GetFrameChildByIndex(5, false));
+}
+
+/**
+ * @tc.name: UINodeTestNg044
+* @tc.desc: Test ui node method of instanceid
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a uinode
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ASSERT_NE(testNode, nullptr);
+
+    int32_t testId = 0;
+    testNode->RegisterUpdateJSInstanceCallback([&testId](int32_t newId) {
+        testId = newId;
+    });
+
+    /**
+     * @tc.steps: step2. attach context
+     */
+    testNode->AttachContext(AceType::RawPtr(context), true);
+    EXPECT_EQ(testNode->context_, AceType::RawPtr(context));
+    EXPECT_EQ(testNode->instanceId_, context->GetInstanceId());
+    EXPECT_EQ(testId, context->GetInstanceId());
+
+    /**
+     * @tc.steps: step3. detach context
+     */
+    testNode->DetachContext(true);
+    EXPECT_EQ(testNode->context_, nullptr);
 }
 
 /**

@@ -22,6 +22,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
@@ -42,6 +43,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
 
+namespace OHOS::Ace {
+class ImageAnalyzerManager;
+}
 namespace OHOS::Ace::NG {
 class XComponentExtSurfaceCallbackClient;
 class XComponentPattern : public Pattern {
@@ -126,7 +130,6 @@ public:
         }
     }
 
-    void OnPaint();
     void NativeXComponentOffset(double x, double y);
     void NativeXComponentChange(float width, float height);
     void NativeXComponentDestroy();
@@ -137,7 +140,7 @@ public:
 
     void InitNativeWindow(float textureWidth, float textureHeight);
     void XComponentSizeInit();
-    void XComponentSizeChange(float textureWidth, float textureHeight);
+    void XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent);
 
     void* GetNativeWindow()
     {
@@ -157,6 +160,11 @@ public:
     const std::string& GetLibraryName() const
     {
         return libraryname_;
+    }
+
+    void SetLibraryName(const std::string& libraryname)
+    {
+        libraryname_ = libraryname;
     }
 
     const std::optional<std::string>& GetSoPath() const
@@ -189,11 +197,6 @@ public:
         return surfaceSize_;
     }
 
-    const OffsetF& GetGlobalPosition() const
-    {
-        return globalPosition_;
-    }
-
     const OffsetF& GetLocalPosition() const
     {
         return localPosition_;
@@ -204,6 +207,13 @@ public:
     const RefPtr<RenderContext>& GetRenderContextForSurface()
     {
         return renderContextForSurface_;
+    }
+
+    void SetSurfaceRotation(bool isLock);
+
+    bool GetSurfaceRotation()
+    {
+        return isSurfaceLock_;
     }
 
     void SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext);
@@ -267,12 +277,17 @@ public:
     void SetIdealSurfaceOffsetX(float offsetX);
     void SetIdealSurfaceOffsetY(float offsetY);
     void ClearIdealSurfaceOffset(bool isXAxis);
-    void UpdateSurfaceBounds(bool needForceRender = false);
+    void UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange = false);
+    void EnableAnalyzer(bool enable);
+    void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
+    void StopImageAnalyzer();
+    RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
+    float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
 
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnAreaChangedInner() override;
     void OnWindowHide() override;
@@ -280,6 +295,8 @@ private:
     void NativeSurfaceHide();
     void NativeSurfaceShow();
     void OnModifyDone() override;
+    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
 
     void InitNativeNodeCallbacks();
     void InitEvent();
@@ -306,12 +323,21 @@ private:
     void HandleUnregisterOnFrameEvent();
     bool ExportTextureAvailable();
     void AddAfterLayoutTaskForExportTexture();
+    void AddAfterLayoutTaskForRotation();
     bool DoTextureExport();
     bool StopTextureExport();
     void InitializeRenderContext();
     void SetSurfaceNodeToGraphic();
+    bool IsSupportImageAnalyzerFeature();
+    void CreateAnalyzerOverlay();
+    void DestroyAnalyzerOverlay();
+    void UpdateAnalyzerOverlay();
+    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void ReleaseImageAnalyzer();
+    void SetRotation();
 
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
+#ifdef RENDER_EXTRACT_SUPPORTED
+    RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
     void RegisterRenderContextCallBack();
     void RequestFocus();
 #endif
@@ -353,11 +379,17 @@ private:
     std::optional<float> selfIdealSurfaceHeight_;
     std::optional<float> selfIdealSurfaceOffsetX_;
     std::optional<float> selfIdealSurfaceOffsetY_;
+    std::string surfaceId_;
+
+    bool isSurfaceLock_ = false;
 
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     uint64_t exportTextureSurfaceId_ = 0U;
     bool hasReleasedSurface_ = false;
+    std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
+    bool isEnableAnalyzer_ = false;
+    Rotation rotation_ = Rotation::ROTATION_0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif

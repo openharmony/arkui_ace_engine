@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -34,18 +35,18 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     auto isInlineStyle = pattern->IsNormalInlineState();
 
-    auto isPasswordType = pattern->IsInPasswordMode();
-    
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
     // Create paragraph.
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
-    if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
-        CreateParagraph(textStyle, pattern->GetDragContents(), textContent_,
-            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, disableTextAlign);
+    auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
+    if (textStyle.GetAdaptTextSize()) {
+        if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty,
+            BuildLayoutConstraintWithoutResponseArea(textFieldContentConstraint, layoutWrapper), layoutWrapper)) {
+            return std::nullopt;
+        }
     } else {
-        CreateParagraph(textStyle, textContent_, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
-            pattern->GetNakedCharPosition(), disableTextAlign);
+        CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
     }
 
     autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
@@ -55,7 +56,6 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         preferredHeight_ = pattern->PreferredLineHeight(true);
     }
 
-    auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     // Paragraph layout.
     if (isInlineStyle) {
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), disableTextAlign);
@@ -96,8 +96,8 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (textFieldContentConstraint.selfIdealSize.Height().has_value()) {
         frameSize.SetHeight(textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
     } else {
-        auto height = contentHeight + pattern->GetVerticalPaddingAndBorderSum() < defaultHeight
-                          ? defaultHeight
+        auto height = LessNotEqual(contentHeight, defaultHeight)
+                          ? defaultHeight + pattern->GetVerticalPaddingAndBorderSum()
                           : contentHeight + pattern->GetVerticalPaddingAndBorderSum();
         frameSize.SetHeight(height);
     }
@@ -225,13 +225,56 @@ float TextInputLayoutAlgorithm::GetDefaultHeightByType(LayoutWrapper* layoutWrap
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
+    return static_cast<float>(textFieldTheme->GetContentHeight().ConvertToPx());
+}
+
+bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    // update child position.
     auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, 0.0f);
+    CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, 0.0f);
-    if (pattern->IsShowPasswordIcon()) {
-        return static_cast<float>(textFieldTheme->GetPasswordTypeHeight().ConvertToPx());
+    CHECK_NULL_RETURN(pattern, false);
+    auto isInlineStyle = pattern->IsNormalInlineState();
+    auto isPasswordType = pattern->IsInPasswordMode();
+    auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
+
+    if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
+        CreateParagraph(textStyle, pattern->GetDragContents(), content,
+            isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, disableTextAlign);
+    } else {
+        CreateParagraph(textStyle, content, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
+            pattern->GetNakedCharPosition(), disableTextAlign);
     }
-    return static_cast<float>(textFieldTheme->GetHeight().ConvertToPx());
+    return true;
+}
+
+LayoutConstraintF TextInputLayoutAlgorithm::BuildLayoutConstraintWithoutResponseArea(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, contentConstraint);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, contentConstraint);
+
+    auto responseArea = pattern->GetResponseArea();
+    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
+    float childWidth = 0.0f;
+    if (responseArea) {
+        auto childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
+        childWidth += responseArea->Measure(layoutWrapper, childIndex).Width();
+    }
+    if (cleanNodeResponseArea) {
+        auto childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
+        childWidth += cleanNodeResponseArea->Measure(layoutWrapper, childIndex).Width();
+    }
+
+    auto newLayoutConstraint = contentConstraint;
+    newLayoutConstraint.maxSize.MinusWidth(childWidth);
+    if (newLayoutConstraint.selfIdealSize.Width()) {
+        newLayoutConstraint.selfIdealSize.SetWidth(newLayoutConstraint.selfIdealSize.Width().value() - childWidth);
+    }
+    return newLayoutConstraint;
 }
 } // namespace OHOS::Ace::NG

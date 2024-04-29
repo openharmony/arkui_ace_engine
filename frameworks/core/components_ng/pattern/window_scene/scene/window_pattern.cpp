@@ -74,6 +74,8 @@ public:
 
     void OnExtensionDied() override {}
 
+    void OnExtensionTimeout(int32_t errorCode) override {}
+
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevelVec) override {};
 
@@ -106,8 +108,9 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] id: %{public}d, state: %{public}u, name: %{public}s",
-        session_->GetPersistentId(), state, session_->GetSessionInfo().bundleName_.c_str());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "[WMSMain] id: %{public}d, state: %{public}u, name: %{public}s, in recents: %{public}d",
+        session_->GetPersistentId(), state, session_->GetSessionInfo().bundleName_.c_str(), session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         if (!HasStartingPage()) {
             return;
@@ -220,9 +223,11 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
             imageCache->ClearCacheImage(
                 ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.second, snapshotSize.first)));
             imageCache->ClearCacheImage(sourceInfo.GetKey());
+        } else {
+            snapshotNode_->GetPattern<ImagePattern>()->SetSyncLoad(true);
         }
     }
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    imageLayoutProperty->UpdateImageFit(ImageFit::COVER_TOP_LEFT);
     snapshotNode_->MarkModifyDone();
 }
 
@@ -413,11 +418,6 @@ bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
     return pointerEvent->GetButtonId() == MMI::PointerEvent::MOUSE_BUTTON_LEFT &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-}
-
-void WindowPattern::OnModifyDone()
-{
-    Pattern::OnModifyDone();
 }
 
 void WindowPattern::TransferFocusState(bool focusState)

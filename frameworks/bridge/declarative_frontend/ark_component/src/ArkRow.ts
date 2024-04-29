@@ -48,9 +48,36 @@ class RowJustifyContentlModifier extends ModifierWithKey<number> {
   }
 }
 
+class RowSpaceModifier extends ModifierWithKey<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
+  static identity:Symbol = Symbol('rowSpace');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().row.resetSpace(node);
+    }
+    else {
+      getUINativeModule().row.setSpace(node, this.value);
+    }
+  }
+  checkObjectDiff() : boolean {
+    return this.stageValue !== this.value;
+  }
+}
+interface RowParam {
+  space: string | number;
+}
+
 class ArkRowComponent extends ArkComponent implements RowAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
+  }
+  initialize(value: Object[]): RowAttribute {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, RowSpaceModifier.identity, RowSpaceModifier, (value[0] as RowParam).space);
+    }
+    return this
   }
   alignItems(value: VerticalAlign): RowAttribute {
     modifierWithKey(this._modifiersWithKeys, RowAlignItemsModifier.identity, RowAlignItemsModifier, value);
@@ -66,12 +93,10 @@ class ArkRowComponent extends ArkComponent implements RowAttribute {
 }
 
 // @ts-ignore
-globalThis.Row.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkRowComponent(nativeNode);
+globalThis.Row.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkRowComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.RowModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

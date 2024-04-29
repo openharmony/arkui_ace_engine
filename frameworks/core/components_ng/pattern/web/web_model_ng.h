@@ -170,11 +170,15 @@ public:
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) override;
     
     void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
+    void SetOpenAppLinkFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
     void SetIntelligentTrackingPreventionResultId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
             intelligentTrackingPreventionResultId) override;
     void SetTextAutosizing(bool isTextAutosizing) override;
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) override;
+    void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) override;
+    void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

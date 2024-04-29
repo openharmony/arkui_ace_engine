@@ -19,7 +19,6 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
-#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -47,6 +46,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     };
     CHECK_NULL_VOID(IsMainWindow());
     CHECK_NULL_VOID(session_);
+    initWindowMode_ = session_->GetWindowMode();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
@@ -84,6 +84,7 @@ void WindowScene::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(session_);
+    session_->SetAttachState(true, initWindowMode_);
     session_->SetUINodeId(host->GetAccessibilityId());
     auto responseRegionCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](
         const std::vector<DimensionRect>& responseRegion) {
@@ -116,7 +117,7 @@ void WindowScene::OnAttachToFrameNode()
         context->SetRSNode(surfaceNode);
         surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
-            session_->GetPersistentId(), session_->GetWindowType(), session_->GetSessionInfo().bundleName_.c_str());
+            session_->GetPersistentId(), session_->GetWindowType(), session_->GetWindowName().c_str());
         return;
     }
 
@@ -136,8 +137,21 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(0);
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain][WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
-        session_->GetPersistentId(), session_->GetWindowType(), session_->GetSessionInfo().bundleName_.c_str());
+    session_->SetAttachState(false, initWindowMode_);
+    if (IsMainWindow()) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] id: %{public}d, name: %{public}s",
+            session_->GetPersistentId(), session_->GetSessionInfo().bundleName_.c_str());
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
+            session_->GetPersistentId(), session_->GetWindowType(), session_->GetWindowName().c_str());
+    }
+}
+
+void WindowScene::OnMountToParentDone()
+{
+    if (snapshotNode_) {
+        snapshotNode_->MovePosition(-1);
+    }
 }
 
 void WindowScene::RegisterFocusCallback()
@@ -156,8 +170,7 @@ void WindowScene::RegisterFocusCallback()
             auto focusHub = host->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(true);
-        },
-            TaskExecutor::TaskType::UI);
+        }, "ArkUIWindowSceneRequestFocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
 
@@ -173,8 +186,7 @@ void WindowScene::RegisterFocusCallback()
             auto focusHub = host->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(false);
-        },
-            TaskExecutor::TaskType::UI);
+        }, "ArkUIWindowSceneLostFocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }
@@ -229,8 +241,11 @@ void WindowScene::BufferAvailableCallback()
             auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
             Rosen::RSAnimationTimingProtocol protocol;
             protocol.SetDuration(config.duration_);
-            auto curve = curveMap.count(config.curve_) ? curveMap.at(config.curve_) :
-                Rosen::RSAnimationTimingCurve::DEFAULT;
+            auto curve = Rosen::RSAnimationTimingCurve::DEFAULT;
+            auto iter = curveMap.find(config.curve_);
+            if (iter != curveMap.end()) {
+                curve = iter->second;
+            }
             Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
                 AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
                 rsNode->NotifyTransition(effect, false);
@@ -252,7 +267,7 @@ void WindowScene::BufferAvailableCallback()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneBufferAvailable", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnActivation()
@@ -300,7 +315,7 @@ void WindowScene::OnActivation()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneActivation", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnConnect()
@@ -322,6 +337,7 @@ void WindowScene::OnConnect()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         host->AddChild(self->contentNode_, 0);
+        self->contentNode_->ForceSyncGeometryNode();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] Add app window finished, id: %{public}d, name: %{public}s",
             self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());
@@ -332,7 +348,7 @@ void WindowScene::OnConnect()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneConnect", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnForeground()
@@ -348,14 +364,14 @@ void WindowScene::OnForeground()
         host->RemoveChild(self->snapshotNode_);
         self->snapshotNode_.Reset();
         self->session_->SetNeedSnapshot(true);
-        host->AddChild(self->contentNode_);
+        host->AddChild(self->contentNode_, 0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneForeground", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnDisconnect()
@@ -372,8 +388,13 @@ void WindowScene::OnDisconnect()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         if (!self->snapshotNode_ && !self->startingNode_) {
-            self->CreateSnapshotNode(snapshot);
-            host->AddChild(self->snapshotNode_);
+            if (snapshot) {
+                self->CreateSnapshotNode(snapshot);
+                host->AddChild(self->snapshotNode_);
+            } else {
+                self->CreateStartingNode();
+                host->AddChild(self->startingNode_);
+            }
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -381,6 +402,6 @@ void WindowScene::OnDisconnect()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDisconnect", TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace::NG

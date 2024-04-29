@@ -252,6 +252,60 @@ void ResetToggleHoverEffect(ArkUINodeHandle node)
     ToggleModelNG::SetHoverEffect(frameNode, OHOS::Ace::HoverEffectType::AUTO);
 }
 
+void SetTogglePointRadius(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DimensionUnit unitValue = static_cast<DimensionUnit>(unit);
+    CalcDimension switchPointRadius = CalcDimension(value, unitValue);
+    ToggleModelNG::SetPointRadius(frameNode, switchPointRadius);
+}
+
+void ResetTogglePointRadius(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::ResetPointRadius(frameNode);
+}
+
+void SetToggleUnselectedColor(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::SetUnselectedColor(frameNode, Color(unselectedColor));
+}
+
+void ResetToggleUnselectedColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    Color unselectedColor;
+    if (switchTheme) {
+        unselectedColor = switchTheme->GetInactiveColor();
+    }
+    ToggleModelNG::SetUnselectedColor(frameNode, unselectedColor);
+}
+
+void SetToggleTrackBorderRadius(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DimensionUnit unitValue = static_cast<DimensionUnit>(unit);
+    CalcDimension borderRadius = CalcDimension(value, unitValue);
+    ToggleModelNG::SetTrackBorderRadius(frameNode, borderRadius);
+}
+
+void ResetToggleTrackBorderRadius(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::ResetTrackBorderRadius(frameNode);
+}
+
 void SetToggleIsOn(ArkUINodeHandle node, ArkUI_Bool switchPointColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -271,6 +325,13 @@ ArkUI_Bool GetToggleIsOn(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return static_cast<ArkUI_Bool>(ToggleModelNG::GetSwitchIsOn(frameNode));
+}
+
+ArkUI_Uint32 GetToggleUnselectedColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return ToggleModelNG::GetUnselectedColor(frameNode).GetValue();
 }
 } // namespace
 namespace NodeModifier {
@@ -295,7 +356,14 @@ const ArkUIToggleModifier* GetToggleModifier()
         GetToggleSwitchPointColor,
         SetToggleIsOn,
         ResetToggleIsOn,
-        GetToggleIsOn
+        GetToggleIsOn,
+        SetTogglePointRadius,
+        ResetTogglePointRadius,
+        SetToggleUnselectedColor,
+        ResetToggleUnselectedColor,
+        SetToggleTrackBorderRadius,
+        ResetToggleTrackBorderRadius,
+        GetToggleUnselectedColor,
     };
 
     return &modifier;

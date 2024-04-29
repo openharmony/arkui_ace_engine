@@ -49,6 +49,24 @@ class FontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class TextForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {
+  constructor(value: ResourceColor | ColoringStrategy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textForegroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetTextForegroundColor(node);
+    } else {
+      getUINativeModule().text.setTextForegroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -312,6 +330,26 @@ class TextLetterSpacingModifier extends ModifierWithKey<number | string> {
   }
 }
 
+class TextLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetLineSpacing(node);
+    } else if (!isObject(this.value)) {
+      getUINativeModule().text.resetLineSpacing(node);
+    } else {
+      getUINativeModule().text.setLineSpacing(node, this.value.value, this.value.unit);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow }> {
   constructor(value: { overflow: TextOverflow }) {
     super(value);
@@ -428,8 +466,8 @@ class TextTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<Shado
   }
 }
 
-class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
-  constructor(value: { type: TextDecorationType; color?: ResourceColor }) {
+class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
   static identity: Symbol = Symbol('textDecoration');
@@ -437,12 +475,12 @@ class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType;
     if (reset) {
       getUINativeModule().text.resetDecoration(node);
     } else {
-      getUINativeModule().text.setDecoration(node, this.value!.type, this.value!.color);
+      getUINativeModule().text.setDecoration(node, this.value!.type, this.value!.color, this.value!.style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (isResource(this.stageValue.color) && isResource(this.value.color)) {
@@ -505,18 +543,51 @@ class TextClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class TextFontFeatureModifier extends ModifierWithKey<FontFeature> {
+  constructor(value: FontFeature) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textFontFeature');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetFontFeature(node);
+    } else {
+      getUINativeModule().text.setFontFeature(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextContentModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textContent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.setContent(node, "");
+    }
+    else {
+      getUINativeModule().text.setContent(node, this.value);
+    }
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
+  }
+  initialize(value: Object[]) {
+    modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, value[0]);
+    return this;
   }
   enableDataDetector(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
     return this;
   }
   dataDetectorConfig(config: any): this {
-    throw new Error('Method not implemented.');
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
   font(value: Font): TextAttribute {
@@ -573,12 +644,16 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMaxLinesModifier.identity, TextMaxLinesModifier, value);
     return this;
   }
-  decoration(value: { type: TextDecorationType; color?: ResourceColor }): TextAttribute {
+  decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, value);
     return this;
   }
   letterSpacing(value: number | string): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLetterSpacingModifier.identity, TextLetterSpacingModifier, value);
+    return this;
+  }
+  lineSpacing(value: LengthMetrics): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, value);
     return this;
   }
   textCase(value: TextCase): TextAttribute {
@@ -623,19 +698,25 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextEllipsisModeModifier.identity, TextEllipsisModeModifier, value);
     return this;
   }
+  fontFeature(value: FontFeature): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextFontFeatureModifier.identity, TextFontFeatureModifier, value);
+    return this;
+  }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, TextClipModifier.identity, TextClipModifier, value);
     return this;
   }
+  foregroundColor(value: ResourceColor | ColoringStrategy) {
+    modifierWithKey(
+      this._modifiersWithKeys, TextForegroundColorModifier.identity, TextForegroundColorModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
-globalThis.Text.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTextComponent(nativeNode);
+globalThis.Text.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTextComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TextModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

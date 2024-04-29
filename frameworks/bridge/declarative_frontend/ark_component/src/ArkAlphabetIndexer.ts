@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexerAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onSelected(callback: (index: number) => void): this {
     throw new Error('Method not implemented.');
@@ -117,16 +117,18 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     modifierWithKey(this._modifiersWithKeys, PopupTitleBackgroundModifier.identity, PopupTitleBackgroundModifier, value);
     return this;
   }
+  width(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, AdaptiveWidthModifier.identity, AdaptiveWidthModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
-globalThis.AlphabetIndexer.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkAlphabetIndexerComponent(nativeNode);
+globalThis.AlphabetIndexer.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkAlphabetIndexerComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.AlphabetIndexerModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };
 
 class PopupItemFontModifier extends ModifierWithKey<Font> {
@@ -495,6 +497,21 @@ class PopupTitleBackgroundModifier extends ModifierWithKey<ResourceColor> {
       getUINativeModule().alphabetIndexer.resetPopupTitleBackground(node);
     } else {
       getUINativeModule().alphabetIndexer.setPopupTitleBackground(node, this.value);
+    }
+  }
+}
+
+class AdaptiveWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('adaptiveWidth');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetAdaptiveWidth(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setAdaptiveWidth(node, this.value);
     }
   }
 }

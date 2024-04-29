@@ -137,6 +137,11 @@ public:
     {
         return nullptr;
     }
+
+    std::shared_ptr<PixelMap>* GetPixelMap()
+    {
+        return nullptr;
+    }
 };
 } // namespace Media
 } // namespace OHOS

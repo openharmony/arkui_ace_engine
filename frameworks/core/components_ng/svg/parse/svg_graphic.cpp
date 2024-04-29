@@ -13,15 +13,41 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/svg/parse/svg_graphic.h"
+#include "core/components_ng/svg/parse/svg_graphic.h"
 
 #include "include/core/SkScalar.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 
+#include "core/components/declaration/svg/svg_declaration.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
+void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
+{
+#ifndef USE_ROSEN_DRAWING
+    fillPaint_.reset();
+    strokePaint_.reset();
+#else
+    fillBrush_.Reset();
+    strokePen_.Reset();
+#endif
+    path_ = AsPath(layout); // asPath override by graphic tag
+    UpdateGradient(layout);
+    if (UpdateFillStyle(color)) {
+        OnGraphicFill();
+    }
+    if (UpdateStrokeStyle()) {
+        OnGraphicStroke();
+    }
+    if (!fillState_.GetHref().empty()) {
+        auto svgContext = svgContext_.Upgrade();
+        auto refSvgNode = svgContext->GetSvgNodeById(fillState_.GetHref());
+        CHECK_NULL_VOID(refSvgNode);
+        refSvgNode->Draw(canvas, layout, color);
+    }
+}
+
 void SvgGraphic::UpdateGradient(const Size& viewPort)
 {
     fillState_ = declaration_->GetFillState();
@@ -170,7 +196,8 @@ void SvgGraphic::SetGradientStyle(double opacity)
 bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
 {
     const auto& strokeState = declaration_->GetStrokeState();
-    if (strokeState.GetColor() == Color::TRANSPARENT) {
+    auto colorFilter = GetColorFilter();
+    if (!colorFilter.has_value() && strokeState.GetColor() == Color::TRANSPARENT) {
         return false;
     }
     if (!GreatNotEqual(strokeState.GetLineWidth().Value(), 0.0)) {
@@ -217,6 +244,10 @@ bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
     strokePen_.SetWidth(static_cast<RSScalar>(strokeState.GetLineWidth().Value()));
     strokePen_.SetMiterLimit(static_cast<RSScalar>(strokeState.GetMiterLimit()));
     strokePen_.SetAntiAlias(antiAlias);
+
+    auto filter = strokePen_.GetFilter();
+    UpdateColorFilter(filter);
+    strokePen_.SetFilter(filter);
 #endif
     UpdateLineDash();
     return true;
@@ -244,4 +275,26 @@ void SvgGraphic::UpdateLineDash()
     }
 }
 
+void SvgGraphic::UpdateColorFilter(RSFilter& filter)
+{
+    auto colorFilter = GetColorFilter();
+    if (!colorFilter.has_value()) {
+        return;
+    }
+    if (colorFilter.value().colorFilterMatrix_) {
+        RSColorMatrix colorMatrix;
+        colorMatrix.SetArray(colorFilter.value().colorFilterMatrix_->data());
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+        return;
+    }
+    if (!colorFilter.value().colorFilterDrawing_) {
+        return;
+    }
+    auto colorFilterSptrAddr = static_cast<std::shared_ptr<RSColorFilter>*>(
+        colorFilter.value().colorFilterDrawing_->GetDrawingColorFilterSptrAddr());
+    if (!colorFilterSptrAddr || !(*colorFilterSptrAddr)) {
+        return;
+    }
+    filter.SetColorFilter(*colorFilterSptrAddr);
+}
 } // namespace OHOS::Ace::NG

@@ -69,6 +69,8 @@ constexpr char DENSITY_UPDATE[] = "densityUpdate";
 constexpr char LAYOUT_DONE[] = "didLayout";
 constexpr char DRAW_COMMAND_SEND[] = "willDraw";
 constexpr char NAVDESTINATION_SWITCH[] = "navDestinationSwitch";
+constexpr char WILLCLICK_UPDATE[] = "willClick";
+constexpr char DIDCLICK_UPDATE[] = "didClick";
 
 bool IsUIAbilityContext(napi_env env, napi_value context)
 {
@@ -312,6 +314,8 @@ ObserverProcess::ObserverProcess()
         { LAYOUT_DONE, &ObserverProcess::ProcessLayoutDoneRegister },
         { DRAW_COMMAND_SEND, &ObserverProcess::ProcessDrawCommandSendRegister },
         { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchRegister },
+        { WILLCLICK_UPDATE, &ObserverProcess::ProcessWillClickRegister },
+        { DIDCLICK_UPDATE, &ObserverProcess::ProcessDidClickRegister },
     };
     unregisterProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
@@ -321,6 +325,8 @@ ObserverProcess::ObserverProcess()
         { LAYOUT_DONE, &ObserverProcess::ProcessLayoutDoneUnRegister },
         { DRAW_COMMAND_SEND, &ObserverProcess::ProcessDrawCommandSendUnRegister},
         { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchUnRegister },
+        { WILLCLICK_UPDATE, &ObserverProcess::ProcessWillClickUnRegister },
+        { DIDCLICK_UPDATE, &ObserverProcess::ProcessDidClickUnRegister },
     };
 }
 
@@ -738,6 +744,140 @@ napi_value ObserverProcess::ProcessNavDestinationSwitchUnRegister(napi_env env, 
     return nullptr;
 }
 
+napi_value ObserverProcess::ProcessWillClickRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+        UIObserver::RegisterWillClickCallback(0, listener);
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        auto context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::RegisterWillClickCallback(env, context, listener);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::RegisterWillClickCallback(uiContextInstanceId, listener);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessWillClickUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_ONE) {
+        UIObserver::UnRegisterWillClickCallback(0, nullptr);
+    }
+
+    if (argc == PARAM_SIZE_TWO) {
+        if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+            UIObserver::UnRegisterWillClickCallback(0, argv[PARAM_INDEX_ONE]);
+        } else if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+            napi_value context = argv[PARAM_INDEX_ONE];
+            if (!context) {
+                return nullptr;
+            }
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterWillClickCallback(env, context, nullptr);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterWillClickCallback(uiContextInstanceId, nullptr);
+            }
+        }
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        napi_value context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterWillClickCallback(env, context, argv[PARAM_INDEX_TWO]);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterWillClickCallback(uiContextInstanceId, argv[PARAM_INDEX_TWO]);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessDidClickRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+        UIObserver::RegisterDidClickCallback(0, listener);
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        auto context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::RegisterDidClickCallback(env, context, listener);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::RegisterDidClickCallback(uiContextInstanceId, listener);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessDidClickUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_ONE) {
+        UIObserver::UnRegisterDidClickCallback(0, nullptr);
+    }
+
+    if (argc == PARAM_SIZE_TWO) {
+        if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+            UIObserver::UnRegisterDidClickCallback(0, argv[PARAM_INDEX_ONE]);
+        } else if (MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+            napi_value context = argv[PARAM_INDEX_ONE];
+            if (!context) {
+                return nullptr;
+            }
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterDidClickCallback(env, context, nullptr);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterDidClickCallback(uiContextInstanceId, nullptr);
+            }
+        }
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
+        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        napi_value context = argv[PARAM_INDEX_ONE];
+        if (context) {
+            if (IsUIAbilityContext(env, context)) {
+                UIObserver::UnRegisterDidClickCallback(env, context, argv[PARAM_INDEX_TWO]);
+            } else {
+                auto uiContextInstanceId = GetUIContextInstanceId(env, context);
+                UIObserver::UnRegisterDidClickCallback(uiContextInstanceId, argv[PARAM_INDEX_TWO]);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 napi_value ObserverOn(napi_env env, napi_callback_info info)
 {
     return ObserverProcess::GetInstance().ProcessRegister(env, info);
@@ -746,6 +886,36 @@ napi_value ObserverOn(napi_env env, napi_callback_info info)
 napi_value ObserverOff(napi_env env, napi_callback_info info)
 {
     return ObserverProcess::GetInstance().ProcessUnRegister(env, info);
+}
+
+napi_value AddToScrollEventType(napi_env env)
+{
+    napi_value scrollEventType = nullptr;
+    napi_value prop = nullptr;
+    napi_create_object(env, &scrollEventType);
+    napi_create_uint32(env, SCROLL_START, &prop);
+    napi_set_named_property(env, scrollEventType, "SCROLL_START", prop);
+    napi_create_uint32(env, SCROLL_STOP, &prop);
+    napi_set_named_property(env, scrollEventType, "SCROLL_STOP", prop);
+    return scrollEventType;
+}
+
+napi_value AddToRouterPageState(napi_env env)
+{
+    napi_value routerPageState = nullptr;
+    napi_value prop = nullptr;
+    napi_create_object(env, &routerPageState);
+    napi_create_uint32(env, ABOUT_TO_APPEAR, &prop);
+    napi_set_named_property(env, routerPageState, "ABOUT_TO_APPEAR", prop);
+    napi_create_uint32(env, ABOUT_TO_DISAPPEAR, &prop);
+    napi_set_named_property(env, routerPageState, "ABOUT_TO_DISAPPEAR", prop);
+    napi_create_uint32(env, ON_PAGE_SHOW, &prop);
+    napi_set_named_property(env, routerPageState, "ON_PAGE_SHOW", prop);
+    napi_create_uint32(env, ON_PAGE_HIDE, &prop);
+    napi_set_named_property(env, routerPageState, "ON_PAGE_HIDE", prop);
+    napi_create_uint32(env, ON_BACK_PRESS, &prop);
+    napi_set_named_property(env, routerPageState, "ON_BACK_PRESS", prop);
+    return routerPageState;
 }
 
 static napi_value UIObserverExport(napi_env env, napi_value exports)
@@ -757,6 +927,8 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     NG::UIObserverHandler::GetInstance().SetLayoutDoneHandleFunc(&UIObserver::HandLayoutDoneChange);
     NG::UIObserverHandler::GetInstance().SetDrawCommandSendHandleFunc(&UIObserver::HandDrawCommandSendChange);
     NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFunc(&UIObserver::HandleNavDestinationSwitch);
+    NG::UIObserverHandler::GetInstance().SetWillClickFunc(&UIObserver::HandleWillClick);
+    NG::UIObserverHandler::GetInstance().SetDidClickFunc(&UIObserver::HandleDidClick);
     napi_value navDestinationState = nullptr;
     napi_create_object(env, &navDestinationState);
     napi_value prop = nullptr;
@@ -772,24 +944,10 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     napi_set_named_property(env, navDestinationState, "ON_BACKPRESS", prop);
 
     napi_value scrollEventType = nullptr;
-    napi_create_object(env, &scrollEventType);
-    napi_create_uint32(env, SCROLL_START, &prop);
-    napi_set_named_property(env, scrollEventType, "SCROLL_START", prop);
-    napi_create_uint32(env, SCROLL_STOP, &prop);
-    napi_set_named_property(env, scrollEventType, "SCROLL_STOP", prop);
+    scrollEventType = AddToScrollEventType(env);
 
     napi_value routerPageState = nullptr;
-    napi_create_object(env, &routerPageState);
-    napi_create_uint32(env, ABOUT_TO_APPEAR, &prop);
-    napi_set_named_property(env, routerPageState, "ABOUT_TO_APPEAR", prop);
-    napi_create_uint32(env, ABOUT_TO_DISAPPEAR, &prop);
-    napi_set_named_property(env, routerPageState, "ABOUT_TO_DISAPPEAR", prop);
-    napi_create_uint32(env, ON_PAGE_SHOW, &prop);
-    napi_set_named_property(env, routerPageState, "ON_PAGE_SHOW", prop);
-    napi_create_uint32(env, ON_PAGE_HIDE, &prop);
-    napi_set_named_property(env, routerPageState, "ON_PAGE_HIDE", prop);
-    napi_create_uint32(env, ON_BACK_PRESS, &prop);
-    napi_set_named_property(env, routerPageState, "ON_BACK_PRESS", prop);
+    routerPageState = AddToRouterPageState(env);
 
     napi_property_descriptor uiObserverDesc[] = {
         DECLARE_NAPI_FUNCTION("on", ObserverOn),

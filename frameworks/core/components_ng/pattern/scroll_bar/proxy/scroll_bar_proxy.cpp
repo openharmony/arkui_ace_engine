@@ -37,6 +37,13 @@ float GetScrollableDistance(RefPtr<Pattern> pattern)
     return scrollPattern->GetScrollableDistance();
 }
 
+double GetScrollBarOutBoundaryExtent(RefPtr<Pattern> pattern)
+{
+    auto scrollPattern = AceType::DynamicCast<ScrollablePattern>(pattern);
+    CHECK_NULL_RETURN(scrollPattern, 0.0f);
+    return scrollPattern->GetScrollBarOutBoundaryExtent();
+}
+
 float GetScrollOffset(RefPtr<Pattern> pattern)
 {
     auto scrollPattern = AceType::DynamicCast<ScrollablePattern>(pattern);
@@ -101,6 +108,23 @@ void ScrollBarProxy::NotifyScrollableNode(
     }
 }
 
+void ScrollBarProxy::NotifyScrollBarNode(float distance, int32_t source) const
+{
+    for (const auto& node : scrollableNodes_) {
+        if (node.onPositionChanged == nullptr) {
+            continue;
+        }
+        auto scrollable = node.scrollableNode.Upgrade();
+        if (!scrollable || !CheckScrollable(scrollable)) {
+            continue;
+        }
+        node.onPositionChanged(distance, source);
+        if (node.scrollbarFRcallback) {
+            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
+        }
+    }
+}
+
 void ScrollBarProxy::NotifyScrollStart() const
 {
     for (const auto& node : scrollableNodes_) {
@@ -136,7 +160,7 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrol
 
     float controlDistance = GetScrollableDistance(scrollable);
     float scrollOffset = -GetScrollOffset(scrollable); // scroll bar direction is reverse
-
+    double scrollBarOutBoundaryDistance = GetScrollBarOutBoundaryExtent(scrollable);
     for (const auto& weakScrollBar : scrollBars_) {
         auto scrollBar = weakScrollBar.Upgrade();
         if (!scrollBar) {
@@ -145,8 +169,13 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrol
 
         scrollBar->SetControlDistance(controlDistance);
         scrollBar->SetScrollOffset(!scrollable->IsReverse() ? scrollOffset : controlDistance - scrollOffset);
+        scrollBar->HandleScrollBarOutBoundary(scrollBarOutBoundaryDistance);
         auto host = scrollBar->GetHost();
-        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        } else {
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
     }
 }
 

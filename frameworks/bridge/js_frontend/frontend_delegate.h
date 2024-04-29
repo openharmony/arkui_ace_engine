@@ -120,7 +120,9 @@ public:
 
     virtual void ResetFocus();
 
-    virtual bool RequestFocus(const std::string& value);
+    virtual bool RequestFocus(const std::string& value, bool isSyncRequest);
+
+    virtual void SetRequestFocusCallback(std::function<void(NG::RequestFocusResult result)> callback);
 
     // distribute
     virtual std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo)
@@ -135,8 +137,8 @@ public:
     virtual void TriggerPageUpdate(int32_t pageId, bool directExecute = false) = 0;
 
     // posting js task from jsengine
-    virtual void PostJsTask(std::function<void()>&& task) = 0;
-    virtual void PostUITask(std::function<void()>&& task) {}
+    virtual void PostJsTask(std::function<void()>&& task, const std::string& name) = 0;
+    virtual void PostUITask(std::function<void()>&& task, const std::string& name) {}
 
     // ----------------
     // system.app
@@ -172,6 +174,14 @@ public:
     virtual void RemoveCustomDialog() {};
     virtual void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) {};
     virtual void CloseCustomDialog(const int32_t dialogId) {};
+    virtual void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) {};
+    virtual void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
+        std::function<void(int32_t)> &&callback) {};
+
+    virtual RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect(void* value)
+    {
+        return nullptr;
+    }
 
     virtual void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) = 0;
     virtual void DisableAlertBeforeBackPage() = 0;
@@ -223,7 +233,7 @@ public:
     virtual void WaitTimer(const std::string& callbackId, const std::string& delay, bool isInterval, bool isFirst) = 0;
     virtual void ClearTimer(const std::string& callbackId) = 0;
 
-    virtual void PostSyncTaskToPage(std::function<void()>&& task) = 0;
+    virtual void PostSyncTaskToPage(std::function<void()>&& task, const std::string& name) = 0;
 
     virtual void AddTaskObserver(std::function<void()>&& task) = 0;
 
@@ -247,6 +257,14 @@ public:
     virtual bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) = 0;
 
     virtual void GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo) {}
+
+    virtual void AddFrameNodeToOverlay(
+        const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) {}
+    virtual void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
+    virtual void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
+    virtual void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
+    virtual void ShowAllNodesOnOverlay() {}
+    virtual void HideAllNodesOnOverlay() {}
 
     virtual SingleTaskExecutor GetAnimationJsTask() = 0;
 

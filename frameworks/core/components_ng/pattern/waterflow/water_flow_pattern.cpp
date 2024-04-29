@@ -37,7 +37,8 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = host->GetLayoutProperty<WaterFlowLayoutProperty>();
     if (layoutProperty->IsReverse()) {
-        if (source != SCROLL_FROM_ANIMATION_SPRING) {
+        if (source != SCROLL_FROM_ANIMATION_SPRING && source != SCROLL_FROM_ANIMATION_CONTROLLER &&
+            source != SCROLL_FROM_JUMP) {
             delta = -delta;
         }
     }
@@ -164,6 +165,15 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(layoutInfo_);
     } else {
+        int32_t footerIndex = -1;
+        auto footer = footer_.Upgrade();
+        if (footer) {
+            int32_t count = footer->FrameCount();
+            if (count > 0) {
+                footerIndex = 0;
+            }
+        }
+        layoutInfo_.footerIndex_ = footerIndex;
         algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(layoutInfo_);
     }
     algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
@@ -196,7 +206,7 @@ void WaterFlowPattern::OnModifyDone()
     // SetAxis for scroll event
     SetAxis(layoutProperty->GetAxis());
     if (!GetScrollableEvent()) {
-        InitScrollableEvent();
+        AddScrollEvent();
     }
     SetEdgeEffect();
 
@@ -278,30 +288,7 @@ bool WaterFlowPattern::ScrollToTargetIndex(int32_t index)
         return false;
     }
     auto item = layoutInfo_.items_[layoutInfo_.GetSegment(index)].at(crossIndex).at(index);
-    float targetPosition = 0.0;
-    ScrollAlign align = layoutInfo_.align_;
-    switch (align) {
-        case ScrollAlign::START:
-            targetPosition = item.first;
-            break;
-        case ScrollAlign::END:
-            targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
-            break;
-        case ScrollAlign::AUTO:
-            if (layoutInfo_.currentOffset_ + item.first < 0) {
-                targetPosition = item.first;
-            } else if (layoutInfo_.currentOffset_ + item.first + item.second > layoutInfo_.lastMainSize_) {
-                targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
-            } else {
-                targetPosition = -layoutInfo_.currentOffset_;
-            }
-            break;
-        case ScrollAlign::CENTER:
-            targetPosition = -(-item.first + (layoutInfo_.lastMainSize_ - item.second) / 2);
-            break;
-        default:
-            return false;
-    }
+    float targetPosition = -layoutInfo_.JumpToTargetAlign(item);
     ScrollablePattern::AnimateTo(targetPosition, -1, nullptr, true);
     return true;
 }
@@ -316,22 +303,16 @@ void WaterFlowPattern::CheckScrollable()
     }
 }
 
-void WaterFlowPattern::InitScrollableEvent()
-{
-    AddScrollEvent();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WaterFlowEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
-    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
-}
-
 bool WaterFlowPattern::UpdateStartIndex(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    layoutInfo_.jumpIndex_ = (index == LAST_ITEM ? host->GetTotalChildCount() - 1 : index);
+    auto childCount = host->GetTotalChildCount();
+    layoutInfo_.jumpIndex_ = (index == LAST_ITEM ? childCount - 1 : index);
+    //if target index is footer, fix align because it will jump after fillViewport.
+    if (layoutInfo_.footerIndex_ == 0 && layoutInfo_.jumpIndex_ == childCount - 1) {
+        SetScrollAlign(ScrollAlign::END);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -457,8 +438,23 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t childUpdateIdx = host->GetChildrenUpdated();
+    if (childUpdateIdx > -1 && layoutInfo_.GetSegment(childUpdateIdx) == start && sections_->IsSpecialUpdate()) {
+        // optimize adding or removing children in the last section. Prevent complete reset of that section.
+        ++start;
+    }
     layoutInfo_.InitSegments(sections_->GetSectionInfo(), start);
     layoutInfo_.margins_.clear();
+
+    MarkDirtyNodeSelf();
+}
+
+void WaterFlowPattern::ResetSections()
+{
+    layoutInfo_.Reset();
+    sections_.Reset();
     MarkDirtyNodeSelf();
 }
 
@@ -568,13 +564,14 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
     // assume this is always before other children are modified, because it's called during State update.
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (layoutInfo_.footerIndex_ < 0) {
+    auto prevFooter = footer_.Upgrade();
+    if (!prevFooter) {
         layoutInfo_.footerIndex_ = 0;
         host->AddChild(footer);
     } else {
-        auto oldChild = host->GetChildAtIndex(layoutInfo_.footerIndex_);
-        host->ReplaceChild(oldChild, footer);
+        host->ReplaceChild(prevFooter, footer);
     }
+    footer_ = footer;
     footer->SetActive(false);
 }
 } // namespace OHOS::Ace::NG

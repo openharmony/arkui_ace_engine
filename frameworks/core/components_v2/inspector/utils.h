@@ -140,7 +140,11 @@ inline FlexDirection ConvertStringToFlexDirection(const std::string& str)
         { "FlexDirection.ColumnReverse", FlexDirection::COLUMN_REVERSE },
     };
 
-    return uMap.count(str) ? uMap.at(str) : FlexDirection::ROW;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return FlexDirection::ROW;
 }
 
 inline std::string ConvertWrapDirectionToStirng(WrapDirection direction)
@@ -190,7 +194,11 @@ inline FlexAlign ConvertStringToFlexAlign(const std::string& str)
         { "FlexAlign.SpaceEvenly", FlexAlign::SPACE_EVENLY },
     };
 
-    return uMap.count(str) ? uMap.at(str) : FlexAlign::FLEX_START;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return FlexAlign::FLEX_START;
 }
 
 inline std::string ConvertItemAlignToStirng(FlexAlign align)
@@ -223,7 +231,11 @@ inline FlexAlign ConvertStringToItemAlign(const std::string& str)
         { "ItemAlign.Stretch", FlexAlign::STRETCH },
     };
 
-    return uMap.count(str) ? uMap.at(str) : FlexAlign::AUTO;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return FlexAlign::AUTO;
 }
 
 inline std::string ConvertWrapAlignmentToStirng(WrapAlignment align)
@@ -366,7 +378,11 @@ inline TextAlign ConvertWrapStringToTextAlign(const std::string& str)
         { "TextAlign.End", TextAlign::END },
     };
 
-    return uMap.count(str) ? uMap.at(str) : TextAlign::START;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return TextAlign::START;
 }
 
 inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
@@ -390,7 +406,11 @@ inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)
         { "TextOverflow.None", TextOverflow::NONE },
     };
 
-    return uMap.count(str) ? uMap.at(str) : TextOverflow::CLIP;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return TextOverflow::CLIP;
 }
 
 inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
@@ -448,7 +468,11 @@ inline FontWeight ConvertWrapStringToFontWeight(const std::string& str)
         { "FontWeight.Regular", FontWeight::REGULAR },
     };
 
-    return uMap.count(str) ? uMap.at(str) : FontWeight::NORMAL;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return FontWeight::NORMAL;
 }
 
 inline std::string ConvertWrapCopyOptionToString(CopyOptions copyOptions)
@@ -485,6 +509,18 @@ inline std::string ConvertEllipsisModeToString(EllipsisMode value)
     };
     auto index = BinarySearchFindIndex(modalTable, ArraySize(modalTable), value);
     return index < 0 ? "EllipsisMode.END" : modalTable[index].value;
+}
+
+inline std::string ConvertWrapLineBreakStrategyToString(LineBreakStrategy lineBreakStrategy)
+{
+    static const LinearEnumMapNode<LineBreakStrategy, std::string> lineBreakStrategyTable[] = {
+        { LineBreakStrategy::GREEDY, "greedy" },
+        { LineBreakStrategy::HIGH_QUALITY, "high-quality" },
+        { LineBreakStrategy::BALANCED, "balanced" }
+    };
+
+    auto index = BinarySearchFindIndex(lineBreakStrategyTable, ArraySize(lineBreakStrategyTable), lineBreakStrategy);
+    return index < 0 ? "line-break-strategy" : lineBreakStrategyTable[index].value;
 }
 
 inline std::string ConvertColorToString(Color color)
@@ -543,6 +579,18 @@ inline std::string ConvertWrapTextHeightAdaptivePolicyToString(TextHeightAdaptiv
     auto index =
         BinarySearchFindIndex(heightAdaptivePolicytTable, ArraySize(heightAdaptivePolicytTable), heightAdaptivePolicy);
     return index < 0 ? "TextHeightAdaptivePolicy.MAX_LINES_FIRST" : heightAdaptivePolicytTable[index].value;
+}
+
+inline std::string ConvertWrapMarqueeUpdateStrategyToStirng(MarqueeUpdateStrategy marqueeUpdateStrategy)
+{
+    static const LinearEnumMapNode<MarqueeUpdateStrategy, std::string> marqueeUpdateStrategyTable[] = {
+        { MarqueeUpdateStrategy::DEFAULT, "MarqueeUpdateStrategy.DEFAULT" },
+        { MarqueeUpdateStrategy::PRESERVE_POSITION, "MarqueeUpdateStrategy.PRESERVE_POSITION" },
+    };
+
+    auto index = BinarySearchFindIndex(
+        marqueeUpdateStrategyTable, ArraySize(marqueeUpdateStrategyTable), marqueeUpdateStrategy);
+    return index < 0 ? "MarqueeUpdateStrategy.DEFAULT" : marqueeUpdateStrategyTable[index].value;
 }
 
 } // namespace OHOS::Ace::V2

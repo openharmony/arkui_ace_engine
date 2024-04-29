@@ -30,7 +30,7 @@ void ClipboardImpl::SetData(const std::string& data)
         }
         taskExecutor_->PostTask(
             [pasteData]() { OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData); },
-            TaskExecutor::TaskType::IO);
+            TaskExecutor::TaskType::IO, "ArkUIClipboardSetPasteData");
     }
 #endif
 }
@@ -57,7 +57,7 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
         }
         taskExecutor_->PostTask(
             [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)), textData]() { callback(*textData); },
-            TaskExecutor::TaskType::IO);
+            TaskExecutor::TaskType::IO, "ArkUIClipboardGetPasteData");
     }
 #endif
 }

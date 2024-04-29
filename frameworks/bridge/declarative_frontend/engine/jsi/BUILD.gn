@@ -20,7 +20,6 @@ import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
 abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
 abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
-abcuicontext_obj_path = base_output_path + "/abc_uicontext.o"
 jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
 arkcomponent_obj_path = base_output_path + "/abc_ark_component.o"
 
@@ -42,16 +41,6 @@ es2abc_gen_abc("gen_jsEnumStyle_abc") {
 
   in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js" ]
   out_puts = [ base_output_path + "/jsEnumStyle.abc" ]
-}
-
-es2abc_gen_abc("gen_jsUIContext_abc") {
-  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
-  src_js = rebase_path(
-          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsUIContext.js")
-  dst_file = rebase_path(base_output_path + "/jsUIContext.abc")
-
-  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsUIContext.js" ]
-  out_puts = [ base_output_path + "/jsUIContext.abc" ]
 }
 
 es2abc_gen_abc("gen_arkComponent_abc") {
@@ -95,15 +84,6 @@ gen_obj("abc_enum_style") {
   }
   output = abcenumstyle_obj_path
   snapshot_dep = [ ":gen_jsEnumStyle_abc" ]
-}
-
-gen_obj("abc_uicontext") {
-  input = base_output_path + "/jsUIContext.abc"
-  if (use_mac || use_mingw_win || use_linux || use_ios) {
-    abcuicontext_obj_path = base_output_path + "/jsUIContext.c"
-  }
-  output = abcuicontext_obj_path
-  snapshot_dep = [ ":gen_jsUIContext_abc" ]
 }
 
 gen_obj("abc_ark_component") {
@@ -197,6 +177,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_navigator_bridge.cpp",
       "nativeModule/arkts_native_node_container_bridge.cpp",
       "nativeModule/arkts_native_panel_bridge.cpp",
+      "nativeModule/arkts_native_particle_bridge.cpp",
       "nativeModule/arkts_native_path_bridge.cpp",
       "nativeModule/arkts_native_pattern_lock_bridge.cpp",
       "nativeModule/arkts_native_polygon_bridge.cpp",
@@ -208,6 +189,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_rect_bridge.cpp",
       "nativeModule/arkts_native_refresh_bridge.cpp",
       "nativeModule/arkts_native_render_node_bridge.cpp",
+      "nativeModule/arkts_native_resource_bridge.cpp",
       "nativeModule/arkts_native_rich_editor_bridge.cpp",
       "nativeModule/arkts_native_row_bridge.cpp",
       "nativeModule/arkts_native_row_split_bridge.cpp",
@@ -221,6 +203,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_stack_bridge.cpp",
       "nativeModule/arkts_native_stepper_item_bridge.cpp",
       "nativeModule/arkts_native_swiper_bridge.cpp",
+      "nativeModule/arkts_native_symbol_glyph_bridge.cpp",
       "nativeModule/arkts_native_tabcontent_bridge.cpp",
       "nativeModule/arkts_native_tabs_bridge.cpp",
       "nativeModule/arkts_native_text_area_bridge.cpp",
@@ -235,11 +218,14 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_video_bridge.cpp",
       "nativeModule/arkts_native_water_flow_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
+      "nativeModule/ui_context_helper.cpp",
     ]
 
     deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
-    external_deps = []
-
+    external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
       sources += [
@@ -249,10 +235,9 @@ template("declarative_js_engine_ark") {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/xcomponent:ace_core_components_xcomponent_pattern_ng_$platform" ]
       if (is_ohos_standard_system) {
         deps += [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
-        external_deps = [
+        external_deps += [
           "c_utils:utils",
           "graphic_2d:librender_service_client",
-          "hilog:libhilog",
         ]
       }
     }
@@ -364,7 +349,6 @@ template("declarative_js_engine_ark") {
       ":gen_obj_src_abc_ark_component",
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
-      ":gen_obj_src_abc_uicontext",
     ]
   }
 }

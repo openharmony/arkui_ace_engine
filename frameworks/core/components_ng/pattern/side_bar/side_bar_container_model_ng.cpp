@@ -61,6 +61,9 @@ void SideBarContainerModelNG::Create()
     CHECK_NULL_VOID(sideBarContainerNode);
 
     stack->Push(sideBarContainerNode);
+    auto pattern = sideBarContainerNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetRightToLeftMode(AceApplicationInfo::GetInstance().IsRightToLeft());
 }
 
 void SideBarContainerModelNG::SetSideBarContainerType(SideBarContainerType type)
@@ -176,16 +179,6 @@ void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(const std::strin
         ACE_UPDATE_LAYOUT_PROPERTY(
             SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, controlButtonSwitchingIconInfo);
     }
-}
-
-void SideBarContainerModelNG::ResetControlButtonIconInfo()
-{
-    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
-        SideBarContainerLayoutProperty, ControlButtonShowIconInfo, PROPERTY_UPDATE_LAYOUT);
-    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
-        SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, PROPERTY_UPDATE_LAYOUT);
-    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
-        SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, PROPERTY_UPDATE_LAYOUT);
 }
 
 void SideBarContainerModelNG::SetDividerStrokeWidth(const Dimension& strokeWidth)
@@ -332,7 +325,12 @@ void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const Dim
 
 void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& minContentWidth)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth, frameNode);
+    if (minContentWidth.IsNonNegative()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinContentWidth, minContentWidth, frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SideBarContainerLayoutProperty, MinContentWidth, DEFAULT_MIN_CONTENT_WIDTH, frameNode);
+    }
 }
 
 void SideBarContainerModelNG::SetSideBarPosition(FrameNode* frameNode, SideBarPosition sideBarPosition)

@@ -38,17 +38,13 @@ constexpr float HALF = 0.5f;
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
 // harder it is to maintain
 struct GridLayoutInfo {
-    float GetTotalHeightOfItemsInView(float mainGap) const
-    {
-        float lengthOfItemsInViewport = 0.0;
-        for (auto i = startMainLineIndex_; i <= endMainLineIndex_; i++) {
-            if (lineHeightMap_.find(i) == lineHeightMap_.end()) {
-                continue;
-            }
-            lengthOfItemsInViewport += (lineHeightMap_.at(i) + mainGap);
-        }
-        return lengthOfItemsInViewport - mainGap;
-    }
+    /**
+     * @param regular running regular/irregular layout. For compatibility.
+     * Because in regular we used to add starting lines that are above viewport.
+     *
+     * @return height of all lines in viewport.
+     */
+    float GetTotalHeightOfItemsInView(float mainGap, bool regular = true) const;
 
     void UpdateStartIndexByStartLine()
     {
@@ -105,6 +101,18 @@ struct GridLayoutInfo {
         return (removeLastGap) ? totalHeight - mainGap : totalHeight;
     }
 
+    /**
+     * @brief optimized function (early exit) to compare total height to [other].
+     * @param other height to compare to.
+     * @return true if total height is less than [other].
+     */
+    bool HeightSumSmaller(float other, float mainGap) const;
+
+    /**
+     * @return height sum of lines in range [startLine, endLine).
+     */
+    float GetHeightInRange(int32_t startLine, int32_t endLine, float mainGap) const;
+
     struct EndIndexInfo {
         int32_t itemIdx = -1; /**< Index of the last item. */
         int32_t y = -1;       /**< Main-axis position (line index) of the item. */
@@ -113,6 +121,7 @@ struct GridLayoutInfo {
     /**
      * @brief Traverse the matrix backward to find the last item index, starting from Line [endLine].
      *
+     * Intended to work on irregular layout.
      * @param endLine index of the line to start traversing.
      * @return last item index above endLine (inclusive) and the position it resides in.
      */
@@ -166,11 +175,25 @@ struct GridLayoutInfo {
     void ClearMapsToEnd(int32_t idx);
 
     /**
+     * @brief clears lineHeightMap_ and gridMatrix_ starting from line [idx]
+     *
+     * @param idx starting line index
+     */
+    void ClearMapsToEndContainsMultiLineItem(int32_t idx);
+
+    /**
      * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
      *
      * @param idx ending line index, exclusive.
      */
     void ClearMapsFromStart(int32_t idx);
+
+    /**
+     * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
+     *
+     * @param idx ending line index, exclusive.
+     */
+    void ClearMapsFromStartContainsMultiLineItem(int32_t idx);
 
     /**
      * @brief clears lineHeightMap_ starting from line [idx]
@@ -237,8 +260,23 @@ struct GridLayoutInfo {
     bool GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const;
     float GetTotalHeightFromZeroIndex(int32_t targetLineIndex, float mainGap) const;
 
+    /**
+     * @brief Calculate the distance from content's end to the viewport bottom.
+     *
+     * REQUIRES: currentOffset_ is valid from last layout.
+     * @param mainSize of the viewport.
+     * @param heightInView total height of items inside the viewport.
+     * @param mainGap gap between lines along the main axis.
+     * @return Positive when content's end is below viewport. Return [mainSize] if last line is not in viewport.
+     */
+    float GetDistanceToBottom(float mainSize, float heightInView, float mainGap) const;
+
     bool GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayoutInfo, int32_t targetIndex, ScrollAlign align,
         float mainGap, float& targetPos);
+
+    using MatIter = std::map<int32_t, std::map<int32_t, int32_t>>::const_iterator;
+    MatIter FindStartLineInMatrix(MatIter iter, int32_t index) const;
+    void ClearHeightsFromMatrix(int32_t lineIdx);
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
@@ -279,12 +317,16 @@ struct GridLayoutInfo {
     bool reachEnd_ = false; // true if last GridItem appears in the viewPort
     bool reachStart_ = false;
 
-    bool offsetEnd_ = false; // true if last GridItem is fully within the viewport
+    bool offsetEnd_ = false; // true if content bottom is truly reached
 
     // Grid has GridItem whose columnEnd - columnStart > 0
     bool hasBigItem_;
 
-    bool offsetUpdated_ = false;
+    // Grid has GridItem whose rowEnd - rowStart > 0
+    bool hasMultiLineItem_;
+    // false when offset is updated but layout hasn't happened, so data is out of sync
+    bool synced_ = false;
+
     std::optional<int32_t> targetIndex_;
 
 private:

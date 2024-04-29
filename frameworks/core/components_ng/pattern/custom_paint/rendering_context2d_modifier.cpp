@@ -55,8 +55,8 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     rsDrawCmdList->SetHeight(drawCmdList->GetHeight());
 
     if (needResetSurface_) {
-        CHECK_NULL_VOID(renderContext_);
-        renderContext_->ResetSurface();
+        CHECK_NULL_VOID(renderContext_.Upgrade());
+        renderContext_.Upgrade()->ResetSurface();
         needResetSurface_ = false;
     }
 
@@ -89,11 +89,12 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     rsDrawCmdList->SetHeight(drawCmdList->GetHeight());
 
     if (needResetSurface_) {
-        CHECK_NULL_VOID(renderContext_);
-        renderContext_->ResetSurface();
+        CHECK_NULL_VOID(renderContext_.Upgrade());
+        renderContext_.Upgrade()->ResetSurface();
         needResetSurface_ = false;
     }
 
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "Playback %{public}zu drawing commands.", drawCmdList->GetOpItemSize());
     if (drawCmdList->IsEmpty()) {
         return;
     }

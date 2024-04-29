@@ -15,11 +15,14 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/log/dump_log.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -27,6 +30,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t API_VERSION_9 = 9;
+constexpr Dimension ADAPT_TOAST_MIN_FONT_SIZE = 12.0_fp;
 
 float GetTextHeight(const RefPtr<FrameNode>& textNode)
 {
@@ -118,6 +122,7 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto safeAreaOffset = safeArea ? safeArea->bottom_.Length() : 0.0f;
     if (!toastProp->HasToastAlignment()) {
         auto toastBottom = GetBottomValue(layoutWrapper);
+        toastBottom_ = toastBottom;
         if (context->GetMinPlatformVersion() > API_VERSION_9) {
             offsetY = Dimension(rootHeight - toastBottom - textHeight - safeAreaOffset);
         } else {
@@ -127,7 +132,10 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
         Alignment alignment = toastProp->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
         if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER ||
             alignment == Alignment::TOP_RIGHT) {
-            offsetY = Dimension(0.0);
+            // Top Needs Avoid System Navigation Bar
+            auto safeAreaManager = context->GetSafeAreaManager();
+            auto sysTop = safeAreaManager ? safeAreaManager->GetSystemSafeArea().top_.Length() : 0.0f;
+            offsetY = Dimension(sysTop);
         } else if (alignment == Alignment::CENTER_LEFT || alignment == Alignment::CENTER ||
                    alignment == Alignment::CENTER_RIGHT) {
             offsetY = Dimension((rootHeight - textHeight - safeAreaOffset) / 2.0f);
@@ -174,7 +182,7 @@ void ToastPattern::BeforeCreateLayoutWrapper()
     auto toastTheme = context->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto textHeight = GetTextHeight(textNode);
-    if (textHeight > toastTheme->GetMinHeight().ConvertToPx()) {
+    if (GreatNotEqual(textHeight, toastTheme->GetMinHeight().ConvertToPx())) {
         textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::START);
     }
 }
@@ -187,7 +195,12 @@ void ToastPattern::UpdateToastSize(const RefPtr<FrameNode>& toast)
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto rootWidth = Dimension(context->GetRootWidth());
-    toastProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(rootWidth), std::nullopt));
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto limitWidth = Dimension(GetTextMaxWidth());
+        toastProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(limitWidth), std::nullopt));
+    } else {
+        toastProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(rootWidth), std::nullopt));
+    }
 }
 
 void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
@@ -203,13 +216,33 @@ void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
     auto maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
     auto textLayoutProperty = text->GetLayoutProperty();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
 
     auto toastTheme = context->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto minWidth = Dimension(toastTheme->GetMinWidth().ConvertToPx());
     auto minHeight = Dimension(toastTheme->GetMinHeight().ConvertToPx());
     textLayoutProperty->UpdateCalcMinSize(CalcSize(NG::CalcLength(minWidth), NG::CalcLength(minHeight)));
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto limitHeight = GetTextMaxHeight();
+        textLayoutProperty->UpdateCalcMaxSize(
+            CalcSize(NG::CalcLength(maxWidth), NG::CalcLength(Dimension(limitHeight))));
+
+        auto textProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textProperty);
+        auto toastMaxFontSize = toastTheme->GetTextStyle().GetFontSize();
+        textProperty->UpdateAdaptMaxFontSize(toastMaxFontSize);
+        textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_MIN_FONT_SIZE);
+        textProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+
+        auto textLineHeight = GetTextLineHeight(text);
+        if (textLineHeight > 0) {
+            auto maxLines = static_cast<int32_t>(limitHeight / textLineHeight);
+            textProperty->UpdateMaxLines(maxLines);
+        }
+    } else {
+        textLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
+    }
 }
 
 void ToastPattern::OnColorConfigurationUpdate()
@@ -256,5 +289,101 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
     }
+}
+
+double ToastPattern::GetTextMaxHeight()
+{
+    auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0);
+    auto containerId = Container::CurrentId();
+    double deviceHeight = 0.0f;
+    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
+        deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
+    } else {
+        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+        deviceHeight = windowGlobalRect.Height();
+    }
+
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, 0.0);
+    auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
+    auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto maxHeight = deviceHeight - bottom - top - toastBottom_;
+    auto limitHeight = (deviceHeight - bottom - top) * 0.65;
+    if (GreatNotEqual(maxHeight, limitHeight)) {
+        maxHeight = limitHeight;
+    }
+    return maxHeight;
+}
+
+double ToastPattern::GetTextMaxWidth()
+{
+    auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0);
+    auto containerId = Container::CurrentId();
+    double deviceWidth = 0.0f;
+    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
+        deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
+    } else {
+        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+        deviceWidth = windowGlobalRect.Width();
+    }
+
+    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+    CHECK_NULL_RETURN(toastTheme, 0.0);
+    auto marging = toastTheme->GetMarging();
+    auto maxWidth = deviceWidth - marging.Left().ConvertToPx() - marging.Right().ConvertToPx();
+    auto maxLimitWidth = toastTheme->GetMaxWidth();
+    if (GreatNotEqual(maxWidth, maxLimitWidth.ConvertToPx())) {
+        maxWidth = maxLimitWidth.ConvertToPx();
+    }
+    return maxWidth;
+}
+
+int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)
+{
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, 0);
+    auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
+    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
+    CHECK_NULL_RETURN(textLayoutWrapper, 0);
+    textLayoutWrapper->Measure(layoutConstraint);
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(textLayoutWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
+    auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(textLayoutAlgorithm, 0);
+    auto paragraph = textLayoutAlgorithm->GetSingleParagraph();
+    CHECK_NULL_RETURN(paragraph, 0);
+    auto paragHeight = paragraph->GetHeight();
+    auto paragLineCount = paragraph->GetLineCount();
+    int32_t paragLineHeight = 0;
+    if (paragLineCount > 0) {
+        paragLineHeight = static_cast<int32_t>(paragHeight / paragLineCount);
+    }
+    return paragLineHeight;
+}
+
+void ToastPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("Message: " + toastInfo_.message);
+    DumpLog::GetInstance().AddDesc("Duration: " + std::to_string(toastInfo_.duration));
+    DumpLog::GetInstance().AddDesc("Bottom: " + toastInfo_.bottom);
+    std::string isRightToLeft = toastInfo_.isRightToLeft ? "true" : "false";
+    DumpLog::GetInstance().AddDesc("IsRightToLeft: " + isRightToLeft);
+    std::string showMode = toastInfo_.showMode == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST";
+    DumpLog::GetInstance().AddDesc("ShowMode: " + showMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto toastProp = DynamicCast<ToastLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProp);
+    if (!toastProp->HasToastAlignment()) {
+        DumpLog::GetInstance().AddDesc("Alignment: NONE");
+    } else {
+        DumpLog::GetInstance().AddDesc(
+            "Alignment: " + toastProp->GetToastAlignmentValue().GetAlignmentStr(toastProp->GetLayoutDirection()));
+    }
+    auto offset = toastProp->GetToastOffsetValue(DimensionOffset());
+    DumpLog::GetInstance().AddDesc(
+        "Offset: { dx: " + offset.GetX().ToString() + " dy: " + offset.GetY().ToString() + " }");
 }
 } // namespace OHOS::Ace::NG

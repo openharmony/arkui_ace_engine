@@ -21,8 +21,16 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#ifdef WINDOWS_PLATFORM
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
 
 #include "gtest/gtest.h"
+#include <unicode/uversion.h>
+#include <unicode/putil.h>
+#include <unicode/uclean.h>
 
 #define private public
 #define protected public
@@ -44,6 +52,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/type_definition.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ime/constant.h"
 #include "core/common/ime/text_editing_value.h"
@@ -63,9 +72,11 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/components_ng/pattern/text_field/text_input_response_area.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 #undef private
 #undef protected
@@ -75,6 +86,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr double ICON_SIZE = 24;
 constexpr double ICON_HOT_ZONE_SIZE = 40;
 constexpr double FONT_SIZE = 16;
@@ -98,6 +110,7 @@ const Color DEFAULT_SELECTED_BACKFROUND_COLOR = Color::BLUE;
 const Color DEFAULT_CARET_COLOR = Color::BLACK;
 const Color DEFAULT_TEXT_COLOR = Color::BLACK;
 const Dimension DEFAULT_FONT_SIZE = Dimension(16, DimensionUnit::VP);
+const Dimension DEFAULT_INDENT_SIZE = Dimension(5, DimensionUnit::VP);
 const FontWeight DEFAULT_FONT_WEIGHT = FontWeight::W500;
 const std::string DEFAULT_INPUT_FILTER = "[a-z]";
 const InputStyle DEFAULT_INPUT_STYLE = InputStyle::INLINE;
@@ -106,6 +119,8 @@ const TextAlign DEFAULT_TEXT_ALIGN = TextAlign::LEFT;
 const CaretStyle DEFAULT_CARET_STYLE = { Dimension(3, DimensionUnit::VP) };
 const OHOS::Ace::DisplayMode DEFAULT_DISPLAY_MODE = OHOS::Ace::DisplayMode::AUTO;
 const TextInputAction DEFAULT_ENTER_KEY_TYPE = TextInputAction::BEGIN;
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;
@@ -230,6 +245,7 @@ void TextInputBase::GetFocus()
 
 class TextInputCursorTest : public TextInputBase {};
 class TextFieldControllerTest : public TextInputBase {};
+class TextFieldResponseAreaTest : public TextInputBase {};
 class TextFieldKeyEventTest : public TextInputBase {};
 class TextFiledAttrsTest : public TextInputBase {};
 class TextFieldUXTest : public TextInputBase {
@@ -295,13 +311,16 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
         model.SetShowUnderline(true);
         model.SetSelectAllValue(true);
         model.SetShowCounterBorder(true);
+        model.SetWordBreak(WordBreak::BREAK_ALL);
+        model.SetTextOverflow(TextOverflow::CLIP);
+        model.SetTextIndent(DEFAULT_INDENT_SIZE);
     });
 
     /**
      * @tc.expected: Check if all set properties are displayed in the corresponding JSON
      */
     auto json = JsonUtil::Create(true);
-    pattern_->ToJsonValue(json);
+    pattern_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("text"), DEFAULT_TEXT.c_str());
     EXPECT_EQ(json->GetString("type"), "InputType.Normal");
     EXPECT_EQ(json->GetString("caretColor"), "#FF000000");
@@ -315,10 +334,13 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("maxLines"), "3");
     EXPECT_EQ(json->GetString("barState"), "BarState.AUTO");
     json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("caretPosition"), "");
     EXPECT_TRUE(json->GetBool("showUnderline"));
     EXPECT_TRUE(json->GetBool("selectAll"));
+    EXPECT_EQ(json->GetString("wordBreak"), "break-all");
+    EXPECT_EQ(json->GetString("textOverflow"), "TextOverflow.Clip");
+    EXPECT_EQ(json->GetString("textIndent"), "5");
 }
 
 /**
@@ -801,7 +823,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition008, TestSize.Le
     pattern_->HandleExtendAction(action[2]);
     pattern_->HandleExtendAction(action[3]);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijfghijklmnopqrstuvwxyz"), 0)
+    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijklmnopqrstuvwxyz"), 0)
         << "Text is " + pattern_->GetTextValue();
 }
 
@@ -2685,7 +2707,8 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
     /**
      * @tc.steps: step7. When handle move done
      */
-    pattern_->OnHandleMoveDone(handleRect, true);
+    pattern_->ProcessOverlay();
+    pattern_->selectOverlay_->OnHandleMoveDone(handleRect, true);
 
     /**
      * @tc.steps: step8. Test magnifier open or close
@@ -2696,11 +2719,11 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ShowMenu001
- * @tc.desc: Test close menu after ShowMenu()
+ * @tc.name: HandleOnShowMenu001
+ * @tc.desc: Test close menu after HandleOnShowMenu()
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldUXTest, ShowMenu001, TestSize.Level1)
+HWTEST_F(TextFieldUXTest, HandleOnShowMenu001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize text input and get focus
@@ -2709,70 +2732,66 @@ HWTEST_F(TextFieldUXTest, ShowMenu001, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy
+     * @tc.steps: step2. Do HandleOnShowMenu()
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->HandleOnShowMenu();
 
     /**
-     * @tc.steps: step3. Do ShowMenu()
-     */
-    pattern_->ShowMenu();
-
-    /**
-     * @tc.steps: step4. Press esc
+     * @tc.steps: step3. Press esc
      */
     KeyEvent event;
     event.code = KeyCode::KEY_ESCAPE;
+    event.action = KeyAction::DOWN;
     pattern_->OnKeyEvent(event);
 
     /**
-     * @tc.steps: step5. Test menu open or close
+     * @tc.steps: step4. Test menu open or close
      * @tc.expected: text menu is close
      */
-    auto ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
-    EXPECT_TRUE(ret);
-
-    /**
-     * @tc.steps: step6. Show menu when select all value
-     */
-    pattern_->HandleOnSelectAll(true);
-    pattern_->ShowMenu();
-
-    /**
-     * @tc.steps: step7. Select all value again
-     */
-    pattern_->HandleOnSelectAll(true);
-
-    /**
-     * @tc.steps: step8. Test menu open or close
-     * @tc.expected: text menu is close
-     */
-    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    auto ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_FALSE(ret);
 
     /**
-     * @tc.steps: step9. emulate Press shift + F10 key event
+     * @tc.steps: step5. Show menu when select all value
+     */
+    pattern_->HandleOnSelectAll(true);
+    pattern_->HandleOnShowMenu();
+
+    /**
+     * @tc.steps: step6. Select all value again
+     */
+    pattern_->HandleOnSelectAll(true);
+
+    /**
+     * @tc.steps: step7. Test menu open or close
+     * @tc.expected: text menu is close
+     */
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step8. emulate Press shift + F10 key event
      */
     event.code = KeyCode::KEY_F10;
     event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
     event.pressedCodes.emplace_back(KeyCode::KEY_F10);
 
     /**
-     * @tc.steps: step10. call OnKeyEvent
+     * @tc.steps: step9. call OnKeyEvent
      */
     ret = pattern_->OnKeyEvent(event);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     /**
-     * @tc.steps: step11. Inset value
+     * @tc.steps: step10. Inset value
      */
     pattern_->InsertValue("abc");
 
     /**
-     * @tc.steps: step12. Test menu open or close
+     * @tc.steps: step11. Test menu open or close
      * @tc.expected: text menu is close
      */
-    ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_FALSE(ret);
 }
 
@@ -2977,9 +2996,9 @@ HWTEST_F(TextFieldControllerTest, TextFieldPatternOnTextInputScroll001, TestSize
     pattern_->contentRect_.x_ = 20.0f;
     pattern_->contentRect_.width_ = 100.0f;
     pattern_->OnTextInputScroll(-1000.0f);
-    pattern_->isSingleHandle_ = false;
+    pattern_->SetIsSingleHandle(false);
     pattern_->OnTextInputScroll(0.0f);
-    pattern_->isSingleHandle_ = true;
+    pattern_->SetIsSingleHandle(true);
     pattern_->OnTextInputScroll(0.0f);
     EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), -90.0f);
     EXPECT_EQ(pattern_->textRect_.GetOffset(), OffsetF(pattern_->currentOffset_, pattern_->textRect_.GetY()));
@@ -3647,6 +3666,96 @@ HWTEST_F(TextFieldUXTest, testTextAlign001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testWordBreak001
+ * @tc.desc: test testInput text WordBreak
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testWordBreak001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set wordBreak NORMAL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::NORMAL);
+
+    /**
+     * @tc.step: step3. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_ALL);
+
+    /**
+     * @tc.step: step4. Set wordBreak BREAK_WORD
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_WORD);
+}
+
+/**
+ * @tc.name: testTextOverFlow001
+ * @tc.desc: test testInput text TextOverFlow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testTextOverFlow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set textOverflow CLIP
+     */
+    layoutProperty_->UpdateTextOverflow(TextOverflow::CLIP);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextOverflow(), TextOverflow::CLIP);
+
+    /**
+     * @tc.step: step2. Set textOverflow ELLIPSIS
+     */
+    layoutProperty_->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextOverflow(), TextOverflow::ELLIPSIS);
+}
+
+/**
+ * @tc.name: testTextIndent001
+ * @tc.desc: test testInput text TextIndent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testTextIndent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set textIndent
+     */
+    layoutProperty_->UpdateTextIndent(DEFAULT_INDENT_SIZE);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextIndent(), DEFAULT_INDENT_SIZE);
+}
+
+/**
  * @tc.name: testShowUnderline001
  * @tc.desc: test testInput showUnderline
  * @tc.type: FUNC
@@ -4054,9 +4163,9 @@ HWTEST_F(TextFieldUXTest, HandleOnEscape001, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Create selectOverlayProxy
+     * @tc.steps: step2. Call ProcessOverlay
      */
-    pattern_->ProcessOverlay(true, true, true);
+    pattern_->ProcessOverlay();
 
 
     /**
@@ -4152,5 +4261,967 @@ HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
     pattern_->UpdateEditingValueToRecord();
     pattern_->HandleOnUndoAction();
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
+}
+
+/**
+ * @tc.name: TextInputToJsonValue001
+ * @tc.desc: test attrs on ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputToJsonValue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default attrs
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextDecoration(TextDecoration::LINE_THROUGH);
+        model.SetTextDecorationColor(Color::BLUE);
+        model.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+        model.SetLetterSpacing(1.0_px);
+        model.SetLineHeight(2.0_px);
+    });
+
+    /**
+     * @tc.expected: Check if all set properties are displayed in the corresponding JSON
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_TRUE(json->Contains("decoration"));
+    EXPECT_TRUE(json->Contains("letterSpacing"));
+    EXPECT_TRUE(json->Contains("lineHeight"));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: TextInputToJsonValue002
+ * @tc.desc: test attrs on ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputToJsonValue002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default attrs
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetAdaptMinFontSize(1.0_px);
+        model.SetAdaptMaxFontSize(2.0_px);
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    });
+
+    /**
+     * @tc.expected: Check if all set properties are displayed in the corresponding JSON
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_TRUE(json->Contains("minFontSize"));
+    EXPECT_TRUE(json->Contains("maxFontSize"));
+    EXPECT_TRUE(json->Contains("heightAdaptivePolicy"));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: TextInputMinFontSize001
+ * @tc.desc: test TextInput minFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputMinFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with set minFontSize 1.0_fp
+     * @tc.expected: minFontSize is 1.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetAdaptMinFontSize(1.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test minFontSize
+     */
+    EXPECT_EQ(layoutProperty_->GetAdaptMinFontSize(), 1.0_fp);
+}
+
+/**
+ * @tc.name: TextInputMaxFontSize001
+ * @tc.desc: test TextInput maxFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputMaxFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with set maxFontSize 2.0_fp
+     * @tc.expected: maxFontSize is 2.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetAdaptMaxFontSize(2.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test maxFontSize
+     */
+    EXPECT_EQ(layoutProperty_->GetAdaptMaxFontSize(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextInputHeightAdaptivePolicy001
+ * @tc.desc: test TextInput heightAdaptivePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputHeightAdaptivePolicy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with set heightAdaptivePolicy TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST
+     * @tc.expected: heightAdaptivePolicy is TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    });
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "1234567890";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.step: step2. test heightAdaptivePolicy
+     */
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    layoutProperty_->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    layoutProperty_->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+}
+
+/**
+ * @tc.name: TextInputLetterSpacing001
+ * @tc.desc: test TextInput letterSpacing
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputLetterSpacing001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set letterSpacing 1.0_fp
+     * @tc.expected: letterSpacing is 1.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLetterSpacing(1.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test letterSpacing
+     */
+    EXPECT_EQ(layoutProperty_->GetLetterSpacing(), 1.0_fp);
+}
+
+/**
+ * @tc.name: TextInputLineHeight001
+ * @tc.desc: test TextInput lineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputLineHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set lineHeight 2.0_fp
+     * @tc.expected: lineHeight is 2.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLineHeight(2.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test maxLength
+     */
+    EXPECT_EQ(layoutProperty_->GetLineHeight(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextInputTextDecoration001
+ * @tc.desc: test TextInput decoration
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTextDecoration001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set decoration(LINE_THROUGH, BLUE, DOTTED)
+     * @tc.expected: maxLength is decoration(LINE_THROUGH, BLUE, DOTTED)
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetTextDecoration(TextDecoration::LINE_THROUGH);
+        model.SetTextDecorationColor(Color::BLUE);
+        model.SetTextDecorationStyle(TextDecorationStyle::DOTTED);
+    });
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "1234567890";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.step: step2. test decoration
+     */
+    EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
+    EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
+}
+
+/**
+ * @tc.name: HandleClickEventTest001
+ * @tc.desc: test scrolling when clicking on the scroll bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateTextField , GestureEvent and ScrollBars.
+     * @tc.expected: create CreateTextField , GestureEvent and ScrollBars created successfully.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    GestureEvent info;
+    info.localLocation_ = Offset(1.0f, 110.0f);
+    pattern_->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
+    pattern_->scrollBar_->touchRegion_ = Rect(10.0f, 100.0f, 30.0f, 100.0f);
+    // /**
+    //  * @tc.steps: step2. Test HandleClickEvent.
+    //  * @tc.expect: CheckBarDirection equal BarDirection's Value.
+    //  */
+    pattern_->hasMousePressed_ = true;
+    pattern_->HandleClickEvent(info);
+    Point point(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point), BarDirection::BAR_NONE);
+    info.localLocation_ = Offset(1.0f, 1.0f);
+    pattern_->HandleClickEvent(info);
+    Point point1(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point1), BarDirection::PAGE_UP);
+    info.localLocation_ = Offset(1.0f, 300.0f);
+    pattern_->HandleClickEvent(info);
+    Point point2(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point2), BarDirection::PAGE_DOWN);
+}
+
+/**
+ * @tc.name: SupportAvoidanceTest
+ * @tc.desc: test whether the custom keyboard supports the collision avoidance function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SupportAvoidanceTest, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto supportAvoidance = true;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_TRUE(pattern_->keyboardAvoidance_);
+    supportAvoidance = false;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_FALSE(pattern_->keyboardAvoidance_);
+}
+
+/**
+ * @tc.name: TextFieldFontFeatureTest
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, FontFeature003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
+    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+}
+
+/**
+ * @tc.name: TextFieldFontFeatureTest
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, FontFeature004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
+    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction001
+ * @tc.desc: test testInput deleteAction for normal emoji.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction001, TestSize.Level1)
+{
+#if defined(__HuaweiLite__) || defined(__OHOS__)
+    // use system icudt .dat file
+    std::string dataPath = "/system/usr/ohos_icu";
+#else
+    // use project icudt .dat file
+#ifdef WINDOWS_PLATFORM
+    char buffer[MAX_PATH];
+    GetCurrentDirectoryA(MAX_PATH, buffer);
+    std::string currentPath = std::string(buffer);
+#else
+    char buffer[PATH_MAX];
+    getcwd(buffer, sizeof(buffer));
+    std::string currentPath = std::string(buffer);
+#endif
+    std::string dataPath = currentPath + "/../../../../../../third_party/icu/ohos_icu4j/data";
+#endif
+    u_setDataDirectory(dataPath.c_str());
+    UErrorCode code;
+    u_init(&code);
+    /**
+     * @tc.steps: Create Text field node
+     */
+    std::string txt = "😄😌😎😭😄😌😎😭😄😌😎😭";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(24);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    std::string result = "😄😌😎😭😄😌😎😭😄😌";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " << pattern_->GetTextValue();
+    
+    pattern_->SetCaretPosition(10);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "😄😌😎😌😎😭😄😌";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " << pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "😎😌😎😭😄😌";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(6);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "😎😌😎😌";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction002
+ * @tc.desc: test testInput deleteAction for ZWJ emoji.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    // change line to aviod the line length exceed 120
+    const std::string txt = std::string("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦")
+        .append("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦");
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    
+    pattern_->SetCaretPosition(132);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    // change line to aviod the line length exceed 120
+    std::string result = std::string("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦")
+        .append("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦");
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    
+    pattern_->SetCaretPosition(88);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(44);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction003
+ * @tc.desc: test testInput deleteAction for VS emoji.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "👁️👁️👁️👁️👁️👁️👁️👁️👁️👁️👁️👁️";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(36);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    std::string result = "👁️👁️👁️👁️👁️👁️👁️👁️👁️👁️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(30);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️👁️👁️👁️👁️👁️👁️👁️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️👁️👁️👁️👁️👁️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(12);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️👁️👁️👁️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction004
+ * @tc.desc: test testInput deleteAction for RIS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(48);
+    pattern_->DeleteBackward(1);
+    FlushLayoutTask(frameNode_);
+    std::string result = "🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(28);
+    pattern_->DeleteBackward(3);
+    FlushLayoutTask(frameNode_);
+    result = "🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(3);
+    FlushLayoutTask(frameNode_);
+    result = "🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    
+    pattern_->SetCaretPosition(12);
+    pattern_->DeleteForward(1);
+    FlushLayoutTask(frameNode_);
+    result = "🇨🇳🇨🇳🇨🇳🇨🇳";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction005
+ * @tc.desc: test testInput deleteAction for keycap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(36);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    std::string result = "3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(27);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(12);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "3️⃣3️⃣3️⃣3️⃣";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction006
+ * @tc.desc: test testInput deleteAction for ZWJ&VS emoji.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(84);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    std::string result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(77);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+  
+    pattern_->SetCaretPosition(21);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction007
+ * @tc.desc: test testInput deleteAction for line break.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1\n23\n45\r\n6\n78\n9";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(15);
+    pattern_->DeleteBackward(4);
+    FlushLayoutTask(frameNode_);
+    std::string result = "1\n23\n45\r\n6\n";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(9);
+    pattern_->DeleteBackward(3);
+    FlushLayoutTask(frameNode_);
+    result = "1\n23\n6\n";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(3);
+    FlushLayoutTask(frameNode_);
+    result = "3\n6\n";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(2);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "3\n";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction008
+ * @tc.desc: test testInput deleteAction for all case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "12345📡👨‍👩‍👧‍👦👁️\n🇨🇳3️⃣👁️‍🗨️\n67890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(42);
+    pattern_->DeleteBackward(6);
+    FlushLayoutTask(frameNode_);
+    std::string result = "12345📡👨‍👩‍👧‍👦👁️\n🇨🇳3️⃣👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(29);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "12345📡👨‍👩‍👧‍👦👁️\n👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(6);
+    FlushLayoutTask(frameNode_);
+    result = "👨‍👩‍👧‍👦👁️\n👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(14);
+    pattern_->DeleteForward(1);
+    FlushLayoutTask(frameNode_);
+    result = "👨‍👩‍👧‍👦👁️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: TextFieldResponseArea001
+ * @tc.desc: test password response area show/hide.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldResponseAreaTest, TextFieldResponseArea001, TestSize.Level1)
+{
+    PasswordIcon myIcon =  {
+        .showResult = "1",
+        .hideResult = "2",
+        .showBundleName = "1",
+        .hideBundleName = "2",
+        .showModuleName = "1",
+        .hideModuleName = "2",
+    };
+    CreateTextField(DEFAULT_TEXT, "", [myIcon](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+        model.SetPasswordIcon(myIcon);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+    });
+    auto passwordArea = AceType::MakeRefPtr<PasswordResponseArea>(pattern_, false);
+    passwordArea->InitResponseArea();
+    EXPECT_EQ(passwordArea->GetCurrentSourceInfo()->GetSrc(), "1");
+    passwordArea->SetObscured(true);
+    EXPECT_EQ(passwordArea->GetCurrentSourceInfo()->GetSrc(), "2");
+}
+
+/**
+ * @tc.name: TextFieldResponseArea002
+ * @tc.desc: test change response area not effect response state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldResponseAreaTest, TextFieldResponseArea002, TestSize.Level1)
+{
+    PasswordIcon myIcon =  {
+        .showResult = "1",
+        .hideResult = "2",
+        .showBundleName = "1",
+        .hideBundleName = "2",
+        .showModuleName = "1",
+        .hideModuleName = "2",
+    };
+    CreateTextField(DEFAULT_TEXT, "", [myIcon](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+        model.SetPasswordIcon(myIcon);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+    });
+    RefPtr<TextInputResponseArea> responseArea = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern_);
+    auto convertedArea = AceType::DynamicCast<CleanNodeResponseArea>(responseArea);
+    convertedArea->UpdateCleanNode(true);
+    EXPECT_EQ(convertedArea->IsShow(), true);
+    responseArea = AceType::MakeRefPtr<PasswordResponseArea>(pattern_, true);
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea);
+    passwordArea->InitResponseArea();
+    EXPECT_EQ(passwordArea->GetCurrentSourceInfo()->GetSrc(), "2");
+}
+
+/**
+ * @tc.name: GetGlobalPointsWithTransform
+ * @tc.desc: test GetGlobalPointsWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, GetGlobalPointsWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call GetGlobalPointsWithTransform.
+     */
+    std::vector<OffsetF> localPoints = { OffsetF(5.0f, 5.0f) };
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointTransform(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(-5.0f);
+        point.SetY(5.0f);
+    });
+    pattern_->selectOverlay_->GetGlobalPointsWithTransform(localPoints);
+    EXPECT_EQ(localPoints[0].GetX(), -5.0f);
+    EXPECT_EQ(localPoints[0].GetY(), 5.0f);
+}
+
+/**
+ * @tc.name: GetGlobalRectWithTransform
+ * @tc.desc: test GetGlobalRectWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, GetGlobalRectWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call GetGlobalRectWithTransform.
+     */
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointTransform(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(point.GetX());
+        point.SetY(point.GetY());
+    });
+    RectF rect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    pattern_->selectOverlay_->GetGlobalRectWithTransform(rect);
+    EXPECT_EQ(rect.GetOffset(), OffsetF(5.0f, 5.0f));
+    EXPECT_EQ(rect.GetSize(), SizeF(5.0f, 5.0f));
+}
+
+/**
+ * @tc.name: RevertLocalPointWithTransform
+ * @tc.desc: test RevertLocalPointWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, RevertLocalPointWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call RevertLocalPointWithTransform
+     */
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(5.0f);
+        point.SetY(5.0f);
+    });
+    OffsetF offset(-5.0f, 5.0f);
+    pattern_->selectOverlay_->RevertLocalPointWithTransform(offset);
+    EXPECT_EQ(offset.GetX(), 5.0f);
+    EXPECT_EQ(offset.GetY(), 5.0f);
+}
+
+/**
+ * @tc.name: GetGlobalRectVertexWithTransform
+ * @tc.desc: test GetGlobalRectVertexWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, GetGlobalRectVertexWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call GetGlobalRectVertexWithTransform
+     */
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(point.GetX());
+        point.SetY(point.GetY());
+    });
+    RectF rect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    auto vertex = pattern_->selectOverlay_->GetGlobalRectVertexWithTransform(rect);
+    EXPECT_EQ(vertex[0], OffsetF(5.0f, 5.0f));
+    EXPECT_EQ(vertex[1], OffsetF(10.0f, 5.0f));
+    EXPECT_EQ(vertex[2], OffsetF(5.0f, 10.0f));
+    EXPECT_EQ(vertex[3], OffsetF(10.0f, 10.0f));
+}
+
+/**
+ * @tc.name: GetLocalPointsWithTransform
+ * @tc.desc: test GetLocalPointsWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, GetLocalPointsWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call GetLocalPointsWithTransform
+     */
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(point.GetX());
+        point.SetY(point.GetY());
+    });
+    std::vector<OffsetF> localPoints = { OffsetF(5.0f, 5.0f) };
+    pattern_->selectOverlay_->GetLocalPointsWithTransform(localPoints);
+    EXPECT_EQ(localPoints[0].GetX(), 5.0f);
+    EXPECT_EQ(localPoints[0].GetY(), 5.0f);
+}
+
+/**
+ * @tc.name: GetLocalRectWithTransform
+ * @tc.desc: test GetLocalRectWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, GetLocalRectWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call GetLocalRectWithTransform
+     */
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(point.GetX());
+        point.SetY(point.GetY());
+    });
+    RectF rect(OffsetF(0.0f, 0.0f), SizeF(5.0f, 5.0f));
+    pattern_->selectOverlay_->GetLocalRectWithTransform(rect);
+    EXPECT_EQ(rect.GetOffset().GetX(), 0.0f);
+    EXPECT_EQ(rect.GetOffset().GetY(), 0.0f);
+    EXPECT_EQ(rect.GetSize().Width(), 5.0f);
+    EXPECT_EQ(rect.GetSize().Height(), 5.0f);
+}
+
+/**
+ * @tc.name: IsPointInRect
+ * @tc.desc: test IsPointInRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, IsPointInRect, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call IsPointInRect
+     */
+    OffsetF leftTop(0.0f, 0.0f);
+    OffsetF leftBottom(0.0f, 5.0f);
+    OffsetF rightTop(5.0f, 0.0f);
+    OffsetF rightBottom(5.0f, 5.0f);
+    OffsetF point(1.0f, 1.0f);
+    auto ret = pattern_->selectOverlay_->IsPointInRect(point, leftBottom, rightBottom, rightTop, leftTop);
+    EXPECT_TRUE(ret);
+    point = OffsetF(-1.0f, -1.0f);
+    ret = pattern_->selectOverlay_->IsPointInRect(point, leftBottom, rightBottom, rightTop, leftTop);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS::Ace::NG

@@ -31,6 +31,7 @@ namespace OHOS::Ace {
 
 struct NodeInfoPU {
     std::function<void()> appearFunc;
+    std::function<void()> didBuildFunc;
     std::function<RefPtr<AceType>()> renderFunc;
     std::function<void()> updateFunc;
     std::function<void()> removeFunc;
@@ -47,6 +48,7 @@ struct NodeInfoPU {
     std::function<void(RefPtr<NG::CustomNodeBase>)> recycleCustomNodeFunc;
     std::function<void(bool)> setActiveFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
+    std::function<void*()> getThisFunc;
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;

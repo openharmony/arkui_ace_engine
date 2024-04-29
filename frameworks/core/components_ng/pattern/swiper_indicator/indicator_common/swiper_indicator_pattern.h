@@ -162,6 +162,7 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void SetIndicatorInteractive(bool isInteractive);
 
 private:
     void OnModifyDone() override;
@@ -195,6 +196,9 @@ private:
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     float HandleTouchClickMargin();
     int32_t GetCurrentIndex() const;
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -207,6 +211,7 @@ private:
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     bool isClicked_ = false;
     bool isRepeatClicked_ = false;
+    bool focusEventInitialized_ = false;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;

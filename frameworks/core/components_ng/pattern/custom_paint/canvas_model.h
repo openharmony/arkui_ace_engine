@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,11 +24,10 @@ namespace OHOS::Ace {
 class CanvasModel {
 public:
     static CanvasModel* GetInstance();
+    static CanvasModel* GetInstanceNG();
     virtual ~CanvasModel() = default;
 
     virtual RefPtr<AceType> Create() = 0;
-    virtual RefPtr<AceType> GetTaskPool(RefPtr<AceType>& pattern) = 0;
-    virtual void PushCanvasPattern(RefPtr<AceType>& canvasPattern) {};
     virtual void SetOnReady(std::function<void(uint32_t)>&& onReady) {};
     virtual void SetOnReady(std::function<void()>&& onReady) {};
     virtual void EnableAnalyzer(bool enable) {};

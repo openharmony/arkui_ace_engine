@@ -17,9 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_PAN_RECOGNIZER_H
 
 #include <map>
+
 #include "core/components_ng/event/drag_event.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/components_ng/gestures/pan_gesture.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -82,16 +83,26 @@ public:
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
 
-    bool AboutToAddCurrentFingers(int32_t touchId) override
-    {
-        if (fingersId_.find(touchId) != fingersId_.end()) {
-            return false;
-        }
-        currentFingers_++;
-        return true;
-    }
+    bool AboutToAddCurrentFingers(int32_t touchId) override;
+
+    bool AboutToMinusCurrentFingers(int32_t touchId) override;
 
 private:
+    class PanVelocity {
+    public:
+        Velocity GetVelocity();
+        double GetMainAxisVelocity();
+        void UpdateTouchPoint(int32_t id, const TouchEvent& event, bool end);
+        void Reset(int32_t id);
+        void ResetAll();
+        void SetDirection(int32_t directionType);
+
+    private:
+        int32_t GetFastestTracker(std::function<double(VelocityTracker&)>&& func);
+        std::map<int32_t, VelocityTracker> trackerMap_;
+        Axis axis_ = Axis::FREE;
+    };
+
     enum class GestureAcceptResult {
         ACCEPT,
         REJECT,
@@ -110,6 +121,7 @@ private:
     GestureAcceptResult IsPanGestureAccept() const;
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
+    void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     GestureJudgeResult TriggerGestureJudgeCallback();
@@ -122,6 +134,8 @@ private:
 
     void OnResetStatus() override;
     void OnSucceedCancel() override;
+
+    void AddOverTimeTrace();
 
     const TouchRestrict& GetTouchRestrict() const
     {
@@ -136,7 +150,7 @@ private:
     std::map<int32_t, Offset> touchPointsDistance_;
     Offset delta_;
     double mainDelta_ = 0.0;
-    VelocityTracker velocityTracker_;
+    PanVelocity panVelocity_;
     TimeStamp time_;
 
     Point globalPoint_;

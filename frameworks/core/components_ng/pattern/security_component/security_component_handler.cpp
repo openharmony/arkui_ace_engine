@@ -308,13 +308,8 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
 
 void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect)
 {
-    auto parentFrame = AceType::DynamicCast<FrameNode>(node);
-    if (!parentFrame) {
-        LOGW("Parent %{public}s get frame failed", node->GetTag().c_str());
-        return;
-    }
-    RectF parentRect = parentFrame->GetRenderContext()->GetPaintRectWithTransform();
-    parentRect.SetOffset(parentFrame->GetOffsetRelativeToWindow());
+    RectF parentRect = node->GetRenderContext()->GetPaintRectWithTransform();
+    parentRect.SetOffset(node->GetOffsetRelativeToWindow());
     visibleRect = visibleRect.Constrain(parentRect);
 }
 
@@ -349,10 +344,6 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     buttonInfo.textIconSpace_ =
         layoutProperty->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToVp();
 
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_RETURN(container, false);
-    buttonInfo.windowId_ = static_cast<int32_t>(container->GetWindowId());
-
     if (!GetDisplayOffset(node, buttonInfo.rect_.x_, buttonInfo.rect_.y_)) {
         LOGW("Get display offset failed");
         return false;
@@ -367,7 +358,13 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     auto rect = render->GetPaintRectWithTransform();
     buttonInfo.rect_.width_ = rect.Width();
     buttonInfo.rect_.height_ = rect.Height();
-
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_RETURN(container, false);
+    uint32_t windId = container->GetWindowId();
+    if (pipeline->IsFocusWindowIdSetted()) {
+        windId = pipeline->GetFocusWindowId();
+    }
+    buttonInfo.windowId_ = static_cast<int32_t>(windId);
     return true;
 }
 
@@ -501,7 +498,8 @@ int32_t SecurityComponentHandler::UnregisterSecurityComponent(int32_t& scId)
 }
 
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t& scId,
-    RefPtr<FrameNode>& node, SecCompClickEvent& event)
+    RefPtr<FrameNode>& node, SecCompClickEvent& event,
+    Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback)
 {
     std::string componentInfo;
     SecCompType type;
@@ -510,11 +508,17 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t
     }
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_RETURN(container, -1);
-    return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, event, container->GetToken());
+    sptr<IRemoteObject> token = container->GetToken();
+    if (container->GetParentToken() != nullptr) {
+        token = container->GetParentToken();
+    }
+    return SecCompKit::ReportSecurityComponentClickEvent(scId,
+        componentInfo, event, token, std::move(callback));
 }
 
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scId,
-    RefPtr<FrameNode>& node, GestureEvent& event)
+    RefPtr<FrameNode>& node, GestureEvent& event,
+    Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback)
 {
     SecCompClickEvent secEvent;
     secEvent.type = ClickEventType::POINT_EVENT_TYPE;
@@ -532,11 +536,12 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
 #endif
 
-    return ReportSecurityComponentClickEventInner(scId, node, secEvent);
+    return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback));
 }
 
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scId,
-    RefPtr<FrameNode>& node, const KeyEvent& event)
+    RefPtr<FrameNode>& node, const KeyEvent& event,
+    Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback)
 {
     SecCompClickEvent secEvent;
     secEvent.type = ClickEventType::KEY_EVENT_TYPE;
@@ -549,7 +554,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
     }
-    return ReportSecurityComponentClickEventInner(scId, node, secEvent);
+    return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback));
 }
 
 bool SecurityComponentHandler::IsSecurityComponentServiceExist()

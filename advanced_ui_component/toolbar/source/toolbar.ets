@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 export enum ItemState {
   ENABLE = 1,
   DISABLE = 2,
-  ACTIVATE = 3
+  ACTIVATE = 3,
 }
 
 const PUBLIC_MORE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAAIGNIUk0AAHomAACAhAAA" +
@@ -28,12 +28,17 @@ const PUBLIC_MORE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAA
   "n83s1o3AAAAAAAAAAAAAEAysyKS6zYrIrlusyKS6zYrwqyIdGZFJDMrIplZETPIrIh5qdusCLMi0pkVkcysiAqYFVEJsyIAAAAAAAAAKOYXUlF" +
   "8EUcdfbsAAAAASUVORK5CYII=";
 
+interface MenuController {
+  value: string;
+  action: () => void;
+}
+
 @Observed
 export class ToolBarOption {
-  content: string;
-  action?: () => void;
-  icon?: Resource;
-  state?: ItemState = 1;
+  public content: string = '';
+  public action?: () => void = undefined;
+  public icon?: Resource = undefined;
+  public state?: ItemState = 1;
 }
 
 @Observed
@@ -43,10 +48,10 @@ export class ToolBarOptions extends Array<ToolBarOption> {
 @Component
 export struct ToolBar {
   @ObjectLink toolBarList: ToolBarOptions
-  controller: TabsController
+  controller: TabsController = new TabsController();
   @Prop activateIndex: number = -1
   @Prop moreText: string = "更多"
-  @State menuContent: { value: string, action: () => void }[] = []
+  @State menuContent: MenuController[] = [];
   toolBarItemBackground: Resource[] = []
   @State itemBackground: Resource = $r('sys.color.ohos_id_color_toolbar_bg')
   @Builder MoreTabBuilder(index: number) {
@@ -57,11 +62,12 @@ export struct ToolBar {
         .fillColor($r('sys.color.ohos_id_color_toolbar_icon'))
         .margin({ top: 8, bottom: 2 })
         .objectFit(ImageFit.Contain)
+        .bindMenu(this.menuContent, { offset: { x: 5, y : -10 } })
       Text(this.moreText)
         .fontColor($r('sys.color.ohos_id_color_toolbar_text'))
         .fontSize($r('sys.float.ohos_id_text_size_caption'))
         .fontWeight(FontWeight.Medium)
-    }.width('100%').height('100%').bindMenu(this.menuContent, { offset: { x: 5, y : -10}})
+    }.width('100%').height('100%')
     .padding({left: 4, right: 4})
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
   }
@@ -94,21 +100,22 @@ export struct ToolBar {
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .backgroundColor(this.itemBackground)
     .onClick(() => {
-      if (this.toolBarList[index].state === 3) {
+      let toolbar = this.toolBarList[index];
+      if (toolbar.state === ItemState.ACTIVATE) {
         if (this.activateIndex === index)
-          this.activateIndex = -1
+          this.activateIndex = -1;
         else {
-          this.activateIndex = index
+          this.activateIndex = index;
         }
       }
-      if (!(this.toolBarList[index].state === 2)) {
-        this.toolBarList[index].action && this.toolBarList[index].action()
+      if (!(toolbar.state === ItemState.DISABLE)) {
+        toolbar.action && toolbar.action();
       }
     })
     .onHover((isHover: boolean) => {
-      if (isHover ) {
-        this.toolBarItemBackground[index] = (this.toolBarList[index].state === 2)
-          ? $r('sys.color.ohos_id_color_toolbar_bg'): $r('sys.color.ohos_id_color_hover')
+      if (isHover) {
+        this.toolBarItemBackground[index] = (this.toolBarList[index].state === ItemState.DISABLE)
+          ? $r('sys.color.ohos_id_color_toolbar_bg') : $r('sys.color.ohos_id_color_hover')
       } else {
         this.toolBarItemBackground[index] = $r('sys.color.ohos_id_color_toolbar_bg')
       }
@@ -116,7 +123,8 @@ export struct ToolBar {
     })
     .stateStyles({
       pressed: {
-        .backgroundColor((this.toolBarList[index].state === 2) ? this.toolBarItemBackground[index] : $r('sys.color.ohos_id_color_click_effect'))
+        .backgroundColor((this.toolBarList[index].state === ItemState.DISABLE) ?
+        this.toolBarItemBackground[index] : $r('sys.color.ohos_id_color_click_effect'))
       },
       normal: {
         .backgroundColor(this.toolBarItemBackground[index])
@@ -130,7 +138,7 @@ export struct ToolBar {
       if (i >= 4 && this.toolBarList.length > 5) {
         this.menuContent[i - 4] = {
           value: this.toolBarList[i].content,
-          action: this.toolBarList[i].action
+          action: this.toolBarList[i].action as () => void,
         }
       } else {
         this.toolBarItemBackground[i] = $r('sys.color.ohos_id_color_toolbar_bg')

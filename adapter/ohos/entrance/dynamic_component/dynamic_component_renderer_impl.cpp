@@ -109,10 +109,10 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
         CHECK_NULL_VOID(renderer);
         auto width = size.Width();
         auto height = size.Height();
+        TAG_LOGD(AceLogTag::ACE_DYNAMIC_COMPONENT, "page size callback: wh(%{public}f,%{public}f)", width, height);
         if (!NearEqual(renderer->contentSize_.Width(), width) || !NearEqual(renderer->contentSize_.Height(), height)) {
             renderer->contentSize_.SetSizeT(size);
-            TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "dynamic card size: width=%{public}f, height=%{public}f", width,
-                height);
+            TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "dynamic card size: wh(%{public}f,%{public}f)", width, height);
             auto hostTaskExecutor = renderer->GetHostTaskExecutor();
             CHECK_NULL_VOID(hostTaskExecutor);
             hostTaskExecutor->PostTask(
@@ -124,7 +124,7 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
                     CHECK_NULL_VOID(pattern);
                     pattern->OnSizeChanged(width, height);
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIDynamicComponentSizeChanged");
         }
     };
     pagePattern->SetDynamicPageSizeCallback(std::move(dynamicPageSizeCallback));
@@ -169,7 +169,7 @@ void DynamicComponentRendererImpl::AttachRenderContext()
             parent->RebuildRenderContextTree();
             hostRenderContext->RequestNextFrame();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentAttachRenderContext");
 }
 
 void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -181,7 +181,7 @@ void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MM
             ContainerScope scope(uiContent->GetInstanceId());
             uiContent->ProcessPointerEvent(pointerEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessPointer");
 }
 
 void DynamicComponentRendererImpl::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -193,34 +193,33 @@ void DynamicComponentRendererImpl::TransferKeyEvent(const std::shared_ptr<MMI::K
             ContainerScope scope(uiContent->GetInstanceId());
             uiContent->ProcessKeyEvent(keyEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessKey");
 }
 
 void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& config,
     Rosen::WindowSizeChangeReason reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_NULL_VOID(uiContent_);
-
-    ViewportConfig vpConfig;
-    vpConfig.SetDensity(config.Density());
-    vpConfig.SetPosition(config.Left(), config.Top());
-    vpConfig.SetOrientation(config.Orientation());
-
-    if (config.Width() == 0 && config.Height() == 0 && !adaptive_) {
-        TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "set adaptive size for dynamic component '%{public}d'",
-            uiContent_->GetInstanceId());
-        adaptive_ = true;
-        int32_t deviceWidth = 0;
-        int32_t deviceHeight = 0;
+    int32_t width = config.Width();
+    int32_t height = config.Height();
+    contentSize_.SetWidth(width);
+    contentSize_.SetHeight(height);
+    if (width == 0 || height == 0) {
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         if (defaultDisplay) {
-            deviceWidth = defaultDisplay->GetWidth();
-            deviceHeight = defaultDisplay->GetHeight();
+            if (width == 0) {
+                width = defaultDisplay->GetWidth();
+            }
+            if (height == 0) {
+                height = defaultDisplay->GetHeight();
+            }
+            TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "set adaptive size (%{public}d, %{public}d) for DC(%{public}d)",
+                width, height, uiContent_->GetInstanceId());
         }
-        vpConfig.SetSize(deviceWidth, deviceHeight);
-    } else {
-        vpConfig.SetSize(config.Width(), config.Height());
     }
+    ViewportConfig vpConfig(width, height, config.Density());
+    vpConfig.SetPosition(config.Left(), config.Top());
+    vpConfig.SetOrientation(config.Orientation());
 
     auto task = [weak = WeakClaim(this), vpConfig, reason, rsTransaction]() {
         auto renderer = weak.Upgrade();
@@ -246,7 +245,8 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
     if (contentReady) {
         auto taskExecutor = GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask(
+            std::move(task), TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewportConfig");
     }
 }
 
@@ -260,7 +260,7 @@ void DynamicComponentRendererImpl::DestroyContent()
             TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "destroy dynamic UI content");
             uiContent->Destroy();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentDestroy");
 }
 
 RefPtr<TaskExecutor> DynamicComponentRendererImpl::GetTaskExecutor()

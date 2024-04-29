@@ -36,6 +36,7 @@ static napi_value PromptActionExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("showDialog", JSPromptShowDialog),
         DECLARE_NAPI_FUNCTION("showActionMenu", JSPromptShowActionMenu),
         DECLARE_NAPI_FUNCTION("openCustomDialog", JSPromptOpenCustomDialog),
+        DECLARE_NAPI_FUNCTION("updateCustomDialog", JSPromptUpdateCustomDialog),
         DECLARE_NAPI_FUNCTION("closeCustomDialog", JSPromptCloseCustomDialog),
         DECLARE_NAPI_PROPERTY("ToastShowMode", showMode),
     };

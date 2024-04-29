@@ -370,7 +370,10 @@ struct SelectItem {
           SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
-        .shadow(ShadowStyle.OUTER_DEFAULT_MD)
+        .shadow(ShadowStyle.OUTER_DEFAULT_XS)
+        .pixelRound({
+          top:PixelRoundCalcPolicy.FORCE_FLOOR
+        })
     }
   }
 }
@@ -671,7 +674,7 @@ struct SegmentButtonItemArrayComponent {
                 options: this.options,
                 property: this.buttonItemProperty[index]
               })
-                .onAreaChange((_, newValue) => {
+                .onSizeChange((_, newValue) => {
                   // Calculate height of items
                   this.buttonItemsRealHeight[index] = newValue.height as number
                   let maxHeight = Math.max(...this.buttonItemsRealHeight.slice(0, this.options.buttons ? this.options.buttons.length : 0))
@@ -687,9 +690,15 @@ struct SegmentButtonItemArrayComponent {
               y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index]
             })
             .layoutWeight(1)
-            .onAreaChange((_, newValue) => {
+            .onSizeChange((_, newValue) => {
               this.buttonItemsSize[index] = { width: newValue.width, height: this.buttonItemsSize[index].height }
-              this.buttonItemsPosition[index] = newValue.position
+              //measure position
+              if (newValue.width) {
+                this.buttonItemsPosition[index] = {
+                  x: Number.parseInt(this.options.componentPadding.toString()) + (Number.parseInt(newValue.width.toString()) + 1) * index,
+                  y: Number.parseInt(this.options.componentPadding.toString())
+                }
+              }
             })
             .overlay(this.focusStack(index), {
               align: Alignment.Center
@@ -743,7 +752,7 @@ struct SegmentButtonItemArrayComponent {
         })
       }
       .padding(this.options.componentPadding)
-      .onAreaChange((_, newValue) => {
+      .onSizeChange((_, newValue) => {
         this.componentSize = { width: newValue.width, height: newValue.height }
       })
     }

@@ -17,11 +17,11 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_V2_H
 
 #include <mutex>
-#include <shared_mutex>
 
 #include "resource_manager.h"
 
 #include "base/image/pixel_map.h"
+#include "base/utils/device_config.h"
 #include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
@@ -78,6 +78,7 @@ public:
     uint32_t GetSymbolByName(const char* resName) const override;
     uint32_t GetSymbolById(uint32_t resId) const override;
     RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName) override;
+    void UpdateColorMode(ColorMode colorMode) override;
 
 private:
     std::string GetActualResourceName(const std::string& resName) const;
@@ -92,6 +93,7 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> sysResourceManager_;
     std::string packagePathStr_;
     std::shared_ptr<Global::Resource::ResConfig> resConfig_;
+    std::mutex updateResConfigMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImplV2);
 };
 } // namespace OHOS::Ace

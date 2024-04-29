@@ -39,8 +39,9 @@ const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
 const TEXT_COLUMN_SPACE = 4;
 const TEXT_SAFE_MARGIN = 8;
-const LISTITEM_PADDING = 8;
-const SWITCH_PADDING = 6;
+const LISTITEM_PADDING = 6;
+const SWITCH_PADDING = 4;
+const STACK_PADDING = 4;
 const BADGE_SIZE = 8;
 const SMALL_ICON_SIZE = 16;
 const SYSTEM_ICON_SIZE = 24;
@@ -883,7 +884,7 @@ class OperateItemStruct extends ViewPU {
       Row.create({ space: SPECICAL_ROW_SPACE });
       Row.padding({
         left: TEXT_SAFE_MARGIN,
-        right: TEXT_SAFE_MARGIN
+        right: LISTITEM_PADDING
       });
       if (!k4) {
         Row.pop();
@@ -1223,8 +1224,8 @@ export class ComposeListItem extends ViewPU {
       ViewStackProcessor.StartGetAccessRecordingFor(z1);
       Stack.create();
       Stack.padding({
-        left: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_default_padding_start'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_default_padding_end'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        left: STACK_PADDING,
+        right: STACK_PADDING
       });
       if (!a2) {
         Stack.pop();

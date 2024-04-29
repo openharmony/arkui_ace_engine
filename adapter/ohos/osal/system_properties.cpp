@@ -44,12 +44,14 @@ constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 constexpr char PROPERTY_DEVICE_TYPE_TWOINONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
+constexpr char DISTRIBUTE_ENGINE_BUNDLE_NAME[] = "atomic.service.distribute.engine.bundle.name";
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -60,6 +62,7 @@ std::shared_mutex mutex_;
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
+constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
 
 using RsOrientation = Rosen::DisplayOrientation;
 
@@ -118,6 +121,11 @@ bool IsStateManagerEnable()
 bool IsBuildTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.build.enabled", "false") == "true");
+}
+
+bool IsSyncDebugTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.sync.debug.enabled", "false") == "true");
 }
 
 bool IsDeveloperModeOn()
@@ -252,7 +260,12 @@ int32_t GetAstcPsnrProp()
 
 bool GetImageFileCacheConvertToAstcEnabled()
 {
-    return system::GetParameter("persist.image.filecache.astc.enable", "true") == "true";
+    return system::GetParameter("persist.image.filecache.astc.enable", "false") == "true";
+}
+
+int32_t GetImageFileCacheConvertAstcThresholdProp()
+{
+    return system::GetIntParameter<int>("persist.image.filecache.astc.threshold", CONVERT_ASTC_THRESHOLD);
 }
 
 bool IsUseMemoryMonitor()
@@ -281,9 +294,23 @@ bool IsResourceDecoupling()
 
 bool IsAcePerformanceMonitorEnabled()
 {
-    return system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
+    return system::GetParameter("const.logsystem.versiontype", "commercial") == "beta" ||
+           system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
 }
 } // namespace
+
+bool IsFaultInjectEnabled()
+{
+    return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
+}
+
+std::vector<double> GetPercent()
+{
+    std::vector<double> result;
+    StringUtils::StringSplitter(
+        system::GetParameter("const.ark.darkModeAppBGColorBrightness", "0.10,0.05"), ',', result);
+    return result;
+}
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
@@ -292,6 +319,7 @@ bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerM
 bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -328,14 +356,17 @@ bool SystemProperties::astcEnabled_ = GetAstcEnabled();
 int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 bool SystemProperties::imageFileCacheConvertAstc_ = GetImageFileCacheConvertToAstcEnabled();
+int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = GetImageFileCacheConvertAstcThresholdProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
+std::vector<double> SystemProperties::brightUpPercent_ = GetPercent();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -354,6 +385,11 @@ void SystemProperties::InitDeviceType(DeviceType)
 int SystemProperties::GetArkProperties()
 {
     return system::GetIntParameter<int>("persist.ark.properties", -1);
+}
+
+std::string SystemProperties::GetMemConfigProperty()
+{
+    return system::GetParameter("persist.ark.mem_config_property", "");
 }
 
 std::string SystemProperties::GetArkBundleName()
@@ -420,6 +456,8 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
         deviceType_ = DeviceType::TABLET;
     } else if (deviceProp == PROPERTY_DEVICE_TYPE_TWOINONE) {
         deviceType_ = DeviceType::TWO_IN_ONE;
+    } else if (deviceProp == PROPERTY_DEVICE_TYPE_WEARABLE) {
+        deviceType_ = DeviceType::WEARABLE;
     } else {
         deviceType_ = DeviceType::PHONE;
     }
@@ -442,7 +480,7 @@ void SystemProperties::InitDeviceInfo(
     apiVersion_ = std::to_string(::GetSdkApiVersion());
     releaseType_ = ::GetOsReleaseType();
     paramDeviceType_ = ::GetDeviceType();
-
+    brightUpPercent_ = GetPercent();
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
@@ -450,6 +488,7 @@ void SystemProperties::InitDeviceInfo(
     traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
     stateManagerEnable_ = IsStateManagerEnable();
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+    syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();
@@ -459,11 +498,11 @@ void SystemProperties::InitDeviceInfo(
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
-
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
-
+    acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+    faultInjectEnabled_  = IsFaultInjectEnabled();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -493,7 +532,15 @@ ACE_WEAK_SYM float SystemProperties::GetFontWeightScale()
     // Default value of font weight scale is 1.0.
     std::string prop =
         "persist.sys.font_wght_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
-    return std::stof(system::GetParameter(prop, "1.0"));
+    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
+}
+
+ACE_WEAK_SYM float SystemProperties::GetFontScale()
+{
+    // Default value of font size scale is 1.0.
+    std::string prop =
+        "persist.sys.font_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
+    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
 }
 
 void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
@@ -674,5 +721,10 @@ void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTra
 void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 {
     debugBoundaryEnabled_ = debugBoundaryEnabled && developerModeOn_;
+}
+
+std::string SystemProperties::GetAtomicServiceBundleName()
+{
+    return system::GetParameter(DISTRIBUTE_ENGINE_BUNDLE_NAME, "");
 }
 } // namespace OHOS::Ace

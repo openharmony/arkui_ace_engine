@@ -61,7 +61,7 @@ void BadgePattern::OnModifyDone()
                 textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()));
             }
             badgeVisible = true;
-        } else {
+        } else if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             textLayoutProperty->ResetContent();
         }
     }
@@ -96,22 +96,50 @@ void BadgePattern::OnModifyDone()
     }
 
     textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-
     BorderWidthProperty borderWidth;
     borderWidth.SetBorderWidth(width);
     textLayoutProperty->UpdateBorderWidth(borderWidth);
-
     auto badgeColor = layoutProperty->GetBadgeColorValue();
     auto textRenderContext = lastFrameNode->GetRenderContext();
-    textRenderContext->SetVisible(badgeVisible);
     textRenderContext->UpdateBackgroundColor(badgeColor);
 
     Color color = layoutProperty->GetBadgeBorderColorValue(badgeTheme->GetBadgeBorderColor());
     BorderColorProperty borderColor;
     borderColor.SetColor(color);
     textRenderContext->UpdateBorderColor(borderColor);
+    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!lastBadgeVisible_ && !badgeVisible) {
+            textRenderContext->SetScale(0, 0);
+        }
+        if (lastBadgeVisible_ != badgeVisible) {
+            BadgeAnimation(lastFrameNode, badgeVisible);
+            lastBadgeVisible_ = badgeVisible;
+        }
+    } else {
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        textRenderContext->SetVisible(badgeVisible);
+    }
     lastFrameNode->MarkModifyDone();
 }
 
+void BadgePattern::BadgeAnimation(RefPtr<FrameNode>& frameNode, bool isShowBadge) const
+{
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    AnimationOption option;
+    option.SetDuration(duration_);
+    option.SetCurve(Curves::SHARP);
+
+    AnimationUtils::Animate(option, [&]() {
+        if (isShowBadge) {
+            renderContext->SetScale(1, 1);
+        } else {
+            renderContext->SetScale(0, 0);
+        }
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    });
+}
 } // namespace OHOS::Ace::NG

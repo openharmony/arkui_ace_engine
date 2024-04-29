@@ -19,9 +19,11 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -54,7 +56,11 @@ VisibleType StringToVisibleType(const std::string& str)
         { "Visibility.None", VisibleType::GONE },
     };
 
-    return uMap.count(str) ? uMap.at(str) : VisibleType::VISIBLE;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return VisibleType::VISIBLE;
 }
 
 std::string TextDirectionToString(TextDirection type)
@@ -81,7 +87,11 @@ TextDirection StringToTextDirection(const std::string& str)
         { "Direction.Auto", TextDirection::AUTO },
     };
 
-    return uMap.count(str) ? uMap.at(str) : TextDirection::LTR;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return TextDirection::LTR;
 }
 } // namespace
 
@@ -102,29 +112,30 @@ void LayoutProperty::Reset()
     CleanDirty();
 }
 
-void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(calcLayoutConstraint_, MeasureProperty);
     ACE_PROPERTY_TO_JSON_VALUE(positionProperty_, PositionProperty);
-    magicItemProperty_.ToJsonValue(json);
+    magicItemProperty_.ToJsonValue(json, filter);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
 
     if (padding_) {
-        json->Put("padding", padding_->ToJsonString().c_str());
+        json->PutExtAttr("padding", padding_->ToJsonString().c_str(), filter);
     } else {
-        json->Put("padding", "0.00vp");
+        json->PutExtAttr("padding", "0.00vp", filter);
     }
 
     if (margin_) {
-        json->Put("margin", margin_->ToJsonString().c_str());
+        json->PutExtAttr("margin", margin_->ToJsonString().c_str(), filter);
     } else {
-        json->Put("margin", "0.00vp");
+        json->PutExtAttr("margin", "0.00vp", filter);
     }
 
-    json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
-    json->Put("direction", TextDirectionToString(GetLayoutDirection()).c_str());
-    json->Put("pixelRound", PixelRoundToJsonValue().c_str());
+    json->PutExtAttr("visibility",
+        VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str(), filter);
+    json->PutExtAttr("direction", TextDirectionToString(GetLayoutDirection()).c_str(), filter);
+    json->PutExtAttr("pixelRound", PixelRoundToJsonValue().c_str(), filter);
 }
 
 void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -255,7 +266,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         // TODO: add margin is negative case.
         marginResult_.reset();
         auto margin = CreateMargin();
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->maxSize);
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->minSize);
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->percentReference);
@@ -483,13 +494,23 @@ void LayoutProperty::UpdateContentConstraint()
     if (padding_) {
         auto paddingF = ConvertToPaddingPropertyF(
             *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            contentConstraint_->MinusPaddingToNonNegativeSize(
+                paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        } else {
+            contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        }
     }
     if (borderWidth_) {
         auto borderWidthF = ConvertToBorderWidthPropertyF(
             *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPadding(
-            borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            contentConstraint_->MinusPaddingToNonNegativeSize(
+                borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+        } else {
+            contentConstraint_->MinusPadding(
+                borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+        }
     }
 }
 
@@ -554,6 +575,17 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
         padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
 }
 
+BorderWidthPropertyF LayoutProperty::CreateBorder()
+{
+    if (layoutConstraint_.has_value()) {
+        return ConvertToBorderWidthPropertyF(
+            borderWidth_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+    }
+
+    return ConvertToBorderWidthPropertyF(
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+}
+
 MarginPropertyF LayoutProperty::CreateMargin()
 {
     CHECK_NULL_RETURN(margin_, MarginPropertyF());
@@ -589,7 +621,7 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
 
     // update visibility value.
     propVisibility_ = visible;
-    host->OnVisibleChange(visible == VisibleType::VISIBLE);
+    host->NotifyVisibleChange(visible == VisibleType::VISIBLE);
     if (allowTransition && preVisibility) {
         if (preVisibility.value() == VisibleType::VISIBLE && visible != VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeDisappear(false);
@@ -719,6 +751,14 @@ void LayoutProperty::UpdateLayoutDirection(TextDirection value)
     }
     layoutDirection_ = value;
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+}
+
+TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
+{
+    auto direction = layoutDirection_.value_or(TextDirection::AUTO);
+    return direction != TextDirection::AUTO
+               ? direction
+               : (AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
 }
 
 void LayoutProperty::UpdateLayoutWeight(float value)

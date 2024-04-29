@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
+#include <string>
+
+#include "base/geometry/dimension.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
@@ -227,6 +230,18 @@ void WaterFlowModelNG::SetCachedCount(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
 }
 
+void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, int32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value, frameNode);
+}
+
+int32_t WaterFlowModelNG::GetCachedCount(FrameNode* frameNode)
+{
+    int32_t cachedCount = 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    return cachedCount;
+}
+
 void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
 {
     ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
@@ -252,6 +267,15 @@ RefPtr<WaterFlowSections> WaterFlowModelNG::GetOrCreateWaterFlowSections()
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetOrCreateWaterFlowSections();
+}
+
+void WaterFlowModelNG::ResetSections()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSections();
 }
 
 void WaterFlowModelNG::SetColumnsTemplate(FrameNode* frameNode, const std::string& value)
@@ -349,8 +373,55 @@ void WaterFlowModelNG::SetFriction(FrameNode* frameNode, double friction)
 FlexDirection WaterFlowModelNG::GetLayoutDirection(FrameNode* frameNode)
 {
     FlexDirection value = FlexDirection::COLUMN;
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         WaterFlowLayoutProperty, WaterflowDirection, value, frameNode, value);
     return value;
+}
+
+std::string WaterFlowModelNG::GetColumnsTemplate(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    std::string value = "1fr";
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, ColumnsTemplate, value, frameNode, value);
+    return value;
+}
+
+std::string WaterFlowModelNG::GetRowsTemplate(FrameNode* frameNode)
+{
+    std::string value = "1fr";
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, RowsTemplate, value, frameNode, value);
+    return value;
+}
+
+float WaterFlowModelNG::GetColumnsGap(FrameNode* frameNode)
+{
+    Dimension value;
+    CHECK_NULL_RETURN(frameNode, value.Value());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, ColumnsGap, value, frameNode, value);
+    return value.Value();
+}
+
+float WaterFlowModelNG::GetRowsGap(FrameNode* frameNode)
+{
+    Dimension value;
+    CHECK_NULL_RETURN(frameNode, value.Value());
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, RowsGap, value, frameNode, value);
+    return value.Value();
+}
+
+NestedScrollOptions WaterFlowModelNG::GetNestedScroll(FrameNode* frameNode)
+{
+    NestedScrollOptions defaultOptions;
+    CHECK_NULL_RETURN(frameNode, defaultOptions);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_RETURN(pattern, defaultOptions);
+    return pattern->GetNestedScroll();
+}
+
+void WaterFlowModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
+{
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
 }
 } // namespace OHOS::Ace::NG

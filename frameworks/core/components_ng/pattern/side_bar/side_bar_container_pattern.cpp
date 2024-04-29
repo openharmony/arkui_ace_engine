@@ -18,6 +18,7 @@
 #include <optional>
 
 #include "base/log/log_wrapper.h"
+#include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/internal_resource.h"
 #include "base/utils/utils.h"
@@ -114,6 +115,13 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
 
     SetSideBarStatus(newShowSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN);
     UpdateControlButtonIcon();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sideBarNode = GetSideBarNode(host);
+    CHECK_NULL_VOID(sideBarNode);
+    if (!newShowSideBar && sideBarNode->IsFirstBuilding()) {
+        SetSideBarActive(false, false);
+    }
 }
 
 void SideBarContainerPattern::OnUpdateShowControlButton(
@@ -216,7 +224,9 @@ RefPtr<FrameNode> SideBarContainerPattern::GetContentNode(const RefPtr<FrameNode
     auto iter = children.rbegin();
     std::advance(iter, CONTENT_INDEX);
     auto contentNode = AceType::DynamicCast<FrameNode>(*iter);
-    CHECK_NULL_RETURN(contentNode, nullptr);
+    if (!contentNode) {
+        contentNode = GetFirstFrameNode(*iter);
+    }
 
     return contentNode;
 }
@@ -233,9 +243,27 @@ RefPtr<FrameNode> SideBarContainerPattern::GetSideBarNode(const RefPtr<FrameNode
     auto iter = children.rbegin();
     std::advance(iter, SIDE_BAR_INDEX);
     auto sideBarNode = AceType::DynamicCast<FrameNode>(*iter);
-    CHECK_NULL_RETURN(sideBarNode, nullptr);
+    if (!sideBarNode) {
+        sideBarNode = GetFirstFrameNode(*iter);
+    }
 
     return sideBarNode;
+}
+
+RefPtr<FrameNode> SideBarContainerPattern::GetFirstFrameNode(const RefPtr<UINode>& host) const
+{
+    CHECK_NULL_RETURN(host, nullptr);
+    auto children = host->GetChildren();
+    while (!children.empty()) {
+        auto firstChild = children.front();
+        auto firstChildNode = AceType::DynamicCast<FrameNode>(firstChild);
+        if (firstChildNode) {
+            return firstChildNode;
+        }
+        children = firstChild->GetChildren();
+    }
+    TAG_LOGI(AceLogTag::ACE_SIDEBAR, "SideBarContainer can't find child frameNode to set ZIndex");
+    return nullptr;
 }
 
 RefPtr<FrameNode> SideBarContainerPattern::GetSideBarNodeOrFirstChild() const
@@ -473,13 +501,16 @@ void SideBarContainerPattern::UpdateDividerShadow() const
     }
 }
 
-void SideBarContainerPattern::SetSideBarActive(bool isActive) const
+void SideBarContainerPattern::SetSideBarActive(bool isActive, bool onlyJsActive) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto sideBarNode = GetSideBarNode(host);
     CHECK_NULL_VOID(sideBarNode);
     sideBarNode->SetJSViewActive(isActive);
+    if (!onlyJsActive) {
+        sideBarNode->SetActive(isActive);
+    }
 }
 
 void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode)
@@ -647,7 +678,7 @@ void SideBarContainerPattern::CreateAnimation()
     CHECK_NULL_VOID(host);
 
     if (!controller_) {
-        controller_ = CREATE_ANIMATOR(host->GetContext());
+        controller_ = CREATE_ANIMATOR(host->GetContextRefPtr());
     }
 
     auto weak = AceType::WeakClaim(this);
@@ -725,7 +756,7 @@ void SideBarContainerPattern::DoAnimation()
         sideBarStatus_ = SideBarStatus::HIDDEN;
     }
 
-    SetSideBarActive(true);
+    SetSideBarActive(true, false);
     UpdateAnimDir();
 
     AnimationOption option = AnimationOption();
@@ -752,7 +783,7 @@ void SideBarContainerPattern::DoAnimation()
             } else {
                 pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
                 pattern->UpdateControlButtonIcon();
-                pattern->SetSideBarActive(false);
+                pattern->SetSideBarActive(false, false);
             }
             pattern->inAnimation_ = false;
         }
@@ -888,7 +919,7 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     }
 
     if (!inAnimation_) {
-        SetSideBarActive(layoutAlgorithm->GetSideBarStatus() == SideBarStatus::SHOW);
+        SetSideBarActive(layoutAlgorithm->GetSideBarStatus() == SideBarStatus::SHOW, true);
     }
 
     adjustMaxSideBarWidth_ = layoutAlgorithm->GetAdjustMaxSideBarWidth();
@@ -932,6 +963,7 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
 
     auto dividerFrameNode = GetDividerNode();
     CHECK_NULL_VOID(dividerFrameNode);
+    dividerFrameNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     auto dividerGestureHub = dividerFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dividerGestureHub);
     dividerGestureHub->SetMouseResponseRegion(mouseRegion);
@@ -1071,10 +1103,21 @@ SideBarPosition SideBarContainerPattern::GetSideBarPositionWithRtl(
     const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
 {
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
-    if (layoutProperty->GetLayoutDirection() == TextDirection::RTL) {
+    if (layoutProperty->GetLayoutDirection() == TextDirection::RTL ||
+        AceApplicationInfo::GetInstance().IsRightToLeft()) {
         sideBarPosition = (sideBarPosition == SideBarPosition::START) ? SideBarPosition::END : SideBarPosition::START;
     }
     return sideBarPosition;
+}
+
+void SideBarContainerPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isRightToLeft_ != AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
 RefPtr<NodePaintMethod> SideBarContainerPattern::CreateNodePaintMethod()

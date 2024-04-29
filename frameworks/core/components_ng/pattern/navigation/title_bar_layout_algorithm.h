@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,6 +111,8 @@ private:
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float titleHeight);
     void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
+    float ChangeOffsetByDirection(LayoutWrapper* layoutWrapper,
+        const RefPtr<NG::GeometryNode>& childGeometryNode, float offsetX) const;
 
     // set variables from theme
     void InitializeTheme();
@@ -120,6 +122,16 @@ private:
     Dimension defaultPaddingStart_;
     Dimension iconSize_;
     Dimension titleFontSize_;
+    Dimension iconBackgroundWidth_;
+    Dimension backButtonWidth_;
+    Dimension backButtonHeight_;
+    Dimension backIconWidth_;
+    Dimension backIconHeight_;
+    Dimension marginLeft_;
+    Dimension marginRight_;
+    Dimension menuCompPadding_;
+    Dimension paddingTopTwolines_;
+    Dimension titleSpaceVertical_;
 
     float menuHeight_ = 0.0f;
     float initialTitleOffsetY_ = 0.0f;

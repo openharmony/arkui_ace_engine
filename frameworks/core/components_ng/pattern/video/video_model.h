@@ -32,7 +32,8 @@ public:
     virtual void Create(const RefPtr<VideoControllerV2>& videoController) = 0;
     virtual void SetSrc(const std::string& src) = 0;
     virtual void SetProgressRate(double progressRate) = 0;
-    virtual void SetPosterSourceInfo(const std::string& posterUrl) = 0;
+    virtual void SetPosterSourceInfo(const std::string& posterUrl, const std::string &bundleName,
+        const std::string &moduleName) = 0;
     virtual void SetPosterSourceByPixelMap(RefPtr<PixelMap>& pixMap) = 0;
     virtual void SetMuted(bool muted) = 0;
     virtual void SetAutoPlay(bool autoPlay) = 0;

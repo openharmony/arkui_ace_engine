@@ -24,12 +24,7 @@ namespace {
 std::string GetNavigationId(const RefPtr<NavDestinationPattern>& pattern)
 {
     CHECK_NULL_RETURN(pattern, "");
-    auto navigationNode = pattern->GetNavigationNode();
-    std::string navigationId;
-    if (navigationNode) {
-        navigationId = navigationNode->GetInspectorId().value_or("");
-    }
-    return navigationId;
+    return pattern->GetNavigationId();
 }
 } // namespace
 
@@ -45,11 +40,11 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     CHECK_NULL_VOID(ref);
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(ref);
     CHECK_NULL_VOID(pattern);
-    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
-    CHECK_NULL_VOID(host);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_VOID(pathInfo);
-    NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, host->GetIndex(),
+    NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
     CHECK_NULL_VOID(navigationHandleFunc_);
     navigationHandleFunc_(info);
@@ -81,7 +76,9 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
     int32_t index = pageInfo->GetPageIndex();
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
-    routerPageHandleFunc_(info, context, index, name, path, state);
+    std::string pageId = std::to_string(pageInfo->GetPageId());
+    RouterPageInfoNG routerPageInfo(context, index, name, path, state, pageId);
+    routerPageHandleFunc_(info, routerPageInfo);
 }
 
 void UIObserverHandler::NotifyDensityChange(double density)
@@ -93,6 +90,32 @@ void UIObserverHandler::NotifyDensityChange(double density)
         Container::Current()->GetModuleName()
     };
     densityHandleFunc_(info, density);
+}
+
+void UIObserverHandler::NotifyWillClick(
+    const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(willClickHandleFunc_);
+    AbilityContextInfo info = {
+        AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(),
+        Container::Current()->GetModuleName()
+    };
+    willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+}
+
+void UIObserverHandler::NotifyDidClick(
+    const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(didClickHandleFunc_);
+    AbilityContextInfo info = {
+        AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(),
+        Container::Current()->GetModuleName()
+    };
+    didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
 
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
@@ -162,19 +185,27 @@ std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const Re
     int32_t index = pageInfo->GetPageIndex();
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
+    std::string pageId = std::to_string(pageInfo->GetPageId());
     return std::make_shared<RouterPageInfoNG>(
         GetUIContextValue(),
         index,
         name,
         path,
-        RouterPageState(pattern->GetPageState()));
+        RouterPageState(pattern->GetPageState()),
+        pageId);
 }
 
 void UIObserverHandler::HandleDrawCommandSendCallBack()
 {
     CHECK_NULL_VOID(drawCommandSendHandleFunc_);
     ACE_LAYOUT_SCOPED_TRACE("drawCommandSend");
-    drawCommandSendHandleFunc_();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [callback = drawCommandSendHandleFunc_] { callback(); },
+        TaskExecutor::TaskType::JS, "ArkUIObserverDrawCommandSend");
 }
 
 void UIObserverHandler::HandleLayoutDoneCallBack()
@@ -231,6 +262,16 @@ void UIObserverHandler::SetLayoutDoneHandleFunc(LayoutDoneHandleFunc func)
 void UIObserverHandler::SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func)
 {
     navDestinationSwitchHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
+{
+    willClickHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
+{
+    didClickHandleFunc_ = func;
 }
 
 napi_value UIObserverHandler::GetUIContextValue()

@@ -24,10 +24,14 @@ namespace OHOS::Ace::Framework {
 class JSImageSpan : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
+    static void SetAlt(const JSCallbackInfo& info);
     static void SetObjectFit(const JSCallbackInfo& info);
     static void SetVerticalAlign(int32_t verticalAlign);
     static void SetTextBackgroundStyle(const JSCallbackInfo& info);
+    static void SetBaselineOffset(const JSCallbackInfo& info);
     static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
+    static void OnComplete(const JSCallbackInfo& args);
+    static void OnError(const JSCallbackInfo& args);
     static void JSBind(BindingTarget globalObj);
 };
 } // namespace OHOS::Ace::Framework

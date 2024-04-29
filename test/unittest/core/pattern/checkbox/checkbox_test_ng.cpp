@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 #include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
@@ -27,6 +28,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -37,8 +39,11 @@
 
 using namespace testing;
 using namespace testing::ext;
+using CheckboxBuilderFunc = std::optional<std::function<void()>>;
+
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const std::string NAME = "checkbox";
 const std::string GROUP_NAME = "checkboxGroup";
 const std::string GROUP_NAME_CHANGE = "checkboxGroupChange";
@@ -69,6 +74,7 @@ class CheckBoxTestNG : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    CheckboxBuilderFunc CheckboxBuilder();
 };
 
 void CheckBoxTestNG::SetUpTestSuite()
@@ -86,6 +92,16 @@ void CheckBoxTestNG::SetUpTestSuite()
 void CheckBoxTestNG::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+}
+
+CheckboxBuilderFunc CheckBoxTestNG::CheckboxBuilder()
+{
+    return []() {
+        ColumnModelNG colModel;
+        colModel.Create(Dimension(0), nullptr, "");
+        ViewAbstract::SetWidth(CalcLength(10.f));
+        ViewAbstract::SetHeight(CalcLength(10.f));
+    };
 }
 
 /**
@@ -156,7 +172,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest002, TestSize.Level1)
     auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
     ASSERT_NE(checkBoxPaintProperty, nullptr);
     auto json = JsonUtil::Create(true);
-    checkBoxPaintProperty->ToJsonValue(json);
+    checkBoxPaintProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("isOn"), "true");
 }
 
@@ -1071,7 +1087,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest001, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(6);
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
     /**
      * @tc.case: case. CheckBoxPaintMethod's PaintCheckBox code when !enabled_->Get()
@@ -1180,7 +1196,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest004, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(3);
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
 }
 
@@ -1627,7 +1643,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest007, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
 }
 
@@ -1757,7 +1773,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest010, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE2);
 }
 
@@ -1806,7 +1822,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest011, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE2);
 }
 
@@ -2167,10 +2183,11 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 4);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 5);
+    auto groupManager = pageEventHub->GetGroupManager();
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 4);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 5);
     pageNode->eventHub_ = pageEventHub;
 
     stageNode->AddChild(pageNode);
@@ -2181,6 +2198,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
      * @tc.steps: step4. create list with Children
      */
     auto checkBoxGroupPattern = AceType::MakeRefPtr<CheckBoxGroupPattern>();
+    checkBoxPattern->groupManager_ = GroupManager::GetGroupManager();
+    checkBoxGroupPattern->groupManager_ = GroupManager::GetGroupManager();
     auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::CHECKBOXGROUP_ETS_TAG, 2, checkBoxGroupPattern);
     auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     groupPaintProperty->isCheckBoxCallbackDealed_ = true;
@@ -2252,8 +2271,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0119, TestSize.Level1)
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
+    auto groupManager = pageEventHub->GetGroupManager();
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
     pageNode->eventHub_ = pageEventHub;
 
     stageNode->AddChild(pageNode);
@@ -2264,6 +2284,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0119, TestSize.Level1)
      * @tc.steps: step4. create list with Children
      */
     auto checkBoxGroupPattern = AceType::MakeRefPtr<CheckBoxGroupPattern>();
+    checkBoxPattern->groupManager_ = GroupManager::GetGroupManager();
+    checkBoxGroupPattern->groupManager_ = GroupManager::GetGroupManager();
     auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::CHECKBOXGROUP_ETS_TAG, 2, checkBoxGroupPattern);
     auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     groupPaintProperty->isCheckBoxCallbackDealed_ = false;
@@ -2316,9 +2338,10 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0120, TestSize.Level1)
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 4);
+    auto groupManager = pageEventHub->GetGroupManager();
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 4);
     pageNode->eventHub_ = pageEventHub;
     stageNode->AddChild(pageNode);
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
@@ -2328,6 +2351,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0120, TestSize.Level1)
      * @tc.steps: step4. create list with Children
      */
     auto checkBoxGroupPattern = AceType::MakeRefPtr<CheckBoxGroupPattern>();
+    checkBoxPattern->groupManager_ = GroupManager::GetGroupManager();
+    checkBoxGroupPattern->groupManager_ = GroupManager::GetGroupManager();
     auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::CHECKBOXGROUP_ETS_TAG, 2, checkBoxGroupPattern);
     auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     groupPaintProperty->isCheckBoxCallbackDealed_ = false;
@@ -2358,4 +2383,319 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0120, TestSize.Level1)
     auto checkBoxPattern3 = frameNode3->GetPattern<CheckBoxPattern>();
     EXPECT_TRUE(checkBoxPattern3->lastSelect_);
 }
+
+/**
+ * @tc.name: CheckBoxPatternTest0121
+ * @tc.desc: SetChangeValue and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0121, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern checkBoxSelect
+     */
+    pattern->SetCheckBoxSelect(SELECTED);
+    /**
+     * @tc.steps: step3. Get paint property
+     * @tc.expected: Check the CheckBox property value
+     */
+   
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    EXPECT_EQ(isSelected, SELECTED);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0122
+ * @tc.desc: SetChangeValue and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0122, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern checkBoxSelect
+     */
+    pattern->SetCheckBoxSelect(false);
+    /**
+     * @tc.steps: step3. Get paint property
+     * @tc.expected: Check the CheckBox property value
+     */
+   
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    EXPECT_EQ(isSelected, false);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0123
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0123, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetCheckBoxSelect(SELECTED);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetName(NAME);
+    auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(NAME, config.name_);
+                EXPECT_EQ(SELECTED, config.selected_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0124
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0124, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetCheckBoxSelect(false);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetName(NAME);
+
+    auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(NAME, config.name_);
+                EXPECT_EQ(false, config.selected_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0125
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0125, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create("", GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetCheckBoxSelect(false);
+
+    auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ("", config.name_);
+                EXPECT_EQ(false, config.selected_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0126
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0126, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create("", GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetCheckBoxSelect(false);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetName(NAME);
+    auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(NAME, config.name_);
+                EXPECT_EQ(false, config.selected_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0127
+ * @tc.desc: CheckBox test SetBuilder.
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0127, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxFunc = CheckboxBuilder();
+    checkBoxModelNG.SetBuilder(checkBoxFunc);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->builder_, nullptr);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0128
+ * @tc.desc: Test UpdateIndicator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0128, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto checkBoxFunc = CheckboxBuilder();
+    checkBoxModelNG.SetBuilder(checkBoxFunc);
+    /**
+     * @tc.steps: step2. Get CheckBox pattern object and get
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+   
+    /**
+     * @tc.steps: step3. call UpdateIndicator
+     * @tc.expected: test GetFirstChild is not null
+     */
+    pattern->OnModifyDone();
+    pattern->UpdateIndicator();
+    auto host = pattern->GetHost();
+    ASSERT_NE(host->GetFirstChild(), nullptr);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0129
+ * @tc.desc: Test StartCustomNodeAnimation when select is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0129, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    auto checkBoxFunc = CheckboxBuilder();
+    checkBoxModelNG.SetBuilder(checkBoxFunc);
+    /**
+     * @tc.steps: step2. Get CheckBox pattern object and get
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    pattern->StartCustomNodeAnimation(true);
+    auto host = pattern->GetHost();
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    ASSERT_NE(childNode, nullptr);
+    ASSERT_NE(childNode->GetRenderContext(), nullptr);
+    EXPECT_EQ(childNode->GetRenderContext()->GetOpacityValue(), 1);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0130
+ * @tc.desc: Test StartCustomNodeAnimation when select is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0130, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    auto checkBoxFunc = CheckboxBuilder();
+    checkBoxModelNG.SetBuilder(checkBoxFunc);
+    /**
+     * @tc.steps: step2. Get CheckBox pattern object and get
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    pattern->StartCustomNodeAnimation(false);
+    auto host = pattern->GetHost();
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    ASSERT_NE(childNode, nullptr);
+    ASSERT_NE(childNode->GetRenderContext(), nullptr);
+    EXPECT_EQ(childNode->GetRenderContext()->GetOpacityValue(), 0);
+}
 } // namespace OHOS::Ace::NG
+

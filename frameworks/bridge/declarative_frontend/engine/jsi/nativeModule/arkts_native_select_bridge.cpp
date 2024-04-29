@@ -16,11 +16,34 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 
 namespace OHOS::Ace::NG {
 const int32_t SIZE_OF_TWO = 2;
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_STR = "-1";
+const char* SELECT_NODEPTR_OF_UINODE = "nodePtr_";
+panda::Local<panda::JSValueRef> JsSelectChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    auto vm = runtimeCallInfo->GetVM();
+    auto firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!firstArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto index = firstArg->ToNumber(vm)->Value();
+    auto value = secondArg->ToString(vm)->ToString();
+    auto ref = runtimeCallInfo->GetThisRef();
+    auto obj = ref->ToObject(vm);
+    if (obj->GetNativePointerFieldCount() < 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    SelectModelNG::SetChangeValue(frameNode, index, value);
+    return panda::JSValueRef::Undefined(vm);
+}
 
 ArkUINativeModuleValue SelectBridge::SelectBridge::SetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -68,8 +91,11 @@ ArkUINativeModuleValue SelectBridge::SetSelected(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     int32_t value = 0;
-    ArkTSUtils::ParseJsInteger(vm, secondArg, value);
-    GetArkUINodeModifiers()->getSelectModifier()->setSelected(nativeNode, value);
+    if (ArkTSUtils::ParseJsIntegerWithResource(vm, secondArg, value)) {
+        GetArkUINodeModifiers()->getSelectModifier()->setSelected(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getSelectModifier()->resetSelected(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -681,6 +707,55 @@ ArkUINativeModuleValue SelectBridge::ResetSize(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSelectModifier()->resetSelectSize(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsObject()) {
+        SelectModelNG::ResetBuilderFunc(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::CopyableGlobal<panda::ObjectRef> obj(vm, secondArg);
+    SelectModelNG::SetBuilderFunc(frameNode,
+        [vm, frameNode, obj = std::move(obj), containerId = Container::CurrentId()](
+            MenuItemConfiguration config) -> RefPtr<FrameNode> {
+            ContainerScope scope(containerId);
+            auto context = ArkTSUtils::GetContext(vm);
+            CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
+            const char* keysOfSelect[] = { "value", "icon", "selected", "index", "triggerSelect"};
+            Local<JSValueRef> valuesOfSelect[] = { panda::StringRef::NewFromUtf8(vm, config.value_.c_str()),
+                panda::StringRef::NewFromUtf8(vm, config.icon_.c_str()),
+                panda::BooleanRef::New(vm, config.selected_),
+                panda::NumberRef::New(vm, config.index_),
+                panda::FunctionRef::New(vm, JsSelectChangeCallback)};
+            auto select = panda::ObjectRef::NewWithNamedProperties(vm,
+                ArraySize(keysOfSelect), keysOfSelect, valuesOfSelect);
+            select->SetNativePointerFieldCount(vm, 1);
+            select->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            panda::Local<panda::JSValueRef> params[] = { context, select };
+            LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            auto jsObject = obj.ToLocal();
+            auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            panda::Local<panda::FunctionRef> func = makeFunc;
+            auto result = func->Call(vm, jsObject, params, 2);
+            JSNApi::ExecutePendingJob(vm);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            auto resultObj = result->ToObject(vm);
+            panda::Local<panda::JSValueRef> nodeptr =
+                resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, SELECT_NODEPTR_OF_UINODE));
+            CHECK_EQUAL_RETURN(nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull(), true, nullptr);
+            auto* frameNode = reinterpret_cast<FrameNode*>(nodeptr->ToNativePointer(vm)->Value());
+            CHECK_NULL_RETURN(frameNode, nullptr);
+            return AceType::Claim(frameNode);
+        });
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -14,6 +14,7 @@
 group("advanced_ui_component") {
   deps = [
     "chip/interfaces:chip",
+    "chipgroup/interfaces:chipgroup",
     "composelistitem/interfaces:composelistitem",
     "composetitlebar/interfaces:composetitlebar",
     "counter/interfaces:counter",
@@ -21,6 +22,7 @@ group("advanced_ui_component") {
     "editabletitlebar/interfaces:editabletitlebar",
     "exceptionprompt/interfaces:exceptionprompt",
     "filter/interfaces:filter",
+    "fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent",
     "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
     "popup/interfaces:popup",
     "progressbutton/interfaces:progressbutton",

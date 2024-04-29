@@ -294,8 +294,8 @@ std::vector<double> TemplatesParser::ParseArgs(const std::string& args, double s
         peSum = FULL_PERCENT;
     }
     // Second loop calculate actual width or height.
-    double sizeLeft = size - (strs.size() - 1) * gap;
-    double sizeNoGap = size - (strs.size() - 1) * gap;
+    double sizeLeft = size - (static_cast<int32_t>(strs.size()) - 1) * gap;
+    double sizeNoGap = size - (static_cast<int32_t>(strs.size()) - 1) * gap;
     double prSumLeft = FULL_PERCENT;
     double frSizeSum = sizeNoGap * (FULL_PERCENT - peSum) / FULL_PERCENT - pxSum;
     for (const auto& str : strs) {

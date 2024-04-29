@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class CounterModifier extends ArkCounterComponent implements AttributeModifier<CounterAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: CounterAttribute): void {
-    applyAndMergeModifier<CounterAttribute, ArkCounterComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<CounterAttribute, ArkCounterComponent, ArkComponent>(instance, this);
   }
 }

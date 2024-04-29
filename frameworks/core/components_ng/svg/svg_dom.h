@@ -37,10 +37,11 @@ public:
     SvgDom();
     ~SvgDom() override;
 
-    static RefPtr<SvgDom> CreateSvgDom(SkStream& svgStream, const std::optional<Color>& color);
+    static RefPtr<SvgDom> CreateSvgDom(SkStream& svgStream, const ImageSourceInfo& src);
 
     void SetFuncNormalizeToPx(FuncNormalizeToPx&& funcNormalizeToPx);
     void SetAnimationCallback(std::function<void()>&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr) override;
+    void SetAnimationOnFinishCallback(const std::function<void()>& onFinishCallback) override;
     void ControlAnimation(bool play) override;
     bool IsStatic() override;
 
@@ -48,12 +49,15 @@ public:
 
     void SetFillColor(const std::optional<Color>& color) override;
     void SetSmoothEdge(float value) override;
+    void SetColorFilter(const std::optional<ImageColorFilter>& colorFilter) override;
 
     void DrawImage(
         RSCanvas& canvas, const ImageFit& imageFit, const Size& layout) override;
 
     SizeF GetContainerSize() const override;
     void SetContainerSize(const SizeF& containerSize) override {}
+
+    void PushAnimatorOnFinishCallback(const RefPtr<SvgNode>& root, std::function<void()> onFinishCallback);
 
 protected:
     void FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& layout);
@@ -74,7 +78,10 @@ private:
     Rect viewBox_;
     PushAttr attrCallback_;
     std::optional<Color> fillColor_;
+    std::string path_;
     float smoothEdge_ = 0.0f;
+    std::optional<ImageColorFilter> colorFilter_;
+    std::function<void()> onFinishCallback_;
 };
 } // namespace OHOS::Ace::NG
 

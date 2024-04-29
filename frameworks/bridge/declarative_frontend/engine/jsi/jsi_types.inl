@@ -193,6 +193,16 @@ void JsiCallbackInfo::SetReturnValue(JsiRef<T> val) const
     retVal_ = panda::CopyableGlobal<panda::JSValueRef>(val.Get().GetHandle());
 }
 
+template<typename T>
+T* JsiCallbackInfo::UnwrapArg(size_t index) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsObject()) {
+        return nullptr;
+    }
+    return static_cast<T*>(arg->ToObject(info_->GetVM())->GetNativePointerField(0));
+}
+
 template<typename... Args>
 void JsiException::Throw(const char* format, Args... args)
 {

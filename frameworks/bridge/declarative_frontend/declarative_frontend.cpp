@@ -202,7 +202,7 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
         jsEngine->Initialize(delegate);
     };
     if (needPostJsTask) {
-        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS);
+        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS, "ArkUIJSEngineInitialize");
     } else {
         initJSEngineTask();
     }
@@ -562,12 +562,25 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             }
             return jsEngine->SearchRouterRegisterMap(pageName);
         };
+        auto navigationLoadCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+            const std::string bundleName, const std::string& moduleName, const std::string& pageSourceFile,
+            bool isSingleton) -> int32_t {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return -1;
+            }
+            return jsEngine->LoadNavDestinationSource(bundleName, moduleName, pageSourceFile, isSingleton);
+        };
         auto container = Container::Current();
         if (container) {
             auto pageUrlChecker = container->GetPageUrlChecker();
             // ArkTSCard container no SetPageUrlChecker
             if (pageUrlChecker != nullptr) {
                 pageUrlChecker->SetModuleNameCallback(std::move(moduleNamecallback));
+            }
+            auto navigationRoute = container->GetNavigationRoute();
+            if (navigationRoute) {
+                navigationRoute->SetLoadPageCallback(std::move(navigationLoadCallback));
             }
         }
     }
@@ -588,7 +601,7 @@ UIContentErrorCode DeclarativeFrontend::RunPage(const std::string& url, const st
                 CHECK_NULL_VOID(frontend->jsEngine_);
                 frontend->jsEngine_->LoadFaAppSource();
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource");
     }
 
     if (delegate_) {
@@ -755,6 +768,11 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
 napi_value DeclarativeFrontend::GetContextValue()
 {
     return jsEngine_->GetContextValue();
+}
+
+napi_value DeclarativeFrontend::GetFrameNodeValueByNodeId(int32_t nodeId)
+{
+    return jsEngine_->GetFrameNodeValueByNodeId(nodeId);
 }
 
 #if defined(PREVIEW)
@@ -1079,7 +1097,7 @@ void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)
     std::string param = eventMarker.GetData().GetEventParam();
     if (eventMarker.GetData().isDeclarativeUi) {
         if (delegate_) {
-            delegate_->GetUiTask().PostTask([eventMarker] { eventMarker.CallUiFunction(); });
+            delegate_->GetUiTask().PostTask([eventMarker] { eventMarker.CallUiFunction(); }, "ArkUICallUiFunction");
         }
     } else {
         delegate_->FireAsyncEvent(eventMarker.GetData().eventId, param.append("null"), std::string(""));
@@ -1111,7 +1129,8 @@ void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, c
     if (eventMarker.GetData().isDeclarativeUi) {
         if (delegate_) {
             auto cinfo = CopyEventInfo(info);
-            delegate_->GetUiTask().PostTask([eventMarker, cinfo] { eventMarker.CallUiArgFunction(cinfo.get()); });
+            delegate_->GetUiTask().PostTask(
+                [eventMarker, cinfo] { eventMarker.CallUiArgFunction(cinfo.get()); }, "ArkUICallUiArgFunction");
         }
     } else {
         delegate_->FireAsyncEvent(eventMarker.GetData().eventId, param, "");
@@ -1128,7 +1147,8 @@ void DeclarativeEventHandler::HandleAsyncEvent(
 {
     if (eventMarker.GetData().isDeclarativeUi) {
         if (delegate_) {
-            delegate_->GetUiTask().PostTask([eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); });
+            delegate_->GetUiTask().PostTask(
+                [eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); }, "ArkUICallUiArgFunction");
         }
     }
 }
@@ -1183,7 +1203,8 @@ void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, c
             fixParam = fixParam.substr(startPos, endPos - startPos + 1);
         }
         if (delegate_) {
-            delegate_->GetUiTask().PostTask([eventMarker, fixParam] { eventMarker.CallUiStrFunction(fixParam); });
+            delegate_->GetUiTask().PostTask(
+                [eventMarker, fixParam] { eventMarker.CallUiStrFunction(fixParam); }, "ArkUICallUiStrFunction");
         }
     } else {
         delegate_->FireAsyncEvent(eventMarker.GetData().eventId, param, "");
@@ -1207,7 +1228,8 @@ void DeclarativeEventHandler::HandleSyncEvent(
     const EventMarker& eventMarker, const std::shared_ptr<BaseEventInfo>& info)
 {
     if (delegate_) {
-        delegate_->GetUiTask().PostSyncTask([eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); });
+        delegate_->GetUiTask().PostSyncTask(
+            [eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); }, "ArkUICallUiArgFunction");
     }
 }
 

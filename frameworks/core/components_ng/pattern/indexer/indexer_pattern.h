@@ -122,11 +122,13 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitInputEvent();
     void InitCurrentInputEvent();
-    void InitChildInputEvent();
+    void InitChildInputEvent(RefPtr<FrameNode>& itemNode, int32_t childIndex);
+    void InitPopupInputEvent();
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void OnHover(bool isHover);
     void OnChildHover(int32_t index, bool isHover);
+    void OnPopupHover(bool isHover);
     void ResetStatus();
     void OnKeyEventDisapear();
     void UpdateBubbleListItem(std::vector<std::string>& currentListData, const RefPtr<FrameNode>& parentNode,
@@ -140,7 +142,7 @@ private:
     RefPtr<FrameNode> CreatePopupNode();
     void UpdateBubbleView();
     void UpdateBubbleSize();
-    void UpdateBubbleLetterView(bool showDivider);
+    void UpdateBubbleLetterView(bool showDivider, std::vector<std::string>& currentListData);
     void CreateBubbleListView(std::vector<std::string>& currentListData);
     void UpdateBubbleListView(std::vector<std::string>& currentListData);
     void UpdatePopupOpacity(float ratio);
@@ -175,6 +177,7 @@ private:
     void UpdateBubbleListItemContext(
         const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme, uint32_t pos);
     void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
+    void StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration = INDEXER_COLLAPSE_WAIT_DURATION);
     
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -185,6 +188,7 @@ private:
     bool isTouch_ = false;
     bool isHover_ = false;
     bool isPopup_ = false;
+    bool isPopupHover_ = false;
 
      // the array of displayed items, ths second param in the pair
      // indicates whether the item should be hidden and displayed as dot
@@ -217,6 +221,7 @@ private:
     bool isNewHeightCalculated_ = false;
     IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;
     CancelableCallback<void()> delayTask_;
+    CancelableCallback<void()> delayCollapseTask_;
 };
 } // namespace OHOS::Ace::NG
 

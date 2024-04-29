@@ -28,13 +28,17 @@ class ACE_EXPORT ImageSpanView {
 public:
     static void SetObjectFit(ImageFit value);
     static void SetVerticalAlign(VerticalAlign verticalAlign);
+    static void SetBaselineOffset(const Dimension& value);
     static void SetVerticalAlign(FrameNode* frameNode, VerticalAlign verticalAlign);
+    static void SetBaselineOffset(FrameNode* frameNode, const Dimension& value);
     static void SetPlaceHolderStyle(TextBackgroundStyle& radius);
     static void Create();
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static ImageSourceInfo GetImageSpanSrc(FrameNode* frameNode);
     static ImageFit GetObjectFit(FrameNode* frameNode);
     static VerticalAlign GetVerticalAlign(FrameNode* frameNode);
+    static void SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyle& style);
+    static TextBackgroundStyle GetSpanTextBackgroundStyle(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_SPAN_VIEW_H

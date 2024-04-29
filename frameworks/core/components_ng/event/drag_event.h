@@ -32,6 +32,8 @@ class PanRecognizer;
 class LongPressRecognizer;
 class FrameNode;
 class OverlayManager;
+class ScrollablePattern;
+struct GatherNodeChildInfo;
 
 class DragEvent : public AceType {
     DECLARE_ACE_TYPE(DragEvent, AceType)
@@ -63,11 +65,22 @@ public:
         return actionCancel_;
     }
 
+    const GestureEventFunc& GetLongPressEventFunc() const
+    {
+        return actionLongPress_;
+    }
+
+    void SetLongPressEventFunc(GestureEventFunc&& actionLongPress)
+    {
+        actionLongPress_ = std::move(actionLongPress);
+    }
+
 private:
     GestureEventFunc actionStart_;
     GestureEventFunc actionUpdate_;
     GestureEventFunc actionEnd_;
     GestureEventNoParameter actionCancel_;
+    GestureEventFunc actionLongPress_;
 };
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
@@ -111,7 +124,7 @@ public:
     static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
-        const RefPtr<FrameNode>& imageNode);
+        const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode);
     static RefPtr<PixelMap> GetPreviewPixelMap(const std::string& inspectorId, const RefPtr<FrameNode>& selfFrameNode);
     static RefPtr<PixelMap> GetPreviewPixelMapByInspectorId(const std::string& inspectorId);
     static RefPtr<PixelMap> GetScreenShotPixelMap(const RefPtr<FrameNode>& frameNode);
@@ -122,13 +135,14 @@ public:
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
     void BindClickEvent(const RefPtr<FrameNode>& columnNode);
-    void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, bool hasContextMenu);
+    void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& frameNode,
+        bool hasContextMenu);
     void SetTextAnimation(const RefPtr<GestureEventHub>& gestureHub, const Offset& globalLocation);
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
-    OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap);
+    static OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap);
     PanDirection GetDirection() const
     {
         return direction_;
@@ -175,24 +189,71 @@ public:
 
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
 
+    void SetGatherNodeAboveFilter(const RefPtr<DragEventActuator>& actuator);
+    bool IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNode);
+    bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);
+    void FindItemFatherNode(const RefPtr<FrameNode>& frameNode);
+    bool IsNeedGather();
+    static RefPtr<FrameNode> GetOrCreateGatherNode(const RefPtr<NG::OverlayManager>& overlayManager,
+        const RefPtr<DragEventActuator>& actuator, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
+    static RefPtr<FrameNode> CreateGatherNode(const RefPtr<DragEventActuator>& actuator);
+    static RefPtr<FrameNode> CreateImageNode(const RefPtr<FrameNode>& frameNode,
+        GatherNodeChildInfo& gatherNodeChildInfo);
+    static void MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode);
+    static void ResetNode(const RefPtr<FrameNode>& frameNode);
+    static void MountGatherNode(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,
+        const RefPtr<FrameNode>& gatherNode, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
+    static void GetFrameNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode);
+    void SetGatherNode(const RefPtr<FrameNode>& gatherNode);
+    RefPtr<FrameNode> GetGatherNode();
+    std::vector<GatherNodeChildInfo> GetGatherNodeChildrenInfo();
+    void ClearGatherNodeChildrenInfo();
+    void PushBackGatherNodeChild(GatherNodeChildInfo& gatherNodeChild);
+    void HandleTouchUpEvent();
+    void HandleTouchMoveEvent();
+    void HandleTouchCancelEvent();
+    RefPtr<FrameNode> GetItemFatherNode();
+    RefPtr<FrameNode> GetFrameNode();
+
     inline static void FlushSyncGeometryNodeTasks();
-    
+
+    void ShowPreviewBadgeAnimation(
+        const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
+    static RefPtr<FrameNode> CreateBadgeTextNode(
+        const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
+
+private:
+    void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
+    void ApplyNewestOptionExecutedFromModifierToNode(
+        const RefPtr<FrameNode>& optionHolderNode, const RefPtr<FrameNode>& targetNode);
+    // check global dragging status
+    bool IsGlobalStatusSuitableForDragging();
+    // check the current node's status to decide if it can initiate one drag operation
+    bool IsCurrentNodeStatusSuitableForDragging(
+        const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
+    WeakPtr<FrameNode> itemFatherNode_;
     RefPtr<DragEvent> userCallback_;
     RefPtr<DragEvent> customCallback_;
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
-    std::function<void(GestureEvent&)> actionStart_;
+    RefPtr<FrameNode> gatherNode_;
 
+    RefPtr<PixelMap> textPixelMap_;
+    std::function<void(GestureEvent&)> actionStart_;
     std::function<void(GestureEvent&)> longPressUpdate_;
     std::function<void()> actionCancel_;
     std::function<void(Offset)> textDragCallback_;
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
     bool isNotInPreviewState_ = false;
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
+    bool isSelectedItemNode_ = false;
+    bool isOnBeforeLiftingAnimation = false;
 
     bool isDragUserReject_ = false;
 

@@ -24,6 +24,8 @@ void JSTextEditableController::JSBind(BindingTarget globalObj)
     JSClass<JSTextEditableController>::Method("caretPosition", &JSTextEditableController::CaretPosition);
     JSClass<JSTextEditableController>::CustomMethod("getCaretOffset", &JSTextEditableController::GetCaretOffset);
     JSClass<JSTextEditableController>::CustomMethod("setTextSelection", &JSTextEditableController::SetTextSelection);
+    JSClass<JSTextEditableController>::CustomMethod("showPassword", &JSTextEditableController::ShowPassword);
+    JSClass<JSTextEditableController>::CustomMethod("hidePassword", &JSTextEditableController::HidePassword);
     JSClass<JSTextEditableController>::CustomMethod(
         "getTextContentRect", &JSTextEditableController::GetTextContentRect);
     JSClass<JSTextEditableController>::CustomMethod(
@@ -51,9 +53,36 @@ void JSTextEditableController::CaretPosition(int32_t caretPosition)
 {
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            caretPosition = caretPosition < 0 ? 0 : caretPosition;
+        } else {
+            // do nothing
+        }
         controller->CaretPosition(caretPosition);
     } else {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "CaretPosition: The JSTextEditableController is NULL");
+    }
+}
+
+void JSTextEditableController::ShowPassword(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "begin to show password");
+        controller->SetPasswordState(false);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ShowPassword: The JSTextEditableController is NULL");
+    }
+}
+
+void JSTextEditableController::HidePassword(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "begin to hide password");
+        controller->SetPasswordState(true);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HidePassword: The JSTextEditableController is NULL");
     }
 }
 
@@ -73,7 +102,7 @@ void JSTextEditableController::SetTextSelection(const JSCallbackInfo& info)
         int32_t selectionStart = start->ToNumber<int32_t>();
         int32_t selectionEnd = end->ToNumber<int32_t>();
 
-        if (info.Length() == 3) { /* 3:args number */
+        if (info.Length() == 3 && info[2]->IsObject()) { /* 2, 3:args number */
             SelectionOptions optionTemp;
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetTextSelection: The selectionOption is set");
             JSRef<JSObject> optionsObj = JSRef<JSObject>::Cast(info[2]); /* 2:args number */

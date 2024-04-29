@@ -23,7 +23,17 @@
 
 namespace OHOS::Ace::GestureModel {
 
+ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers);
+
+ArkUI_GestureRecognizer* CreateLongPressGesture(int32_t fingers, bool repeatResult, int32_t duration);
+
 ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirectionMask mask, double distanceNum);
+
+ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingersNum, double distanceNum);
+
+ArkUI_GestureRecognizer* CreateRotationGesture(int32_t fingersNum, double angleNum);
+
+ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingersNum, ArkUI_GestureDirectionMask directions, double speedNum);
 
 void DisposeGesture(ArkUI_GestureRecognizer* recognizer);
 
@@ -32,6 +42,10 @@ int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_Gesture
 
 int32_t AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer, ArkUI_GesturePriority priorityNum,
     ArkUI_GestureMask mask);
+
+int32_t RemoveGestureFromNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer);
+
+ArkUI_GestureRecognizerType GetGestureType(ArkUI_GestureRecognizer* recognizer);
 
 void HandleGestureEvent(ArkUINodeEvent* event);
 

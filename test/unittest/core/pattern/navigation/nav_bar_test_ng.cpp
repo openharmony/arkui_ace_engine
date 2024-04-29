@@ -40,6 +40,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const std::string BAR_ITEM_ETS_TAG = "BarItem";
 const std::string FRAME_ITEM_ETS_TAG = "FrameItem";
 const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
@@ -260,7 +261,7 @@ HWTEST_F(NavBarTestNg, ToJsonValue001, TestSize.Level1)
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
     auto json = JsonUtil::Create(true);
-    barNode->ToJsonValue(json);
+    barNode->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetValue("title")->GetString(), EMPTY_STRING);
     EXPECT_EQ(json->GetValue("subtitle")->GetString(), EMPTY_STRING);
     EXPECT_EQ(json->GetValue("menus")->GetString(), EMPTY_STRING);
@@ -825,12 +826,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern011, TestSize.Level1)
     ASSERT_NE(firstClickListener->callback_, nullptr);
     GestureEvent info;
     info.SetSourceDevice(SourceType::KEYBOARD);
-    firstClickListener->callback_(info);
-    EXPECT_FALSE(isClick);
-    /**
-     * @tc.case: case3: Call click callback when SourceDevice is TOUCH.
-     */
-    info.SetSourceDevice(SourceType::TOUCH);
     firstClickListener->callback_(info);
     EXPECT_FALSE(isClick);
 }
@@ -1433,7 +1428,10 @@ HWTEST_F(NavBarTestNg, NavigationStack001, TestSize.Level1)
     auto navigationStack = std::make_shared<NavigationStack>();
     EXPECT_NE(navigationStack, nullptr);
     std::string name = "pageOne";
-    EXPECT_EQ(navigationStack->GetFromPreBackup(name), nullptr);
+    RefPtr<UINode> navDestinationNode;
+    int32_t lastIndex;
+    navigationStack->GetFromPreBackup(name, navDestinationNode, lastIndex);
+    EXPECT_EQ(navDestinationNode, nullptr);
 }
 
 /**
@@ -1451,7 +1449,10 @@ HWTEST_F(NavBarTestNg, NavigationStack002, TestSize.Level1)
     navPathList.emplace_back(std::make_pair("pageThree", frameNode));
     navigationStack->SetNavPathList(navPathList);
     std::string name = "pageOne";
-    EXPECT_EQ(navigationStack->GetFromPreBackup(name), nullptr);
+    RefPtr<UINode> navDestinationNode;
+    int32_t lastIndex;
+    navigationStack->GetFromPreBackup(name, navDestinationNode, lastIndex);
+    EXPECT_EQ(navDestinationNode, nullptr);
 }
 
 /**

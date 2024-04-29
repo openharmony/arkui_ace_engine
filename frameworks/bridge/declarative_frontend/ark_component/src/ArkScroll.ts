@@ -70,7 +70,7 @@ class ScrollScrollSnapModifier extends ModifierWithKey<ArkScrollSnapOptions> {
       let snapPagination = [];
       let isArray = true;
       if (Array.isArray(this.value.snapPagination)) {
-        for (let i = 0; i <= this.value.snapPagination.length; i++) {
+        for (let i = 0; i < this.value.snapPagination.length; i++) {
           let item = this.value.snapPagination[i];
           snapPagination.push(item);
         }
@@ -216,11 +216,8 @@ class ScrollClipModifier extends ModifierWithKey<boolean | object> {
 
 
 class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   scrollable(value: ScrollDirection): this {
     modifierWithKey(this._modifiersWithKeys, ScrollScrollableModifier.identity, ScrollScrollableModifier, value);
@@ -317,12 +314,10 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   }
 }
 // @ts-ignore
-globalThis.Scroll.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkScrollComponent(nativeNode);
+globalThis.Scroll.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkScrollComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ScrollModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

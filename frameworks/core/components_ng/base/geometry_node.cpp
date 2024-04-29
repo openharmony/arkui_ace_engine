@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
@@ -54,7 +55,7 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     return node;
 }
 
-void GeometryNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void GeometryNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
 #if defined(PREVIEW)
     auto frameSize = frame_.rect_.GetSize();
@@ -76,17 +77,17 @@ void GeometryNode::Restore()
     previousState_ = nullptr;
 }
 
-void GeometryNode::RestoreCache()
+bool GeometryNode::RestoreCache()
 {
-    CHECK_NULL_VOID(restoreCache_);
+    CHECK_NULL_RETURN(restoreCache_, false);
     frame_.rect_ = *restoreCache_;
     restoreCache_ = nullptr;
+    return true;
 }
 
 void GeometryNode::Save()
 {
     // INVARIANT: previousState_ is null when Save() is called (only allow 1 layer of save/restore)
-    CHECK_NULL_VOID(!previousState_);
     previousState_ = std::make_unique<RectF>(frame_.rect_);
 }
 } // namespace OHOS::Ace::NG

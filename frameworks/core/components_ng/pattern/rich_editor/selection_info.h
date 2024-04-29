@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,17 @@
 #include "base/geometry/offset.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
+
+namespace OHOS::Ace::NG {
+struct SpanItem;
+}
 namespace OHOS::Ace {
+using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 enum GetSpansMethod : int32_t {
     GETSPANS,
     ONSELECT,
@@ -61,7 +67,9 @@ struct SymbolSpanStyle {
     double fontSize = 0.0;
     double lineHeight = 0.0;
     double letterSpacing = 0.0;
+    double lineSpacing = 0.0;
     std::string symbolColor;
+    FONT_FEATURES_LIST fontFeature;
     int32_t fontWeight = 0;
     uint32_t renderingStrategy;
     uint32_t effectStrategy;
@@ -72,14 +80,17 @@ struct TextStyleResult {
     double fontSize = 0.0;
     double lineHeight = 0.0;
     double letterSpacing = 0.0;
+    double lineSpacing = 0.0;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
+    FONT_FEATURES_LIST fontFeature;
     std::string fontFamily;
     int32_t decorationType = 0;
     std::string decorationColor;
     int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
-    float leadingMarginSize[2] = { 0.0, 0.0 };
+    int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
+    std::string leadingMarginSize[2] = { "0.0", "0.0" };
 };
 
 struct ImageStyleResult {
@@ -100,7 +111,9 @@ struct ResultObject {
     ImageStyleResult imageStyle;
     SymbolSpanStyle symbolSpanStyle;
     RefPtr<ResourceObject> valueResource;
+    WeakPtr<NG::SpanItem> span;
     bool isDraggable = true;
+    bool isInit = false;
 };
 
 struct Selection {
@@ -169,9 +182,10 @@ public:
 struct ParagraphInfo {
     // style
     RefPtr<PixelMap> leadingMarginPixmap;
-    float leadingMarginSize[2] = { 0.0, 0.0 };
+    std::string leadingMarginSize[2] = { "0.0", "0.0" };
     int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
+    int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
 
     std::pair<int32_t, int32_t> range;
 };

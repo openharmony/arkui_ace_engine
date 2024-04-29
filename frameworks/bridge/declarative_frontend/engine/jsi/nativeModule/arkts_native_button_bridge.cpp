@@ -20,6 +20,8 @@
 #include "core/components/common/properties/text_style.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
@@ -44,6 +46,31 @@ constexpr int32_t FONT_SIZE_ARG_6 = 6;
 constexpr int32_t FONT_WEIGHT_ARG_7 = 7;
 constexpr int32_t FONT_STYLE_ARG_8 = 8;
 constexpr int32_t FONT_FAMILY_ARG_9 = 9;
+const char* BUTTON_NODEPTR_OF_UINODE = "nodePtr_";
+panda::Local<panda::JSValueRef> JsButtonClickCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    auto vm = runtimeCallInfo->GetVM();
+    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
+    if (argc != CALL_ARG_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    if (!firstArg->IsNumber() || !secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    double xPos = firstArg->ToNumber(vm)->Value();
+    double yPos = secondArg->ToNumber(vm)->Value();
+    auto ref = runtimeCallInfo->GetThisRef();
+    auto obj = ref->ToObject(vm);
+    if (obj->GetNativePointerFieldCount() < CALL_ARG_1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ButtonModelNG::TriggerClick(frameNode, xPos, yPos);
+    return panda::JSValueRef::Undefined(vm);
+}
 
 ArkUINativeModuleValue ButtonBridge::SetType(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -620,6 +647,52 @@ ArkUINativeModuleValue ButtonBridge::ResetButtonControlSize(ArkUIRuntimeCallInfo
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getButtonModifier()->resetButtonControlSize(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsObject()) {
+        ButtonModelNG::SetBuilderFunc(frameNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::CopyableGlobal<panda::ObjectRef> obj(vm, secondArg);
+    auto containerId = Container::CurrentId();
+    ButtonModelNG::SetBuilderFunc(frameNode, [vm, frameNode, obj = std::move(obj), containerId](
+            ButtonConfiguration config) -> RefPtr<FrameNode> {
+            ContainerScope scope(containerId);
+            auto context = ArkTSUtils::GetContext(vm);
+            const char* keyOfButton[] = { "label", "pressed", "enabled", "triggerClick" };
+            Local<JSValueRef> valuesOfButton[] = { panda::StringRef::NewFromUtf8(vm, config.label_.c_str()),
+                panda::BooleanRef::New(vm, config.pressed_), panda::BooleanRef::New(vm, config.enabled_),
+                panda::FunctionRef::New(vm, JsButtonClickCallback) };
+            auto button = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keyOfButton),
+                keyOfButton, valuesOfButton);
+            button->SetNativePointerFieldCount(vm, 1);
+            button->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            panda::Local<panda::JSValueRef> params[CALL_ARG_2] = { context, button };
+            LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            auto jsObject = obj.ToLocal();
+            auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            panda::Local<panda::FunctionRef> func = makeFunc;
+            auto result = func->Call(vm, jsObject, params, CALL_ARG_2);
+            JSNApi::ExecutePendingJob(vm);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            auto resultObj = result->ToObject(vm);
+            panda::Local<panda::JSValueRef> nodeptr =
+                resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, BUTTON_NODEPTR_OF_UINODE));
+            CHECK_EQUAL_RETURN(nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull(), true, nullptr);
+            auto* frameNode = reinterpret_cast<FrameNode*>(nodeptr->ToNativePointer(vm)->Value());
+            CHECK_NULL_RETURN(frameNode, nullptr);
+            return AceType::Claim(frameNode);
+        });
     return panda::JSValueRef::Undefined(vm);
 }
 

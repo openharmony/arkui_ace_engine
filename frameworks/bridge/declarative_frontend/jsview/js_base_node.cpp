@@ -25,14 +25,17 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
@@ -50,6 +53,9 @@ const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VI
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 {
     auto builder = info[0];
+    if (!builder->IsFunction()) {
+        return;
+    }
     auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
@@ -60,12 +66,14 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     } else {
         buildFunc->ExecuteJS();
     }
+    auto needProxyVal = info[2];
+    bool needProxy = needProxyVal->IsBoolean() ? needProxyVal->ToBoolean() : true;
     auto parent = viewNode_ ? viewNode_->GetParent() : nullptr;
     auto newNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    // If the node is a UINode, amount it to a BuilderProxyNode.
-    // Let the returned node be a FrameNode.
+    // If the node is a UINode, amount it to a BuilderProxyNode if needProxy.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
-    if (!flag) {
+    auto isSupportExportTexture = newNode ? EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0 : false;
+    if (!flag && newNode && needProxy) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
             "BuilderProxyNode", nodeId, []() { return AceType::MakeRefPtr<NG::StackPattern>(); });
@@ -79,8 +87,28 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
     }
     viewNode_ = newNode;
+    ProccessNode(isSupportExportTexture);
+    UpdateEnd(info);
+
+    JSRef<JSObject> thisObj = info.This();
+    JSWeak<JSObject> jsObject(thisObj);
+    viewNode_->RegisterUpdateJSInstanceCallback([jsObject, vm = info.GetVm()](int32_t id) {
+        JSRef<JSObject> jsThis = jsObject.Lock();
+        JSRef<JSVal> jsUpdateFunc = jsThis->GetProperty("updateInstance");
+        if (jsUpdateFunc->IsFunction()) {
+            auto jsFunc = JSRef<JSFunc>::Cast(jsUpdateFunc);
+            auto uiContext = NG::UIContextHelper::GetUIContext(vm, id);
+            auto jsVal = JSRef<JSVal>::Make(uiContext);
+            jsFunc->Call(jsThis, 1, &jsVal);
+        }
+    });
+}
+
+void JSBaseNode::ProccessNode(bool isSupportExportTexture)
+{
     CHECK_NULL_VOID(viewNode_);
-    if (EXPORT_TEXTURE_SUPPORT_TYPES.count(viewNode_->GetTag()) > 0) {
+    viewNode_->SetIsRootBuilderNode(true);
+    if (isSupportExportTexture) {
         viewNode_->CreateExportTextureInfoIfNeeded();
         auto exportTextureInfo = viewNode_->GetExportTextureInfo();
         CHECK_NULL_VOID(exportTextureInfo);
@@ -88,9 +116,6 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         exportTextureInfo->SetCurrentRenderType(renderType_);
     }
     viewNode_->Build(nullptr);
-    if (size_.IsValid()) {
-        viewNode_->SetParentLayoutConstraint(size_.ConvertToSizeT());
-    }
 }
 
 void JSBaseNode::Create(const JSCallbackInfo& info)
@@ -104,115 +129,6 @@ void JSBaseNode::Create(const JSCallbackInfo& info)
     BuildNode(info);
     EcmaVM* vm = info.GetVm();
     info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, AceType::RawPtr(viewNode_))));
-}
-
-void JSBaseNode::CreateRenderNode(const JSCallbackInfo& info)
-{
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    std::string nodeTag = "RenderNode";
-    auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
-        nodeTag, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
-    viewNode_ = frameNode;
-    void* ptr = AceType::RawPtr(viewNode_);
-
-    EcmaVM* vm = info.GetVm();
-    auto object = info[0];
-    auto renderNode = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> jsDrawFunc = renderNode->GetProperty("draw");
-    if (jsDrawFunc->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(jsDrawFunc);
-        RefPtr<JsFunction> jsDraw = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(renderNode), jsFunc);
-        auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
-        pattern->SetDrawCallback(
-            [func = std::move(jsDraw), execCtx = info.GetExecutionContext(), vm](NG::DrawingContext& context) -> void {
-                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-
-                JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-                objectTemplate->SetInternalFieldCount(1);
-                JSRef<JSObject> contextObj = objectTemplate->NewInstance();
-                JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
-                sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
-                sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
-                contextObj->SetPropertyObject("size", sizeObj);
-
-                auto engine = EngineHelper::GetCurrentEngine();
-                CHECK_NULL_VOID(engine);
-                NativeEngine* nativeEngine = engine->GetNativeEngine();
-                napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-                ScopeRAII scope(env);
-
-                auto jsCanvas =
-                    OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas, context.width, context.height);
-                JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
-                contextObj->SetPropertyObject("canvas", jsCanvasVal);
-
-                auto jsVal = JSRef<JSVal>::Cast(contextObj);
-                panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
-                JSValueWrapper valueWrapper = value;
-                napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
-
-                napi_wrap(
-                    env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
-
-                JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
-                OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-                napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
-                if (unwrapCanvas) {
-                    unwrapCanvas->ResetCanvas();
-                }
-            });
-    }
-    info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
-}
-
-void JSBaseNode::CreateFrameNode(const JSCallbackInfo& info)
-{
-    EcmaVM* vm = info.GetVm();
-    CHECK_NULL_VOID(vm);
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
-    node->SetExclusiveEventForChild(true);
-    auto pattern = node->GetPattern<NG::CustomFrameNodePattern>();
-    auto global = JSNApi::GetGlobalObject(vm);
-    auto funcName = panda::StringRef::NewFromUtf8(vm, "__AttachToMainTree__");
-    auto obj = global->Get(vm, funcName);
-    panda::Local<panda::FunctionRef> attachFunc = obj;
-    if (obj->IsFunction()) {
-        pattern->SetOnAttachFunc([vm, func = panda::CopyableGlobal(vm, attachFunc)](int32_t nodeId) {
-            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
-            func->Call(vm, func.ToLocal(), params, ArraySize(params));
-        });
-    }
-    funcName = panda::StringRef::NewFromUtf8(vm, "__DetachToMainTree__");
-    obj = global->Get(vm, funcName);
-    panda::Local<panda::FunctionRef> detachFunc = obj;
-    if (detachFunc->IsFunction()) {
-        pattern->SetOnDetachFunc([vm, func = panda::CopyableGlobal(vm, detachFunc)](int32_t nodeId) {
-            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
-            func->Call(vm, func.ToLocal(), params, ArraySize(params));
-        });
-    }
-    viewNode_ = node;
-    void* ptr = AceType::RawPtr(viewNode_);
-    info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
-}
-
-void JSBaseNode::ConvertToFrameNode(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    EcmaVM* vm = info.GetVm();
-    CHECK_NULL_VOID(vm);
-    auto obj = info[0];
-    CHECK_NULL_VOID(!obj.IsEmpty());
-    auto* node = obj->GetLocalHandle()->ToNativePointer(vm)->Value();
-    auto* uiNode = reinterpret_cast<NG::UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    CHECK_NULL_VOID(AceType::InstanceOf<NG::UINode>(uiNode));
-    viewNode_ = AceType::Claim(uiNode);
-    void* ptr = AceType::RawPtr(viewNode_);
-    info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
 }
 
 void JSBaseNode::ConstructorCallback(const JSCallbackInfo& info)
@@ -313,6 +229,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
             point.y = itemObj->GetPropertyValue<float>("y", 0.0f);
             point.screenX = itemObj->GetPropertyValue<float>("screenX", 0.0f);
             point.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
+            point.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
             touchEvent.pointers.emplace_back(point);
         }
     }
@@ -342,6 +259,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         touchEvent.y = itemObj->GetPropertyValue<float>("y", 0.0f);
         touchEvent.screenX = itemObj->GetPropertyValue<float>("screenX", 0.0f);
         touchEvent.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
+        touchEvent.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
     }
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     if (!pipelineContext) {
@@ -364,10 +282,11 @@ void JSBaseNode::UpdateStart(const JSCallbackInfo& info)
 
 void JSBaseNode::UpdateEnd(const JSCallbackInfo& info)
 {
-    if (viewNode_ && size_.IsValid()) {
+    scopedViewStackProcessor_ = nullptr;
+    CHECK_NULL_VOID(viewNode_);
+    if (size_.IsValid()) {
         viewNode_->SetParentLayoutConstraint(size_.ConvertToSizeT());
     }
-    scopedViewStackProcessor_ = nullptr;
 }
 
 void JSBaseNode::JSBind(BindingTarget globalObj)
@@ -375,12 +294,9 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
     JSClass<JSBaseNode>::Declare("__JSBaseNode__");
 
     JSClass<JSBaseNode>::CustomMethod("create", &JSBaseNode::Create);
-    JSClass<JSBaseNode>::CustomMethod("createRenderNode", &JSBaseNode::CreateRenderNode);
-    JSClass<JSBaseNode>::CustomMethod("createFrameNode", &JSBaseNode::CreateFrameNode);
-    JSClass<JSBaseNode>::CustomMethod("convertToFrameNode", &JSBaseNode::ConvertToFrameNode);
     JSClass<JSBaseNode>::CustomMethod("finishUpdateFunc", &JSBaseNode::FinishUpdateFunc);
     JSClass<JSBaseNode>::CustomMethod("postTouchEvent", &JSBaseNode::PostTouchEvent);
-    JSClass<JSBaseNode>::CustomMethod("dispose", &JSBaseNode::Dispose);
+    JSClass<JSBaseNode>::CustomMethod("disposeNode", &JSBaseNode::Dispose);
     JSClass<JSBaseNode>::CustomMethod("updateStart", &JSBaseNode::UpdateStart);
     JSClass<JSBaseNode>::CustomMethod("updateEnd", &JSBaseNode::UpdateEnd);
 

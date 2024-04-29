@@ -22,6 +22,7 @@
 #include "base/json/json_util.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -48,15 +49,17 @@ struct FlexItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Barrier, BarrierItem);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Guideline, GuidelineItem);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         static const char* ITEM_ALIGN[] = { "ItemAlign.Auto", "ItemAlign.Start", "ItemAlign.Center", "ItemAlign.End",
             "ItemAlign.Stretch", "ItemAlign.Baseline" };
-        json->Put("flexBasis", propFlexBasis.has_value() ? propFlexBasis.value().ToString().c_str() : "auto");
-        json->Put("flexGrow", round(static_cast<double>(propFlexGrow.value_or(0.0)) * 100) / 100);
-        json->Put("flexShrink", round(static_cast<double>(propFlexShrink.value_or(1)) * 100) / 100);
-        json->Put("alignSelf", ITEM_ALIGN[static_cast<int32_t>(propAlignSelf.value_or(FlexAlign::AUTO))]);
-        json->Put("displayPriority", propDisplayIndex.value_or(1));
+        json->PutExtAttr("flexBasis",
+            propFlexBasis.has_value() ? propFlexBasis.value().ToString().c_str() : "auto", filter);
+        json->PutExtAttr("flexGrow", round(static_cast<double>(propFlexGrow.value_or(0.0)) * 100) / 100, filter);
+        json->PutExtAttr("flexShrink", round(static_cast<double>(propFlexShrink.value_or(1)) * 100) / 100, filter);
+        json->PutExtAttr("alignSelf",
+            ITEM_ALIGN[static_cast<int32_t>(propAlignSelf.value_or(FlexAlign::AUTO))], filter);
+        json->PutExtAttr("displayPriority", propDisplayIndex.value_or(1), filter);
     }
 
     void ClearAlignValue()

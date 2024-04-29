@@ -53,7 +53,7 @@ public:
     bool IsAllowUpdate();
 
     void DispatchSurfaceChangeEvent(float width, float height) override;
-    void SetVisibleChange(bool isVisible) override;
+    void SetObscured(bool isObscured) override;
 private:
     std::weak_ptr<UIContent> uiContent_;
     std::weak_ptr<FormRenderer> formRenderer_;

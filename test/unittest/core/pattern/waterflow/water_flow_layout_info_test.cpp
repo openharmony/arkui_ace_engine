@@ -85,6 +85,26 @@ HWTEST_F(WaterFlowLayoutInfoTest, FastSolveStartIndex001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FastSolveStartIndex002
+ * @tc.desc: Test FastSolveStartIndex in WaterFlowLayoutInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, FastSolveStartIndex002, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+
+    info.items_ = ITEM_MAP_1;
+    info.endPosArray_ = END_POS_ARRAY_1;
+    info.itemInfos_ = ITEM_INFO_1;
+
+    info.currentOffset_ = -1000.0f;
+    EXPECT_EQ(info.FastSolveStartIndex(), 9);
+
+    info.currentOffset_ = 1000.0f;
+    EXPECT_EQ(info.FastSolveStartIndex(), 0);
+}
+
+/**
  * @tc.name: FastSolveEndIndex001
  * @tc.desc: Test FastSolveEndIndex in WaterFlowLayoutInfo.
  * @tc.type: FUNC
@@ -112,6 +132,28 @@ HWTEST_F(WaterFlowLayoutInfoTest, FastSolveEndIndex001, TestSize.Level1)
 
     info.currentOffset_ = 0.0f;
     EXPECT_EQ(info.FastSolveEndIndex(35.0f), 3);
+}
+
+/**
+ * @tc.name: FastSolveEndIndex002
+ * @tc.desc: Test FastSolveEndIndex in WaterFlowLayoutInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, FastSolveEndIndex002, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    EXPECT_EQ(info.FastSolveEndIndex(50.0f), -1);
+
+    info.items_ = ITEM_MAP_1;
+    info.endPosArray_ = END_POS_ARRAY_1;
+    info.itemInfos_ = ITEM_INFO_1;
+    info.childrenCount_ = 10;
+
+    info.currentOffset_ = -1000.0f;
+    EXPECT_EQ(info.FastSolveEndIndex(50.0f), 9);
+
+    info.currentOffset_ = 1000.0f;
+    EXPECT_EQ(info.FastSolveEndIndex(50.0f), 0);
 }
 
 /**

@@ -58,6 +58,11 @@ public:
             shapePaintProperty->UpdateFill(Color::FOREGROUND);
             shapePaintProperty->ResetFillOpacity();
         }
+        const auto& geometryNode = paintWrapper->GetGeometryNode();
+        const auto& contentSize = geometryNode->GetContentSize();
+        if (!contentSize.IsPositive()) {
+            return nullptr;
+        }
         return [shapePaintProperty, paintWrapper](RSCanvas& canvas) {
                     PathPainter::DrawPath(canvas, *shapePaintProperty);
                     if (paintWrapper) {

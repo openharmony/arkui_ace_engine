@@ -31,6 +31,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
     }
     ContainerScope scope(currentId);
     auto pipelineContext = container->GetPipelineContext();
@@ -56,15 +57,13 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         CHECK_NULL_VOID(overlayManager);
         auto controllerPtr = controller.Upgrade();
         CHECK_NULL_VOID(controllerPtr);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
-            if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog) {
-                DialogProperties Maskarg;
-                Maskarg.isMask = true;
-                Maskarg.autoCancel = dialogProperties.autoCancel;
-                Maskarg.onWillDismiss = dialogProperties.onWillDismiss;
-                Maskarg.maskColor = dialogProperties.maskColor;
-                auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+            if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog &&
+                !container->IsUIExtensionWindow()) {
+                auto mask = overlayManager->SetDialogMask(dialogProperties);
                 CHECK_NULL_VOID(mask);
                 overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
             }
@@ -74,7 +73,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         CHECK_NULL_VOID(dialog);
         dialogs.emplace_back(dialog);
     };
-    executor->PostTask(task, TaskExecutor::TaskType::UI);
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
 }
 
 RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProperties& dialogProperties,
@@ -86,6 +85,7 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
     if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_RETURN(container, nullptr);
     }
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
@@ -96,7 +96,7 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
     RefPtr<NG::FrameNode> dialog;
     if (dialogProperties.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNGWithNode(dialogProperties, customNode);
-        if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog) {
+        if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog && !container->IsUIExtensionWindow()) {
             DialogProperties Maskarg;
             Maskarg.isMask = true;
             Maskarg.autoCancel = dialogProperties.autoCancel;
@@ -122,6 +122,7 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
     }
     ContainerScope scope(currentId);
     auto pipelineContext = container->GetPipelineContext();
@@ -159,7 +160,7 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             dialogs.pop_back();
         }
     };
-    executor->PostTask(task, TaskExecutor::TaskType::UI);
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog");
 }
 
 void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)

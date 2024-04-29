@@ -98,6 +98,15 @@ RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
     return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
 }
 
+NG::FrameNode* ElementRegister::GetFrameNodePtrById(ElementIdType elementId)
+{
+    if (elementId == ElementRegister::UndefinedElementId) {
+        return nullptr;
+    }
+    auto iter = itemMap_.find(elementId);
+    return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::FrameNode>(iter->second.GetRawPtr());
+}
+
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
 {
     if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {
@@ -106,14 +115,14 @@ bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
     return AddReferenced(node->GetId(), node);
 }
 
-bool ElementRegister::RemoveItem(ElementIdType elementId, const std::string& tag)
+bool ElementRegister::RemoveItem(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
         return false;
     }
     auto removed = itemMap_.erase(elementId);
     if (removed) {
-        removedItems_.insert(std::pair(elementId, tag));
+        removedItems_.insert(elementId);
     }
     return removed;
 }
@@ -129,7 +138,7 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
 void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
 {
     removedItems = removedItems_;
-    removedItems_ = std::unordered_set<std::pair<ElementIdType, std::string>, deleted_element_hash>();
+    removedItems_ = std::unordered_set<ElementIdType>();
 }
 
 void ElementRegister::Clear()

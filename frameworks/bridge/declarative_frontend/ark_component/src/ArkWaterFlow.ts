@@ -175,9 +175,28 @@ class FrictionModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
+class WaterFlowEdgeEffectModifier extends ModifierWithKey<ArkWaterFlowEdgeEffect> {
+  constructor(value: ArkWaterFlowEdgeEffect) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowEdgeEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().waterFlow.resetEdgeEffect(node);
+    } else {
+      getUINativeModule().waterFlow.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
+  }
+}
+
 class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   columnsTemplate(value: string): this {
     modifierWithKey(this._modifiersWithKeys, ColumnsTemplateModifier.identity, ColumnsTemplateModifier, value);
@@ -251,15 +270,20 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
     modifierWithKey(this._modifiersWithKeys, WaterFlowClipModifier.identity, WaterFlowClipModifier, value);
     return this;
   }
+  edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this {
+    let effect: ArkWaterFlowEdgeEffect = new ArkWaterFlowEdgeEffect();
+    effect.value = value;
+    effect.options = options;
+    modifierWithKey(this._modifiersWithKeys, WaterFlowEdgeEffectModifier.identity, WaterFlowEdgeEffectModifier, effect);
+    return this;
+  }
 }
 
 // @ts-ignore
-globalThis.WaterFlow.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkWaterFlowComponent(nativeNode);
+globalThis.WaterFlow.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkWaterFlowComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.WaterFlowModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

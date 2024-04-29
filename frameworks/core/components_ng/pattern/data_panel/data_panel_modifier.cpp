@@ -43,6 +43,7 @@ constexpr float MIN_CIRCLE = 0.03f;
 constexpr float PERCENT_HALF = 0.5f;
 constexpr float DIAMETER_TO_THICKNESS_RATIO = 0.12f;
 constexpr uint32_t SHADOW_ALPHA = 0.4 * 255;
+constexpr float ZERO_CORNER_RADIUS = 0.0f;
 } // namespace
 
 DataPanelModifier::DataPanelModifier()
@@ -62,6 +63,7 @@ DataPanelModifier::DataPanelModifier()
     trackBackgroundColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(theme->GetBackgroundColor()));
     strokeWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetThickness().ConvertToPx());
     isEffect_ = AceType::MakeRefPtr<PropertyBool>(true);
+    useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(date_);
     AttachProperty(max_);
     AttachProperty(trackBackgroundColor_);
@@ -98,6 +100,9 @@ DataPanelModifier::DataPanelModifier()
 
 void DataPanelModifier::onDraw(DrawingContext& context)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     if (dataPanelType_ == 0) {
         PaintCircle(context, offset_);
     } else {
@@ -409,13 +414,33 @@ void DataPanelModifier::PaintBackground(
     canvas.AttachBrush(brush);
     RSRect rRect(offset.GetX(), offset.GetY(), totalWidth + offset.GetX(), height + offset.GetY());
     RSRoundRect rrRect;
-    if (height <= segmentWidth) {
-        rrRect = RSRoundRect(rRect, height, height);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (height <= segmentWidth) {
+            rrRect = RSRoundRect(rRect, height, height);
+        } else {
+            rrRect = RSRoundRect(rRect, segmentWidth, segmentWidth);
+        }
     } else {
-        rrRect = RSRoundRect(rRect, segmentWidth, segmentWidth);
+        rrRect = RSRoundRect(rRect, ZERO_CORNER_RADIUS, ZERO_CORNER_RADIUS);
     }
     canvas.DrawRoundRect(rrRect);
     canvas.DetachBrush();
+}
+
+void DataPanelModifier::SetCornerRadius(
+    RSRoundRect& paintRect, const LinearData& segmentLinearData, const float height) const
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (segmentLinearData.isFirstData) {
+            paintRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, height, height);
+            paintRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, height, height);
+        }
+
+        if (segmentLinearData.isEndData) {
+            paintRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, height, height);
+            paintRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, height, height);
+        }
+    }
 }
 
 void DataPanelModifier::PaintColorSegment(RSCanvas& canvas, const LinearData& segmentLinearData) const
@@ -435,16 +460,7 @@ void DataPanelModifier::PaintColorSegment(RSCanvas& canvas, const LinearData& se
 
     RSRect rect(xSegment, offset.GetY(), xSegment + segmentWidth, offset.GetY() + height);
     RSRoundRect paintRect = RSRoundRect(rect, 0, 0);
-
-    if (segmentLinearData.isFirstData) {
-        paintRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, height, height);
-        paintRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, height, height);
-    }
-
-    if (segmentLinearData.isEndData) {
-        paintRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, height, height);
-        paintRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, height, height);
-    }
+    SetCornerRadius(paintRect, segmentLinearData, height);
 
     RSPoint segmentStartPoint;
     segmentStartPoint.SetX(rect.GetLeft());
@@ -485,15 +501,7 @@ void DataPanelModifier::PaintColorSegmentFilterMask(RSCanvas& canvas, const Line
     RSRect rect(xSegment + shadowOffsetXFloat_->Get(), offset.GetY() + shadowOffsetYFloat_->Get(),
         xSegment + segmentWidth + shadowOffsetXFloat_->Get(), offset.GetY() + height + shadowOffsetYFloat_->Get());
     RSRoundRect paintRect = RSRoundRect(rect, 0, 0);
-    if (segmentLinearData.isFirstData) {
-        paintRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, height, height);
-        paintRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, height, height);
-    }
-
-    if (segmentLinearData.isEndData) {
-        paintRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, height, height);
-        paintRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, height, height);
-    }
+    SetCornerRadius(paintRect, segmentLinearData, height);
 
     RSPoint segmentStartPoint;
     segmentStartPoint.SetX(rect.GetLeft());

@@ -15,18 +15,19 @@
 
 /// <reference path='./import.ts' />
 class ArkEffectComponentComponent extends ArkComponent implements EffectComponentAttribute {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
+  }
 }
 
 // @ts-ignore
 if (globalThis.EffectComponent !== undefined) {
   // @ts-ignore
-  globalThis.EffectComponent.attributeModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkEffectComponentComponent(nativeNode);
+  globalThis.EffectComponent.attributeModifier = function (modifier: ArkComponent): void {
+    attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+      return new ArkEffectComponentComponent(nativePtr);
+    }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+      return new modifierJS.CommonModifier(nativePtr, classType);
     });
-    modifier.applyNormalAttribute(component);
-    component.applyModifierPatch();
   };
 }

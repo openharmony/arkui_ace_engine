@@ -100,7 +100,10 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressLayoutAlgorithm001, TestSize.Leve
      */
     LayoutConstraintF layoutConstraint;
     layoutConstraint.percentReference = SizeF(MAXSIZE_WIDTH, MAXSIZE_HEIGHT);
-    auto size1 = layoutAlgorithm.MeasureContent(layoutConstraint, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto size1 = layoutAlgorithm.MeasureContent(layoutConstraint, &layoutWrapper);
     EXPECT_NE(size1, std::nullopt);
     EXPECT_EQ(size1.value(), SizeF(MAXSIZE_WIDTH, MAXSIZE_WIDTH));
     /**
@@ -109,7 +112,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressLayoutAlgorithm001, TestSize.Leve
      */
     layoutConstraint.selfIdealSize.width_ = SELFSIZE_WIDTH;
     layoutConstraint.selfIdealSize.height_ = SELFSIZE_HEIGHT;
-    auto size2 = layoutAlgorithm.MeasureContent(layoutConstraint, nullptr);
+    auto size2 = layoutAlgorithm.MeasureContent(layoutConstraint, &layoutWrapper);
     EXPECT_NE(size2, std::nullopt);
     EXPECT_EQ(size2.value(), SizeF(SELFSIZE_WIDTH, SELFSIZE_WIDTH));
 }
@@ -280,6 +283,41 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest004, TestSize.Level1)
     loadingProgressPattern->enableLoading_ = false;
     loadingProgressPattern->StartAnimation();
     EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+}
+
+/**
+ * @tc.name: LoadingProgressPatternTest005
+ * @tc.desc: SetChangeValue and get value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode.
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    /**
+     * @tc.steps: step2. get parament to enableloading
+     */
+    modelNg.SetEnableLoading(true);
+    /**
+     * @tc.steps: step3.
+     * @tc.expected: check the switch property value.
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(config.enableloading_, true);
+        return nullptr;
+    };
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->BuildContentModifierNode();
 }
 
 /**
@@ -669,5 +707,85 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest009, TestSize.Level1)
     loadingProgressModifier->cometSizeScale_.Reset();
     EXPECT_EQ(loadingProgressModifier->cometSizeScale_, nullptr);
     loadingProgressModifier->StartRecycleCometAnimation();
+}
+
+/**
+ * @tc.name: LoadingProgressModifierTest010
+ * @tc.desc: Test LoadingProgressModifier DrawRing function. ColorMode = DARK
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest010, TestSize.Level1)
+{
+    SystemProperties::SetColorMode(ColorMode::DARK);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
+    progressTheme->loadingColor_ = COLOR_DEFAULT;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    LoadingProgressModifier loadingProgressModifier;
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+    RingParam ringParam;
+    /**
+     * @tc.cases: case1. ringColor == defaultColor.
+     */
+    loadingProgressModifier.SetColor(LinearColor(COLOR_DEFAULT));
+    EXPECT_CALL(rsCanvas, Save()).Times(2);
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(2);
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
+    loadingProgressModifier.DrawRing(context, ringParam);
+    /**
+     * @tc.cases: case2. ringColor != defaultColor.
+     */
+    loadingProgressModifier.SetColor(LinearColor(Color::BLUE));
+    EXPECT_CALL(rsCanvas, Save()).Times(2);
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(2);
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
+    loadingProgressModifier.DrawRing(context, ringParam);
+}
+
+/**
+ * @tc.name: LoadingProgressModifierTest011
+ * @tc.desc: Test LoadingProgressModifier DrawOrbit function.ColorMode = DARK
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest011, TestSize.Level1)
+{
+    SystemProperties::SetColorMode(ColorMode::DARK);
+    LoadingProgressModifier loadingProgressModifier;
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 10.0f, 10.0f };
+    /**
+     * @tc.cases: case1. date > 0 && date < COUNT.
+     */
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    CometParam cometParam;
+    loadingProgressModifier.DrawOrbit(context, cometParam, 1.0f, 2.0f);
+    /**
+     * @tc.cases: case2. date > 0 && date >= COUNT.
+     */
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    loadingProgressModifier.DrawOrbit(context, cometParam, 50.0f, 2.0f);
+    /**
+     * @tc.cases: case3. date <= 0.
+     */
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    loadingProgressModifier.DrawOrbit(context, cometParam, .0f, 2.0f);
 }
 } // namespace OHOS::Ace::NG

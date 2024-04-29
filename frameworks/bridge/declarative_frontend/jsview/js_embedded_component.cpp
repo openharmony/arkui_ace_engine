@@ -59,6 +59,7 @@ void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
     JSClass<JSEmbeddedComponent>::StaticMethod("flexBasis", &JSEmbeddedComponent::JsFlexBasis);
     JSClass<JSEmbeddedComponent>::StaticMethod("flexGrow", &JSEmbeddedComponent::JsFlexGrow);
     JSClass<JSEmbeddedComponent>::StaticMethod("flexShrink", &JSEmbeddedComponent::JsFlexShrink);
+    JSClass<JSEmbeddedComponent>::StaticMethod("opacity", &JSEmbeddedComponent::JsOpacity);
     JSClass<JSEmbeddedComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

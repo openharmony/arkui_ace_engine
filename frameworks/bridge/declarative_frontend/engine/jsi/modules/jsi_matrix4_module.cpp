@@ -16,7 +16,13 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_matrix4_module.h"
 
 #include "base/geometry/matrix4.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/render/render_context.h"
+#include "frameworks/base/geometry/ng/point_t.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
+#include "frameworks/core/components_ng/render/adapter/matrix2d.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -236,6 +242,75 @@ shared_ptr<JsValue> TransformPoint(const shared_ptr<JsRuntime>& runtime, const s
     return result;
 }
 
+void ParsePoint(shared_ptr<JsValue> array, std::vector<OHOS::Ace::NG::PointT<int32_t>>& vector,
+    const shared_ptr<JsRuntime>& runtime)
+{
+    for (int i = 0; i < array->GetArrayLength(runtime); i++) {
+        auto value = array->GetElement(runtime, i);
+        if (!value->IsObject(runtime)) {
+            continue;
+        }
+        shared_ptr<JsValue> xJsValue = value->GetProperty(runtime, "x");
+        shared_ptr<JsValue> yJsValue = value->GetProperty(runtime, "y");
+        int32_t x = xJsValue->ToInt32(runtime);
+        int32_t y = yJsValue->ToInt32(runtime);
+        vector.push_back(OHOS::Ace::NG::PointT(x, y));
+    }
+}
+
+shared_ptr<JsValue> SetPolyToPoly(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 1 || !argv[0]->IsObject(runtime)) {
+        return thisObj;
+    }
+    auto matrix = ConvertToMatrix(runtime, thisObj->GetProperty(runtime, MATRIX_4X4));
+    auto pointCountJSValue = argv[0]->GetProperty(runtime, "pointCount");
+    shared_ptr<JsValue> srcJsValue = argv[0]->GetProperty(runtime, "src");
+    shared_ptr<JsValue> dstJsValue = argv[0]->GetProperty(runtime, "dst");
+    if (!srcJsValue->IsArray(runtime) || !dstJsValue->IsArray(runtime)) {
+        LOGE("setpPolyToPoly src or dst is not array");
+        return thisObj;
+    }
+    int32_t srcIndex = argv[0]->GetProperty(runtime, "srcIndex")->ToInt32(runtime);
+    int32_t dstIndex = argv[0]->GetProperty(runtime, "dstIndex")->ToInt32(runtime);
+    int32_t pointCount = srcJsValue->GetArrayLength(runtime)/2;
+    if (pointCountJSValue->IsInt32(runtime)) {
+        pointCount = pointCountJSValue->ToInt32(runtime);
+    }
+    std::vector<OHOS::Ace::NG::PointT<int32_t>> srcPoint, dstPoint;
+    ParsePoint(srcJsValue, srcPoint, runtime);
+    ParsePoint(dstJsValue, dstPoint, runtime);
+    if (pointCount <= 0 || pointCount > static_cast<int32_t>(srcPoint.size()) ||
+        pointCount > static_cast<int32_t>(dstPoint.size())) {
+        LOGE("setpPolyToPoly pointCount out of range pointCount:%{public}d, src size:%{public}d, dst size:%{public}d",
+            pointCount, static_cast<int>(srcPoint.size()), static_cast<int>(dstPoint.size()));
+        return thisObj;
+    }
+    if (srcIndex < 0 || (pointCount + srcIndex) > static_cast<int32_t>(srcPoint.size())) {
+        LOGE("setpPolyToPoly srcIndex out of range srcIndex:%{public}d, pointCount:%{public}d, src size%{public}d",
+            srcIndex, pointCount, static_cast<int>(srcPoint.size()));
+        return thisObj;
+    }
+    if (dstIndex < 0 || (pointCount + dstIndex) > dstPoint.size()) {
+        LOGE("setpPolyToPoly dstIndex out of range dstIndex:%{public}d, pointCount:%{public}d, dst size%{public}d",
+            dstIndex, pointCount, static_cast<int>(dstPoint.size()));
+        return thisObj;
+    }
+    std::vector<OHOS::Ace::NG::PointT<int32_t>> totalPoint;
+    int srcLastIndex = pointCount + srcIndex;
+    for (int i = srcIndex; i < srcLastIndex; i++) {
+        totalPoint.push_back(srcPoint[i]);
+    }
+    int dstLastIndex = pointCount + dstIndex;
+    for (int i = dstIndex; i < dstLastIndex; i++) {
+        totalPoint.push_back(dstPoint[i]);
+    }
+    Matrix4 ret = OHOS::Ace::NG::SetMatrixPolyToPoly(matrix, totalPoint);
+    thisObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, ret));
+    return thisObj;
+}
+
 shared_ptr<JsValue> Copy(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
 
@@ -249,6 +324,7 @@ void AddCommonMatrixProperties(const shared_ptr<JsRuntime>& runtime, const share
     obj->SetProperty(runtime, MATRIX_SKEW, runtime->NewFunction(Skew));
     obj->SetProperty(runtime, MATRIX_ROTATE, runtime->NewFunction(Rotate));
     obj->SetProperty(runtime, MATRIX_TRANSFORM_POINT, runtime->NewFunction(TransformPoint));
+    obj->SetProperty(runtime, MATRIX_SET_POLY_TO_POLY, runtime->NewFunction(SetPolyToPoly));
 }
 
 shared_ptr<JsValue> Copy(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,

@@ -80,6 +80,8 @@ public:
                 theme->tabContentAnimationDuration_ =
                     pattern->GetAttr<double>("tab_content_animation_duration", 0.0);
                 theme->tabBarDefaultHeight_ = pattern->GetAttr<Dimension>("tab_bar_default_height", 0.0_vp);
+                theme->bottomTabBarDefaultHeight_ =
+                    pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
                 theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
                 theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
                 theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
@@ -105,6 +107,9 @@ public:
                     pattern->GetAttr<Dimension>("focus_indicator_horizontal_padding", 0.0_vp);
                 theme->focusIndicatorVerticalPadding_ =
                     pattern->GetAttr<Dimension>("focus_indicator_vertical_padding", 0.0_vp);
+                theme->dialog_radius_level10_ = pattern->GetAttr<Dimension>("dialog_radius_level10", 20.0_vp);
+                theme->dialog_iconColor_ = pattern->GetAttr<Color>("dialog_icon_primary", Color(0xff182431));
+                theme->dialog_fontColor_ = pattern->GetAttr<Color>("dialog_font_primary", Color(0xff182431));
             } else {
                 LOGW("find pattern of tab fail");
             }
@@ -363,6 +368,23 @@ public:
     {
         return horizontalBottomTabMinWidth_;
     }
+    const Dimension& GetBottomTabBarDefaultWidth() const
+    {
+        return bottomTabBarDefaultHeight_;
+    }
+    const Dimension& GetDialogRadiusLevel10() const
+    {
+        return dialog_radius_level10_;
+    }
+    const Color& GetDialogIconColor() const
+    {
+        return dialog_iconColor_;
+    }
+    const Color& GetDialogFontColor() const
+    {
+        return dialog_fontColor_;
+    }
+    
 
 protected:
     TabTheme() = default;
@@ -408,6 +430,7 @@ private:
     double subTabBarHoverToPressDuration_;
     double tabContentAnimationDuration_;
     Dimension tabBarDefaultHeight_;
+    Dimension bottomTabBarDefaultHeight_;
     Dimension tabBarDefaultWidth_;
     Dimension subTabBarMinWidth_;
     Color dividerColor_;
@@ -418,6 +441,9 @@ private:
     Dimension tabBarColumnGutter_;
     Dimension tabBarColumnMargin_;
     Dimension horizontalBottomTabMinWidth_;
+    Dimension dialog_radius_level10_;
+    Color dialog_iconColor_;
+    Color dialog_fontColor_;
 };
 
 } // namespace OHOS::Ace

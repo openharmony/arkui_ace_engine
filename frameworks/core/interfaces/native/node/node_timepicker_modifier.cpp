@@ -44,6 +44,7 @@ void ResetTimepickerSelected(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     time_t now = time(nullptr);
     auto currentTm = localtime(&now);
+    CHECK_NULL_VOID(currentTm);
     PickerTime pickerTime(currentTm->tm_hour, currentTm->tm_min, 0);
 
     TimePickerModelNG::SetSelectedTime(frameNode, pickerTime);
@@ -165,6 +166,27 @@ void ResetTimepickerUseMilitaryTime(ArkUINodeHandle node)
     TimePickerModelNG::SetHour24(frameNode, false);
 }
 
+void SetTimepickerDateTimeOptions(
+    ArkUINodeHandle node, ArkUI_Int32 hourType, ArkUI_Int32 minuteType, ArkUI_Int32 secondType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ZeroPrefixType hour = static_cast<ZeroPrefixType>(hourType);
+    ZeroPrefixType minute = static_cast<ZeroPrefixType>(minuteType);
+    ZeroPrefixType second = static_cast<ZeroPrefixType>(secondType);
+    TimePickerModelNG::SetDateTimeOptions(frameNode, hour, minute, second);
+}
+
+void ResetTimepickerDateTimeOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    ZeroPrefixType minuteType = ZeroPrefixType::AUTO;
+    ZeroPrefixType secondType = ZeroPrefixType::AUTO;
+    TimePickerModelNG::SetDateTimeOptions(frameNode, hourType, minuteType, secondType);
+}
+
 ArkUI_CharPtr GetTimepickerSelectedTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -172,20 +194,23 @@ ArkUI_CharPtr GetTimepickerSelectedTextStyle(ArkUINodeHandle node)
     PickerTextStyle pickerTextStyle = TimePickerModelNG::getSelectedTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
     std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue =
         g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
     return g_strValue.c_str();
@@ -198,20 +223,23 @@ ArkUI_CharPtr GetTimepickerTextStyle(ArkUINodeHandle node)
     PickerTextStyle pickerTextStyle = TimePickerModelNG::getNormalTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
     std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue =
         g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
     return g_strValue.c_str();
@@ -224,20 +252,23 @@ ArkUI_CharPtr GetTimepickerDisappearTextStyle(ArkUINodeHandle node)
     PickerTextStyle pickerTextStyle = TimePickerModelNG::getDisappearTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
     std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue =
         g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
     return g_strValue.c_str();
@@ -279,7 +310,7 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         SetTimepickerTextStyle, GetTimepickerSelectedTextStyle, SetTimepickerSelectedTextStyle,
         ResetTimepickerDisappearTextStyle, ResetTimepickerTextStyle, ResetTimepickerSelectedTextStyle,
         ResetTimepickerBackgroundColor, GetTimepickerUseMilitaryTime, SetTimepickerUseMilitaryTime,
-        ResetTimepickerUseMilitaryTime };
+        ResetTimepickerUseMilitaryTime, SetTimepickerDateTimeOptions, ResetTimepickerDateTimeOptions };
 
     return &modifier;
 }

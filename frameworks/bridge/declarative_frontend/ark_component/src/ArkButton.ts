@@ -34,11 +34,11 @@ const FontWeightMap = {
 };
 
 class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+  builder: WrappedBuilder<Object[]> | null = null;
+  buttonNode: BuilderNode<[ButtonConfiguration]> | null = null;
+  modifier: ContentModifier<ButtonConfiguration>;
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   backgroundColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, ButtonBackgroundColorModifier.identity, ButtonBackgroundColorModifier, value);
@@ -87,6 +87,25 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   size(value: SizeOptions): this {
     modifierWithKey(this._modifiersWithKeys, ButtonSizeModifier.identity, ButtonSizeModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<ButtonConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().button.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, buttonConfiguration: ButtonConfiguration): FrameNode | null {
+    buttonConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.buttonNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.buttonNode = new xNode.BuilderNode(context);
+      this.buttonNode.build(this.builder, buttonConfiguration);
+    } else {
+      this.buttonNode.update(buttonConfiguration);
+    }
+    return this.buttonNode.getFrameNode();
   }
   role(value: ButtonRole): this {
     modifierWithKey(this._modifiersWithKeys, ButtonRoleModifier.identity, ButtonRoleModifier, value);
@@ -490,12 +509,20 @@ class ButtonControlSizeModifier extends ModifierWithKey<ControlSize> {
 }
 
 // @ts-ignore
-globalThis.Button.attributeModifier = function (modifier) {
+globalThis.Button.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkButtonComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ButtonModifier(nativePtr, classType);
+  });
+};
+
+// @ts-ignore
+globalThis.Button.contentModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkButtonComponent(nativeNode);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
+  component.setContentModifier(modifier);
 };

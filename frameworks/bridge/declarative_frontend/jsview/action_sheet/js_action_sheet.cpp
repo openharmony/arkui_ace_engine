@@ -68,7 +68,7 @@ static void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
     }
 }
 
-ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
+ActionSheetInfo ParseSheetInfo(const JsiExecutionContext& execContext, JSRef<JSVal> val)
 {
     ActionSheetInfo sheetInfo;
     if (!val->IsObject()) {
@@ -93,9 +93,8 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
     if (actionValue->IsFunction()) {
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc), node = frameNode]
-            (const GestureEvent&) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto eventFunc = [execContext, func = std::move(actionFunc), node = frameNode](const GestureEvent&) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
             ACE_SCORING_EVENT("SheetInfo.action");
             auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipelineContext);
@@ -105,6 +104,85 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
         ActionSheetModel::GetInstance()->SetAction(eventFunc, sheetInfo);
     }
     return sheetInfo;
+}
+
+void ParseTitleAndMessage(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse title.
+    auto titleValue = obj->GetProperty("title");
+    std::string title;
+    if (JSActionSheet::ParseJsString(titleValue, title)) {
+        properties.title = title;
+    }
+
+    // Parse subtitle.
+    auto subtitleValue = obj->GetProperty("subtitle");
+    std::string subtitle;
+    if (JSActionSheet::ParseJsString(subtitleValue, subtitle)) {
+        properties.subtitle = subtitle;
+    }
+
+    // Parses message.
+    auto messageValue = obj->GetProperty("message");
+    std::string message;
+    if (JSActionSheet::ParseJsString(messageValue, message)) {
+        properties.content = message;
+    }
+}
+
+void ParseConfirmButton(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto confirmVal = obj->GetProperty("confirm");
+    if (!confirmVal->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> confirmObj = JSRef<JSObject>::Cast(confirmVal);
+    std::string buttonValue;
+    if (JSActionSheet::ParseJsString(confirmObj->GetProperty("value"), buttonValue)) {
+        ButtonInfo buttonInfo = { .text = buttonValue };
+        JSRef<JSVal> actionValue = confirmObj->GetProperty("action");
+        if (actionValue->IsFunction()) {
+            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+            auto gestureEvent = [execContext, func = std::move(actionFunc), node = frameNode](GestureEvent&) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
+                ACE_SCORING_EVENT("ActionSheet.confirm.action");
+                auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipelineContext);
+                pipelineContext->UpdateCurrentActiveNode(node);
+                func->ExecuteJS();
+            };
+            actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+            auto eventFunc = [execContext, func = std::move(actionFunc), node = frameNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
+                ACE_SCORING_EVENT("ActionSheet.confirm.action");
+                auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipelineContext);
+                pipelineContext->UpdateCurrentActiveNode(node);
+                func->Execute();
+            };
+            ActionSheetModel::GetInstance()->SetConfirm(gestureEvent, eventFunc, buttonInfo, properties);
+        }
+        auto enabledValue = confirmObj->GetProperty("enabled");
+        if (enabledValue->IsBoolean()) {
+            buttonInfo.enabled = enabledValue->ToBoolean();
+        }
+        auto defaultFocusValue = confirmObj->GetProperty("defaultFocus");
+        if (defaultFocusValue->IsBoolean()) {
+            buttonInfo.defaultFocus = defaultFocusValue->ToBoolean();
+        }
+        auto style = confirmObj->GetProperty("style");
+        if (style->IsNumber()) {
+            SetParseStyle(buttonInfo, style->ToNumber<int32_t>());
+        }
+        if (!buttonInfo.defaultFocus) {
+            buttonInfo.isPrimary = true;
+        }
+        if (buttonInfo.IsValid()) {
+            properties.buttons.clear();
+            properties.buttons.emplace_back(buttonInfo);
+        }
+    }
 }
 
 void JSActionSheet::Show(const JSCallbackInfo& args)
@@ -124,26 +202,33 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         .type = DialogType::ACTION_SHEET, .alignment = DialogAlignment::BOTTOM, .offset = ACTION_SHEET_OFFSET_DEFAULT
     };
     auto obj = JSRef<JSObject>::Cast(args[0]);
-    // Parse title.
-    auto titleValue = obj->GetProperty("title");
-    std::string title;
-    if (ParseJsString(titleValue, title)) {
-        properties.title = title;
-    }
+    auto execContext = args.GetExecutionContext();
+    auto dialogNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
 
-    // Parse subtitle.
-    auto subtitleValue = obj->GetProperty("subtitle");
-    std::string subtitle;
-    if (ParseJsString(subtitleValue, subtitle)) {
-        properties.subtitle = subtitle;
-    }
+    ParseTitleAndMessage(properties, obj);
+    ParseConfirmButton(execContext, properties, obj);
 
-    // Parses message.
-    auto messageValue = obj->GetProperty("message");
-    std::string message;
-    if (ParseJsString(messageValue, message)) {
-        properties.content = message;
-    }
+    auto onLanguageChange = [execContext, obj, parseContent = ParseTitleAndMessage, parseButton = ParseConfirmButton,
+                                node = dialogNode](DialogProperties& dialogProps) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
+        ACE_SCORING_EVENT("ActionSheet.property.onLanguageChange");
+        auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        parseContent(dialogProps, obj);
+        parseButton(execContext, dialogProps, obj);
+        // Parse sheets
+        auto sheetsVal = obj->GetProperty("sheets");
+        if (sheetsVal->IsArray()) {
+            std::vector<ActionSheetInfo> sheetsInfo;
+            auto sheetsArr = JSRef<JSArray>::Cast(sheetsVal);
+            for (size_t index = 0; index < sheetsArr->Length(); ++index) {
+                sheetsInfo.emplace_back(ParseSheetInfo(execContext, sheetsArr->GetValueAt(index)));
+            }
+            dialogProps.sheetsInfo = std::move(sheetsInfo);
+        }
+    };
+    properties.onLanguageChange = std::move(onLanguageChange);
 
     // Parse auto autoCancel.
     auto autoCancelValue = obj->GetProperty("autoCancel");
@@ -154,10 +239,9 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     // Parse cancel.
     auto cancelValue = obj->GetProperty("cancel");
     if (cancelValue->IsFunction()) {
-        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto cancelFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(cancelValue));
-        auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(cancelFunc), node = frameNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto eventFunc = [execContext, func = std::move(cancelFunc), node = dialogNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
             ACE_SCORING_EVENT("ActionSheet.cancel");
             auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipelineContext);
@@ -171,73 +255,13 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     ParseDialogCallback(obj, onWillDismissFunc);
     ActionSheetModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
 
-    // Parse confirm.
-    auto confirmVal = obj->GetProperty("confirm");
-    if (confirmVal->IsObject()) {
-        JSRef<JSObject> confirmObj = JSRef<JSObject>::Cast(confirmVal);
-        JSRef<JSVal> value = confirmObj->GetProperty("value");
-        std::string buttonValue;
-        if (ParseJsString(value, buttonValue)) {
-            ButtonInfo buttonInfo = { .text = buttonValue };
-            JSRef<JSVal> actionValue = confirmObj->GetProperty("action");
-            // parse confirm action
-            if (actionValue->IsFunction()) {
-                auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-                auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-                auto gestureEvent = [execCtx = args.GetExecutionContext(),
-                    func = std::move(actionFunc), node = frameNode](GestureEvent&) {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("ActionSheet.confirm.action");
-                    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
-                    CHECK_NULL_VOID(pipelineContext);
-                    pipelineContext->UpdateCurrentActiveNode(node);
-                    func->ExecuteJS();
-                };
-                actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
-                auto eventFunc = [execCtx = args.GetExecutionContext(), func = std::move(actionFunc),
-                                    node = frameNode]() {
-                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("ActionSheet.confirm.action");
-                    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
-                    CHECK_NULL_VOID(pipelineContext);
-                    pipelineContext->UpdateCurrentActiveNode(node);
-                    func->Execute();
-                };
-                ActionSheetModel::GetInstance()->SetConfirm(gestureEvent, eventFunc, buttonInfo, properties);
-            }
-
-            // Parse enabled
-            auto enabledValue = confirmObj->GetProperty("enabled");
-            if (enabledValue->IsBoolean()) {
-                buttonInfo.enabled = enabledValue->ToBoolean();
-            }
-
-            // Parse defaultFocus
-            auto defaultFocusValue = confirmObj->GetProperty("defaultFocus");
-            if (defaultFocusValue->IsBoolean()) {
-                buttonInfo.defaultFocus = defaultFocusValue->ToBoolean();
-            }
-
-            // Parse style
-            auto style = confirmObj->GetProperty("style");
-            if (style->IsNumber()) {
-                auto styleValue = style->ToNumber<int32_t>();
-                SetParseStyle(buttonInfo, styleValue);
-            }
-
-            if (buttonInfo.IsValid()) {
-                properties.buttons.emplace_back(buttonInfo);
-            }
-        }
-    }
-
     // Parse sheets
     auto sheetsVal = obj->GetProperty("sheets");
     if (sheetsVal->IsArray()) {
         std::vector<ActionSheetInfo> sheetsInfo;
         auto sheetsArr = JSRef<JSArray>::Cast(sheetsVal);
         for (size_t index = 0; index < sheetsArr->Length(); ++index) {
-            sheetsInfo.emplace_back(ParseSheetInfo(args, sheetsArr->GetValueAt(index)));
+            sheetsInfo.emplace_back(ParseSheetInfo(execContext, sheetsArr->GetValueAt(index)));
         }
         properties.sheetsInfo = std::move(sheetsInfo);
     }

@@ -17,8 +17,8 @@
 
 #include <optional>
 
-#include "key_event.h"
-#include "pointer_event.h"
+#include "core/event/key_event.h"
+#include "core/event/pointer_event.h"
 #include "session/host/include/extension_session.h"
 #include "session/host/include/session.h"
 #include "ui/rs_surface_node.h"
@@ -49,6 +49,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
+}
 UIExtensionPattern::UIExtensionPattern(
     bool isTransferringCaller, bool isModal, bool isAsyncModalBinding, SessionType sessionType)
     : isTransferringCaller_(isTransferringCaller), isModal_(isModal), isAsyncModalBinding_(isAsyncModalBinding)
@@ -59,7 +62,9 @@ UIExtensionPattern::UIExtensionPattern(
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
-        sessionType, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
+        sessionType, WeakClaim(this), instanceId_, isTransferringCaller_);
+    accessibilitySessionAdapter_ =
+        AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
     UIEXT_LOGI("The %{public}smodal UIExtension is created.", isModal_ ? "" : "non");
 }
 
@@ -83,7 +88,12 @@ RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
 
 FocusPattern UIExtensionPattern::GetFocusPattern() const
 {
-    return { FocusType::NODE, true, FocusStyleType::NONE };
+    return { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
+}
+
+RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionAdapter()
+{
+    return accessibilitySessionAdapter_;
 }
 
 void UIExtensionPattern::InitializeDynamicComponent(
@@ -105,6 +115,28 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
     UpdateWant(want);
 }
 
+void UIExtensionPattern::MountPlaceholderNode()
+{
+    if (!isShowPlaceholder_ && placeholderNode_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->AddChild(placeholderNode_, 0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        isShowPlaceholder_ = true;
+    }
+}
+
+void UIExtensionPattern::RemovePlaceholderNode()
+{
+    if (isShowPlaceholder_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->RemoveChildAtIndex(0);
+        isShowPlaceholder_ = false;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
     CHECK_NULL_VOID(sessionWrapper_);
@@ -120,6 +152,10 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         NotifyDestroy();
     }
+
+    isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
+    UIEXT_LOGI("The ability KeyAsync %{public}d.", isKeyAsync_);
+    MountPlaceholderNode();
     sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
     NotifyForeground();
 }
@@ -146,6 +182,7 @@ void UIExtensionPattern::OnConnect()
     auto surfaceNode = sessionWrapper_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
     context->SetRSNode(surfaceNode);
+    RemovePlaceholderNode();
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
@@ -441,10 +478,6 @@ void UIExtensionPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline && pipeline->GetIsFocusActive()) {
-        DispatchFocusActiveEvent(true);
-    }
     return DispatchKeyEventSync(event);
 }
 
@@ -542,7 +575,13 @@ void UIExtensionPattern::DispatchKeyEvent(const KeyEvent& event)
 
 bool UIExtensionPattern::DispatchKeyEventSync(const KeyEvent& event)
 {
-    return sessionWrapper_ && sessionWrapper_->NotifyKeyEventSync(event.rawKeyEvent, event.isPreIme);
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    if (isKeyAsync_) {
+        sessionWrapper_->NotifyKeyEventAsync(event.rawKeyEvent, false);
+        return true;
+    }
+
+    return sessionWrapper_->NotifyKeyEventSync(event.rawKeyEvent, event.isPreIme);
 }
 
 void UIExtensionPattern::DispatchFocusActiveEvent(bool isFocusActive)

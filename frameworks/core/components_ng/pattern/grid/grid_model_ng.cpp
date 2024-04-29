@@ -356,6 +356,22 @@ void GridModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
     eventHub->SetOnReachEnd(std::move(onReachEnd));
 }
 
+RefPtr<FrameNode> GridModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
+
+    return frameNode;
+}
+
+void GridModelNG::SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollIndex(std::move(onScrollIndex));
+}
+
 void GridModelNG::SetColumnsTemplate(FrameNode* frameNode, const std::string& columnsTemplate)
 {
     if (columnsTemplate.empty()) {

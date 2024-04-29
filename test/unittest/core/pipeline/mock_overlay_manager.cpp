@@ -65,18 +65,19 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 }
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
-{}
-
-void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
-    std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
+    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {}
 
+void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
+    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, PickerTime> timePickerProperty,
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
+{}
+
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
-    std::map<std::string, NG::DialogTextEvent> dialogEvent,
+    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogTextEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {}
@@ -111,6 +112,5 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
 void OverlayManager::MarkDirty(PropertyChangeFlag flag) {}
 
 void OverlayManager::BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId) {}
-void OverlayManager::DestroyKeyboard() {}
 void OverlayManager::CloseKeyboard(int32_t targetId) {}
 } // namespace OHOS::Ace::NG

@@ -13,13 +13,18 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_list_modifier.h"
+
 #include <cstdint>
 
+#include "base/error/error_code.h"
 #include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
+#include "base/utils/utils.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
@@ -413,8 +418,8 @@ void ResetContentEndOffset(ArkUINodeHandle node)
     ListModelNG::SetContentEndOffset(frameNode, DEFAULT_OFFSET);
 }
 
-void ListSetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-    const int32_t* units, ArkUI_Int32 length)
+void ListSetDivider(
+    ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const int32_t* units, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -480,6 +485,50 @@ void ResetChainAnimationOptions(ArkUINodeHandle node)
 
     ListModelNG::SetChainAnimationOptions(frameNode, options);
 }
+
+void SetFadingEdge(ArkUINodeHandle node, ArkUI_Bool fadingEdge)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetFadingEdge(frameNode, fadingEdge);
+}
+
+void ResetFadingEdge(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetFadingEdge(frameNode, false);
+}
+
+ArkUI_Int32 SetNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto totalChildCount = frameNode->TotalChildCount();
+    if (totalChildCount > 0) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_CHILD_NODE_EXIST;
+    }
+    NodeAdapter::GetNodeAdapterAPI()->attachHostNode(handle, node);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetNodeAdapter(ArkUINodeHandle node)
+{
+    NodeAdapter::GetNodeAdapterAPI()->detachHostNode(node);
+}
+
+ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle node)
+{
+    return NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(node);
+}
+
+ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return ListModelNG::GetCachedCount(frameNode);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -494,8 +543,9 @@ const ArkUIListModifier* GetListModifier()
         GetListScrollBarWidth, SetListScrollBarWidth, ResetListScrollBarWidth, GetListScrollBarColor,
         SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem, ResetAlignListItem,
         SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset,
-        ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions,
-        ResetChainAnimationOptions, GetListSpace, SetListSpace, ResetListSpace };
+        ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
+        GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
+        GetNodeAdapter, GetCachedCount };
     return &modifier;
 }
 
@@ -520,8 +570,8 @@ void SetOnListScrollFrameBegin(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onScrollFrameBegin = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) ->
-            ScrollFrameResult {
+    auto onScrollFrameBegin = [nodeId, node, extraParam](
+                                  const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
         ScrollFrameResult scrollRes { .offset = offset };
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
@@ -566,5 +616,21 @@ void SetOnListScrollStop(ArkUINodeHandle node, void* extraParam)
     ListModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
 
+void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onWillScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_WILL_SCROLL;
+        event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int32_t>(state);
+        SendArkUIAsyncEvent(&event);
+    };
+    ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

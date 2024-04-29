@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,10 +29,12 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
 public:                                                                      \
@@ -137,9 +139,36 @@ public:                                                                         
     }
 
 namespace OHOS::Ace::NG {
-
+using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
+class InspectorFilter;
 class Paragraph;
 
+enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2 };
+
+struct PlaceholderStyle {
+    double width = 0.0f;
+    double height = 0.0f;
+    double baselineOffset = 0.0f;
+    VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
+    TextBaseline baseline = TextBaseline::ALPHABETIC;
+};
+
+struct CustomSpanPlaceholderInfo {
+    int32_t customSpanIndex = -1;
+    int32_t paragraphIndex = -1;
+    std::function<void(NG::DrawingContext&, CustomSpanOptions)> onDraw;
+
+    std::string ToString()
+    {
+        std::string result = "CustomPlaceholderInfo: [";
+        result += "customSpanIndex: " + std::to_string(customSpanIndex);
+        result += ", paragraphIndex: " + std::to_string(paragraphIndex);
+        result += ", onDraw: ";
+        result += !onDraw ? "nullptr" : "true";
+        result += "]";
+        return result;
+    }
+};
 struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
 
@@ -156,6 +185,7 @@ public:
     std::string description;
     std::string content;
     uint32_t unicode = 0;
+    SpanItemType spanItemType = SpanItemType::NORMAL;
     std::pair<int32_t, int32_t> interval;
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
     std::unique_ptr<TextLineStyle> textLineStyle = std::make_unique<TextLineStyle>();
@@ -176,25 +206,25 @@ public:
     int32_t selectedEnd = -1;
     void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        double width = 0.0f, double height = 0.0f, VerticalAlign verticalAlign = VerticalAlign::BASELINE);
+        PlaceholderStyle placeholderStyle = PlaceholderStyle());
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
-    virtual void UpdateTextStyle(
-        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle,
-        const int32_t selStart, const int32_t selEnd);
+    virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
+        const std::optional<TextStyle>& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     std::string GetFont() const;
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
     virtual bool IsDragging();
+    virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
     TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode);
-    RefPtr<SpanItem> GetSameStyleSpanItem() const;
+    virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::optional<TextStyle> GetTextStyle() const
     {
@@ -212,7 +242,7 @@ public:
     {
         resourceObject_ = resourceObject;
     }
-    void MarkNeedRemoveNewLine(bool value)
+    void SetNeedRemoveNewLine(bool value)
     {
         needRemoveNewLine = value;
     }
@@ -235,13 +265,13 @@ public:
     std::string GetSpanContent(const std::string& rawContent);
     std::string GetSpanContent();
     uint32_t GetSymbolUnicode();
+    std::string SymbolColorToString();
 
 private:
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
     RefPtr<ResourceObject> resourceObject_;
 };
-
 
 enum class PropertyInfo {
     FONTSIZE = 0,
@@ -261,6 +291,11 @@ enum class PropertyInfo {
     SYMBOL_RENDERING_STRATEGY,
     SYMBOL_EFFECT_STRATEGY,
     WORD_BREAK,
+    LINE_BREAK_STRATEGY,
+    FONTFEATURE,
+    BASELINE_OFFSET,
+    LINESPACING,
+    SYMBOL_EFFECT_OPTIONS,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -362,16 +397,21 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolColorList, std::vector<Color>);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();
@@ -386,9 +426,9 @@ public:
         spanItem_->children.clear();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        spanItem_->ToJsonValue(json);
+        spanItem_->ToJsonValue(json, filter);
     }
 
     void RequestTextFlushDirty();
@@ -414,18 +454,10 @@ public:
         RequestTextFlushDirty();
     }
 
-    std::set<PropertyInfo> CalculateInheritPropertyInfo()
-    {
-        std::set<PropertyInfo> inheritPropertyInfo;
-        const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
-            PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
-            PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
-            PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
-            PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK };
-        set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
-            propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
-        return inheritPropertyInfo;
-    }
+    std::set<PropertyInfo> CalculateInheritPropertyInfo();
+
+protected:
+    void DumpInfo() override;
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
@@ -442,11 +474,12 @@ struct PlaceholderSpanItem : public SpanItem {
 public:
     int32_t placeholderSpanNodeId = -1;
     TextStyle textStyle;
+    PlaceholderRun run_;
     PlaceholderSpanItem() = default;
     ~PlaceholderSpanItem() override = default;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
-    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
-        double height, VerticalAlign verticalAlign) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
+    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
+        PlaceholderStyle placeholderStyle) override;
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
 };
 
@@ -502,17 +535,43 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanNode);
 };
 
+struct CustomSpanItem : public PlaceholderSpanItem {
+    DECLARE_ACE_TYPE(CustomSpanItem, PlaceholderSpanItem);
+
+public:
+    CustomSpanItem() : PlaceholderSpanItem()
+    {
+        this->spanItemType = SpanItemType::CustomSpan;
+    }
+    ~CustomSpanItem() override = default;
+    RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
+    ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
+    std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;
+    std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw;
+};
+
 struct ImageSpanItem : public PlaceholderSpanItem {
     DECLARE_ACE_TYPE(ImageSpanItem, PlaceholderSpanItem);
 
 public:
-    ImageSpanItem() = default;
+    ImageSpanItem() : PlaceholderSpanItem()
+    {
+        this->spanItemType = SpanItemType::IMAGE;
+    }
     ~ImageSpanItem() override = default;
-    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
-        double height, VerticalAlign verticalAlign) override;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
+    PlaceholderRun run_;
+    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
+        PlaceholderStyle placeholderStyle) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     void UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode);
+    void SetImageSpanOptions(const ImageSpanOptions& options);
+    void ResetImageSpanOptions();
+    ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
+    RefPtr<SpanItem> GetSameStyleSpanItem() const override;
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
+
+    ImageSpanOptions options;
 };
 
 class ACE_EXPORT ImageSpanNode : public FrameNode {
@@ -543,6 +602,12 @@ public:
         return imageSpanItem_;
     }
 
+    void DumpInfo() override;
+    void SetImageItem(const RefPtr<ImageSpanItem>& imageSpan)
+    {
+        imageSpanItem_ = imageSpan;
+    }
+
 private:
     RefPtr<ImageSpanItem> imageSpanItem_ = MakeRefPtr<ImageSpanItem>();
 
@@ -568,7 +633,7 @@ public:
     explicit ContainerSpanNode(int32_t nodeId) : UINode(V2::CONTAINER_SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
     ~ContainerSpanNode() override = default;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     bool IsAtomicNode() const override
     {

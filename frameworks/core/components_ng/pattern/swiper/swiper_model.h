@@ -89,6 +89,7 @@ public:
     virtual RefPtr<SwiperController> Create();
     virtual void SetDirection(Axis axis);
     virtual void SetIndex(uint32_t index);
+    virtual void SetIndicatorInteractive(bool interactive) {}
     virtual void SetAutoPlay(bool autoPlay);
     virtual void SetAutoPlayInterval(uint32_t interval);
     virtual void SetDuration(uint32_t duration);
@@ -121,8 +122,8 @@ public:
     virtual void SetIsIndicatorCustomSize(bool isCustomSize) {}
     virtual void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) {}
     virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
-    virtual void SetPreviousMargin(const Dimension& prevMargin) {}
-    virtual void SetNextMargin(const Dimension& nextMargin) {}
+    virtual void SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank) {}
+    virtual void SetNextMargin(const Dimension& nextMargin, bool ignoreBlank) {}
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
     virtual void SetIndicatorIsBoolean(bool isBoolean) {}
     virtual void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}

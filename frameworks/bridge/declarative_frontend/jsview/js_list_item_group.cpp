@@ -50,6 +50,106 @@ ListItemGroupModel* ListItemGroupModel::GetInstance()
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
+namespace {
+bool ParseChange(const JSRef<JSObject>& changeObject, const float defaultSize, int32_t& start,
+    int32_t& deleteCount, std::vector<float>& newChildrenSize)
+{
+    if (!JSViewAbstract::ParseJsInteger<int32_t>(changeObject->GetProperty("start"), start) || start < 0) {
+        return false;
+    }
+    if (!(changeObject->HasProperty("deleteCount"))) {
+        // If only input one parameter, set -1 to deleteCount for deleting elements after index 'start' in the array.
+        deleteCount = -1;
+    } else if (!JSViewAbstract::ParseJsInteger<int32_t>(changeObject->GetProperty("deleteCount"), deleteCount) ||
+        deleteCount < 0) {
+        deleteCount = 0;
+    }
+    auto childrenSizeValue = changeObject->GetProperty("childrenSize");
+    if (childrenSizeValue->IsArray()) {
+        auto childrenSize = JSRef<JSArray>::Cast(childrenSizeValue);
+        auto childrenSizeCount = childrenSize->Length();
+        for (size_t j = 0; j < childrenSizeCount; ++j) {
+            // -1.0: represent default size.
+            double childSize = -1.0;
+            if (!JSViewAbstract::ParseJsDouble(childrenSize->GetValueAt(j), childSize) || Negative(childSize)) {
+                // -1.0f: represent default size.
+                newChildrenSize.emplace_back(-1.0f);
+            } else {
+                newChildrenSize.emplace_back(Dimension(childSize, DimensionUnit::VP).ConvertToPx());
+            }
+        }
+    }
+    return true;
+}
+
+void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChildrenMainSize> childrenSize)
+{
+    auto sizeArray = childrenSizeObj->GetProperty("sizeArray");
+    if (!sizeArray->IsArray()) {
+        return;
+    }
+    childrenSize->ResizeChildrenSize(0);
+    auto childrenSizeJSArray = JSRef<JSArray>::Cast(sizeArray);
+    auto length = childrenSizeJSArray->Length();
+    for (size_t i = 0; i < length; ++i) {
+        // -1.0: represent default size.
+        double childSize = -1.0;
+        if (!JSViewAbstract::ParseJsDouble(childrenSizeJSArray->GetValueAt(i), childSize) || Negative(childSize)) {
+            // -1.0f: represent default size.
+            childrenSize->SyncChildrenSize(-1.0f);
+        } else {
+            childrenSize->SyncChildrenSize(Dimension(childSize, DimensionUnit::VP).ConvertToPx());
+        }
+    }
+    childrenSize->SyncChildrenSizeOver();
+}
+} // namespace
+
+void JSListItemGroup::SetChildrenMainSize(const JSCallbackInfo& args)
+{
+    if (args.Length() != 1 || !(args[0]->IsObject())) {
+        return;
+    }
+    JSRef<JSObject> childrenSizeObj = JSRef<JSObject>::Cast(args[0]);
+    double defaultSize = 0.0f;
+    if (!ParseJsDouble(childrenSizeObj->GetProperty("defaultMainSize"), defaultSize) || !NonNegative(defaultSize)) {
+        LOGW("JSListItemGroup input parameter defaultSize check failed.");
+        return;
+    }
+    auto listChildrenMainSize = ListItemGroupModel::GetInstance()->GetOrCreateListChildrenMainSize();
+    CHECK_NULL_VOID(listChildrenMainSize);
+    listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
+
+    if (listChildrenMainSize->NeedSync()) {
+        SyncChildrenSize(childrenSizeObj, listChildrenMainSize);
+    } else {
+        auto changes = childrenSizeObj->GetProperty("changeArray");
+        if (!changes->IsArray()) {
+            return;
+        }
+        auto changeArray = JSRef<JSArray>::Cast(changes);
+        auto length = changeArray->Length();
+        for (size_t i = 0; i < length; ++i) {
+            auto change = changeArray->GetValueAt(i);
+            auto changeObject = JSRef<JSObject>::Cast(change);
+            int32_t start = 0;
+            int32_t deleteCount = 0;
+            std::vector<float> newChildrenSize;
+            if (!ParseChange(changeObject, defaultSize, start, deleteCount, newChildrenSize)) {
+                SyncChildrenSize(childrenSizeObj, listChildrenMainSize);
+                break;
+            }
+            listChildrenMainSize->ChangeData(start, deleteCount, newChildrenSize);
+        }
+    }
+    auto clearFunc = childrenSizeObj->GetProperty("clearChanges");
+    if (!clearFunc->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(clearFunc);
+    JSRef<JSVal>::Cast(func->Call(childrenSizeObj));
+}
+
 void JSListItemGroup::Create(const JSCallbackInfo& args)
 {
     V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE;
@@ -65,7 +165,7 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
         Dimension space;
-        if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsValid()) {
+        if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsNonNegative()) {
             ListItemGroupModel::GetInstance()->SetSpace(space);
         }
 
@@ -118,8 +218,9 @@ void JSListItemGroup::JSBind(BindingTarget globalObj)
     JSClass<JSListItemGroup>::Declare("ListItemGroup");
     JSClass<JSListItemGroup>::StaticMethod("create", &JSListItemGroup::Create);
 
-    JSClass<JSListItemGroup>::StaticMethod("divider", &JSListItemGroup::SetDivider);
     JSClass<JSListItemGroup>::StaticMethod("aspectRatio", &JSListItemGroup::SetAspectRatio);
+    JSClass<JSListItemGroup>::StaticMethod("childrenMainSize", &JSListItemGroup::SetChildrenMainSize);
+    JSClass<JSListItemGroup>::StaticMethod("divider", &JSListItemGroup::SetDivider);
     JSClass<JSListItemGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSListItemGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSListItemGroup>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

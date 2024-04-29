@@ -50,7 +50,7 @@ int32_t UIServiceMgrProxy::RegisterCallBack(const AAFwk::Want& want, const sptr<
     }
     int32_t error = Remote()->SendRequest(IUIServiceMgr::REGISTER_CALLBACK, data, reply, option);
     if (error != NO_ERROR) {
-        HILOG_WARN("register callback fail, error: %d", error);
+        LOGW("register callback fail, error: %d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -68,7 +68,7 @@ int32_t UIServiceMgrProxy::UnregisterCallBack(const AAFwk::Want& want)
     data.WriteParcelable(&want);
     int32_t error = Remote()->SendRequest(IUIServiceMgr::UNREGISTER_CALLBACK, data, reply, option);
     if (error != NO_ERROR) {
-        HILOG_WARN("unregister callback fail, error: %d", error);
+        LOGW("unregister callback fail, error: %d", error);
         return error;
     }
     return reply.ReadInt32();

@@ -19,17 +19,21 @@
 #include "base/image/image_source.h"
 #include "base/image/pixel_map.h"
 namespace OHOS::Ace {
-using Size = std::pair<int32_t, int32_t>;
 class MockImageSource : public ImageSource {
     DECLARE_ACE_TYPE(MockImageSource, ImageSource)
 
 public:
 
     MOCK_METHOD1(GetProperty, std::string(const std::string& key));
-    MOCK_METHOD1(CreatePixelMap, RefPtr<PixelMap>(const Size& size));
-    MOCK_METHOD2(CreatePixelMap, RefPtr<PixelMap>(uint32_t index, const Size& size));
+    MOCK_METHOD2(CreatePixelMap, RefPtr<PixelMap>(const ImageSource::Size& size, AIImageQuality imageQuality));
+    MOCK_METHOD3(
+        CreatePixelMap, RefPtr<PixelMap>(uint32_t index, const ImageSource::Size& size, AIImageQuality imageQuality));
     MOCK_METHOD0(CreatePixelMap, RefPtr<PixelMap>());
-    MOCK_METHOD0(GetImageSize, Size());
+    MOCK_METHOD0(GetImageSize, ImageSource::Size());
+    MOCK_METHOD0(GetFrameCount, uint32_t());
+    MOCK_METHOD0(GetEncodedFormat, std::string());
+
+    static RefPtr<MockImageSource> mockImageSource_;
 };
 
 } // namespace OHOS::Ace

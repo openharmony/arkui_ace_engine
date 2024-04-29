@@ -33,8 +33,7 @@ class ACE_EXPORT ModelPattern : public Pattern {
     DECLARE_ACE_TYPE(ModelPattern, Pattern);
 
 public:
-    ModelPattern(uint32_t key, Render3D::SurfaceType surfaceType, const std::string& bundleName,
-        const std::string& moduleName);
+    ModelPattern(uint32_t key, const ModelViewContext& context);
     ~ModelPattern() override;
 
     RefPtr<PaintProperty> CreatePaintProperty() override

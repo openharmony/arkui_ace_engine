@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/time/time_event_proxy.h"
 #include "core/pipeline/base/render_context.h"
@@ -98,7 +99,6 @@ void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
-    pipeline->RemoveFormVisibleChangeNode(frameNode->GetId());
 }
 
 void TextClockPattern::UpdateTextLayoutProperty(
@@ -142,6 +142,7 @@ void TextClockPattern::OnModifyDone()
     hourWest_ = GetHoursWest();
     delayTask_.Cancel();
     UpdateTimeText();
+    FireBuilder();
 }
 
 void TextClockPattern::InitTextClockController()
@@ -161,6 +162,7 @@ void TextClockPattern::InitTextClockController()
         auto textClock = wp.Upgrade();
         if (textClock) {
             textClock->isStart_ = false;
+            textClock->FireBuilder();
             textClock->delayTask_.Cancel();
         }
     });
@@ -188,20 +190,6 @@ void TextClockPattern::OnVisibleAreaChange(bool visible)
     }
 }
 
-void TextClockPattern::OnFormVisibleChange(bool visible)
-{
-    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
-        "Form is %{public}s and clock %{public}s running",
-        visible ? "visible" : "invisible", visible ? "starts" : "stops");
-    if (visible && !isFormVisible_) {
-        isFormVisible_ = visible;
-        UpdateTimeText();
-    } else if (!visible) {
-        isFormVisible_ = visible;
-        delayTask_.Cancel();
-    }
-}
-
 void TextClockPattern::RegistVisibleAreaChangeCallback()
 {
     auto host = GetHost();
@@ -217,21 +205,13 @@ void TextClockPattern::RegistVisibleAreaChangeCallback()
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
     std::vector<double> ratioList = {0.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, areaCallback, false);
-
-    if (isForm_) {
-        pipeline->RemoveFormVisibleChangeNode(host->GetId());
-        auto formCallback = [weak = WeakClaim(this)](bool visible) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnFormVisibleChange(visible);
-        };
-        pipeline->AddFormVisibleChangeNode(host, formCallback);
-    }
 }
 
 void TextClockPattern::InitUpdateTimeTextCallBack()
 {
-    auto context = UINode::GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     if (context) {
         isForm_ = context->IsFormRender();
     }
@@ -240,9 +220,10 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
 
 void TextClockPattern::UpdateTimeText(bool isTimeChange)
 {
-    if (!isStart_ || (!isTimeChange && (!isSetVisible_ || !isInVisibleArea_ || !isFormVisible_))) {
+    if (!isStart_ || (!isTimeChange && (!isSetVisible_ || !isInVisibleArea_))) {
         return;
     }
+    FireBuilder();
     RequestUpdateForNextSecond();
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
@@ -290,7 +271,9 @@ void TextClockPattern::RequestUpdateForNextSecond()
         delayTime += (tempTime - MILLISECONDS_OF_SECOND);
     }
 
-    auto context = UINode::GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
     delayTask_.Reset([weak = WeakClaim(this)] {
@@ -301,7 +284,8 @@ void TextClockPattern::RequestUpdateForNextSecond()
         }
         textClock->UpdateTimeText();
     });
-    context->GetTaskExecutor()->PostDelayedTask(delayTask_, TaskExecutor::TaskType::UI, delayTime);
+    context->GetTaskExecutor()->PostDelayedTask(
+        delayTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUITextClockUpdateTimeText");
 }
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
@@ -341,8 +325,9 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     // parse data time
     std::string tempdateTimeValue = dateTimeValue;
     std::string strAmPm = GetAmPm(tempdateTimeValue);
-    if (!strAmPm.empty()) {
-        tempdateTimeValue.replace(tempdateTimeValue.find(strAmPm), strAmPm.length(), "");
+    auto strAmPmPos = tempdateTimeValue.find(strAmPm);
+    if (!strAmPm.empty() && strAmPmPos != std::string::npos) {
+        tempdateTimeValue.replace(strAmPmPos, strAmPm.length(), "");
     }
     std::vector<std::string> curDateTime = ParseDateTimeValue(tempdateTimeValue);
     curDateTime[(int32_t)(TextClockElementIndex::CUR_AMPM_INDEX)] = strAmPm;
@@ -719,5 +704,48 @@ void TextClockPattern::OnTimeChange()
 {
     is24H_ = SystemProperties::Is24HourClock();
     UpdateTimeText(ON_TIME_CHANGE);
+}
+
+void TextClockPattern::FireBuilder()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value()) {
+        auto children = host->GetChildren();
+        for (const auto& child : children) {
+            if (child->GetId() == nodeId_) {
+                host->RemoveChildAndReturnIndex(child);
+            }
+        }
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = node;
+    CHECK_NULL_VOID(contentModifierNode_);
+    nodeId_ = contentModifierNode_->GetId();
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> TextClockPattern::BuildContentModifierNode()
+{
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
+    auto timeZoneOffset = GetHoursWest();
+    auto started = isStart_;
+    auto timeValue = static_cast<int64_t>(GetMilliseconds() / MICROSECONDS_OF_MILLISECOND);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto eventHub = host->GetEventHub<TextClockEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    TextClockConfiguration textClockConfiguration(timeZoneOffset, started, timeValue, enabled);
+    return (makeFunc_.value())(textClockConfiguration);
 }
 } // namespace OHOS::Ace::NG

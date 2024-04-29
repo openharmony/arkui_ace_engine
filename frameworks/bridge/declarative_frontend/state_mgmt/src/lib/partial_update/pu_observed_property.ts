@@ -33,6 +33,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     super(owningView, propertyName);
    
     this.setValueInternal(localInitValue);
+    this.setDecoratorInfo('@State');
   }
 
   aboutToBeDeleted(unsubscribeMe?: IPropertySubscriber) {
@@ -40,12 +41,6 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     this.removeSubscriber(unsubscribeMe);
     super.aboutToBeDeleted();
   }
-
-  
-  public debugInfoDecorator() : string {
-    return `@State/@Provide (class ObservedPropertyPU)`;
-  }
-
 
   /**
    * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
@@ -68,7 +63,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
    */
   public objectPropertyHasChangedPU(souceObject: ObservedObject<T>, changedPropertyName : string) {
     stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: contained ObservedObject property \ 
-                                                '${changedPropertyName}' has changed.`)
+                                                '${changedPropertyName}' has changed.`);
     this.notifyPropertyHasChangedPU();
   }
 
@@ -92,9 +87,9 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     and also notify with this.aboutToChange();
   */
   private setValueInternal(newValue: T): boolean {
-    stateMgmtProfiler.begin("ObservedPropertyPU.setValueInternal");
+    stateMgmtProfiler.begin('ObservedPropertyPU.setValueInternal');
     if (newValue === this.wrappedValue_) {
-      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] newValue unchanged`);
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || 'unknown'}'] newValue unchanged`);
       stateMgmtProfiler.end();
       return false;
     }
@@ -128,7 +123,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
   }
 
   public get(): T {
-    stateMgmtProfiler.begin("ObservedPropertyPU.get");
+    stateMgmtProfiler.begin('ObservedPropertyPU.get');
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get`);
     this.recordPropertyDependentUpdate();
     if (this.shouldInstallTrackedObjectReadCb) {
@@ -149,7 +144,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
 
   public set(newValue: T): void {
     if (this.wrappedValue_ === newValue) {
-      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || 'unknown'}']: set with unchanged value - ignoring.`);
       return;
     }
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: set: value about to changed.`);
@@ -162,7 +157,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
   }
 
   protected onOptimisedObjectPropertyRead(readObservedObject: T, readPropertyName: string, isTracked: boolean) : void {
-    stateMgmtProfiler.begin("ObservedProperty.onOptimisedObjectPropertyRead");
+    stateMgmtProfiler.begin('ObservedProperty.onOptimisedObjectPropertyRead');
     const renderingElmtId = this.getRenderingElmtId();
     if (renderingElmtId >= 0) {
       if (!isTracked) {
@@ -176,7 +171,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
         //    because there can be change to depended variables unless one of the bindings is a JS expression
         // 2 - the changed ObservedObject is the wrapped object. The situation where it can be different is after a value assignment.
         if (this.getUnmonitored() === readObservedObject) {
-          this.recordTrackObjectPropertyDependencyForElmtId(renderingElmtId, readPropertyName)
+          this.recordTrackObjectPropertyDependencyForElmtId(renderingElmtId, readPropertyName);
         }
       }
     }

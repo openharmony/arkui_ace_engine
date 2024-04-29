@@ -51,12 +51,13 @@ public:
     static void SetViewportMetrics(AceViewOhos* view, const ViewportConfig& config);
 
     static void DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr);
-    static bool DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme = false);
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr,
+        bool isInjected = false);
+    static bool DispatchKeyEvent(
+        AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme = false);
     static bool DispatchRotationEvent(AceViewOhos* view, float rotationValue);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
-
 
     static uint32_t GetBackgroundColor();
 
@@ -72,13 +73,14 @@ public:
     void Launch() override;
 
     void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr);
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr,
+        bool isInjected = false);
 
     void ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, bool isInjected = false);
 
     void ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, bool isInjected = false);
 
     bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme);
 

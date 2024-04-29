@@ -15,11 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   loop(value: boolean): this {
     throw new Error('Method not implemented.');
@@ -46,6 +43,11 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
   }
   onChange(callback: (value: TimePickerResult) => void): this {
     throw new Error('Method not implemented.');
+  }
+  dateTimeOptions(value: DateTimeOptions): this {
+    modifierWithKey(this._modifiersWithKeys, TimepickerDateTimeOptionsModifier.identity,
+      TimepickerDateTimeOptionsModifier, value);
+    return this;
   }
 }
 
@@ -153,13 +155,25 @@ class TimepickerUseMilitaryTimeModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TimepickerDateTimeOptionsModifier extends ModifierWithKey<DateTimeOptions> {
+  constructor(value: DateTimeOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timepickerDateTimeOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerDateTimeOptions(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerDateTimeOptions(node, this.value.hour, this.value.minute, this.value.second);
+    }
+  }
+}
+
 // @ts-ignore
-globalThis.TimePicker.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTimePickerComponent(nativeNode);
+globalThis.TimePicker.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTimePickerComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TimePickerModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

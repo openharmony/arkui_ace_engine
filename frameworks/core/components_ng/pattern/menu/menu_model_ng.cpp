@@ -75,6 +75,11 @@ void MenuModelNG::SetBorderRadius(const Dimension& radius)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius);
 }
 
+void MenuModelNG::ResetBorderRadius()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MenuLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE);
+}
+
 void MenuModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight)
@@ -97,6 +102,11 @@ void MenuModelNG::SetWidth(const Dimension& width)
 void MenuModelNG::SetFontFamily(const std::vector<std::string>& families)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, families);
+}
+
+void MenuModelNG::SetExpandingMode(const SubMenuExpandingMode& expandingMode)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode);
 }
 
 void MenuModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& color)
@@ -141,6 +151,11 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const Dimension& radius)
     borderRadius.radiusBottomRight = radius;
     borderRadius.multiValued = true;
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
+}
+
+void MenuModelNG::ResetBorderRadius(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MenuLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE, frameNode);
 }
 
 void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,

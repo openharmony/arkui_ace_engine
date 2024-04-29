@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkTabsComponent extends ArkComponent implements TabsAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onAnimationStart(handler: (index: number, targetIndex: number, event: TabsAnimationEvent) => void): TabsAttribute {
     throw new Error('Method not implemented.');
@@ -95,6 +95,14 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, TabClipModifier.identity, TabClipModifier, value);
     return this;
   }
+  width(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, TabWidthModifier.identity, TabWidthModifier, value);
+    return this;
+  }
+  height(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, TabHeightModifier.identity, TabHeightModifier, value);
+    return this;
+  }
 }
 
 class BarGridAlignModifier extends ModifierWithKey<BarGridColumnOptions> {
@@ -163,7 +171,7 @@ class BarWidthModifier extends ModifierWithKey<Length> {
   }
 }
 
-class BarAdaptiveHeightModifier extends Modifier<boolean> {
+class BarAdaptiveHeightModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -301,7 +309,7 @@ class BarPositionModifier extends ModifierWithKey<number> {
   }
 }
 
-class TabsHideTitleBarModifier extends Modifier<string> {
+class TabsHideTitleBarModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -368,13 +376,41 @@ class TabClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class TabWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabWidth');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabWidth(node);
+    } else {
+      getUINativeModule().tabs.setTabWidth(node, this.value);
+    }
+  }
+}
+
+class TabHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabHeight');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabHeight(node);
+    } else {
+      getUINativeModule().tabs.setTabHeight(node, this.value);
+    }
+  }
+}
+
 // @ts-ignore
-globalThis.Tabs.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTabsComponent(nativeNode);
+globalThis.Tabs.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTabsComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TabsModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

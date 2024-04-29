@@ -167,12 +167,17 @@ public:
 
     virtual void SetCopyOptionMode(CopyOptions mode) {};
     virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
+    virtual void SetOpenAppLinkFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetIntelligentTrackingPreventionResultId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
             intelligentTrackingPreventionResultId) {};
     virtual void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetTextAutosizing(bool isTextAutosizing) {};
     virtual void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) = 0;
+    virtual void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) = 0;
+    virtual void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
+    virtual void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
+
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

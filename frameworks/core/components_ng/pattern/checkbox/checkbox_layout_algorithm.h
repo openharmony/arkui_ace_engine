@@ -33,15 +33,18 @@ public:
 
     void OnReset() override {}
 
+    void Layout(LayoutWrapper* layoutWrapper) override;
+
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+
+    void Measure(LayoutWrapper* layoutWrapper) override;
 
 private:
     float defaultWidth_ = 0.0f;
     float defaultHeight_ = 0.0f;
     float horizontalPadding_ = 0.0f;
     float verticalPadding_ = 0.0f;
-
     void InitializeParam();
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxLayoutAlgorithm);

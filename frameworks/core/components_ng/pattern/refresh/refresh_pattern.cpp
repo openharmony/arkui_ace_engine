@@ -415,10 +415,11 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
             return { delta, true };
         }
         auto lastScrollOffset = scrollOffset_;
-        auto friction = CalculateFriction();
-        scrollOffset_ = std::clamp(scrollOffset_ + delta * friction, 0.0f, MAX_OFFSET);
-        remain = NearZero(friction) ? delta : delta - (scrollOffset_ - lastScrollOffset) / friction;
+        auto pullDownRatio = CalculatePullDownRatio();
+        scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, MAX_OFFSET);
+        remain = NearZero(pullDownRatio) ? delta : delta - (scrollOffset_ - lastScrollOffset) / pullDownRatio;
         if (!isSourceFromAnimation_) {
+            FireOnOffsetChange(scrollOffset_);
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
                 UpdateFirstChildPlacement();
@@ -453,10 +454,15 @@ void RefreshPattern::HandleDragCancel()
     HandleDragEnd(0.0f);
 }
 
-float RefreshPattern::CalculateFriction()
+float RefreshPattern::CalculatePullDownRatio()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 1.0f);
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 1.f);
+    if (layoutProperty->GetPullDownRatio().has_value()) {
+        return layoutProperty->GetPullDownRatio().value();
+    }
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 1.0f);
     auto contentHeight = geometryNode->GetPaddingSize().Height();
@@ -504,6 +510,16 @@ void RefreshPattern::FireChangeEvent(const std::string& value)
     auto refreshEventHub = GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireChangeEvent(value);
+}
+
+void RefreshPattern::FireOnOffsetChange(float value)
+{
+    if (!NearEqual(lastScrollOffset_, value)) {
+        auto refreshEventHub = GetEventHub<RefreshEventHub>();
+        CHECK_NULL_VOID(refreshEventHub);
+        refreshEventHub->FireOnOffsetChange(Dimension(value).ConvertToVp());
+        lastScrollOffset_ = value;
+    }
 }
 
 void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)

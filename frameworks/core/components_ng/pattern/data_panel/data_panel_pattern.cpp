@@ -64,12 +64,14 @@ RefPtr<NodePaintMethod> DataPanelPattern::CreateNodePaintMethod()
     );
     RectF boundsRect(x, y, width, height);
     dataPanelModifier_->SetBoundsRect(boundsRect);
+    dataPanelModifier_->SetUseContentModifier(UseContentModifier());
     return paintMethod;
 }
 
 void DataPanelPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -83,4 +85,46 @@ void DataPanelPattern::OnModifyDone()
     }
 }
 
+void DataPanelPattern::FireBuilder()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    if (!makeFunc_.has_value()) {
+        contentModifierNode_ = nullptr;
+        host->AddChild(nullptr, 0);
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    CHECK_NULL_VOID(makeFunc_);
+    contentModifierNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> DataPanelPattern::BuildContentModifierNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<DataPanelPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    auto geometryNode = host->GetGeometryNode();
+
+    std::vector<double> tmpArry;
+    if (paintProperty->GetValues().value().size() > 0) {
+        for (size_t i = 0; i < paintProperty->GetValues().value().size(); i++) {
+            tmpArry.push_back(paintProperty->GetValues().value()[i]);
+        }
+    } else {
+        tmpArry.push_back(0.0f);
+    }
+
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    double max = paintProperty->GetMax().value_or(DEFAULT_MAX_VALUE);
+    DataPanelConfiguration config(tmpArry, max, enabled);
+    return (makeFunc_.value())(config);
+}
 } // namespace OHOS::Ace::NG

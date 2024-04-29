@@ -49,7 +49,7 @@ enum class FrameNodeTrigger {
 class ACE_EXPORT SelectOverlayNode : public FrameNode {
     DECLARE_ACE_TYPE(SelectOverlayNode, FrameNode)
 public:
-    explicit SelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info);
+    explicit SelectOverlayNode(const RefPtr<Pattern>& pattern);
     ~SelectOverlayNode() override = default;
 
     static RefPtr<FrameNode> CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info);
@@ -94,6 +94,10 @@ public:
 private:
     void CreateToolBar();
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);
+    bool ShowCutCopy(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    bool ShowPasteCopyAll(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    bool ShowShare(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    bool ShowCamera(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void AddExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
     void GetDefaultButtonAndMenuWidth(float& maxWidth);
 

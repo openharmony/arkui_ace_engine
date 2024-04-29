@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_COMMON_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "core/components_ng/pattern/gesture/gesture_model.h"
 
 namespace OHOS::Ace::NG {
 class CommonBridge {
@@ -99,6 +100,8 @@ public:
     static ArkUINativeModuleValue ResetBorder(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundImagePosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundImagePosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBackgroundImageResizable(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBackgroundImageResizable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundImageSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundImageSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundImage(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -129,6 +132,8 @@ public:
     static ArkUINativeModuleValue ResetForegroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMotionPath(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMotionPath(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetMotionBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetMotionBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetGroupDefaultFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetGroupDefaultFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFocusOnTouch(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -199,6 +204,10 @@ public:
     static ArkUINativeModuleValue ResetBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBackgroundBrightnessInternal(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBackgroundBrightnessInternal(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetForegroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetForegroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -233,6 +242,77 @@ public:
     static ArkUINativeModuleValue ResetKeyBoardShortCut(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetClipWithEdge(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetClipWithEdge(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static FrameNode* GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static Local<panda::ObjectRef> CreateGestureInfo(EcmaVM* vm, const RefPtr<NG::GestureInfo>& gestureInfo);
+    static Local<panda::ObjectRef> CreateGestureEventInfo(
+        EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info);
+    static Local<panda::ObjectRef> SetUniqueAttributes(
+        EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info);
+    static Local<panda::ObjectRef> CreateFingerInfo(EcmaVM* vm, const FingerInfo& fingerInfo);
+    static Local<panda::ObjectRef> CreateEventTargetObject(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
+    static Local<panda::ObjectRef> CreateAreaObject(EcmaVM* vm, const RectF& rect, const OffsetF& origin);
+    static void GetGestureCommonValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& priority, int32_t& mask);
+    static void SetGestureTag(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t argNumber, ArkUIGesture* gesture);
+    static void GetTapGestureValue(
+        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& count, uint32_t argNumber);
+    static void GetLongPressGestureValue(
+        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration, uint32_t argNumber);
+    static void GetPanGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction,
+        double& distance, uint32_t argNumber);
+    static void GetSwipeGestureValue(
+        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, double& speed, uint32_t argNumber);
+    static void GetPinchGestureValue(
+        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, double& distance, uint32_t argNumber);
+    static void GetRotationGestureValue(
+        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, double& angle, uint32_t argNumber);
+    static void GetGestureModeValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& mode, uint32_t argNumber);
+    static void SetOnGestureEvent(ArkUIRuntimeCallInfo* runtimeCallInfo, const GestureEventAction& action,
+        uint32_t argNumber, ArkUIGesture* gesture);
+    static ArkUIGesture* GetGestureGroup(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t argNumber);
+    static Local<panda::ObjectRef> CreateCommonGestureEventInfo(EcmaVM* vm, GestureEvent& info);
+    static Local<panda::ArrayRef> CreateFingerListArray(EcmaVM* vm, GestureEvent& info);
+    static ArkUINativeModuleValue SetOnClick(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnClick(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnTouch(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnTouch(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnAppear(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnAppear(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnDisappear(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnDisappear(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnKeyEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnKeyEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnHover(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnHover(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnMouse(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnMouse(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnSizeChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnSizeChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnAreaChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnAreaChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnGestureJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnGestureJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddTapGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddLongPressGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddPanGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddSwipeGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddPinchGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddRotationGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddGestureGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddTapGestureToGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddLongPressGestureToGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddPanGestureToGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddSwipeGestureToGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddPinchGestureToGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddRotationGestureToGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AddGestureGroupToGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AttachGestureGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue RemoveGestureByTag(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ClearGestures(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetWindowName(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

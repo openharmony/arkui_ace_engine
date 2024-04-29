@@ -81,6 +81,11 @@ public:
         return touchRegion_;
     }
 
+    const Border& GetBorder() const
+    {
+        return border_;
+    }
+
     Placement GetArrowPlacement() const
     {
         return arrowPlacement_;

@@ -33,6 +33,8 @@ public:
     MOCK_METHOD4(SetBounds, void(float, float, float, float));
     MOCK_METHOD1(DoTextureExport, bool(uint64_t));
     MOCK_METHOD0(StopTextureExport, bool());
+    MOCK_METHOD1(GetPointTransform, void(PointF&));
+    MOCK_METHOD1(GetPointWithRevert, void(PointF&));
 
     void SetVisible(bool visible) override
     {
@@ -59,10 +61,21 @@ public:
         return rect_;
     }
 
+    RectF GetPaintRectWithoutTransform() override
+    {
+        return paintRect_;
+    }
+
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propBlurStyleOption = bgBlurStyle;
+    }
+
+    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
+    {
+        const auto& groupProperty = GetOrCreateForeground();
+        groupProperty->propMotionBlur = motionBlurOption;
     }
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
@@ -72,6 +85,7 @@ public:
 
     bool isVisible_ = true;
     RectF rect_;
+    RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
     std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 };

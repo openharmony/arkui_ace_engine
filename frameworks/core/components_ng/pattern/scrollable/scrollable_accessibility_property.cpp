@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
-float ScrollableAccessibilityProperty::GetScrollOffSet()
+float ScrollableAccessibilityProperty::GetScrollOffSet() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, 0.0f);

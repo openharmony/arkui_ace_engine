@@ -39,6 +39,7 @@ protected:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnMountToParentDone() override;
 
     void OnActivation() override;
     void OnConnect() override;
@@ -52,7 +53,7 @@ private:
     void RegisterFocusCallback();
 
     bool destroyed_ = false;
-
+    OHOS::Rosen::WindowMode initWindowMode_;
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };
 } // namespace OHOS::Ace::NG

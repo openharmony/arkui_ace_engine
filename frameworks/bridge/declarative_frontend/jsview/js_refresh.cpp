@@ -78,9 +78,13 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& re
     RefreshModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
 }
 
-void JSRefresh::SetPullToRefresh(bool value)
+void JSRefresh::SetPullToRefresh(const JSCallbackInfo& info)
 {
-    RefreshModel::GetInstance()->SetPullToRefresh(value);
+    bool pullToRefresh = true;
+    if (info[0]->IsBoolean()) {
+        pullToRefresh = info[0]->ToBoolean();
+    }
+    RefreshModel::GetInstance()->SetPullToRefresh(pullToRefresh);
 }
 
 void JSRefresh::JSBind(BindingTarget globalObj)
@@ -92,10 +96,28 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("pullToRefresh", &JSRefresh::SetPullToRefresh, opt);
     JSClass<JSRefresh>::StaticMethod("onStateChange", &JSRefresh::OnStateChange);
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
+    JSClass<JSRefresh>::StaticMethod("onOffsetChange", &JSRefresh::OnOffsetChange);
+    JSClass<JSRefresh>::StaticMethod("pullDownRatio", &JSRefresh::SetPullDownRatio);
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRefresh>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRefresh>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRefresh>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+void JSRefresh::SetPullDownRatio(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    auto args = info[0];
+    std::optional<float> pulldownRatio = std::nullopt;
+    if (!args->IsNumber()) {
+        RefreshModel::GetInstance()->SetPullDownRatio(pulldownRatio);
+        return;
+    }
+    pulldownRatio = std::clamp(args->ToNumber<float>(), 0.f, 1.f);
+    RefreshModel::GetInstance()->SetPullDownRatio(pulldownRatio);
 }
 
 void JSRefresh::JsRefreshOffset(const JSCallbackInfo& info)
@@ -212,6 +234,25 @@ void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
         func->ExecuteJS(1, &newJSVal);
     };
     RefreshModel::GetInstance()->SetOnRefreshing(std::move(onRefreshing));
+}
+
+void JSRefresh::OnOffsetChange(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        RefreshModel::GetInstance()->ResetOnOffsetChange();
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto offsetChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                                const float& value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Refresh.OnOffsetChange");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    RefreshModel::GetInstance()->SetOnOffsetChange(std::move(offsetChange));
 }
 
 void JSRefresh::ParsFrictionData(const JsiRef<JsiValue>& friction)

@@ -16,9 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
 
-#include "core/components_ng/pattern/image/image_model.h"
-
+#include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/image/image_model.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {
 // ImageModel is essentially the same class as ImageView
@@ -28,6 +29,8 @@ class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
     void Create(const std::string &src, RefPtr<PixelMap> &pixMap, const std::string &bundleName,
         const std::string &moduleName, bool isUriPureNumber = false) override;
+    void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
+    bool GetIsAnimation() override;
     void SetAlt(const ImageSourceInfo &src) override;
     void SetBorder(const Border &border) override;
     void SetBackBorder() override;
@@ -47,6 +50,7 @@ public:
     void SetAutoResize(bool autoResize) override;
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float> &matrix) override;
+    void SetDrawingColorFilter(RefPtr<DrawingColorFilter> &colorFilter) override;
     void SetDraggable(bool draggable) override;
     void SetOnDragStart(OnDragStartFunc &&onDragStart) override;
     void SetOnDragEnter(OnDragDropFunc &&onDragEnter) override;
@@ -55,6 +59,8 @@ public:
     void SetOnDrop(OnDragDropFunc &&onDrop) override;
     void SetCopyOption(const CopyOptions &copyOption) override;
     void SetSmoothEdge(float value) override;
+    void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override;
+    void SetEnhancedImageQuality(AIImageQuality imageQuality) override;
     bool UpdateDragItemInfo(DragItemInfo &itemInfo) override;
     void EnableAnalyzer(bool isEnableAnalyzer) override;
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
@@ -70,6 +76,7 @@ public:
     static void SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode);
     static void SetSyncMode(FrameNode *frameNode, bool syncMode);
     static void SetImageFit(FrameNode *frameNode, ImageFit value);
+    static void SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter);
     static void SetFitOriginSize(FrameNode *framNode, bool value);
     static void SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size);
     static void SetMatchTextDirection(FrameNode *frameNode, bool value);
@@ -82,6 +89,7 @@ public:
     static bool IsSrcSvgImage(FrameNode* frameNode);
     static void SetOnComplete(FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback);
     static void SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback);
+    static void SetOnSvgPlayFinish(FrameNode* frameNode, std::function<void()>&& callback);
     static ImageSourceInfo GetSrc(FrameNode* frameNode);
     static ImageFit GetObjectFit(FrameNode* frameNode);
     static ImageInterpolation GetInterpolation(FrameNode* frameNode);
@@ -91,6 +99,11 @@ public:
     static ImageSourceInfo GetAlt(FrameNode* frameNode);
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
+    static void SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice);
+    static void SetDynamicRangeMode(FrameNode *frameNode, DynamicRangeMode dynamicRangeMode);
+    static void SetEnhancedImageQuality(FrameNode *frameNode, AIImageQuality imageQuality);
+private:
+    RefPtr<ImagePattern> GetImagePattern();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H

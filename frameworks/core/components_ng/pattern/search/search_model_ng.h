@@ -59,17 +59,34 @@ public:
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override;
     void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override;
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
-    void SetCustomKeyboard(const std::function<void ()> &&buildFunc) override;
+    void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override;
     void SetSearchEnterKeyType(TextInputAction value) override;
+    void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) override;
+    void SetOnEditChanged(std::function<void(bool)>&& func) override;
+    void SetTextIndent(const Dimension& value) override;
     void SetMaxLength(uint32_t value) override;
     void ResetMaxLength() override;
     void SetType(TextInputType value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
+    void SetAdaptMinFontSize(const Dimension& value) override;
+    void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
+    void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void UpdateInspectorId(const std::string& key) override;
+    void SetDragPreviewOptions(const NG::DragPreviewOption option) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
+    static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
+    static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
+    static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
+    static void SetIcon(FrameNode* frameNode, const std::optional<std::string>& icon);
+    static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetInputFilter(
+        FrameNode* frameNode, const std::string& value, const std::function<void(const std::string&)>& onError);
+    static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& font);
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
@@ -92,14 +109,30 @@ public:
     static void SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle style);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value);
+    static void SetId(FrameNode* frameNode, const std::string& key);
+    static void SetTextDecoration(FrameNode* frameNode, Ace::TextDecoration value);
+    static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
+    static void SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecorationStyle value);
+    static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& onChange);
+    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnPasteWithEvent(FrameNode* frameNode,
+                                    std::function<void(const std::string&, NG::TextCommonEvent&)>&& func);
 private:
-    void CreateTextField(const RefPtr<SearchNode>& parentNode,
+    static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
+        const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);
+    static void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);
-    void CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode);
-    void CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool hasCancelImageNode);
-    void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode);
-    void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode);
-    RefPtr<SearchNode> GetOrCreateSearchNode(
+    static void CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode);
+    static void CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool hasCancelImageNode);
+    static void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode);
+    static void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode);
+    static RefPtr<SearchNode> GetOrCreateSearchNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
 };

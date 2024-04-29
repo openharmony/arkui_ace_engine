@@ -16,16 +16,19 @@
 #include "core/common/event_manager.h"
 
 #include "base/geometry/ng/point_t.h"
+#include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/frame_trace_adapter.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/xcollie/xcollieInterface.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -45,6 +48,7 @@ const std::string SHORT_CUT_VALUE_Z = "Z";
 const std::string SHORT_CUT_VALUE_A = "A";
 const std::string SHORT_CUT_VALUE_C = "C";
 const std::string SHORT_CUT_VALUE_V = "V";
+const std::string SHORT_CUT_VALUE_TAB = "TAB";
 enum class CtrlKeysBit {
     CTRL = 1,
     SHIFT = 2,
@@ -176,8 +180,42 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             }
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
+        RecordHitEmptyMessage(touchPoint, resultInfo, frameNode);
     }
     LogTouchTestResultRecognizers(touchTestResults_[touchPoint.id]);
+}
+
+void EventManager::RecordHitEmptyMessage(
+    const TouchEvent& touchPoint, const std::string& resultInfo, const RefPtr<NG::FrameNode>& frameNode)
+{
+    auto hitEmptyMessage = JsonUtil::Create(true);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto windowId = 0;
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = NG::WindowSceneHelper::GetWindowIdForWindowScene(frameNode);
+#endif
+    if (windowId == 0) {
+        windowId = container->GetWindowId();
+    }
+    hitEmptyMessage->Put("windowId", static_cast<int32_t>(windowId));
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        auto window = pipelineContext->GetWindow();
+        if (window) {
+            hitEmptyMessage->Put("windowName", window->GetWindowName().c_str());
+        }
+    }
+    hitEmptyMessage->Put("resultInfo", resultInfo.c_str());
+    hitEmptyMessage->Put("x", touchPoint.x);
+    hitEmptyMessage->Put("y", touchPoint.y);
+    hitEmptyMessage->Put("currentTime", static_cast<int64_t>(touchPoint.time.time_since_epoch().count()));
+    hitEmptyMessage->Put("bundleName", container->GetBundleName().c_str());
+    auto frontEnd = container->GetFrontend();
+    if (frontEnd) {
+        hitEmptyMessage->Put("pageInfo", frontEnd->GetCurrentPageUrl().c_str());
+    }
+    XcollieInterface::GetInstance().TriggerTimerCount("HIT_EMPTY_WARNING", true, hitEmptyMessage->ToString());
 }
 
 void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result)
@@ -217,6 +255,14 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result)
         }
     }
     TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "%{public}s", hittedRecognizerTypeInfo.c_str());
+    if (hittedRecognizerInfo.empty()) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Hitted recognizer info is empty.");
+        std::list<std::pair<int32_t, std::string>> dumpList;
+        eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
+        for (auto& item : dumpList) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+        }
+    }
 }
 
 bool EventManager::PostEventTouchTest(
@@ -272,6 +318,7 @@ void EventManager::TouchTest(
     TouchTestResult hitTestResult;
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, event.id);
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
+    LogTouchTestResultRecognizers(axisTouchTestResults_[event.id]);
 }
 
 bool EventManager::HasDifferentDirectionGesture()
@@ -482,10 +529,10 @@ void EventManager::CheckTouchEvent(TouchEvent touchEvent)
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive DOWN event twice,"
                 " touchEvent id is %{public}d", touchEvent.id);
         }
-    } else if (touchEvent.type == TouchType::UP) {
+    } else if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
         if (touchEventFindResult == downFingerIds_.end()) {
-            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP event without receive DOWN event,"
-                " touchEvent id is %{public}d", touchEvent.id);
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP/CANCEL event "
+                "without receive DOWN event, touchEvent id is %{public}d", touchEvent.id);
         } else {
             downFingerIds_.erase(touchEvent.id);
         }
@@ -524,6 +571,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
             for (auto& item : dumpList) {
                 TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
             }
+            eventTree_.eventTreeList.clear();
             refereeNG_->ForceCleanGestureReferee();
         }
         // first collect gesture into gesture referee.
@@ -540,6 +588,10 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     for (auto entry = iter->second.rbegin(); entry != iter->second.rend(); ++entry) {
         if (!(*entry)->DispatchMultiContainerEvent(point)) {
             dispatchSuccess = false;
+            if ((*entry)->GetAttachedNode().Upgrade()) {
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "FrameNode %{public}s dispatch multi container event fail.",
+                    (*entry)->GetAttachedNode().Upgrade()->GetTag().c_str());
+            }
             break;
         }
     }
@@ -655,7 +707,8 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
         LOGI("the %{public}d axis test result does not exist!", event.id);
         return false;
     }
-    if (event.action == AxisAction::BEGIN) {
+    // rotate event is no need to add scope.
+    if (event.action == AxisAction::BEGIN && !event.isRotationEvent) {
         // first collect gesture into gesture referee.
         if (Container::IsCurrentUseNewPipeline()) {
             if (refereeNG_) {
@@ -670,7 +723,8 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
             break;
         }
     }
-    if (event.action == AxisAction::END || event.action == AxisAction::NONE || event.action == AxisAction::CANCEL) {
+    if ((event.action == AxisAction::END || event.action == AxisAction::NONE || event.action == AxisAction::CANCEL) &&
+        !event.isRotationEvent) {
         if (Container::IsCurrentUseNewPipeline()) {
             if (refereeNG_) {
                 refereeNG_->CleanGestureScope(event.id);
@@ -890,7 +944,7 @@ void EventManager::MouseTest(
         std::vector<NG::RectF> rect;
         frameNode->CheckSecurityComponentStatus(rect);
     }
-    frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetId());
+    frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetPointerId(event.id));
 
     currMouseTestResults_.clear();
     HoverTestResult hoverTestResult;
@@ -1185,6 +1239,9 @@ bool EventManager::IsSystemKeyboardShortcut(const std::string& value, uint8_t ke
         value == SHORT_CUT_VALUE_Z) {
         return true;
     }
+    if (!(keys ^ (static_cast<uint8_t>(CtrlKeysBit::SHIFT))) && value == SHORT_CUT_VALUE_TAB) {
+        return true;
+    }
     return false;
 }
 
@@ -1439,7 +1496,7 @@ bool TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
             // Handle the keys order problem.
             do {
                 keyCode.emplace_back(event.code);
-                if (!event.IsKey(keyCode)) {
+                if (!event.IsExactlyKey(keyCode)) {
                     keyCode.pop_back();
                     std::next_permutation(keyCode.begin(), keyCode.end());
                     continue;

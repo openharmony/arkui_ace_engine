@@ -30,6 +30,9 @@
 #include "core/components_ng/base/observer_handler.h"
 
 namespace OHOS::Ace::Napi {
+using ListenerPtr = std::shared_ptr<UIObserverListener>;
+using NavListenerMap = std::unordered_map<int32_t, std::list<ListenerPtr>>;
+using SpecNavListenerMap = std::unordered_map<int32_t, std::unordered_map<std::string, std::list<ListenerPtr>>>;
 class UIObserver {
 public:
     static void RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener);
@@ -52,9 +55,8 @@ public:
         int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterRouterPageCallback(napi_env env, napi_value uiAbilityContext, napi_value callback);
     static void UnRegisterRouterPageCallback(int32_t uiContextInstanceId, napi_value callback);
-    static void HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_value context, int32_t index,
-        const std::string& name, const std::string& path, NG::RouterPageState state);
-    
+    static void HandleRouterPageStateChange(NG::AbilityContextInfo& info, const NG::RouterPageInfoNG& pageInfo);
+
     static void RegisterDensityCallback(
         int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_value callback);
@@ -80,6 +82,24 @@ public:
     static void HandleNavDestinationSwitch(
         const NG::AbilityContextInfo& info, NG::NavDestinationSwitchInfo& switchInfo);
 
+    static void RegisterWillClickCallback(
+        napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterWillClickCallback(
+        int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterWillClickCallback(napi_env env, napi_value uiAbilityContext, napi_value callback);
+    static void UnRegisterWillClickCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void HandleWillClick(NG::AbilityContextInfo& info, const GestureEvent& gestureEventInfo,
+        const ClickInfo& clickInfo, const RefPtr<NG::FrameNode>& frameNode);
+    
+    static void RegisterDidClickCallback(
+        napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterDidClickCallback(
+        int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterDidClickCallback(napi_env env, napi_value uiAbilityContext, napi_value callback);
+    static void UnRegisterDidClickCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void HandleDidClick(NG::AbilityContextInfo& info, const GestureEvent& gestureEventInfo,
+        const ClickInfo& clickInfo, const RefPtr<NG::FrameNode>& frameNode);
+
     static bool ParseStringFromNapi(napi_env env, napi_value val, std::string& str);
     static bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType);
 private:
@@ -95,9 +115,8 @@ private:
     static void GetAbilityInfos(napi_env env, napi_value abilityContext, NG::AbilityContextInfo& info);
     static napi_env GetCurrentNapiEnv();
 
-    static std::list<std::shared_ptr<UIObserverListener>> unspecifiedNavigationListeners_;
-    static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
-        specifiedCNavigationListeners_;
+    static NavListenerMap unspecifiedNavigationListeners_;
+    static SpecNavListenerMap specifiedCNavigationListeners_;
     static std::list<std::shared_ptr<UIObserverListener>> scrollEventListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedScrollEventListeners_;
@@ -110,10 +129,20 @@ private:
         specifiedDensityListeners_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> specifiedDrawListeners_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> specifiedLayoutListeners_;
+    static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+        abilityContextWillClickListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedWillClickListeners_;
+    static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+        abilityContextDidClickListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedDidClickListeners_;
 
     static std::unordered_map<napi_ref, NavIdAndListenersMap> abilityUIContextNavDesSwitchListeners_;
     static std::unordered_map<int32_t, NavIdAndListenersMap> uiContextNavDesSwitchListeners_;
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> infosForNavDesSwitch_;
+    static std::unordered_map<napi_ref, NG::AbilityContextInfo> willClickInfos_;
+    static std::unordered_map<napi_ref, NG::AbilityContextInfo> didClickInfos_;
 };
 } // namespace OHOS::Ace::Napi
 #endif // FOUNDATION_ACE_INTERFACES_OBSERVER_H

@@ -3,8 +3,8 @@
 -   [Introduction](#section15701932113019)
 -   [Directory Structure](#section1791423143211)
 -   [When to Use](#section171384529150)
--   [Available Components](#section271831717166xxxxxxxx)
--   [Repositories Involved](#section1447164910172xxxx)
+-   [Available Components](#section271831717166)
+-   [Repositories Involved](#section1447164910172)
 
 ## Introduction<a name="section15701932113019"></a>
 

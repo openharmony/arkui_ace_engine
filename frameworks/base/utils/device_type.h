@@ -25,6 +25,7 @@ enum class DeviceType {
     CAR,
     TABLET,
     TWO_IN_ONE,
+    WEARABLE,
     UNKNOWN,
 };
 

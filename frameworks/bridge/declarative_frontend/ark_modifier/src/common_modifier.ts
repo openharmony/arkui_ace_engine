@@ -16,12 +16,15 @@
 /// <reference path='./import.ts' />
 class CommonModifier extends ArkComponent implements AttributeModifier<CommonAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-    this._modifiersWithKeys = new ModifierMap();
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    if (!classType) {
+      classType = ModifierType.EXPOSE_MODIFIER;
+    }
+    super(nativePtr, classType);
   }
-
+  
   applyNormalAttribute(instance: CommonAttribute): void {
-    applyAndMergeModifier<CommonAttribute, ArkComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<CommonAttribute, ArkComponent, ArkComponent>(instance, this);
   }
 }

@@ -16,9 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H
 
+#include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/pattern/select/select_model.h"
 
 namespace OHOS::Ace::NG {
+class MenuItemConfiguration : public CommonConfiguration {
+    public:
+        MenuItemConfiguration(const std::string& value, const std::string& icon, int index, bool selected, bool enabled)
+            : CommonConfiguration(enabled), value_(value), icon_(icon), index_(index), selected_(selected) {}
+        std::string value_;
+        std::string icon_;
+        int index_;
+        bool selected_;
+};
+using SelectMakeCallback =
+    std::function<RefPtr<FrameNode>(const MenuItemConfiguration menuItemConfiguration)>;
 class ACE_EXPORT SelectModelNG : public OHOS::Ace::SelectModel {
 public:
     void Create(const std::vector<SelectParam>& params) override;
@@ -64,6 +76,9 @@ public:
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
+    static void SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&& makeFunc);
+    static void ResetBuilderFunc(FrameNode* frameNode);
+    static void SetChangeValue(FrameNode* frameNode, int index, const std::string& value);
     ControlSize GetControlSize() override;
 
     static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);

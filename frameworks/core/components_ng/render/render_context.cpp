@@ -16,6 +16,7 @@
 #include "core/components_ng/render/render_context.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -61,6 +62,11 @@ RefPtr<FrameNode> RenderContext::GetHost() const
     return host_.Upgrade();
 }
 
+FrameNode* RenderContext::GetUnsafeHost() const
+{
+    return UnsafeRawPtr(host_);
+}
+
 void RenderContext::SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
 {
     sharedTransitionOption_ = option;
@@ -91,7 +97,7 @@ bool RenderContext::HasSharedTransitionOption() const
     return sharedTransitionOption_ != nullptr;
 }
 
-void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(propBorder_, BorderProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propOuterBorder_, OuterBorderProperty);
@@ -116,42 +122,45 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
             matrixString.replace(num, 1, "");
         }
         jsonValue->Put("matrix", matrixString.c_str());
-        json->Put("transform", jsonValue);
+        json->PutExtAttr("transform", jsonValue, filter);
     } else {
-        json->Put("transform", JsonUtil::Create(true));
+        json->PutExtAttr("transform", JsonUtil::Create(true), filter);
     }
-    json->Put("backgroundColor", propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
-    json->Put("zIndex", propZIndex_.value_or(0));
-    json->Put("opacity", propOpacity_.value_or(1));
+    json->PutExtAttr("backgroundColor",
+        propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str(), filter);
+    json->PutExtAttr("zIndex", propZIndex_.value_or(0), filter);
+    json->PutExtAttr("opacity", propOpacity_.value_or(1), filter);
     if (propProgressMask_.has_value() && propProgressMask_.value()) {
-        json->Put("total", propProgressMask_.value()->GetMaxValue());
-        json->Put("updateProgress", propProgressMask_.value()->GetValue());
-        json->Put("updateColor", propProgressMask_.value()->GetColor().ColorToString().c_str());
-        json->Put("enableBreathe", propProgressMask_.value()->GetEnableBreathe());
+        json->PutExtAttr("total", propProgressMask_.value()->GetMaxValue(), filter);
+        json->PutExtAttr("updateProgress", propProgressMask_.value()->GetValue(), filter);
+        json->PutExtAttr("updateColor", propProgressMask_.value()->GetColor().ColorToString().c_str(), filter);
+        json->PutExtAttr("enableBreathe", propProgressMask_.value()->GetEnableBreathe(), filter);
     }
-    json->Put("lightUpEffect", propLightUpEffect_.value_or(0.0));
-    json->Put("sphericalEffect", propSphericalEffect_.value_or(0.0));
+    json->PutExtAttr("lightUpEffect", propLightUpEffect_.value_or(0.0), filter);
+    json->PutExtAttr("sphericalEffect", propSphericalEffect_.value_or(0.0), filter);
     auto pixStretchEffectOption = propPixelStretchEffect_.value_or(PixStretchEffectOption());
     auto pixelJsonValue = JsonUtil::Create(true);
     pixelJsonValue->Put("left", pixStretchEffectOption.left.ToString().c_str());
     pixelJsonValue->Put("right", pixStretchEffectOption.right.ToString().c_str());
     pixelJsonValue->Put("top", pixStretchEffectOption.top.ToString().c_str());
     pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ToString().c_str());
-    json->Put("pixelStretchEffect", pixelJsonValue);
-    json->Put("foregroundColor", propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str());
+    json->PutExtAttr("pixelStretchEffect", pixelJsonValue, filter);
+    json->PutExtAttr("foregroundColor",
+        propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str(), filter);
     if (propClickEffectLevel_.has_value()) {
         auto clickEffectJsonValue = JsonUtil::Create(true);
         clickEffectJsonValue->Put("level", std::to_string((int)propClickEffectLevel_.value().level).c_str());
-        clickEffectJsonValue->Put("scale", std::to_string((float)propClickEffectLevel_.value().scaleNumber).c_str());
-        json->Put("clickEffect", clickEffectJsonValue);
+        clickEffectJsonValue->Put("scale",
+            std::to_string((float)propClickEffectLevel_.value().scaleNumber).c_str());
+        json->PutExtAttr("clickEffect", clickEffectJsonValue, filter);
     }
-    ObscuredToJsonValue(json);
-    json->Put("renderGroup", propRenderGroup_.value_or(false) ? "true" : "false");
-    json->Put("renderFit", RenderFitToString(propRenderFit_.value_or(RenderFit::TOP_LEFT)).c_str());
-    json->Put("useShadowBatching", propUseShadowBatching_.value_or(false) ? "true" : "false");
+    ObscuredToJsonValue(json, filter);
+    json->PutExtAttr("renderGroup", propRenderGroup_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("renderFit", RenderFitToString(propRenderFit_.value_or(RenderFit::TOP_LEFT)).c_str(), filter);
+    json->PutExtAttr("useShadowBatching", propUseShadowBatching_.value_or(false) ? "true" : "false", filter);
 }
 
-void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const
+void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto jsonObscuredArray = JsonUtil::CreateArray(true);
     std::vector<ObscuredReasons> obscuredReasons = propObscured_.value_or(std::vector<ObscuredReasons>());
@@ -160,7 +169,7 @@ void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const
         auto value = std::to_string(static_cast<int32_t>(obscuredReasons[i]));
         jsonObscuredArray->Put(index.c_str(), value.c_str());
     }
-    json->Put("obscured", jsonObscuredArray);
+    json->PutExtAttr("obscured", jsonObscuredArray, filter);
 }
 
 void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json)

@@ -15,11 +15,11 @@
 
 /// <reference path='./import.ts' />
 class ArkSelectComponent extends ArkComponent implements SelectAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+  builder: WrappedBuilder<Object[]> | null = null;
+  menuItemNodes: Array<BuilderNode<[MenuItemConfiguration]>> | null = null;
+  modifier: ContentModifier<MenuItemConfiguration>;
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   optionWidth(value: Dimension | OptionWidthMode): this {
     modifierWithKey(
@@ -119,6 +119,23 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
     modifierWithKey(
       this._modifiersWithKeys, ControlSizeModifier.identity, ControlSizeModifier, controlSize);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<MenuItemConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().select.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().select.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, menuItemConfiguration: MenuItemConfiguration): FrameNode | null {
+    menuItemConfiguration.contentModifier = this.modifier;
+    const index = menuItemConfiguration.index;
+    const xNode = globalThis.requireNapi('arkui.node');
+    this.menuItemNodes = new xNode.BuilderNode(context);
+    this.menuItemNodes.build(this.builder, menuItemConfiguration);
+    return this.menuItemNodes.getFrameNode();
   }
 }
 
@@ -492,12 +509,20 @@ class SelectSizeModifier extends ModifierWithKey<SizeOptions> {
 }
 
 // @ts-ignore
-globalThis.Select.attributeModifier = function (modifier) {
+globalThis.Select.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkSelectComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.SelectModifier(nativePtr, classType);
+  });
+};
+
+// @ts-ignore
+globalThis.Select.menuItemContentModifier = function (modifier): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSelectComponent(nativeNode);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
+  component.setContentModifier(modifier);
 };

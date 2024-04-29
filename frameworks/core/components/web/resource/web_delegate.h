@@ -280,12 +280,44 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
 };
 
+class NWebScreenCaptureConfigImpl : public OHOS::NWeb::NWebScreenCaptureConfig {
+public:
+    NWebScreenCaptureConfigImpl() = default;
+    ~NWebScreenCaptureConfigImpl() = default;
+
+    int32_t GetMode() override
+    {
+        return mode_;
+    }
+
+    void SetMode(int32_t mode)
+    {
+        mode_ = mode;
+    }
+
+    int32_t GetSourceId() override
+    {
+        return source_id_;
+    }
+
+    void SetSourceId(int32_t source_id)
+    {
+        source_id_ = source_id;
+    }
+
+private:
+    int32_t mode_ = 0;
+    int32_t source_id_ = -1;
+};
+
 class WebScreenCaptureRequestOhos : public WebScreenCaptureRequest {
     DECLARE_ACE_TYPE(WebScreenCaptureRequestOhos, WebScreenCaptureRequest)
 
 public:
     WebScreenCaptureRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request)
-        : request_(request) {}
+        : request_(request) {
+        config_ = std::make_shared<NWebScreenCaptureConfigImpl>();
+    }
 
     void Deny() const override;
 
@@ -300,7 +332,7 @@ public:
 private:
     std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest> request_;
 
-    OHOS::NWeb::NWebScreenCaptureConfig config_;
+    std::shared_ptr<NWebScreenCaptureConfigImpl> config_;
 };
 
 class WebWindowNewHandlerOhos : public WebWindowNewHandler {
@@ -321,6 +353,30 @@ public:
 private:
     std::shared_ptr<OHOS::NWeb::NWebControllerHandler> handler_;
     int32_t parentNWebId_ = -1;
+};
+
+class WebAppLinkCallbackOhos : public WebAppLinkCallback {
+    DECLARE_ACE_TYPE(WebAppLinkCallbackOhos, WebAppLinkCallback)
+public:
+    WebAppLinkCallbackOhos(const std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback>& callback)
+        : callback_(callback) {}
+
+    void ContinueLoad() override
+    {
+        if (callback_) {
+            callback_->ContinueLoad();
+        }
+    }
+
+    void CancelLoad() override
+    {
+        if (callback_) {
+            callback_->CancelLoad();
+        }
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback_;
 };
 
 class DataResubmittedOhos : public DataResubmitted {
@@ -389,6 +445,32 @@ class WebPattern;
 }; // namespace NG
 
 class RenderWeb;
+
+class NWebDragEventImpl : public OHOS::NWeb::NWebDragEvent {
+public:
+    NWebDragEventImpl(double x, double y, NWeb::DragAction action) : x_(x), y_(y), action_(action) {}
+    ~NWebDragEventImpl() = default;
+
+    double GetX() override
+    {
+        return x_;
+    }
+
+    double GetY() override
+    {
+        return y_;
+    }
+
+    NWeb::DragAction GetAction() override
+    {
+        return action_;
+    }
+
+private:
+    double x_ = 0.0;
+    double y_ = 0.0;
+    NWeb::DragAction action_ = NWeb::DragAction::DRAG_START;
+};
 
 class NWebTouchPointInfoImpl : public OHOS::NWeb::NWebTouchPointInfo {
 public:
@@ -487,6 +569,8 @@ public:
         : WebResource(type, context, std::move(onError))
     {}
 
+    void UnRegisterScreenLockFunction();
+
     void SetObserver(const RefPtr<WebDelegateObserver>& observer)
     {
         observer_ = observer;
@@ -510,6 +594,8 @@ public:
     void InitWebViewWithWindow();
     void ShowWebView();
     void HideWebView();
+    void OnRenderToBackground();
+    void OnRenderToForeground();
     void Resize(const double& width, const double& height, bool isKeyboard = false);
     int32_t GetRosenWindowId()
     {
@@ -588,6 +674,7 @@ public:
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
     void OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request);
+    void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
@@ -599,11 +686,13 @@ public:
     std::string GetUrl();
     void UpdateLocale();
     void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
+    void ReleaseResizeHold();
+    bool GetPendingSizeStatus();
     void OnInactive();
     void OnActive();
     void OnWebviewHide();
     void OnWebviewShow();
-    bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
+    bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     void OnSelectPopupMenu(
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
@@ -638,7 +727,7 @@ public:
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     void OnDateTimeChooserPopup(
-        const NWeb::DateTimeChooser& chooser,
+        std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
@@ -671,6 +760,10 @@ public:
     void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
     bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
+    void OnTooltip(const std::string& tooltip);
+    void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void SuggestionSelected(int32_t index);
+    void OnHideAutofillPopup();
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
@@ -698,12 +791,13 @@ public:
     void OnFirstMeaningfulPaint(std::shared_ptr<OHOS::NWeb::NWebFirstMeaningfulPaintDetails> details);
     void OnLargestContentfulPaint(std::shared_ptr<OHOS::NWeb::NWebLargestContentfulPaintDetails> details);
     void OnSafeBrowsingCheckResult(int threat_type);
-    void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
+    void OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchHandleHotZone> hotZone);
     void OnOverScroll(float xOffset, float yOffset);
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
     void OnRootLayerChanged(int width, int height);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
+    void OnNativeEmbedAllDestory();
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
@@ -722,6 +816,9 @@ public:
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
+    void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
+    bool GetIsSmoothDragResizeEnabled();
+    void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -749,6 +846,7 @@ public:
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
+    void ScrollByRefScreen(float deltaX, float deltaY, float vx = 0, float vy = 0);
     void ExecuteAction(int64_t accessibilityId, AceAction action);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);
@@ -761,6 +859,16 @@ public:
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost);
     bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
+    void ScaleGestureChange(double scale, double centerX, double centerY);
+    std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
+    // Backward
+    void Backward();
+    bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
+
+    void OnRenderProcessNotResponding(
+        const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
+    void OnRenderProcessResponding();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -809,8 +917,7 @@ private:
     void RegisterConfigObserver();
     void UnRegisterConfigObserver();
 
-    // Backward and forward
-    void Backward();
+    // forward
     void Forward();
     void ClearHistory();
     void ClearSslCache();
@@ -834,6 +941,7 @@ private:
     void UnregisterSurfacePositionChangedCallback();
 
     void NotifyPopupWindowResult(bool result);
+    void IsNativeType(const double& x, const double& y);
 
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
     void SurfaceOcclusionCallback(float visibleRatio);
@@ -896,9 +1004,12 @@ private:
     EventCallbackV2 onScreenCaptureRequestV2_;
     EventCallbackV2 onNavigationEntryCommittedV2_;
     EventCallbackV2 onSafeBrowsingCheckResultV2_;
+    EventCallbackV2 OnNativeEmbedAllDestoryV2_;
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
+    EventCallbackV2 onRenderProcessNotRespondingV2_;
+    EventCallbackV2 onRenderProcessRespondingV2_;
 
     int32_t renderMode_;
     std::string bundlePath_;
@@ -938,8 +1049,12 @@ private:
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;
     bool isEmbedModeEnabled_ = false;
+    std::map<std::string, std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo>> embedDataInfo_;
     std::string tag_;
     std::string tag_type_;
+    bool isSmoothDragResizeEnabled_ = false;
+    double resizeWidth_ = 0.0;
+    double resizeHeight_ = 0.0;
 #endif
 };
 

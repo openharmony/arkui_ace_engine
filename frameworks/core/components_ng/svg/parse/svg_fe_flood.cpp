@@ -36,11 +36,12 @@ SvgFeFlood::SvgFeFlood() : SvgFe()
 }
 
 void SvgFeFlood::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-    ColorInterpolationType& currentColor) const
+    ColorInterpolationType& currentColor,
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
     auto declaration = AceType::DynamicCast<SvgFeFloodDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
-    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
+    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
 
     auto floodColor = declaration->GetFloodColor();
     auto floodOpacity = declaration->GetFloodOpacity();
@@ -48,9 +49,13 @@ void SvgFeFlood::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, co
     floodColor = floodColor.ChangeOpacity(floodOpacity);
     auto shaderFilter = RSRecordingShaderEffect::CreateColorShader(floodColor.GetValue());
     CHECK_NULL_VOID(shaderFilter);
-    imageFilter = RSRecordingImageFilter::CreateShaderImageFilter(shaderFilter);
+    Rect effectFilterArea = effectFilterArea_;
+
+    imageFilter = RSRecordingImageFilter::CreateShaderImageFilter(shaderFilter,
+        { effectFilterArea.Left(), effectFilterArea.Top(), effectFilterArea.Right(), effectFilterArea.Bottom() });
 
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
+    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
 }
 
 } // namespace OHOS::Ace::NG

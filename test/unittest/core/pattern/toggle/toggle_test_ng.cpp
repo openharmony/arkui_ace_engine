@@ -1110,11 +1110,212 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0016, TestSize.Level1)
     auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(switchFrameNode, nullptr);
     switchFrameNode->MarkModifyDone();
+    auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
 
     auto eventHub = switchFrameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
     eventHub->getInnerFocusRectFunc_(paintRect);
+}
+
+/**
+ * @tc.name: TogglePatternTest0020
+ * @tc.desc: test the process of toggle created with switch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, TogglePatternTest0020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    toggleModelNG.SetPointRadius(Dimension(10));
+    toggleModelNG.SetUnselectedColor(Color(0x00000000));
+    toggleModelNG.SetTrackBorderRadius(Dimension(10));
+
+    /**
+     * @tc.steps: step2.get switch property and check whether the property value is correct.
+     */
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+    auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetPointRadius(), Dimension(10));
+    EXPECT_EQ(paintProperty->GetUnselectedColor(), Color(0x00000000));
+    EXPECT_EQ(paintProperty->GetTrackBorderRadius(), Dimension(10));
+}
+
+/**
+ * @tc.name: TogglePatternTest0021
+ * @tc.desc: test the process of toggle created with switch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, TogglePatternTest0021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    toggleModelNG.ResetPointRadius();
+    toggleModelNG.ResetTrackBorderRadius();
+
+    /**
+     * @tc.steps: step2.get switch property and check whether the property value is correct.
+     */
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+    auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_FALSE(paintProperty->GetPointRadius().has_value());
+    EXPECT_FALSE(paintProperty->GetTrackBorderRadius().has_value());
+}
+
+/**
+ * @tc.name: TogglePatternTest0022
+ * @tc.desc: SetChangeValue and get value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, TogglePatternTest0022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. get parament to pattern SwitchIsOn
+     */
+    pattern->SetSwitchIsOn(IS_ON);
+    /**
+     * @tc.steps: step3.get paint property.
+     * @tc.expected: check the switch property value.
+     */
+    auto switchPaintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(switchPaintProperty, nullptr);
+    bool isOn = false;
+    if (switchPaintProperty->HasIsOn()) {
+        isOn = switchPaintProperty->GetIsOnValue();
+    } else {
+        isOn = false;
+    }
+    EXPECT_EQ(isOn, IS_ON);
+}
+
+/**
+ * @tc.name: TogglePatternTest0023
+ * @tc.desc: SetChangeValue and get value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, TogglePatternTest0023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. get parament to pattern SwitchIsOn
+     */
+    pattern->SetSwitchIsOn(false);
+    /**
+     * @tc.steps: step3.get paint property.
+     * @tc.expected: check the switch property value.
+     */
+    auto switchPaintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(switchPaintProperty, nullptr);
+    bool isOn = false;
+    if (switchPaintProperty->HasIsOn()) {
+        isOn = switchPaintProperty->GetIsOnValue();
+    } else {
+        isOn = false;
+    }
+    EXPECT_EQ(isOn, false);
+}
+
+/**
+ * @tc.name: TogglePatternTest0024
+ * @tc.desc: SetChangeValue and get value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, TogglePatternTest0024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. get parament to pattern SwitchIsOn
+     */
+    pattern->SetSwitchIsOn(IS_ON);
+    /**
+     * @tc.steps: step3.get paint property.
+     * @tc.expected: check the switch property value.
+     */
+    auto switchPaintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(switchPaintProperty, nullptr);
+    bool isOn = false;
+    if (switchPaintProperty->HasIsOn()) {
+        isOn = switchPaintProperty->GetIsOnValue();
+    } else {
+        isOn = false;
+    }
+    EXPECT_EQ(isOn, IS_ON);
+}
+
+/**
+ * @tc.name: TogglePatternTest0025
+ * @tc.desc: SetChangeValue and get value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, TogglePatternTest0025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. get parament to pattern SwitchIsOn
+     */
+    pattern->SetSwitchIsOn(false);
+    /**
+     * @tc.steps: step3.get paint property.
+     * @tc.expected: check the switch property value.
+     */
+    auto switchPaintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(switchPaintProperty, nullptr);
+    bool isOn = false;
+    if (switchPaintProperty->HasIsOn()) {
+        isOn = switchPaintProperty->GetIsOnValue();
+    } else {
+        isOn = false;
+    }
+    EXPECT_EQ(isOn, false);
 }
 
 /**

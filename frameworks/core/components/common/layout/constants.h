@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H
 
 #include <cstdint>
+#include "base/utils/linear_map.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -194,11 +196,34 @@ enum class TextAlign {
     END = 2,
 };
 
+namespace StringUtils {
+inline std::string ToString(const TextAlign& textAlign)
+{
+    static const LinearEnumMapNode<TextAlign, std::string> table[] = {
+        { TextAlign::LEFT, "LEFT" },
+        { TextAlign::RIGHT, "RIGHT" },
+        { TextAlign::CENTER, "CENTER" },
+        { TextAlign::JUSTIFY, "JUSTIFY" },
+        { TextAlign::START, "START" },
+        { TextAlign::END, "END" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textAlign);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
+
 enum class TextDataDetectType {
     PHONE_NUMBER = 0,
     URL,
     EMAIL,
     ADDRESS,
+    DATETIME,
+};
+
+enum class LineBreakStrategy {
+    GREEDY = 0,
+    HIGH_QUALITY,
+    BALANCED,
 };
 
 enum class WhiteSpace {
@@ -215,6 +240,31 @@ enum class TextOverflow {
     CLIP,
     ELLIPSIS,
     MARQUEE,
+};
+
+namespace StringUtils {
+inline std::string ToString(const TextOverflow& textOverflow)
+{
+    static const LinearEnumMapNode<TextOverflow, std::string> table[] = {
+        { TextOverflow::NONE, "NONE" },
+        { TextOverflow::CLIP, "CLIP" },
+        { TextOverflow::ELLIPSIS, "ELLIPSIS" },
+        { TextOverflow::MARQUEE, "MARQUEE" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textOverflow);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
+
+enum class TextMarqueeState {
+    START = 0,
+    BOUNCE,
+    FINISH,
+};
+
+enum class MarqueeStartPolicy {
+    DEFAULT = 0,
+    ON_FOCUS,
 };
 
 // overflow-x: visible|hidden|scroll|auto|no-display|no-content;
@@ -279,6 +329,19 @@ enum class ImageFit {
     NONE,
     SCALE_DOWN,
     TOP_LEFT,
+    COVER_TOP_LEFT,
+};
+
+enum class DynamicRangeMode {
+    HIGH = 0,
+    CONSTRAINT,
+    STANDARD,
+};
+
+enum class AIImageQuality {
+    NONE = 1,
+    NORMAL,
+    HIGH,
 };
 
 enum class ImageRenderMode {
@@ -520,6 +583,21 @@ enum class VerticalAlign {
     NONE,
 };
 
+namespace StringUtils {
+inline std::string ToString(const VerticalAlign& verticalAlign)
+{
+    static const LinearEnumMapNode<VerticalAlign, std::string> table[] = {
+        { VerticalAlign::TOP, "TOP" },
+        { VerticalAlign::CENTER, "CENTER" },
+        { VerticalAlign::BOTTOM, "BOTTOM" },
+        { VerticalAlign::BASELINE, "BASELINE" },
+        { VerticalAlign::NONE, "NONE" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), verticalAlign);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
+
 enum class BarPosition {
     START,
     END,
@@ -683,6 +761,11 @@ enum class FunctionKey {
     F10 = 10,
     F11 = 11,
     F12 = 12,
+    TAB = 13,
+    DPAD_UP = 14,
+    DPAD_DOWN = 15,
+    DPAD_LEFT = 16,
+    DPAD_RIGHT = 17,
 };
 
 enum class ObscuredReasons {
@@ -748,6 +831,12 @@ enum class NodeRenderType : uint32_t {
     RENDER_TYPE_DISPLAY = 0,
     RENDER_TYPE_TEXTURE,
 };
+
+enum class MarqueeUpdateStrategy : uint32_t {
+    DEFAULT = 0,
+    PRESERVE_POSITION,
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

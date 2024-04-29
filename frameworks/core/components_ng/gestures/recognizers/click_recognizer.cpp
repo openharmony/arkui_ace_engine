@@ -56,7 +56,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     if (!frameNode.Invalid()) {
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
-        NGGestureRecognizer::Transform(localPoint, frameNode, false, isPostEventResult_);
+        NGGestureRecognizer::Transform(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto paintRect = renderContext->GetPaintRectWithoutTransform();
@@ -94,6 +94,40 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
     }
 }
 
+ClickInfo ClickRecognizer::GetClickInfo()
+{
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    ClickInfo info(touchPoint.id);
+    PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
+    Offset localOffset(localPoint.GetX(), localPoint.GetY());
+    info.SetTimeStamp(touchPoint.time);
+    info.SetScreenLocation(touchPoint.GetScreenOffset());
+    info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(localOffset);
+    info.SetSourceDevice(deviceType_);
+    info.SetDeviceId(deviceId_);
+    info.SetTarget(GetEventTarget().value_or(EventTarget()));
+    info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
+    if (touchPoint.tiltX.has_value()) {
+        info.SetTiltX(touchPoint.tiltX.value());
+    }
+    if (touchPoint.tiltY.has_value()) {
+        info.SetTiltY(touchPoint.tiltY.value());
+    }
+    info.SetSourceTool(touchPoint.sourceTool);
+    return info;
+}
+
 void ClickRecognizer::OnAccepted()
 {
     int64_t acceptTime = GetSysTimestamp();
@@ -120,28 +154,16 @@ void ClickRecognizer::OnAccepted()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
-        ClickInfo info(touchPoint.id);
-        info.SetTimeStamp(touchPoint.time);
-        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(localOffset);
-        info.SetSourceDevice(deviceType_);
-        info.SetDeviceId(deviceId_);
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetForce(touchPoint.force);
-        if (touchPoint.tiltX.has_value()) {
-            info.SetTiltX(touchPoint.tiltX.value());
-        }
-        if (touchPoint.tiltY.has_value()) {
-            info.SetTiltY(touchPoint.tiltY.value());
-        }
-        info.SetSourceTool(touchPoint.sourceTool);
+        ClickInfo info = GetClickInfo();
         onClick_(info);
     }
 
     if (remoteMessage_) {
-        ClickInfo info(touchPoint.id);
+        ClickInfo info = GetClickInfo();
         info.SetTimeStamp(touchPoint.time);
         info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(localOffset);
         remoteMessage_(info);
@@ -165,6 +187,10 @@ void ClickRecognizer::OnRejected()
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
+        "%{public}d, %{public}d",
+        event.id, equalsToFingers_, currentTouchPointsNum_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -174,13 +200,15 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         touchDownTime_ = event.time;
     }
     if (IsRefereeFinished()) {
+        auto node = GetAttachedNode().Upgrade();
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "Click recognizer handle touch down event refereeState is %{public}d, node tag = %{public}s, id = "
+            "%{public}s",
+            refereeState_, node ? node->GetTag().c_str() : "null",
+            node ? std::to_string(node->GetId()).c_str() : "invalid");
         return;
     }
     InitGlobalValue(event.sourceType);
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
-        "%{public}d, %{public}d",
-        event.id, equalsToFingers_, currentTouchPointsNum_);
     if (!IsInAttachedNode(event)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
@@ -337,7 +365,7 @@ void ClickRecognizer::DeadlineTimer(CancelableCallback<void()>& deadlineTimer, i
 
     deadlineTimer.Reset(callback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    taskExecutor.PostDelayedTask(deadlineTimer, time);
+    taskExecutor.PostDelayedTask(deadlineTimer, time, "ArkUIGestureClickDeadlineTimer");
 }
 
 Offset ClickRecognizer::ComputeFocusPoint()
@@ -367,40 +395,55 @@ bool ClickRecognizer::ExceedSlop()
     return false;
 }
 
+GestureEvent ClickRecognizer::GetGestureEventInfo()
+{
+    GestureEvent info;
+    info.SetTimeStamp(time_);
+    info.SetFingerList(fingerList_);
+    TouchEvent touchPoint = {};
+    for (const auto& pointKeyVal : touchPoints_) {
+        auto pointVal = pointKeyVal.second;
+        if (pointVal.sourceType != SourceType::NONE) {
+            touchPoint = pointVal;
+            break;
+        }
+    }
+    PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
+    info.SetTimeStamp(touchPoint.time);
+    info.SetScreenLocation(touchPoint.GetScreenOffset());
+    info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
+    info.SetSourceDevice(deviceType_);
+    info.SetDeviceId(deviceId_);
+    info.SetTarget(GetEventTarget().value_or(EventTarget()));
+    info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
+    
+    if (touchPoint.tiltX.has_value()) {
+        info.SetTiltX(touchPoint.tiltX.value());
+    }
+    if (touchPoint.tiltY.has_value()) {
+        info.SetTiltY(touchPoint.tiltY.value());
+    }
+    info.SetSourceTool(touchPoint.sourceTool);
+#ifdef SECURITY_COMPONENT_ENABLE
+    info.SetDisplayX(touchPoint.screenX);
+    info.SetDisplayY(touchPoint.screenY);
+#endif
+    info.SetPointerEvent(touchPoint.pointerEvent);
+    return info;
+}
+
 void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& onAction)
 {
     if (onAction && *onAction) {
-        GestureEvent info;
-        info.SetTimeStamp(time_);
-        info.SetFingerList(fingerList_);
-        TouchEvent touchPoint = {};
-        for (const auto& pointKeyVal : touchPoints_) {
-            auto pointVal = pointKeyVal.second;
-            if (pointVal.sourceType != SourceType::NONE) {
-                touchPoint = pointVal;
-                break;
-            }
-        }
-        PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
-        info.SetScreenLocation(touchPoint.GetScreenOffset());
-        info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
-        info.SetSourceDevice(deviceType_);
-        info.SetDeviceId(deviceId_);
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetForce(touchPoint.force);
-        if (touchPoint.tiltX.has_value()) {
-            info.SetTiltX(touchPoint.tiltX.value());
-        }
-        if (touchPoint.tiltY.has_value()) {
-            info.SetTiltY(touchPoint.tiltY.value());
-        }
-        info.SetSourceTool(touchPoint.sourceTool);
-#ifdef SECURITY_COMPONENT_ENABLE
-        info.SetDisplayX(touchPoint.screenX);
-        info.SetDisplayY(touchPoint.screenY);
-#endif
-        info.SetPointerEvent(touchPoint.pointerEvent);
+        GestureEvent info = GetGestureEventInfo();
         // onAction may be overwritten in its invoke so we copy it first
         auto onActionFunction = *onAction;
         onActionFunction(info);

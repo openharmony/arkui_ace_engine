@@ -56,6 +56,14 @@ public:
 
     RefPtr<XComponentPattern> GetPattern();
 
+    void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed) override;
+
+    void StopImageAnalyzer() override;
+
+    void SetSurfaceRotation(bool isLock) override;
+
+    bool GetSurfaceRotation() override;
+
 private:
     WeakPtr<XComponentPattern> pattern_;
 };

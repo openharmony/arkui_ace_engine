@@ -24,36 +24,40 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 
 namespace OHOS::Ace {
+enum class AroundSpecialNode { AFTER = 0, BEFORE, BETWEEN, NONE };
 
 class ACE_EXPORT MutableSpanString : public SpanString {
     DECLARE_ACE_TYPE(MutableSpanString, SpanString);
 
 public:
     explicit MutableSpanString(const std::string& text) : SpanString(text) {}
-    MutableSpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans)
-        : SpanString(text, spans) {}
+    explicit MutableSpanString(const ImageSpanOptions& options) : SpanString(options) {}
+    explicit MutableSpanString(RefPtr<CustomSpan>& span) : SpanString(span) {}
     void ReplaceString(int32_t start, int32_t length, const std::string& other);
     void InsertString(int32_t start, const std::string& other);
     void RemoveString(int32_t start, int32_t length);
     void ReplaceSpan(int32_t start, int32_t length, const RefPtr<SpanBase>& span);
-    void RemoveSpan(int32_t start, int32_t length, SpanType key);
     void RemoveSpans(int32_t start, int32_t length);
     void ClearAllSpans();
     void ReplaceSpanString(int32_t start, int32_t length, const RefPtr<SpanString>& spanString);
     void InsertSpanString(int32_t start, const RefPtr<SpanString>& spanString);
     void AppendSpanString(const RefPtr<SpanString>& spanString);
+    bool IsSpeicalNode(int32_t location, SpanType speicalType);
 
 private:
     void KeepSpansOrder();
     void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
+    void ApplyInsertStringToSpans(int32_t start, const std::string& other);
     void ApplyReplaceStringToSpanBase(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
-    static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
-    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
-    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
+    void ApplyInsertSpanStringToSpans(int32_t start, const RefPtr<SpanString>& spanString);
+    void ApplyInsertSpanStringToSpanBase(int32_t start, const RefPtr<SpanString>& spanString);
+    void SplitSpansByNewLine();
+    bool InsertUseFrontStyle(int32_t start);
+    void UpdateSpanAndSpanMapAfterInsertSpanString(int32_t start, int32_t offset);
     void UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start, int32_t offset, bool useFrontStyle);
-    void UpdateSpansWithOffset(int32_t start, int32_t offset, SpanStringOperation op);
-    void UpdateSpanMapWithOffset(int32_t start, int32_t offset, SpanStringOperation op);
-    void UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start, int32_t offset, SpanStringOperation op);
+    AroundSpecialNode IsInsertAroundSpecialNode(int32_t start);
+    void InsertStringAroundSpecialNode(int32_t start, const std::string& str, AroundSpecialNode aroundMode);
+    void RemoveSpecialpanText();
 };
 } // namespace OHOS::Ace
 

@@ -24,6 +24,7 @@
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 template<typename T>
 struct BorderRadiusPropertyT {
@@ -110,7 +111,7 @@ struct BorderRadiusPropertyT<Dimension> {
     bool UpdateWithCheck(const BorderRadiusPropertyT<Dimension>& value);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
-        bool isOutline = false) const;
+        const InspectorFilter& filter, bool isOutline = false) const;
 
     std::string ToString() const
     {
@@ -208,7 +209,7 @@ struct BorderColorProperty {
     std::string ToString() const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
-        bool isOutline = false) const;
+        const InspectorFilter& filter, bool isOutline = false) const;
 };
 
 template<typename T>
@@ -270,7 +271,7 @@ struct BorderWidthPropertyT<Dimension> {
     bool UpdateWithCheck(const BorderWidthPropertyT& value);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
-        bool isOutline = false) const;
+        const InspectorFilter& filter, bool isOutline = false) const;
 
     std::string ToString() const;
 };
@@ -338,7 +339,7 @@ struct BorderStyleProperty {
     bool operator==(const BorderStyleProperty& value) const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
-        bool isOutline = false) const;
+        const InspectorFilter& filter, bool isOutline = false) const;
 };
 
 using BorderRadiusPropertyF = BorderRadiusPropertyT<float>;

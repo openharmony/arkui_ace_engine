@@ -16,11 +16,11 @@
 /// <reference path='./import.ts' />
 
 class ArkRadioComponent extends ArkComponent implements RadioAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+  builder: WrappedBuilder<Object[]> | null = null;
+  radioNode: BuilderNode<[RadioConfiguration]> | null = null;
+  modifier: ContentModifier<RadioConfiguration>;
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   checked(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, RadioCheckedModifier.identity, RadioCheckedModifier, value);
@@ -57,6 +57,26 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     modifierWithKey(this._modifiersWithKeys, RadioResponseRegionModifier.identity,
       RadioResponseRegionModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<RadioConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, radioConfiguration: RadioConfiguration): FrameNode | null {
+    radioConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.radioNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.radioNode = new xNode.BuilderNode(context);
+      this.radioNode.build(this.builder, radioConfiguration);
+    } else {
+      this.radioNode.update(radioConfiguration);
+    }
+    return this.radioNode.getFrameNode();
   }
 }
 
@@ -276,12 +296,20 @@ class RadioResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rec
   }
 }
 // @ts-ignore
-globalThis.Radio.attributeModifier = function (modifier) {
+globalThis.Radio.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkRadioComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.RadioModifier(nativePtr, classType);
+  });
+};
+
+// @ts-ignore
+globalThis.Radio.contentModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRadioComponent(nativeNode);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
+  component.setContentModifier(modifier);
 };

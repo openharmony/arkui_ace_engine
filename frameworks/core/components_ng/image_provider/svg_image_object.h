@@ -39,10 +39,8 @@ public:
 private:
     void MakeCanvasImage(
         const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
-
     // return true if process is successful
-    bool MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor);
-
+    bool MakeSvgDom(const RefPtr<ImageData>& data, const ImageSourceInfo& src);
     RefPtr<SvgDomBase> svgDomBase_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SvgImageObject);

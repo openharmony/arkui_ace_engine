@@ -15,6 +15,7 @@
 
 #include "mock_pipeline_context.h"
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -45,6 +46,7 @@ void MockPipelineContext::SetUp()
 
 void MockPipelineContext::TearDown()
 {
+    pipeline_->Destroy();
     pipeline_ = nullptr;
 }
 
@@ -71,16 +73,14 @@ float PipelineContext::GetCurrentRootHeight()
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootHeight_);
 }
 
-std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(
-    const std::string& id)
+std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(const std::string& id)
 {
     return nullptr;
 }
 
-void PipelineContext::AddOrReplaceNavigationNode(
-    const std::string &id, const WeakPtr<FrameNode>& node) {}
+void PipelineContext::AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node) {}
 
-void PipelineContext::DeleteNavigationNode(const std::string &id) {}
+void PipelineContext::DeleteNavigationNode(const std::string& id) {}
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
@@ -90,6 +90,12 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
 {
     return MockPipelineContext::GetCurrent();
+}
+
+PipelineContext* PipelineContext::GetCurrentContextPtrSafely()
+{
+    auto context = MockPipelineContext::GetCurrent();
+    return AceType::RawPtr(context);
 }
 
 RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
@@ -119,7 +125,7 @@ void PipelineContext::SetupRootElement()
     auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
     rootFocusHub->SetFocusType(FocusType::SCOPE);
     rootFocusHub->SetFocusable(true);
-    rootNode_->AttachToMainTree();
+    rootNode_->AttachToMainTree(false, this);
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
     rootNode_->AddChild(stageNode);
@@ -128,7 +134,7 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
-    focusManager_ = MakeRefPtr<FocusManager>();
+    focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
 
@@ -150,7 +156,10 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
 
 void PipelineContext::OnIdle(int64_t deadline) {}
 
-void PipelineContext::Destroy() {}
+void PipelineContext::Destroy()
+{
+    rootNode_.Reset();
+}
 
 void PipelineContext::OnShow() {}
 
@@ -178,6 +187,8 @@ void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
+void PipelineContext::ChangeDarkModeBrightness(bool isFocus) {}
+
 void PipelineContext::SetAppTitle(const std::string& title) {}
 
 void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon) {}
@@ -202,7 +213,11 @@ void PipelineContext::NotifyMemoryLevel(int32_t level) {}
 
 void PipelineContext::FlushMessages() {}
 
+void PipelineContext::FlushModifier() {}
+
 void PipelineContext::FlushUITasks() {}
+
+void PipelineContext::DetachNode(RefPtr<UINode>) {}
 
 void PipelineContext::Finish(bool autoFinish) const {}
 
@@ -212,16 +227,32 @@ void PipelineContext::FlushPipelineWithoutAnimation() {}
 
 void PipelineContext::FlushFocus() {}
 
+void PipelineContext::FlushOnceVsyncTask() {}
+
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
-void PipelineContext::OnVirtualKeyboardHeightChange(
-    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineContext::FlushRequestFocus() {}
+
+void PipelineContext::CheckNeedUpdateBackgroundColor(Color& color) {}
+
+bool PipelineContext::CheckNeedDisableUpdateBackgroundImage() { return false; }
+
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
 {}
 
-void PipelineContext::OnVirtualKeyboardHeightChange(
-    float keyboardHeight, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
+{}
+
+void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const float safeHeight, const bool supportAvoidance)
+{}
+
+void PipelineContext::OriginalAvoidanceLogic(
+    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
 
 void PipelineContext::CheckVirtualKeyboardHeight() {}
@@ -239,6 +270,11 @@ void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
 bool PipelineContext::CheckPageFocus()
 {
     return true;
+}
+
+bool PipelineContext::CheckOverlayFocus()
+{
+    return false;
 }
 
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
@@ -267,6 +303,14 @@ const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
 
 const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
 {
+    return focusManager_;
+}
+
+const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
+{
+    if (!focusManager_) {
+        focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
+    }
     return focusManager_;
 }
 
@@ -299,7 +343,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
-bool PipelineContext::RequestFocus(const std::string& targetNodeId)
+bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncRequest)
 {
     return false;
 }
@@ -363,6 +407,8 @@ void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 
 void PipelineContext::FlushPipelineImmediately() {}
 
+void PipelineContext::RebuildFontNode() {}
+
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t /* recvTime */, uint64_t /* timeStamp */)
 {
     return nullptr;
@@ -370,8 +416,8 @@ FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t /* recvTime */, uint64_
 
 void PipelineContext::DumpPipelineInfo() const {}
 
-void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
-    const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback)
+void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, const std::vector<double>& ratio,
+    const VisibleRatioCallback& callback, bool isUserCallback)
 {
     CHECK_NULL_VOID(callback);
     callback(false, 0.0);
@@ -380,13 +426,9 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
-void PipelineContext::AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback)
-{}
-void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId) {}
 void PipelineContext::HandleVisibleAreaChangeEvent() {}
-void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible) {}
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
 {
     return true;
 }
@@ -411,10 +453,9 @@ void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
-void PipelineContext::AddNavigationStateCallback(
-    int32_t pageId, int32_t nodeId, const std::function<void()>& callback, bool isOnShow) {}
+void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode) {}
 
-void PipelineContext::RemoveNavigationStateCallback(int32_t pageId, int32_t nodeId) {}
+void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow) {}
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
@@ -475,7 +516,7 @@ bool PipelineContext::NeedSoftKeyboard()
 
 void PipelineContext::SetCursor(int32_t cursorValue) {}
 
-void PipelineContext::RestoreDefault() {}
+void PipelineContext::RestoreDefault(int32_t windowId) {}
 
 void PipelineContext::HandleSubwindow(bool isShow) {}
 
@@ -501,6 +542,8 @@ void PipelineContext::ResetDragging() {}
 
 void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
+void PipelineContext::CheckAndUpdateKeyboardInset() {}
+
 bool PipelineContext::PrintVsyncInfoIfNeed() const
 {
     return false;
@@ -524,6 +567,19 @@ void PipelineContext::FlushFocusView()
     }
 }
 
+void PipelineContext::SetOverlayNodePositions(std::vector<Ace::RectF> rects) {}
+
+std::vector<Ace::RectF> PipelineContext::GetOverlayNodePositions() { return {}; }
+
+void PipelineContext::RegisterOverlayNodePositionsUpdateCallback(
+    const std::function<void(std::vector<Ace::RectF>)>&& callback) {}
+
+void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects) {}
+
+bool PipelineContext::IsContainerModalVisible()
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -556,6 +612,13 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
 {
     return nullptr;
 }
+
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+{}
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
+{}
 
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
@@ -611,16 +674,25 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     return 1;
 }
 
-void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type) {}
 
-void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(
+    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
 
-void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostSyncEvent(
+    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     return nullptr;
 }
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    const RefPtr<UIExtensionManager>& GetUIExtensionManager()
+    {
+        return AceType::MakeRefPtr<UIExtensionManager>();
+    }
+#endif
 
 bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
@@ -661,6 +733,11 @@ void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
 bool PipelineBase::HasFloatTitle() const
 {
     return true;
+}
+
+Dimension NG::PipelineContext::GetCustomTitleHeight()
+{
+    return Dimension();
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

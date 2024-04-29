@@ -24,6 +24,8 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 struct ScrollBarProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarMode, DisplayMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarWidth, Dimension);
@@ -51,16 +53,16 @@ public:
         PaintProperty::Reset();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_GROUP(ScrollBarProperty, ScrollBarProperty);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarMode, DisplayMode, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarWidth, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
+    Dimension GetBarWidth() const;
+    Color GetBarColor() const;
 
 private:
-    Color GetBarColor() const;
-    Dimension GetBarWidth() const;
     std::string GetBarStateString() const;
 };
 } // namespace OHOS::Ace::NG

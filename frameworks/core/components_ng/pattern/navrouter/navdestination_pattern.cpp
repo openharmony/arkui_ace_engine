@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,9 +72,32 @@ void NavDestinationPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+
+    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    if (opts && opts->Expansive() && navDestinationContentNode) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "Navdestination SafArea expand as %{public}s", opts->ToString().c_str());
+            navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+            navDestinationContentNode->MarkModifyDone();
+    }
+
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
     UpdateTitlebarVisibility(hostNode);
+}
+
+void NavDestinationPattern::OnLanguageConfigurationUpdate()
+{
+    if (isRightToLeft_ == AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        return;
+    }
+    isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void NavDestinationPattern::UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode)
@@ -98,8 +121,8 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
 {
     auto renderContext = hostNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (renderContext->GetBackgroundColor().has_value()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Background already has color: %{public}s",
+    if (IsUserDefinedBgColor()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "User defined Background color: %{public}s",
             renderContext->GetBackgroundColor()->ColorToString().c_str());
         return;
     }
@@ -118,7 +141,7 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
         return;
     }
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set default background color: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Default background color: %{public}s",
         renderContext->GetBackgroundColor()->ColorToString().c_str());
 }
 
@@ -130,13 +153,6 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-
-    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
-    auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-    if (opts && opts->Expansive() && navDestinationContentNode) {
-        navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        navDestinationContentNode->MarkModifyDone();
-    }
 
     if (navDestinationLayoutProperty->HasNoPixMap()) {
         if (navDestinationLayoutProperty->HasImageSource()) {
@@ -154,6 +170,7 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
     } else {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         titleBarNode->SetJSViewActive(true);
+        auto&& opts = navDestinationLayoutProperty->GetSafeAreaExpandOpts();
         if (opts && opts->Expansive()) {
             titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }
@@ -229,6 +246,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
         SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
+    isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
 void NavDestinationPattern::DumpInfo()

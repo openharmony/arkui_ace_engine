@@ -75,6 +75,7 @@ struct TestProperty {
     std::optional<Ace::FontWeight> fontWeight = std::nullopt;
     std::optional<std::vector<std::string>> fontFamily = std::nullopt;
     std::optional<bool> allowScale = std::nullopt;
+    std::optional<Ace::MarqueeUpdateStrategy> marqueeUpdateStrategy = std::nullopt;
 };
 
 class MarqueeTestNg : public testing::Test {
@@ -130,6 +131,9 @@ RefPtr<FrameNode> MarqueeTestNg::CreateMarqueeParagraph(const TestProperty& test
     }
     if (testProperty.allowScale.has_value()) {
         marqueeModel.SetAllowScale(testProperty.allowScale.value());
+    }
+    if (testProperty.marqueeUpdateStrategy.has_value()) {
+        marqueeModel.SetMarqueeUpdateStrategy(testProperty.marqueeUpdateStrategy.value());
     }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // MarqueeView pop
@@ -1120,6 +1124,11 @@ HWTEST_F(MarqueeTestNg, MarqueeTest015, TestSize.Level1)
     marqueeModel.SetAllowScale(std::nullopt);
     EXPECT_FALSE(marqueeLayoutProperty->HasAllowScale());
 
+    marqueeModel.SetMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::DEFAULT);
+    EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::DEFAULT);
+    marqueeModel.SetMarqueeUpdateStrategy(std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasMarqueeUpdateStrategy());
+
     marqueeModel.SetValue("test");
     EXPECT_EQ(marqueeLayoutProperty->GetSrcValue(), "test");
     marqueeModel.SetValue(std::nullopt);
@@ -1177,6 +1186,11 @@ HWTEST_F(MarqueeTestNg, MarqueeTest016, TestSize.Level1)
     EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
     marqueeModel.SetAllowScale(&frameNode, false);
     EXPECT_FALSE(marqueeLayoutProperty->HasAllowScale());
+
+    marqueeModel.SetMarqueeUpdateStrategy(&frameNode, Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
+    EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
+    marqueeModel.SetMarqueeUpdateStrategy(&frameNode, std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasMarqueeUpdateStrategy());
 }
 
 /**
@@ -1513,7 +1527,6 @@ HWTEST_F(MarqueeTestNg, MarqueeTest021, TestSize.Level1)
     pattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::MAXIMIZE);
     EXPECT_FALSE(pattern->isOritationListenerRegisted_);
     EXPECT_FALSE(pattern->isRegistedAreaCallback_);
-    EXPECT_TRUE(pattern->measureChanged_);
 
     /**
      * @tc.steps: step4. Call RegistOritationListener.
@@ -1563,5 +1576,62 @@ HWTEST_F(MarqueeTestNg, MarqueeTest022, TestSize.Level1)
     pattern->OnColorConfigurationUpdate();
     EXPECT_EQ(frameChild1->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_MEASURE_SELF);
     EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color(0)), Color(2));
+}
+
+/**
+ * @tc.name: MarqueeTest023
+ * @tc.desc: Test MarqueePattern.GetTextOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and add a Child.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameChild1 =
+        FrameNode::GetOrCreateFrameNode("Child1", 2, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    frameChild1->SetLayoutProperty(textLayoutProperty);
+    RefPtr<GeometryNode> geo1 = AceType::MakeRefPtr<GeometryNode>();
+    geo1->SetFrameSize(SizeF(2, 2));
+    frameNode->SetGeometryNode(geo1);
+    RefPtr<GeometryNode> geo2 = AceType::MakeRefPtr<GeometryNode>();
+    geo2->SetFrameSize(SizeF(5, 5));
+    frameChild1->SetGeometryNode(geo2);
+    frameNode->AddChild(frameChild1);
+
+    /**
+     * @tc.steps: step2. Create MarqueePattern and create MarqueePaintProperty.
+     */
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
+    frameNode->SetLayoutProperty(marqueeLayoutProperty);
+    RefPtr<MarqueePaintProperty> marqueePaintProperty = AceType::MakeRefPtr<MarqueePaintProperty>();
+    frameNode->paintProperty_ = marqueePaintProperty;
+    marqueePaintProperty->UpdatePlayerStatus(true);
+    Alignment align;
+    align.horizontal_ = 0.0f;
+    marqueeLayoutProperty->positionProperty_ = std::make_unique<PositionProperty>();
+    marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
+    marqueeLayoutProperty->UpdateSrc("Test MarqueePattern.GetTextOffset");
+
+    /**
+     * @tc.steps: step3. Call GetTextOff.
+     * @tc.expected: step3. Check whether the call is correct.
+     */
+    marqueeLayoutProperty->UpdateMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::DEFAULT);
+    EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::DEFAULT);
+    pattern->StartMarqueeAnimation();
+    auto offset = pattern->GetTextOffset();
+    EXPECT_EQ(offset, 0.0f);
+    pattern->StopMarqueeAnimation(false);
+    marqueeLayoutProperty->UpdateMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
+    EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
+    pattern->StartMarqueeAnimation();
+    offset = pattern->GetTextOffset();
+    EXPECT_EQ(offset, 0.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -147,4 +147,11 @@ HWTEST_F(PluginAdapterTest, GetDevInfoTest003, TestSize.Level1)
     EXPECT_EQ(infoPair.first, INFO_STR_TWO);
     EXPECT_EQ(infoPair.second, true);
 }
+
+HWTEST_F(PluginAdapterTest, GetMemConfigProperty001, TestSize.Level1)
+{
+    OHOS::system::SetParameter("persist.ark.mem_config_property", "jsHeap500");
+    std::string ret = SystemProperties::GetMemConfigProperty("persist.ark.mem_config_property", "");
+    EXPECT_EQ(ret, "jsHeap500");
+}
 } // namespace OHOS::Ace::Framework

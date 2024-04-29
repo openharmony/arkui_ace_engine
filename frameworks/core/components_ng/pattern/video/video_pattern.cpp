@@ -244,7 +244,7 @@ void VideoPattern::PrepareMediaPlayer()
         auto targetPattern = video->GetTargetVideoPattern();
         CHECK_NULL_VOID(targetPattern);
         targetPattern->ResetMediaPlayer();
-    });
+    }, "ArkUIVideoMediaPlayerReset");
 }
 
 bool VideoPattern::SetSourceForMediaPlayer()
@@ -273,25 +273,25 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnCurrentTimeChange(currentPos);
-        });
+        }, "ArkUIVideoCurrentTimeChange");
     };
 
     auto&& stateChangedEvent = [videoPattern, uiTaskExecutor](PlaybackStatus status) {
-        uiTaskExecutor.PostSyncTask([&videoPattern, status] {
+        uiTaskExecutor.PostTask([videoPattern, status] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnPlayerStatus(status);
-        });
+        }, "ArkUIVideoPlayerStatusChange");
     };
 
     auto&& errorEvent = [videoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostTask([&videoPattern] {
+        uiTaskExecutor.PostTask([videoPattern] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnError("");
-        });
+        }, "ArkUIVideoError");
     };
 
     auto&& resolutionChangeEvent = [videoPattern, uiTaskExecutor]() {
@@ -300,7 +300,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnResolutionChange();
-        });
+        }, "ArkUIVideoResolutionChange");
     };
 
     auto&& startRenderFrameEvent = [videoPattern, uiTaskExecutor]() {
@@ -309,13 +309,13 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnStartRenderFrameCb();
-        });
+        }, "ArkUIVideoStartRenderFrame");
     };
 
     mediaPlayer_->RegisterMediaPlayerEvent(
         positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent, startRenderFrameEvent);
 
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
     auto&& textureRefreshEvent = [videoPattern, uiTaskExecutor](int32_t instanceId, int64_t textureId) {
         uiTaskExecutor.PostSyncTask([&videoPattern, instanceId, textureId] {
             auto video = videoPattern.Upgrade();
@@ -326,13 +326,13 @@ void VideoPattern::RegisterMediaPlayerEvent()
                 return;
             }
             video->OnTextureRefresh(nativeWindow);
-        });
+        }, "ArkUIVideoTextureRefresh");
     };
     mediaPlayer_->RegisterTextureEvent(textureRefreshEvent);
 #endif
 }
 
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
 void* VideoPattern::GetNativeWindow(int32_t instanceId, int64_t textureId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -628,7 +628,7 @@ void VideoPattern::UpdateLooping()
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetLooping(loop);
-        });
+        }, "ArkUIVideoUpdateLooping");
     }
 }
 
@@ -643,7 +643,7 @@ void VideoPattern::UpdateSpeed()
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetPlaybackSpeed(static_cast<float>(progress));
-        });
+        }, "ArkUIVideoUpdateSpeed");
     }
 }
 
@@ -659,7 +659,7 @@ void VideoPattern::UpdateMuted()
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetVolume(videoVolume, videoVolume);
-        });
+        }, "ArkUIVideoUpdateMuted");
     }
 }
 
@@ -727,8 +727,17 @@ void VideoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+    CHECK_NULL_VOID(renderSurface_);
+    auto contextType = renderSurface_->IsTexture() ?
+        RenderContext::ContextType::HARDWARE_TEXTURE : RenderContext::ContextType::HARDWARE_SURFACE;
+    static RenderContext::ContextParam param = { contextType, "MediaPlayerSurface",
+                                                 RenderContext::PatternType::VIDEO };
+#else
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
+#endif
     renderContextForMediaPlayer_->InitContext(false, param);
 
     if (SystemProperties::GetExtSurfaceEnabled()) {
@@ -750,7 +759,7 @@ void VideoPattern::OnDetachFromMainTree()
 
 void VideoPattern::RegisterRenderContextCallBack()
 {
-#ifndef VIDEO_TEXTURE_SUPPORTED
+#ifndef RENDER_EXTRACT_SUPPORTED
     auto isFullScreen = IsFullScreen();
     if (!isFullScreen) {
         auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
@@ -835,7 +844,7 @@ void VideoPattern::OnModifyDone()
             CHECK_NULL_VOID(videoPattern);
             ContainerScope scope(videoPattern->instanceId_);
             videoPattern->UpdateMediaPlayerOnBg();
-        });
+        }, "ArkUIVideoUpdateMediaPlayer");
     }
 
     if (SystemProperties::GetExtSurfaceEnabled()) {
@@ -1006,7 +1015,7 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 void VideoPattern::OnAreaChangedInner()
 {
-#ifndef VIDEO_TEXTURE_SUPPORTED
+#ifndef RENDER_EXTRACT_SUPPORTED
     auto isFullScreen = IsFullScreen();
     if (SystemProperties::GetExtSurfaceEnabled() && isFullScreen) {
 #else
@@ -1234,7 +1243,7 @@ void VideoPattern::SetMethodCall()
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Start();
-        });
+        }, "ArkUIVideoStart");
     });
     videoController->SetPausetImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
@@ -1244,7 +1253,7 @@ void VideoPattern::SetMethodCall()
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Pause();
-        });
+        }, "ArkUIVideoPause");
     });
     videoController->SetStopImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
@@ -1254,7 +1263,7 @@ void VideoPattern::SetMethodCall()
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Stop();
-        });
+        }, "ArkUIVideoStop");
     });
     videoController->SetSeekToImpl([weak = WeakClaim(this), uiTaskExecutor](float pos, SeekMode seekMode) {
         uiTaskExecutor.PostTask([weak, pos, seekMode]() {
@@ -1264,7 +1273,7 @@ void VideoPattern::SetMethodCall()
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->SetCurrentTime(pos, seekMode);
-        });
+        }, "ArkUIVideoSetCurrentTime");
     });
     videoController->SetRequestFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isFullScreen) {
         uiTaskExecutor.PostTask([weak, isFullScreen]() {
@@ -1281,7 +1290,7 @@ void VideoPattern::SetMethodCall()
                 CHECK_NULL_VOID(fullScreenPattern);
                 fullScreenPattern->ExitFullScreen();
             }
-        });
+        }, "ArkUIVideoFullScreen");
     });
     videoController->SetExitFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isSync) {
         if (isSync) {
@@ -1304,7 +1313,7 @@ void VideoPattern::SetMethodCall()
             auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(targetPattern);
             CHECK_NULL_VOID(fullScreenPattern);
             fullScreenPattern->ExitFullScreen();
-        });
+        }, "ArkUIVideoExitFullScreen");
     });
     CHECK_NULL_VOID(videoControllerV2_);
     videoControllerV2_->AddVideoController(videoController);
@@ -1330,7 +1339,7 @@ void VideoPattern::Start()
         CHECK_NULL_VOID(mediaPlayer);
         TAG_LOGI(AceLogTag::ACE_VIDEO, "trigger mediaPlayer play");
         mediaPlayer->Play();
-    });
+    }, "ArkUIVideoPlay");
 }
 
 void VideoPattern::Pause()
@@ -1365,7 +1374,7 @@ void VideoPattern::FireError()
         CHECK_NULL_VOID(videoPattern);
         ContainerScope scope(videoPattern->instanceId_);
         videoPattern->OnError("");
-    });
+    }, "ArkUIVideoError");
 }
 
 void VideoPattern::ChangePlayButtonTag()

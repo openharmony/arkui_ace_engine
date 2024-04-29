@@ -53,15 +53,18 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(tag, nodeId,
         AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode));
-
     if (customNode) {
         customNode->Build(nullptr);
     }
-
     // update layout and render props
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
     CHECK_NULL_RETURN(dialogLayoutProp, dialog);
-    dialogLayoutProp->UpdateDialogAlignment(param.alignment);
+    DialogAlignment align = static_cast<DialogAlignment>(dialogTheme->GetAlignDialog());
+    if (param.alignment != DialogAlignment::DEFAULT && align == DialogAlignment::CENTER) {
+        dialogLayoutProp->UpdateDialogAlignment(align);
+    } else {
+        dialogLayoutProp->UpdateDialogAlignment(param.alignment);
+    }
     dialogLayoutProp->UpdateDialogOffset(param.offset);
     dialogLayoutProp->UpdateUseCustomStyle(param.customStyle);
     dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
@@ -69,20 +72,25 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
     dialogLayoutProp->UpdateIsModal(param.isModal);
     dialogLayoutProp->UpdateIsScenceBoardDialog(param.isScenceBoardDialog);
-    if (param.width.has_value()) {
+    if (param.width.has_value() && NonNegative(param.width.value().Value())) {
         dialogLayoutProp->UpdateWidth(param.width.value());
     } else {
         dialogLayoutProp->UpdateGridCount(param.gridCount);
     }
-    if (param.height.has_value()) {
+    if (param.height.has_value() && NonNegative(param.height.value().Value())) {
         dialogLayoutProp->UpdateHeight(param.height.value());
     }
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);
-    if ((dialogLayoutProp->GetShowInSubWindowValue(false) && dialogLayoutProp->GetIsModal().value_or(true)) ||
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(pattern, dialog);
+    pattern->SetDialogProperties(param);
+
+    auto isSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
+    if ((isSubWindow && dialogLayoutProp->GetIsModal().value_or(true)) ||
         !dialogLayoutProp->GetIsModal().value_or(true)) {
-        dialogContext->UpdateBackgroundColor(param.maskColor.value_or(Color(0x00000000)));
+        dialogContext->UpdateBackgroundColor(Color(0x00000000));
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
     }
@@ -91,12 +99,10 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     }
     // set onCancel callback
     auto hub = dialog->GetEventHub<DialogEventHub>();
-    CHECK_NULL_RETURN(hub, nullptr);
+    CHECK_NULL_RETURN(hub, dialog);
     hub->SetOnCancel(param.onCancel);
     hub->SetOnSuccess(param.onSuccess);
 
-    auto pattern = dialog->GetPattern<DialogPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
     pattern->BuildChild(param);
     pattern->SetOnWillDismiss(param.onWillDismiss);
 
@@ -107,8 +113,6 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
         pattern->SetOpenAnimation(param.openAnimation);
         pattern->SetCloseAnimation(param.closeAnimation);
     }
-
-    pattern->SetDialogProperties(param);
 
     dialog->MarkModifyDone();
     return dialog;

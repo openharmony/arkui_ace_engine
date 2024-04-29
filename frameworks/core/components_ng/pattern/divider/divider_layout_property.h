@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIVIDER_DIVIDER_LAYOUT_PROPERTY_H
 
 #include "core/common/container.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -45,17 +46,17 @@ public:
         ResetStrokeWidthLimitation();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("vertical", propVertical_.value_or(true) ? "true" : "false");
-        json->Put("strokeWidth",
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("vertical", propVertical_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("strokeWidth",
             propStrokeWidth_
                 .value_or(
                     Dimension(1, Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) ? DimensionUnit::PX
                                                                                                  : DimensionUnit::VP))
                 .ToString()
-                .c_str());
+                .c_str(), filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

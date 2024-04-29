@@ -169,10 +169,18 @@ public:
         shadowColorsLastLength_ = shadowColorsLastLength;
     };
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
 private:
     void PaintCircle(DrawingContext& context, OffsetF offset) const;
     void PaintLinearProgress(DrawingContext& context, OffsetF offset) const;
     void PaintBackground(RSCanvas& canvas, OffsetF offset, float totalWidth, float height, float segmentWidth) const;
+    void SetCornerRadius(RSRoundRect& paintRect, const LinearData& segmentLinearData, const float height) const;
     void PaintColorSegment(RSCanvas& canvas, const LinearData& segmentLinearData) const;
     void PaintSpace(RSCanvas& canvas, const LinearData& segmentLinearData, float spaceWidth) const;
     void PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const;
@@ -188,7 +196,8 @@ private:
     OffsetF offset_;
     bool isFirstCreate_ = true;
     bool isHasShadowValue_ = false;
-
+    RefPtr<PropertyBool> useContentModifier_;
+    
     RefPtr<AnimatablePropertyFloat> max_;
     std::vector<RefPtr<AnimatablePropertyFloat>> values_;
     std::vector<RefPtr<AnimatablePropertyVectorColor>> valueColors_;

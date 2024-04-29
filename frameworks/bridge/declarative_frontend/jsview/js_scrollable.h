@@ -16,14 +16,14 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLABLE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLABLE_H
 
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::Framework {
 class JSScrollable {
 public:
-    static EdgeEffect ParseEdgeEffect(const JSCallbackInfo& info, EdgeEffect defaultValue);
-    static bool ParseAlwaysEnable(const JSCallbackInfo& info, bool defaultValue);
+    static EdgeEffect ParseEdgeEffect(const JSRef<JSVal>& jsValue, EdgeEffect defaultValue);
+    static bool ParseAlwaysEnable(const JSRef<JSVal>& jsValue, bool defaultValue);
     static DisplayMode ParseDisplayMode(const JSCallbackInfo& info, DisplayMode defaultValue);
     static std::string ParseBarColor(const std::string& color);
     static std::string ParseBarWidth(const JSCallbackInfo& info);

@@ -171,7 +171,7 @@ OffsetF SafeAreaManager::GetWindowWrapperOffset()
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (isContainerModal) {
         auto wrapperOffset = OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
-            static_cast<float>((CONTAINER_TITLE_HEIGHT + CONTAINER_BORDER_WIDTH).ConvertToPx()));
+            static_cast<float>((pipelineContext->GetCustomTitleHeight() + CONTAINER_BORDER_WIDTH).ConvertToPx()));
         return wrapperOffset;
     }
     return OffsetF();
@@ -179,6 +179,7 @@ OffsetF SafeAreaManager::GetWindowWrapperOffset()
 
 void SafeAreaManager::ExpandSafeArea()
 {
+    ACE_LAYOUT_SCOPED_TRACE("ExpandSafeArea node count %zu", needExpandNodes_.size());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();

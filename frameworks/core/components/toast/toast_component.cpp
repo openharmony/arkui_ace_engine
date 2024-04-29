@@ -217,7 +217,7 @@ void ToastComponent::Show(const RefPtr<PipelineContext>& context, const std::str
                 stopCallback();
             }
         },
-        TaskExecutor::TaskType::UI, duration);
+        TaskExecutor::TaskType::UI, duration, "ArkUIToastAnimatorStopCallback");
 }
 
 void ToastComponent::SetToastStopListenerCallback(std::function<void()>&& stopCallback)

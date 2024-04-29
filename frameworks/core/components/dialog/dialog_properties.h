@@ -26,6 +26,7 @@
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/component.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {
 
@@ -35,6 +36,26 @@ enum class DialogType {
     ACTION_SHEET,
     CHECKBOX_DIALOG,
     PROGRESS_DIALOG,
+};
+
+class DialogTypeUtils {
+public:
+    static std::string ConvertDialogTypeToString(DialogType type)
+    {
+        switch (type) {
+            case DialogType::COMMON:
+                return "DialogType.COMMON";
+            case DialogType::ALERT_DIALOG:
+                return "DialogType.ALERT_DIALOG";
+            case DialogType::ACTION_SHEET:
+                return "DialogType.ACTION_SHEET";
+            case DialogType::CHECKBOX_DIALOG:
+                return "DialogType.CHECKBOX_DIALOG";
+            default:
+                break;
+        }
+        return "DialogType.COMMON";
+    }
 };
 
 enum class DialogButtonStyle {
@@ -138,14 +159,26 @@ struct ActionSheetInfo {
 
 // Information of Button.
 struct ButtonInfo {
-    std::string text;              // text of button.
-    std::string textColor;         // style of text in button.
+    std::string text;      // text of button.
+    std::string textColor; // style of text in button.
     bool isBgColorSetted = false;
-    Color bgColor;                 // background color of button.
-    RefPtr<NG::ClickEvent> action; // NG button click action
+    Color bgColor;                                   // background color of button.
+    RefPtr<NG::ClickEvent> action;                   // NG button click action
     bool enabled = true;                             // status of enabled in button.
     bool defaultFocus = false;                       // status of defaultFocus in button.
     std::optional<DialogButtonStyle> dlgButtonStyle; // DialogButtonStyle of dialog.
+    std::optional<ButtonType> type;
+    std::optional<ButtonStyleMode> buttonStyle;
+    std::optional<ButtonRole> role;
+    std::optional<Color> fontColor;
+    std::optional<CalcDimension> fontSize;
+    std::optional<FontWeight> fontWeight;
+    std::optional<FontStyle> fontStyle;
+    std::optional<std::vector<std::string>> fontFamily;
+    std::optional<Color> backgroundColor;
+    std::optional<NG::BorderRadiusProperty> borderRadius;
+    bool isPrimary = false;
+    bool isAcceptButton = false;
 
     // Whether button info is valid, valid if text is not empty.
     bool IsValid() const
@@ -169,6 +202,7 @@ struct DialogProperties {
     std::function<void(const int32_t& info)> onWillDismiss; // Cancel Dismiss Callback
     std::function<void(int32_t, int32_t)> onSuccess;      // NG prompt success callback
     std::function<void(const bool)> onChange;             // onChange success callback
+    std::function<void(DialogProperties&)> onLanguageChange;    // onLanguageChange callback
     DialogAlignment alignment = DialogAlignment::DEFAULT; // Alignment of dialog.
     DimensionOffset offset;                               // Offset which base on alignment of Dialog.
     int32_t gridCount = -1;
@@ -209,6 +243,12 @@ struct DialogProperties {
     WeakPtr<NG::UINode> windowScene;
     std::optional<DimensionRect> maskRect;
     RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr; // Used for AlertDialog and ActionSheet transition
+
+    WeakPtr<NG::UINode> contentNode;
+    std::function<void()> onDidAppear;
+    std::function<void()> onDidDisappear;
+    std::function<void()> onWillAppear;
+    std::function<void()> onWillDisappear;
 };
 
 struct PromptDialogAttr {
@@ -224,6 +264,7 @@ struct PromptDialogAttr {
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
+    std::optional<int32_t> backgroundBlurStyle;
     std::optional<NG::BorderWidthProperty> borderWidth;
     std::optional<NG::BorderColorProperty> borderColor;
     std::optional<NG::BorderStyleProperty> borderStyle;
@@ -231,6 +272,15 @@ struct PromptDialogAttr {
     std::optional<Shadow> shadow;
     std::optional<CalcDimension> width;
     std::optional<CalcDimension> height;
+
+    WeakPtr<NG::UINode> contentNode;
+    bool customStyle = false;
+    std::optional<Color> maskColor;
+    RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr;
+    std::function<void()> onDidAppear;
+    std::function<void()> onDidDisappear;
+    std::function<void()> onWillAppear;
+    std::function<void()> onWillDisappear;
 };
 
 } // namespace OHOS::Ace

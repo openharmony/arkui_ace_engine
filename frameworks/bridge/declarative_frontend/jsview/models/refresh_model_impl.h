@@ -45,6 +45,8 @@ public:
     void SetProgressBackgroundColor(const Color& backgroundColor) override;
     void SetOnStateChange(std::function<void(const int32_t)>&& stateChange) override;
     void SetOnRefreshing(std::function<void()>&& refreshing) override;
+    void SetOnOffsetChange(std::function<void(const float)>&& offsetChange) override;
+    void ResetOnOffsetChange() override;
     void SetChangeEvent(std::function<void(const std::string)>&& changeEvent) override;
     void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
     void SetLoadingText(const std::string& loadingText) override;

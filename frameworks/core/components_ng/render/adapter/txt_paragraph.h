@@ -110,6 +110,7 @@ public:
 
     // interfaces for calculate the the specified paragraph position
     int32_t GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos = false) override;
+    void AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index);
     void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
     void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
@@ -122,15 +123,29 @@ public:
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
     std::u16string GetParagraphText() override;
     const ParagraphStyle& GetParagraphStyle() const override;
+    bool empty() const
+    {
+        return GetParagraphLength() == 0;
+    }
+    void SetParagraphId(uint32_t id) override
+    {
+        if (paragraph_) {
+            paragraph_->SetParagraghId(id);
+        }
+    }
+    LineMetrics GetLineMetricsByRectF(RectF& rect) override;
 
 private:
     void CreateBuilder();
     bool CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent);
     inline size_t GetParagraphLength() const
     {
-        return text_.length() + placeholderIndex_ + 1;
+        return text_.length() + placeholderCnt_;
     }
     float MakeEmptyOffsetX();
+    bool HandleCaretWhenEmpty(CaretMetricsF& result);
+    void HandleTextAlign(CaretMetricsF& result, TextAlign align);
+    void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
 
     ParagraphStyle paraStyle_;
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -144,7 +159,7 @@ private:
     std::shared_ptr<RSFontCollection> fontCollection_;
 #endif
     std::u16string text_;
-    int32_t placeholderIndex_ = -1;
+    int32_t placeholderCnt_ = 0;
     TextAlign textAlign_;
     static uint32_t destructCount;
     std::list<size_t> placeholderPosition_;

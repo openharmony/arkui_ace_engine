@@ -59,6 +59,7 @@ public:
     void SetOnScrollStart(OnScrollStartEvent&& onScrollStart) override;
     void SetOnScrollStop(OnScrollStopEvent&& onScrollStop) override;
     void SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex) override;
+    void SetOnScrollVisibleContentChange(OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange) override;
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     void SetOnItemDelete(OnItemDeleteEvent&& onItemDelete) override {}
@@ -68,6 +69,8 @@ public:
     void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override;
     void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
+    void SetFadingEdge(bool fadingEdge) override;
+    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
 
     DisplayMode GetDisplayMode() const override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -75,6 +78,7 @@ public:
     static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
     static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static int32_t GetCachedCount(FrameNode* frameNode);
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);
@@ -106,6 +110,7 @@ public:
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
     static void SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options);
+    static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);

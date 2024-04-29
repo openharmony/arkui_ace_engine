@@ -251,6 +251,16 @@ public:
     {
         maxMenuNums_ = maxMenu;
     }
+
+    bool GetIsTitleMoving() const
+    {
+        return isTitleMoving_;
+    }
+
+    void SetIsTitleMoving(bool isTitleMoving)
+    {
+        isTitleMoving_ = isTitleMoving;
+    }
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
@@ -289,24 +299,33 @@ private:
     void UpdateSubTitleOpacity(const double &value);
     void UpdateTitleModeChange();
     void MountTitle(const RefPtr<TitleBarNode>& hostNode);
-    void MountMenu(const RefPtr<TitleBarNode>& hostNode);
+    void MountMenu(const RefPtr<TitleBarNode>& hostNode, bool isWindowSizeChange = false);
 
     void UpdateTitleBarByCoordScroll(float offset);
     void SetTitleStyleByCoordScrollOffset(float offset);
     float CalculateHandledOffsetMinTitle(float offset, float lastCordScrollOffset);
     float CalculateHandledOffsetMaxTitle(float offset, float lastCordScrollOffset);
     float CalculateHandledOffsetBetweenMinAndMaxTitle(float offset, float lastCordScrollOffset);
+    void CleanSpringAnimation()
+    {
+        springAnimation_.reset();
+    }
+    void CleanAnimation()
+    {
+        animation_.reset();
+    }
+    void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
 
     RefPtr<PanEvent> panEvent_;
-    RefPtr<SpringMotion> springMotion_;
-    RefPtr<Animator> springController_;
-    RefPtr<Animator> animator_;
+    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<Dimension> fontSize_ = 0.0_fp;
     std::optional<float> opacity_;
 
     float overDragOffset_ = 0.0f;
     float maxTitleBarHeight_ = 0.0f;
     float defaultTitleBarHeight_ = 0.0f;
+    Dimension titleSpaceVertical_;
     Dimension tempTitleBarHeight_ = 0.0_vp;
     float minTitleOffsetY_ = 0.0f;
     float maxTitleOffsetY_ = 0.0f;
@@ -334,6 +353,7 @@ private:
     bool CanOverDrag_ = true;
     bool isTitleScaleChange_ = true;
     bool isTitleChanged_ = false; // navigation Non-custom title changed
+    bool isTitleMoving_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 
     bool isFreeTitleUpdated_ = false;

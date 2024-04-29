@@ -70,8 +70,9 @@ const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
 const TEXT_COLUMN_SPACE = 4;
 const TEXT_SAFE_MARGIN = 8;
-const LISTITEM_PADDING = 8;
-const SWITCH_PADDING = 6;
+const LISTITEM_PADDING = 6;
+const SWITCH_PADDING = 4;
+const STACK_PADDING = 4;
 const BADGE_SIZE = 8;
 const SMALL_ICON_SIZE = 16;
 const SYSTEM_ICON_SIZE = 24;
@@ -524,7 +525,7 @@ struct OperateItemStruct {
       }
       .padding({
         left: TEXT_SAFE_MARGIN,
-        right: TEXT_SAFE_MARGIN
+        right: LISTITEM_PADDING
       })
     }
     .hitTestBehavior(HitTestMode.Block)
@@ -758,8 +759,8 @@ export struct ComposeListItem {
       })
     }
     .padding({
-      left: $r('sys.float.ohos_id_default_padding_start'),
-      right: $r('sys.float.ohos_id_default_padding_end')
+      left: STACK_PADDING,
+      right: STACK_PADDING
     })
   }
 }

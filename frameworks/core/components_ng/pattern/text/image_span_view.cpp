@@ -41,10 +41,30 @@ void ImageSpanView::SetVerticalAlign(FrameNode* frameNode, VerticalAlign vertica
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, verticalAlign, frameNode);
 }
 
+void ImageSpanView::SetBaselineOffset(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value);
+}
+
+void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value, frameNode);
+}
+
 void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    style.groupId = frameNode->GetId();
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
+        style.backgroundColor.has_value() || style.backgroundRadius.has_value());
+    auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
+    SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode));
+}
+
+void ImageSpanView::SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyle& style)
+{
     style.groupId = frameNode->GetId();
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
@@ -92,4 +112,14 @@ VerticalAlign ImageSpanView::GetVerticalAlign(FrameNode* frameNode)
     CHECK_NULL_RETURN(layoutProperty, VerticalAlign::BOTTOM);
     return layoutProperty->GetVerticalAlign().value_or(VerticalAlign::BOTTOM);
 }
+
+TextBackgroundStyle ImageSpanView::GetSpanTextBackgroundStyle(FrameNode* frameNode)
+{
+    TextBackgroundStyle backgroundStyle;
+    CHECK_NULL_RETURN(frameNode, backgroundStyle);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, backgroundStyle);
+    return layoutProperty->GetPlaceHolderStyle().value_or(backgroundStyle);
+}
+
 } // namespace OHOS::Ace::NG

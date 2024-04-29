@@ -32,9 +32,11 @@ constexpr int32_t AI_TEXT_MAX_LENGTH = 300;
 constexpr int32_t AI_TEXT_GAP = 100;
 constexpr int32_t AI_DELAY_TIME = 100;
 const std::pair<std::string, std::string> UI_EXTENSION_TYPE = { "ability.want.params.uiExtensionType", "sys/commonUI" };
+constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
-    { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" }
+    { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
+    { TextDataDetectType::DATETIME, "datetime" }
 };
 
 bool DataDetectorAdapter::ShowUIExtensionMenu(
@@ -50,7 +52,7 @@ bool DataDetectorAdapter::ShowUIExtensionMenu(
     };
     callbacks.onDestroy = []() { TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability Destroy"); };
     callbacks.onError = [](int32_t code, const std::string& name, const std::string& message) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "UIExtension Ability Error, code: %{public}d, name: %{public}s, message: %{public}s", code, name.c_str(),
             message.c_str());
     };
@@ -84,22 +86,13 @@ std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        std::function<void ()> onMenuDisappear;
         std::string action = wantParams.GetStringParam("action");
         if (!action.empty() && onClickMenu) {
-            onMenuDisappear = [action, onClickMenu]() {
-                onClickMenu(action);
-            };
+            onClickMenu(action);
         }
         std::string closeMenu = wantParams.GetStringParam("closeMenu");
         if (closeMenu == "true") {
-            int32_t targetId = targetNode->GetId();
-            auto menuNode = overlayManager->GetMenuNode(targetId);
-            CHECK_NULL_VOID(menuNode);
-            auto menuPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
-            CHECK_NULL_VOID(menuPattern);
-            menuPattern->RegisterMenuDisappearCallback(onMenuDisappear);
-            overlayManager->HideMenu(menuNode, targetId);
+            overlayManager->CloseUIExtensionMenu(onClickMenu, targetNode->GetId());
             return;
         }
         std::string longestContent = wantParams.GetStringParam("longestContent");
@@ -134,6 +127,13 @@ void DataDetectorAdapter::SetWantParamaters(const AISpan& aiSpan, AAFwk::Want& w
     want.SetParam("entityType", TEXT_DETECT_MAP.at(aiSpan.type));
     want.SetParam("entityText", aiSpan.content);
     want.SetParam(UI_EXTENSION_TYPE.first, UI_EXTENSION_TYPE.second);
+    if (entityJson_.find(aiSpan.start) != entityJson_.end()) {
+        want.SetParam("entityJson", entityJson_[aiSpan.start]);
+    }
+    if (aiSpan.type == TextDataDetectType::DATETIME) {
+        want.SetParam("fullText", textForAI_);
+        want.SetParam("offset", aiSpan.start);
+    }
 }
 
 void DataDetectorAdapter::SetTextDetectTypes(const std::string& types)
@@ -183,18 +183,21 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
             dataDetectorAdapter->SetTextDetectResult(result);
             dataDetectorAdapter->FireOnResult(result);
             if (result.code != 0) {
-                TAG_LOGD(AceLogTag::ACE_TEXT, "Data detect error, error code: %{public}d", result.code);
+                TAG_LOGE(AceLogTag::ACE_TEXT, "Data detect error, error code: %{public}d", result.code);
                 return;
             }
             dataDetectorAdapter->ParseAIResult(result, startPos);
             auto host = dataDetectorAdapter->GetHost();
             CHECK_NULL_VOID(host);
             host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-        });
+        }, "ArkUITextParseAIResult");
     };
 
-    TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
-    DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    uiTaskExecutor.PostTask([info, textFunc] {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
+        DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
+    }, "ArkUITextInitDataDetect");
 }
 
 void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)
@@ -235,7 +238,7 @@ void DataDetectorAdapter::ParseAIJson(
     const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos)
 {
     if (!jsonValue || !jsonValue->IsArray()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT, "Error AI Result.");
+        TAG_LOGW(AceLogTag::ACE_TEXT, "Error AI Result.");
         return;
     }
 
@@ -248,12 +251,12 @@ void DataDetectorAdapter::ParseAIJson(
         int32_t end = startPos + charOffset + static_cast<int32_t>(wOriText.length());
         if (charOffset < 0 || startPos + charOffset >= static_cast<int32_t>(wTextForAI.length()) ||
             end >= startPos + AI_TEXT_MAX_LENGTH || oriText.empty()) {
-            TAG_LOGI(AceLogTag::ACE_TEXT, "The result of AI is error");
+            TAG_LOGW(AceLogTag::ACE_TEXT, "The result of AI is error");
             continue;
         }
         if (oriText !=
             StringUtils::ToString(wTextForAI.substr(startPos + charOffset, static_cast<int32_t>(wOriText.length())))) {
-            TAG_LOGI(AceLogTag::ACE_TEXT, "The charOffset is error");
+            TAG_LOGW(AceLogTag::ACE_TEXT, "The charOffset is error");
             continue;
         }
         int32_t start = startPos + charOffset;
@@ -262,6 +265,14 @@ void DataDetectorAdapter::ParseAIJson(
             // both entities start at the same position, leaving the longer one
             continue;
         }
+
+        TimeStamp currentDetectorTimeStamp = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> costTime =
+            currentDetectorTimeStamp - startDetectorTimeStamp_;
+        item->Put("costTime", costTime.count());
+        item->Put("resultCode", textDetectResult_->code);
+        entityJson_[start] = item->ToString();
+        TAG_LOGD(AceLogTag::ACE_TEXT, "The json of the entity is: %{public}s", entityJson_[start].c_str());
 
         AISpan aiSpan;
         aiSpan.start = start;
@@ -275,7 +286,7 @@ void DataDetectorAdapter::ParseAIJson(
 void DataDetectorAdapter::StartAITask()
 {
     aiSpanMap_.clear();
-
+    startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
@@ -296,6 +307,7 @@ void DataDetectorAdapter::StartAITask()
             startPos += AI_TEXT_MAX_LENGTH - AI_TEXT_GAP;
         }
     });
-    taskExecutor->PostDelayedTask(aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME);
+    taskExecutor->PostDelayedTask(
+        aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME, "ArkUITextStartAIDetect");
 }
 } // namespace OHOS::Ace

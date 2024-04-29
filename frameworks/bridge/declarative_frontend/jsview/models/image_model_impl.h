@@ -48,6 +48,7 @@ public:
     void SetResizableSlice(const ImageResizableSlice& slice) override {};
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float>& matrix) override;
+    void SetDrawingColorFilter(RefPtr<DrawingColorFilter>& colorFilter) override {};
     void SetDraggable(bool draggable) override {}
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
@@ -60,6 +61,10 @@ public:
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override {}
     void SetImageAnalyzerConfig(void* config) override {}
     void SetSmoothEdge(float value)  override {}
+    void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override {}
+    void SetEnhancedImageQuality(AIImageQuality imageQuality) override {}
+    void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override {}
+    bool GetIsAnimation() override;
 };
 
 } // namespace OHOS::Ace::Framework

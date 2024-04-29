@@ -29,14 +29,17 @@ public:
     void SetFontFamily(const std::vector<std::string> &families) override;
     void SetWidth(const Dimension& width) override;
     void SetBorderRadius(const Dimension& radius) override;
+    void ResetBorderRadius() override;
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
+    void SetExpandingMode(const SubMenuExpandingMode& expandingMode) override;
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, FontWeight weight);
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle style);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& families);
     static void SetBorderRadius(FrameNode* frameNode, const Dimension& radius);
+    static void ResetBorderRadius(FrameNode* frameNode);
     static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);

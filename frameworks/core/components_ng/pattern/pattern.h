@@ -38,6 +38,9 @@ class AccessibilityEventInfo;
 }
 
 namespace OHOS::Ace::NG {
+class AccessibilitySessionAdapter;
+class InspectorFilter;
+
 struct DirtySwapConfig {
     bool frameSizeChange = false;
     bool frameOffsetChange = false;
@@ -85,7 +88,7 @@ public:
     {
         return false;
     }
-    
+
     virtual bool IsSupportDrawModifier() const
     {
         return true;
@@ -167,31 +170,22 @@ public:
     virtual void OnModifyDone()
     {
 #if (defined(__aarch64__) || defined(__x86_64__))
-        FrameNode::PostTask(
-            [weak = WeakClaim(this)]() {
-                if (Recorder::IsCacheAvaliable()) {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    pattern->OnAfterModifyDone();
-                }
-            },
-            TaskExecutor::TaskType::UI);
         if (IsNeedInitClickEventRecorder()) {
             InitClickEventRecorder();
         }
 #endif
-        auto frameNode = frameNode_.Upgrade();
-        auto children = frameNode->GetChildren();
+        auto* frameNode = GetUnsafeHostPtr();
+        const auto& children = frameNode->GetChildren();
         if (children.empty()) {
             return;
         }
-        auto renderContext = frameNode->GetRenderContext();
+        const auto& renderContext = frameNode->GetRenderContext();
         if (!renderContext->HasForegroundColor() && !renderContext->HasForegroundColorStrategy()) {
             return;
         }
         std::list<RefPtr<FrameNode>> childrenList {};
         std::queue<RefPtr<FrameNode>> queue {};
-        queue.emplace(frameNode);
+        queue.emplace(Claim(frameNode));
         RefPtr<FrameNode> parentNode;
         while (!queue.empty()) {
             parentNode = queue.front();
@@ -267,7 +261,7 @@ public:
         return true;
     }
 
-    virtual void UpdateSlideOffset() {}
+    virtual void UpdateSlideOffset(bool isNeedReset = false) {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -275,6 +269,8 @@ public:
     {
         return false;
     }
+
+    virtual void BeforeSyncGeometryProperties(const DirtySwapConfig& config) {}
 
     // Called on main thread to check if need rerender of the content.
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -331,6 +327,18 @@ public:
     RefPtr<FrameNode> GetHost() const
     {
         return frameNode_.Upgrade();
+    }
+
+    int32_t GetHostInstanceId() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, -1); // -1 means no valid id exists
+        return host->GetInstanceId();
+    }
+
+    FrameNode* GetUnsafeHostPtr() const
+    {
+        return UnsafeRawPtr(frameNode_);
     }
 
     virtual void DumpInfo() {}
@@ -410,7 +418,7 @@ public:
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
     // get XTS inspector value
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
     // call by recycle framework.
     virtual void OnRecycle() {}
@@ -487,6 +495,11 @@ public:
         return false;
     }
 
+    virtual RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter()
+    {
+        return nullptr;
+    }
+
     virtual int32_t GetUiExtensionId()
     {
         return -1;
@@ -503,7 +516,7 @@ public:
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             auto inspectorId = host->GetInspectorId().value_or("");
-            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
             auto desc = host->GetAutoEventParamValue("");
             if (inspectorId.empty() && text.empty() && desc.empty()) {
                 return;
@@ -519,6 +532,9 @@ public:
         };
         return longPressCallback;
     }
+
+    virtual void OnAttachContext(PipelineContext *context) {}
+    virtual void OnDetachContext(PipelineContext *context) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}
@@ -552,7 +568,7 @@ protected:
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             auto inspectorId = host->GetInspectorId().value_or("");
-            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
             auto desc = host->GetAutoEventParamValue("");
             if (inspectorId.empty() && text.empty() && desc.empty()) {
                 return;

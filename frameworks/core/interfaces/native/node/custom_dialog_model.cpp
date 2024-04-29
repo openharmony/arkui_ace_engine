@@ -39,7 +39,7 @@ ArkUIDialogHandle CreateDialog()
         .offsetY = 0.0f, .isModal = true, .autoCancel = true, .maskColor = DEFAULT_MASK_COLOR, .maskRect = nullptr,
         .backgroundColor = DEFAULT_DIALOG_BACKGROUND_COLOR, .cornerRadiusRect = nullptr,
         .gridCount = -1, .enableCustomStyle = false,
-        .showInSubWindow = false, .enableCustomAnimation = false, .onWillDissmissCall = nullptr });
+        .showInSubWindow = false, .enableCustomAnimation = false, .onWillDismissCall = nullptr });
 }
 
 void DisposeDialog(ArkUIDialogHandle controllerHandler)
@@ -63,7 +63,7 @@ void DisposeDialog(ArkUIDialogHandle controllerHandler)
     if (cornerRadiusRect) {
         delete cornerRadiusRect;
     }
-    controllerHandler->onWillDissmissCall = nullptr;
+    controllerHandler->onWillDismissCall = nullptr;
     delete controllerHandler;
 }
 
@@ -103,9 +103,12 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         Dimension(controllerHandler->offsetY));
     dialogProperties.maskColor = Color(controllerHandler->maskColor);
     if (controllerHandler->maskRect) {
-        dialogProperties.maskRect = DimensionRect(Dimension(controllerHandler->maskRect->width),
-        Dimension(controllerHandler->maskRect->height),
-        DimensionOffset(Dimension(controllerHandler->maskRect->x), Dimension(controllerHandler->maskRect->y)));
+        DimensionRect maskRect;
+        maskRect.SetOffset(DimensionOffset(Dimension(controllerHandler->maskRect->x, DimensionUnit::VP),
+            Dimension(controllerHandler->maskRect->y, DimensionUnit::VP)));
+        maskRect.SetSize(DimensionSize(Dimension(controllerHandler->maskRect->width, DimensionUnit::VP),
+            Dimension(controllerHandler->maskRect->height, DimensionUnit::VP)));
+        dialogProperties.maskRect = maskRect;
     }
     dialogProperties.isShowInSubWindow = controllerHandler->showInSubWindow;
     dialogProperties.isModal = controllerHandler->isModal;
@@ -121,11 +124,11 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         radius.multiValued = true;
         dialogProperties.borderRadius = radius;
     }
-    if (controllerHandler->onWillDissmissCall) {
+    if (controllerHandler->onWillDismissCall) {
         dialogProperties.onWillDismiss = [controllerHandler](int32_t reason) {
                 CHECK_NULL_VOID(controllerHandler);
-                CHECK_NULL_VOID(controllerHandler->onWillDissmissCall);
-                auto executeClose = (*(controllerHandler->onWillDissmissCall))(reason);
+                CHECK_NULL_VOID(controllerHandler->onWillDismissCall);
+                auto executeClose = (*(controllerHandler->onWillDismissCall))(reason);
                 if (!executeClose) {
                     // todo
                 }
@@ -278,10 +281,10 @@ ArkUI_Int32 CloseDialog(ArkUIDialogHandle controllerHandler)
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 RegiesterOnWillDialogDismiss(ArkUIDialogHandle controllerHandler, bool (*eventHandler)(ArkUI_Int32))
+ArkUI_Int32 RegisterOnWillDialogDismiss(ArkUIDialogHandle controllerHandler, bool (*eventHandler)(ArkUI_Int32))
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    controllerHandler->onWillDissmissCall = eventHandler;
+    controllerHandler->onWillDismissCall = eventHandler;
     return ERROR_CODE_NO_ERROR;
 }
 } // namespace OHOS::Ace::NG::ViewModel

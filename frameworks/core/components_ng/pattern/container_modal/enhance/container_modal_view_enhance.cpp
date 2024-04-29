@@ -66,16 +66,17 @@ namespace OHOS::Ace::NG {
  *          |--container_modal_content(stage)
  *              |--page
  *          |--dialog(when show)
+ *      |--gesture_row(row)
  *   |--container_modal_custom_floating_title(row)
  *          |--custom_node(js)
  *   |--container_modal_control_buttons(row)
  *          |--[maxRecover, minimize, close](button)
  */
 namespace {
-const Dimension MENU_CONTAINER_WIDTH = 240.0_vp;
+const Dimension MENU_CONTAINER_WIDTH = 232.0_vp;
 const Dimension MENU_CONTAINER_HEIGHT = 96.0_vp;
 const Dimension MENU_ITEM_RADIUS = 12.0_vp;
-const Dimension MENU_ITEM_WIDTH = 240.0_vp;
+const Dimension MENU_ITEM_WIDTH = 232.0_vp;
 const Dimension MENU_ITEM_HEIGHT = 48.0_vp;
 const Dimension MENU_ITEM_LEFT_PADDING = 12.0_vp;
 const Dimension MENU_ITEM_TEXT_WIDTH = 144.0_vp;
@@ -119,6 +120,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
     column->AddChild(BuildTitle(containerModalNode));
     stack->AddChild(content);
     column->AddChild(stack);
+    column->AddChild(BuildGestureRow(containerModalNode));
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
     containerModalNode->AddChild(AddControlButtons(containerModalNode, controlButtonsRow));
@@ -159,10 +161,9 @@ void ContainerModalViewEnhance::SetTapGestureEvent(
         CHECK_NULL_VOID(containerNode);
         auto windowMode = windowManager->GetWindowMode();
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
-        if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR
-            || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN
-            || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY
-            || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_RECOVER);
             windowManager->WindowRecover();
         } else if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
@@ -182,7 +183,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    SetTapGestureEvent(containerNode, containerTitleRow);
 
     RefPtr<FrameNode> maximizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MAX,
         [weak = AceType::WeakClaim(AceType::RawPtr(containerNode)),
@@ -194,10 +194,8 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
             ResetHoverTimer();
             auto mode = windowManager->GetWindowMode();
             auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
-            if (mode == WindowMode::WINDOW_MODE_FULLSCREEN
-                || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR
-                || mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY
-                || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
+                mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
                 windowManager->WindowRecover();
             } else {
                 windowManager->WindowMaximize(true);
@@ -308,7 +306,8 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(
         };
         sContextTimer_.Reset(callback);
         ACE_SCOPED_TRACE("ContainerModalEnhance::PendingMaxMenu");
-        pipeline->GetTaskExecutor()->PostDelayedTask(sContextTimer_, TaskExecutor::TaskType::UI, MENU_TASK_DELAY_TIME);
+        pipeline->GetTaskExecutor()->PostDelayedTask(sContextTimer_, TaskExecutor::TaskType::UI, MENU_TASK_DELAY_TIME,
+            "ArkUIContainerModalShowMaxMenu");
         sIsMenuPending_ = true;
     };
     hub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFuc)));
@@ -330,8 +329,8 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
         V2::LIST_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
     auto listLayoutProperty = menuList->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listLayoutProperty, nullptr);
-    listLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(MENU_CONTAINER_WIDTH),
-        CalcLength(MENU_CONTAINER_HEIGHT)));
+    listLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(MENU_CONTAINER_WIDTH), CalcLength(MENU_CONTAINER_HEIGHT)));
     menuList->AddChild(BuildLeftSplitMenuItem());
     menuList->AddChild(BuildRightSplitMenuItem());
     auto subWindowManger = SubwindowManager::GetInstance();
@@ -436,13 +435,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItem(
     // add icon and label
     containerTitleRow->AddChild(leftIcon);
     containerTitleRow->AddChild(text);
-    if (chooseCurrent) {
-        auto chooseIcon = BuildMenuItemIcon(InternalResource::ResourceId::IC_WINDOW_MENU_OK);
-        auto iconLayoutProperty = chooseIcon->GetLayoutProperty<ImageLayoutProperty>();
-        PaddingProperty chooseIconLeftPadding;
-        chooseIconLeftPadding.left = CalcLength(MENU_ITEM_TEXT_PADDING);
-        containerTitleRow->AddChild(BuildMenuItemPadding(chooseIconLeftPadding, chooseIcon));
-    }
     auto hub = containerTitleRow->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
     hub->AddClickEvent(event);
@@ -494,7 +486,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItemIcon(InternalResource:
     iconLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     iconLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TITLE_BUTTON_SIZE), CalcLength(TITLE_BUTTON_SIZE)));
-    FrameNode *frameNode = RawPtr(icon);
+    FrameNode* frameNode = RawPtr(icon);
     ImageModelNG::SetSmoothEdge(frameNode, SMOOTH_EDGE_SIZE);
     auto render = icon->GetRenderContext();
     if (render) {
@@ -531,6 +523,9 @@ void ContainerModalViewEnhance::CalculateMenuOffset(OffsetF currentOffset)
     auto menuWidth = MENU_CONTAINER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx() * 2;
     auto menuHeight = MENU_CONTAINER_HEIGHT.ConvertToPx() + CONTENT_PADDING.ConvertToPx() * 2;
     auto buttonWidth = TITLE_ICON_SIZE.ConvertToPx() + CONTENT_PADDING.ConvertToPx() * 2;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto titleHeight = pipeline->GetCustomTitleHeight().ConvertToPx();
     if (offsetX < MENU_SAFETY_X.ConvertToPx()) {
         LOGI("ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen left");
         offsetX = offsetX + menuWidth - buttonWidth;
@@ -541,8 +536,23 @@ void ContainerModalViewEnhance::CalculateMenuOffset(OffsetF currentOffset)
     }
     if (offsetY > screenHeight - menuHeight - MENU_SAFETY_Y.ConvertToPx()) {
         LOGI("ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen bottom");
-        offsetY = offsetY - menuHeight - CONTAINER_TITLE_HEIGHT.ConvertToPx();
+        offsetY = offsetY - menuHeight - titleHeight;
     }
     menuOffset_ = { offsetX, offsetY };
 }
+
+RefPtr<FrameNode> ContainerModalViewEnhance::BuildGestureRow(RefPtr<FrameNode>& containerNode)
+{
+    auto gestureRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto renderContext = gestureRow->GetRenderContext();
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdatePosition(OffsetT<Dimension>());
+    SetTapGestureEvent(containerNode, gestureRow);
+    auto layoutProp = gestureRow->GetLayoutProperty();
+    layoutProp->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+    return gestureRow;
+}
+
 } // namespace OHOS::Ace::NG

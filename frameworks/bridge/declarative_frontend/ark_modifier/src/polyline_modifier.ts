@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class PolylineModifier extends ArkPolylineComponent implements AttributeModifier<PolylineAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: PolylineAttribute): void {
-    applyAndMergeModifier<PolylineAttribute, ArkPolylineComponent, ArkCommonShapeComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<PolylineAttribute, ArkPolylineComponent, ArkComponent>(instance, this);
   }
 }

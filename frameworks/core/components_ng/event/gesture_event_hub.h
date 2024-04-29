@@ -154,6 +154,7 @@ public:
     {
         if (!recreateGesture_) {
             gestures_.clear();
+            backupGestures_.clear();
         }
         gestures_.emplace_back(gesture);
         backupGestures_.emplace_back(gesture);
@@ -163,19 +164,23 @@ public:
     // call by CAPI do distinguish with AddGesture called by ARKUI;
     void AttachGesture(const RefPtr<NG::Gesture>& gesture)
     {
-        gestures_.emplace_back(gesture);
-        backupGestures_.emplace_back(gesture);
+        modifierGestures_.emplace_back(gesture);
+        backupModifierGestures_.emplace_back(gesture);
         recreateGesture_ = true;
         OnModifyDone();
     }
 
     void RemoveGesture(const RefPtr<NG::Gesture>& gesture)
     {
-        gestures_.remove(gesture);
-        backupGestures_.remove(gesture);
+        modifierGestures_.remove(gesture);
+        backupModifierGestures_.remove(gesture);
         recreateGesture_ = true;
         OnModifyDone();
     }
+
+    void RemoveGesturesByTag(const std::string& gestureTag);
+
+    void ClearModifierGesture();
 
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
@@ -239,6 +244,14 @@ public:
         touchEventActuator_->AddTouchEvent(touchEvent);
     }
 
+    void AddTouchAfterEvent(const RefPtr<TouchEventImpl>& touchEvent)
+    {
+        if (!touchEventActuator_) {
+            touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+        }
+        touchEventActuator_->AddTouchAfterEvent(touchEvent);
+    }
+
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
         if (!touchEventActuator_) {
@@ -293,6 +306,7 @@ public:
     void ClearJSFrameNodeOnTouch();
 
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
+    void AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
@@ -300,14 +314,6 @@ public:
             return;
         }
         clickEventActuator_->RemoveClickEvent(clickEvent);
-    }
-
-    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& longPressEvent)
-    {
-        if (!longPressEventActuator_) {
-            return;
-        }
-        longPressEventActuator_->RemoveLongPressEvent(longPressEvent);
     }
 
     bool IsClickEventsEmpty() const
@@ -318,11 +324,24 @@ public:
         return clickEventActuator_->IsClickEventsEmpty();
     }
 
+    GestureEventFunc GetClickEvent()
+    {
+        if (!IsClickable()) {
+            return nullptr;
+        }
+        return clickEventActuator_->GetClickEvent();
+    }
+
     void BindMenu(GestureEventFunc&& showMenu);
 
     bool IsLongClickable() const
     {
         return longPressEventActuator_ != nullptr;
+    }
+
+    void SetRedirectClick(bool redirectClick)
+    {
+        redirectClick_ = redirectClick;
     }
 
     bool ActLongClick();
@@ -610,6 +629,23 @@ public:
 
     RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
         const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    int32_t GetSelectItemSize();
+
+    bool IsNeedSwitchToSubWindow() const;
+    RefPtr<PixelMap> GetDragPreviewPixelMap()
+    {
+        return dragPreviewPixelMap_;
+    }
+    void SetDragGatherPixelMaps(const GestureEvent& info);
+    void SetMouseDragGatherPixelMaps();
+    void SetNotMouseDragGatherPixelMaps();
+#if defined(PIXEL_MAP_SUPPORTED)
+    static void PrintBuilderNode(
+        const RefPtr<UINode>& customNode, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
+    static void PrintIfImageNode(
+        const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
+    static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+#endif
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -618,6 +654,8 @@ private:
 
     void UpdateGestureHierarchy();
 
+    void AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture);
+
     // old path.
     void UpdateExternalNGGestureRecognizer();
 
@@ -625,6 +663,7 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
@@ -643,7 +682,10 @@ private:
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
+    // set by CAPI or modifier do distinguish with gestures_;
+    std::list<RefPtr<NG::Gesture>> modifierGestures_;
     std::list<RefPtr<NG::Gesture>> backupGestures_;
+    std::list<RefPtr<NG::Gesture>> backupModifierGestures_;
     std::list<RefPtr<NGGestureRecognizer>> gestureHierarchy_;
 
     // used in bindMenu, need to delete the old callback when bindMenu runs again
@@ -651,6 +693,7 @@ private:
 
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;
+    bool needRecollect_ = false;
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
     std::vector<DimensionRect> mouseResponseRegion_;
@@ -666,6 +709,7 @@ private:
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;
     OnReponseRegionFunc responseRegionFunc_;
+    bool redirectClick_  = false;
 
     GestureJudgeFunc gestureJudgeFunc_;
     GestureJudgeFunc gestureJudgeNativeFunc_;

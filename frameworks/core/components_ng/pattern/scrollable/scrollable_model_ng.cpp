@@ -64,6 +64,14 @@ void ScrollableModelNG::SetOnWillScroll(OnScrollEvent&& onScroll)
     eventHub->SetOnWillScroll(std::move(onScroll));
 }
 
+void ScrollableModelNG::SetOnWillScroll(FrameNode* frameNode, OnScrollEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillScroll(std::move(event));
+}
+
 void ScrollableModelNG::SetOnDidScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -167,6 +175,14 @@ int32_t ScrollableModelNG::GetAlwaysEnabled(FrameNode* frameNode)
     const auto& pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, 0);
     return pattern->GetAlwaysEnabled();
+}
+
+void ScrollableModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachEnd(std::move(onReachEnd));
 }
 
 } // namespace OHOS::Ace::NG

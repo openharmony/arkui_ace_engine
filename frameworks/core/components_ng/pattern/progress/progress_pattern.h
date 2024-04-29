@@ -34,6 +34,8 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+using ProgressMakeCallback = std::function<RefPtr<FrameNode>(const ProgressConfiguration& config)>;
 // ProgressPattern is the base class for progress render node to perform paint progress.
 class ProgressPattern : public Pattern {
     DECLARE_ACE_TYPE(ProgressPattern, Pattern);
@@ -51,6 +53,7 @@ public:
             progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
         }
         progressModifier_->SetVisible(visibilityProp_);
+        progressModifier_->SetUseContentModifier(UseContentModifier());
         return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_);
     }
 
@@ -74,7 +77,7 @@ public:
         return MakeRefPtr<ProgressAccessibilityProperty>();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -93,6 +96,26 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
+    void SetBuilderFunc(ProgressMakeCallback&& makeFunc)
+    {
+        if (!makeFunc) {
+            makeFunc_ = std::nullopt;
+            OnModifyDone();
+            return;
+        }
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier() const
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
+    RefPtr<FrameNode> GetContentModifierNode()
+    {
+        return contentModifierNode_;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
@@ -103,9 +126,13 @@ private:
     void HandleEnabled();
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
-    void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const;
-    void ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     static std::string ConvertProgressStatusToString(const ProgressStatus status);
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
+    std::optional<ProgressMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
 
     double strokeWidth_ = 2;
     RefPtr<ProgressModifier> progressModifier_;

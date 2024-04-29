@@ -23,6 +23,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -67,15 +68,19 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
 {
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
     CHECK_NULL_VOID(buttonConfirmNode);
-    auto confirmNode = buttonConfirmNode->GetFirstChild();
-    auto confirmNodeLayout = AceType::DynamicCast<FrameNode>(confirmNode)->GetLayoutProperty<TextLayoutProperty>();
+    auto confirmNode = AceType::DynamicCast<FrameNode>(buttonConfirmNode->GetFirstChild());
+    CHECK_NULL_VOID(confirmNode);
+    auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(confirmNodeLayout);
     confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto buttonCancelNode = weakButtonCancel_.Upgrade();
     CHECK_NULL_VOID(buttonCancelNode);
-    auto cancelNode = buttonCancelNode->GetFirstChild();
-    auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
+    auto cancelNode = AceType::DynamicCast<FrameNode>(buttonCancelNode->GetFirstChild());
+    CHECK_NULL_VOID(cancelNode);
+    auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(cancelNodeLayout);
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -105,7 +110,15 @@ void TextPickerPattern::SetButtonIdeaSize()
             UpdateUserDefinedIdealSize(CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx() * RATE),
                 CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
-        buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto columnNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(columnNode);
+        auto columnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(columnPattern);
+        if (!columnPattern->isHover()) {
+            buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode();
     }
@@ -612,7 +625,7 @@ void TextPickerPattern::ProcessCascadeOptions(const std::vector<NG::TextCascadeP
             reOptions.emplace_back(option);
             return ProcessCascadeOptions(options[selecteds_[index]].children, reOptions, index + 1);
         }
-        if (i == options.size() - 1) {
+        if (options.size() > 0 && i == options.size() - 1) {
             option.children = options[0].children;
             reOptions.emplace_back(option);
             return ProcessCascadeOptions(options[0].children, reOptions, index + 1);
@@ -731,7 +744,7 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
     result = std::string("{\"value\":") + "[";
     for (uint32_t i = 0; i < values.size(); i++) {
         result += "\"" + values[i];
-        if (i != values.size() - 1) {
+        if (values.size() > 0 && i != values.size() - 1) {
             result += "\",";
         } else {
             result += "\"]";
@@ -740,7 +753,7 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
     result += std::string(",\"index\":") + "[";
     for (uint32_t i = 0; i < indexs.size(); i++) {
         result += "\"" + std::to_string(indexs[i]);
-        if (i != indexs.size() - 1) {
+        if (indexs.size() > 0 && i != indexs.size() - 1) {
             result += "\",";
         } else {
             result += "\"]";
@@ -793,16 +806,16 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
     }
 }
 
-void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     if (!range_.empty()) {
-        json->Put("range", GetRangeStr().c_str());
+        json->PutExtAttr("range", GetRangeStr().c_str(), filter);
     } else {
         if (!cascadeOriginptions_.empty()) {
             if (!isCascade_) {
-                json->Put("range", GetOptionsMultiStr().c_str());
+                json->PutExtAttr("range", GetOptionsMultiStr().c_str(), filter);
             } else {
-                json->Put("range", GetOptionsCascadeStr(cascadeOriginptions_).c_str());
+                json->PutExtAttr("range", GetOptionsCascadeStr(cascadeOriginptions_).c_str(), filter);
             }
         }
     }
@@ -841,7 +854,7 @@ std::string TextPickerPattern::GetOptionsCascadeStr(
             result += std::string(", \"children\":");
             result += GetOptionsCascadeStr(options[i].children);
         }
-        if (i != options.size() - 1) {
+        if (options.size() > 0 && i != options.size() - 1) {
             result += "},";
         } else {
             result += "}]";
@@ -863,7 +876,7 @@ std::string TextPickerPattern::GetOptionsMultiStrInternal() const
                 result += "\"]";
             }
         }
-        if (i != cascadeOptions_.size() - 1) {
+        if (cascadeOptions_.size() > 0 && i != cascadeOptions_.size() - 1) {
             result += ",";
         } else {
             result += "]";

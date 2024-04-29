@@ -40,12 +40,14 @@ struct RequestFormInfo {
     int32_t renderingMode = 0;
     uint64_t index = GetNanoseconds();
     float borderWidth = 0.0f;
+    bool obscuredMode = false;
+    int32_t shape = -1;
 
     std::string ToString() const
     {
         std::stringstream paramStream;
         paramStream << bundleName << abilityName << moduleName << cardName << dimension << renderingMode
-            << index << temporary;
+            << index << temporary << shape;
         if (wantWrap) {
             paramStream << wantWrap->ToString();
         }
@@ -58,7 +60,8 @@ struct RequestFormInfo {
                abilityName == formInfo.abilityName && moduleName == formInfo.moduleName &&
                temporary == formInfo.temporary && dimension == formInfo.dimension &&
                allowUpdate == formInfo.allowUpdate && width == formInfo.width && height == formInfo.height &&
-               renderingMode == formInfo.renderingMode && index == formInfo.index && wantWrap == formInfo.wantWrap;
+               renderingMode == formInfo.renderingMode && index == formInfo.index && wantWrap == formInfo.wantWrap &&
+               shape == formInfo.shape;
     }
 };
 

@@ -16,14 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
+#include <tuple>
 #include "core/animation/chain_animation.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_paint_method.h"
+#include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -32,6 +35,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 struct ListItemGroupPara {
     int32_t lanes = -1;
     int32_t itemEndIndex = -1;
@@ -45,6 +50,8 @@ class ListPattern : public ScrollablePattern {
 public:
     ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
     ~ListPattern() override = default;
+
+    void CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode);
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -70,7 +77,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
@@ -95,7 +102,7 @@ public:
 
     bool IsScrollable() const override
     {
-        return scrollable_;
+        return isScrollable_;
     }
 
     bool IsAtTop() const override;
@@ -127,6 +134,10 @@ public:
             });
     }
 
+    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+
+    std::function<bool(int32_t)> GetScrollIndexAbility() override;
+
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
 
     const ListLayoutAlgorithm::PositionMap& GetItemPosition() const
@@ -157,7 +168,11 @@ public:
     float GetMainContentSize() const override
     {
         return contentMainSize_;
-    };
+    }
+    int32_t GetLanes() const
+    {
+        return lanes_;
+    }
 
     void UpdatePosMapStart(float delta);
     void UpdatePosMapEnd();
@@ -178,6 +193,13 @@ public:
     }
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
+    WeakPtr<ListItemPattern> GetSwiperItem()
+    {
+        if (!swiperItem_.Upgrade()) {
+            return nullptr;
+        }
+        return swiperItem_;
+    }
     void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem)
     {
         if (swiperItem == swiperItem_) {
@@ -244,11 +266,13 @@ public:
         }
     }
 
+    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
+    void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag);
+    bool ListChildrenSizeExist()
+    {
+        return static_cast<bool>(childrenSize_);
+    }
 private:
-    struct PositionInfo {
-        float mainPos;
-        float mainSize;
-    };
 
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -279,13 +303,12 @@ private:
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     bool OnScrollCallback(float offset, int32_t source) override;
-    void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
-    void CheckRestartSpring(bool sizeDiminished);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     void UpdateScrollSnap();
     bool IsScrollSnapAlignCenter() const;
+    void SetChainAnimationToPosMap();
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
     bool NeedScrollSnapAlignEffect() const;
@@ -311,8 +334,18 @@ private:
     void RefreshLanesItemRange();
     void UpdateListDirectionInCardStyle();
     void UpdateFrameSizeToWeb();
+    bool UpdateStartListItemIndex();
+    bool UpdateEndListItemIndex();
+    float GetStartOverScrollOffset(float offset) const;
+    float GetEndOverScrollOffset(float offset) const;
     RefPtr<ListContentModifier> listContentModifier_;
     std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
+
+    void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
+    void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ListPaintMethod> paint);
+    bool isFadingEdge_ = false;
+    bool isTopEdgeFading_ = false;
+    bool isLowerEdgeFading_ = false;
 
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
@@ -339,13 +372,15 @@ private:
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
-    bool scrollable_ = true;
+    bool isScrollable_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
     bool isNeedCheckOffset_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
-    std::map<int32_t, PositionInfo> posMap_;
+    RefPtr<ListPositionMap> posMap_;
+    RefPtr<ListChildrenMainSize> childrenSize_;
+    float listTotalHeight_ = 0.0f;
 
     std::map<int32_t, int32_t> lanesItemRange_;
     std::set<int32_t> pressedItem_;
@@ -365,7 +400,7 @@ private:
 
     RefPtr<SpringMotion> scrollToIndexMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;
-    RefPtr<Scrollable> scrollableTouchEvent_;
+    RefPtr<Scrollable> scrollable_;
 
     bool isScrollEnd_ = false;
     bool needReEstimateOffset_ = false;
@@ -374,6 +409,9 @@ private:
     bool isNeedToUpdateListDirection_ = false;
 
     bool endIndexChanged_ = false;
+
+    ListItemIndex startInfo_ = {-1, -1, -1};
+    ListItemIndex endInfo_ = {-1, -1, -1};
 };
 } // namespace OHOS::Ace::NG
 

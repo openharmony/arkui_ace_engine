@@ -75,6 +75,7 @@ public:
                     pattern->GetAttr<Dimension>("text_overlay_menu_padding_bottom", 0.0_vp));
                 theme->menuSpacingWithText_ =
                     pattern->GetAttr<Dimension>("text_overlay_menu_spacing_with_text", 0.0_vp);
+                theme->menuSafeSpacing_ = pattern->GetAttr<Dimension>("text_overlay_menu_safe_spacing", 16.0_vp);
                 theme->menuButtonWidth_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_width", 0.0_vp);
                 theme->menuButtonHeight_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_height", 0.0_vp);
                 theme->menuButtonTextStyle_.SetFontWeight(FontWeight(
@@ -180,6 +181,11 @@ public:
         return menuSpacingWithText_;
     }
 
+    const Dimension& GetMenuSafeSpacing() const
+    {
+        return menuSafeSpacing_;
+    }
+
     const Dimension& GetMenuButtonWidth() const
     {
         return menuButtonWidth_;
@@ -263,6 +269,7 @@ private:
     Dimension handleDiameter_;
     Dimension handleDiameterInner_;
     Dimension menuSpacingWithText_;
+    Dimension menuSafeSpacing_;
     Dimension menuButtonWidth_;
     Dimension menuButtonHeight_;
     Dimension moreButtonHeight_;

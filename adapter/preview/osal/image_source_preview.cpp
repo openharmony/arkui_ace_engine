@@ -47,12 +47,12 @@ std::string ImageSourcePreview::GetProperty(const std::string& /* key */)
     return "";
 }
 
-RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(const Size& size)
+RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(const Size& size, AIImageQuality imageQuality)
 {
     return nullptr;
 }
 
-RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(uint32_t index, const Size& size)
+RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(uint32_t index, const Size& size, AIImageQuality imageQuality)
 {
     return nullptr;
 }
@@ -65,5 +65,15 @@ RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap()
 ImageSource::Size ImageSourcePreview::GetImageSize()
 {
     return {};
+}
+
+uint32_t ImageSourcePreview::GetFrameCount()
+{
+    return 0;
+}
+
+std::string ImageSourcePreview::GetEncodedFormat()
+{
+    return "";
 }
 } // namespace OHOS::Ace

@@ -24,10 +24,13 @@ class ImageSourcePreview : public ImageSource {
 
 public:
     std::string GetProperty(const std::string& key) override;
-    RefPtr<PixelMap> CreatePixelMap(const Size& size) override;
-    RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size) override;
+    RefPtr<PixelMap> CreatePixelMap(const Size& size, AIImageQuality imageQuality = AIImageQuality::NONE) override;
+    RefPtr<PixelMap> CreatePixelMap(
+        uint32_t index, const Size& size, AIImageQuality imageQuality = AIImageQuality::NONE) override;
     RefPtr<PixelMap> CreatePixelMap() override;
     Size GetImageSize() override;
+    uint32_t GetFrameCount() override;
+    std::string GetEncodedFormat() override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_IMAGE_SOURCE_PREVIEW_H

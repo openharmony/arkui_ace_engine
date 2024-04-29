@@ -126,7 +126,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset04, TestSize.Level1)
      *               onStateChange event triggered and refreshStatus is DRAG
      */
     pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx()
-                               / pattern_->CalculateFriction());
+                               / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
 }
 
@@ -168,7 +168,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset05, TestSize.Level1)
      *               onStateChange event triggered and refreshStatus is OVER_DRAG
      */
     pattern_->HandleDragUpdate((OVERDRAG_OFFSET).ConvertToPx()
-                               / pattern_->CalculateFriction());
+                               / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
 }
 
@@ -256,7 +256,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh03, TestSize.Level1)
      *               onStateChange event triggered and refreshStatus is DRAG
      */
     pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx()
-                               / pattern_->CalculateFriction());
+                               / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
 }
 
@@ -298,8 +298,54 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh04, TestSize.Level1)
      *               onStateChange event triggered and refreshStatus is OVER_DRAG
      */
     pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx()
-                               / pattern_->CalculateFriction());
+                               / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
+}
+
+/**
+ * @tc.name: AttrPullToRefresh05
+ * @tc.desc: Test attr RefreshOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh05, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    bool isRefreshTrigger = false;
+    float offset;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onOffsetChange = [&offset](const float param) { offset = param; };
+    Create(
+        [onRefreshing, onOffsetChange](RefreshModelNG model) { model.SetOnOffsetChange(std::move(onOffsetChange)); });
+
+    /**
+     * @tc.steps: step1. PullToRefresh: -> false
+     * @tc.expected: pullToRefresh_ == false
+     */
+    layoutProperty_->UpdatePullToRefresh(false);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->pullToRefresh_, false);
+    /**
+     * @tc.steps: step2. HandleDragStart
+     * @tc.expected: offset is 0.f
+     */
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+    EXPECT_EQ(offset, 0.f);
+
+    /**
+     * @tc.steps: step3. HandleDragUpdate, the delta greater than TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: offset is 64.f
+     */
+    pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx() / pattern_->CalculatePullDownRatio());
+    EXPECT_EQ(Dimension(offset, DimensionUnit::VP), TRIGGER_REFRESH_DISTANCE);
+
+    /**
+     * @tc.steps: step4. HandleDragUpdate, the delta -TRIGGER_LOADING_DISTANCE
+     * @tc.expected: offset is 48.f
+     */
+    pattern_->HandleDragUpdate(-(TRIGGER_LOADING_DISTANCE).ConvertToPx() / pattern_->CalculatePullDownRatio());
+    EXPECT_EQ(Dimension(offset, DimensionUnit::VP), TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE);
 }
 
 /**

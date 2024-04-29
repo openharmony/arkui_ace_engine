@@ -51,6 +51,8 @@ const char ATTRS_COMMON_ZINDEX[] = "zIndex";
 const char ROOT_ETS_TAG[] = "root";
 // stage view
 const char STAGE_ETS_TAG[] = "stage";
+// overlay view
+const char OVERLAY_ETS_TAG[] = "overlay";
 // page view
 const char PAGE_ETS_TAG[] = "page";
 // container modal view (title bar)
@@ -70,6 +72,9 @@ const char JS_FOR_EACH_ETS_TAG[] = "ForEach";
 const char JS_SYNTAX_ITEM_ETS_TAG[] = "SyntaxItem";
 // js if lese node
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
+// js node slot
+const char JS_NODE_SLOT_ETS_TAG[] = "NodeSlot";
+
 // toast view
 const char TOAST_ETS_TAG[] = "Toast";
 
@@ -546,6 +551,10 @@ const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";
 const char UI_EXTENSION_SURFACE_TAG[] = "UIExtensionSurface";
 const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
 
+// embedded_component
+const char EMBEDDED_COMPONENT_TAG[] = "EmbeddedComponent";
+const char EMBEDDED_COMPONENT_ETS_TAG[] = "EmbeddedComponent";
+
 // LocationButton
 const char LOCATION_BUTTON_COMPONENT_TAG[] = "LocationButtonComponent";
 const char LOCATION_BUTTON_ETS_TAG[] = "LocationButton";
@@ -578,4 +587,14 @@ const char DYNAMIC_COMPONENT_ETS_TAG[] = "DynamicComponent";
 // ContainerSpan
 const char CONTAINER_SPAN_COMPONENT_TAG[] = "ContainerSpanComponent";
 const char CONTAINER_SPAN_ETS_TAG[] = "ContainerSpan";
+
+//RenderNode
+const char RENDER_NODE_ETS_TAG[] = "RenderNode";
+
+//CustomFrameNode
+const char CUSTOM_FRAME_NODE_ETS_TAG[] = "CustomFrameNode";
+
+// MovingPhoto
+const char MOVING_PHOTO_COMPONENT_TAG[] = "MovingPhotoComponent";
+const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
 } // namespace OHOS::Ace::V2

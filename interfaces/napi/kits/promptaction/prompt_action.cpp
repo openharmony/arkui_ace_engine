@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,12 @@
 
 #include "prompt_action.h"
 
+#include <cstddef>
 #include <memory>
 #include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-
+#include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
@@ -33,6 +34,8 @@ namespace OHOS::Ace::Napi {
 namespace {
 const int32_t SHOW_DIALOG_BUTTON_NUM_MAX = -1;
 const int32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
+const int32_t CUSTOM_DIALOG_PARAM_NUM = 2;
+const int32_t BG_BLUR_STYLE_MAX_INDEX = 12;
 constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
@@ -268,7 +271,13 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    delegate->ShowToast(messageString, duration, bottomString, NG::ToastShowMode::DEFAULT, alignment, offset);
+    if (showMode == NG::ToastShowMode::DEFAULT) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
+        delegate->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before subwindow manager show toast");
+        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
+    }
 #endif
     return nullptr;
 }
@@ -287,6 +296,7 @@ struct PromptAsyncContext {
     napi_value builder = nullptr;
     napi_value onWillDismiss = nullptr;
     napi_value backgroundColorApi = nullptr;
+    napi_value backgroundBlurStyleApi = nullptr;
     napi_value borderWidthApi = nullptr;
     napi_value borderColorApi = nullptr;
     napi_value borderStyleApi = nullptr;
@@ -294,6 +304,13 @@ struct PromptAsyncContext {
     napi_value shadowApi = nullptr;
     napi_value widthApi = nullptr;
     napi_value heightApi = nullptr;
+    napi_value frameNodePtr = nullptr;
+    napi_value maskColorApi = nullptr;
+    napi_value onDidAppear = nullptr;
+    napi_value onDidDisappear = nullptr;
+    napi_value onWillAppear = nullptr;
+    napi_value onWillDisappear = nullptr;
+    napi_value transitionApi = nullptr;
     napi_ref callbackSuccess = nullptr;
     napi_ref callbackCancel = nullptr;
     napi_ref callbackComplete = nullptr;
@@ -315,6 +332,11 @@ struct PromptAsyncContext {
     int32_t successType = -1;
     bool valid = true;
     int32_t instanceId = -1;
+    void* nativePtr = nullptr;
+    napi_ref onDidAppearRef = nullptr;
+    napi_ref onDidDisappearRef = nullptr;
+    napi_ref onWillAppearRef = nullptr;
+    napi_ref onWillDisappearRef = nullptr;
 };
 
 void DeleteContextAndThrowError(
@@ -330,9 +352,11 @@ void DeleteContextAndThrowError(
 bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, int32_t maxButtonNum)
 {
     uint32_t buttonsLen = 0;
+    bool isPrimaryButtonSet = false;
     napi_value buttonArray = nullptr;
     napi_value textNApi = nullptr;
     napi_value colorNApi = nullptr;
+    napi_value primaryButtonNApi = nullptr;
     napi_valuetype valueType = napi_undefined;
     int32_t index = 0;
     napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
@@ -367,6 +391,16 @@ bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, in
             }
         }
         ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
+        if (!isPrimaryButtonSet) {
+            napi_get_named_property(env, buttonArray, "primary", &primaryButtonNApi);
+            napi_typeof(env, primaryButtonNApi, &valueType);
+            if (valueType == napi_boolean) {
+                napi_get_value_bool(env, primaryButtonNApi, &buttonInfo.isPrimary);
+            }
+            if (buttonInfo.isPrimary) {
+                isPrimaryButtonSet = true;
+            }
+        }
         context->buttons.emplace_back(buttonInfo);
     }
     return true;
@@ -423,6 +457,22 @@ void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>&
         ParseNapiDimension(env, height, heightApi, DimensionUnit::VP);
         DimensionOffset dimensionOffset = { x, y };
         maskRect = DimensionRect { width, height, dimensionOffset };
+    }
+}
+
+void GetNapiDialogbackgroundBlurStyleProps(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
+    std::optional<int32_t>& backgroundBlurStyle)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "get napi dialog backgroundBlurStyle props enter");
+    napi_valuetype valueType = napi_undefined;
+
+    napi_typeof(env, asyncContext->backgroundBlurStyleApi, &valueType);
+    if (valueType == napi_number) {
+        int32_t num;
+        napi_get_value_int32(env, asyncContext->backgroundBlurStyleApi, &num);
+        if (num >= 0 && num < BG_BLUR_STYLE_MAX_INDEX) {
+            backgroundBlurStyle = num;
+        }
     }
 }
 
@@ -644,7 +694,7 @@ std::optional<NG::BorderRadiusProperty> GetBorderRadiusProps(
     return std::nullopt;
 }
 
-std::optional<Color> GetBackgroundColorProps(napi_env env, napi_value value)
+std::optional<Color> GetColorProps(napi_env env, napi_value value)
 {
     Color color;
     if (ParseNapiColor(env, value, color)) {
@@ -776,12 +826,16 @@ void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>
     if (valueType == napi_number) {
         napi_get_value_int32(env, typeApi, &shadowType);
     }
+    if (shadowType != static_cast<int32_t>(ShadowType::BLUR)) {
+        shadowType = static_cast<int32_t>(ShadowType::COLOR);
+    }
     shadowType =
         std::clamp(shadowType, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(shadowType));
+    valueType = GetValueType(env, fillApi);
     bool isFilled = false;
-    if (napi_get_value_bool(env, fillApi, &isFilled) == napi_ok) {
-        isFilled = true;
+    if (valueType == napi_boolean) {
+        napi_get_value_bool(env, fillApi, &isFilled);
     }
     shadow.SetIsFilled(isFilled);
 }
@@ -855,22 +909,54 @@ std::optional<CalcDimension> GetNapiDialogHeightProps(
     return heightProperty;
 }
 
-void GetNapiNamedProperties(napi_env env, napi_value* argv, std::shared_ptr<PromptAsyncContext>& asyncContext)
+void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
+    std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
-    napi_get_named_property(env, argv[0], "showInSubWindow", &asyncContext->showInSubWindow);
-    napi_get_named_property(env, argv[0], "isModal", &asyncContext->isModal);
-    napi_get_named_property(env, argv[0], "alignment", &asyncContext->alignmentApi);
-    napi_get_named_property(env, argv[0], "offset", &asyncContext->offsetApi);
-    napi_get_named_property(env, argv[0], "maskRect", &asyncContext->maskRectApi);
-    napi_get_named_property(env, argv[0], "builder", &asyncContext->builder);
-    napi_get_named_property(env, argv[0], "backgroundColor", &asyncContext->backgroundColorApi);
-    napi_get_named_property(env, argv[0], "cornerRadius", &asyncContext->borderRadiusApi);
-    napi_get_named_property(env, argv[0], "borderWidth", &asyncContext->borderWidthApi);
-    napi_get_named_property(env, argv[0], "borderColor", &asyncContext->borderColorApi);
-    napi_get_named_property(env, argv[0], "borderStyle", &asyncContext->borderStyleApi);
-    napi_get_named_property(env, argv[0], "shadow", &asyncContext->shadowApi);
-    napi_get_named_property(env, argv[0], "width", &asyncContext->widthApi);
-    napi_get_named_property(env, argv[0], "height", &asyncContext->heightApi);
+    napi_valuetype valueType = napi_undefined;
+
+    if (index == 0) {
+        napi_get_named_property(env, argv[index], "builder", &asyncContext->builder);
+        napi_get_named_property(env, argv[index], "backgroundColor", &asyncContext->backgroundColorApi);
+        napi_get_named_property(env, argv[index], "backgroundBlurStyle", &asyncContext->backgroundBlurStyleApi);
+        napi_get_named_property(env, argv[index], "cornerRadius", &asyncContext->borderRadiusApi);
+        napi_get_named_property(env, argv[index], "borderWidth", &asyncContext->borderWidthApi);
+        napi_get_named_property(env, argv[index], "borderColor", &asyncContext->borderColorApi);
+        napi_get_named_property(env, argv[index], "borderStyle", &asyncContext->borderStyleApi);
+        napi_get_named_property(env, argv[index], "shadow", &asyncContext->shadowApi);
+        napi_get_named_property(env, argv[index], "width", &asyncContext->widthApi);
+        napi_get_named_property(env, argv[index], "height", &asyncContext->heightApi);
+
+        napi_typeof(env, asyncContext->builder, &valueType);
+        if (valueType == napi_function) {
+            napi_create_reference(env, asyncContext->builder, 1, &asyncContext->builderRef);
+        }
+    }
+    napi_get_named_property(env, argv[index], "showInSubWindow", &asyncContext->showInSubWindow);
+    napi_get_named_property(env, argv[index], "isModal", &asyncContext->isModal);
+    napi_get_named_property(env, argv[index], "alignment", &asyncContext->alignmentApi);
+    napi_get_named_property(env, argv[index], "offset", &asyncContext->offsetApi);
+    napi_get_named_property(env, argv[index], "maskRect", &asyncContext->maskRectApi);
+    napi_get_named_property(env, argv[index], "autoCancel", &asyncContext->autoCancel);
+    napi_get_named_property(env, argv[index], "maskColor", &asyncContext->maskColorApi);
+    napi_get_named_property(env, argv[index], "transition", &asyncContext->transitionApi);
+    napi_get_named_property(env, argv[index], "onWillDismiss", &asyncContext->onWillDismiss);
+    napi_get_named_property(env, argv[index], "onDidAppear", &asyncContext->onDidAppear);
+    napi_get_named_property(env, argv[index], "onDidDisappear", &asyncContext->onDidDisappear);
+    napi_get_named_property(env, argv[index], "onWillAppear", &asyncContext->onWillAppear);
+    napi_get_named_property(env, argv[index], "onWillDisappear", &asyncContext->onWillDisappear);
+
+    napi_typeof(env, asyncContext->autoCancel, &valueType);
+    if (valueType == napi_boolean) {
+        napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
+    }
+    napi_typeof(env, asyncContext->showInSubWindow, &valueType);
+    if (valueType == napi_boolean) {
+        napi_get_value_bool(env, asyncContext->showInSubWindow, &asyncContext->showInSubWindowBool);
+    }
+    napi_typeof(env, asyncContext->isModal, &valueType);
+    if (valueType == napi_boolean) {
+        napi_get_value_bool(env, asyncContext->isModal, &asyncContext->isModalBool);
+    }
 }
 
 bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared_ptr<PromptAsyncContext>& asyncContext)
@@ -878,35 +964,37 @@ bool JSPromptParseParam(napi_env env, size_t argc, napi_value* argv, std::shared
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
-        if (i == 0) {
+        if (i == 0 || i == 1) {
             if (valueType != napi_object) {
                 DeleteContextAndThrowError(env, asyncContext, "The type of parameters is incorrect.");
                 return false;
             }
-            GetNapiNamedProperties(env, argv, asyncContext);
-            napi_typeof(env, asyncContext->builder, &valueType);
-            if (valueType == napi_function) {
-                napi_create_reference(env, asyncContext->builder, 1, &asyncContext->builderRef);
+            GetNapiNamedProperties(env, argv, i, asyncContext);
+            auto result = napi_get_named_property(env, argv[0], "nodePtr_", &asyncContext->frameNodePtr);
+            if (result == napi_ok) {
+                napi_get_value_external(env, asyncContext->frameNodePtr, &asyncContext->nativePtr);
             }
-            napi_typeof(env, asyncContext->autoCancel, &valueType);
-            if (valueType == napi_boolean) {
-                napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
-            }
-            napi_typeof(env, asyncContext->showInSubWindow, &valueType);
-            if (valueType == napi_boolean) {
-                napi_get_value_bool(env, asyncContext->showInSubWindow, &asyncContext->showInSubWindowBool);
-            }
-            napi_typeof(env, asyncContext->isModal, &valueType);
-            if (valueType == napi_boolean) {
-                napi_get_value_bool(env, asyncContext->isModal, &asyncContext->isModalBool);
-            }
-            napi_get_named_property(env, argv[0], "onWillDismiss", &asyncContext->onWillDismiss);
+
             napi_typeof(env, asyncContext->onWillDismiss, &valueType);
             if (valueType == napi_function) {
                 napi_create_reference(env, asyncContext->onWillDismiss, 1, &asyncContext->onWillDismissRef);
             }
-        } else if (valueType == napi_function) {
-            napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
+            napi_typeof(env, asyncContext->onDidAppear, &valueType);
+            if (valueType == napi_function) {
+                napi_create_reference(env, asyncContext->onDidAppear, 1, &asyncContext->onDidAppearRef);
+            }
+            napi_typeof(env, asyncContext->onDidDisappear, &valueType);
+            if (valueType == napi_function) {
+                napi_create_reference(env, asyncContext->onDidDisappear, 1, &asyncContext->onDidDisappearRef);
+            }
+            napi_typeof(env, asyncContext->onWillAppear, &valueType);
+            if (valueType == napi_function) {
+                napi_create_reference(env, asyncContext->onWillAppear, 1, &asyncContext->onWillAppearRef);
+            }
+            napi_typeof(env, asyncContext->onWillDisappear, &valueType);
+            if (valueType == napi_function) {
+                napi_create_reference(env, asyncContext->onWillDisappear, 1, &asyncContext->onWillDisappearRef);
+            }
         } else {
             DeleteContextAndThrowError(env, asyncContext, "The type of parameters is incorrect.");
             return false;
@@ -960,6 +1048,9 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
+    std::optional<Shadow> shadowProps;
+    std::optional<Color> backgroundColor;
+    std::optional<int32_t> backgroundBlurStyle;
 
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
@@ -978,9 +1069,15 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "alignment", &asyncContext->alignmentApi);
             napi_get_named_property(env, argv[0], "offset", &asyncContext->offsetApi);
             napi_get_named_property(env, argv[0], "maskRect", &asyncContext->maskRectApi);
+            napi_get_named_property(env, argv[0], "shadow", &asyncContext->shadowApi);
+            napi_get_named_property(env, argv[0], "backgroundColor", &asyncContext->backgroundColorApi);
+            napi_get_named_property(env, argv[0], "backgroundBlurStyle", &asyncContext->backgroundBlurStyleApi);
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString, valueType);
             GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
+            GetNapiDialogbackgroundBlurStyleProps(env, asyncContext, backgroundBlurStyle);
+            backgroundColor = GetColorProps(env, asyncContext->backgroundColorApi);
+            shadowProps = GetShadowProps(env, asyncContext);
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
@@ -989,6 +1086,16 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     return nullptr;
                 }
             }
+            bool isPrimaryButtonSet = false;
+            for (auto btn : asyncContext->buttons) {
+                if (btn.isPrimary) {
+                    isPrimaryButtonSet = true;
+                    break;
+                }
+            }
+            ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
+                .textColor = "", .isPrimary = !isPrimaryButtonSet};
+            asyncContext->buttons.emplace_back(buttonInfo);
             napi_typeof(env, asyncContext->autoCancel, &valueType);
             if (valueType == napi_boolean) {
                 napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
@@ -1086,7 +1193,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContent");
         asyncContext = nullptr;
     };
 
@@ -1099,6 +1206,9 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         .alignment = alignment,
         .offset = offset,
         .maskRect = maskRect,
+        .shadow = shadowProps,
+        .backgroundColor = backgroundColor,
+        .backgroundBlurStyle = backgroundBlurStyle,
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1306,7 +1416,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuResults");
         asyncContext = nullptr;
     };
 
@@ -1404,16 +1514,52 @@ void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
     };
 }
 
-PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
-    std::function<void(const int32_t& info)> onWillDismiss)
+PromptDialogAttr GetDialogLifeCycleCallback(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
-    std::optional<DialogAlignment> alignment;
-    std::optional<DimensionOffset> offset;
-    std::optional<DimensionRect> maskRect;
-    GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
-    auto borderWidthProps = GetBorderWidthProps(env, asyncContext);
-    std::optional<NG::BorderColorProperty> borderColorProps;
-    std::optional<NG::BorderStyleProperty> borderStyleProps;
+    auto onDidAppear = [env = asyncContext->env, onDidAppearRef = asyncContext->onDidAppearRef]() {
+        if (onDidAppearRef) {
+            napi_value onDidAppearFunc = nullptr;
+            napi_get_reference_value(env, onDidAppearRef, &onDidAppearFunc);
+            napi_call_function(env, nullptr, onDidAppearFunc, 0, nullptr, nullptr);
+            napi_delete_reference(env, onDidAppearRef);
+        }
+    };
+    auto onDidDisappear = [env = asyncContext->env, onDidDisappearRef = asyncContext->onDidDisappearRef]() {
+        if (onDidDisappearRef) {
+            napi_value onDidDisappearFunc = nullptr;
+            napi_get_reference_value(env, onDidDisappearRef, &onDidDisappearFunc);
+            napi_call_function(env, nullptr, onDidDisappearFunc, 0, nullptr, nullptr);
+            napi_delete_reference(env, onDidDisappearRef);
+        }
+    };
+    auto onWillAppear = [env = asyncContext->env, onWillAppearRef = asyncContext->onWillAppearRef]() {
+        if (onWillAppearRef) {
+            napi_value onWillAppearFunc = nullptr;
+            napi_get_reference_value(env, onWillAppearRef, &onWillAppearFunc);
+            napi_call_function(env, nullptr, onWillAppearFunc, 0, nullptr, nullptr);
+            napi_delete_reference(env, onWillAppearRef);
+        }
+    };
+    auto onWillDisappear = [env = asyncContext->env, onWillDisappearRef = asyncContext->onWillDisappearRef]() {
+        if (onWillDisappearRef) {
+            napi_value onWillDisappearFunc = nullptr;
+            napi_get_reference_value(env, onWillDisappearRef, &onWillDisappearFunc);
+            napi_call_function(env, nullptr, onWillDisappearFunc, 0, nullptr, nullptr);
+            napi_delete_reference(env, onWillDisappearRef);
+        }
+    };
+    PromptDialogAttr promptDialogAttr = {
+        .onDidAppear =  std::move(onDidAppear),
+        .onDidDisappear = std::move(onDidDisappear),
+        .onWillAppear = std::move(onWillAppear),
+        .onWillDisappear = std::move(onWillDisappear) };
+    return promptDialogAttr;
+}
+
+void ParseBorderColorAndStyle(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
+    std::optional<NG::BorderWidthProperty>& borderWidthProps, std::optional<NG::BorderColorProperty>& borderColorProps,
+    std::optional<NG::BorderStyleProperty>& borderStyleProps)
+{
     if (borderWidthProps.has_value()) {
         borderColorProps = GetBorderColorProps(env, asyncContext);
         if (!borderColorProps.has_value()) {
@@ -1425,11 +1571,25 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
                 { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID });
         }
     }
-    auto borderRadiusProps = GetBorderRadiusProps(env, asyncContext);
-    auto backgroundColorProps = GetBackgroundColorProps(env, asyncContext->backgroundColorApi);
-    auto widthProps = GetNapiDialogWidthProps(env, asyncContext);
-    auto heightProps = GetNapiDialogHeightProps(env, asyncContext);
-    auto shadowProps = GetShadowProps(env, asyncContext);
+}
+
+RefPtr<NG::ChainedTransitionEffect> GetTransitionProps(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    RefPtr<NG::ChainedTransitionEffect> transitionEffect = nullptr;
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (delegate) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, asyncContext->transitionApi, &valueType);
+        if (valueType == napi_object) {
+            transitionEffect = delegate->GetTransitionEffect(asyncContext->transitionApi);
+        }
+    }
+    return transitionEffect;
+}
+
+std::function<void()> GetCustomBuilder(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
     auto builder = [env = asyncContext->env, builderRef = asyncContext->builderRef]() {
         if (builderRef) {
             napi_value builderFunc = nullptr;
@@ -1438,6 +1598,33 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
             napi_delete_reference(env, builderRef);
         }
     };
+    return builder;
+}
+
+PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
+    std::function<void(const int32_t& info)> onWillDismiss)
+{
+    std::optional<DialogAlignment> alignment;
+    std::optional<DimensionOffset> offset;
+    std::optional<DimensionRect> maskRect;
+    std::optional<int32_t> backgroundBlurStyle;
+    GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
+    auto borderWidthProps = GetBorderWidthProps(env, asyncContext);
+    std::optional<NG::BorderColorProperty> borderColorProps;
+    std::optional<NG::BorderStyleProperty> borderStyleProps;
+    GetNapiDialogbackgroundBlurStyleProps(env, asyncContext, backgroundBlurStyle);
+    ParseBorderColorAndStyle(env, asyncContext, borderWidthProps, borderColorProps, borderStyleProps);
+    auto borderRadiusProps = GetBorderRadiusProps(env, asyncContext);
+    auto backgroundColorProps = GetColorProps(env, asyncContext->backgroundColorApi);
+    auto widthProps = GetNapiDialogWidthProps(env, asyncContext);
+    auto heightProps = GetNapiDialogHeightProps(env, asyncContext);
+    auto shadowProps = GetShadowProps(env, asyncContext);
+    auto builder = GetCustomBuilder(env, asyncContext);
+    auto* nodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(asyncContext->nativePtr);
+    auto frameNodeWeak = AceType::WeakClaim(nodePtr);
+    auto maskColorProps = GetColorProps(env, asyncContext->maskColorApi);
+    auto transitionEffectProps = GetTransitionProps(env, asyncContext);
+    PromptDialogAttr lifeCycleAttr = GetDialogLifeCycleCallback(env, asyncContext);
     PromptDialogAttr promptDialogAttr = { .showInSubWindow = asyncContext->showInSubWindowBool,
         .isModal = asyncContext->isModalBool,
         .customBuilder = std::move(builder),
@@ -1450,48 +1637,113 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .borderRadius = borderRadiusProps,
         .borderStyle = borderStyleProps,
         .backgroundColor = backgroundColorProps,
+        .backgroundBlurStyle = backgroundBlurStyle,
         .shadow = shadowProps,
         .width = widthProps,
-        .height = heightProps };
+        .height = heightProps,
+        .autoCancel = asyncContext->autoCancelBool,
+        .contentNode = frameNodeWeak,
+        .maskColor = maskColorProps,
+        .transitionEffect = transitionEffectProps,
+        .onDidAppear =  lifeCycleAttr.onDidAppear,
+        .onDidDisappear = lifeCycleAttr.onDidDisappear,
+        .onWillAppear = lifeCycleAttr.onWillAppear,
+        .onWillDisappear = lifeCycleAttr.onWillDisappear };
     return promptDialogAttr;
 }
 
-napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
+std::string GetErrorMsg(int32_t errorCode)
 {
-    size_t requireArgc = 1;
-    size_t argc = 1;
-    napi_value argv[1] = { 0 };
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < requireArgc) {
-        NapiThrow(
-            env, "The number of parameters must be greater than or equal to 1.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
-    }
-
-    auto asyncContext = std::make_shared<PromptAsyncContext>();
-    asyncContext->env = env;
-    asyncContext->instanceId = Container::CurrentIdSafely();
-    bool parseOK = JSPromptParseParam(env, argc, argv, asyncContext);
-    if (!parseOK) {
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    if (asyncContext->callbackRef == nullptr) {
-        napi_create_promise(env, &asyncContext->deferred, &result);
+    std::string strMsg;
+    if (errorCode == ERROR_CODE_DIALOG_CONTENT_ERROR) {
+        strMsg = ErrorToMessage(ERROR_CODE_DIALOG_CONTENT_ERROR) + "The ComponentContent is incorrect.";
+    } else if (errorCode == ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST) {
+        strMsg = ErrorToMessage(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST) +
+            "The ComponentContent has already been opened.";
+    } else if (errorCode == ERROR_CODE_DIALOG_CONTENT_NOT_FOUND) {
+        strMsg = ErrorToMessage(ERROR_CODE_DIALOG_CONTENT_NOT_FOUND) + "The ComponentContent cannot be found.";
     } else {
-        napi_get_undefined(env, &result);
+        strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Build custom dialog failed.";
     }
+    return strMsg;
+}
 
-    auto callBack = [asyncContext](int32_t dialogId) mutable {
+std::string GetErrorCode(int32_t errorCode)
+{
+    std::string strCode;
+    if (errorCode == ERROR_CODE_DIALOG_CONTENT_ERROR) {
+        strCode = std::to_string(ERROR_CODE_DIALOG_CONTENT_ERROR);
+    } else if (errorCode == ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST) {
+        strCode = std::to_string(ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+    } else if (errorCode == ERROR_CODE_DIALOG_CONTENT_NOT_FOUND) {
+        strCode = std::to_string(ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
+    } else {
+        strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
+    }
+    return strCode;
+}
+
+void ParseCustomDialogContentCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
+    std::function<void(int32_t)>& callBack)
+{
+    callBack = [asyncContext](int32_t errorCode) mutable {
         if (!asyncContext) {
             return;
         }
-
         auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
         if (!container) {
             return;
         }
+        auto taskExecutor = container->GetTaskExecutor();
+        if (!taskExecutor) {
+            return;
+        }
+        taskExecutor->PostTask(
+            [asyncContext, errorCode]() {
+                if (asyncContext == nullptr || !asyncContext->valid) {
+                    return;
+                }
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(asyncContext->env, &scope);
+                if (scope == nullptr) {
+                    return;
+                }
+                if (!asyncContext->deferred) {
+                    return;
+                }
+                if (errorCode == ERROR_CODE_NO_ERROR) {
+                    napi_value result = nullptr;
+                    napi_get_undefined(asyncContext->env, &result);
+                    napi_resolve_deferred(asyncContext->env, asyncContext->deferred, result);
+                } else {
+                    std::string strMsg = GetErrorMsg(errorCode);
+                    std::string strCode = GetErrorCode(errorCode);
+                    napi_value code = nullptr;
+                    napi_create_string_utf8(asyncContext->env, strCode.c_str(), strCode.length(), &code);
+                    napi_value msg = nullptr;
+                    napi_create_string_utf8(asyncContext->env, strMsg.c_str(), strMsg.length(), &msg);
+                    napi_value error = nullptr;
+                    napi_create_error(asyncContext->env, code, msg, &error);
+                    napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
+                }
+                napi_close_handle_scope(asyncContext->env, scope);
+            },
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContent");
+        asyncContext = nullptr;
+    };
+}
 
+void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
+    std::function<void(int32_t)>& callBack)
+{
+    callBack = [asyncContext](int32_t dialogId) mutable {
+        if (!asyncContext) {
+            return;
+        }
+        auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
+        if (!container) {
+            return;
+        }
         auto taskExecutor = container->GetTaskExecutor();
         if (!taskExecutor) {
             return;
@@ -1509,50 +1761,140 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
                 }
 
                 napi_value ret = nullptr;
-                if (asyncContext->deferred) {
-                    if (dialogId > 0) {
-                        napi_create_int32(asyncContext->env, dialogId, &ret);
-                        napi_resolve_deferred(asyncContext->env, asyncContext->deferred, ret);
-                    } else {
-                        napi_get_undefined(asyncContext->env, &ret);
-                        napi_reject_deferred(asyncContext->env, asyncContext->deferred, ret);
-                    }
+                if (!asyncContext->deferred) {
+                    return;
+                }
+                if (dialogId > 0) {
+                    napi_create_int32(asyncContext->env, dialogId, &ret);
+                    napi_resolve_deferred(asyncContext->env, asyncContext->deferred, ret);
+                } else {
+                    std::string strMsg = GetErrorMsg(dialogId);
+                    std::string strCode = GetErrorCode(dialogId);
+                    napi_value code = nullptr;
+                    napi_create_string_utf8(asyncContext->env, strCode.c_str(), strCode.length(), &code);
+                    napi_value msg = nullptr;
+                    napi_create_string_utf8(asyncContext->env, strMsg.c_str(), strMsg.length(), &msg);
+                    napi_value error = nullptr;
+                    napi_create_error(asyncContext->env, code, msg, &error);
+                    napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogId");
         asyncContext = nullptr;
     };
-    std::function<void(const int32_t& info)> onWillDismiss = nullptr;
-    if (asyncContext->onWillDismissRef) {
-        ParseDialogCallback(asyncContext, onWillDismiss);
-    }
-    PromptDialogAttr promptDialogAttr = GetPromptActionDialog(env, asyncContext, onWillDismiss);
+}
+
+void OpenCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext,
+    PromptDialogAttr& promptDialogAttr, std::function<void(int32_t)>& openCallback)
+{
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
-            delegate->OpenCustomDialog(promptDialogAttr, std::move(callBack));
+            delegate->OpenCustomDialog(promptDialogAttr, std::move(openCallback));
         } else {
             // throw internal error
             std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->OpenCustomDialog(promptDialogAttr, std::move(callBack));
+        SubwindowManager::GetInstance()->OpenCustomDialog(promptDialogAttr, std::move(openCallback));
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (delegate) {
-        delegate->OpenCustomDialog(promptDialogAttr, std::move(callBack));
+        delegate->OpenCustomDialog(promptDialogAttr, std::move(openCallback));
     } else {
         // throw internal error
         std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
         JSPromptThrowInterError(env, asyncContext, strMsg);
     }
 #endif
+}
+
+napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
+{
+    size_t argc = 2;
+    napi_value argv[2] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        NapiThrow(
+            env, "The number of parameters must be greater than or equal to 1.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+
+    auto asyncContext = std::make_shared<PromptAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = Container::CurrentIdSafely();
+    bool parseOK = JSPromptParseParam(env, argc, argv, asyncContext);
+    if (!parseOK) {
+        return nullptr;
+    }
+    napi_value result = nullptr;
+    napi_create_promise(env, &asyncContext->deferred, &result);
+
+    std::function<void(const int32_t& info)> onWillDismiss = nullptr;
+    if (asyncContext->onWillDismissRef) {
+        ParseDialogCallback(asyncContext, onWillDismiss);
+    }
+    std::function<void(int32_t)> openCallback = nullptr;
+    PromptDialogAttr promptDialogAttr = GetPromptActionDialog(env, asyncContext, onWillDismiss);
+    if (!asyncContext->builderRef) {
+        ParseCustomDialogContentCallback(asyncContext, openCallback);
+        promptDialogAttr.customStyle = true;
+        promptDialogAttr.customBuilder = nullptr;
+    } else {
+        ParseCustomDialogIdCallback(asyncContext, openCallback);
+    }
+
+    OpenCustomDialog(env, asyncContext, promptDialogAttr, openCallback);
+
     return result;
+}
+
+void CloseCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext, bool useDialogId,
+    int32_t dialogId, const WeakPtr<NG::UINode>& nodeWk, std::function<void(int32_t)>& contentCallback)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    // NG
+    if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
+        auto delegate = EngineHelper::GetCurrentDelegateSafely();
+        if (delegate) {
+            if (useDialogId) {
+                delegate->CloseCustomDialog(dialogId);
+            } else {
+                delegate->CloseCustomDialog(nodeWk, std::move(contentCallback));
+            }
+        } else {
+            // throw internal error
+            napi_create_promise(env, &asyncContext->deferred, nullptr);
+            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            JSPromptThrowInterError(env, asyncContext, strMsg);
+        }
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        if (useDialogId) {
+            SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
+        } else {
+            SubwindowManager::GetInstance()->CloseCustomDialogNG(nodeWk, std::move(contentCallback));
+        }
+    }
+#else
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (delegate) {
+        if (useDialogId) {
+            delegate->CloseCustomDialog(dialogId);
+        } else {
+            delegate->CloseCustomDialog(nodeWk, std::move(contentCallback));
+        }
+    } else {
+        // throw internal error
+        napi_create_promise(env, &asyncContext->deferred, nullptr);
+        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
+        JSPromptThrowInterError(env, asyncContext, strMsg);
+    }
+#endif
 }
 
 napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
@@ -1560,7 +1902,14 @@ napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
     size_t argc = 1;
     napi_value argv[1] = { 0 };
     int32_t dialogId = -1;
+    WeakPtr<NG::UINode> nodeWk;
+    bool useDialogId = true;
+    std::function<void(int32_t)> contentCallback = nullptr;
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    auto asyncContext = std::make_shared<PromptAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = Container::CurrentIdSafely();
+    napi_value ret = nullptr;
     if (argc > 1) {
         NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
@@ -1569,44 +1918,121 @@ napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
     } else {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[0], &valueType);
-        if (valueType != napi_number) {
+        if (valueType == napi_number) {
+            napi_get_value_int32(env, argv[0], &dialogId);
+        } else if (valueType == napi_object) {
+            napi_value frameNodePtr = nullptr;
+            auto result = napi_get_named_property(env, argv[0], "nodePtr_", &frameNodePtr);
+            if (result != napi_ok) {
+                NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+                return nullptr;
+            }
+            void* nativePtr = nullptr;
+            result = napi_get_value_external(env, frameNodePtr, &nativePtr);
+            if (result != napi_ok) {
+                NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+                return nullptr;
+            }
+            auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
+            nodeWk = AceType::WeakClaim(uiNodePtr);
+            useDialogId = false;
+            napi_create_promise(env, &asyncContext->deferred, &ret);
+            ParseCustomDialogContentCallback(asyncContext, contentCallback);
+        } else {
             NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
             return nullptr;
         }
-        napi_get_value_int32(env, argv[0], &dialogId);
     }
 
+    CloseCustomDialog(env, asyncContext, useDialogId, dialogId, nodeWk, contentCallback);
+
+    return ret;
+}
+
+void UpdateCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncContext,
+    PromptDialogAttr& promptDialogAttr, const WeakPtr<NG::UINode>& nodeWk,
+    std::function<void(int32_t)>& contentCallback)
+{
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
-            delegate->CloseCustomDialog(dialogId);
+            delegate->UpdateCustomDialog(nodeWk, promptDialogAttr, std::move(contentCallback));
         } else {
             // throw internal error
-            auto asyncContext = std::make_shared<PromptAsyncContext>();
-            asyncContext->env = env;
             napi_create_promise(env, &asyncContext->deferred, nullptr);
             std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
+        SubwindowManager::GetInstance()->UpdateCustomDialogNG(nodeWk, promptDialogAttr, std::move(contentCallback));
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (delegate) {
-        delegate->CloseCustomDialog(dialogId);
+        delegate->UpdateCustomDialog(nodeWk, promptDialogAttr, std::move(contentCallback));
     } else {
         // throw internal error
-        auto asyncContext = std::make_shared<PromptAsyncContext>();
-        asyncContext->env = env;
         napi_create_promise(env, &asyncContext->deferred, nullptr);
         std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
         JSPromptThrowInterError(env, asyncContext, strMsg);
     }
 #endif
-    return nullptr;
+}
+
+napi_value JSPromptUpdateCustomDialog(napi_env env, napi_callback_info info)
+{
+    size_t argc = CUSTOM_DIALOG_PARAM_NUM;
+    napi_value argv[CUSTOM_DIALOG_PARAM_NUM] = { nullptr };
+    WeakPtr<NG::UINode> nodeWk;
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != CUSTOM_DIALOG_PARAM_NUM) {
+        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    auto asyncContext = std::make_shared<PromptAsyncContext>();
+    asyncContext->env = env;
+    asyncContext->instanceId = Container::CurrentIdSafely();
+    napi_value ret = nullptr;
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[0], &valueType);
+    if (valueType == napi_object) {
+        napi_value frameNodePtr = nullptr;
+        auto result = napi_get_named_property(env, argv[0], "nodePtr_", &frameNodePtr);
+        if (result != napi_ok) {
+            NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+            return nullptr;
+        }
+        void* nativePtr = nullptr;
+        result = napi_get_value_external(env, frameNodePtr, &nativePtr);
+        if (result != napi_ok) {
+            NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+            return nullptr;
+        }
+        auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
+        nodeWk = AceType::WeakClaim(uiNodePtr);
+    } else {
+        NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+
+    napi_typeof(env, argv[1], &valueType);
+    if (valueType != napi_object) {
+        NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    GetNapiNamedProperties(env, argv, 1, asyncContext);
+
+    napi_create_promise(env, &asyncContext->deferred, &ret);
+    std::function<void(int32_t)> contentCallback = nullptr;
+    ParseCustomDialogContentCallback(asyncContext, contentCallback);
+    PromptDialogAttr promptDialogAttr = GetPromptActionDialog(env, asyncContext, nullptr);
+
+    UpdateCustomDialog(env, asyncContext, promptDialogAttr, nodeWk, contentCallback);
+
+    return ret;
 }
 
 } // namespace OHOS::Ace::Napi

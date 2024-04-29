@@ -132,9 +132,7 @@ void JSMenu::SetWidth(const JSCallbackInfo& info)
         return;
     }
     CalcDimension width;
-    if (!ParseJsDimensionVp(info[0], width)) {
-        return;
-    }
+    ParseJsDimensionVp(info[0], width);
     MenuModel::GetInstance()->SetWidth(width);
 }
 
@@ -176,13 +174,36 @@ void JSMenu::SetRadius(const JSCallbackInfo& info)
         return;
     }
     CalcDimension radius;
-    ParseJsDimensionVp(info[0], radius);
+    if (info[0]->IsObject()) {
+        HandleDifferentRadius(info[0]);
+    } else {
+        if (!ParseJsDimensionVpNG(info[0], radius)) {
+            MenuModel::GetInstance()->ResetBorderRadius();
+            return;
+        }
+        if (LessNotEqual(radius.Value(), 0.0)) {
+            MenuModel::GetInstance()->ResetBorderRadius();
+            return;
+        }
+        MenuModel::GetInstance()->SetBorderRadius(radius);
+    }
+}
 
-    if (LessNotEqual(radius.Value(), 0.0)) {
+void JSMenu::SetExpandingMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info[0]->IsNull() || !info[0]->IsNumber()) {
         return;
     }
-    MenuModel::GetInstance()->SetBorderRadius(radius);
-    HandleDifferentRadius(info[0]);
+
+    auto mode = static_cast<SubMenuExpandingMode>(info[0]->ToNumber<int32_t>());
+    auto expandingMode =
+        mode == SubMenuExpandingMode::EMBEDDED
+            ? NG::SubMenuExpandingMode::EMBEDDED
+            : mode == SubMenuExpandingMode::STACK
+                ? NG::SubMenuExpandingMode::STACK
+                : NG::SubMenuExpandingMode::SIDE;
+                
+    MenuModel::GetInstance()->SetExpandingMode(expandingMode);
 }
 
 void JSMenu::JSBind(BindingTarget globalObj)
@@ -195,6 +216,7 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::StaticMethod("fontColor", &JSMenu::FontColor, opt);
     JSClass<JSMenu>::StaticMethod("width", &JSMenu::SetWidth, opt);
     JSClass<JSMenu>::StaticMethod("radius", &JSMenu::SetRadius, opt);
+    JSClass<JSMenu>::StaticMethod("subMenuExpandingMode", &JSMenu::SetExpandingMode);
     JSClass<JSMenu>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSMenu>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMenu>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

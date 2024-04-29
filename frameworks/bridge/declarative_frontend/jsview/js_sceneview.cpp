@@ -32,6 +32,10 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
+#if defined(KIT_3D_ENABLE)
+#include "scene_adapter/scene_bridge.h"
+#endif
+
 namespace OHOS::Ace {
 
 std::unique_ptr<ModelView> ModelView::instance_ = nullptr;
@@ -161,6 +165,76 @@ void JSSceneView::JsSetHandleCameraMove(const JSCallbackInfo& info)
     ModelView::GetInstance()->SetHandleCameraMove(value);
 }
 
+#if defined(KIT_3D_ENABLE)
+std::shared_ptr<Render3D::ISceneAdapter> UnwrapScene(JSRef<JSVal> obj)
+{
+#if defined(USE_ARK_ENGINE) && !defined(PREVIEW)
+    if (!obj->IsObject()) {
+        return nullptr;
+    }
+
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!runtime) {
+        return nullptr;
+    }
+
+    auto nativeEngine = runtime->GetNativeEngine();
+    if (nativeEngine == nullptr) {
+        return nullptr;
+    }
+
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+    auto ret = Render3D::SceneBridge::UnwrapSceneFromJs(env, napiValue);
+    napi_close_handle_scope(env, scope);
+    return ret;
+#else
+    return nullptr;
+#endif
+}
+
+bool ParseSceneOpt(const JSCallbackInfo& info, std::string& srcPath, std::shared_ptr<Render3D::ISceneAdapter>& scene,
+    int& surfaceData, std::string& bundleName, std::string& moduleName)
+{
+    if (JSViewAbstract::ParseJsMedia(info[0], srcPath)) {
+        return false;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    auto type = jsObj->GetProperty("modelType");
+    if (!type->IsNull()) {
+        surfaceData = type->ToNumber<int32_t>();
+    }
+
+    // SceneOptings
+    auto sceneOpt = jsObj->GetProperty("scene");
+    if (!sceneOpt->IsObject()) {
+        return false;
+    }
+
+    JSRef<JSObject> jsObjScene = JSRef<JSObject>::Cast(sceneOpt);
+    scene = UnwrapScene(jsObjScene);
+    if (scene == nullptr) {
+        JSViewAbstract::ParseJsMedia(sceneOpt, srcPath);
+        JSViewAbstract::GetJsMediaBundleInfo(sceneOpt, bundleName, moduleName);
+        return false;
+    }
+
+    // Scene new api
+    auto prop = jsObjScene->GetProperty("uri");
+    if (!prop->IsNull()) {
+        scene = UnwrapScene(jsObjScene);
+    }
+    return true;
+}
+#endif
+
 void JSSceneView::Create(const JSCallbackInfo& info)
 {
     const auto& length = info.Length();
@@ -170,11 +244,18 @@ void JSSceneView::Create(const JSCallbackInfo& info)
     std::string moduleName;
 
     Render3D::SurfaceType surfaceType = OHOS::Render3D::SurfaceType::SURFACE_TEXTURE;
+#if defined(KIT_3D_ENABLE)
+    std::shared_ptr<Render3D::ISceneAdapter> scene = nullptr;
+    bool isSceneApi = false;
+#endif
     if (length == 2) { // 2: info size
         surfaceData = info[1]->ToNumber<int32_t>();
         ParseJsMedia(info[0], srcPath);
         GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     } else if (length == 1) {
+#if defined(KIT_3D_ENABLE)
+        isSceneApi = ParseSceneOpt(info, srcPath, scene, surfaceData, bundleName, moduleName);
+#else
         if (!ParseJsMedia(info[0], srcPath)) {
             // SceneOptions
             JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
@@ -188,6 +269,7 @@ void JSSceneView::Create(const JSCallbackInfo& info)
                 surfaceData = type->ToNumber<int32_t>();
             }
         }
+#endif
     }
 
     surfaceType = (surfaceData == 0) ? OHOS::Render3D::SurfaceType::SURFACE_TEXTURE :
@@ -197,7 +279,11 @@ void JSSceneView::Create(const JSCallbackInfo& info)
     SetOhosPath(srcPath, ohosPath);
     LOGD("srcPath after ParseJsMedia(): %s bundleName: %s, moduleName %s", ohosPath.c_str(),
         bundleName.c_str(), moduleName.c_str());
-    ModelView::GetInstance()->Create(bundleName, moduleName, surfaceType);
+#if defined(KIT_3D_ENABLE)
+    ModelView::GetInstance()->Create({ bundleName, moduleName, surfaceType, scene });
+#else
+    ModelView::GetInstance()->Create({ bundleName, moduleName, surfaceType });
+#endif
     ModelView::GetInstance()->SetModelSource(ohosPath);
 }
 

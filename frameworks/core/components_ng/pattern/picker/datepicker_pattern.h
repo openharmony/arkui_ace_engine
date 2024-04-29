@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 namespace {
 const Dimension FOCUS_PAINT_WIDTH = 2.0_vp;
 }
@@ -87,6 +88,11 @@ public:
     void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
     {
         weakButtonCancel_ = buttonCancelNode;
+    }
+
+    void SetLunarSwitchTextNode(WeakPtr<FrameNode> lunarSwitchTextNode)
+    {
+        weakLunarSwitchText_ = lunarSwitchTextNode;
     }
 
     void OnLanguageConfigurationUpdate() override;
@@ -365,6 +371,11 @@ public:
         return startDateLunar_;
     }
 
+    const PickerDate& GetStartDateSolar()
+    {
+        return startDateSolar_;
+    }
+
     void SetEndDate(const PickerDate& value)
     {
         endDateSolar_ = value;
@@ -375,6 +386,11 @@ public:
     const LunarDate& GetEndDateLunar()
     {
         return endDateLunar_;
+    }
+
+    const PickerDate& GetEndDateSolar()
+    {
+        return endDateSolar_;
     }
 
     void AdjustSolarDate(PickerDate& date, const PickerDate& start, const PickerDate& end) const
@@ -548,7 +564,7 @@ public:
     }
 
     void ShowTitle(int32_t titleId);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
         contentRowNode_ = contentRowNode;
@@ -610,6 +626,7 @@ private:
     EventMarker OnDialogChange_;
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
+    WeakPtr<FrameNode> weakLunarSwitchText_;
     PickerDate startDateSolar_ = PickerDate(1970, 1, 1); // default start date is 1970-1-1 from FA document.
     LunarDate startDateLunar_;
     PickerDate endDateSolar_ = PickerDate(2100, 12, 31); // default end date is 2100-12-31 from FA document.

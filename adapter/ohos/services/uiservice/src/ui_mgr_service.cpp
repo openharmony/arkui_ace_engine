@@ -74,7 +74,7 @@ void UIMgrService::OnStart()
     if (!ret) {
         return;
     }
-    HILOG_INFO("Ace UImanager service OnStart");
+    LOGI("Ace UImanager service OnStart");
 }
 
 bool UIMgrService::Init()
@@ -88,7 +88,7 @@ bool UIMgrService::Init()
     if (handler_ == nullptr) {
         return false;
     }
-    HILOG_INFO("Ace UIservice init success");
+    LOGI("Ace UIservice init success");
     return true;
 }
 
@@ -98,7 +98,7 @@ void UIMgrService::OnStop()
     eventLoop_.reset();
     handler_.reset();
     state_ = UIServiceRunningState::STATE_NOT_START;
-    HILOG_INFO("Ace UImanager service stop");
+    LOGI("Ace UImanager service stop");
 }
 
 UIServiceRunningState UIMgrService::QueryServiceState() const
@@ -119,7 +119,7 @@ int32_t UIMgrService::RegisterCallBack(const AAFwk::Want& want, const sptr<IUISe
     if (!ret) {
         return UI_SERVICE_POST_TASK_FAILED;
     }
-    HILOG_INFO("UIServices register CallBack success");
+    LOGI("UIServices register CallBack success");
     return NO_ERROR;
 }
 
@@ -133,7 +133,7 @@ int32_t UIMgrService::UnregisterCallBack(const AAFwk::Want& want)
     if (!ret) {
         return UI_SERVICE_POST_TASK_FAILED;
     }
-    HILOG_INFO("UIServices unregister CallBack success");
+    LOGI("UIServices unregister CallBack success");
     return NO_ERROR;
 }
 

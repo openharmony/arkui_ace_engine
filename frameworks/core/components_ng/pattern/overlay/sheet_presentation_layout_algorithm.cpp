@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -43,7 +44,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     sheetStyle_ = layoutProperty->GetSheetStyleValue();
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     if (!layoutConstraint) {
-        LOGE("fail to measure sheet due to layoutConstraint is nullptr");
+        TAG_LOGE(AceLogTag::ACE_SHEET, "fail to measure sheet due to layoutConstraint is nullptr");
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -60,6 +61,18 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         sheetMaxWidth_ = maxSize.Width();
         sheetWidth_ = GetWidthByScreenSizeType(maxSize);
         sheetHeight_ = GetHeightByScreenSizeType(maxSize);
+        if (sheetStyle_.width.has_value()) {
+            float width = 0.0f;
+            if (sheetStyle_.width->Unit() == DimensionUnit::PERCENT) {
+                width = sheetStyle_.width->ConvertToPxWithSize(sheetWidth_);
+            } else {
+                width = sheetStyle_.width->ConvertToPx();
+            }
+            if (width > sheetWidth_ || width < 0.0f) {
+                width = sheetWidth_;
+            }
+            sheetWidth_ = width;
+        }
         SizeF idealSize(sheetWidth_, sheetHeight_);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
@@ -70,7 +83,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         auto scrollNode = layoutWrapper->GetChildByIndex(1);
         CHECK_NULL_VOID(scrollNode);
-        childConstraint.selfIdealSize = OptionalSizeF(childConstraint.maxSize);
+        childConstraint.selfIdealSize.SetWidth(childConstraint.maxSize.Width());
         scrollNode->Measure(childConstraint);
         if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP)
             && (sheetStyle_.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
@@ -109,10 +122,9 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    const auto& pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
+    sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
     if (sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE) {
         sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
     } else if (sheetType_ == SheetType::SHEET_CENTER) {
@@ -127,6 +139,8 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         sheetOffsetX_ = popupStyleSheetOffset.GetX() - parentOffset.GetX();
         sheetOffsetY_ = popupStyleSheetOffset.GetY() - parentOffset.GetY();
     }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet layout info, sheetOffsetX_ is: %{public}f, sheetOffsetY_ is: %{public}f",
+        sheetOffsetX_, sheetOffsetY_);
     OffsetF positionOffset;
     positionOffset.SetX(sheetOffsetX_);
     positionOffset.SetY(0.0f);
@@ -206,13 +220,9 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& ma
 
 float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, .0f);
-    auto safeAreaInsets = pipeline->GetSafeAreaWithoutProcess();
     float height = 0.0f;
     if (sheetStyle_.height.has_value()) {
-        auto maxHeight = std::min(sheetMaxHeight_ - safeAreaInsets.top_.Length() - safeAreaInsets.bottom_.Length(),
-            sheetMaxWidth_ - safeAreaInsets.top_.Length() - safeAreaInsets.bottom_.Length()) * POPUP_LARGE_SIZE;
+        auto maxHeight = std::min(sheetMaxHeight_, sheetMaxWidth_) * POPUP_LARGE_SIZE;
         if (sheetStyle_.height->Unit() == DimensionUnit::PERCENT) {
             height = sheetStyle_.height->ConvertToPxWithSize(maxHeight);
         } else {

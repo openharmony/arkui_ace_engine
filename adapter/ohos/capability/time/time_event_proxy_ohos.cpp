@@ -77,7 +77,7 @@ void NotifyCard(const RefPtr<TimeChangeListener>& listener)
                 ContainerScope scope(id);
                 listener->OnTimeChange();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUINotifyCardTimeChange");
     }
 }
 } // namespace

@@ -17,9 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_ITEM_LAYOUT_PROPERTY_H
 
 #include <string>
+
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -60,6 +62,8 @@ public:
         value->propLabel_ = CloneLabel();
         value->propSelectIconStyle_ = CloneSelectIconStyle();
         value->propMenuWidth_ = CloneMenuWidth();
+        value->propExpandingMode_ = CloneExpandingMode();
+        value->propHasFurtherExpand_ = CloneHasFurtherExpand();
         return value;
     }
 
@@ -74,13 +78,17 @@ public:
         ResetLabel();
         ResetSelectIconStyle();
         ResetMenuWidth();
+        ResetExpandingMode();
+        ResetHasFurtherExpand();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartIcon, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartIcon, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndIcon, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndIcon, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Label, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ExpandingMode, SubMenuExpandingMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasFurtherExpand, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(SelectIconStyle, MenuItemSelectIconStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectIconStyle, SelectIcon, bool, PROPERTY_UPDATE_MEASURE);
@@ -101,19 +109,23 @@ public:
         PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LabelFontStyle, LabelItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("startIcon", GetStartIcon().value_or("").c_str());
-        json->Put("content", GetContent().value_or("").c_str());
-        json->Put("labelInfo", GetLabel().value_or("").c_str());
-        json->Put("endIcon", GetEndIcon().value_or("").c_str());
+        LayoutProperty::ToJsonValue(json, filter);
+        if (GetStartIcon().has_value()) {
+            json->PutExtAttr("startIcon", GetStartIcon()->GetSrc().c_str(), filter);
+        }
+        json->PutFixedAttr("content", GetContent().value_or("").c_str(), filter, FIXED_ATTR_CONTENT);
+        json->PutExtAttr("labelInfo", GetLabel().value_or("").c_str(), filter);
+        if (GetEndIcon().has_value()) {
+            json->PutExtAttr("endIcon", GetEndIcon()->GetSrc().c_str(), filter);
+        }
         auto selectIconShow = GetSelectIcon().value_or(false);
         auto selectIconSrc = GetSelectIconSrc().value_or("");
         if (selectIconShow) {
-            json->Put("selectIcon", selectIconSrc.empty() ? "true" : selectIconSrc.c_str());
+            json->PutExtAttr("selectIcon", selectIconSrc.empty() ? "true" : selectIconSrc.c_str(), filter);
         } else {
-            json->Put("selectIcon", "false");
+            json->PutExtAttr("selectIcon", "false", filter);
         }
         auto context = PipelineBase::GetCurrentContext();
         auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
@@ -126,8 +138,9 @@ public:
         contentFontJsonObject->Put("style",
             V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
         contentFontJsonObject->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
-        json->Put("contentFont", contentFontJsonObject);
-        json->Put("contentFontColor", GetFontColor().value_or(defaultFontColor).ColorToString().c_str());
+        json->PutExtAttr("contentFont", contentFontJsonObject, filter);
+        json->PutExtAttr("contentFontColor",
+            GetFontColor().value_or(defaultFontColor).ColorToString().c_str(), filter);
         auto labelFontJsonObject = JsonUtil::Create(true);
         labelFontJsonObject->Put("size", GetLabelFontSize().value_or(defaultFontSize).ToString().c_str());
         labelFontJsonObject->Put("weight",
@@ -135,9 +148,10 @@ public:
         labelFontJsonObject->Put("style",
             V2::ConvertWrapFontStyleToStirng(GetLabelItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
         labelFontJsonObject->Put("family", V2::ConvertFontFamily(GetLabelFontFamilyValue({})).c_str());
-        json->Put("labelFont", labelFontJsonObject);
+        json->PutExtAttr("labelFont", labelFontJsonObject, filter);
         auto defaultLabelFontColor = theme ? theme->GetSecondaryFontColor() : Color::GRAY;
-        json->Put("labelFontColor", GetLabelFontColor().value_or(defaultLabelFontColor).ColorToString().c_str());
+        json->PutExtAttr("labelFontColor",
+            GetLabelFontColor().value_or(defaultLabelFontColor).ColorToString().c_str(), filter);
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutProperty);

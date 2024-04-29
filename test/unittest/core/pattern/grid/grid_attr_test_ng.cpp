@@ -15,9 +15,14 @@
 
 #include "grid_test_ng.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const InspectorFilter filter;
+} // namespace
 
 class GridAttrTestNg : public GridTestNg {
 public:
@@ -56,7 +61,7 @@ HWTEST_F(GridAttrTestNg, Property001, TestSize.Level1)
      * @tc.steps: step1. Test ToJsonValue
      */
     auto json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("columnsTemplate"), "1fr 1fr");
     EXPECT_EQ(json->GetString("rowsTemplate"), "1fr 1fr 1fr");
     EXPECT_EQ(Dimension::FromString(json->GetString("columnsGap")), Dimension(COL_GAP));
@@ -74,7 +79,7 @@ HWTEST_F(GridAttrTestNg, Property001, TestSize.Level1)
      */
     layoutProperty_->UpdateGridDirection(FlexDirection::ROW_REVERSE);
     json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("layoutDirection"), "GridDirection.RowReverse");
 
     /**
@@ -82,7 +87,7 @@ HWTEST_F(GridAttrTestNg, Property001, TestSize.Level1)
      */
     layoutProperty_->UpdateGridDirection(FlexDirection::COLUMN);
     json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("layoutDirection"), "GridDirection.Column");
 
     /**
@@ -90,7 +95,7 @@ HWTEST_F(GridAttrTestNg, Property001, TestSize.Level1)
      */
     layoutProperty_->UpdateGridDirection(FlexDirection::COLUMN_REVERSE);
     json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("layoutDirection"), "GridDirection.ColumnReverse");
 }
 
@@ -163,7 +168,7 @@ HWTEST_F(GridAttrTestNg, Property003, TestSize.Level1)
      * @tc.steps: step2. Test ToJsonValue
      */
     auto json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("rowStart"), "1");
     EXPECT_EQ(json->GetString("rowEnd"), "2");
     EXPECT_EQ(json->GetString("columnStart"), "1");
@@ -683,7 +688,7 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
         CreateFixedItem(7);
     });
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT))); // normal item
+    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT)));        // normal item
 
     /**
      * @tc.steps: step2. Change colStart and colEnd
@@ -694,7 +699,7 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
     itemLayoutProperty->UpdateColumnEnd(1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // update items
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
+    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT)));        // big item
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH, ITEM_HEIGHT))); // normal item
 }
 
@@ -711,7 +716,7 @@ HWTEST_F(GridAttrTestNg, EnableScrollInteraction001, TestSize.Level1)
     });
     EXPECT_TRUE(layoutProperty_->GetScrollEnabledValue());
 }
-    
+
 /**
  * @tc.name: EnableScrollInteraction002
  * @tc.desc: Test property about enableScrollInteraction.
@@ -1020,11 +1025,11 @@ HWTEST_F(GridAttrTestNg, LayoutOptions001, TestSize.Level1)
      * @tc.expected: Each gridItem rect is correct
      */
     GridLayoutOptions option;
-    option.irregularIndexes = { 6, 1, 4};
+    option.irregularIndexes = { 6, 1, 4 };
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(option);
-        CreateFixedItem(10);
+        CreateItem(10, -2, ITEM_HEIGHT);
     });
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, ITEM_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));
@@ -1057,7 +1062,7 @@ HWTEST_F(GridAttrTestNg, LayoutOptions002, TestSize.Level1)
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(option);
-        CreateFixedItem(10);
+        CreateItem(10, -2, ITEM_HEIGHT);
     });
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, GRID_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));

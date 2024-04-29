@@ -66,15 +66,18 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("selectedColor", &JSSlider::SetSelectedColor);
     JSClass<JSSlider>::StaticMethod("minLabel", &JSSlider::SetMinLabel);
     JSClass<JSSlider>::StaticMethod("maxLabel", &JSSlider::SetMaxLabel);
+    JSClass<JSSlider>::StaticMethod("minResponsiveDistance", &JSSlider::SetMinResponsiveDistance);
     JSClass<JSSlider>::StaticMethod("showSteps", &JSSlider::SetShowSteps);
     JSClass<JSSlider>::StaticMethod("showTips", &JSSlider::SetShowTips);
     JSClass<JSSlider>::StaticMethod("blockBorderColor", &JSSlider::SetBlockBorderColor);
     JSClass<JSSlider>::StaticMethod("blockBorderWidth", &JSSlider::SetBlockBorderWidth);
     JSClass<JSSlider>::StaticMethod("stepColor", &JSSlider::SetStepColor);
     JSClass<JSSlider>::StaticMethod("trackBorderRadius", &JSSlider::SetTrackBorderRadius);
+    JSClass<JSSlider>::StaticMethod("selectedBorderRadius", &JSSlider::SetSelectedBorderRadius);
     JSClass<JSSlider>::StaticMethod("blockSize", &JSSlider::SetBlockSize);
     JSClass<JSSlider>::StaticMethod("blockStyle", &JSSlider::SetBlockStyle);
     JSClass<JSSlider>::StaticMethod("stepSize", &JSSlider::SetStepSize);
+    JSClass<JSSlider>::StaticMethod("sliderInteractionMode", &JSSlider::SetSliderInteractionMode);
     JSClass<JSSlider>::StaticMethod("onChange", &JSSlider::OnChange);
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSlider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -181,6 +184,8 @@ void JSSlider::Create(const JSCallbackInfo& info)
         sliderMode = SliderModel::SliderMode::INSET;
     } else if (sliderStyle == SliderStyle::CAPSULE) {
         sliderMode = SliderModel::SliderMode::CAPSULE;
+    } else if (sliderStyle == SliderStyle::NONE) {
+        sliderMode = SliderModel::SliderMode::NONE;
     } else {
         sliderMode = SliderModel::SliderMode::OUTSET;
     }
@@ -235,6 +240,7 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
         return;
     }
     NG::Gradient gradient;
+    bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
@@ -242,12 +248,13 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
             CHECK_NULL_VOID(theme);
             colorVal = theme->GetTrackBgColor();
         }
+        isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
         // Set track color to Framework::SliderModelImpl. Need to backward compatibility with old pipeline.
         SliderModel::GetInstance()->SetTrackBackgroundColor(colorVal);
     }
     // Set track gradient color to NG::SliderModelNG
-    SliderModel::GetInstance()->SetTrackBackgroundColor(gradient);
+    SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, isResourceColor);
 }
 
 bool JSSlider::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient)
@@ -297,7 +304,7 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
 
 void JSSlider::SetMinLabel(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsString()) {
+    if (!info[0]->IsString() && !info[0]->IsNumber()) {
         return;
     }
     SliderModel::GetInstance()->SetMinLabel(info[0]->ToNumber<float>());
@@ -305,10 +312,26 @@ void JSSlider::SetMinLabel(const JSCallbackInfo& info)
 
 void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsString()) {
+    if (!info[0]->IsString() && !info[0]->IsNumber()) {
         return;
     }
     SliderModel::GetInstance()->SetMaxLabel(info[0]->ToNumber<float>());
+}
+
+void JSSlider::SetMinResponsiveDistance(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        SliderModel::GetInstance()->ResetMinResponsiveDistance();
+        return;
+    }
+    float value = 0.0f;
+    if (info[0]->IsString() || info[0]->IsNumber()) {
+        value = info[0]->ToNumber<float>();
+        value = std::isfinite(value) ? value : 0.0f;
+        SliderModel::GetInstance()->SetMinResponsiveDistance(value);
+    } else {
+        SliderModel::GetInstance()->ResetMinResponsiveDistance();
+    }
 }
 
 void JSSlider::SetShowSteps(const JSCallbackInfo& info)
@@ -321,6 +344,24 @@ void JSSlider::SetShowSteps(const JSCallbackInfo& info)
         showSteps = info[0]->ToBoolean();
     }
     SliderModel::GetInstance()->SetShowSteps(showSteps);
+}
+
+void JSSlider::SetSliderInteractionMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        SliderModel::GetInstance()->ResetSliderInteractionMode();
+        return;
+    }
+
+    if (!info[0]->IsNull() && info[0]->IsNumber()) {
+        auto mode = static_cast<SliderInteraction>(info[0]->ToNumber<int32_t>());
+        auto sliderInteractionMode = mode == SliderInteraction::SLIDE_ONLY
+                                         ? SliderModel::SliderInteraction::SLIDE_ONLY
+                                         : SliderModel::SliderInteraction::SLIDE_AND_CLICK;
+        SliderModel::GetInstance()->SetSliderInteractionMode(sliderInteractionMode);
+    } else {
+        SliderModel::GetInstance()->ResetSliderInteractionMode();
+    }
 }
 
 void JSSlider::SetShowTips(const JSCallbackInfo& info)
@@ -406,6 +447,24 @@ void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
         return;
     }
     SliderModel::GetInstance()->SetTrackBorderRadius(trackBorderRadius);
+}
+
+void JSSlider::SetSelectedBorderRadius(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    CalcDimension selectedBorderRadius;
+    if (!ParseJsDimensionVpNG(info[0], selectedBorderRadius, false)) {
+        SliderModel::GetInstance()->ResetSelectedBorderRadius();
+        return;
+    }
+    if (LessNotEqual(selectedBorderRadius.Value(), 0.0)) {
+        SliderModel::GetInstance()->ResetSelectedBorderRadius();
+        return;
+    }
+    SliderModel::GetInstance()->SetSelectedBorderRadius(selectedBorderRadius);
 }
 
 void JSSlider::SetBlockSize(const JSCallbackInfo& info)

@@ -46,21 +46,24 @@ ArkUI_CharPtr GetSelectedTextStyle(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, "");
     PickerTextStyle pickerTextStyle = DatePickerModelNG::getSelectedTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     std::string families;
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
     return g_strValue.c_str();
 }
@@ -114,20 +117,23 @@ ArkUI_CharPtr GetDatePickerTextStyle(ArkUINodeHandle node)
     PickerTextStyle pickerTextStyle = DatePickerModelNG::getNormalTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
     std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
     return g_strValue.c_str();
 }
@@ -182,20 +188,23 @@ ArkUI_CharPtr GetDisappearTextStyle(ArkUINodeHandle node)
     PickerTextStyle pickerTextStyle = DatePickerModelNG::getDisappearTextStyle(frameNode);
     std::vector<std::string> fontFamilies = pickerTextStyle.fontFamily.value_or(std::vector<std::string>());
     std::string families;
+    if (fontFamilies.size() == 0) {
+        fontFamilies.emplace_back("HarmonyOS Sans");
+    }
     //set index start
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
     }
-    g_strValue = pickerTextStyle.textColor->ColorToString() + ",";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ",";
+    g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
+    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ",";
-    g_strValue = g_strValue + families + ",";
+        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + families + ";";
     g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
     return g_strValue.c_str();
 }
@@ -290,8 +299,8 @@ ArkUI_CharPtr GetStartDate(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, "");
     LunarDate lunarDate = DatePickerModelNG::getStartDate(frameNode);
-    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + ",";
-    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + ",";
+    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + "-";
     g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.day));
     return g_strValue.c_str();
 }
@@ -315,8 +324,8 @@ ArkUI_CharPtr GetEndDate(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, "");
     LunarDate lunarDate = DatePickerModelNG::getEndDate(frameNode);
-    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + ",";
-    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + ",";
+    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + "-";
     g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.day));
     return g_strValue.c_str();
 }
@@ -340,8 +349,8 @@ ArkUI_CharPtr GetSelectedDate(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, "");
     LunarDate lunarDate = DatePickerModelNG::getSelectedDate(frameNode);
-    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + ",";
-    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + ",";
+    g_strValue = std::to_string(static_cast<uint32_t>(lunarDate.year)) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.month)) + "-";
     g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(lunarDate.day));
     return g_strValue.c_str();
 }
@@ -359,6 +368,7 @@ void ResetSelectedDate(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     time_t now = time(nullptr);
     auto currentTm = localtime(&now);
+    CHECK_NULL_VOID(currentTm);
     PickerDate pickerDate(currentTm->tm_year + 1900, currentTm->tm_mon + 1, currentTm->tm_mday);
 
     DatePickerModelNG::SetSelectedDate(frameNode, pickerDate);

@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/button/toggle_button_accessibility_property.h"
 #include "core/components_ng/pattern/button/toggle_button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components/toggle/toggle_theme.h"
 
 namespace OHOS::Ace::NG {
 class ToggleButtonPattern : public ButtonPattern {
@@ -37,6 +39,11 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -53,11 +60,28 @@ public:
     {
         return MakeRefPtr<ToggleButtonAccessibilityProperty>();
     }
+
+    RefPtr<TouchEventImpl>& GetTouchListener()
+    {
+        return touchListener_;
+    }
+
+    void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
+    {
+        if (toggleMakeFunc == nullptr) {
+            toggleMakeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
+        toggleMakeFunc_ = std::move(toggleMakeFunc);
+    }
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnClick();
     void OnColorConfigurationUpdate() override;
     void MarkIsSelected(bool isSelected);
+    void SetButtonPress(bool value);
 
 private:
     void OnAttachToFrameNode() override;
@@ -67,15 +91,39 @@ private:
     void HandleEnabled();
     void InitClickEvent();
     void InitButtonAndText();
+    void InitButtonShadow();
     void InitOnKeyEvent();
+    void InitFocusEvent();
+    void HandleBlurEvent(RefPtr<RenderContext> renderContext, RefPtr<ToggleTheme> toggleTheme,
+        RefPtr<FrameNode> textNode, RefPtr<TextLayoutProperty> textLayoutProperty,
+        RefPtr<ToggleButtonPaintProperty> paintProperty);
+    void HandleFocusEvent(RefPtr<RenderContext> renderContext, RefPtr<ToggleTheme> toggleTheme,
+        RefPtr<FrameNode> textNode, RefPtr<TextLayoutProperty> textLayoutProperty,
+        RefPtr<ToggleButtonPaintProperty> paintProperty);
+    void HandleBorderColorAndWidth();
     bool OnKeyEvent(const KeyEvent& event);
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
+    void InitTouchEvent();
+    void OnTouchDown();
+    void OnTouchUp();
+    void FireBuilder();
+    void OpenToCloseFocused();
+    void CloseToOpenFocused();
+    void OpenToCloseWithoutFocused();
+    void CloseToOpenWithoutFocused();
+
+    RefPtr<FrameNode> BuildContentModifierNode();
+    std::optional<SwitchMakeCallback> toggleMakeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
+    void SetIsFocus(bool isFocus);
+    RefPtr<TouchEventImpl> touchListener_;
 
     RefPtr<ClickEvent> clickListener_;
     std::optional<bool> isOn_;
     Color checkedColor_;
     Color unCheckedColor_;
+    Color backgroundColor_;
     float disabledAlpha_ { 1.0f };
     Dimension textMargin_;
     Dimension buttonMargin_;
@@ -83,6 +131,15 @@ private:
     Dimension buttonRadius_;
     Dimension textFontSize_;
     Color textColor_;
+    bool isShadow_ = false;
+    bool isScale_ = false;
+    bool isTextColor_ = false;
+    bool isCheckedShadow_ = false;
+    bool isbgColorFocus_ = false;
+    bool isFocus_ = false;
+    bool isPress_ = false;
+    bool isSetClickedColor_ = false;
+    bool IsNeedToHandleHoverOpacity();
 
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPattern);
 };

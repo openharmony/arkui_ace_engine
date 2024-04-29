@@ -17,6 +17,7 @@ import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import measure from '@ohos.measure';
 import mediaquery from '@ohos.mediaquery';
 import resourceManager from '@ohos.resourceManager';
+import { ColorMetrics } from '@ohos.arkui.node'
 
 export enum ChipSize {
   NORMAL = "NORMAL",
@@ -232,6 +233,7 @@ export struct ChipComponent {
   private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("0vp<width<600vp")
   private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("600vp<=width<840vp")
   private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("840vp<=width")
+  @State private isShowPressedBackGroundColor: boolean = false
 
   private isChipSizeEnum(): boolean {
     return typeof (this.chipSize) === 'string'
@@ -427,10 +429,34 @@ export struct ChipComponent {
   }
 
   private getChipNodeBackGroundColor(): ResourceColor {
+    let currentColor: ResourceColor;
+
     if (this.getChipActive()) {
-      return this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor
+      currentColor = this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor
     }
-    return this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
+    else {
+      currentColor = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
+    }
+
+    if (!this.isShowPressedBackGroundColor) {
+      return currentColor
+    }
+    let sourceColor:ColorMetrics;
+
+    try {
+      sourceColor = ColorMetrics.resourceColor(currentColor);
+    } catch (err) {
+      console.log(err.toString()); 
+      if (this.getChipActive()) {
+        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor);
+      } else {
+        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
+      }
+    }
+
+    return sourceColor
+      .blendColor(ColorMetrics.resourceColor("#19000000"))
+      .color
   }
 
   private getChipNodeHeight(): Length {
@@ -475,7 +501,7 @@ export struct ChipComponent {
   }
 
   private getChipActive(): boolean {
-    return this.chipActivated || this.chipActivated === void (0)
+    return this.chipActivated
   }
 
   private getChipNodeOpacity(): number {
@@ -488,27 +514,19 @@ export struct ChipComponent {
     }
     if (this.isHover) {
       if (event.type === TouchType.Down) {
-        animateTo({ curve: Curve.Sharp, duration: 100 }, () => {
-          this.chipBlendColor = this.theme.chipNode.pressedBlendColor
-          this.chipOpacity = this.theme.chipNode.opacity.pressed
-        })
+        this.isShowPressedBackGroundColor = true
+
       } else if (event.type === TouchType.Up) {
-        animateTo({ curve: Curve.Sharp, duration: 100 }, () => {
-          this.chipBlendColor = this.theme.chipNode.hoverBlendColor
-          this.chipOpacity = this.theme.chipNode.opacity.hover
-        })
+        this.isShowPressedBackGroundColor = false
+
       }
     } else {
       if (event.type === TouchType.Down) {
-        animateTo({ curve: Curve.Friction, duration: 350 }, () => {
-          this.chipBlendColor = this.theme.chipNode.pressedBlendColor
-          this.chipOpacity = this.theme.chipNode.opacity.pressed
-        })
+        this.isShowPressedBackGroundColor = true
+
       } else if (event.type === TouchType.Up) {
-        animateTo({ curve: Curve.Friction, duration: 350 }, () => {
-          this.chipBlendColor = Color.Transparent
-          this.chipOpacity = this.theme.chipNode.opacity.normal
-        })
+        this.isShowPressedBackGroundColor = false
+
       }
     }
   }
@@ -518,18 +536,11 @@ export struct ChipComponent {
       return
     }
     this.isHover = isHover
-    animateTo({
-      curve: Curve.Friction,
-      duration: 250
-    }, () => {
-      if (isHover) {
-        this.chipBlendColor = this.theme.chipNode.hoverBlendColor
-        this.chipOpacity = this.theme.chipNode.opacity.hover
-      } else {
-        this.chipBlendColor = Color.Transparent
-        this.chipOpacity = this.theme.chipNode.opacity.normal
-      }
-    })
+    if (this.isHover) {
+      this.isShowPressedBackGroundColor = true
+    } else {
+      this.isShowPressedBackGroundColor = false
+    }
   }
 
   private deleteChipNodeAnimate() {
@@ -690,9 +701,6 @@ export struct ChipComponent {
         .textAlign(TextAlign.Center)
         .visibility(this.getVisibility())
         .draggable(false)
-        .stateStyles({
-          focused: {}
-        })
 
       Image(this.getSuffixIconSrc())
         .opacity(this.getChipNodeOpacity())
@@ -738,9 +746,15 @@ export struct ChipComponent {
     .enabled(this.getChipEnable())
     .scale(this.chipScale)
     .focusable(true)
-    .colorBlend(this.chipBlendColor)
     .opacity(this.getChipNodeOpacity())
-    .overlay(this.focusOverlay, { align: Alignment.Center })
+    .stateStyles({
+      normal: {
+        .overlay(undefined)
+      },
+      focused: {
+        .overlay(this.focusOverlay, { align: Alignment.Center })
+      }
+    })
     .onFocus(() => {
       this.chipNodeOnFocus = true
     })
@@ -751,16 +765,20 @@ export struct ChipComponent {
       this.handleTouch(event)
     })
     .onHover((isHover: boolean) => {
-      this.hoverAnimate(isHover)
+      if (this.isShowPressedBackGroundColor == false) {
+        this.isShowPressedBackGroundColor = true
+      }
+      else {
+        this.isShowPressedBackGroundColor = false
+      }
+
     })
     .onKeyEvent((event) => {
       if (event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL && !this.suffixIconOnFocus) {
         this.deleteChipNodeAnimate()
       }
     })
-    .onClick(() => {
-      this.onClicked()
-    })
+    .onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this))
   }
 
   build() {

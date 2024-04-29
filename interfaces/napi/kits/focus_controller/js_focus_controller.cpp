@@ -60,8 +60,27 @@ static napi_value JSRequestFocus(napi_env env, napi_callback_info info)
         napi_get_boolean(env, false, &obj);
         return obj;
     }
-    bool result = delegate->RequestFocus(key);
-    napi_get_boolean(env, result, &obj);
+    auto focusCallback = [env](NG::RequestFocusResult result) {
+        switch (result) {
+            case NG::RequestFocusResult::NON_FOCUSABLE:
+                NapiThrow(env, "This component is not focusable.", ERROR_CODE_NON_FOCUSABLE);
+                break;
+            case NG::RequestFocusResult::NON_FOCUSABLE_ANCESTOR:
+                NapiThrow(env, "This component has unfocusable ancestor.", ERROR_CODE_NON_FOCUSABLE_ANCESTOR);
+                break;
+            case NG::RequestFocusResult::NON_EXIST:
+                NapiThrow(env,
+                    "The component doesn't exist, is currently invisible, or has been disabled.",
+                    ERROR_CODE_NON_EXIST);
+                break;
+            default:
+                NapiThrow(env, "An internal error occurred.", ERROR_CODE_INTERNAL_ERROR);
+                break;
+        }
+    };
+    delegate->SetRequestFocusCallback(focusCallback);
+    delegate->RequestFocus(key, true);
+    napi_get_null(env, &obj);
     return obj;
 }
 

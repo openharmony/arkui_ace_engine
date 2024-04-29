@@ -65,7 +65,8 @@ std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
             onFinish();
             return;
         }
-        taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask(
+            [onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI, "ArkUIAnimationGetWrappedCallback");
     };
     return wrappedOnFinish;
 }
@@ -186,5 +187,10 @@ void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Anima
     for (auto& ani : animation->animations_) {
         ani->Resume();
     }
+}
+
+void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback)
+{
+    Rosen::RSNode::ExecuteWithoutAnimation(callback);
 }
 } // namespace OHOS::Ace

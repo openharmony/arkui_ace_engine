@@ -44,6 +44,7 @@ public:
     void AddParentContainerId(int32_t containerId, int32_t parentContainerId);
     void RemoveParentContainerId(int32_t containerId);
     int32_t GetParentContainerId(int32_t containerId);
+    int32_t GetSubContainerId(int32_t parentContainerId);
 
     void AddSubwindow(int32_t instanceId, RefPtr<Subwindow>);
     void RemoveSubwindow(int32_t instanceId);
@@ -83,12 +84,12 @@ public:
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
     void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
     void CloseCustomDialogNG(int32_t dialogId);
+    void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback);
+    void UpdateCustomDialogNG(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
+        std::function<void(int32_t)>&& callback);
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
-    void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
-    void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId = -1, int32_t instanceId = -1);
-    void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
-    void DeletePopupHotAreas(int32_t overlayId, int32_t instanceId);
+    void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId = -1, int32_t instanceId = -1);
     int32_t GetDialogSubWindowId()
     {
         return dialogSubWindowId_;
@@ -103,7 +104,7 @@ public:
     const RefPtr<Subwindow> GetDialogSubwindow(int32_t instanceId);
     void SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow);
     const RefPtr<Subwindow>& GetCurrentDialogWindow();
-    void DeleteHotAreas(int32_t subwindowid, int32_t overlayid);
+    void DeleteHotAreas(int32_t subwindowId, int32_t nodeId);
 
     void ClearToastInSubwindow();
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
@@ -119,11 +120,13 @@ public:
     void RequestFocusSubwindow(int32_t instanceId);
     void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
+    void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
 
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
+    void MarkDirtyDialogSafeArea();
 private:
-    RefPtr<Subwindow> GetOrCreateSubWindow();
+    RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
 
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;

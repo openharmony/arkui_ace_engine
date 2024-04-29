@@ -21,17 +21,20 @@
 #include "base/utils/utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 class CheckBoxPattern : public Pattern {
     DECLARE_ACE_TYPE(CheckBoxPattern, Pattern);
 
@@ -82,6 +85,8 @@ public:
             checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
         }
         checkboxModifier_->SetCheckboxStyle(checkboxStyle);
+        checkboxModifier_->SetUseContentModifier(UseContentModifier());
+        checkboxModifier_->SetHasBuilder(builder_.has_value());
         host->SetCheckboxFlag(true);
         auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(checkboxModifier_);
         auto eventHub = host->GetEventHub<EventHub>();
@@ -150,25 +155,63 @@ public:
         lastSelect_ = select;
     }
 
+    void SetBuilderFunc(CheckBoxMakeCallback&& makeFunc)
+    {
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
+    {
+        if (toggleMakeFunc == nullptr) {
+            toggleMakeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
+        toggleMakeFunc_ = std::move(toggleMakeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
+    void SetCheckBoxSelect(bool value);
+
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void SetIndicatorBuilder(const std::optional<std::function<void()>>& buildFunc)
     {
-        Pattern::ToJsonValue(json);
+        builder_ = buildFunc.value_or(nullptr);
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
+    {
+        Pattern::ToJsonValue(json, filter);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxEventHub>();
         auto name = checkBoxEventHub ? checkBoxEventHub->GetName() : "";
         auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
-        json->Put("name", name.c_str());
-        json->Put("group", group.c_str());
-        json->Put("type", "ToggleType.Checkbox");
+        json->PutExtAttr("name", name.c_str(), filter);
+        json->PutExtAttr("group", group.c_str(), filter);
+        json->PutExtAttr("type", "ToggleType.Checkbox", filter);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
         auto select = paintProperty->GetCheckBoxSelectValue(false);
-        json->Put("select", select ? "true" : "false");
+        json->PutExtAttr("select", select ? "true" : "false", filter);
+    }
+
+    void SetOriginalCheckboxStyle(OriginalCheckBoxStyle style)
+    {
+        originalStyle_ = style;
+    }
+
+    OriginalCheckBoxStyle GetOriginalCheckboxStyle()
+    {
+        return originalStyle_;
     }
 
     FocusPattern GetFocusPattern() const override;
@@ -177,6 +220,9 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
+    void OnAttachToMainTree() override;
+    void StartCustomNodeAnimation(bool select);
+    RefPtr<GroupManager> GetGroupManager();
 
 private:
     void OnAttachToFrameNode() override;
@@ -186,11 +232,19 @@ private:
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
+    void InitFocusEvent();
     void OnClick();
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     void CheckPageNode();
+    void LoadBuilder();
+    void UpdateIndicator();
+    void SetBuilderNodeHidden();
+    void StartEnterAnimation();
+    void StartExitAnimation();
     void UpdateState();
     void UpdateUnSelect();
     void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
@@ -200,6 +254,7 @@ private:
     void UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* frameNode,
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap);
     void CheckBoxGroupIsTrue();
+    void SetPrePageIdToLastPageId();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -207,11 +262,22 @@ private:
     void RemoveLastHotZoneRect() const;
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
+    void ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProperty>& paintProperty,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap);
+    void ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkBoxGroupNode, const std::vector<std::string>& vec,
+        bool haveCheckBoxSelected, bool isAllCheckBoxSelected);
+    std::string GetGroupNameWithNavId();
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
 
+    std::optional<CheckBoxMakeCallback> makeFunc_;
+    std::optional<SwitchMakeCallback> toggleMakeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
     int32_t prePageId_ = 0;
     bool lastSelect_ = false;
+    std::optional<std::string> currentNavId_ = std::nullopt;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -220,6 +286,7 @@ private:
     bool isHover_ = false;
     bool isFirstCreated_ = true;
     bool isUserSetResponseRegion_ = false;
+    bool focusEventInitialized_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
@@ -228,8 +295,12 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
+    OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
+    RefPtr<FrameNode> builderNode_;
+    std::optional<std::function<void()>> builder_;
 
     RefPtr<CheckBoxModifier> checkboxModifier_;
+    WeakPtr<GroupManager> groupManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxPattern);
 };

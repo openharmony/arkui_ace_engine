@@ -82,6 +82,8 @@ public:
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
     void CleanRecognizerState() override;
+    GestureEvent GetGestureEventInfo();
+    ClickInfo GetClickInfo();
 
 private:
     // Recognize whether MOVE/UP event is in response region.

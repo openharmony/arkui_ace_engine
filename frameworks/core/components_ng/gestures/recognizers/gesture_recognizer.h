@@ -59,8 +59,8 @@ public:
     static void ResetGlobalTransCfg();
 
     // IsRealTime is true when using real-time layouts.
-    static void Transform(
-        PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false, bool isPostEventResult = false);
+    static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false,
+        bool isPostEventResult = false, int32_t postEventNodeId = -1);
 
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
     void BeginReferee(int32_t touchId, bool needUpdateChild = false)
@@ -300,6 +300,11 @@ public:
         return true;
     }
 
+    virtual bool AboutToMinusCurrentFingers(int32_t touchId)
+    {
+        return true;
+    }
+
     bool IsInAttachedNode(const TouchEvent& event);
 
 protected:
@@ -326,6 +331,9 @@ protected:
 
     virtual void OnSucceedCancel() {}
     bool ShouldResponse() override;
+
+    void HandleWillAccept();
+    void HandleDidAccept();
 
     RefereeState refereeState_ = RefereeState::READY;
 

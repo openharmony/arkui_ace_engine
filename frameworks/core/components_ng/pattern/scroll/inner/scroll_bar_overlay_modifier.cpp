@@ -192,6 +192,7 @@ void ScrollBarOverlayModifier::StartHoverAnimation(const Rect& fgRect, HoverAnim
 {
     // Only the cross axis offset is updated, the main axis offset will be updated by adaptAnimation.
     if (hoverAnimationType == HoverAnimationType::NONE) {
+        SetCrossModeSize(fgRect.GetSize());
         SetCrossModeOffset(fgRect.GetOffset());
         return;
     }

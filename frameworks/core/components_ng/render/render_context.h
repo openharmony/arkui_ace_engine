@@ -53,6 +53,7 @@ namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
+class InspectorFilter;
 class Modifier;
 
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
@@ -60,7 +61,7 @@ using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
 // RenderContext is used for render node to paint.
-class RenderContext : public virtual AceType {
+class ACE_FORCE_EXPORT RenderContext : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderContext, AceType)
 
 public:
@@ -73,6 +74,7 @@ public:
 
     virtual void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
+    FrameNode* GetUnsafeHost() const;
 
     virtual void SetNeedDebugBoundary(bool flag) {}
     virtual bool NeedDebugBoundary() const
@@ -134,18 +136,27 @@ public:
 
     virtual void OnModifyDone() {}
 
-    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS, HARDWARE_SURFACE };
+    enum class ContextType : int8_t {
+        CANVAS,
+        ROOT,
+        SURFACE,
+        EFFECT,
+        EXTERNAL,
+        INCREMENTAL_CANVAS,
+        HARDWARE_SURFACE,
+#ifdef RENDER_EXTRACT_SUPPORTED
+        HARDWARE_TEXTURE,
+#endif
+    };
+
     enum class PatternType : int8_t { DEFAULT, VIDEO };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
         PatternType patternType = PatternType::DEFAULT;
     };
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface = false) {}
-#else
+
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
-#endif
 
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
@@ -248,6 +259,7 @@ public:
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
     virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
     virtual void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
+    virtual void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
@@ -277,7 +289,7 @@ public:
     virtual void SetFrame(float positionX, float positionY, float width, float height) {}
     virtual void SetOpacity(float opacity) {}
     virtual void SetTranslate(float translateX, float translateY, float translateZ) {}
-
+    virtual void CleanTransition() {}
     virtual void SetRectMask(const RectF& rect, const ShapeMaskProperty& property) {}
     virtual void SetCircleMask(const Circle& circle, const ShapeMaskProperty& property) {}
     virtual void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) {}
@@ -288,6 +300,9 @@ public:
     {
         return {};
     }
+
+    virtual void SavePaintRect(bool isRound = true, uint8_t flag = 0) {}
+    virtual void SyncPartialRsProperties() {}
 
     virtual std::pair<RectF, bool> GetPaintRectWithTranslate()
     {
@@ -336,7 +351,7 @@ public:
 
     virtual void SetTransitionInCallback(std::function<void()>&& callback) {}
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
@@ -346,7 +361,7 @@ public:
 
     virtual void DumpAdvanceInfo() {}
 
-    void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option);
     const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const;
@@ -395,16 +410,19 @@ public:
     virtual void ClearAccessibilityFocus() {};
 
     virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {};
+    virtual void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnPositionEdgesUpdate(const EdgesParam& value) {}
+    virtual void RecalculatePosition() {}
     virtual void OnZIndexUpdate(int32_t value) {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
+    virtual void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) {}
     virtual void SetAlphaOffscreen(bool isOffScreen) {}
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
@@ -413,12 +431,14 @@ public:
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
     virtual void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) {}
     virtual void OnSuggestedRenderGroupUpdate(bool isRenderGroup) {}
+    virtual void OnDynamicDimDegreeUpdate(const float degree) {}
     virtual void OnRenderFitUpdate(RenderFit renderFit) {}
     virtual void OnNodeNameUpdate(const std::string& id) {}
     virtual void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionArray) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicDimDegree, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ParticleOptionArray, std::list<ParticleOption>);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
     virtual RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false)
@@ -450,6 +470,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImagePosition, BackgroundImagePosition);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageResizableSlice, ImageResizableSlice);
 
     // BorderImage
     ACE_DEFINE_PROPERTY_GROUP(BdImage, BorderImageProperty);
@@ -467,7 +488,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(NodeName, std::string);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SuggestedRenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundEffect, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicRangeMode, DynamicRangeMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
 
     // CustomBackground
@@ -489,6 +512,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpRate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpDegree, float);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BgDynamicBrightnessOption, BrightnessOption);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FgDynamicBrightnessOption, BrightnessOption);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendApplyType, BlendApplyType);
@@ -511,6 +536,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(PointLight, PointLightProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightPosition, TranslateOptions);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightIntensity, float);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightColor, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightIlluminated, uint32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, IlluminatedBorderWidth, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, Bloom, float);
@@ -555,6 +581,7 @@ public:
 
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocusRect, RectT<int32_t>);
 
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
@@ -571,7 +598,7 @@ public:
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
-    virtual void SetUsingContentRectForRenderFrame(bool value) {}
+    virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual std::vector<double> GetTrans()
     {
         return std::vector<double>();
@@ -599,6 +626,8 @@ public:
         return false;
     }
 
+    virtual void SetSurfaceRotation(bool isLock) {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -611,9 +640,11 @@ protected:
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
+    virtual void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) {}
 
     virtual void OnForegroundColorUpdate(const Color& value) {}
     virtual void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) {}
+    virtual void OnForegroundEffectUpdate(float radius) {};
 
     virtual void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) {}
     virtual void OnBackgroundAlignUpdate(const Alignment& align) {}
@@ -638,6 +669,7 @@ protected:
 
     virtual void OnLightPositionUpdate(const TranslateOptions& value) {}
     virtual void OnLightIntensityUpdate(const float value) {}
+    virtual void OnLightColorUpdate(const Color& value) {}
     virtual void OnLightIlluminatedUpdate(const uint32_t value) {}
     virtual void OnIlluminatedBorderWidthUpdate(const Dimension& value) {}
     virtual void OnBloomUpdate(const float value) {}
@@ -669,6 +701,8 @@ protected:
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
     virtual void OnDynamicLightUpRateUpdate(const float rate) {}
     virtual void OnDynamicLightUpDegreeUpdate(const float degree) {}
+    virtual void OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) {}
+    virtual void OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
     virtual void OnBackBlendModeUpdate(BlendMode blendMode) {}
     virtual void OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType) {}

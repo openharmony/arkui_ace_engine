@@ -14,16 +14,18 @@
  */
 
 #include "gtest/gtest.h"
+#include "base/geometry/offset.h"
 #define private public
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -33,6 +35,8 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -44,6 +48,7 @@ constexpr float DEVICE_WIDTH = 720.0f;
 constexpr float DEVICE_HEIGHT = 1136.0f;
 constexpr float SCROLL_BAR_FLOAT_10 = 10.0f;
 constexpr float SCROLL_BAR_FLOAT_100 = 100.0f;
+constexpr float SCROLL_BAR_FLOAT_200 = 200.0f;
 constexpr float SCROLL_BAR_FLOAT_NEGATIVE_100 = -100.0f;
 constexpr double SCROLL_BAR_CHILD_WIDTH = 30.0;
 constexpr double SCROLL_BAR_CHILD_HEIGHT = 100.0;
@@ -63,6 +68,8 @@ protected:
     void CreateScrollBarWithoutChild(bool infoFlag, bool proxyFlag, int directionValue, int stateValue);
     void CreateScrollBar(
         bool infoFlag, bool proxyFlag, int directionValue, int stateValue, const LayoutConstraintF& layoutConstraint);
+    void CreateScrollBarWithoutSubComponent(
+        bool infoFlag, bool proxyFlag, int directionValue, int stateValue, const LayoutConstraintF& layoutConstraint);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ScrollBarPattern> pattern_;
@@ -70,6 +77,8 @@ protected:
     RefPtr<ScrollBarAccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutAlgorithm> layoutAlgorithm_;
     RefPtr<LayoutWrapperNode> layoutWrapper_;
+    RefPtr<ScrollablePaintProperty> paintProperty_;
+    RefPtr<ScrollBar> scrollBar_;
 };
 
 void ScrollBarTestNg::SetUpTestSuite()
@@ -92,6 +101,7 @@ void ScrollBarTestNg::TearDown()
     accessibilityProperty_ = nullptr;
     layoutAlgorithm_ = nullptr;
     layoutWrapper_ = nullptr;
+    scrollBar_ = nullptr;
 }
 
 void ScrollBarTestNg::GetInstance()
@@ -100,6 +110,7 @@ void ScrollBarTestNg::GetInstance()
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ScrollBarPattern>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ScrollBarLayoutProperty>();
+    paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ScrollBarAccessibilityProperty>();
     layoutAlgorithm_ = pattern_->CreateLayoutAlgorithm();
 }
@@ -142,6 +153,23 @@ void ScrollBarTestNg::CreateScrollBar(
 
     layoutAlgorithm_->Measure(AceType::RawPtr(layoutWrapper_));
     layoutAlgorithm_->Layout(AceType::RawPtr(layoutWrapper_));
+}
+
+void ScrollBarTestNg::CreateScrollBarWithoutSubComponent(
+    bool infoFlag, bool proxyFlag, int directionValue, int stateValue, const LayoutConstraintF& layoutConstraint)
+{
+    ScrollBarModelNG model;
+    RefPtr<ScrollProxy> scrollProxy;
+    auto proxy = model.GetScrollBarProxy(scrollProxy);
+    model.Create(proxy, infoFlag, proxyFlag, directionValue, stateValue);
+    GetInstance();
+
+    layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty_->UpdateContentConstraint();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    layoutWrapper_ = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    layoutWrapper_->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm_));
+    layoutAlgorithm_->Measure(AceType::RawPtr(layoutWrapper_));
 }
 
 /**
@@ -202,6 +230,12 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. Create scrollBar and initialize related properties.
      */
+    MockPipelineContext::SetUp();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    context->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ScrollBarTheme>()));
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = CONTAINER_SIZE;
     layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
@@ -1197,5 +1231,377 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest019, TestSize.Level1)
     scrollBarProxy->NotifySnapScroll(10.0f, 10.0f, 1.0f, 1.0f);
     EXPECT_EQ(scrollSnapDelta, -10.0);
     EXPECT_EQ(scrollSnapVelocity, 10.0);
+}
+
+/**
+ * @tc.name: HandleClickScroll001
+ * @tc.desc: Test scrolling when clicking on the scroll bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleClickScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateScrollBar , GestureEvent and ScrollBarProxy.
+     * @tc.expected: create CreateScrollBar , GestureEvent and ScrollBarProxy created successfully.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON), layoutConstraint);
+    pattern_->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
+    auto scrollBarProxy = pattern_->scrollBarProxy_;
+    GestureEvent info;
+    info.SetLocalLocation(Offset(1.0f, 1.0f));
+    pattern_->InitClickEvent();
+    const RectF& rect = RectF(0.0f, 10.0f, 30.0f, 50.0f);
+    const SizeF& size = SizeF(10.0f, 20.0f);
+    auto scrollBar = pattern_->GetHost();
+    scrollBar->GetGeometryNode()->SetFrameSize(size);
+    pattern_->SetChildRect(rect);
+    // /**
+    //  * @tc.steps: step2. Test HandleClickEvent.
+    //  * @tc.expect: reverse is FALSE.
+    //  */
+    pattern_->isMousePressed_ = true;
+    auto reverse = false;
+    auto smooth = false;
+    auto scrollPageFunction = [&reverse, &smooth](bool parameter1, bool parameter2) {
+        reverse = parameter1;
+        smooth = parameter2;
+    };
+    auto scrollPattern1 = AceType::MakeRefPtr<ScrollPattern>();
+    EXPECT_NE(scrollPattern1, nullptr);
+    auto* scrollRaw1 = AceType::RawPtr(scrollPattern1);
+    EXPECT_NE(scrollRaw1, nullptr);
+    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(scrollRaw1), nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, std::move(scrollPageFunction) });
+    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 1);
+    // /**
+    //  * @tc.steps: step2. Test HandleClickEvent.
+    //  * @tc.expect: reverse is TRUE or FALSE.
+    //  */
+    pattern_->HandleClickEvent(info);
+    EXPECT_TRUE(reverse);
+    GestureEvent info1;
+    info1.SetLocalLocation(Offset(1.0f, 70.0f));
+    pattern_->HandleClickEvent(info1);
+    EXPECT_FALSE(reverse);
+    GestureEvent info2;
+    info2.SetLocalLocation(Offset(1.0f, 35.0f));
+    pattern_->HandleClickEvent(info2);
+    EXPECT_FALSE(reverse);
+}
+
+/**
+ * @tc.name: HandleLongPressScroll001
+ * @tc.desc: Test long press and hold scrolling when clicking on the scroll bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleLongPressScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateScrollBar and ScrollBarProxy.
+     * @tc.expected: create CreateScrollBar and ScrollBarProxy created successfully.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON), layoutConstraint);
+    pattern_->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
+    auto scrollBarProxy = pattern_->scrollBarProxy_;
+    pattern_->InitLongPressEvent();
+    pattern_->locationInfo_ = Offset(1.0f, 1.0f);
+    const RectF& rect = RectF(0.0f, 10.0f, 30.0f, 50.0f);
+    const SizeF& size = SizeF(10.0f, 100.0f);
+    auto scrollBar = pattern_->GetHost();
+    scrollBar->GetGeometryNode()->SetFrameSize(size);
+    pattern_->SetChildRect(rect);
+    pattern_->isMousePressed_ = true;
+    auto reverse = false;
+    auto smooth = false;
+    auto scrollPageFunction = [this, &reverse, &smooth](bool parameter1, bool parameter2) {
+        reverse = parameter1;
+        smooth = parameter2;
+        pattern_->isMousePressed_ = false;
+    };
+    auto scrollPattern1 = AceType::MakeRefPtr<ScrollPattern>();
+    EXPECT_NE(scrollPattern1, nullptr);
+    auto* scrollRaw1 = AceType::RawPtr(scrollPattern1);
+    EXPECT_NE(scrollRaw1, nullptr);
+    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(scrollRaw1), nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, std::move(scrollPageFunction) });
+    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 1);
+    // /**
+    //  * @tc.steps: step2. Test HandleClickEvent.
+    //  * @tc.expect: reverse equal to TRUE or FALSE.
+    //  */
+    pattern_->HandleLongPress(true);
+    EXPECT_TRUE(reverse);
+    pattern_->locationInfo_ = Offset(1.0f, 70.0f);
+    pattern_->isMousePressed_ = true;
+    pattern_->scrollingUp_ = false;
+    pattern_->scrollingDown_ = false;
+    pattern_->HandleLongPress(true);
+    EXPECT_FALSE(reverse);
+    pattern_->locationInfo_ = Offset(1.0f, 35.0f);
+    pattern_->isMousePressed_ = true;
+    pattern_->scrollingUp_ = false;
+    pattern_->scrollingDown_ = false;
+    pattern_->HandleLongPress(true);
+    EXPECT_FALSE(reverse);
+}
+
+/**
+ * @tc.name: InitMouseEvent001
+ * @tc.desc: Test mouse event callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, InitMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateScrollBar and MouseInfo.
+     * @tc.expected: create CreateScrollBar and MouseInfo created successfully.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON), layoutConstraint);
+    // /**
+    //  * @tc.steps: step2. Test HandleMouseEvent.
+    //  * @tc.expect: isMousePressed_ is FALSE.
+    //  */
+    pattern_->InitMouseEvent();
+    MouseInfo info;
+    info.SetAction(MouseAction::PRESS);
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    auto& inputEvents = pattern_->GetEventHub<EventHub>()->GetInputEventHub()->mouseEventActuator_->inputEvents_;
+    EXPECT_EQ(inputEvents.size(), 1);
+    for (const auto& callback : inputEvents) {
+        if (callback) {
+            (*callback)(info);
+        }
+    }
+    EXPECT_TRUE(pattern_->isMousePressed_);
+    MouseInfo info1;
+    info1.SetAction(MouseAction::RELEASE);
+    info1.SetButton(MouseButton::LEFT_BUTTON);
+    for (const auto& callback : inputEvents) {
+        if (callback) {
+            (*callback)(info1);
+        }
+    }
+    EXPECT_FALSE(pattern_->isMousePressed_);
+}
+
+/**
+ * @tc.name: BarCollectLongPressTarget001
+ * @tc.desc: Test OnCollectLongPressTarget of ScrollBarPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, BarCollectLongPressTarget001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBar(true, true, -1, -1, layoutConstraint);
+
+    /**
+     * @tc.steps: step2. Verify the OnCollectLongPressTarget function of ScrollBarPattern.
+     * @tc.expected: step2. Compare the value with expected value.
+     */
+    const RectF& rect = pattern_->childRect_;
+    PointF localPoint = PointF(rect.Width() + rect.GetX(), rect.Height() + rect.GetY());
+    const SourceType source = SourceType::TOUCH;
+    OffsetF coordinateOffset;
+    GetEventTargetImpl getEventTargetImpl;
+    TouchTestResult result;
+    const int32_t size = result.size();
+    EXPECT_EQ(pattern_->scrollableEvent_->InBarRectRegion(localPoint, source), true);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    pattern_->scrollableEvent_->BarCollectLongPressTarget(
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+    EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
+    EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
+    EXPECT_EQ(result.size(), size + 1);
+
+    localPoint.SetX(localPoint.GetX() + 1);
+    localPoint.SetY(localPoint.GetY() + 1);
+    EXPECT_EQ(pattern_->scrollableEvent_->InBarRectRegion(localPoint, source), true);
+
+    pattern_->longPressRecognizer_ = nullptr;
+    pattern_->scrollableEvent_->BarCollectLongPressTarget(
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+    EXPECT_EQ(result.size(), size + 1);
+}
+
+/**
+ * @tc.name: ScrollBarTest020
+ * @tc.desc: When axis is VERTICAL, and no subcomponents, verify the Measure and Layout,
+ * and related functions in the scrollbar pattern functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest020, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(
+        true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::OFF), layoutConstraint);
+    auto scrollBarSize = layoutWrapper_->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(scrollBarSize, SCROLL_BAR_SELF_SIZE) << "scrollBarSize: " << scrollBarSize.ToString()
+                                                   << " SCROLL_BAR_SELF_SIZE: " << SCROLL_BAR_SELF_SIZE.ToString();
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    config.skipLayout = false;
+    pattern_->SetChild(false);
+    auto ret = pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper_, config);
+    EXPECT_EQ(ret, true);
+    pattern_->SetChild(true);
+    pattern_->preFrameChildState_ = true;
+    ret = pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper_, config);
+    EXPECT_EQ(ret, false);
+    CreateScrollBarWithoutSubComponent(
+        true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON), layoutConstraint);
+    ret = pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper_, config);
+    EXPECT_EQ(ret, true);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest021
+ * @tc.desc: When axis is HORIZONTAL, and no subcomponents, verify the Measure and Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest021, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(
+        true, false, static_cast<int>(Axis::HORIZONTAL), static_cast<int>(DisplayMode::ON), layoutConstraint);
+    auto scrollBarSize = layoutWrapper_->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(scrollBarSize, SCROLL_BAR_SELF_SIZE) << "scrollBarSize: " << scrollBarSize.ToString()
+                                                   << " SCROLL_BAR_SELF_SIZE: " << SCROLL_BAR_SELF_SIZE.ToString();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest022
+ * @tc.desc: Test NotifyScrollBarNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest022, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+    RefPtr<ScrollProxy> ScrollProxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    EXPECT_NE(ScrollProxy, nullptr);
+    auto distance = -1.0;
+    auto source = SCROLL_FROM_START;
+    auto scrollFunction = [&distance, &source](double parameter1, int32_t parameter2) {
+        distance = parameter1;
+        source = parameter2;
+        return true;
+    };
+    auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(ScrollProxy);
+    EXPECT_NE(scrollBarProxy, nullptr);
+    auto scrollPattern1 = AceType::MakeRefPtr<ScrollPattern>();
+    EXPECT_NE(scrollPattern1, nullptr);
+    auto* scrollRaw1 = AceType::RawPtr(scrollPattern1);
+    EXPECT_NE(scrollRaw1, nullptr);
+    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(scrollRaw1), std::move(scrollFunction) });
+    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 1);
+    scrollBarProxy->NotifyScrollBarNode(1.0, SCROLL_FROM_BAR);
+    EXPECT_EQ(distance, 1.0);
+    EXPECT_EQ(source, SCROLL_FROM_BAR);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest023
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest023, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_100);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::OFF;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_100);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_100);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest024
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest024, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    scrollBar->SetHoverAnimationType(HoverAnimationType::GROW);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

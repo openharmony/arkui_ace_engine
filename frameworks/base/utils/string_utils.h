@@ -35,9 +35,13 @@ namespace OHOS::Ace::StringUtils {
 ACE_EXPORT extern const char DEFAULT_STRING[];
 ACE_EXPORT extern const std::wstring DEFAULT_WSTRING;
 ACE_EXPORT extern const std::u16string DEFAULT_USTRING;
+ACE_EXPORT extern const std::u32string DEFAULT_U32STRING;
 constexpr int32_t TEXT_CASE_LOWERCASE = 1;
 constexpr int32_t TEXT_CASE_UPPERCASE = 2;
 constexpr double PERCENT_VALUE = 100.0;
+constexpr double DEGREES_VALUE = 360.0; // one turn means 360 deg
+constexpr double GRADIANS_VALUE = 400.0; // one turn means 400 grad
+constexpr double RADIANS_VALUE = 2 * M_PI; // one turn means 2*pi rad
 const char ELLIPSIS[] = "...";
 
 inline std::u16string Str8ToStr16(const std::string& str)
@@ -89,6 +93,26 @@ inline std::string ToString(const std::wstring& str)
 #else
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert(DEFAULT_STRING);
 #endif
+    std::string result = convert.to_bytes(str);
+    return result == DEFAULT_STRING ? "" : result;
+}
+
+inline std::u32string ToU32string(const std::string& str)
+{
+    if (str == DEFAULT_STRING) {
+        return DEFAULT_U32STRING;
+    }
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert(DEFAULT_STRING, DEFAULT_U32STRING);
+    std::u32string result = convert.from_bytes(str);
+    return result == DEFAULT_U32STRING ? U"" : result;
+}
+
+inline std::string U32StringToString(const std::u32string& str)
+{
+    if (str == DEFAULT_U32STRING) {
+        return DEFAULT_STRING;
+    }
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert(DEFAULT_STRING);
     std::string result = convert.to_bytes(str);
     return result == DEFAULT_STRING ? "" : result;
 }
@@ -176,13 +200,13 @@ inline int32_t StringToInt(const std::string& value)
     }
 }
 
-inline int64_t StringToLongInt(const std::string& value)
+inline int64_t StringToLongInt(const std::string& value, int64_t defaultErr = 0)
 {
     errno = 0;
     char* pEnd = nullptr;
     int64_t result = std::strtoll(value.c_str(), &pEnd, 10);
     if (pEnd == value.c_str() || errno == ERANGE) {
-        return 0;
+        return defaultErr;
     } else {
         return result;
     }
@@ -239,6 +263,7 @@ inline double StringToDouble(const std::string& value)
 // string to double method with success check, and support for parsing number string with percentage case
 inline bool StringToDouble(const std::string& value, double& result)
 {
+    errno = 0;
     char* pEnd = nullptr;
     double res = std::strtod(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
@@ -257,6 +282,7 @@ inline bool StringToDouble(const std::string& value, double& result)
 
 inline float StringToFloat(const std::string& value)
 {
+    errno = 0;
     char* pEnd = nullptr;
     float result = std::strtof(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
@@ -413,9 +439,6 @@ inline std::string ReplaceChar(std::string str, char old_char, char new_char)
 inline double StringToDegree(const std::string& value)
 {
     // https://developer.mozilla.org/zh-CN/docs/Web/CSS/angle
-    constexpr static double DEGREES = 360.0;
-    constexpr static double GRADIANS = 400.0;
-    constexpr static double RADIUS = 2 * M_PI;
 
     errno = 0;
     char* pEnd = nullptr;
@@ -426,14 +449,47 @@ inline double StringToDegree(const std::string& value)
         if ((std::strcmp(pEnd, "deg")) == 0) {
             return result;
         } else if (std::strcmp(pEnd, "grad") == 0) {
-            return result / GRADIANS * DEGREES;
+            return result / GRADIANS_VALUE * DEGREES_VALUE;
         } else if (std::strcmp(pEnd, "rad") == 0) {
-            return result / RADIUS * DEGREES;
+            return result / RADIANS_VALUE * DEGREES_VALUE;
         } else if (std::strcmp(pEnd, "turn") == 0) {
-            return result * DEGREES;
+            return result * DEGREES_VALUE;
         }
     }
     return StringToDouble(value);
+}
+
+// StringToDegree with check. If the string is valid, change result and return true, otherwise return false.
+inline bool StringToDegree(const std::string& value, double& result)
+{
+    errno = 0;
+    char* pEnd = nullptr;
+    double temp = std::strtod(value.c_str(), &pEnd);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return false;
+    } else if (pEnd) {
+        if (*pEnd == '\0') {
+            result = temp;
+            return true;
+        }
+        if (std::strcmp(pEnd, "deg") == 0) {
+            result = temp;
+            return true;
+        }
+        if (std::strcmp(pEnd, "grad") == 0) {
+            result = temp / GRADIANS_VALUE * DEGREES_VALUE;
+            return true;
+        }
+        if (std::strcmp(pEnd, "rad") == 0) {
+            result = temp / RADIANS_VALUE * DEGREES_VALUE;
+            return true;
+        }
+        if (std::strcmp(pEnd, "turn") == 0) {
+            result = temp * DEGREES_VALUE;
+            return true;
+        }
+    }
+    return false;
 }
 
 template<class T>
@@ -461,6 +517,22 @@ inline void StringSplitter(
     if (startIndex < source.size()) {
         out.emplace_back(func(source.substr(startIndex)));
     }
+}
+
+inline bool ParseStringToArray(const std::string& input, std::vector<float>& output)
+{
+    std::istringstream iss(StringUtils::ReplaceChar(input, ',', ' '));
+    std::string token;
+
+    while (iss >> token) {
+        double value;
+        if (!StringToDouble(token, value)) {
+            return false;
+        }
+        output.emplace_back(value);
+    }
+
+    return true;
 }
 
 inline void StringSplitter(const std::string& source, char delimiter, std::vector<std::string>& out)

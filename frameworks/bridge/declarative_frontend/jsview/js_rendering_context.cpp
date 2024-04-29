@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,9 @@
  */
 
 #include "js_rendering_context.h"
+
 #include <cstdint>
+
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
@@ -28,40 +30,31 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
+#include "bridge/declarative_frontend/jsview/models/canvas/canvas_rendering_context_2d_model_impl.h"
 #include "core/common/container_scope.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/rendering_context_model_impl.h"
-#include "frameworks/core/components_ng/pattern/rendering_context/rendering_context_model_ng.h"
+#include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<RenderingContextModel> RenderingContextModel::instance_ = nullptr;
-std::mutex RenderingContextModel::mutex_;
 struct CanvasAsyncCxt {
     napi_env env = nullptr;
     napi_deferred deferred = nullptr;
 };
-RenderingContextModel* RenderingContextModel::GetInstance()
-{
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-#ifdef NG_BUILD
-            instance_.reset(new NG::RenderingContextModelNG());
-#else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::RenderingContextModelNG());
-            } else {
-                instance_.reset(new Framework::RenderingContextModelImpl());
-            }
-#endif
-        }
-    }
-    return instance_.get();
-}
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
-JSRenderingContext::JSRenderingContext() {}
+JSRenderingContext::JSRenderingContext()
+{
+#ifdef NG_BUILD
+    renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+    } else {
+        renderingContext2DModel_ = AceType::MakeRefPtr<Framework::CanvasRenderingContext2DModelImpl>();
+    }
+#endif
+}
 
 void JSRenderingContext::JSBind(BindingTarget globalObj)
 {
@@ -159,6 +152,7 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("createConicGradient", &JSCanvasRenderer::JsCreateConicGradient);
     JSClass<JSRenderingContext>::CustomMethod("saveLayer", &JSCanvasRenderer::JsSaveLayer);
     JSClass<JSRenderingContext>::CustomMethod("restoreLayer", &JSCanvasRenderer::JsRestoreLayer);
+    JSClass<JSRenderingContext>::CustomMethod("reset", &JSCanvasRenderer::JsReset);
     JSClass<JSRenderingContext>::CustomMethod("startImageAnalyzer", &JSRenderingContext::JsStartImageAnalyzer);
     JSClass<JSRenderingContext>::CustomMethod("stopImageAnalyzer", &JSRenderingContext::JsStopImageAnalyzer);
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
@@ -193,7 +187,9 @@ void JSRenderingContext::Destructor(JSRenderingContext* controller)
 void JSRenderingContext::JsGetWidth(const JSCallbackInfo& info)
 {
     double width = 0.0;
-    RenderingContextModel::GetInstance()->GetWidth(canvasPattern_, width);
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasRenderingContext2DModel);
+    canvasRenderingContext2DModel->GetWidth(canvasPattern_, width);
 
     width = PipelineBase::Px2VpWithCurrentDensity(width);
     auto returnValue = JSVal(ToJSValue(width));
@@ -214,7 +210,9 @@ void JSRenderingContext::JsSetHeight(const JSCallbackInfo& info)
 void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
 {
     double height = 0.0;
-    RenderingContextModel::GetInstance()->GetHeight(canvasPattern_, height);
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasRenderingContext2DModel);
+    canvasRenderingContext2DModel->GetHeight(canvasPattern_, height);
 
     height = PipelineBase::Px2VpWithCurrentDensity(height);
     auto returnValue = JSVal(ToJSValue(height));
@@ -224,6 +222,7 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
 
 void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     if (info.Length() == 0) {
         return;
     }
@@ -231,21 +230,24 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
         return;
     }
     auto engine = EngineHelper::GetCurrentEngine();
-    if (engine != nullptr) {
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-        panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
-    
-        uint32_t id = 0;
-        napi_value widthId = nullptr;
-        napi_get_named_property(env, napiValue, "__id", &widthId);
-        napi_get_value_uint32(env, widthId, &id);
-        RefPtr<AceType> offscreenPattern = JSOffscreenRenderingContext::GetOffscreenPattern(id);
-        RenderingContextModel::GetInstance()->SetTransferFromImageBitmap(
-            canvasPattern_, offscreenPattern);
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    void* nativeObj = nullptr;
+    auto status = napi_unwrap(env, napiValue, &nativeObj);
+    if (status != napi_ok) {
+        return;
     }
+    auto jsImage = (JSRenderImage*)nativeObj;
+    uint32_t id = jsImage->GetContextId();
+
+    RefPtr<AceType> offscreenPattern = JSOffscreenRenderingContext::GetOffscreenPattern(id);
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasRenderingContext2DModel);
+    canvasRenderingContext2DModel->SetTransferFromImageBitmap(canvasPattern_, offscreenPattern);
 }
 
 napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& errMsg = "")
@@ -260,11 +262,41 @@ napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& er
     return error;
 }
 
-void HandleReject(const shared_ptr<CanvasAsyncCxt>& ctx, int32_t errCode, const std::string& errMsg = "")
+void HandleDeferred(const shared_ptr<CanvasAsyncCxt>& asyncCtx, ImageAnalyzerState state)
 {
+    auto env = asyncCtx->env;
+    CHECK_NULL_VOID(env);
+    auto deferred = asyncCtx->deferred;
+    CHECK_NULL_VOID(deferred);
+
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
     napi_value result = nullptr;
-    result = CreateErrorValue(ctx->env, errCode, errMsg);
-    napi_reject_deferred(ctx->env, ctx->deferred, result);
+    switch (state) {
+        case ImageAnalyzerState::UNSUPPORTED:
+            result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_UNSUPPORTED);
+            napi_reject_deferred(env, deferred, result);
+            break;
+        case ImageAnalyzerState::ONGOING:
+            result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_IS_ONGOING);
+            napi_reject_deferred(env, deferred, result);
+            break;
+        case ImageAnalyzerState::STOPPED:
+            result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_IS_STOPPED);
+            napi_reject_deferred(env, deferred, result);
+            break;
+        case ImageAnalyzerState::FINISHED:
+            napi_get_null(env, &result);
+            napi_resolve_deferred(env, deferred, result);
+            break;
+        default:
+            break;
+    }
+    napi_close_handle_scope(env, scope);
 }
 
 void ReturnPromise(const JSCallbackInfo& info, napi_value result)
@@ -280,24 +312,24 @@ void ReturnPromise(const JSCallbackInfo& info, napi_value result)
 void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_);
-    napi_value promise = nullptr;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        ReturnPromise(info, promise);
-        return;
-    }
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     auto env = reinterpret_cast<napi_env>(nativeEngine);
-    ScopeRAII scopeRaii(env);
-
-    panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
-    JSValueWrapper valueWrapper = value;
-    napi_value configNativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
     auto asyncCtx = std::make_shared<CanvasAsyncCxt>();
     asyncCtx->env = env;
+    napi_value promise = nullptr;
     napi_create_promise(env, &asyncCtx->deferred, &promise);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        ReturnPromise(info, promise);
+        return;
+    }
+
+    ScopeRAII scopeRaii(env);
+    panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value configNativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     if (isImageAnalyzing_) {
         napi_value result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_IS_ONGOING);
         napi_reject_deferred(env, asyncCtx->deferred, result);
@@ -305,35 +337,25 @@ void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
         return;
     }
 
-    onAnalyzedCallback onAnalyzed_ = [asyncCtx, weakCtx = WeakClaim(this)](bool isSucceed) {
+    onAnalyzedCallback onAnalyzed_ = [asyncCtx, weakCtx = WeakClaim(this)](ImageAnalyzerState state) {
+        CHECK_NULL_VOID(asyncCtx);
+        HandleDeferred(asyncCtx, state);
         auto ctx = weakCtx.Upgrade();
         CHECK_NULL_VOID(ctx);
-        auto env = asyncCtx->env;
-        napi_handle_scope scope = nullptr;
-        auto status = napi_open_handle_scope(asyncCtx->env, &scope);
-        if (status != napi_ok) {
-            return;
-        }
-
-        napi_value result = nullptr;
-        if (isSucceed) {
-            napi_get_null(env, &result);
-            napi_resolve_deferred(env, asyncCtx->deferred, result);
-        } else {
-            result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_UNSUPPORTED);
-            napi_reject_deferred(env, asyncCtx->deferred, result);
-        }
         ctx->isImageAnalyzing_ = false;
-        napi_close_handle_scope(env, scope);
     };
     isImageAnalyzing_ = true;
-    RenderingContextModel::GetInstance()->StartImageAnalyzer(canvasPattern_, configNativeValue, onAnalyzed_);
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasRenderingContext2DModel);
+    canvasRenderingContext2DModel->StartImageAnalyzer(canvasPattern_, configNativeValue, onAnalyzed_);
     ReturnPromise(info, promise);
 }
 
 void JSRenderingContext::JsStopImageAnalyzer(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_);
-    RenderingContextModel::GetInstance()->StopImageAnalyzer(canvasPattern_);
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasRenderingContext2DModel);
+    canvasRenderingContext2DModel->StopImageAnalyzer(canvasPattern_);
 }
 } // namespace OHOS::Ace::Framework

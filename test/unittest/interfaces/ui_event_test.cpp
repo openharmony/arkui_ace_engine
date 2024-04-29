@@ -16,11 +16,15 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-
 #include "ace_forward_compatibility.h"
 #include "interfaces/inner_api/ace/ui_event.h"
 #include "interfaces/inner_api/ace/ui_event_func.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components/popup/popup_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,8 +32,21 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 class UiEventTest : public testing::Test {
 public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
+    static void SetUpTestSuite()
+    {
+        NG::MockPipelineContext::SetUp();
+        MockContainer::SetUp();
+        MockContainer::Current()->pipelineContext_ = PipelineBase::GetCurrentContext();
+        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+        PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+        PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
+        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    }
+    static void TearDownTestSuite()
+    {
+        MockContainer::Current()->pipelineContext_ = nullptr;
+        NG::MockPipelineContext::TearDown();
+    }
     void SetUp() {}
     void TearDown() {}
 };
@@ -54,7 +71,7 @@ HWTEST_F(UiEventTest, UiEventTest001, TestSize.Level1)
     UIEvent::GetNodeProperty(pageUrl, nodeProperties);
 
     bool result = UIEventFunc::Get().IsAvailable();
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -75,6 +92,6 @@ HWTEST_F(UiEventTest, UiEventTest002, TestSize.Level1)
      */
     UIEvent::GetSimplifiedInspectorTree(tree);
     bool result = UIEventFunc::Get().IsAvailable();
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace

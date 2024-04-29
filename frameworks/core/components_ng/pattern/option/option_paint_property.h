@@ -18,6 +18,7 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -56,12 +57,12 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasIcon, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectModifiedWidth, float, PROPERTY_UPDATE_MEASURE);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
-        json->Put("hover", propHover_.value_or(false) ? "true" : "false");
-        json->Put("needDivider", propNeedDivider_.value_or(true) ? "true" : "false");
-        json->Put("hasIcon", propHasIcon_.value_or(false) ? "true" : "false");
+        PaintProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("hover", propHover_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("needDivider", propNeedDivider_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("hasIcon", propHasIcon_.value_or(false) ? "true" : "false", filter);
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPaintProperty);

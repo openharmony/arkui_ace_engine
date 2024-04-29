@@ -68,7 +68,7 @@ ArkUINativeModuleValue XComponentNodeBridge::Create(ArkUIRuntimeCallInfo* runtim
     void* jsXComponent = Framework::JSXComponent::Create(params);
     auto nativeModule = panda::NativePointerRef::New(
         vm, reinterpret_cast<void*>(jsXComponent),
-        [](void* data, [[maybe_unused]] void* hint) {
+        [](void *env, void* data, [[maybe_unused]] void* hint) {
             auto* jsXComponent = reinterpret_cast<Framework::JSXComponent*>(data);
             if (jsXComponent) {
                 delete jsXComponent;

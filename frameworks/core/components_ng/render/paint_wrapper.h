@@ -37,8 +37,8 @@ class PaintWrapper : public virtual AceType {
     DECLARE_ACE_TYPE(PaintWrapper, AceType)
 
 public:
-    PaintWrapper(
-        WeakPtr<RenderContext> renderContext, RefPtr<GeometryNode> geometryNode, RefPtr<PaintProperty> layoutProperty);
+    PaintWrapper(WeakPtr<RenderContext> renderContext, RefPtr<GeometryNode> geometryNode,
+        RefPtr<PaintProperty> layoutProperty, RefPtr<ExtensionHandler> handler = nullptr);
     ~PaintWrapper() override;
 
     void SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintImpl);
@@ -48,7 +48,7 @@ public:
         taskThread_ = taskThread;
     }
 
-    void FlushRender(const RefPtr<NG::DrawModifier>& drawModifier);
+    void FlushRender();
 
     TaskThread CanRunOnWhichThread() const
     {
@@ -105,11 +105,14 @@ public:
 
     void FlushOverlayModifier();
 
+    void FlushContentModifier();
+
 private:
     WeakPtr<RenderContext> renderContext_;
     RefPtr<GeometryNode> geometryNode_;
     RefPtr<PaintProperty> paintProperty_;
     RefPtr<NodePaintMethod> nodePaintImpl_;
+    RefPtr<ExtensionHandler> extensionHandler_;
     TaskThread taskThread_ = MAIN_TASK;
 };
 } // namespace OHOS::Ace::NG

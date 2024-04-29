@@ -34,6 +34,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float DEVICE_WIDTH = 480.f;
 constexpr float DEVICE_HEIGHT = 800.f;
 constexpr int32_t STATE_DEFAULT = 0;
@@ -72,12 +73,20 @@ public:
     void GetInstance();
     RefPtr<LayoutWrapperNode> RunMeasureAndLayout(float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
     void CreateImageAnimator(int32_t number = 1);
+    void CreatePixelMapAnimator(int32_t number = 1);
+    RefPtr<PixelMap> CreatePixelMap(const std::string& src);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ImageAnimatorPattern> pattern_;
     RefPtr<ImageAnimatorEventHub> eventHub_;
     RefPtr<LayoutProperty> layoutProperty_;
 };
+
+RefPtr<PixelMap> ImageAnimatorTestNg::CreatePixelMap(const std::string& src)
+{
+    RefPtr<PixelMap> pixelMap = nullptr;
+    return pixelMap;
+}
 
 void ImageAnimatorTestNg::SetUpTestCase()
 {
@@ -166,6 +175,28 @@ void ImageAnimatorTestNg::CreateImageAnimator(int32_t number)
     RunMeasureAndLayout();
 }
 
+void ImageAnimatorTestNg::CreatePixelMapAnimator(int32_t number)
+{
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
+    std::vector<ImageProperties> images;
+    for (int32_t index = 0; index < number; index++) {
+        ImageProperties imageProperties;
+        imageProperties.pixelMap = CreatePixelMap(IMAGE_SRC_URL);
+        imageProperties.width = IMAGE_WIDTH;
+        imageProperties.height = IMAGE_HEIGHT;
+        imageProperties.top = IMAGE_TOP;
+        imageProperties.left = IMAGE_LEFT;
+        images.push_back(imageProperties);
+    }
+    ImageAnimatorModelNG.SetImages(std::move(images));
+    ImageAnimatorModelNG.SetState(STATE_START);
+    ImageAnimatorModelNG.SetIsReverse(ISREVERSE_DEFAULT);
+    ImageAnimatorModelNG.SetIteration(ITERATION_DEFAULT);
+    GetInstance();
+    RunMeasureAndLayout();
+}
+
 /**
  * @tc.name: ImageAnimatorTest001
  * @tc.desc: Create ImageAnimator.
@@ -240,7 +271,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest002, TestSize.Level1)
      */
 
     auto jsonValue = JsonUtil::Create(true);
-    imageAnimatorPattern->ToJsonValue(jsonValue);
+    imageAnimatorPattern->ToJsonValue(jsonValue, filter);
     EXPECT_EQ(jsonValue->GetValue("state")->GetString().c_str(), STATUS_IDLE_STR);
     EXPECT_EQ(jsonValue->GetValue("duration")->GetString().c_str(), std::to_string(DURATION_DEFAULT));
     EXPECT_EQ(jsonValue->GetValue("iterations")->GetString().c_str(), std::to_string(ITERATION_DEFAULT));
@@ -298,7 +329,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest003, TestSize.Level1)
      */
 
     auto jsonValue = JsonUtil::Create(true);
-    imageAnimatorPattern->ToJsonValue(jsonValue);
+    imageAnimatorPattern->ToJsonValue(jsonValue, filter);
     std::string imagesStr = jsonValue->GetValue("images")->GetString();
     auto imageArray = JsonUtil::CreateArray(true);
     auto imageItem = JsonUtil::Create(true);
@@ -1282,4 +1313,56 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest021, TestSize.Level1)
     EXPECT_FALSE(maxWidth.IsValid());
     EXPECT_TRUE(maxHeight.IsValid());
 }
+
+/**
+ * @tc.name: ImageAnimatorTest022
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. images size is 0.
+     * @tc.expected: do nothing
+     */
+    CreatePixelMapAnimator(0);
+
+    /**
+     * @tc.steps: step2. SetShowingIndex() greater than images size-1.
+     * @tc.expected: nowImageIndex_ not change
+     */
+    CreatePixelMapAnimator(1);
+    pattern_->SetShowingIndex(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+
+    /**
+     * @tc.steps: step3. SetShowingIndex().
+     * @tc.expected: nowImageIndex_ is change
+     */
+    CreatePixelMapAnimator(2);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+    pattern_->SetShowingIndex(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 1);
+
+    // coverage fixedSize_ is false
+    pattern_->nowImageIndex_ = 0;
+    CreatePixelMapAnimator(2);
+    pattern_->fixedSize_ = false;
+    pattern_->SetShowingIndex(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 1);
+    EXPECT_TRUE(pattern_->cacheImages_.size());
+    pattern_->fixedSize_ = true;
+
+    // expected:images_ size is 2
+    CreatePixelMapAnimator(2);
+    EXPECT_TRUE(pattern_->images_.size() == 2);
+
+    CreatePixelMapAnimator(1);
+    ImageAnimatorPattern::CacheImageStruct cTemp;
+    int32_t iIndex = 2;
+    pattern_->UpdateCacheImageInfo(cTemp, iIndex);
+    // expected:iIndex > images_ size
+    EXPECT_TRUE(iIndex >= static_cast<int32_t>(pattern_->images_.size()));
+}
+
 } // namespace OHOS::Ace::NG

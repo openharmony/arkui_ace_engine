@@ -51,7 +51,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(LongPressEvent);
 };
 
-class ACE_EXPORT LongPressEventActuator : public GestureEventActuator {
+class ACE_FORCE_EXPORT LongPressEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(LongPressEventActuator, GestureEventActuator)
 public:
     explicit LongPressEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
@@ -62,11 +62,6 @@ public:
         longPressEvent_ = event;
         isForDrag_ = isForDrag;
         isDisableMouseLeft_ = isDisableMouseLeft;
-    }
-
-    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& longPressEvent)
-    {
-        longPressEvents_.remove(longPressEvent);
     }
 
     RefPtr<LongPressRecognizer> GetLongPressRecognizer() const
@@ -105,7 +100,6 @@ private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<LongPressEvent> longPressEvent_;
-    std::list<RefPtr<LongPressEvent>> longPressEvents_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LongPressEventActuator);
 };

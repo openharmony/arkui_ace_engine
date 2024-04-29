@@ -19,7 +19,6 @@
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
 
-#include "base/log/log.h"
 #include "base/memory/referenced.h"
 
 namespace OHOS::Ace::Napi {
@@ -32,9 +31,8 @@ static ComponentObserver* GetObserver(napi_env env, napi_value thisVar)
 {
     ComponentObserver* observer = nullptr;
     napi_unwrap(env, thisVar, (void**)&observer);
-    if (observer->thisVarRef_ == nullptr) {
-        observer->Initialize(env, thisVar);
-    }
+    observer->Initialize(env, thisVar);
+
     return observer;
 }
 
@@ -82,8 +80,6 @@ void ComponentObserver::callUserFunction(std::list<napi_ref>& cbList)
     if (scope == nullptr) {
         return;
     }
-    napi_value thisVal = nullptr;
-    napi_get_reference_value(env_, thisVarRef_, &thisVal);
 
     std::list<napi_value> cbs;
     for (auto& cbRef : cbList) {
@@ -94,7 +90,7 @@ void ComponentObserver::callUserFunction(std::list<napi_ref>& cbList)
     for (auto& cb : cbs) {
         napi_value resultArg = nullptr;
         napi_value result = nullptr;
-        napi_call_function(env_, thisVal, cb, 1, &resultArg, &result);
+        napi_call_function(env_, nullptr, cb, 1, &resultArg, &result);
     }
     napi_close_handle_scope(env_, scope);
 }
@@ -163,9 +159,7 @@ void ComponentObserver::FunctionOn(napi_env& env, napi_value result, const char*
 
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN(scope, nullptr);
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         CalloutType calloutType = CalloutType::UNKNOW;
@@ -196,9 +190,13 @@ void ComponentObserver::FunctionOff(napi_env& env, napi_value result, const char
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         CalloutType calloutType = CalloutType::UNKNOW;
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        CHECK_NULL_RETURN(scope, nullptr);
         size_t argc = ParseArgs(env, info, thisVar, cb, calloutType);
         ComponentObserver* observer = GetObserver(env, thisVar);
         if (!observer) {
+            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         if (calloutType == CalloutType::LAYOUTCALLOUT) {
@@ -206,6 +204,7 @@ void ComponentObserver::FunctionOff(napi_env& env, napi_value result, const char
         } else if (calloutType == CalloutType::DRAWCALLOUT) {
             observer->DeleteCallbackFromList(argc, observer->cbDrawList_, calloutType, cb, env);
         }
+        napi_close_handle_scope(env, scope);
         return nullptr;
     };
 
@@ -225,7 +224,6 @@ void ComponentObserver::NapiSerializer(napi_env& env, napi_value& result)
     napi_value componentIdVal = nullptr;
     napi_create_string_utf8(env, componentId_.c_str(), componentId_.size(), &componentIdVal);
     napi_set_named_property(env, result, "componentId", componentIdVal);
-    napi_close_handle_scope(env, scope);
 
     napi_wrap(
         env, result, this,
@@ -239,6 +237,7 @@ void ComponentObserver::NapiSerializer(napi_env& env, napi_value& result)
 
     FunctionOn(env, result, "on");
     FunctionOff(env, result, "off");
+    napi_close_handle_scope(env, scope);
 }
 
 void ComponentObserver::Initialize(napi_env env, napi_value thisVar)
@@ -251,7 +250,6 @@ void ComponentObserver::Initialize(napi_env env, napi_value thisVar)
     if (env_ == nullptr) {
         env_ = env;
     }
-    napi_create_reference(env, thisVar, 1, &thisVarRef_);
     napi_close_handle_scope(env, scope);
 }
 

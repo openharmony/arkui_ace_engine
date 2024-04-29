@@ -64,6 +64,9 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         LOGW("Invalid context.");
         return nullptr;
     }
+    auto offscreenCanvasPattern = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
+        workCanvas->GetWidth(), workCanvas->GetHeight());
+    workCanvas->SetOffscreenPattern(offscreenCanvasPattern);
 
     napi_value offscreenCanvas = nullptr;
     napi_create_object(env, &offscreenCanvas);
@@ -136,10 +139,6 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     double fWidth = 0.0;
     double fHeight = 0.0;
     auto workCanvas = new (std::nothrow) JSOffscreenCanvas();
-    auto context = PipelineBase::GetCurrentContext();
-    if (context != nullptr) {
-        workCanvas->instanceId_ = context->GetInstanceId();
-    }
     if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
         fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
         workCanvas->SetWidth(fWidth);
@@ -148,7 +147,8 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
         fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
         workCanvas->SetHeight(fHeight);
     }
-
+    workCanvas->offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
+        static_cast<int32_t>(fWidth), static_cast<int32_t>(fHeight));
     napi_coerce_to_native_binding_object(
         env, thisVar, DetachOffscreenCanvas, AttachOffscreenCanvas, workCanvas, nullptr);
     napi_wrap(
@@ -296,27 +296,32 @@ napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
 
 napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
 {
-    std::string type = "ImageBitmap";
     if (offscreenCanvasContext_ == nullptr) {
         return nullptr;
     }
-    uint32_t id = offscreenCanvasContext_->GetId();
-    auto final_height = static_cast<uint32_t>(GetHeight());
-    auto final_width = static_cast<uint32_t>(GetWidth());
+    napi_value global = nullptr;
+    napi_status status = napi_get_global(env, &global);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+    napi_value constructor = nullptr;
+    status = napi_get_named_property(env, global, "ImageBitmap", &constructor);
+    if (status != napi_ok) {
+        return nullptr;
+    }
     napi_value renderImage = nullptr;
-    napi_value jsType = nullptr;
-    napi_value jsId = nullptr;
-    napi_value jsHeight = nullptr;
-    napi_value jsWidth = nullptr;
     napi_create_object(env, &renderImage);
-    napi_create_string_utf8(env, type.c_str(), type.length(), &jsType);
-    napi_create_uint32(env, id, &jsId);
-    napi_create_double(env, final_height, &jsHeight);
-    napi_create_double(env, final_width, &jsWidth);
-    napi_set_named_property(env, renderImage, "__type", jsType);
-    napi_set_named_property(env, renderImage, "__id", jsId);
-    napi_set_named_property(env, renderImage, "height", jsHeight);
-    napi_set_named_property(env, renderImage, "width", jsWidth);
+    status = napi_new_instance(env, constructor, 0, nullptr, &renderImage);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+    void* nativeObj = nullptr;
+    status = napi_unwrap(env, renderImage, &nativeObj);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+    auto jsImage = (JSRenderImage*)nativeObj;
+    jsImage->SetContextId(offscreenCanvasContext_->GetId());
     return renderImage;
 }
 
@@ -393,13 +398,6 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     status = napi_new_instance(env, constructor, 0, nullptr, &thisVal);
     if (status != napi_ok) {
         return nullptr;
-    }
-    if (instanceId_ != -1) {
-        offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
-            GetContext(), static_cast<int32_t>(width), static_cast<int32_t>(height));
-    } else {
-        offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
-            static_cast<int32_t>(width), static_cast<int32_t>(height));
     }
     if (offscreenCanvasPattern_ == nullptr) {
         return thisVal;

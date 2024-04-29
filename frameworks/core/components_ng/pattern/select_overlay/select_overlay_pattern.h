@@ -100,12 +100,12 @@ public:
 
     void SetSelectInfo(const std::string& selectInfo)
     {
-        selectInfo_ = selectInfo;
+        info_->selectText = selectInfo;
     }
 
     const std::string& GetSelectInfo() const
     {
-        return selectInfo_;
+        return info_->selectText;
     }
 
     const RefPtr<SelectOverlayModifier>& GetOverlayModifier()
@@ -163,36 +163,45 @@ public:
     void StartHiddenHandleTask(bool isDelay = true);
     void UpdateSelectArea(const RectF& selectArea);
 
+protected:
+    virtual void CheckHandleReverse();
+    virtual void UpdateHandleHotZone();
+    RectF GetHandlePaintRect(const SelectHandleInfo& handleInfo);
+    void AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion);
+    std::shared_ptr<SelectOverlayInfo> info_;
+    RefPtr<ClickEvent> clickEvent_;
+    RefPtr<PanEvent> panEvent_;
+    CancelableCallback<void()> hiddenHandleTask_;
+    bool isHiddenHandle_ = false;
+    RectF firstHandleRegion_;
+    RectF secondHandleRegion_;
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void UpdateHandleHotZone();
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void HandleOnClick(GestureEvent& info);
     void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchDownEvent(const TouchEventInfo& info);
     void HandleOnTouch(GestureEvent& info);
     void HandlePanStart(GestureEvent& info);
     void HandlePanMove(GestureEvent& info);
     void HandlePanEnd(GestureEvent& info);
     void HandlePanCancel();
 
-    void CheckHandleReverse();
     bool IsHandlesInSameLine();
+    bool IsFirstHandleMoveStart(const Offset& touchOffset);
     void StopHiddenHandleTask();
     void HiddenHandle();
-    void AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion);
+    void UpdateOffsetOnMove(RectF& region, SelectHandleInfo& handleInfo, const OffsetF& offset, bool isFirst);
 
-    std::shared_ptr<SelectOverlayInfo> info_;
-    RefPtr<PanEvent> panEvent_;
-    RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
-
-    RectF firstHandleRegion_;
-    RectF secondHandleRegion_;
 
     bool firstHandleDrag_ = false;
     bool secondHandleDrag_ = false;
+    bool isFirstHandleTouchDown_ = false;
+    bool isSecondHandleTouchDown_ = false;
     // Used to record the original menu display status when the handle is moved.
     bool orignMenuIsShow_ = false;
     bool hasExtensionMenu_ = false;
@@ -201,8 +210,6 @@ private:
     int32_t greatThanMaxWidthIndex_ = -1;
     std::optional<float> menuWidth_;
     std::optional<float> menuHeight_;
-
-    std::string selectInfo_;
 
     OffsetF defaultMenuEndOffset_;
 
@@ -213,8 +220,6 @@ private:
     bool paintMethodCreated_ = false;
 
     bool closedByGlobalTouchEvent_ = false;
-    CancelableCallback<void()> hiddenHandleTask_;
-    bool isHiddenHandle_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

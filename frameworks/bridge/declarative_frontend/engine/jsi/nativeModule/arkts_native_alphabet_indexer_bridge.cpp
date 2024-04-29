@@ -17,7 +17,7 @@
 #include "core/interfaces/native/node/node_api.h"
 #include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int NUM_0 = 0;
@@ -44,9 +44,12 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemFont(ArkUIRuntimeCallI
     Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize)) {
-        fontSize = Dimension(DEFAULT_POPUPITEMFONT_SIZE, DimensionUnit::FP);
+    if (!fontSizeArg->IsNull()) {
+        CalcDimension fontSizeData;
+        if (ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSizeData) && !fontSizeData.IsNegative() &&
+            fontSizeData.Unit() != DimensionUnit::PERCENT) {
+            fontSize = fontSizeData;
+        }
     }
     std::string weight = DEFAULT_POPUP_ITEM_FONT_WEIGHT;
     if (!weightArg->IsNull() && !weightArg->IsUndefined()) {
@@ -702,4 +705,31 @@ ArkUINativeModuleValue AlphabetIndexerBridge::ResetPopupTitleBackground(ArkUIRun
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue AlphabetIndexerBridge::SetAdaptiveWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+
+    CalcDimension width;
+    ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, width);
+    if (width.Unit() == DimensionUnit::AUTO) {
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAdaptiveWidth(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    } else {
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAdaptiveWidth(nativeNode);
+    }
+    CommonBridge::SetWidth(runtimeCallInfo);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::ResetAdaptiveWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    CommonBridge::ResetWidth(runtimeCallInfo);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

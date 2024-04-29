@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
@@ -67,7 +68,6 @@ void ScrollPattern::OnModifyDone()
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
-        RegisterScrollEventTask();
     }
     SetEdgeEffect();
     SetScrollBar(paintProperty->GetScrollBarProperty());
@@ -76,14 +76,6 @@ void ScrollPattern::OnModifyDone()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     Register2DragDropManager();
-}
-
-void ScrollPattern::RegisterScrollEventTask()
-{
-    auto eventHub = GetHost()->GetEventHub<ScrollEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
-    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -139,7 +131,12 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
+    auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
+    CheckScrollToEdge(oldScrollableDistance, scrollableDistance_);
+    if (LessNotEqual(scrollableDistance_, oldScrollableDistance)) {
+        CheckRestartSpring(true);
+    }
     auto axis = GetAxis();
     auto oldMainSize = GetMainAxisSize(viewPort_, axis);
     auto newMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPort(), axis);
@@ -271,7 +268,11 @@ OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
 
 bool ScrollPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
-    return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
+    if (Positive(scrollableDistance_)) {
+        return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
+    } else {
+        return !NearZero(currentOffset_);
+    }
 }
 
 bool ScrollPattern::ScrollPageCheck(float delta, int32_t source)
@@ -531,6 +532,14 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     float distance = scrollEdgeType == ScrollEdgeType::SCROLL_TOP ? -currentOffset_ :
         (-scrollableDistance_ - currentOffset_);
     ScrollBy(distance, distance, smooth);
+    scrollEdgeType_ = scrollEdgeType;
+}
+
+void ScrollPattern::CheckScrollToEdge(float oldScrollableDistance, float newScrollableDistance)
+{
+    if (!NearEqual(oldScrollableDistance, newScrollableDistance) && scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE) {
+        ScrollToEdge(scrollEdgeType_, true);
+    }
 }
 
 void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish)
@@ -723,6 +732,16 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
         return OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
     }
     return false;
+}
+
+std::pair<std::function<bool(float)>, Axis> ScrollPattern::GetScrollOffsetAbility()
+{
+    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
+                auto pattern = wp.Upgrade();
+                CHECK_NULL_RETURN(pattern, false);
+                return pattern->OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
+            },
+        GetAxis() };
 }
 
 std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta, float dragDistance, float velocity)
@@ -1019,12 +1038,12 @@ void ScrollPattern::TriggerModifyDone()
     OnModifyDone();
 }
 
-void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    ScrollablePattern::ToJsonValue(json);
+    ScrollablePattern::ToJsonValue(json, filter);
     auto initialOffset = JsonUtil::Create(true);
-    initialOffset->Put("xOffset", initialOffset_.GetX().ToString().c_str());
-    initialOffset->Put("yOffset", initialOffset_.GetY().ToString().c_str());
-    json->Put("initialOffset", initialOffset);
+    initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
+    initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());
+    json->PutExtAttr("initialOffset", initialOffset, filter);
 }
 } // namespace OHOS::Ace::NG

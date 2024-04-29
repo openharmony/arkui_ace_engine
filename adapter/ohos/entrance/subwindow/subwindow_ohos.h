@@ -79,15 +79,17 @@ public:
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) override;
     void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) override;
     void CloseCustomDialogNG(int32_t dialogId) override;
+    void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) override;
+    void UpdateCustomDialogNG(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback) override;
     void HideSubWindowNG() override;
     bool GetShown() override
     {
         return isShowed_;
     }
 
-    void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
-    void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
-    void DeleteHotAreas(int32_t overlayId) override;
+    void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId) override;
+    void DeleteHotAreas(int32_t nodeId) override;
     void ClearToast() override;
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
         const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset) override;
@@ -101,6 +103,7 @@ public:
     void CloseDialog(int32_t instanceId) override;
     void OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback) override;
     void CloseCustomDialog(const int32_t dialogId) override;
+    void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) override;
     const RefPtr<NG::OverlayManager> GetOverlayManager() override;
 
     int32_t GetChildContainerId() const override
@@ -124,6 +127,8 @@ public:
 
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
+    Rect GetUIExtensionHostWindowRect() const override;
+    bool CheckHostWindowStatus() const override;
 
     bool IsFocused() override;
     void RequestFocus() override;
@@ -133,8 +138,7 @@ public:
     }
     void ResizeWindowForFoldStatus() override;
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
-    void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
-    void DeletePopupHotAreas(int32_t overlayId) override;
+    void MarkDirtyDialogSafeArea() override;
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -173,7 +177,7 @@ private:
     RefPtr<PipelineBase> GetChildPipelineContext() const;
     void ContainerModalUnFocus();
 
-    void HideFilter();
+    void HideFilter(bool isInSubWindow);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
 
@@ -185,7 +189,6 @@ private:
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
     std::unordered_map<int32_t, std::vector<Rosen::Rect>> hotAreasMap_;
-    std::unordered_map<int32_t, std::vector<Rosen::Rect>> popupHotAreasMap_;
 
     sptr<OHOS::Rosen::Window> dialogWindow_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
@@ -193,7 +196,7 @@ private:
     int32_t targetId_ = -1;
     bool isToastWindow_ = false;
     int32_t popupTargetId_ = -1;
-    bool haveDialog_;
+    bool haveDialog_ = false;
     bool isShowed_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
 };

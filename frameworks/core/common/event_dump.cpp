@@ -21,6 +21,7 @@ constexpr size_t MAX_EVENT_TREE_RECORD_CNT = 5;
 constexpr size_t MAX_FRAME_NODE_CNT = 256;
 constexpr int32_t MAX_EVENT_TREE_TOUCH_DOWN_CNT = 10;
 constexpr int32_t MAX_EVENT_TREE_TOUCH_POINT_CNT = 20;
+constexpr int32_t MAX_EVENT_TREE_GESTURE_CNT = 100;
 } // end of namespace
 
 void FrameNodeSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
@@ -49,6 +50,7 @@ TouchPointSnapshot::TouchPointSnapshot(const TouchEvent& event)
     screenPoint = OffsetF(event.screenX, event.screenY);
     type = event.type;
     timestamp = GetCurrentTimestamp();
+    isInjected = event.isInjected;
 }
 
 void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
@@ -58,7 +60,8 @@ void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLi
         << "point: " << point.ToString() << ", "
         << "screenPoint: " << screenPoint.ToString() << ", "
         << "type: " << GestureSnapshot::TransTouchType(type) << ", "
-        << "timestamp: " << ConvertTimestampToStr(timestamp);
+        << "timestamp: " << ConvertTimestampToStr(timestamp) << ", "
+        << "isInjected: " << isInjected;
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }
 
@@ -107,6 +110,16 @@ void EventTreeRecord::AddFrameNodeSnapshot(FrameNodeSnapshot&& node)
         return;
     }
     if (eventTreeList.back().hitTestTree.size() < MAX_FRAME_NODE_CNT) {
+        bool isInList = false;
+        for (auto iter : eventTreeList.back().hitTestTree) {
+            if (iter.nodeId == node.nodeId) {
+                isInList = true;
+                break;
+            }
+        }
+        if (isInList) {
+            return;
+        }
         eventTreeList.back().hitTestTree.emplace_back(node);
     }
 }
@@ -116,8 +129,18 @@ void EventTreeRecord::AddGestureSnapshot(int32_t finger, RefPtr<GestureSnapshot>
     if (eventTreeList.empty()) {
         return;
     }
+    if (eventTreeList.size() > MAX_EVENT_TREE_RECORD_CNT) {
+        eventTreeList.clear();
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventTreeList size is over MAX, clean event tree.");
+        return;
+    }
     auto& gestureTree = eventTreeList.back().gestureTree;
     auto& gestureMap = eventTreeList.back().gestureMap;
+    if (gestureMap.size() > MAX_EVENT_TREE_GESTURE_CNT) {
+        eventTreeList.clear();
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureMap size is over MAX, clean event tree.");
+        return;
+    }
     gestureMap[gesture->id] = gesture;
     gestureTree[finger].emplace_back(gesture);
 }

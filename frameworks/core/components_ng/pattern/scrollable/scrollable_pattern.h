@@ -23,6 +23,7 @@
 #include "core/animation/select_motion.h"
 #include "core/animation/spring_curve.h"
 #include "core/animation/bezier_variable_velocity_motion.h"
+#include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -41,10 +42,11 @@
 #include "core/event/mouse_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double NEW_FRICTION = 0.7;
-constexpr double MAX_VELOCITY = 800000.0;
+constexpr double MAX_VELOCITY = 4200.0;
 #else
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
@@ -76,7 +78,7 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void OnWindowHide() override;
 
     // scrollable
@@ -221,13 +223,6 @@ public:
         scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
     }
 
-    void SetScrollFrameBeginCallback(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
-    {
-        // Previous: Set to Scrollable and called in HandleScroll
-        // Now: HandleScroll moved to base class, directly store and call scrollFrameBeginCallback_ here
-        scrollFrameBeginCallback_ = scrollFrameBeginCallback;
-    }
-
     bool IsScrollableSpringEffect() const
     {
         CHECK_NULL_RETURN(scrollEffect_, false);
@@ -242,6 +237,12 @@ public:
     void GetParentNavigation();
     void GetParentModalSheet();
 
+    /**
+     * @brief Return the portion of delta that's in overScroll range.
+     *
+     * @param delta incoming offset change.
+     * @return the portion of delta in overScroll range. Both top overScroll and bottom overScroll.
+     */
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
     {
         return { 0, 0 };
@@ -392,6 +393,13 @@ public:
 
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
 
+    virtual ScrollEdgeType GetScrollEdgeType() const
+    {
+        return ScrollEdgeType::SCROLL_NONE;
+    }
+
+    virtual void SetScrollEdgeType(ScrollEdgeType scrollEdgeType) {}
+
     virtual void Fling(double flingVelocity);
 
     void SetPositionController(RefPtr<ScrollableController> control)
@@ -474,22 +482,13 @@ public:
     
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
-        CHECK_NULL_VOID(scrollableEvent_);
-        auto canScroll = scrollableEvent_->GetEnable();
-        animateCanOverScroll_ = canScroll && animateCanOverScroll;
+        bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
+        animateCanOverScroll_ = isScrollable && animateCanOverScroll;
     }
-
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent(GestureEvent& info);
-    virtual void InitScrollBarLongPressEvent();
-    void HandleLongPress(bool smooth);
-    virtual void InitScrollBarTouchEvent();
-    void OnTouchUp();
-    void OnTouchDown();
-    void ScheduleCaretLongPress();
-    void StartLongPressEventTimer();
+    void InitScrollBarMouseEvent();
     virtual void ScrollPage(bool reverse, bool smooth = false);
-    bool AnalysisUpOrDown(Point point, bool& reverse);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
     void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
@@ -501,6 +500,26 @@ public:
     {
         return isScrollToSafeAreaHelper_;
     }
+
+    void ScrollAtFixedVelocity(float velocity);
+
+    PositionMode GetPositionMode();
+
+    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
+    {
+        return { nullptr, Axis::NONE };
+    }
+
+    virtual std::function<bool(int32_t)> GetScrollIndexAbility()
+    {
+        return nullptr;
+    }
+
+    void CheckRestartSpring(bool sizeDiminished);
+
+    void HandleMoveEventInComp(const PointF& point);
+    void HandleLeaveHotzoneEvent();
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
@@ -578,6 +597,11 @@ protected:
 
     void Register2DragDropManager();
 
+    bool StopExpandMark() override
+    {
+        return true;
+    }
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -644,7 +668,6 @@ private:
     bool HandleScrollImpl(float offset, int32_t source);
     void NotifyMoved(bool value);
 
-    ScrollFrameBeginCallback scrollFrameBeginCallback_;
     /*
      *  End of NestableScrollContainer implementations
      *******************************************************************************/
@@ -727,17 +750,16 @@ private:
     RefPtr<Animator> hotzoneAnimator_;
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
+    RefPtr<VelocityMotion> fixedVelocityMotion_;
     void UnRegister2DragDropManager();
     float IsInHotZone(const PointF& point);
     void HotZoneScroll(const float offset);
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
-    void HandleMoveEventInComp(const PointF& point);
-    void HandleLeaveHotzoneEvent();
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);
+    RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
-    Offset locationInfo_;
 };
 } // namespace OHOS::Ace::NG
 

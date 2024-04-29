@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class StackModifier extends ArkStackComponent implements AttributeModifier<StackAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: StackAttribute): void {
-    applyAndMergeModifier<StackAttribute, ArkStackComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<StackAttribute, ArkStackComponent, ArkComponent>(instance, this);
   }
 }

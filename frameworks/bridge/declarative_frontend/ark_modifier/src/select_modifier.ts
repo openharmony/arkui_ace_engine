@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class SelectModifier extends ArkSelectComponent implements AttributeModifier<SelectAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: SelectAttribute): void {
-    applyAndMergeModifier<SelectAttribute, ArkSelectComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<SelectAttribute, ArkSelectComponent, ArkComponent>(instance, this);
   }
 }

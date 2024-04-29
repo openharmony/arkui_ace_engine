@@ -43,6 +43,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
 constexpr int32_t DEFAULT_CUSTOM_ANIMATION_TIMEOUT = 0;
+const auto DEFAULT_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(-1, 1, 328, 34);
 } // namespace
 std::unique_ptr<SwiperModel> SwiperModel::instance_ = nullptr;
 std::mutex SwiperModel::mutex_;
@@ -112,6 +113,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::Declare("Swiper");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSwiper>::StaticMethod("create", &JSSwiper::Create, opt);
+    JSClass<JSSwiper>::StaticMethod("indicatorInteractive", &JSSwiper::SetIndicatorInteractive, opt);
     JSClass<JSSwiper>::StaticMethod("autoPlay", &JSSwiper::SetAutoPlay, opt);
     JSClass<JSSwiper>::StaticMethod("duration", &JSSwiper::SetDuration, opt);
     JSClass<JSSwiper>::StaticMethod("index", &JSSwiper::SetIndex, opt);
@@ -150,6 +152,19 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("customContentTransition", &JSSwiper::SetCustomContentTransition);
     JSClass<JSSwiper>::StaticMethod("onContentDidScroll", &JSSwiper::SetOnContentDidScroll);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+void JSSwiper::SetIndicatorInteractive(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (info[0]->IsBoolean()) {
+        SwiperModel::GetInstance()->SetIndicatorInteractive(info[0]->ToBoolean());
+    } else {
+        SwiperModel::GetInstance()->SetIndicatorInteractive(true);
+    }
 }
 
 void JSSwiper::SetAutoPlay(bool autoPlay)
@@ -718,11 +733,15 @@ void JSSwiper::SetPreviousMargin(const JSCallbackInfo& info)
     }
 
     CalcDimension value;
+    bool ignoreBlank = false;
     if (!ParseJsDimensionVp(info[0], value) || info[0]->IsNull() || info[0]->IsUndefined() ||
         LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
-    SwiperModel::GetInstance()->SetPreviousMargin(value);
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        ignoreBlank = info[1]->ToBoolean();
+    }
+    SwiperModel::GetInstance()->SetPreviousMargin(value, ignoreBlank);
 }
 
 void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
@@ -732,11 +751,15 @@ void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
     }
 
     CalcDimension value;
+    bool ignoreBlank = false;
     if (!ParseJsDimensionVp(info[0], value) || info[0]->IsNull() || info[0]->IsUndefined() ||
         LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
-    SwiperModel::GetInstance()->SetNextMargin(value);
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        ignoreBlank = info[1]->ToBoolean();
+    }
+    SwiperModel::GetInstance()->SetNextMargin(value, ignoreBlank);
 }
 
 void JSSwiper::SetDisplayMode(int32_t index)
@@ -766,7 +789,7 @@ void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
 
 void JSSwiper::SetCurve(const JSCallbackInfo& info)
 {
-    RefPtr<Curve> curve = Curves::LINEAR;
+    RefPtr<Curve> curve = DEFAULT_CURVE;
     if (info[0]->IsString()) {
         curve = CreateCurve(info[0]->ToString());
     } else if (info[0]->IsObject()) {

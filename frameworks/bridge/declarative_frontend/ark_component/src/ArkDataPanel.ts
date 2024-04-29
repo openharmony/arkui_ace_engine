@@ -15,8 +15,11 @@
 
 /// <reference path='./import.ts' />
 class ArkDataPanelComponent extends ArkComponent implements DataPanelAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  builder: WrappedBuilder<Object[]> | null = null;
+  dataPanelNode: BuilderNode<[taPanelTrackShado]> | null = null;
+  modifier: ContentModifier<DataPanelConfiguration>;
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   closeEffect(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, DataPanelCloseEffectModifier.identity, DataPanelCloseEffectModifier, value);
@@ -37,6 +40,26 @@ class ArkDataPanelComponent extends ArkComponent implements DataPanelAttribute {
   trackShadow(value: DataPanelShadowOptions): this {
     modifierWithKey(this._modifiersWithKeys, DataPanelTrackShadowModifier.identity, DataPanelTrackShadowModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<DataPanelConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().datapanel.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, datapanelConfig: DataPanelConfiguration): FrameNode | null {
+    datapanelConfig.contentModifier = this.style;
+    if (!isUndefined(this.dataPanelNode)) {
+      let xNode = globalThis.requireNapi('arkui.node');
+      this.dataPanelNode = new xNode.BuilderNode(context);
+      this.dataPanelNode.build(this.builder, datapanelConfig);
+    } else {
+      this.dataPanelNode.update(datapanelConfig);
+    }
+    return this.dataPanelNode.getFrameNode();
   }
 }
 
@@ -115,12 +138,19 @@ class DataPanelValueColorsModifier extends ModifierWithKey<Array<ResourceColor |
   }
 }
 // @ts-ignore
-globalThis.DataPanel.attributeModifier = function (modifier) {
+globalThis.DataPanel.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkDataPanelComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.DataPanelModifier(nativePtr, classType);
+  });
+};
+// @ts-ignore
+globalThis.DataPanel.contentModifier = function (modifier: ContentModifier<DataPanelConfiguration>) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkDataPanelComponent(nativeNode);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
+  component.setContentModifier(modifier);
 };

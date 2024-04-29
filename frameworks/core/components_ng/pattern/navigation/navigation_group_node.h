@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT NavigationGroupNode : public GroupNode {
     DECLARE_ACE_TYPE(NavigationGroupNode, GroupNode)
@@ -110,22 +111,44 @@ public:
         needSetInvisible_ = needSetInvisible;
     }
 
+    std::list<std::shared_ptr<AnimationUtils::Animation>>& GetPushAnimations()
+    {
+        return pushAnimations_;
+    }
+
+    std::list<std::shared_ptr<AnimationUtils::Animation>>& GetPopAnimations()
+    {
+        return popAnimations_;
+    }
+
+    void CleanPushAnimations()
+    {
+        pushAnimations_.clear();
+    }
+
+    void CleanPopAnimations()
+    {
+        popAnimations_.clear();
+    }
+
     bool CheckCanHandleBack();
 
     void OnInspectorIdUpdate(const std::string& id) override;
 
     bool HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
     void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination);
 
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
 
-    void BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
-    void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
-    void TitleOpacityAnimation(const RefPtr<FrameNode>& node, bool isTransitionOut);
+    std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
+        const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
+    std::shared_ptr<AnimationUtils::Animation> MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
+    std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(
+        const RefPtr<FrameNode>& node, bool isTransitionOut);
     void TransitionWithReplace(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar);
     void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar, bool isAnimated = true);
     void NotifyPageHide();
@@ -148,6 +171,8 @@ public:
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
 
+    float CheckLanguageDirection();
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
@@ -156,6 +181,7 @@ private:
         RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
         const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
+    bool FindNavigationParent(const std::string& parentName);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
@@ -166,6 +192,8 @@ private:
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
     std::string curId_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

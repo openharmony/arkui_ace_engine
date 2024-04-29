@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/search/search_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -190,6 +191,34 @@ void SearchPattern::OnModifyDone()
     InitFocusEvent(focusHub);
     InitClickEvent();
     HandleEnabled();
+    SetAccessibilityAction();
+}
+
+void SearchPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    textAccessibilityProperty->SetActionSetSelection([host](int32_t start, int32_t end, bool isForward) {
+        auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+        CHECK_NULL_VOID(textFieldFrameNode);
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        textFieldPattern->SetSelectionFlag(start, end, std::nullopt);
+    });
+
+    textAccessibilityProperty->SetActionSetIndex([weakPtr = WeakClaim(this)](int32_t index) {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleCaretPosition(index);
+    });
+
+    textAccessibilityProperty->SetActionGetIndex([weakPtr = WeakClaim(this)]() -> int32_t {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_RETURN(pattern, -1);
+        auto index = pattern->HandleGetCaretIndex();
+        return index;
+    });
 }
 
 void SearchPattern::HandleBackgroundColor()
@@ -214,7 +243,7 @@ void SearchPattern::HandleEnabled()
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
-    eventHub->SetEnabled(searchEventHub->IsEnabled()? true : false);
+    eventHub->SetEnabled(searchEventHub->IsEnabled() ? true : false);
     textFieldFrameNode->MarkModifyDone();
 }
 
@@ -552,7 +581,8 @@ void SearchPattern::OnClickButtonAndImage()
     CHECK_NULL_VOID(textFieldPattern);
     auto text = textFieldPattern->GetTextValue();
     searchEventHub->UpdateSubmitEvent(text);
-    textFieldPattern->CloseKeyboard(true);
+    // close keyboard and select background color
+    textFieldPattern->StopEditing();
 }
 
 void SearchPattern::OnClickCancelButton()
@@ -615,6 +645,8 @@ void SearchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool SearchPattern::OnKeyEvent(const KeyEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "KeyAction:%{public}d, KeyCode:%{public}d", static_cast<int>(event.action),
+        static_cast<int>(event.code));
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -636,8 +668,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     constexpr int ONE = 1; // Only one focusable component on scene
     bool isOnlyOneFocusableComponent = getMaxFocusableCount(getMaxFocusableCount, parentHub) == ONE;
 
-    if (event.action == KeyAction::UP && event.code == KeyCode::KEY_TAB &&
-        focusChoice_ != FocusChoice::SEARCH) {
+    if (event.action == KeyAction::UP && event.code == KeyCode::KEY_TAB && focusChoice_ != FocusChoice::SEARCH) {
         textFieldPattern->HandleSetSelection(0, 0, false); // Clear selection and caret when tab pressed
     }
 
@@ -763,6 +794,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
 
 void SearchPattern::PaintFocusState(bool recoverFlag)
 {
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "Focus Choice = %{public}d", static_cast<int>(focusChoice_));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -1112,7 +1144,7 @@ bool SearchPattern::HandleInputChildOnFocus() const
     return true;
 }
 
-void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) const
+void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1123,39 +1155,49 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
 
-    json->Put("value", textFieldPattern->GetTextValue().c_str());
-    json->Put("placeholder", textFieldPattern->GetPlaceHolder().c_str());
-    json->Put("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str());
-    json->Put("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str());
-    json->Put("textAlign", V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str());
+    json->PutExtAttr("value", textFieldPattern->GetTextValue().c_str(), filter);
+    json->PutExtAttr("placeholder", textFieldPattern->GetPlaceHolder().c_str(), filter);
+    json->PutExtAttr("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str(), filter);
+    json->PutExtAttr("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str(), filter);
+    json->PutExtAttr("textAlign",
+        V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str(), filter);
     auto textColor = textFieldLayoutProperty->GetTextColor().value_or(Color());
-    json->Put("fontColor", textColor.ColorToString().c_str());
+    json->PutExtAttr("fontColor", textColor.ColorToString().c_str(), filter);
     auto textFontJson = JsonUtil::Create(true);
     textFontJson->Put("fontSize", textFieldPattern->GetFontSize().c_str());
     textFontJson->Put("fontStyle",
         textFieldPattern->GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
     textFontJson->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textFieldPattern->GetFontWeight()).c_str());
     textFontJson->Put("fontFamily", textFieldPattern->GetFontFamily().c_str());
-    json->Put("textFont", textFontJson->ToString().c_str());
-    json->Put("copyOption",
-        ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str());
+    json->PutExtAttr("textFont", textFontJson->ToString().c_str(), filter);
+    json->PutExtAttr("copyOption", ConvertCopyOptionsToString(
+        textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str(), filter);
     auto maxLength = GetMaxLength();
-    json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
-    json->Put("type", SearchTypeToString().c_str());
+    json->PutExtAttr("maxLength",
+        GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str(), filter);
+    json->PutExtAttr("type", SearchTypeToString().c_str(), filter);
     textFieldLayoutProperty->HasCopyOptions();
-    json->Put("letterSpacing", textFieldLayoutProperty->GetLetterSpacing().value_or(Dimension()).ToString().c_str());
-    json->Put("lineHeight", textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str());
-    auto jsonDecoration = JsonUtil::Create(true);
-    std::string type = V2::ConvertWrapTextDecorationToStirng(
-        textFieldLayoutProperty->GetTextDecoration().value_or(TextDecoration::NONE));
-    jsonDecoration->Put("type", type.c_str());
-    jsonDecoration->Put("color",
-        textFieldLayoutProperty->GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
-    std::string style =
-        V2::ConvertWrapTextDecorationStyleToString(
-            textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
-    jsonDecoration->Put("style", style.c_str());
-    json->Put("decoration", jsonDecoration->ToString().c_str());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        json->PutExtAttr("letterSpacing",
+            textFieldLayoutProperty->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("lineHeight",
+            textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
+        auto jsonDecoration = JsonUtil::Create(true);
+        std::string type = V2::ConvertWrapTextDecorationToStirng(
+            textFieldLayoutProperty->GetTextDecoration().value_or(TextDecoration::NONE));
+        jsonDecoration->Put("type", type.c_str());
+        jsonDecoration->Put("color",
+            textFieldLayoutProperty->GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
+        std::string style =
+            V2::ConvertWrapTextDecorationStyleToString(
+                textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
+        jsonDecoration->Put("style", style.c_str());
+        json->PutExtAttr("decoration", jsonDecoration->ToString().c_str(), filter);
+        json->PutExtAttr("minFontSize",
+            textFieldLayoutProperty->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("maxFontSize",
+            textFieldLayoutProperty->GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    }
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -1178,7 +1220,7 @@ std::string SearchPattern::SearchTypeToString() const
     }
 }
 
-void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) const
+void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1204,11 +1246,11 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) c
     // icon path
     auto searchIconPath = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
     searchIconJson->Put("src", searchIconPath.c_str());
-    json->Put("icon", searchIconPath.c_str());
-    json->Put("searchIcon", searchIconJson);
+    json->PutExtAttr("icon", searchIconPath.c_str(), filter);
+    json->PutExtAttr("searchIcon", searchIconJson, filter);
 }
 
-void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json) const
+void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1251,10 +1293,11 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json)
     auto cancelImageSrc = cancelImageLayoutProperty->GetImageSourceInfo()->GetSrc();
     cancelIconJson->Put("src", cancelImageSrc.c_str());
     cancelButtonJson->Put("icon", cancelIconJson);
-    json->Put("cancelButton", cancelButtonJson);
+    json->PutExtAttr("cancelButton", cancelButtonJson, filter);
 }
 
-void SearchPattern::ToJsonValueForSearchButtonOption(std::unique_ptr<JsonValue>& json) const
+void SearchPattern::ToJsonValueForSearchButtonOption(
+    std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1271,10 +1314,10 @@ void SearchPattern::ToJsonValueForSearchButtonOption(std::unique_ptr<JsonValue>&
     // font color
     auto searchButtonFontColor = searchButtonLayoutProperty->GetFontColor().value_or(Color());
     searchButtonJson->Put("fontColor", searchButtonFontColor.ColorToString().c_str());
-    json->Put("searchButtonOption", searchButtonJson);
+    json->PutExtAttr("searchButtonOption", searchButtonJson, filter);
 }
 
-void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
+void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1289,18 +1332,18 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
     cursorJson->Put("color", caretColor.ColorToString().c_str());
     auto caretWidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
     cursorJson->Put("width", caretWidth.ToString().c_str());
-    json->Put("caretStyle", cursorJson);
+    json->PutExtAttr("caretStyle", cursorJson, filter);
 }
 
-void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    Pattern::ToJsonValue(json);
+    Pattern::ToJsonValue(json, filter);
 
-    ToJsonValueForTextField(json);
-    ToJsonValueForSearchIcon(json);
-    ToJsonValueForCancelButton(json);
-    ToJsonValueForCursor(json);
-    ToJsonValueForSearchButtonOption(json);
+    ToJsonValueForTextField(json, filter);
+    ToJsonValueForSearchIcon(json, filter);
+    ToJsonValueForCancelButton(json, filter);
+    ToJsonValueForCursor(json, filter);
+    ToJsonValueForSearchButtonOption(json, filter);
 }
 
 void SearchPattern::OnColorConfigurationUpdate()

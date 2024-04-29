@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWITCH_SWITCH_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWITCH_SWITCH_PAINT_PROPERTY_H
 
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
@@ -26,11 +28,33 @@ struct SwitchPaintParagraph {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SwitchPointColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CurrentOffset, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PointRadius, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(UnselectedColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBorderRadius, Dimension);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("selectedColor", propSelectedColor.value_or(Color()).ColorToString().c_str());
-        json->Put("switchPointColor", propSwitchPointColor.value_or(Color()).ColorToString().c_str());
+        json->PutExtAttr("selectedColor", propSelectedColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("switchPointColor",
+            propSwitchPointColor.value_or(Color()).ColorToString().c_str(), filter);
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+        CHECK_NULL_VOID(switchTheme);
+        auto defaultHeight = (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2);
+        auto defaultPointRadius = defaultHeight / 2 - 2.0_vp; // Get the default radius of the point.
+        if (propPointRadius.has_value()) {
+            json->PutExtAttr("pointRadius", propPointRadius.value().ToString().c_str(), filter);
+        } else {
+            json->PutExtAttr("pointRadius", defaultPointRadius.ToString().c_str(), filter);
+        }
+        json->PutExtAttr("unselectedColor", propUnselectedColor.value_or(Color()).ColorToString().c_str(), filter);
+        auto defaultTrackBorderRadius = defaultHeight / 2; // Get the default border radius of the track.
+        if (propTrackBorderRadius.has_value()) {
+            json->PutExtAttr("trackBorderRadius", propTrackBorderRadius.value().ToString().c_str(), filter);
+        } else {
+            json->PutExtAttr("trackBorderRadius", defaultTrackBorderRadius.ToString().c_str(), filter);
+        }
     }
 };
 
@@ -63,10 +87,10 @@ public:
         ResetSwitchAnimationStyle();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        json->Put("type", "ToggleType.Switch");
-        json->Put("isOn", propIsOn_.value_or(false) ? "true" : "false");
+        json->PutExtAttr("type", "ToggleType.Switch", filter);
+        json->PutExtAttr("isOn", propIsOn_.value_or(false) ? "true" : "false", filter);
         ACE_PROPERTY_TO_JSON_VALUE(propSwitchPaintParagraph_, SwitchPaintParagraph);
     }
 
@@ -77,6 +101,9 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(SwitchPaintParagraph, SwitchPaintParagraph);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, SelectedColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, SwitchPointColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, PointRadius, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, UnselectedColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, TrackBorderRadius, Dimension, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsOn, bool, PROPERTY_UPDATE_MEASURE);
 

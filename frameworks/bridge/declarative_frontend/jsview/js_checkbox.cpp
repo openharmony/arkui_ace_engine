@@ -23,8 +23,11 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/checkbox_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -61,6 +64,7 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
 {
     auto checkboxName = std::optional<std::string>("");
     auto checkboxGroup = std::optional<std::string>("");
+    std::optional<std::function<void()>> customBuilderFunc;
     if ((info.Length() >= 1) && info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto name = paramObject->GetProperty("name");
@@ -71,8 +75,25 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
         if (group->IsString()) {
             checkboxGroup = group->ToString();
         }
+        auto builderObject = paramObject->GetProperty("indicatorBuilder");
+        if (builderObject->IsFunction()) {
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderObject));
+            CHECK_NULL_VOID(builderFunc);
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto callbackFunc = [execCtx = info.GetExecutionContext(),
+                func = std::move(builderFunc), node = targetNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("CheckBox.builder");
+                PipelineContext::SetCallBackNode(node);
+                func->Execute();
+            };
+            customBuilderFunc = std::move(callbackFunc);
+        }
     }
     CheckBoxModel::GetInstance()->Create(checkboxName, checkboxGroup, V2::CHECK_BOX_ETS_TAG);
+    if (customBuilderFunc.has_value()) {
+        CheckBoxModel::GetInstance()->SetBuilder(customBuilderFunc);
+    }
 }
 
 void JSCheckbox::JSBind(BindingTarget globalObj)
@@ -177,17 +198,11 @@ void JSCheckbox::JsWidth(const JSCallbackInfo& info)
 
 void JSCheckbox::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    auto defaultWidth = checkBoxTheme->GetDefaultWidth();
-    auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
-    auto width = defaultWidth - horizontalPadding * 2;
-    CalcDimension value(width);
+    CalcDimension value;
     ParseJsDimensionVp(jsValue, value);
     if (value.IsNegative()) {
-        value = width;
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        return;
     }
     CheckBoxModel::GetInstance()->SetWidth(value);
 }
@@ -203,17 +218,11 @@ void JSCheckbox::JsHeight(const JSCallbackInfo& info)
 
 void JSCheckbox::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    auto defaultHeight = checkBoxTheme->GetDefaultHeight();
-    auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
-    auto height = defaultHeight - verticalPadding * 2;
-    CalcDimension value(height);
+    CalcDimension value;
     ParseJsDimensionVp(jsValue, value);
     if (value.IsNegative()) {
-        value = height;
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        return;
     }
     CheckBoxModel::GetInstance()->SetHeight(value);
 }

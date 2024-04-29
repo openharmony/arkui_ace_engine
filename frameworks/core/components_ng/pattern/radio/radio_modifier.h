@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing_forward.h"
 
@@ -48,31 +49,51 @@ enum class TouchHoverAnimationType {
 class RadioModifier : public ContentModifier {
     DECLARE_ACE_TYPE(RadioModifier, ContentModifier);
 
+private:
+    void DrawFocusBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;
+
 public:
     RadioModifier();
     ~RadioModifier() override = default;
 
     void onDraw(DrawingContext& context) override
     {
+        if (useContentModifier_->Get()) {
+            return;
+        }
         RSCanvas& canvas = context.canvas;
-        PaintRadio(canvas, isCheck_->Get(), size_->Get(), offset_->Get());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            PaintIndicator(canvas, isCheck_->Get(), size_->Get(), offset_->Get());
+        } else {
+            PaintRadio(canvas, isCheck_->Get(), size_->Get(), offset_->Get());
+        }
     }
 
     void UpdateAnimatableProperty();
+    void UpdateTotalScaleOnAnimatable(
+        bool isCheck, const AnimationOption& delayOption, const AnimationOption& halfDurationOption);
     void UpdateIsOnAnimatableProperty(bool isCheck);
+    void UpdateIndicatorAnimation(bool isCheck);
     void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve);
     void InitializeParam();
     void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
+    void PaintRingCircle(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset, RSBrush brush) const;
+    void PaintOutRingCircle(
+        RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset, RSPen outPen) const;
+    void PaintIndicator(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
+    void PaintUnselectedIndicator(RSCanvas& canvas, float outCircleRadius, float centerX, float centerY) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;
 
     void SetPointColor(const Color& pointColor)
     {
         pointColor_->Set(LinearColor(pointColor));
     }
+
     void SetactiveColor(const Color& activeColor)
     {
         activeColor_->Set(LinearColor(activeColor));
     }
+
     void SetinactiveColor(const Color& inactiveColor)
     {
         inactiveColor_->Set(LinearColor(inactiveColor));
@@ -123,6 +144,16 @@ public:
         }
     }
 
+    void InitOpacityScale(bool isCheck)
+    {
+        if (opacityScale_) {
+            opacityScale_->Set(isCheck ? 1.0f : 0);
+        }
+        if (borderOpacityScale_) {
+            borderOpacityScale_->Set(isCheck ? 0 : 1.0f);
+        }
+    }
+
     void SetPointScale(const float pointScale)
     {
         if (pointScale_) {
@@ -168,6 +199,20 @@ public:
         showHoverEffect_ = showHoverEffect;
     }
 
+    void SetIsFocused(bool isFocused)
+    {
+        if (isFocused_) {
+            isFocused_->Set(isFocused);
+        }
+    }
+
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
 private:
     float shadowWidth_ = 1.5f;
     float borderWidth_ = 1.5f;
@@ -186,6 +231,8 @@ private:
     RefPtr<PropertyBool> enabled_;
     RefPtr<PropertyBool> isCheck_;
     RefPtr<PropertyInt> uiStatus_;
+    RefPtr<PropertyBool> isFocused_;
+    RefPtr<PropertyBool> useContentModifier_;
 
     RefPtr<AnimatablePropertyColor> pointColor_;
     RefPtr<AnimatablePropertyColor> activeColor_;
@@ -194,6 +241,8 @@ private:
     RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<RadioModifier> radioModifier_;
     RefPtr<AnimatablePropertyFloat> totalScale_;
+    RefPtr<AnimatablePropertyFloat> opacityScale_;
+    RefPtr<AnimatablePropertyFloat> borderOpacityScale_;
     RefPtr<AnimatablePropertyFloat> pointScale_;
     RefPtr<AnimatablePropertyFloat> ringPointScale_;
     RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;

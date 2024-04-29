@@ -571,7 +571,8 @@ public:
     }
 };
 
-class LazyForEachElementProxy : public ElementProxy, public DataChangeListener {
+class LazyForEachElementProxy : public virtual ElementProxy, public virtual DataChangeListener {
+    DECLARE_ACE_TYPE(LazyForEachElementProxy, ElementProxy, DataChangeListener)
 public:
     explicit LazyForEachElementProxy(const WeakPtr<ElementProxyHost>& host) : ElementProxy(host) {}
     ~LazyForEachElementProxy() override
@@ -851,6 +852,8 @@ public:
     }
 
     void OnDataBulkDeleted(size_t index, size_t count) override {};
+
+    void OnDatasetChange(const std::list<V2::Operation>& DataOperations) override {};
 
     void OnDataChanged(size_t index) override
     {

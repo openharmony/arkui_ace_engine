@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -47,6 +48,7 @@ public:
         value->propFontWeight_ = CloneFontWeight();
         value->propFontColor_ = CloneFontColor();
         value->propFontFamily_ = CloneFontFamily();
+        value->propMarqueeUpdateStrategy_ = CloneMarqueeUpdateStrategy();
         return value;
     }
 
@@ -63,24 +65,25 @@ public:
         ResetFontWeight();
         ResetFontColor();
         ResetFontFamily();
+        ResetMarqueeUpdateStrategy();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto textChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
         CHECK_NULL_VOID(textChild);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        json->Put("src", textLayoutProperty->GetContent().value_or("").c_str());
-        json->Put("allowScale", propAllowScale_.value_or(false) ? "true" : "false");
-        json->Put("fontSize", propFontSize_.value_or(10.0_vp).ToString().c_str());
-        json->Put("fontColor",
-            propFontColor_.value_or(textLayoutProperty->GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
-        json->Put(
-            "fontWeight", V2::ConvertWrapFontWeightToStirng(propFontWeight_.value_or(FontWeight::NORMAL)).c_str());
+        json->PutFixedAttr("src", textLayoutProperty->GetContent().value_or("").c_str(), filter, FIXED_ATTR_SRC);
+        json->PutExtAttr("allowScale", propAllowScale_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("fontSize", propFontSize_.value_or(10.0_vp).ToString().c_str(), filter);
+        json->PutExtAttr("fontColor", propFontColor_.value_or(textLayoutProperty->GetTextColor().
+            value_or(Color::BLACK)).ColorToString().c_str(), filter);
+        json->PutExtAttr("fontWeight",
+            V2::ConvertWrapFontWeightToStirng(propFontWeight_.value_or(FontWeight::NORMAL)).c_str(), filter);
         std::vector<std::string> fontFamilyVector =
             propFontFamily_.value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
         if (fontFamilyVector.empty()) {
@@ -90,7 +93,9 @@ public:
         for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
             fontFamily += ',' + fontFamilyVector.at(i);
         }
-        json->Put("fontFamily", fontFamily.c_str());
+        json->PutExtAttr("fontFamily", fontFamily.c_str(), filter);
+        json->PutExtAttr("marqueeUpdateStrategy", V2::ConvertWrapMarqueeUpdateStrategyToStirng(
+            propMarqueeUpdateStrategy_.value_or(MarqueeUpdateStrategy::DEFAULT)).c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PlayerStatus, bool, PROPERTY_UPDATE_MEASURE);
@@ -103,6 +108,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MarqueeUpdateStrategy, MarqueeUpdateStrategy, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(MarqueeLayoutProperty);

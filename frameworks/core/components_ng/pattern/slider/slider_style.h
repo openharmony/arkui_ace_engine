@@ -38,6 +38,7 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Reverse, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockColor, Color)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBackgroundColor, Gradient)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBackgroundIsResourceColor, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectColor, Color)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowSteps, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Direction, Axis)
@@ -45,6 +46,7 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockBorderWidth, Dimension)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StepColor, Color)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBorderRadius, Dimension)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedBorderRadius, Dimension)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockSize, SizeT<Dimension>)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockType, SliderModel::BlockStyleType)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockImage, std::string)
@@ -53,6 +55,8 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockShape, RefPtr<BasicShape>)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StepSize, Dimension)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SliderMode, SliderModel::SliderMode)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SliderInteractionMode, SliderModel::SliderInteraction)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MinResponsiveDistance, float)
 };
 struct SliderTipStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowTips, bool)

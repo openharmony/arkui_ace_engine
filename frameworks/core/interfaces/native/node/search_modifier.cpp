@@ -19,6 +19,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
@@ -26,6 +27,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_SEARCH_COLOR = 0x99182431;
@@ -36,6 +38,11 @@ const bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr CancelButtonStyle DEFAULT_CANCEL_BUTTON_STYLE = CancelButtonStyle::INPUT;
 constexpr Dimension THEME_SEARCH_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 constexpr Color THEME_SEARCH_TEXT_COLOR = Color(0xe5000000);
+constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
+constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
+constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr int16_t DEFAULT_ALPHA = 255;
+constexpr double DEFAULT_OPACITY = 0.2;
 
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value)
 {
@@ -276,6 +283,212 @@ void ResetSearchHeight(ArkUINodeHandle node)
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
+void SetSearchInspectorId(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetId(frameNode, key);
+}
+
+void ResetSearchInspectorId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetId(frameNode, "");
+}
+
+void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
+    SearchModelNG::SetTextDecorationColor(frameNode, Color(color));
+    SearchModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
+}
+
+void ResetSearchDecoration(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
+    SearchModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
+    SearchModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+}
+
+void SetSearchLetterSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetLetterSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetSearchLetterSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value;
+    value.Reset();
+    SearchModelNG::SetLetterSpacing(frameNode, value);
+}
+void SetSearchLineHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetLineHeight(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+void ResetSearchLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value;
+    value.Reset();
+    SearchModelNG::SetLineHeight(frameNode, value);
+}
+
+void SetSearchFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = value;
+    SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
+void ResetSearchFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = "";
+    SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+void SetSearchAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetAdaptMinFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetSearchAdaptMinFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
+    SearchModelNG::SetAdaptMinFontSize(frameNode, minFontSize);
+}
+
+void SetSearchAdaptMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetAdaptMaxFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetSearchAdaptMaxFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    SearchModelNG::SetAdaptMaxFontSize(frameNode, maxFontSize);
+}
+
+void SetSearchSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color selectedColor = Color(color);
+    if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+    }
+    SearchModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
+}
+
+void ResetSearchSelectedBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color selectedColor;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    selectedColor = theme->GetSelectedColor();
+    if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+    }
+    SearchModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
+}
+
+void SetSearchTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+}
+
+void ResetSearchTextIndent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::VP));
+}
+
+void SetSearchValue(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<std::string> valueNG = value;
+
+    SearchModelNG::SetTextValue(frameNode, valueNG);
+}
+
+void ResetSearchValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetTextValue(frameNode, "");
+}
+
+void SetSearchPlaceholder(ArkUINodeHandle node, ArkUI_CharPtr placeholder)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<std::string> placeholderNG = placeholder;
+
+    SearchModelNG::SetPlaceholder(frameNode, placeholderNG);
+}
+
+void ResetSearchPlaceholder(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetPlaceholder(frameNode, "");
+}
+
+void SetSearchIcon(ArkUINodeHandle node, ArkUI_CharPtr icon)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<std::string> iconNG = icon;
+
+    SearchModelNG::SetIcon(frameNode, iconNG);
+}
+
+void ResetSearchIcon(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetIcon(frameNode, "");
+}
+
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -285,8 +498,90 @@ const ArkUISearchModifier* GetSearchModifier()
         ResetSearchCancelButton, SetSearchEnableKeyboardOnFocus, ResetSearchEnableKeyboardOnFocus,
         SetSearchPlaceholderFont, ResetSearchPlaceholderFont, SetSearchSearchIcon, ResetSearchSearchIcon,
         SetSearchSearchButton, ResetSearchSearchButton, SetSearchFontColor, ResetSearchFontColor, SetSearchCopyOption,
-        ResetSearchCopyOption, SetSearchEnterKeyType, ResetSearchEnterKeyType, SetSearchHeight, ResetSearchHeight };
+        ResetSearchCopyOption, SetSearchEnterKeyType, ResetSearchEnterKeyType, SetSearchHeight, ResetSearchHeight,
+        SetSearchInspectorId, ResetSearchInspectorId, SetSearchDecoration, ResetSearchDecoration,
+        SetSearchLetterSpacing, ResetSearchLetterSpacing, SetSearchLineHeight, ResetSearchLineHeight,
+        SetSearchFontFeature, ResetSearchFontFeature, SetSearchAdaptMinFontSize,
+        ResetSearchAdaptMinFontSize, SetSearchAdaptMaxFontSize, ResetSearchAdaptMaxFontSize,
+        SetSearchSelectedBackgroundColor, ResetSearchSelectedBackgroundColor, SetSearchTextIndent,
+        ResetSearchTextIndent, SetSearchValue, ResetSearchValue, SetSearchPlaceholder, ResetSearchPlaceholder,
+        SetSearchIcon, ResetSearchIcon };
     return &modifier;
+}
+
+void SetOnSearchSubmit(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const std::string& text) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_SEARCH_SUBMIT;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
+        SendArkUIAsyncEvent(&event);
+    };
+    SearchModelNG::SetOnSubmit(frameNode, std::move(onEvent));
+}
+
+void SetOnSearchChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const std::string& text) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_SEARCH_CHANGE;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
+        SendArkUIAsyncEvent(&event);
+    };
+    SearchModelNG::SetOnChange(frameNode, std::move(onEvent));
+}
+
+void SetOnSearchCopy(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const std::string& text) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_SEARCH_COPY;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
+        SendArkUIAsyncEvent(&event);
+    };
+    SearchModelNG::SetOnCopy(frameNode, std::move(onEvent));
+}
+
+void SetOnSearchCut(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const std::string& text) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_SEARCH_CUT;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
+        SendArkUIAsyncEvent(&event);
+    };
+    SearchModelNG::SetOnCut(frameNode, std::move(onEvent));
+}
+
+void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const std::string& text, NG::TextCommonEvent& textEvent) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_SEARCH_PASTE;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
+        SendArkUIAsyncEvent(&event);
+    };
+    SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onEvent));
 }
 }
 } // namespace OHOS::Ace::NG

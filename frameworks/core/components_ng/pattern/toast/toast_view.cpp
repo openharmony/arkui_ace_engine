@@ -29,8 +29,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const std::string& bottom, bool isRightToLeft,
-    const ToastShowMode& showMode, std::optional<Alignment> alignment, std::optional<DimensionOffset> offset)
+RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
@@ -49,7 +48,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     CHECK_NULL_RETURN(toastContext, nullptr);
     auto toastAccessibilityProperty = toastNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(toastAccessibilityProperty, nullptr);
-    toastAccessibilityProperty->SetText(message);
+    toastAccessibilityProperty->SetText(toastInfo.message);
     // create text in toast
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
@@ -57,22 +56,25 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     auto pattern = toastNode->GetPattern<ToastPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetToastInfo(toastInfo);
     pattern->SetTextNode(textNode);
-    UpdateTextLayoutProperty(textNode, message, isRightToLeft);
+    UpdateTextLayoutProperty(textNode, toastInfo.message, toastInfo.isRightToLeft);
     UpdateTextContext(textNode);
     textNode->MountToParent(toastNode);
-    if (alignment.has_value()) {
-        toastProperty->UpdateToastAlignment(alignment.value());
+    auto align = Alignment::ParseAlignment(toastInfo.alignment);
+    if (align.has_value()) {
+        toastProperty->UpdateToastAlignment(align.value());
     } else {
         toastProperty->ResetToastAlignment();
     }
-    if (offset.has_value()) {
-        toastProperty->UpdateToastOffset(offset.value());
+    if (toastInfo.offset.has_value()) {
+        toastProperty->UpdateToastOffset(toastInfo.offset.value());
     } else {
         toastProperty->ResetToastOffset();
     }
-    toastProperty->UpdateBottom(StringUtils::StringToDimensionWithThemeValue(bottom, true, toastTheme->GetBottom()));
-    toastProperty->UpdateShowMode(showMode);
+    toastProperty->UpdateBottom(
+        StringUtils::StringToDimensionWithThemeValue(toastInfo.bottom, true, toastTheme->GetBottom()));
+    toastProperty->UpdateShowMode(toastInfo.showMode);
     toastNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     toastNode->MarkModifyDone();
     return toastNode;
@@ -87,10 +89,10 @@ void ToastView::UpdateTextLayoutProperty(
     CHECK_NULL_VOID(context);
     auto toastTheme = context->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
-    auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
-    auto textColor = toastTheme->GetTextStyle().GetTextColor();
     auto fontSize = toastTheme->GetTextStyle().GetFontSize();
     auto padding = toastTheme->GetPadding();
+    auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
+    auto textColor = toastTheme->GetTextStyle().GetTextColor();
     PaddingProperty paddings;
     paddings.top = NG::CalcLength(padding.Top());
     paddings.bottom = NG::CalcLength(padding.Bottom());
@@ -98,12 +100,17 @@ void ToastView::UpdateTextLayoutProperty(
     paddings.right = NG::CalcLength(padding.Right());
 
     textLayoutProperty->UpdateContent(message);
-    textLayoutProperty->UpdateTextColor(textColor);
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-    textLayoutProperty->UpdateFontWeight(fontWeight);
     textLayoutProperty->UpdateFontSize(fontSize);
     textLayoutProperty->UpdateLayoutDirection((isRightToLeft ? TextDirection::RTL : TextDirection::LTR));
     textLayoutProperty->UpdatePadding(paddings);
+    textLayoutProperty->UpdateTextColor(textColor);
+    textLayoutProperty->UpdateFontWeight(fontWeight);
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        textLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
+    }
 }
 void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
 {
@@ -114,11 +121,20 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto radius = toastTheme->GetRadius();
-    auto toastBackgroundColor = toastTheme->GetBackgroundColor();
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(radius.GetX().ConvertToPx()));
-    textContext->UpdateBackgroundColor(toastBackgroundColor);
     textContext->UpdateBorderRadius(borderRadius);
     textContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
+    textContext->UpdateClipEdge(false);
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        textContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+        textContext->UpdateBackBlurStyle(styleOption);
+    } else {
+        auto toastBackgroundColor = toastTheme->GetBackgroundColor();
+        textContext->UpdateBackgroundColor(toastBackgroundColor);
+    }
 }
 } // namespace OHOS::Ace::NG

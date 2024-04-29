@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 
+#include "base/error/error_code.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
@@ -35,13 +36,20 @@
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
 
 namespace OHOS::Ace::Framework {
-
+namespace {
+static constexpr uint32_t PARAM_SIZE_ONE   = 1;
+static constexpr uint32_t PARAM_SIZE_TWO   = 2;
+static constexpr uint32_t PARAM_SIZE_THREE = 3;
+static constexpr uint32_t PARAM_TRHEE_INDEX = 2;
 constexpr int FUNC_SET_CREATE_ARG_LEN = 2;
+}
 
 JSRef<JSVal> CreateJsObjectFromJsonValue(const EcmaVM* vm, const std::unique_ptr<JsonValue>& jsonValue)
 {
@@ -315,6 +323,31 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
         panda::Global<panda::FunctionRef>(vm, Local<panda::FunctionRef>(firstArg)), secondArg->ToString(vm)->ToString(),
         thirdArg->ToObject(vm));
 
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> JsNavigationRegister(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    auto argsNum = runtimeCallInfo->GetArgsNumber();
+    const uint8_t maxArgSize = 2;
+    if (argsNum != maxArgSize) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "builder param is invalid: argsNum: %{public}d", argsNum);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nameProp = runtimeCallInfo->GetCallArgRef(0);
+    if (!nameProp->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "name is invalid");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::string name = nameProp->ToString(vm)->ToString();
+    Local<JSValueRef> builderProp = runtimeCallInfo->GetCallArgRef(1);
+    if (!builderProp->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "get builder object failed: %{public}s", name.c_str());
+        return panda::JSValueRef::Undefined(vm);
+    }
+    JsiDeclarativeEngine::AddToNavigationBuilderMap(name,
+        panda::Global<panda::ObjectRef>(vm, Local<panda::ObjectRef>(builderProp)));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -613,7 +646,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
     }
 
     if (container->IsUseNewPipeline()) {
-        auto nodeInfos = NG::Inspector::GetInspector();
+        auto nodeInfos = NG::Inspector::GetInspector(false);
         return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str()));
     }
 #if !defined(NG_BUILD)
@@ -626,6 +659,118 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
 #else
     return panda::JSValueRef::Undefined(vm);
 #endif
+}
+
+panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope{Container::CurrentIdSafely()};
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("container is null");
+        return panda::StringRef::NewFromUtf8(vm, "");
+    }
+    auto argc = runtimeCallInfo->GetArgsNumber();
+    if (argc > PARAM_SIZE_ONE) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param count");
+        return panda::StringRef::NewFromUtf8(vm, "");
+    }
+
+    NG::InspectorFilter filter;
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (argc == PARAM_SIZE_ONE) {
+        if (!firstArg->IsArray(vm)) {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
+            return panda::StringRef::NewFromUtf8(vm, "");
+        }
+        auto arrayVal = panda::Local<panda::ArrayRef>(firstArg);
+        auto len = arrayVal->Length(vm);
+        for (auto i = 0U; i < len; i++) {
+            auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
+            if (!subItemVal->IsString()) {
+                JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
+                return panda::StringRef::NewFromUtf8(vm, "");
+            }
+            auto itemVal = panda::Local<panda::StringRef>(subItemVal);
+            filter.AddFilterAttr(itemVal->ToString());
+        }
+    }
+    bool needThrow = false;
+    auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
+    if (needThrow) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
+        return panda::StringRef::NewFromUtf8(vm, "");
+    }
+    return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
+}
+
+panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope{Container::CurrentIdSafely()};
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("container is null");
+        return panda::StringRef::NewFromUtf8(vm, "");
+    }
+
+    auto argc = runtimeCallInfo->GetArgsNumber();
+    if (argc < PARAM_SIZE_TWO || argc > PARAM_SIZE_THREE) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param count");
+        return panda::StringRef::NewFromUtf8(vm, "");
+    }
+
+    NG::InspectorFilter filter;
+    // get component id
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsString()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
+        return panda::StringRef::NewFromUtf8(vm, "");
+    }
+    std::string key = firstArg->ToString(vm)->ToString();
+    filter.SetFilterID(key);
+
+    // get depth
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!secondArg->IsNumber()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
+        return panda::StringRef::NewFromUtf8(vm, "");
+    }
+    int32_t depth = secondArg->Int32Value(vm);
+    if (depth < 0) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid filter depth");
+        return panda::StringRef::NewFromUtf8(vm, "");
+    }
+    filter.SetFilterDepth(depth);
+
+    // get inspecotr filter list
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(PARAM_TRHEE_INDEX);
+    if (argc == PARAM_SIZE_THREE) {
+        if (!thirdArg->IsArray(vm)) {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
+            return panda::StringRef::NewFromUtf8(vm, "");
+        }
+        auto arrayVal = panda::Local<panda::ArrayRef>(thirdArg);
+        auto len = arrayVal->Length(vm);
+        for (auto i = 0U; i < len; i++) {
+            auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
+            if (!subItemVal->IsString()) {
+                JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
+                return panda::StringRef::NewFromUtf8(vm, "");
+            }
+            auto itemVal = panda::Local<panda::StringRef>(subItemVal);
+            filter.AddFilterAttr(itemVal->ToString());
+        }
+    }
+    bool needThrow = false;
+    auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
+    if (needThrow) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
+        return panda::StringRef::NewFromUtf8(vm, "");
+    }
+    return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
 }
 
 panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
@@ -742,7 +887,8 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
     JsiObject obj(firstArg);
     TouchEvent touchPoint = GetTouchPointFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
-        [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
+        [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); },
+        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -796,7 +942,8 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
     JsiObject obj(firstArg);
     KeyEvent keyEvent = GetKeyEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
-        [pipelineContext, keyEvent]() { pipelineContext->OnKeyEvent(keyEvent); }, TaskExecutor::TaskType::UI);
+        [pipelineContext, keyEvent]() { pipelineContext->OnKeyEvent(keyEvent); },
+        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -847,7 +994,8 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runt
     JsiObject obj(firstArg);
     MouseEvent mouseEvent = GetMouseEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
-        [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); }, TaskExecutor::TaskType::UI);
+        [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); },
+        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -974,7 +1122,13 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
-    windowConfig.UpdateDesignWidthScale(width);
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        width -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
 
     double lpxValue = firstArg->ToNumber(vm)->Value();
     double pxValue = lpxValue * windowConfig.designWidthScale;
@@ -1002,7 +1156,13 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
-    windowConfig.UpdateDesignWidthScale(width);
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        width -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
     
     double pxValue = firstArg->ToNumber(vm)->Value();
     double lpxValue = pxValue / windowConfig.designWidthScale;
@@ -1055,7 +1215,7 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     }
     pipelineContext->GetTaskExecutor()->PostSyncTask(
         [pipelineContext, inspectorKey, &result]() { result = pipelineContext->RequestFocus(inspectorKey); },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIJsRequestFocus");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -1080,7 +1240,7 @@ panda::Local<panda::JSValueRef> SetCursor(panda::JsiRuntimeCallInfo* runtimeCall
     }
     pipelineContext->GetTaskExecutor()->PostSyncTask(
         [pipelineContext, intValue]() { pipelineContext->SetCursor(intValue); },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIJsSetCursor");
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1099,7 +1259,7 @@ panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtim
     }
     pipelineContext->GetTaskExecutor()->PostSyncTask(
         [pipelineContext]() { pipelineContext->RestoreDefault(); },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1144,6 +1304,10 @@ void JsRegisterFormViews(
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorTree));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorByKey"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorByKey));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFilteredInspectorTree"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetFilteredInspectorTree));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFilteredInspectorTreeById"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetFilteredInspectorTreeById));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendEventByKey"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendEventByKey));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendTouchEvent"),
@@ -1235,6 +1399,7 @@ void JsRegisterFormViews(
     JSObjectTemplate sliderStyle;
     sliderStyle.Constant("OutSet", 0);
     sliderStyle.Constant("InSet", 1);
+    sliderStyle.Constant("NONE", 2);
 
     JSObjectTemplate sliderChangeMode;
     sliderChangeMode.Constant("Begin", 0);
@@ -1317,6 +1482,10 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorTree));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorByKey"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorByKey));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFilteredInspectorTree"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetFilteredInspectorTree));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFilteredInspectorTreeById"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetFilteredInspectorTreeById));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendEventByKey"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendEventByKey));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendTouchEvent"),
@@ -1346,6 +1515,8 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "focusControl"), focusControlObj);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerNamedRoute"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRegisterNamedRoute));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "NavigationBuilderRegister"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsNavigationRegister));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getArkUINativeModule"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModule));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleBar"),
@@ -1425,6 +1596,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     JSObjectTemplate sliderStyle;
     sliderStyle.Constant("OutSet", 0);
     sliderStyle.Constant("InSet", 1);
+    sliderStyle.Constant("NONE", 2);
 
     JSObjectTemplate sliderChangeMode;
     sliderChangeMode.Constant("Begin", 0);

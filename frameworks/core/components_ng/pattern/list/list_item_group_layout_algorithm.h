@@ -24,6 +24,8 @@
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
+class ListPositionMap;
+class ListChildrenMainSize;
 struct LayoutedItemInfo {
     int32_t startIndex = 0;
     float startPos = 0.0f;
@@ -100,12 +102,26 @@ public:
         return tmpIndex;
     }
 
-    void SetListMainSize(float startPos, float endPos, float referencePos, bool forwardLayout)
+    void SetListMainSize(float startPos, float endPos, float referencePos, float prevContentSize, bool forwardLayout)
     {
         startPos_ = startPos;
         endPos_ = endPos;
         referencePos_ = referencePos;
         forwardLayout_ = forwardLayout;
+        refPos_ = referencePos;
+        prevContentMainSize_ = prevContentSize;
+    }
+
+    void ModifyReferencePos(int32_t index, float pos);
+
+    void SetNeedAdjustRefPos(bool needAdjust)
+    {
+        needAdjustRefPos_ = needAdjust;
+    }
+
+    float GetRefPos() const
+    {
+        return refPos_;
     }
 
     void SetContentOffset(float contentStartOffset, float contentEndOffset)
@@ -210,7 +226,29 @@ public:
         return layoutedItemInfo_;
     }
 
+    void SetListChildrenMainSize(const RefPtr<ListChildrenMainSize>& childrenMainSize)
+    {
+        childrenSize_ = childrenMainSize;
+    }
+
+    void SetListPositionMap(const RefPtr<ListPositionMap>& posMap)
+    {
+        posMap_ = posMap;
+    }
+
+    void AdjustByPosMap();
+
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
+
+    float GetStartHeaderPos() const
+    {
+        return startHeaderPos_;
+    }
+
+    float GetEndFooterPos() const
+    {
+        return endFooterPos_;
+    }
 
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
@@ -252,7 +290,7 @@ private:
     void MeasureHeaderFooter(LayoutWrapper* layoutWrapper);
     void SetActiveChildRange(LayoutWrapper* layoutWrapper);
     float UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos);
-    bool NeedMeasureItem() const;
+    bool NeedMeasureItem();
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
     bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);
@@ -269,6 +307,8 @@ private:
     float paddingAfterContent_ = 0.0f;
 
     PositionMap itemPosition_;
+    RefPtr<ListChildrenMainSize> childrenSize_;
+    RefPtr<ListPositionMap> posMap_;
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;
     float laneGutter_ = 0.0f;
@@ -285,14 +325,19 @@ private:
     float headerMainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
     float startPos_ = 0.0f;
+    float startHeaderPos_ = 0.0f;
+    float endFooterPos_ = 0.0f;
     float prevStartPos_ = 0.0f;
     float prevEndPos_ = 0.0f;
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
+    float refPos_ = 0.0f;
+    float prevContentMainSize_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
     bool forwardLayout_ = true;
     bool needAllLayout_ = false;
+    bool needAdjustRefPos_ = false;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;

@@ -52,6 +52,13 @@ enum class AlphaType : int32_t {
     IMAGE_ALPHA_TYPE_UNPREMUL = 3, // image have alpha component, and all pixels stored without premultiply alpha value.
 };
 
+enum class ResizableOption {
+    LEFT,
+    RIGHT,
+    TOP,
+    BOTTOM,
+};
+
 struct ImageResizableSlice {
     Dimension left;
     Dimension right;
@@ -80,6 +87,41 @@ struct ImageResizableSlice {
     {
         return left.IsValid() || right.IsValid() || top.IsValid() || bottom.IsValid();
     }
+    void SetResizableLeft(const Dimension& sliceDimension)
+    {
+        left = sliceDimension;
+    }
+    void SetResizableRight(const Dimension& sliceDimension)
+    {
+        right = sliceDimension;
+    }
+    void SetResizableBottom(const Dimension& sliceDimension)
+    {
+        bottom = sliceDimension;
+    }
+    void SetResizableTop(const Dimension& sliceDimension)
+    {
+        top = sliceDimension;
+    }
+    void SetEdgeSlice(ResizableOption direction, const Dimension& sliceDimension)
+    {
+        switch (direction) {
+            case ResizableOption::TOP:
+                SetResizableTop(sliceDimension);
+                break;
+            case ResizableOption::BOTTOM:
+                SetResizableBottom(sliceDimension);
+                break;
+            case ResizableOption::LEFT:
+                SetResizableLeft(sliceDimension);
+                break;
+            case ResizableOption::RIGHT:
+                SetResizableRight(sliceDimension);
+                break;
+            default:
+                break;
+        }
+    }
 };
 
 enum class AceAntiAliasingOption : int32_t {
@@ -95,10 +137,13 @@ class ACE_EXPORT PixelMap : public AceType {
 public:
     static RefPtr<PixelMap> Create(std::unique_ptr<Media::PixelMap>&& pixmap);
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);
+    static RefPtr<PixelMap> CopyPixelMap(const RefPtr<PixelMap>& pixelMap);
     /**
      * @param ptr: drawable pointer of type Napi::DrawableDescriptor&
      */
     static RefPtr<PixelMap> GetFromDrawable(void* ptr);
+    static bool GetPxielMapListFromAnimatedDrawable(void* ptr, std::vector<RefPtr<PixelMap>>& pixelMaps,
+        int32_t& duration, int32_t& iterations);
     static RefPtr<PixelMap> CreatePixelMapFromDataAbility(void* uniquePtr);
     static RefPtr<PixelMap> ConvertSkImageToPixmap(
         const uint32_t* colors, uint32_t colorLength, int32_t width, int32_t height);

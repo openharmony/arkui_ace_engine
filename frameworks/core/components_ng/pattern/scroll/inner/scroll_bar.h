@@ -34,8 +34,6 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/border_property.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/event/long_press_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -503,7 +501,10 @@ public:
 
     void SetReverse(bool reverse)
     {
-        isReverse_ = reverse;
+        if (isReverse_ != reverse) {
+            isReverse_ = reverse;
+            isReverseUpdate_ = true;
+        }
     }
 
     bool IsReverse()
@@ -515,19 +516,25 @@ public:
     {
         return touchRegion_;
     }
-    BarDirection CheckBarDirection(const Point& point, const Axis& axis);
+    BarDirection CheckBarDirection(const Point& point);
     RefPtr<ClickEvent> GetClickEvent()
     {
         return clickevent_;
     }
-    RefPtr<LongPressEvent> GetLongPressEvent()
+    void SetAxis(Axis axis)
     {
-        return longPressEvent_;
+        axis_ = axis;
     }
-    RefPtr<TouchEventImpl> GetScrollBarTouchEvent()
+    void SetScrollPageCallback(ScrollPageCallback&& scrollPageCallback)
     {
-        return scrollBarTouchEvent_;
+        scrollPageCallback_ = std::move(scrollPageCallback);
     }
+    void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
+    void InitLongPressEvent();
+    void HandleLongPress(bool smooth);
+    bool AnalysisUpOrDown(Point point, bool& reverse);
+    void ScheduleCaretLongPress();
 
 protected:
     void InitTheme();
@@ -564,6 +571,7 @@ private:
     Dimension inactiveWidth_;
     Dimension activeWidth_;
     Dimension normalWidth_;
+    Dimension themeNormalWidth_;
     Dimension touchWidth_;
     Dimension hoverWidth_;
 
@@ -594,6 +602,7 @@ private:
     bool isUserNormalWidth_ = false;
     bool needAdaptAnimation_ = false;
     bool isReverse_ = false;
+    bool isReverseUpdate_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;
@@ -610,14 +619,17 @@ private:
     ScrollEndCallback scrollEndCallback_;
     CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
     StartScrollSnapMotionCallback startScrollSnapMotionCallback_;
+    ScrollPageCallback scrollPageCallback_;
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
     HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
     CancelableCallback<void()> disappearDelayTask_;
 
     DragFRCSceneCallback dragFRCSceneCallback_;
+    Axis axis_ = Axis::VERTICAL;
     RefPtr<ClickEvent> clickevent_;
-    RefPtr<TouchEventImpl> scrollBarTouchEvent_;
-    RefPtr<LongPressEvent> longPressEvent_;
+    RefPtr<LongPressRecognizer> longPressRecognizer_;
+    bool isMousePressed_ = false;
+    Offset locationInfo_;
 };
 
 } // namespace OHOS::Ace::NG

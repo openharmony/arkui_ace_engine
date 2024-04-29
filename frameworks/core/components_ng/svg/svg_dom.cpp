@@ -35,6 +35,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_filter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_g.h"
 #include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
+#include "frameworks/core/components_ng/svg/parse/svg_image.h"
 #include "frameworks/core/components_ng/svg/parse/svg_line.h"
 #include "frameworks/core/components_ng/svg/parse/svg_mask.h"
 #include "frameworks/core/components_ng/svg/parse/svg_path.h"
@@ -69,6 +70,7 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "feOffset", []() -> RefPtr<SvgNode> { return SvgFeOffset::Create(); } },
     { "filter", []() -> RefPtr<SvgNode> { return SvgFilter::Create(); } },
     { "g", []() -> RefPtr<SvgNode> { return SvgG::Create(); } },
+    { "image", []() -> RefPtr<SvgNode> { return SvgImage::Create(); } },
     { "line", []() -> RefPtr<SvgNode> { return SvgLine::Create(); } },
     { "linearGradient", []() -> RefPtr<SvgNode> { return SvgGradient::CreateLinearGradient(); } },
     { "mask", []() -> RefPtr<SvgNode> { return SvgMask::Create(); } },
@@ -99,12 +101,11 @@ SvgDom::SvgDom()
 
 SvgDom::~SvgDom() {}
 
-RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const std::optional<Color>& color)
+RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const ImageSourceInfo& src)
 {
     RefPtr<SvgDom> svgDom = AceType::MakeRefPtr<SvgDom>();
-    if (color) {
-        svgDom->fillColor_ = color;
-    }
+    svgDom->fillColor_ = src.GetFillColor();
+    svgDom->path_ = src.GetSrc();
     bool ret = svgDom->ParseSvg(svgStream);
     if (ret) {
         return svgDom;
@@ -150,6 +151,7 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
     RefPtr<SvgNode> node = TAG_FACTORIES[elementIter].value();
     CHECK_NULL_RETURN(node, nullptr);
     node->SetContext(svgContext_);
+    node->SetImagePath(path_);
     ParseAttrs(dom, xmlNode, node);
     for (auto* child = dom.getFirstChild(xmlNode, nullptr); child; child = dom.getNextSibling(child)) {
         const auto& childNode = TranslateSvgNode(dom, child, node);
@@ -271,6 +273,25 @@ bool SvgDom::IsStatic()
     return svgContext_->GetAnimatorCount() == 0;
 }
 
+void SvgDom::SetAnimationOnFinishCallback(const std::function<void()>& onFinishCallback)
+{
+    if (IsStatic() || !root_) {
+        return;
+    }
+    svgContext_->InitAnimatorNeedFinishCnt();
+    onFinishCallback_ = std::move(onFinishCallback);
+    auto AnimatorOnFinishCallback = [weakSvgDom = AceType::WeakClaim(this)]() {
+        auto svgDom = weakSvgDom.Upgrade();
+        CHECK_NULL_VOID(svgDom);
+        auto svgContext = svgDom->svgContext_;
+        if (svgContext && !svgContext->ReleaseAndGetAnimatorNeedFinishCnt()) {
+            svgDom->onFinishCallback_();
+        }
+    };
+
+    root_->PushAnimatorOnFinishCallback(AnimatorOnFinishCallback);
+}
+
 void SvgDom::DrawImage(
     RSCanvas& canvas, const ImageFit& imageFit, const Size& layout)
 {
@@ -283,7 +304,8 @@ void SvgDom::DrawImage(
     if (GreatNotEqual(smoothEdge_, 0.0f)) {
         root_->SetSmoothEdge(smoothEdge_);
     }
-    root_->Draw(canvas, layout, fillColor_);
+    root_->SetColorFilter(colorFilter_);
+    root_->Draw(canvas, svgContext_->GetViewPort(), fillColor_);
     canvas.Restore();
 }
 
@@ -369,5 +391,10 @@ void SvgDom::SetFillColor(const std::optional<Color>& color)
 void SvgDom::SetSmoothEdge(float value)
 {
     smoothEdge_ = value;
+}
+
+void SvgDom::SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
+{
+    colorFilter_ = colorFilter;
 }
 } // namespace OHOS::Ace::NG

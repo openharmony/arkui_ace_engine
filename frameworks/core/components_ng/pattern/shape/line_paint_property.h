@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_LINE_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_LINE_PAINT_PROPERTY_H
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/property/property.h"
@@ -58,20 +59,20 @@ public:
         ResetEndPoint();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        ShapePaintProperty::ToJsonValue(json);
+        ShapePaintProperty::ToJsonValue(json, filter);
         if (propStartPoint_.has_value()) {
             auto startPointArray = JsonUtil::CreateArray(true);
             startPointArray->Put("0", propStartPoint_.value().first.Value());
             startPointArray->Put("1", propStartPoint_.value().second.Value());
-            json->Put("startPoint", startPointArray);
+            json->PutExtAttr("startPoint", startPointArray, filter);
         }
         if (propEndPoint_.has_value()) {
             auto endPointArray = JsonUtil::CreateArray(true);
             endPointArray->Put("0", propEndPoint_.value().first.Value());
             endPointArray->Put("1", propEndPoint_.value().second.Value());
-            json->Put("endPoint", endPointArray);
+            json->PutExtAttr("endPoint", endPointArray, filter);
         }
     }
 

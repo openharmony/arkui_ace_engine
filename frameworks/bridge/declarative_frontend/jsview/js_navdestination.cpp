@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
 namespace OHOS::Ace {
@@ -80,7 +81,7 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE(context)
         JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
     };
-    auto ctx = AceType::MakeRefPtr<JSNavDestinationContext>();
+    auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
     auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
     ctx->SetNavPathInfo(navPathInfo);
     NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
@@ -140,9 +141,14 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
             NavDestinationModel::GetInstance()->SetCustomTitle(customNode);
         }
     } else {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetTitle is undefined");
         NavDestinationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
     }
+
+    NG::NavigationTitlebarOptions options;
+    if (info.Length() > 1) {
+        ParseBackgroundOptions(info[1], options.bgOptions);
+    }
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
 
 void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
@@ -226,12 +232,14 @@ void JSNavDestination::SetOnReady(const JSCallbackInfo& info)
     auto onReadyCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onReady = [execCtx = info.GetExecutionContext(), func = std::move(onReadyCallback)](
                        RefPtr<NG::NavDestinationContext> context) {
-        auto jsContext = AceType::DynamicCast<JSNavDestinationContext>(context);
-        CHECK_NULL_VOID(jsContext);
+        auto jsContext = JSClass<JSNavDestinationContext>::NewInstance();
+        auto jsNavDestinationContext = Referenced::Claim(jsContext->Unwrap<JSNavDestinationContext>());
+        CHECK_NULL_VOID(jsNavDestinationContext);
+        jsNavDestinationContext->SetNavDestinationContext(context);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("NavDestination.onReady");
         JSRef<JSVal> params[1];
-        params[0] = jsContext->CreateJSObject();
+        params[0] = jsContext;
         func->ExecuteJS(1, params);
     };
     NavDestinationModel::GetInstance()->SetOnReady(std::move(onReady));
@@ -264,7 +272,6 @@ void JSNavDestination::SetMenus(const JSCallbackInfo& info)
         }
         NavDestinationModel::GetInstance()->SetMenuItems(std::move(menuItems));
         return;
-
     } else if (info[0]->IsObject()) {
         auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
         if (builderObject->IsFunction()) {
@@ -278,13 +285,87 @@ void JSNavDestination::SetMenus(const JSCallbackInfo& info)
     }
 }
 
+void JSNavDestination::SetBackgroundColor(const JSCallbackInfo& info)
+{
+    Color backgroundColor;
+    bool isValid = ParseJsColor(info[0], backgroundColor);
+
+    NavDestinationModel::GetInstance()->SetBackgroundColor(backgroundColor, isValid);
+}
+
+void JSNavDestination::SetWillAppear(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto willAppear = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onWillAppear = [execCtx = info.GetExecutionContext(), func = std::move(willAppear)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("NavDestination.WillAppear");
+        func->ExecuteJS();
+    };
+    NavDestinationModel::GetInstance()->SetOnWillAppear(std::move(onWillAppear));
+    info.ReturnSelf();
+}
+
+void JSNavDestination::SetWillHide(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto willHideCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onWillHide = [execCtx = info.GetExecutionContext(), func = std::move(willHideCallback)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("NavDestination.WillHide");
+        func->ExecuteJS();
+    };
+    NavDestinationModel::GetInstance()->SetOnWillHide(std::move(onWillHide));
+    info.ReturnSelf();
+}
+
+void JSNavDestination::SetWillShow(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto willShowCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onWillShow = [execCtx = info.GetExecutionContext(), func = std::move(willShowCallback)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("NavDestination.WillShow");
+        func->ExecuteJS();
+    };
+    NavDestinationModel::GetInstance()->SetOnWillShow(std::move(onWillShow));
+    info.ReturnSelf();
+}
+
+void JSNavDestination::SetWillDisAppear(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto WillDisAppear = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onWillDisAppear = [execCtx = info.GetExecutionContext(), func = std::move(WillDisAppear)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("NavDestination.WillDisAppear");
+        func->ExecuteJS();
+    };
+    NavDestinationModel::GetInstance()->SetOnWillDisAppear(std::move(onWillDisAppear));
+    info.ReturnSelf();
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
+    JSNavDestinationContext::JSBind(globalObj);
     JSClass<JSNavDestination>::Declare("NavDestination");
     JSClass<JSNavDestination>::StaticMethod("create", &JSNavDestination::Create);
     JSClass<JSNavDestination>::StaticMethod("title", &JSNavDestination::SetTitle);
     JSClass<JSNavDestination>::StaticMethod("hideTitleBar", &JSNavDestination::SetHideTitleBar);
     JSClass<JSNavDestination>::StaticMethod("backButtonIcon", &JSNavDestination::SetBackButtonIcon);
+    JSClass<JSNavDestination>::StaticMethod("backgroundColor", &JSNavDestination::SetBackgroundColor);
     JSClass<JSNavDestination>::StaticMethod("onShown", &JSNavDestination::SetOnShown);
     JSClass<JSNavDestination>::StaticMethod("onHidden", &JSNavDestination::SetOnHidden);
     JSClass<JSNavDestination>::StaticMethod("onBackPressed", &JSNavDestination::SetOnBackPressed);
@@ -295,6 +376,10 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSNavDestination>::StaticMethod("mode", &JSNavDestination::SetMode);
     JSClass<JSNavDestination>::StaticMethod("menus", &JSNavDestination::SetMenus);
+    JSClass<JSNavDestination>::StaticMethod("onWillAppear", &JSNavDestination::SetWillAppear);
+    JSClass<JSNavDestination>::StaticMethod("onWillShow", &JSNavDestination::SetWillShow);
+    JSClass<JSNavDestination>::StaticMethod("onWillHide", &JSNavDestination::SetWillHide);
+    JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

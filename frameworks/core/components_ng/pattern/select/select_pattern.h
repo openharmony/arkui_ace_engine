@@ -34,8 +34,10 @@
 #include "core/components_ng/pattern/select/select_layout_algorithm.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class SelectPattern : public Pattern {
     DECLARE_ACE_TYPE(SelectPattern, Pattern);
@@ -174,6 +176,7 @@ public:
         return isHover_;
     }
 
+    void SetItemSelected(int index, const std::string& value);
     void PlayBgColorAnimation(bool isHoverChange = true);
     void SetSpace(const Dimension& value);
     void SetArrowPosition(const ArrowPosition value);
@@ -286,10 +289,10 @@ private:
     OptionFont optionFont_;
     std::optional<Color> optionBgColor_;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-    void ToJsonArrowAndText(std::unique_ptr<JsonValue>& json) const;
-    void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const;
-    void ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     // XTS inspector helper functions
     std::string InspectorGetOptions() const;
     std::string InspectorGetSelectedFont() const;

@@ -51,6 +51,8 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSDynamicComponent>::StaticMethod("create", &JSDynamicComponent::Create, opt);
     JSClass<JSDynamicComponent>::StaticMethod("onSizeChanged", &JSDynamicComponent::SetOnSizeChanged, opt);
+    JSClass<JSDynamicComponent>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSDynamicComponent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDynamicComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -100,7 +102,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
                 UIExtensionModel::GetInstance()->InitializeDynamicComponent(
                     frameNode, hapPath, abcPath, entryPoint, env);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIDynamicComponentInitialize");
     });
 }
 

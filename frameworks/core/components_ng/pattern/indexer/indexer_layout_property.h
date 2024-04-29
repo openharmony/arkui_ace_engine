@@ -26,6 +26,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT IndexerLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(IndexerLayoutProperty, LayoutProperty);
 
@@ -56,6 +58,7 @@ public:
         value->propAutoCollapse_ = CloneAutoCollapse();
         value->propPopupHorizontalSpace_ = ClonePopupHorizontalSpace();
         value->propIsPopup_ = CloneIsPopup();
+        value->propAdaptiveWidth_ = CloneAdaptiveWidth();
         return value;
     }
 
@@ -80,9 +83,10 @@ public:
         ResetAutoCollapse();
         ResetPopupHorizontalSpace();
         ResetIsPopup();
+        ResetAdaptiveWidth();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrayValue, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, int32_t, PROPERTY_UPDATE_NORMAL);
@@ -102,6 +106,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCollapse, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupHorizontalSpace, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsPopup, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptiveWidth, bool, PROPERTY_UPDATE_MEASURE);
 
 private:
     static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);

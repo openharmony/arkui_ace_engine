@@ -51,11 +51,23 @@ public:
         }
     }
 
+    void FireDidBuild()
+    {
+        if (didBuildFunc_) {
+            didBuildFunc_();
+        }
+    }
+
     virtual void SetRenderFunction(const RenderFunction& renderFunction) {}
 
     void SetAppearFunction(std::function<void()>&& appearFunc)
     {
         appearFunc_ = std::move(appearFunc);
+    }
+
+    void SetDidBuildFunction(std::function<void()>&& didBuildFunc)
+    {
+        didBuildFunc_ = std::move(didBuildFunc);
     }
 
     void SetUpdateFunction(std::function<void()>&& updateFunc)
@@ -158,6 +170,7 @@ public:
         updateFunc_ = nullptr;
         appearFunc_ = nullptr;
         destroyFunc_ = nullptr;
+        didBuildFunc_ = nullptr;
     }
 
     // called by view in js thread
@@ -193,6 +206,19 @@ public:
         return false;
     }
 
+    void SetThisFunc(std::function<void*()>&& getThisFunc)
+    {
+        getThisFunc_ = std::move(getThisFunc);
+    }
+
+    void* FireThisFunc()
+    {
+        if (getThisFunc_) {
+            return getThisFunc_();
+        }
+        return nullptr;
+    }
+
 protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
@@ -200,6 +226,7 @@ protected:
 private:
     std::function<void()> updateFunc_;
     std::function<void()> appearFunc_;
+    std::function<void()> didBuildFunc_;
     std::function<void()> destroyFunc_;
     std::function<void()> pageTransitionFunc_;
     std::function<void(bool)> reloadFunc_;
@@ -209,6 +236,7 @@ private:
     std::function<void()> recycleRenderFunc_;
     std::function<void(bool)> setActiveFunc_;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
+    std::function<void*()> getThisFunc_;
     bool needRebuild_ = false;
     bool executeFireOnAppear_ = false;
 };

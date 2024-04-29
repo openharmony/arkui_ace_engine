@@ -15,21 +15,24 @@
 
 #include "core/components_ng/image_provider/svg_image_object.h"
 
+#include "core/components_ng/render/canvas_image.h"
+
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #else
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #endif
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
     auto obj = AceType::MakeRefPtr<SvgImageObject>(src, SizeF());
-    if (!obj->MakeSvgDom(data, src.GetFillColor())) {
+    if (!obj->MakeSvgDom(data, src)) {
         return nullptr;
-    };
+    }
     return obj;
 }
 
@@ -47,18 +50,17 @@ void SvgImageObject::MakeCanvasImage(
     ctx->SuccessCallback(canvasImage);
 }
 
-bool SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor)
+bool SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const ImageSourceInfo& src)
 {
 #ifndef USE_ROSEN_DRAWING
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, false);
-    // update SVGSkiaDom
-    svgDomBase_ = skiaImageData->MakeSvgDom(svgFillColor);
+    svgDomBase_ = skiaImageData->MakeSvgDom(src.GetFillColor());
 #else
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
     CHECK_NULL_RETURN(rosenImageData, false);
     // update SVGSkiaDom
-    svgDomBase_ = rosenImageData->MakeSvgDom(svgFillColor);
+    svgDomBase_ = rosenImageData->MakeSvgDom(src);
 #endif
     CHECK_NULL_RETURN(svgDomBase_, false);
     imageSize_ = svgDomBase_->GetContainerSize();
@@ -70,4 +72,5 @@ bool SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const std::option
     }
     return true;
 }
+
 } // namespace OHOS::Ace::NG

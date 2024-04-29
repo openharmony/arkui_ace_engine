@@ -39,25 +39,7 @@ public:
     }
     ~SvgGraphic() override = default;
 
-    void OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color) override
-    {
-#ifndef USE_ROSEN_DRAWING
-        fillPaint_.reset();
-        strokePaint_.reset();
-#else
-        fillBrush_.Reset();
-        strokePen_.Reset();
-#endif
-        path_ = AsPath(layout); // asPath override by graphic tag
-        UpdateGradient(layout);
-        if (UpdateFillStyle(color)) {
-            OnGraphicFill();
-        }
-        if (UpdateStrokeStyle()) {
-            OnGraphicStroke();
-        }
-    }
-
+    void OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color) override;
 protected:
     void OnGraphicFill()
     {
@@ -160,6 +142,9 @@ protected:
     RSPen strokePen_;
 #endif
     FillState fillState_;
+
+private:
+    void UpdateColorFilter(RSFilter& filter);
 };
 
 } // namespace OHOS::Ace::NG

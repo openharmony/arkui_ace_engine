@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,16 +145,16 @@ public:
 
     std::list<int32_t> GetRouteOfFirstScope() override
     {
-        return { 2, 0 };
+        return {};
     }
 
     std::string GetEntryFocusViewName() override
     {
         /*
-        |-> Navigation (root focus view)
+        |-> Any FocusView (entry focus view)
           |-> NavDestination
         */
-        return V2::NAVIGATION_VIEW_ETS_TAG;
+        return ENTRY_ANY_FOCUSVIEW;
     }
 
     void SetIsOnShow(bool isOnShow)
@@ -185,6 +185,34 @@ public:
     {
         navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
+    
+    void OnDetachFromMainTree() override
+    {
+        auto weak = AceType::WeakClaim(this);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(weak, NavDestinationState::ON_DISAPPEAR);
+    }
+
+    void SetNavigationId(const std::string& id)
+    {
+        inspectorId_ = id;
+    }
+
+    std::string GetNavigationId() const
+    {
+        return inspectorId_;
+    }
+
+    void SetIsUserDefinedBgColor(bool isUserDefinedBgColor)
+    {
+        isUserDefinedBgColor_ = isUserDefinedBgColor;
+    }
+
+    bool IsUserDefinedBgColor() const
+    {
+        return isUserDefinedBgColor_;
+    }
+
+    void OnLanguageConfigurationUpdate() override;
 
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -193,10 +221,13 @@ private:
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
+    std::string inspectorId_;
     RefPtr<NavDestinationContext> navDestinationContext_;
     RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;
     bool isOnShow_ = false;
+    bool isUserDefinedBgColor_ = false;
+    bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
 };

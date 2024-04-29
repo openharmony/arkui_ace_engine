@@ -30,6 +30,14 @@ namespace OHOS::Ace::NG {
 
 void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->UseContentModifier()) {
+        BoxLayoutAlgorithm::Measure(layoutWrapper);
+        return;
+    }
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     HandleChildLayoutConstraint(layoutWrapper, layoutConstraint);
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -181,6 +189,7 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto bottomPadding = padding.bottom.value_or(0.0);
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
+
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
         if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
             HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize, defaultHeight);

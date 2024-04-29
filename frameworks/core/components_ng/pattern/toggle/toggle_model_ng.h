@@ -15,11 +15,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOGGLE_TOGGLE_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOGGLE_TOGGLE_MODEL_NG_H
 
+#include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 
 namespace OHOS::Ace::NG {
 
+class ToggleConfiguration : public CommonConfiguration {
+    public:
+        ToggleConfiguration(bool enabled, bool isOn)
+            : CommonConfiguration(enabled), isOn_(isOn)
+        {}
+        bool isOn_;
+};
+using SwitchMakeCallback = std::function<RefPtr<FrameNode>(const ToggleConfiguration& toggleConfiguration)>;
 class ACE_EXPORT ToggleModelNG : public OHOS::Ace::ToggleModel {
 public:
     void Create(ToggleType toggleType, bool isOn) override;
@@ -35,6 +44,16 @@ public:
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void Pop() override;
+    void SetPointRadius(const Dimension& switchPointRadius) override;
+    void ResetPointRadius() override;
+    void SetUnselectedColor(const Color& unselectedColor) override;
+    void SetTrackBorderRadius(const Dimension& borderRadius) override;
+    void ResetTrackBorderRadius() override;
+    static void SetPointRadius(FrameNode* frameNode, const Dimension& switchPointRadius);
+    static void ResetPointRadius(FrameNode* frameNode);
+    static void SetUnselectedColor(FrameNode* frameNode, const Color& unselectedColor);
+    static void SetTrackBorderRadius(FrameNode* frameNode, const Dimension& borderRadius);
+    static void ResetTrackBorderRadius(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, ToggleType toggleType, bool isOn);
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
     static void SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor);
@@ -45,20 +64,26 @@ public:
     static void SetPadding(FrameNode* frameNode, const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static void SetSwitchIsOn(FrameNode* frameNode, bool isOn);
+    static void SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&& jsMake);
+    static void SetChangeValue(FrameNode* frameNode, bool value);
 
     static Color GetSelectedColor(FrameNode* frameNode);
     static Color GetSwitchPointColor(FrameNode* frameNode);
     static bool GetSwitchIsOn(FrameNode* frameNode);
+    static Color GetUnselectedColor(FrameNode* frameNode);
+
 private:
-    static void CreateCheckbox(int32_t nodeId);
-    static void CreateSwitch(int32_t nodeId);
-    static void CreateButton(int32_t nodeId);
+    static void ReCreateFrameNode(
+        const RefPtr<FrameNode>& childFrameNode, int32_t nodeId, ToggleType toggleType, bool isOn);
     static RefPtr<FrameNode> CreateCheckboxFrameNode(int32_t nodeId, bool isOn);
     static RefPtr<FrameNode> CreateSwitchFrameNode(int32_t nodeId, bool isOn);
     static RefPtr<FrameNode> CreateButtonFrameNode(int32_t nodeId, bool isOn);
     static void AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index);
     static int32_t RemoveNode(const RefPtr<FrameNode>& childFrameNode, int32_t nodeId);
-    static void SetSwitchSelected(RefPtr<FrameNode>& childFrameNode, bool isOn);
+    static void UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
+    static void UpdateCheckboxIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
+    static void UpdateToggleButtonIsOn(const RefPtr<FrameNode>& frameNode, bool isOn);
+    static void ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode);
 };
 
 } // namespace OHOS::Ace::NG

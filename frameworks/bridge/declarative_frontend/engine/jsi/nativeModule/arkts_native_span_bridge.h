@@ -39,8 +39,14 @@ public:
     static ArkUINativeModuleValue ResetFontColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetLetterSpacing(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetLetterSpacing(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetBaselineOffset(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBaselineOffset(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetFont(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetTextBackgroundStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTextBackgroundStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetTextShadow(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTextShadow(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 }
 

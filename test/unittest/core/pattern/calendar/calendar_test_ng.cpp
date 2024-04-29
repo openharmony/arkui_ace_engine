@@ -56,6 +56,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 struct TestProperty {};
 namespace {
+const InspectorFilter filter;
 const Color COLOR_VALUE = Color(0xffbbffff);
 const Dimension SIZE_VALUE = 1.2_px;
 
@@ -1056,14 +1057,14 @@ HWTEST_F(CalendarTestNg, CalendarPatternTest005, TestSize.Level1)
 
     swiperLayoutProperty->UpdateDisableSwipe(true);
     swiperLayoutProperty->UpdateDirection(Axis::VERTICAL);
-    calendarPattern->ToJsonValue(json);
+    calendarPattern->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("needSlide"), "false");
     EXPECT_EQ(json->GetString("direction"), "0");
 
     swiperLayoutProperty->UpdateDisableSwipe(false);
     swiperLayoutProperty->UpdateDirection(Axis::HORIZONTAL);
     json = JsonUtil::Create(true);
-    calendarPattern->ToJsonValue(json);
+    calendarPattern->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("needSlide"), "true");
     EXPECT_EQ(json->GetString("direction"), "1");
 
@@ -1072,7 +1073,7 @@ HWTEST_F(CalendarTestNg, CalendarPatternTest005, TestSize.Level1)
     swiperLayoutProperty->propDisableSwipe_ = disableSwipe;
     swiperLayoutProperty->propDirection_ = direction;
     json = JsonUtil::Create(true);
-    calendarPattern->ToJsonValue(json);
+    calendarPattern->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("needSlide"), "true");
     EXPECT_EQ(json->GetString("direction"), "1");
 }
@@ -1257,7 +1258,7 @@ HWTEST_F(CalendarTestNg, CalendarLayoutAlgorithmTest001, TestSize.Level1)
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     ASSERT_NE(pipeline, nullptr);
     pipeline->rootWidth_ = OFFSET_X;
     pipeline->rootHeight_ = OFFSET_Y;

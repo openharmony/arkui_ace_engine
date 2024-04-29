@@ -60,19 +60,22 @@ public:
     virtual void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) = 0;
     virtual void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) = 0;
     virtual void CloseCustomDialogNG(int32_t dialogId) = 0;
+    virtual void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) = 0;
+    virtual void UpdateCustomDialogNG(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback) = 0;
     virtual void HideSubWindowNG() = 0;
     virtual int32_t GetChildContainerId() const = 0;
     virtual bool GetShown() = 0;
+    virtual void MarkDirtyDialogSafeArea() = 0;
 
     // Add interface for hot regions
-    virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
-    virtual void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
-    virtual void DeleteHotAreas(int32_t overlayId) {};
-    virtual void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
-    virtual void DeletePopupHotAreas(int32_t overlayId) {};
+    virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId) {};
+    virtual void DeleteHotAreas(int32_t nodeId) {};
 
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
+    virtual Rect GetUIExtensionHostWindowRect() const = 0;
+    virtual bool CheckHostWindowStatus() const = 0;
 
     int32_t GetSubwindowId() const
     {
@@ -82,6 +85,16 @@ public:
     void SetSubwindowId(int32_t id)
     {
         subwindowId_ = id;
+    }
+
+    int32_t GetUIExtensionHostWindowId() const
+    {
+        return uiExtensionHostWindowId_;
+    }
+
+    void SetUIExtensionHostWindowId(int32_t id)
+    {
+        uiExtensionHostWindowId_ = id;
     }
 
     void SetAboveApps(bool isAboveApps)
@@ -107,6 +120,7 @@ public:
     virtual void CloseDialog(int32_t instanceId) = 0;
     virtual void OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback) = 0;
     virtual void CloseCustomDialog(const int32_t dialogId) = 0;
+    virtual void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) = 0;
     virtual const RefPtr<NG::OverlayManager> GetOverlayManager() = 0;
     virtual bool IsFocused() = 0;
     virtual void RequestFocus() = 0;
@@ -114,6 +128,7 @@ public:
     virtual void ResizeWindowForFoldStatus(int32_t parentContainerId) = 0;
 private:
     int32_t subwindowId_ = 0;
+    int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
 };
 

@@ -30,7 +30,7 @@ class NavigationPattern;
  */
 class InnerNavigationController : public OHOS::Ace::NavigationController {
 public:
-    explicit InnerNavigationController(const WeakPtr<NG::NavigationPattern>& pattern);
+    explicit InnerNavigationController(const WeakPtr<NG::NavigationPattern>& pattern, int32_t containerId);
     bool IsNavDestinationInTopStack() override;
     int32_t GetTopHandle() override;
     void SetInPIPMode(int32_t handle) override;
@@ -40,6 +40,7 @@ public:
 
 private:
     WeakPtr<NG::NavigationPattern> weakNavigationPattern_;
+    int32_t containerId_;
 };
 } // namespace Ace
 } // namespace OHOS

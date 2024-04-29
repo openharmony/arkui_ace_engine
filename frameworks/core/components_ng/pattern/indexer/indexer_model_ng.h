@@ -59,7 +59,11 @@ public:
     void SetIndexerBorderRadius(const Dimension& radius) override;
     void SetPopupBackgroundBlurStyle(const BlurStyleOption& indexerBlurStyle) override;
     void SetPopupTitleBackground(const std::optional<Color>& color) override;
+    void SetAdaptiveWidth(bool state) override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetArrayValue(FrameNode* frameNode, const std::vector<std::string>& arrayValue);
+    static void SetAdaptiveWidth(FrameNode* frameNode, bool state);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const FontWeight weight);
     static void SetSelectedFont(FrameNode* frameNode, std::optional<Dimension>& fontSize,
@@ -91,6 +95,14 @@ public:
     static void SetIndexerBorderRadius(FrameNode* frameNode, const Dimension& radius);
     static void SetPopupBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& indexerBlurStyle);
     static void SetPopupTitleBackground(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetOnSelected(FrameNode* frameNode,
+        std::function<void(const int32_t selected)>&& onSelect);
+    static void SetOnRequestPopupData(FrameNode* frameNode,
+        std::function<std::vector<std::string>(const int32_t selected)>&& RequestPopupData);
+    static void SetOnPopupSelected(FrameNode* frameNode,
+        std::function<void(const int32_t selected)>&& onPopupSelected);
+    static void SetChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent);
+    static void SetCreatChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H

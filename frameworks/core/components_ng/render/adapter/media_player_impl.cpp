@@ -21,7 +21,7 @@
 #include "core/common/container.h"
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/render/adapter/render_surface_impl.h"
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/components_ng/render/adapter/render_texture_impl.h"
 #endif
 #include "core/pipeline_ng/pipeline_context.h"
@@ -57,7 +57,7 @@ void MediaPlayerImpl::CreateMediaPlayer()
             if (player->errorCallback_) {
                 player->errorCallback_();
             }
-        });
+        }, "ArkUIVideoCreateMediaPlayer");
     };
     player_ = AceType::MakeRefPtr<Player>(context, std::move(errorCallback));
     InitListener();
@@ -81,7 +81,7 @@ void MediaPlayerImpl::InitListener()
             if (player->stateChangeCallback_) {
                 player->stateChangeCallback_(PlaybackStatus::PREPARED);
             }
-        });
+        }, "ArkUIVideoAddPreparedListener");
     };
 
     auto onPlayerStatus = [weak = WeakClaim(this), uiTaskExecutor](bool isPlaying) {
@@ -96,7 +96,7 @@ void MediaPlayerImpl::InitListener()
                 player->startRenderFrameCallback_();
             }
 #endif
-        });
+        }, "ArkUIVideoAddPlayStatusListener");
     };
 
     auto onCurrentTimeChange = [weak = WeakClaim(this), uiTaskExecutor](uint32_t currentPos) {
@@ -106,7 +106,7 @@ void MediaPlayerImpl::InitListener()
             if (player->positionUpdateCallback_) {
                 player->positionUpdateCallback_(currentPos);
             }
-        });
+        }, "ArkUIVideoAddCurrentPosListener");
     };
 
     auto onCompletion = [weak = WeakClaim(this), uiTaskExecutor] {
@@ -116,7 +116,7 @@ void MediaPlayerImpl::InitListener()
             if (player->stateChangeCallback_) {
                 player->stateChangeCallback_(PlaybackStatus::PLAYBACK_COMPLETE);
             }
-        });
+        }, "ArkUIVideoAddCompletionListener");
     };
 
     player_->AddPreparedListener(onPrepared);
@@ -148,7 +148,7 @@ bool MediaPlayerImpl::SetSource(const std::string& src)
 void MediaPlayerImpl::SetRenderSurface(const RefPtr<RenderSurface>& renderSurface)
 {
     renderSurface_ = renderSurface;
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (renderSurface ->IsTexture()) {
         auto surfaceImpl = AceType::DynamicCast<RenderTextureImpl>(renderSurface);
         surfaceImpl->SetExtSurfaceCallback(AceType::Claim(this));
@@ -216,7 +216,7 @@ int32_t MediaPlayerImpl::SetSurface()
     CHECK_NULL_RETURN(player_, -1);
     auto renderSurface = renderSurface_.Upgrade();
     CHECK_NULL_RETURN(renderSurface, -1);
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (renderSurface ->IsTexture()) {
         auto textureImpl = AceType::DynamicCast<RenderTextureImpl>(renderSurface);
         CHECK_NULL_RETURN(textureImpl, -1);

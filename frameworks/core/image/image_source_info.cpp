@@ -19,6 +19,7 @@
 
 #include "base/utils/string_utils.h"
 #include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -104,7 +105,7 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
         return SrcType::INTERNAL;
     } else if (head == "data") {
         static constexpr char BASE64_PATTERN[] =
-            "^data:image/(jpeg|JPEG|jpg|JPG|png|PNG|ico|ICO|gif|GIF|bmp|BMP|webp|WEBP);base64$";
+            "^data:image/(jpeg|JPEG|jpg|JPG|png|PNG|ico|ICO|gif|GIF|bmp|BMP|webp|WEBP|heic|heif|HEIF);base64$";
         if (IsValidBase64Head(uri, BASE64_PATTERN)) {
             return SrcType::BASE64;
         }
@@ -146,6 +147,11 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
         TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: multi image source set, only one will be load.");
     }
     GenerateCacheKey();
+
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        localColorMode_ = pipelineContext->GetLocalColorMode();
+    }
 }
 
 SrcType ImageSourceInfo::ResolveSrcType() const

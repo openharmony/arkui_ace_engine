@@ -20,6 +20,7 @@
 
 #include "ability_info.h"
 #include "display_manager.h"
+#include "interfaces/inner_api/ace/arkui_rect.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
@@ -90,7 +91,6 @@ public:
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
-    void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
 
@@ -153,6 +153,8 @@ public:
     void OnFormSurfaceChange(float width, float height) override;
 
     void SetFormBackgroundColor(const std::string& color) override;
+
+    void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) override;
 
     SerializeableObjectArray DumpUITree() override
     {
@@ -234,6 +236,9 @@ public:
     bool NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t offset) override;
 
+    void HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+        int32_t eventType, int64_t timeMs) override;
+
     int32_t GetInstanceId() override
     {
         return instanceId_;
@@ -247,6 +252,7 @@ public:
     int32_t CreateCustomPopupUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) override;
     void DestroyCustomPopupUIExtension(int32_t nodeId) override;
+    void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) override;
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
     void SetContainerModalTitleHeight(int32_t height) override;
@@ -288,6 +294,15 @@ public:
         return isUIExtensionAbilityHost_;
     }
 
+    std::vector<Ace::RectF> GetOverlayNodePositions() const override;
+
+    void RegisterOverlayNodePositionsUpdateCallback(
+        const std::function<void(std::vector<Ace::RectF>)>& callback) const override;
+
+    void SetFormRenderingMode(int8_t renderMode) override;
+
+    void SetContentNodeGrayScale(float grayscale) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -304,6 +319,7 @@ private:
 
     RefPtr<PopupParam> CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config);
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
+    void SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId);
 
     static void RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId);
     void RenderLayoutBoundary(bool isDebugBoundary);
@@ -313,6 +329,8 @@ private:
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
+
+    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -339,8 +357,10 @@ private:
     float formWidth_ = 0.0;
     float formHeight_ = 0.0;
     std::string formData_;
+    bool fontScaleFollowSystem_ = true;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
     std::unordered_map<int32_t, CustomPopupUIExtensionConfig> customPopupConfigMap_;
+    std::unordered_map<int32_t, int32_t> popupUIExtensionRecords_;
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     bool isDynamicRender_ = false;

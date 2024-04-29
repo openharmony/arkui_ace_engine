@@ -20,6 +20,8 @@
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT WaterFlowLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(WaterFlowLayoutProperty, LayoutProperty);
 
@@ -41,7 +43,7 @@ public:
         itemLayoutConstraint_.reset();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     Axis GetAxis() const
     {
@@ -53,7 +55,9 @@ public:
     bool IsReverse() const
     {
         auto axis = propWaterflowDirection_.value_or(FlexDirection::COLUMN);
-        return axis == FlexDirection::COLUMN_REVERSE || axis == FlexDirection::ROW_REVERSE;
+        auto isRtl = GetNonAutoLayoutDirection() == TextDirection::RTL;
+        return (!isRtl && (axis == FlexDirection::COLUMN_REVERSE || axis == FlexDirection::ROW_REVERSE)) ||
+                (isRtl && (axis == FlexDirection::COLUMN_REVERSE || axis == FlexDirection::ROW));
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ColumnsTemplate, std::string);

@@ -17,7 +17,9 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const InspectorFilter filter;
+} // namespace
 
 class SwiperAttrTestNg : public SwiperTestNg {
 public:
@@ -166,11 +168,10 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator001, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsShowIndicator());
     EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DOT);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 5); // 4 items and indicator
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    EXPECT_EQ(indicatorNode->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
+    EXPECT_EQ(indicatorNode_->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 4), RectF(196.05f, 768.02f, 87.9f, 31.98f)));
 
-    auto wrapper = FlushLayoutTask(indicatorNode);
+    auto wrapper = FlushLayoutTask(indicatorNode_);
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);
     EXPECT_FALSE(paintMethod->dotIndicatorModifier_->indicatorMask_);
     EXPECT_EQ(paintMethod->dotIndicatorModifier_->unselectedColor_->Get(), Color::FromString("#182431"));
@@ -212,11 +213,10 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator002, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsShowIndicator());
     EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DOT);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 5); // 4 items and indicator
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    EXPECT_EQ(indicatorNode->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
+    EXPECT_EQ(indicatorNode_->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 4), RectF(10.f, 10.f, 114.5f, 37.3f)));
 
-    auto wrapper = FlushLayoutTask(indicatorNode);
+    auto wrapper = FlushLayoutTask(indicatorNode_);
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);
     EXPECT_TRUE(paintMethod->dotIndicatorModifier_->indicatorMask_);
     EXPECT_EQ(paintMethod->dotIndicatorModifier_->unselectedColor_->Get(), Color::RED);
@@ -242,17 +242,16 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator003, TestSize.Level1)
      */
     CreateWithItem([](SwiperModelNG model) { model.SetIndicatorType(SwiperIndicatorType::DIGIT); });
     EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto firstTextNode = GetChildFrameNode(indicatorNode, 0);
-    auto lastTextNode = GetChildFrameNode(indicatorNode, 1);
+    auto firstTextNode = GetChildFrameNode(indicatorNode_, 0);
+    auto lastTextNode = GetChildFrameNode(indicatorNode_, 1);
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(firstTextLayoutProperty->GetTextColor(), Color::FromString("#ff182431"));
-    EXPECT_EQ(firstTextLayoutProperty->GetFontSize(), Dimension(14.f));
-    EXPECT_EQ(firstTextLayoutProperty->GetFontWeight(), FontWeight::W800);
-    EXPECT_EQ(lastTextLayoutProperty->GetTextColor(), Color::FromString("#ff182431"));
-    EXPECT_EQ(lastTextLayoutProperty->GetFontSize(), Dimension(14.f));
-    EXPECT_EQ(lastTextLayoutProperty->GetFontWeight(), FontWeight::W800);
+    EXPECT_EQ(firstTextLayoutProperty->GetTextColor(), INDICATOR_TEXT_FONT_COLOR);
+    EXPECT_EQ(firstTextLayoutProperty->GetFontSize(), INDICATOR_TEXT_FONT_SIZE);
+    EXPECT_EQ(firstTextLayoutProperty->GetFontWeight(), INDICATOR_TEXT_FONT_WEIGHT);
+    EXPECT_EQ(lastTextLayoutProperty->GetTextColor(), INDICATOR_TEXT_FONT_COLOR);
+    EXPECT_EQ(lastTextLayoutProperty->GetFontSize(), INDICATOR_TEXT_FONT_SIZE);
+    EXPECT_EQ(lastTextLayoutProperty->GetFontWeight(), INDICATOR_TEXT_FONT_WEIGHT);
 }
 
 /**
@@ -278,9 +277,8 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator004, TestSize.Level1)
         model.SetDigitIndicatorStyle(swiperDigitalParameters);
     });
     EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto firstTextNode = GetChildFrameNode(indicatorNode, 0);
-    auto lastTextNode = GetChildFrameNode(indicatorNode, 1);
+    auto firstTextNode = GetChildFrameNode(indicatorNode_, 0);
+    auto lastTextNode = GetChildFrameNode(indicatorNode_, 1);
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_EQ(firstTextLayoutProperty->GetTextColor(), Color::GREEN);
@@ -514,6 +512,8 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount001, TestSize.Level1)
      */
     CreateWithItem([](SwiperModelNG model) {});
     EXPECT_EQ(pattern_->GetDisplayCount(), 1);
+    EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f); // item size > 0
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), 0.f);
 }
 
 /**
@@ -529,6 +529,8 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount002, TestSize.Level1)
      */
     CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(2); });
     EXPECT_EQ(pattern_->GetDisplayCount(), 2);
+    EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f); // item size > 0
+    EXPECT_GT(GetChildWidth(frameNode_, 1), 0.f);
 }
 
 /**
@@ -539,11 +541,14 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount002, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set displayCount to invalid 0
-     * @tc.expected: DisplayCount is default 1
+     * @tc.cases: Set displayCount to ITEM_NUMBER+1
+     * @tc.expected: DisplayCount is ITEM_NUMBER+1, last item place has placeholder child
      */
-    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(0); });
-    EXPECT_EQ(pattern_->GetDisplayCount(), 1);
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(ITEM_NUMBER + 1); });
+    EXPECT_EQ(pattern_->GetDisplayCount(), 5);
+    EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER); // child number still is 4
+    EXPECT_GT(GetChildWidth(frameNode_, 3), 0.f); // item size > 0
+    EXPECT_GT(GetChildWidth(frameNode_, 4), 0.f); // placeholder child
 }
 
 /**
@@ -552,6 +557,40 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperAttrTestNg, AttrDisplayCount004, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set minsize to half of swiper width
+     * @tc.expected: show 2 item in one page
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetMinSize(Dimension(SWIPER_WIDTH / 3)); });
+    EXPECT_TRUE(pattern_->IsAutoFill());
+    EXPECT_EQ(pattern_->GetDisplayCount(), 2);
+    EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f); // item size > 0
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), 0.f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 2), 0.f);
+}
+
+/**
+ * @tc.name: AttrDisplayCount005
+ * @tc.desc: Test property about DisplayCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrDisplayCount005, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set displayCount to invalid 0
+     * @tc.expected: DisplayCount is default 1
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(0); });
+    EXPECT_EQ(pattern_->GetDisplayCount(), 1);
+}
+
+/**
+ * @tc.name: AttrDisplayCount006
+ * @tc.desc: Test property about DisplayCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrDisplayCount006, TestSize.Level1)
 {
     /**
      * @tc.cases: Do not set displayCount
@@ -660,8 +699,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin002, TestSize.Level1)
      * @tc.expected: Margin is 10,5
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f));
-        model.SetPreviousMargin(Dimension(5.f));
+        model.SetNextMargin(Dimension(10.f), false);
+        model.SetPreviousMargin(Dimension(5.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
@@ -679,8 +718,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin003, TestSize.Level1)
      * @tc.expected: Margin is 0
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(SWIPER_WIDTH + 1.f));
-        model.SetPreviousMargin(Dimension(5));
+        model.SetNextMargin(Dimension(SWIPER_WIDTH + 1.f), false);
+        model.SetPreviousMargin(Dimension(5), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
@@ -698,8 +737,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin004, TestSize.Level1)
      * @tc.expected: Margin is 0
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f));
-        model.SetPreviousMargin(Dimension(SWIPER_WIDTH + 1.f));
+        model.SetNextMargin(Dimension(10.f), false);
+        model.SetPreviousMargin(Dimension(SWIPER_WIDTH + 1.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
@@ -716,7 +755,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin005, TestSize.Level1)
      * @tc.cases: Only set nextMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f));
+        model.SetNextMargin(Dimension(10.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
@@ -733,7 +772,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin006, TestSize.Level1)
      * @tc.cases: Only set preMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetPreviousMargin(Dimension(5.f));
+        model.SetPreviousMargin(Dimension(5.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
@@ -829,5 +868,306 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayArrow001, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetBackgroundColor(), Color::BLUE);
     EXPECT_EQ(layoutProperty_->GetArrowSize(), Dimension(24.0));
     EXPECT_EQ(layoutProperty_->GetArrowColor(), Color::BLUE);
+}
+
+/**
+ * @tc.name: SwiperModelNg001
+ * @tc.desc: Swiper Model NG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, SwiperModelNg001, TestSize.Level1)
+{
+    SwiperModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    auto paintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
+
+    /**
+     * @tc.steps: step3.1. Test SetIndex function.
+     * @tc.expected: layoutProperty->GetIndex() is equal to 1.
+     */
+    model.SetIndex(1);
+    EXPECT_EQ(layoutProperty->GetIndex(), 1);
+
+    /**
+     * @tc.steps: step3.2. Test SetDisplayMode function.
+     * @tc.expected: layoutProperty->GetDisplayMode() is equal to swiperDisplayMode.
+     */
+    model.SetDisplayMode(SwiperDisplayMode::STRETCH);
+    EXPECT_EQ(layoutProperty->GetDisplayMode(), SwiperDisplayMode::STRETCH);
+
+    /**
+     * @tc.steps: step3.3. Test SetShowIndicator function.
+     * @tc.expected: layoutProperty->GetIndex() is equal to 1.
+     */
+    model.SetShowIndicator(true);
+    EXPECT_TRUE(layoutProperty->GetShowIndicator());
+
+    /**
+     * @tc.steps: step3.4. Test SetItemSpace function.
+     * @tc.expected: layoutProperty->GetItemSpace() is equal to dimension.
+     */
+    auto dimension = Dimension(-1.0);
+    model.SetItemSpace(dimension);
+    EXPECT_EQ(layoutProperty->GetItemSpace(), dimension);
+
+    /**
+     * @tc.steps: step3.5. Test SetCachedCount function.
+     * @tc.expected:DisplayCount = -1 layoutProperty->SetCachedCount() is equal to 1.
+     * @tc.expected:DisplayCount = 1 layoutProperty->SetCachedCount() is equal to 1.
+     */
+    model.SetCachedCount(-1);
+    model.SetCachedCount(1);
+    EXPECT_EQ(layoutProperty->GetCachedCount(), 1);
+
+    /**
+     * @tc.steps: step3.6. Test SetIsIndicatorCustomSize function.
+     * @tc.expected: pattern->IsIndicatorCustomSize() is equal to true.
+     */
+    model.SetIsIndicatorCustomSize(true);
+    EXPECT_TRUE(pattern->IsIndicatorCustomSize());
+
+    /**
+     * @tc.steps: step3.7. Test SetAutoPlay function.
+     * @tc.expected: SwiperPaintProperty->GetAutoPlay() is equal to true.
+     */
+    model.SetAutoPlay(true);
+    EXPECT_TRUE(paintProperty->GetAutoPlay());
+
+    /**
+     * @tc.steps: step3.8. Test SetAutoPlayInterval function.
+     * @tc.expected: SwiperPaintProperty->GetAutoPlayInterval() is equal to 1.
+     */
+    model.SetAutoPlayInterval(1);
+    EXPECT_EQ(paintProperty->GetAutoPlayInterval(), 1);
+
+    /**
+     * @tc.steps: step3.9. Test SetDuration function.
+     * @tc.expected: SwiperPaintProperty->GetDuration() is equal to 1.
+     */
+    model.SetDuration(1);
+    EXPECT_EQ(paintProperty->GetDuration(), 1);
+}
+
+/**
+ * @tc.name: SwiperModelNg002
+ * @tc.desc: Swiper Model NG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, SwiperModelNg002, TestSize.Level1)
+{
+    SwiperModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    auto paintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+
+    /**
+     * @tc.steps: step3.1. Test SetLoop function.
+     * @tc.expected: SwiperPaintProperty->GetLoop() is true.
+     */
+    model.SetLoop(true);
+    EXPECT_TRUE(layoutProperty->GetLoop());
+
+    /**
+     * @tc.steps: step3.2. Test SetEnabled function.
+     * @tc.expected: SwiperPaintProperty->GetEnabled() is true.
+     */
+    model.SetEnabled(true);
+    EXPECT_TRUE(paintProperty->GetEnabled());
+
+    /**
+     * @tc.steps: step3.3. Test SetDisableSwipe function.
+     * @tc.expected: layoutProperty->GetDisableSwipe() is true.
+     */
+    model.SetDisableSwipe(true);
+    EXPECT_TRUE(layoutProperty->GetDisableSwipe());
+
+    /**
+     * @tc.steps: step3.4. Test SetEdgeEffect function.
+     * @tc.expected: SwiperPaintProperty->GetEdgeEffect() is true.
+     */
+    model.SetEdgeEffect(EdgeEffect::FADE);
+    EXPECT_EQ(paintProperty->GetEdgeEffect(), EdgeEffect::FADE);
+
+    /**
+     * @tc.steps: step3.5. Test SetOnChange function.
+     * @tc.expected:pattern->changeEvent_ not null.
+     */
+    auto onChange = [](const BaseEventInfo* info) {};
+    model.SetOnChange(std::move(onChange));
+    EXPECT_NE(pattern->changeEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3.6. Test SetOnAnimationStart function.
+     * @tc.expected:pattern->animationStartEvent_ not null.
+     */
+    auto onAnimationStart = [](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {};
+    model.SetOnAnimationStart(std::move(onAnimationStart));
+    EXPECT_NE(pattern->animationStartEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3.7. Test SetOnAnimationEnd function.
+     * @tc.expected:pattern->animationEndEvent_ not null.
+     */
+    auto onAnimationEnd = [](int32_t index, const AnimationCallbackInfo& info) {};
+    model.SetOnAnimationEnd(std::move(onAnimationEnd));
+    EXPECT_NE(pattern->animationEndEvent_, nullptr);
+}
+
+/**
+ * @tc.name: SwiperModelNg003
+ * @tc.desc: Swiper Model NG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, SwiperModelNg003, TestSize.Level1)
+{
+    SwiperModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    auto paintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
+
+    /**
+     * @tc.steps: step3.1. Test SetIndicatorStyle function.
+     * @tc.expected: SwiperPaintProperty->swiperParameters_->colorVal is swiperParameters.colorVal.
+     */
+    SwiperParameters swiperParameters;
+    swiperParameters.colorVal = Color(Color::BLUE);
+    model.SetIndicatorStyle(swiperParameters);
+    EXPECT_EQ(pattern->swiperParameters_->colorVal, swiperParameters.colorVal);
+
+    /**
+     * @tc.steps: step3.2. Test SetPreviousMargin function.
+     * @tc.expected: paintProperty->GetPrevMargin() is equal to dimension.
+     */
+    auto dimension = Dimension(-1.0);
+    model.SetPreviousMargin(dimension, false);
+    EXPECT_EQ(layoutProperty->GetPrevMargin(), dimension);
+
+    /**
+     * @tc.steps: step3.3. Test SetNextMargin function.
+     * @tc.expected: paintProperty->GetNextMargin() is equal to dimension.
+     */
+    model.SetNextMargin(dimension, false);
+    EXPECT_EQ(layoutProperty->GetNextMargin(), dimension);
+
+    /**
+     * @tc.steps: step3.5. Test SetIndicatorIsBoolean function.
+     * @tc.expected: pattern->indicatorIsBoolean_ is true.
+     */
+    model.SetIndicatorIsBoolean(true);
+    EXPECT_TRUE(pattern->indicatorIsBoolean_);
+
+    /**
+     * @tc.steps: step3.6. Test SetArrowStyle function.
+     * @tc.expected: before set swiperArrowParameters, all result is null.
+     */
+    SwiperArrowParameters swiperArrowParameters;
+    model.SetArrowStyle(swiperArrowParameters);
+
+    /**
+     * @tc.steps: step3.7. Test SetArrowStyle function.
+     * @tc.expected: after set swiperArrowParameters, layoutProperty->IsShowBoard is true.
+     */
+    swiperArrowParameters.isShowBackground = true;
+    swiperArrowParameters.backgroundSize = dimension;
+    swiperArrowParameters.backgroundColor = Color(Color::BLUE);
+    swiperArrowParameters.arrowSize = dimension;
+    swiperArrowParameters.arrowColor = Color(Color::RED);
+    swiperArrowParameters.isSidebarMiddle = true;
+    model.SetArrowStyle(swiperArrowParameters);
+    EXPECT_TRUE(layoutProperty->GetIsShowBackground());
+    EXPECT_EQ(layoutProperty->GetBackgroundSize(), dimension);
+    EXPECT_EQ(layoutProperty->GetBackgroundColor(), Color(Color::BLUE));
+    EXPECT_EQ(layoutProperty->GetArrowSize(), dimension);
+    EXPECT_EQ(layoutProperty->GetArrowColor(), Color(Color::RED));
+    EXPECT_TRUE(layoutProperty->GetIsSidebarMiddle());
+
+    /**
+     * @tc.steps: step3.8. Test SetDisplayArrow function.
+     * @tc.expected: layoutProperty->GetDisplayArrow() is true.
+     */
+    model.SetDisplayArrow(true);
+    EXPECT_TRUE(layoutProperty->GetDisplayArrow());
+
+    /**
+     * @tc.steps: step3.9. Test SetHoverShow function.
+     * @tc.expected: layoutProperty->GetHoverShow() is true.
+     */
+    model.SetHoverShow(true);
+    EXPECT_TRUE(layoutProperty->GetHoverShow());
+}
+
+/**
+ * @tc.name: SetMinSize001
+ * @tc.desc: Swiper Model NG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, SetMinSize003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    SwiperModelNG model;
+    model.Create();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    auto paintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
+
+    /**
+     * @tc.steps: step2. Calling the SetMinSize interface to set Dimension
+     * @tc.expected: LayoutProperty ->GetMinSize(), equal to Dimension()
+     */
+    model.SetMinSize(Dimension(10));
+    layoutProperty->GetMinSize();
+    EXPECT_EQ(layoutProperty->GetMinSize(), Dimension(10));
+}
+
+/**
+ * @tc.name: SwiperPaintProperty001
+ * @tc.desc: Swiper Paint Property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+
+    /**
+     * @tc.steps: step1. Test ToJsonValue function.
+     * @tc.expected: Check the swiper property value
+     */
+    auto json = JsonUtil::Create(true);
+    paintProperty_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("autoPlay"), "false");
+
+    /**
+     * @tc.steps: step2. call UpdateCalcLayoutProperty, push constraint is null.
+     * @tc.expected: Return expected results.
+     */
+    MeasureProperty constraint;
+    layoutProperty_->UpdateCalcLayoutProperty(std::move(constraint));
+    EXPECT_EQ(layoutProperty_->propertyChangeFlag_, 1);
+
+    /**
+     * @tc.steps: step3. Test FromJson function.
+     * @tc.expected: Check the swiper property value
+     */
+    auto jsonFrom = JsonUtil::Create(true);
+    paintProperty_->FromJson(jsonFrom);
+    EXPECT_TRUE(jsonFrom);
 }
 } // namespace OHOS::Ace::NG

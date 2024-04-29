@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RENDER_NODE_RENDER_NODE_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RENDER_NODE_RENDER_NODE_LAYOUT_PROPERTY_H
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -39,14 +40,14 @@ public:
         LayoutProperty::Reset();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
         auto align = Alignment::TOP_LEFT;
         if (GetPositionProperty()) {
             align = GetPositionProperty()->GetAlignment().value_or(Alignment::TOP_LEFT);
         }
-        json->Put("alignContent", align.GetAlignmentStr(TextDirection::LTR).c_str());
+        json->PutExtAttr("alignContent", align.GetAlignmentStr(TextDirection::LTR).c_str(), filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

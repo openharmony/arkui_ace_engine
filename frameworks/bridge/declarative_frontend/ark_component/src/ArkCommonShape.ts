@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   viewPort(value: {
     x?: string | number | undefined;

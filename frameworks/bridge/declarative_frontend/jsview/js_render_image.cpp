@@ -15,11 +15,12 @@
 
 #include "bridge/declarative_frontend/jsview/js_render_image.h"
 
-#include "frameworks/core/common/container.h"
-#include "bridge/declarative_frontend/jsview/js_rendering_context.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+
+#include "bridge/declarative_frontend/jsview/js_rendering_context.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -65,19 +66,15 @@ napi_value AttachImageBitmap(napi_env env, void* value, void*)
 
     napi_value imageBitmap = nullptr;
     napi_create_object(env, &imageBitmap);
-    double width = image->GetWidth();
-    napi_value jsWidth = nullptr;
-    napi_create_double(env, width, &jsWidth);
-    double height = image->GetHeight();
-    napi_value jsHeight = nullptr;
-    napi_create_double(env, height, &jsHeight);
     napi_value isImageBitmap = nullptr;
     napi_create_int32(env, 1, &isImageBitmap);
-
-    napi_set_named_property(env, imageBitmap, "width", jsWidth);
-    napi_set_named_property(env, imageBitmap, "height", jsHeight);
-    napi_set_named_property(env, imageBitmap, "isImageBitmap", isImageBitmap);
-    BindNativeFunction(env, imageBitmap, "close", JSRenderImage::JsClose);
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_GETTER_SETTER("width", JSRenderImage::JsGetWidth, JSRenderImage::JsSetWidth),
+        DECLARE_NAPI_GETTER_SETTER("height", JSRenderImage::JsGetHeight, JSRenderImage::JsSetHeight),
+        DECLARE_NAPI_FUNCTION("close", JSRenderImage::JsClose),
+        DECLARE_NAPI_PROPERTY("isImageBitmap", isImageBitmap),
+    };
+    napi_define_properties(env, imageBitmap, sizeof(desc) / sizeof(*desc), desc);
 
     napi_coerce_to_native_binding_object(env, imageBitmap, DetachImageBitmap, AttachImageBitmap, value, nullptr);
     napi_wrap(
@@ -96,36 +93,37 @@ JSRenderImage::JSRenderImage() {}
 
 napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
 {
-    size_t argc = 1;
-    napi_value argv = nullptr;
+    ContainerScope scope(Container::CurrentIdSafely());
+    size_t argc = 0;
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, &argv, &thisVar, nullptr));
-    if (argc <= 0 || argv == nullptr) {
-        LOGW("Invalid args.");
-        return nullptr;
-    }
-    size_t textLen = 0;
-    std::string textString = "";
-    napi_get_value_string_utf8(env, argv, nullptr, 0, &textLen);
-    std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen + 1);
-    napi_get_value_string_utf8(env, argv, text.get(), textLen + 1, &textLen);
-    textString = text.get();
-    auto context = PipelineBase::GetCurrentContext();
-    if (!context) {
-        LOGW("Invalid context.");
-        return nullptr;
-    }
-    if (context->IsFormRender()) {
-        SrcType srcType = ImageSourceInfo::ResolveURIType(textString);
-        bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
-        if (notSupport) {
-            LOGE("Not supported src : %{public}s when form render", textString.c_str());
-            return nullptr;
-        }
-    }
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, nullptr, &thisVar, nullptr));
     auto wrapper = new (std::nothrow) JSRenderImage();
     wrapper->SetInstanceId(OHOS::Ace::Container::CurrentId());
-    wrapper->LoadImage(textString);
+    if (argc > 0) {
+        napi_value argv = nullptr;
+        napi_get_cb_info(env, info, &argc, &argv, nullptr, nullptr);
+        size_t textLen = 0;
+        std::string textString = "";
+        napi_get_value_string_utf8(env, argv, nullptr, 0, &textLen);
+        std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen + 1);
+        napi_get_value_string_utf8(env, argv, text.get(), textLen + 1, &textLen);
+        textString = text.get();
+        auto context = PipelineBase::GetCurrentContext();
+        if (!context) {
+            LOGW("Invalid context.");
+            return nullptr;
+        }
+        if (context->IsFormRender()) {
+            SrcType srcType = ImageSourceInfo::ResolveURIType(textString);
+            bool notSupport =
+                (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+            if (notSupport) {
+                LOGE("Not supported src : %{public}s when form render", textString.c_str());
+                return nullptr;
+            }
+        }
+        wrapper->LoadImage(textString);
+    }
     napi_coerce_to_native_binding_object(env, thisVar, DetachImageBitmap, AttachImageBitmap, wrapper, nullptr);
     napi_wrap(
         env, thisVar, wrapper,
@@ -144,7 +142,6 @@ napi_value JSRenderImage::InitImageBitmap(napi_env env)
     napi_value object = nullptr;
     napi_create_object(env, &object);
     napi_value isImageBitmap = nullptr;
-    napi_create_object(env, &isImageBitmap);
     napi_create_int32(env, 1, &isImageBitmap);
 
     napi_property_descriptor desc[] = {

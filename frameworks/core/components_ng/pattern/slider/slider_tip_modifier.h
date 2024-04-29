@@ -95,7 +95,9 @@ public:
 
     void SetSliderGlobalOffset(const OffsetF& sliderGlobalOffset)
     {
-        sliderGlobalOffset_ = sliderGlobalOffset;
+        if (sliderGlobalOffset_) {
+            sliderGlobalOffset_->Set(sliderGlobalOffset);
+        }
     }
 
     void SetBubbleOffset(const OffsetF& bubbleOffset)
@@ -145,7 +147,7 @@ private:
     RefPtr<PropertyOffsetF> bubbleVertex_;
     SizeF blockSize_;
     SizeF bubbleSize_;
-    OffsetF sliderGlobalOffset_;
+    RefPtr<PropertyOffsetF> sliderGlobalOffset_;
     OffsetF bubbleOffset_;
     OffsetF textOffset_;
     OffsetF vertex_;

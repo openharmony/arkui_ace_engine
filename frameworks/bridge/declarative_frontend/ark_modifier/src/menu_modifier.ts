@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class MenuModifier extends ArkMenuComponent implements AttributeModifier<MenuAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: MenuAttribute): void {
-    applyAndMergeModifier<MenuAttribute, ArkMenuComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<MenuAttribute, ArkMenuComponent, ArkComponent>(instance, this);
   }
 }

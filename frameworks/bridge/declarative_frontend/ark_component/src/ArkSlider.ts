@@ -15,11 +15,12 @@
 
 /// <reference path='./import.ts' />
 class ArkSliderComponent extends ArkComponent implements SliderAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+  builder: WrappedBuilder<Object[]> | null = null;
+  sliderNode: BuilderNode<[SliderConfiguration]> | null = null;
+  modifier: ContentModifier<SliderConfiguration>;
+  needRebuild: boolean = false;
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   blockColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, BlockColorModifier.identity, BlockColorModifier, value);
@@ -82,6 +83,31 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   stepSize(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, StepSizeModifier.identity, StepSizeModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<SliderConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, sliderConfiguration: SliderConfiguration): FrameNode | null {
+    sliderConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.sliderNode) || this.needRebuild) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.sliderNode = new xNode.BuilderNode(context);
+      this.sliderNode.build(this.builder, sliderConfiguration);
+      this.needRebuild = false;
+    } else {
+      this.sliderNode.update(sliderConfiguration);
+    }
+    return this.sliderNode.getFrameNode();
   }
 }
 
@@ -329,12 +355,20 @@ class TrackThicknessModifier extends ModifierWithKey<Length> {
 }
 
 // @ts-ignore
-globalThis.Slider.attributeModifier = function (modifier) {
+globalThis.Slider.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkSliderComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.SliderModifier(nativePtr, classType);
+  });
+};
+
+// @ts-ignore
+globalThis.Slider.contentModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSliderComponent(nativeNode);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
+  component.setContentModifier(modifier);
 };

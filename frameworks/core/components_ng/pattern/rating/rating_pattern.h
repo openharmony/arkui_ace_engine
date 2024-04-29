@@ -24,11 +24,13 @@
 #include "core/components_ng/pattern/rating/rating_event_hub.h"
 #include "core/components_ng/pattern/rating/rating_layout_algorithm.h"
 #include "core/components_ng/pattern/rating/rating_layout_property.h"
+#include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_modifier.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 #define ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(name, type)     \
     static std::optional<type> Get##name##FromTheme()             \
@@ -98,6 +100,24 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
+    void SetBuilderFunc(RatingMakeCallback&& makeFunc)
+    {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
+    void SetRatingScore(double value);
+
 private:
     void UpdateRatingScore(double ratingScore);
     void MarkDirtyNode(const PropertyChangeFlag& flag);
@@ -142,11 +162,15 @@ private:
     void HandleTouchDown(const Offset& localPosition);
     void HandleTouchUp();
     void HandleClick(const GestureEvent& info);
-    void FireChangeEvent() const;
+    void FireChangeEvent();
     void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX, bool isDrag);
     bool IsIndicator();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag);
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
 
+    std::optional<RatingMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickEvent_;
@@ -182,7 +206,7 @@ private:
     bool isSecondaryImageInfoFromTheme_ = false;
     bool isBackgroundImageInfoFromTheme_ = false;
     // get XTS inspector value
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPattern);
 };
 

@@ -46,6 +46,11 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const char TIMEPICKER_OPTIONS_HOUR[] = "hour";
+const char TIMEPICKER_OPTIONS_MINUTE[] = "minute";
+const char TIMEPICKER_OPTIONS_SECOND[] = "second";
+const std::string TIMEPICKER_OPTIONS_NUMERIC_VAL = "numeric";
+const std::string TIMEPICKER_OPTIONS_TWO_DIGIT_VAL = "2-digit";
 } // namespace
 
 std::unique_ptr<DatePickerModel> DatePickerModel::datePickerInstance_ = nullptr;
@@ -136,6 +141,8 @@ TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
+const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+
 JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -187,6 +194,164 @@ JSRef<JSVal> DatePickerDateChangeEventToJSValue(const DatePickerChangeEvent& eve
     auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
     auto dateObj = JSDate::New(milliseconds);
     return JSRef<JSVal>::Cast(dateObj);
+}
+
+std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args)
+{
+    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
+    if (!args->IsObject()) {
+        return prop;
+    }
+
+    std::optional<CalcDimension> radiusTopLeft;
+    std::optional<CalcDimension> radiusTopRight;
+    std::optional<CalcDimension> radiusBottomLeft;
+    std::optional<CalcDimension> radiusBottomRight;
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+    CalcDimension topLeft;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
+        radiusTopLeft = topLeft;
+    }
+    CalcDimension topRight;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
+        radiusTopRight = topRight;
+    }
+    CalcDimension bottomLeft;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
+        radiusBottomLeft = bottomLeft;
+    }
+    CalcDimension bottomRight;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
+        radiusBottomRight = bottomRight;
+    }
+    if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
+        !radiusBottomRight.has_value()) {
+        return prop;
+    }
+    NG::BorderRadiusProperty borderRadius;
+    if (radiusTopLeft.has_value()) {
+        borderRadius.radiusTopLeft = radiusTopLeft;
+    }
+    if (radiusTopRight.has_value()) {
+        borderRadius.radiusTopRight = radiusTopRight;
+    }
+    if (radiusBottomLeft.has_value()) {
+        borderRadius.radiusBottomLeft = radiusBottomLeft;
+    }
+    if (radiusBottomRight.has_value()) {
+        borderRadius.radiusBottomRight = radiusBottomRight;
+    }
+    borderRadius.multiValued = true;
+    prop = borderRadius;
+
+    return prop;
+}
+
+std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
+{
+    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
+    CalcDimension radiusDim;
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        return prop;
+    }
+    if (JSViewAbstract::ParseJsDimensionVpNG(args, radiusDim)) {
+        NG::BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(radiusDim);
+        borderRadius.multiValued = false;
+        prop = borderRadius;
+    } else if (args->IsObject()) {
+        prop = HandleDifferentRadius(args);
+    }
+    return prop;
+}
+
+void ParseFontOfButtonStyle(const JSRef<JSObject>& pickerButtonParamObject, ButtonInfo& buttonInfo)
+{
+    CalcDimension fontSize;
+    JSRef<JSVal> sizeProperty = pickerButtonParamObject->GetProperty("fontSize");
+    if (JSViewAbstract::ParseJsDimensionVpNG(sizeProperty, fontSize) && fontSize.Unit() != DimensionUnit::PERCENT &&
+        GreatOrEqual(fontSize.Value(), 0.0)) {
+        if (JSViewAbstract::ParseJsDimensionFp(sizeProperty, fontSize)) {
+            buttonInfo.fontSize = fontSize;
+        }
+    }
+    Color fontColor;
+    if (JSViewAbstract::ParseJsColor(pickerButtonParamObject->GetProperty("fontColor"), fontColor)) {
+        buttonInfo.fontColor = fontColor;
+    }
+    auto fontWeight = pickerButtonParamObject->GetProperty("fontWeight");
+    if (fontWeight->IsString() || fontWeight->IsNumber()) {
+        buttonInfo.fontWeight = ConvertStrToFontWeight(fontWeight->ToString());
+    }
+    JSRef<JSVal> style = pickerButtonParamObject->GetProperty("fontStyle");
+    if (style->IsNumber()) {
+        auto value = style->ToNumber<int32_t>();
+        if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
+            buttonInfo.fontStyle = FONT_STYLES[value];
+        }
+    }
+    JSRef<JSVal> family = pickerButtonParamObject->GetProperty("fontFamily");
+    std::vector<std::string> fontFamilies;
+    if (JSViewAbstract::ParseJsFontFamilies(family, fontFamilies)) {
+        buttonInfo.fontFamily = fontFamilies;
+    }
+}
+
+ButtonInfo ParseButtonStyle(const JSRef<JSObject>& pickerButtonParamObject)
+{
+    ButtonInfo buttonInfo;
+    if (pickerButtonParamObject->GetProperty("type")->IsNumber()) {
+        buttonInfo.type =
+            static_cast<ButtonType>(pickerButtonParamObject->GetProperty("type")->ToNumber<int32_t>());
+    }
+    if (pickerButtonParamObject->GetProperty("style")->IsNumber()) {
+        auto styleModeIntValue = pickerButtonParamObject->GetProperty("style")->ToNumber<int32_t>();
+        if (styleModeIntValue >= static_cast<int32_t>(ButtonStyleMode::NORMAL) &&
+            styleModeIntValue <= static_cast<int32_t>(ButtonStyleMode::TEXT)) {
+            buttonInfo.buttonStyle = static_cast<ButtonStyleMode>(styleModeIntValue);
+        }
+    }
+    if (pickerButtonParamObject->GetProperty("role")->IsNumber()) {
+        auto buttonRoleIntValue = pickerButtonParamObject->GetProperty("role")->ToNumber<int32_t>();
+        if (buttonRoleIntValue >= static_cast<int32_t>(ButtonRole::NORMAL) &&
+            buttonRoleIntValue <= static_cast<int32_t>(ButtonRole::ERROR)) {
+            buttonInfo.role = static_cast<ButtonRole>(buttonRoleIntValue);
+        }
+    }
+    ParseFontOfButtonStyle(pickerButtonParamObject, buttonInfo);
+    Color backgroundColor;
+    if (JSViewAbstract::ParseJsColor(pickerButtonParamObject->GetProperty("backgroundColor"), backgroundColor)) {
+        buttonInfo.backgroundColor = backgroundColor;
+    }
+    auto radius = ParseBorderRadiusAttr(pickerButtonParamObject->GetProperty("borderRadius"));
+    if (radius.has_value()) {
+        buttonInfo.borderRadius = radius.value();
+    }
+
+    auto primaryValue = pickerButtonParamObject->GetProperty("primary");
+    if (primaryValue->IsBoolean()) {
+        buttonInfo.isPrimary = primaryValue->ToBoolean();
+    }
+
+    return buttonInfo;
+}
+
+std::vector<ButtonInfo> ParseButtonStyles(const JSRef<JSObject>& paramObject)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    auto acceptButtonStyle = paramObject->GetProperty("acceptButtonStyle");
+    if (acceptButtonStyle->IsObject()) {
+        auto acceptButtonStyleParamObject = JSRef<JSObject>::Cast(acceptButtonStyle);
+        buttonInfos.emplace_back(ParseButtonStyle(acceptButtonStyleParamObject));
+        buttonInfos[0].isAcceptButton = true;
+    }
+    auto cancelButtonStyle = paramObject->GetProperty("cancelButtonStyle");
+    if (cancelButtonStyle->IsObject()) {
+        auto cancelButtonStyleParamObject = JSRef<JSObject>::Cast(cancelButtonStyle);
+        buttonInfos.emplace_back(ParseButtonStyle(cancelButtonStyleParamObject));
+    }
+
+    return buttonInfos;
 }
 } // namespace
 
@@ -491,6 +656,9 @@ PickerTime JSDatePicker::ParseTime(const JSRef<JSVal>& timeVal)
 void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObject>& selectedObject, bool isDatePicker)
 {
     JSRef<JSVal> changeEventVal = selectedObject->GetProperty("changeEvent");
+    if (changeEventVal->IsUndefined() || !changeEventVal->IsFunction()) {
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
@@ -641,6 +809,9 @@ void DatePickerDialogAppearEvent(const JSCallbackInfo& info, PickerDialogEvent& 
 {
     std::function<void()> didAppearEvent;
     std::function<void()> willAppearEvent;
+    if (info.Length() == 0 || !info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
@@ -671,6 +842,9 @@ void DatePickerDialogDisappearEvent(const JSCallbackInfo& info, PickerDialogEven
 {
     std::function<void()> didDisappearEvent;
     std::function<void()> willDisappearEvent;
+    if (info.Length() == 0 || !info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
@@ -924,12 +1098,19 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
 
+    auto buttonInfos = ParseButtonStyles(paramObject);
+
+    auto shadowValue = paramObject->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
+        pickerDialog.shadow = shadow;
+    }
     PickerDialogEvent pickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
     DatePickerDialogAppearEvent(info, pickerDialogEvent);
     DatePickerDialogDisappearEvent(info, pickerDialogEvent);
     DatePickerDialogModel::GetInstance()->SetDatePickerDialogShow(pickerDialog, settingData, std::move(cancelEvent),
         std::move(acceptEvent), std::move(changeEvent), std::move(dateAcceptEvent), std::move(dateChangeEvent),
-        pickerType, pickerDialogEvent);
+        pickerType, pickerDialogEvent, buttonInfos);
 }
 
 void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
@@ -967,7 +1148,6 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     auto theme = GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
 
-    ButtonInfo buttonInfo;
     DialogProperties properties;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         properties.alignment = DialogAlignment::BOTTOM;
@@ -998,13 +1178,15 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     JSDatePicker::ParseTextProperties(paramObj, settingData.properties);
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowDateDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowDateDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowDatePicker");
 }
 
 void JSDatePickerDialog::CreateDatePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj)
@@ -1062,9 +1244,15 @@ PickerDate JSDatePickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
         return pickerDate;
     }
     auto dateObj = JSRef<JSObject>::Cast(dateVal);
-    auto yearFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getFullYear"));
-    auto monthFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getMonth"));
-    auto dateFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getDate"));
+    auto yearFuncJsVal = dateObj->GetProperty("getFullYear");
+    auto monthFuncJsVal = dateObj->GetProperty("getMonth");
+    auto dateFuncJsVal = dateObj->GetProperty("getDate");
+    if (!(yearFuncJsVal->IsFunction() && monthFuncJsVal->IsFunction() && dateFuncJsVal->IsFunction())) {
+        return pickerDate;
+    }
+    auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
+    auto monthFunc = JSRef<JSFunc>::Cast(monthFuncJsVal);
+    auto dateFunc = JSRef<JSFunc>::Cast(dateFuncJsVal);
     JSRef<JSVal> year = yearFunc->Call(dateObj);
     JSRef<JSVal> month = monthFunc->Call(dateObj);
     JSRef<JSVal> date = dateFunc->Call(dateObj);
@@ -1084,9 +1272,15 @@ PickerTime JSDatePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
         return pickerTime;
     }
     auto timeObj = JSRef<JSObject>::Cast(timeVal);
-    auto hourFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getHours"));
-    auto minuteFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getMinutes"));
-    auto secondFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getSeconds"));
+    auto hourFuncJsVal = timeObj->GetProperty("getHours");
+    auto minuteFuncJsVal = timeObj->GetProperty("getMinutes");
+    auto secondFuncJsVal = timeObj->GetProperty("getSeconds");
+    if (!(hourFuncJsVal->IsFunction() && minuteFuncJsVal->IsFunction() && secondFuncJsVal->IsFunction())) {
+        return pickerTime;
+    }
+    auto hourFunc = JSRef<JSFunc>::Cast(hourFuncJsVal);
+    auto minuteFunc = JSRef<JSFunc>::Cast(minuteFuncJsVal);
+    auto secondFunc = JSRef<JSFunc>::Cast(secondFuncJsVal);
     JSRef<JSVal> hour = hourFunc->Call(timeObj);
     JSRef<JSVal> minute = minuteFunc->Call(timeObj);
     JSRef<JSVal> second = secondFunc->Call(timeObj);
@@ -1117,6 +1311,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("disappearTextStyle", &JSTimePicker::SetDisappearTextStyle);
     JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
     JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
+    JSClass<JSTimePicker>::StaticMethod("dateTimeOptions", &JSTimePicker::DateTimeOptions);
     JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1137,6 +1332,43 @@ void JSTimePicker::Loop(bool isLoop)
 void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
 {
     TimePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
+}
+
+void JSTimePicker::DateTimeOptions(const JSCallbackInfo& info)
+{
+    JSRef<JSObject> paramObject;
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    ZeroPrefixType minuteType = ZeroPrefixType::AUTO;
+    ZeroPrefixType secondType = ZeroPrefixType::AUTO;
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto hourValue = paramObject->GetProperty(TIMEPICKER_OPTIONS_HOUR);
+        if (hourValue->IsString()) {
+            std::string hour = hourValue->ToString();
+            if (hour == TIMEPICKER_OPTIONS_TWO_DIGIT_VAL) {
+                hourType = ZeroPrefixType::SHOW;
+            } else if (hour == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+                hourType = ZeroPrefixType::HIDE;
+            }
+        }
+        auto minuteValue = paramObject->GetProperty(TIMEPICKER_OPTIONS_MINUTE);
+        if (minuteValue->IsString()) {
+            minuteType = ZeroPrefixType::SHOW;
+            std::string minute = minuteValue->ToString();
+            if (minute == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+                minuteType = ZeroPrefixType::HIDE;
+            }
+        }
+        auto secondValue = paramObject->GetProperty(TIMEPICKER_OPTIONS_SECOND);
+        if (secondValue->IsString()) {
+            secondType = ZeroPrefixType::SHOW;
+            std::string second = secondValue->ToString();
+            if (second == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+                secondType = ZeroPrefixType::HIDE;
+            }
+        }
+    }
+    TimePickerModel::GetInstance()->SetDateTimeOptions(hourType, minuteType, secondType);
 }
 
 void JSTimePicker::PickerBackgroundColor(const JSCallbackInfo& info)
@@ -1287,6 +1519,9 @@ void TimePickerDialogAppearEvent(const JSCallbackInfo& info, TimePickerDialogEve
 {
     std::function<void()> didAppearEvent;
     std::function<void()> willAppearEvent;
+    if (info.Length() == 0 || !info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
@@ -1317,6 +1552,9 @@ void TimePickerDialogDisappearEvent(const JSCallbackInfo& info, TimePickerDialog
 {
     std::function<void()> didDisappearEvent;
     std::function<void()> willDisappearEvent;
+    if (info.Length() == 0 || !info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
@@ -1458,11 +1696,18 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
 
+    auto buttonInfos = ParseButtonStyles(paramObject);
+
+    auto shadowValue = paramObject->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
+        pickerDialog.shadow = shadow;
+    }
     TimePickerDialogEvent timePickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
     TimePickerDialogAppearEvent(info, timePickerDialogEvent);
     TimePickerDialogDisappearEvent(info, timePickerDialogEvent);
     TimePickerDialogModel::GetInstance()->SetTimePickerDialogShow(pickerDialog, settingData, std::move(cancelEvent),
-        std::move(acceptEvent), std::move(changeEvent), timePickerDialogEvent);
+        std::move(acceptEvent), std::move(changeEvent), timePickerDialogEvent, buttonInfos);
 }
 
 void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
@@ -1470,18 +1715,13 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
     auto container = Container::CurrentSafely();
-    if (!container) {
-        return;
-    }
+    CHECK_NULL_VOID(container);
+
     auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    if (!pipelineContext) {
-        return;
-    }
+    CHECK_NULL_VOID(pipelineContext);
 
     auto executor = pipelineContext->GetTaskExecutor();
-    if (!executor) {
-        return;
-    }
+    CHECK_NULL_VOID(executor);
 
     auto theme = JSAlertDialog::GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
@@ -1491,7 +1731,6 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     NG::TimePickerSettingData settingData;
     settingData.isUseMilitaryTime = useMilitaryTime->ToBoolean();
 
-    ButtonInfo buttonInfo;
     DialogProperties properties;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         properties.alignment = DialogAlignment::BOTTOM;
@@ -1515,14 +1754,16 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
+        [properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTimeDialog(
+                properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowTimePicker");
 }
 
 void JSTimePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj)

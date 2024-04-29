@@ -52,6 +52,10 @@ public:
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle style);
     static void SetSelectIcon(FrameNode* frameNode, bool isShow = false);
     static void SetSelectIconSrc(FrameNode* frameNode, const std::string& src);
+
+private:
+    void AddExpandableAreaView(RefPtr<FrameNode> menuItem);
+    void AddClickableAreaView(RefPtr<FrameNode> menuItem, BorderRadiusProperty border);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MODEL_NG_H

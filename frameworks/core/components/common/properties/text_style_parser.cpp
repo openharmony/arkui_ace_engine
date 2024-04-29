@@ -27,35 +27,35 @@ constexpr int32_t FONT_FEATURE_PARENTHESES_LENGTH = 2; // length of ()
 const char FONT_FEATURE_NONE[] = "none";
 const char FONT_FEATURE_NORMAL[] = "normal";
 const char FONT_FEATURE_ON[] = "on";
-const char FONT_FEATURE_OFF[] = "off";
 
 } // namespace
+using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 
-bool ParseFontVariantCaps(const std::string& fontVariant, std::unordered_map<std::string, int32_t>& fontFeatures)
+bool ParseFontVariantCaps(const std::string& fontVariant, FONT_FEATURES_LIST& fontFeatures)
 {
     if (fontVariant == FONT_FEATURE_NORMAL || fontVariant.empty()) {
         return true;
     }
 
-    const std::unordered_map<std::string, void (*)(std::unordered_map<std::string, int32_t>&)> operators = {
+    const std::unordered_map<std::string, void (*)(FONT_FEATURES_LIST&)> operators = {
         { "small-caps",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("smcp", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("smcp", 1)); } },
         { "all-small-caps",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) {
-                fontFeatures.try_emplace("c2sc", 1);
-                fontFeatures.try_emplace("smcp", 1);
+            [](FONT_FEATURES_LIST& fontFeatures) {
+                fontFeatures.emplace_back(std::make_pair("c2sc", 1));
+                fontFeatures.emplace_back(std::make_pair("smcp", 1));
             } },
         { "petite-caps",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("pcap", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("pcap", 1)); } },
         { "all-petite-caps",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) {
-                fontFeatures.try_emplace("c2pc", 1);
-                fontFeatures.try_emplace("pcap", 1);
+            [](FONT_FEATURES_LIST& fontFeatures) {
+                fontFeatures.emplace_back(std::make_pair("c2pc", 1));
+                fontFeatures.emplace_back(std::make_pair("pcap", 1));
             } },
         { "unicase",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("unic", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("unic", 1)); } },
         { "titling-caps",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("titl", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("titl", 1)); } },
     };
     auto iter = operators.find(fontVariant);
     if (iter != operators.end()) {
@@ -65,29 +65,29 @@ bool ParseFontVariantCaps(const std::string& fontVariant, std::unordered_map<std
     return false;
 }
 
-bool ParseFontVariantNumeric(const std::string& fontVariant, std::unordered_map<std::string, int32_t>& fontFeatures)
+bool ParseFontVariantNumeric(const std::string& fontVariant, FONT_FEATURES_LIST& fontFeatures)
 {
     if (fontVariant == FONT_FEATURE_NORMAL || fontVariant.empty()) {
         return true;
     }
 
-    const std::unordered_map<std::string, void (*)(std::unordered_map<std::string, int32_t>&)> operators = {
+    const std::unordered_map<std::string, void (*)(FONT_FEATURES_LIST&)> operators = {
         { "ordinal",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("ordn", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("ordn", 1)); } },
         { "slashed-zero",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("zero", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("zero", 1)); } },
         { "lining-nums",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("lnum", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("lnum", 1)); } },
         { "oldstyle-nums",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("onum", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("onum", 1)); } },
         { "proportional-nums",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("pnum", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("pnum", 1)); } },
         { "tabular-nums",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("tnum", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("tnum", 1)); } },
         { "diagonal-fractions",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("frac", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("frac", 1)); } },
         { "stacked-fractions",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("afrc", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("afrc", 1)); } },
     };
     auto iter = operators.find(fontVariant);
     if (iter != operators.end()) {
@@ -97,7 +97,7 @@ bool ParseFontVariantNumeric(const std::string& fontVariant, std::unordered_map<
     return false;
 }
 
-bool ParseFontVariantAlternates(const std::string& fontVariant, std::unordered_map<std::string, int32_t>& fontFeatures)
+bool ParseFontVariantAlternates(const std::string& fontVariant, FONT_FEATURES_LIST& fontFeatures)
 {
     // format of font-variant-alternates is key(value) | normal | historical-forms.
     if (fontVariant == FONT_FEATURE_NORMAL || fontVariant.empty()) {
@@ -116,40 +116,40 @@ bool ParseFontVariantAlternates(const std::string& fontVariant, std::unordered_m
             fontVariant.substr(valueIndex + 1, fontVariant.size() - key.size() - FONT_FEATURE_PARENTHESES_LENGTH));
     }
     const std::unordered_map<std::string,
-        void (*)(const std::string&, int32_t, std::unordered_map<std::string, int32_t>&)>
+        void (*)(const std::string&, int32_t, FONT_FEATURES_LIST&)>
         operators = {
             { "historical-forms",
-                [](const std::string& key, int32_t value, std::unordered_map<std::string, int32_t>& fontFeatures) {
-                    fontFeatures.try_emplace("hist", 1);
+                [](const std::string& key, int32_t value, FONT_FEATURES_LIST& fontFeatures) {
+                    fontFeatures.emplace_back(std::make_pair("hist", 1));
                 } },
             { "stylistic",
-                [](const std::string& key, int32_t value, std::unordered_map<std::string, int32_t>& fontFeatures) {
-                    fontFeatures.try_emplace("salt", value);
+                [](const std::string& key, int32_t value, FONT_FEATURES_LIST& fontFeatures) {
+                    fontFeatures.emplace_back(std::make_pair("salt", value));
                 } },
             { "styleset",
-                [](const std::string& key, int32_t value, std::unordered_map<std::string, int32_t>& fontFeatures) {
+                [](const std::string& key, int32_t value, FONT_FEATURES_LIST& fontFeatures) {
                     // Convert value to ssxx, like 1 to ss01.
                     std::string temp = "0" + std::to_string(value);
-                    fontFeatures.try_emplace("ss" + temp.substr(temp.size() - 2, 2), 1);
+                    fontFeatures.emplace_back(std::make_pair("ss" + temp.substr(temp.size() - 2, 2), 1));
                 } },
             { "character-variant",
-                [](const std::string& key, int32_t value, std::unordered_map<std::string, int32_t>& fontFeatures) {
+                [](const std::string& key, int32_t value, FONT_FEATURES_LIST& fontFeatures) {
                     // Convert value to cvxx, like 1 to cv01.
                     std::string temp = "0" + std::to_string(value);
-                    fontFeatures.try_emplace("cv" + temp.substr(temp.size() - 2, 2), 1);
+                    fontFeatures.emplace_back(std::make_pair("cv" + temp.substr(temp.size() - 2, 2), 1));
                 } },
             { "swash",
-                [](const std::string& key, int32_t value, std::unordered_map<std::string, int32_t>& fontFeatures) {
-                    fontFeatures.try_emplace("swsh", value);
-                    fontFeatures.try_emplace("cswh", value);
+                [](const std::string& key, int32_t value, FONT_FEATURES_LIST& fontFeatures) {
+                    fontFeatures.emplace_back(std::make_pair("swsh", value));
+                    fontFeatures.emplace_back(std::make_pair("cswh", value));
                 } },
             { "ornaments",
-                [](const std::string& key, int32_t value, std::unordered_map<std::string, int32_t>& fontFeatures) {
-                    fontFeatures.try_emplace("ornm", value);
+                [](const std::string& key, int32_t value, FONT_FEATURES_LIST& fontFeatures) {
+                    fontFeatures.emplace_back(std::make_pair("ornm", value));
                 } },
             { "annotation",
-                [](const std::string& key, int32_t value, std::unordered_map<std::string, int32_t>& fontFeatures) {
-                    fontFeatures.try_emplace("nalt", value);
+                [](const std::string& key, int32_t value, FONT_FEATURES_LIST& fontFeatures) {
+                    fontFeatures.emplace_back(std::make_pair("nalt", value));
                 } },
         };
     auto iter = operators.find(key);
@@ -160,43 +160,43 @@ bool ParseFontVariantAlternates(const std::string& fontVariant, std::unordered_m
     return false;
 }
 
-bool ParseFontVariantLigatures(const std::string& fontVariant, std::unordered_map<std::string, int32_t>& fontFeatures)
+bool ParseFontVariantLigatures(const std::string& fontVariant, FONT_FEATURES_LIST& fontFeatures)
 {
     if (fontVariant == FONT_FEATURE_NORMAL || fontVariant.empty()) {
         return true;
     }
 
-    const std::unordered_map<std::string, void (*)(std::unordered_map<std::string, int32_t>&)> operators = {
+    const std::unordered_map<std::string, void (*)(FONT_FEATURES_LIST&)> operators = {
         { "none",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) {
-                fontFeatures.try_emplace("liga ", 0);
-                fontFeatures.try_emplace("clig ", 0);
-                fontFeatures.try_emplace("dlig ", 0);
-                fontFeatures.try_emplace("hlig ", 0);
-                fontFeatures.try_emplace("calt ", 0);
+            [](FONT_FEATURES_LIST& fontFeatures) {
+                fontFeatures.emplace_back(std::make_pair("liga ", 0));
+                fontFeatures.emplace_back(std::make_pair("clig ", 0));
+                fontFeatures.emplace_back(std::make_pair("dlig ", 0));
+                fontFeatures.emplace_back(std::make_pair("hlig ", 0));
+                fontFeatures.emplace_back(std::make_pair("calt ", 0));
             } },
         { "common-ligatures",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) {
-                fontFeatures.try_emplace("liga ", 1);
-                fontFeatures.try_emplace("clig ", 1);
+            [](FONT_FEATURES_LIST& fontFeatures) {
+                fontFeatures.emplace_back(std::make_pair("liga ", 1));
+                fontFeatures.emplace_back(std::make_pair("clig ", 1));
             } },
         { "no-common-ligatures",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) {
-                fontFeatures.try_emplace("liga", 0);
-                fontFeatures.try_emplace("clig", 0);
+            [](FONT_FEATURES_LIST& fontFeatures) {
+                fontFeatures.emplace_back(std::make_pair("liga", 0));
+                fontFeatures.emplace_back(std::make_pair("clig", 0));
             } },
         { "discretionary-ligatures",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("dlig", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("dlig", 1)); } },
         { "no-discretionary-ligatures",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("dlig", 0); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("dlig", 0)); } },
         { "historical-ligatures",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("hlig", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("hlig", 1)); } },
         { "no-historical-ligatures",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("hlig", 0); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("hlig", 0)); } },
         { "contextual",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("calt", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("calt", 1)); } },
         { "no-contextual",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("calt", 0); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("calt", 0)); } },
     };
     auto iter = operators.find(fontVariant);
     if (iter != operators.end()) {
@@ -206,30 +206,30 @@ bool ParseFontVariantLigatures(const std::string& fontVariant, std::unordered_ma
     return false;
 }
 
-bool ParseFontVariantEastAsian(const std::string& fontVariant, std::unordered_map<std::string, int32_t>& fontFeatures)
+bool ParseFontVariantEastAsian(const std::string& fontVariant, FONT_FEATURES_LIST& fontFeatures)
 {
     if (fontVariant == FONT_FEATURE_NORMAL || fontVariant.empty()) {
         return true;
     }
 
-    const std::unordered_map<std::string, void (*)(std::unordered_map<std::string, int32_t>&)> operators = {
-        { "ruby", [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("ruby", 1); } },
+    const std::unordered_map<std::string, void (*)(FONT_FEATURES_LIST&)> operators = {
+        { "ruby", [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("ruby", 1)); } },
         { "jis78",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("jp78", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("jp78", 1)); } },
         { "jis83",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("jp83", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("jp83", 1)); } },
         { "jis90",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("jp90", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("jp90", 1)); } },
         { "jis04",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("jp04", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("jp04", 1)); } },
         { "simplified",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("smpl", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("smpl", 1)); } },
         { "traditional",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("trad", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("trad", 1)); } },
         { "proportional-width",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("pwid", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("pwid", 1)); } },
         { "full-width",
-            [](std::unordered_map<std::string, int32_t>& fontFeatures) { fontFeatures.try_emplace("fwid", 1); } },
+            [](FONT_FEATURES_LIST& fontFeatures) { fontFeatures.emplace_back(std::make_pair("fwid", 1)); } },
     };
     auto iter = operators.find(fontVariant);
     if (iter != operators.end()) {
@@ -239,7 +239,15 @@ bool ParseFontVariantEastAsian(const std::string& fontVariant, std::unordered_ma
     return false;
 }
 
-void ParseFontVariant(const std::string& fontVariant, std::unordered_map<std::string, int32_t>& fontFeatures)
+int32_t ParseFontFeatureParameters(std::string& value)
+{
+    if ((value == FONT_FEATURE_ON) || (StringUtils::StringToInt(value) == 1)) {
+        return 1;
+    }
+    return 0;
+}
+
+void ParseFontVariant(const std::string& fontVariant, FONT_FEATURES_LIST& fontFeatures)
 {
     if (fontVariant.empty()) {
         return;
@@ -268,19 +276,19 @@ void ParseFontVariant(const std::string& fontVariant, std::unordered_map<std::st
  * normal | none | <string>
  * number of <string> can be single or multiple, and separated by space ' '
  */
-std::unordered_map<std::string, int32_t> ParseFontVariants(const std::string& fontVariants)
+FONT_FEATURES_LIST ParseFontVariants(const std::string& fontVariants)
 {
-    std::unordered_map<std::string, int32_t> fontFeatures;
+    FONT_FEATURES_LIST fontFeatures;
     if (fontVariants == FONT_FEATURE_NORMAL || fontVariants.empty()) {
         return fontFeatures;
     }
 
     if (fontVariants == FONT_FEATURE_NONE) {
-        fontFeatures.try_emplace("liga ", 0);
-        fontFeatures.try_emplace("clig ", 0);
-        fontFeatures.try_emplace("dlig ", 0);
-        fontFeatures.try_emplace("hlig ", 0);
-        fontFeatures.try_emplace("calt ", 0);
+        fontFeatures.emplace_back(std::make_pair("liga ", 0));
+        fontFeatures.emplace_back(std::make_pair("clig ", 0));
+        fontFeatures.emplace_back(std::make_pair("dlig ", 0));
+        fontFeatures.emplace_back(std::make_pair("hlig ", 0));
+        fontFeatures.emplace_back(std::make_pair("calt ", 0));
         return fontFeatures;
     }
 
@@ -293,7 +301,7 @@ std::unordered_map<std::string, int32_t> ParseFontVariants(const std::string& fo
 }
 
 void ParseFontFeatureSetting(
-    const std::string& fontFeatureSetting, std::unordered_map<std::string, int32_t>& fontFeatures)
+    const std::string& fontFeatureSetting, FONT_FEATURES_LIST& fontFeatures)
 {
     if (fontFeatureSetting.empty()) {
         LOGW("ParseFontFeatureSetting fontFeatureSetting is empty");
@@ -316,12 +324,10 @@ void ParseFontFeatureSetting(
 
     switch (value.size()) {
         case 1:
-            fontFeatures.try_emplace(value[0], 1);
+            fontFeatures.emplace_back(std::make_pair(value[0], 1));
             break;
         case 2:
-            fontFeatures.try_emplace(value[0],
-                value[1] == FONT_FEATURE_ON ? 1
-                                            : (value[1] == FONT_FEATURE_OFF ? 0 : StringUtils::StringToInt(value[1])));
+            fontFeatures.emplace_back(std::make_pair(value[0], ParseFontFeatureParameters(value[1])));
             break;
         default:
             LOGW("ParseFontFeatureSetting format of font-feature-settings is invalid");
@@ -334,9 +340,9 @@ void ParseFontFeatureSetting(
  * normal | <feature-tag-value>, where <feature-tag-value> = <string> [ <integer> | on | off ], like: "liga" 0
  * number of <feature-tag-value> can be single or multiple, and separated by comma ','
  */
-std::unordered_map<std::string, int32_t> ParseFontFeatureSettings(const std::string& fontFeatureSettings)
+FONT_FEATURES_LIST ParseFontFeatureSettings(const std::string& fontFeatureSettings)
 {
-    std::unordered_map<std::string, int32_t> fontFeatures;
+    FONT_FEATURES_LIST fontFeatures;
     if (fontFeatureSettings == FONT_FEATURE_NORMAL || fontFeatureSettings.empty()) {
         return fontFeatures;
     }
@@ -349,4 +355,16 @@ std::unordered_map<std::string, int32_t> ParseFontFeatureSettings(const std::str
     return fontFeatures;
 }
 
+std::string UnParseFontFeatureSetting(const FONT_FEATURES_LIST& fontFeatureSettings)
+{
+    std::stringstream strTemp;
+    for (const auto& kv:fontFeatureSettings) {
+        strTemp << kv.first << " " << kv.second << ",";
+    }
+    std::string fontFeatures = strTemp.str();
+    if (!fontFeatures.empty()) {
+        fontFeatures.pop_back();
+    }
+    return fontFeatures;
+}
 } // namespace OHOS::Ace

@@ -101,6 +101,7 @@ void StepperPattern::UpdateIndexWithoutMeasure(int32_t index)
 
 void StepperPattern::UpdateOrCreateLeftButtonNode(int32_t index)
 {
+    isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     if (index <= 0) {
@@ -158,7 +159,12 @@ void StepperPattern::CreateLeftButtonNode()
         CalcSize(CalcLength(stepperTheme->GetArrowWidth()), CalcLength(stepperTheme->GetArrowHeight())));
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
+    if (isRightToLeft_) {
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
+    } else {
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
+    }
+    leftImage_ = imageNode;
     imageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     SizeF sourceSize(static_cast<float>(stepperTheme->GetArrowWidth().ConvertToPx()),
@@ -225,24 +231,20 @@ void StepperPattern::CreateRightButtonNode(int32_t index)
     auto labelStatus =
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus().value_or("normal");
     if (labelStatus == "normal") {
-        isRightLabelDisable_ = false;
         if (index == maxIndex_) {
             CreateArrowlessRightButtonNode(index, false, Localization::GetInstance()->GetEntryLetters("stepper.start"));
         } else {
             CreateArrowRightButtonNode(index, false);
         }
     } else if (labelStatus == "disabled") {
-        isRightLabelDisable_ = true;
         if (index == maxIndex_) {
             CreateArrowlessRightButtonNode(index, true, Localization::GetInstance()->GetEntryLetters("stepper.start"));
         } else {
             CreateArrowRightButtonNode(index, true);
         }
     } else if (labelStatus == "waiting") {
-        isRightLabelDisable_ = false;
         CreateWaitingRightButtonNode();
     } else if (labelStatus == "skip") {
-        isRightLabelDisable_ = false;
         CreateArrowlessRightButtonNode(index, false, Localization::GetInstance()->GetEntryLetters("stepper.skip"));
     }
 }
@@ -284,8 +286,8 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(stepperTheme->GetRadius()));
         buttonNode->MountToParent(hostNode);
     }
-    isRightLabelDisable_ ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
-                         : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
+    isDisabled ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
+               : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
     buttonNode->MarkModifyDone();
 
     // Create rowNode
@@ -296,7 +298,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     rowLayoutProperty->UpdateSpace(stepperTheme->GetControlPadding());
     rowLayoutProperty->UpdateMargin(
         { CalcLength(stepperTheme->GetControlPadding()), CalcLength(stepperTheme->GetControlPadding()) });
-    rowLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    rowNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     rowNode->MountToParent(buttonNode);
     rowNode->MarkModifyDone();
 
@@ -332,7 +334,12 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
         CalcSize(CalcLength(stepperTheme->GetArrowWidth()), CalcLength(stepperTheme->GetArrowHeight())));
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
+    if (isRightToLeft_) {
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
+    } else {
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
+    }
+    rightImage_ = imageNode;
     auto imageColor = stepperTheme->GetArrowColor();
     if (isDisabled) {
         imageColor = imageColor.BlendOpacity(stepperTheme->GetDisabledAlpha());
@@ -381,8 +388,8 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, bool isDisabl
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(stepperTheme->GetRadius()));
         buttonNode->MountToParent(hostNode);
     }
-    isRightLabelDisable_ ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
-                         : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
+    isDisabled ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
+               : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
     buttonNode->MarkModifyDone();
 
     // Create textNode
@@ -655,5 +662,42 @@ void StepperPattern::ButtonSkipColorConfigurationUpdate(const RefPtr<FrameNode>&
     auto pattern = buttonNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSkipColorConfigurationUpdate();
+}
+
+void StepperPattern::OnLanguageConfigurationUpdate()
+{
+    if (AceApplicationInfo::GetInstance().IsRightToLeft() != isRightToLeft_) {
+        auto hostNode = AceType::DynamicCast<StepperNode>(GetHost());
+        CHECK_NULL_VOID(hostNode);
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
+
+        auto stepperTheme = GetTheme();
+        CHECK_NULL_VOID(stepperTheme);
+
+        auto leftimageLayoutProperty = leftImage_->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(leftimageLayoutProperty);
+
+        ImageSourceInfo leftimageSourceInfo;
+        if (isRightToLeft_) {
+            leftimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
+        } else {
+            leftimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
+        }
+        leftimageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
+        leftimageLayoutProperty->UpdateImageSourceInfo(leftimageSourceInfo);
+
+        auto rightimageLayoutProperty = rightImage_->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(rightimageLayoutProperty);
+
+        ImageSourceInfo rightimageSourceInfo;
+        if (isRightToLeft_) {
+            rightimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
+        } else {
+            rightimageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
+        }
+        rightimageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
+        rightimageLayoutProperty->UpdateImageSourceInfo(rightimageSourceInfo);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -21,18 +21,26 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView)
 {
     CHECK_NULL_VOID(focusView);
+    if (!focusView->HasParentFocusHub()) {
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "FocusView: %{public}s/%{public}d has no parent. Do not need show.",
+            focusView->GetFrameName().c_str(), focusView->GetFrameId());
+        return;
+    }
     auto lastFocusView = lastFocusView_.Upgrade();
     if (lastFocusView) {
-        if (lastFocusView == focusView) {
+        if (lastFocusView == focusView || lastFocusView->IsChildFocusViewOf(focusView)) {
             return;
         }
-        lastFocusView->LostViewFocus();
+        if (!focusView->IsChildFocusViewOf(lastFocusView)) {
+            lastFocusView->LostViewFocus();
+        }
     }
 
     auto focusViewWeak = AceType::WeakClaim(AceType::RawPtr(focusView));
@@ -46,9 +54,9 @@ void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView)
 void FocusManager::FocusViewHide(const RefPtr<FocusView>& focusView)
 {
     CHECK_NULL_VOID(focusView);
+    focusView->LostViewFocus();
     auto lastFocusView = lastFocusView_.Upgrade();
-    if (lastFocusView && lastFocusView == focusView) {
-        lastFocusView->LostViewFocus();
+    if (lastFocusView && (lastFocusView == focusView || lastFocusView->IsChildFocusViewOf(focusView))) {
         lastFocusView_ = nullptr;
     }
 }
@@ -56,13 +64,18 @@ void FocusManager::FocusViewHide(const RefPtr<FocusView>& focusView)
 void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView)
 {
     CHECK_NULL_VOID(focusView);
-    auto lastFocusView = lastFocusView_.Upgrade();
-    if (lastFocusView && lastFocusView == focusView) {
-        lastFocusView->LostViewFocus();
-    }
-    auto focusViewWeak = AceType::WeakClaim(AceType::RawPtr(focusView));
-    if (std::find(focusViewStack_.begin(), focusViewStack_.end(), focusViewWeak) != focusViewStack_.end()) {
-        focusViewStack_.remove(focusViewWeak);
+    focusView->LostViewFocus();
+    for (auto iter = focusViewStack_.begin(); iter != focusViewStack_.end();) {
+        auto view = (*iter).Upgrade();
+        if (view && (view == focusView || view->IsChildFocusViewOf(focusView))) {
+            auto focusHub = view->GetFocusHub();
+            if (focusHub) {
+                focusHub->RemoveFocusScopeIdAndPriority();
+            }
+            iter = focusViewStack_.erase(iter);
+        } else {
+            ++iter;
+        }
     }
     if (focusViewStack_.empty()) {
         lastFocusView_ = nullptr;
@@ -96,6 +109,22 @@ void FocusManager::GetFocusViewMap(FocusViewMap& focusViewMap)
         }
     }
 }
+
+void FocusManager::PaintFocusState()
+{
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto rootFocusHub = rootNode->GetFocusHub();
+    CHECK_NULL_VOID(rootFocusHub);
+    if (!pipeline->GetIsFocusActive()) {
+        return;
+    }
+    rootFocusHub->ClearAllFocusState();
+    rootFocusHub->PaintAllFocusState();
+}
+
 
 void FocusManager::DumpFocusManager()
 {
@@ -134,4 +163,67 @@ void FocusManager::DumpFocusManager()
     }
 }
 
+bool FocusManager::AddFocusScope(const std::string& focusScopeId, const RefPtr<FocusHub>& scopeFocusHub)
+{
+    auto iter = focusHubScopeMap_.find(focusScopeId);
+    if (iter != focusHubScopeMap_.end()) {
+        auto focusScope = iter->second.first.Upgrade();
+        if (!focusScope) {
+            iter->second.first = scopeFocusHub;
+            return true;
+        }
+        return false;
+    } else {
+        focusHubScopeMap_[focusScopeId] = { scopeFocusHub, {} };
+    }
+    return true;
+}
+
+void FocusManager::RemoveFocusScope(const std::string& focusScopeId)
+{
+    auto iter = focusHubScopeMap_.find(focusScopeId);
+    if (iter != focusHubScopeMap_.end()) {
+        if (iter->second.second.empty()) {
+            focusHubScopeMap_.erase(iter);
+        } else {
+            iter->second.first = nullptr;
+        }
+    }
+}
+
+void FocusManager::AddScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub)
+{
+    auto iter = focusHubScopeMap_.find(focusScopeId);
+    if (iter != focusHubScopeMap_.end()) {
+        iter->second.second.emplace_back(priorFocusHub);
+    } else {
+        focusHubScopeMap_[focusScopeId] = { nullptr, { priorFocusHub } };
+    }
+}
+
+void FocusManager::RemoveScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub)
+{
+    auto iter = focusHubScopeMap_.find(focusScopeId);
+    if (iter != focusHubScopeMap_.end()) {
+        if (iter->second.second.empty()) {
+            return;
+        }
+        iter->second.second.remove(priorFocusHub);
+        auto focusScope = iter->second.first.Upgrade();
+        if (!focusScope && iter->second.second.empty()) {
+            focusHubScopeMap_.erase(iter);
+        }
+    }
+}
+
+std::optional<std::list<WeakPtr<FocusHub>>*> FocusManager::GetFocusScopePriorityList(const std::string& focusScopeId)
+{
+    auto iter = focusHubScopeMap_.find(focusScopeId);
+    if (iter != focusHubScopeMap_.end()) {
+        if (!iter->second.second.empty()) {
+            return &(iter->second.second);
+        }
+    }
+    return std::nullopt;
+}
 } // namespace OHOS::Ace::NG

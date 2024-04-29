@@ -131,7 +131,12 @@ RefPtr<ScrollProxy> ScrollModelNG::CreateScrollBarProxy()
 int32_t ScrollModelNG::GetAxis(FrameNode *frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    return static_cast<int32_t>(frameNode->GetLayoutProperty<ScrollLayoutProperty>()->GetAxisValue());
+    int32_t value = 0;
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollLayoutProperty>();
+    if (layoutProperty->GetAxis()) {
+        value = static_cast<int32_t>(layoutProperty->GetAxisValue());
+    }
+    return value;
 }
 
 void ScrollModelNG::SetAxis(Axis axis)
@@ -168,6 +173,14 @@ void ScrollModelNG::SetOnWillScroll(NG::ScrollEventWithState&& event)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillScrollEvent(std::move(event));
+}
+
+void ScrollModelNG::SetOnWillScroll(FrameNode* frameNode, ScrollEventWithState&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillScrollEvent(std::move(event));
 }
@@ -313,6 +326,19 @@ void ScrollModelNG::SetFriction(FrameNode* frameNode, double friction)
     pattern->SetFriction(friction);
 }
 
+ScrollSnapOptions ScrollModelNG::GetScrollSnap(FrameNode* frameNode)
+{
+    ScrollSnapOptions snapOptions;
+    CHECK_NULL_RETURN(frameNode, snapOptions);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, snapOptions);
+    snapOptions.enableSnapToStart = pattern->GetEnableSnapToSide().first;
+    snapOptions.enableSnapToEnd = pattern->GetEnableSnapToSide().second;
+    snapOptions.snapAlign = static_cast<int32_t>(pattern->GetScrollSnapAlign());
+    snapOptions.paginationParams = pattern->GetSnapPaginations();
+    return snapOptions;
+}
+
 void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
     const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
 {
@@ -332,8 +358,11 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
 int32_t ScrollModelNG::GetScrollEnabled(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    int32_t value = 0;
-    ACE_GET_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollEnabled, value, frameNode);
+    int32_t value = true;
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollLayoutProperty>();
+    if (layoutProperty->GetScrollEnabled()) {
+        value = layoutProperty->GetScrollEnabledValue();
+    }
     return value;
 }
 
@@ -345,8 +374,8 @@ void ScrollModelNG::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled)
 float ScrollModelNG::GetScrollBarWidth(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarWidth();
-    return value->ConvertToVp();
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarWidth();
+    return value.ConvertToVp();
 }
 
 void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension)
@@ -357,8 +386,8 @@ void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension)
 uint32_t ScrollModelNG::GetScrollBarColor(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarColor();
-    return value->GetValue();
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarColor();
+    return value.GetValue();
 }
 
 void ScrollModelNG::SetScrollBarColor(const Color& color)
@@ -426,6 +455,10 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
 void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAxis(axis);
 }
 
 void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)

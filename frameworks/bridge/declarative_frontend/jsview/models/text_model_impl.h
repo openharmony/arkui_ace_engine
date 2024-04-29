@@ -19,6 +19,7 @@
 #include <functional>
 #include <string>
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_component_v2.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
@@ -40,12 +41,14 @@ public:
     void SetMaxLines(uint32_t value) override;
     void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
+    void SetLineSpacing(const Dimension& value) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetBaselineOffset(const Dimension& value) override;
     void SetTextCase(TextCase value) override;
     void SetWordBreak(WordBreak value) override {};
+    void SetLineBreakStrategy(LineBreakStrategy value) override {};
     void SetLetterSpacing(const Dimension& value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
@@ -55,14 +58,16 @@ public:
     void OnSetHeight() override;
     void OnSetWidth() override;
     void OnSetAlign() override;
-    void SetOnClick(std::function<void(const BaseEventInfo*)>&& click) override;
+    void SetOnClick(std::function<void(BaseEventInfo*)>&& click) override;
     void ClearOnClick() override {};
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override {};
     void SetEllipsisMode(EllipsisMode modal) override {};
-    void SetClipEdge() override {};
-
+    void SetClipEdge(bool clip) override {};
+    void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
+    void SetMarqueeOptions(const NG::TextMarqueeOptions& options) override {};
+    void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override {};
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;

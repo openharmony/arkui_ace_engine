@@ -16,14 +16,21 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 
+#include "core/components/image/image_event.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
+
+JSRef<JSVal> LoadImageSuccEventToJSValue(const LoadImageSuccessEvent& eventInfo);
+JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo);
+
 class JSImage : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
+    static void CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps,
+        int32_t duration, int32_t iterations);
     static void HandleLoadImageSuccess(const BaseEventInfo& param);
     static void HandleLoadImageFail(const BaseEventInfo& param);
     static void SetAlt(const JSCallbackInfo& args);
@@ -42,6 +49,8 @@ public:
     static void SetSyncLoad(const JSCallbackInfo& info);
     static void SetColorFilter(const JSCallbackInfo& info);
     static void SetSmoothEdge(const JSCallbackInfo& info);
+    static void SetDynamicRangeMode(const JSCallbackInfo& info);
+    static void SetEnhancedImageQuality(const JSCallbackInfo& info);
 
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
@@ -60,12 +69,11 @@ public:
     static void EnableAnalyzer(bool isEnableAnalyzer);
     static void AnalyzerConfig(const JSCallbackInfo &info);
     static void JsImageResizable(const JSCallbackInfo& info);
+    static bool IsDrawable(const JSRef<JSVal>& jsValue);
 
 protected:
     static void SetBorder(const Border& border);
     static void SetAutoResize(bool autoResize);
-
-    static bool IsDrawable(const JSRef<JSVal>& jsValue);
 };
 
 class JSColorFilter : public AceType {

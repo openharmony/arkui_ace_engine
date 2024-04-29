@@ -48,6 +48,7 @@ public:
     bool NotifyBackPressedSync() override;
     bool NotifyPointerEventSync(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
     bool NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme) override;
+    bool NotifyKeyEventAsync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme) override;
     bool NotifyAxisEventSync(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
 
     // Asynchronous interface for event notify
@@ -65,9 +66,10 @@ public:
     void NotifyDestroy() override;
     void NotifyConfigurationUpdate() override;
 
-    // Notify the Host
+    // The interface for responsing provider
     void OnConnect() override;
     void OnDisconnect(bool isAbnormal) override;
+    void OnExtensionTimeout(int32_t errorCode) override;
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) override;
 
     // The interface about the accessibility
@@ -81,6 +83,8 @@ public:
         Accessibility::AccessibilityElementInfo& output) override;
     void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
+    void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) override;
 
     // The interface to control the display area and the avoid area
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const override;
@@ -103,12 +107,13 @@ private:
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
     sptr<Rosen::ExtensionSession> session_;
-    bool isNotifyOccupiedAreaChange_ = false;
+    bool isNotifyOccupiedAreaChange_ = true;
     RectF displayArea_;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     std::function<void((OHOS::Rosen::WSError))> foregroundCallback_;
     std::function<void((OHOS::Rosen::WSError))> backgroundCallback_;
     std::function<void((OHOS::Rosen::WSError))> destructionCallback_;
+    std::weak_ptr<Rosen::RSTransaction> transaction_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_IMPL_H

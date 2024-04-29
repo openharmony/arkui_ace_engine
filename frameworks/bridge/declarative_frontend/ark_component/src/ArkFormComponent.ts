@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkFormComponentComponent extends ArkComponent implements FormComponentAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   size(value: { width: Length; height: Length }): this {
     modifierWithKey(this._modifiersWithKeys,
@@ -143,12 +143,10 @@ class FormComponentVisibilityModifier extends ModifierWithKey<Visibility> {
 }
 
 // @ts-ignore
-globalThis.FormComponent.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkFormComponentComponent(nativeNode);
+globalThis.FormComponent.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkFormComponentComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.FormComponentModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

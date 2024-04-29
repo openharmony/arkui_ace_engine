@@ -26,10 +26,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
-constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
@@ -86,19 +83,24 @@ void SwiperIndicatorPattern::OnModifyDone()
 
     swiperEventHub->SetIndicatorOnChange(
         [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)]() {
-            auto indicator = weak.Upgrade();
-            CHECK_NULL_VOID(indicator);
-            auto textContext = context.Upgrade();
-            CHECK_NULL_VOID(textContext);
-            if (textContext->swiperIndicatorType_ == SwiperIndicatorType::DIGIT) {
-                RefPtr<FrameNode> firstTextNode;
-                RefPtr<FrameNode> lastTextNode;
-                auto layoutProperty = indicator->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-                firstTextNode = DynamicCast<FrameNode>(indicator->GetFirstChild());
-                lastTextNode = DynamicCast<FrameNode>(indicator->GetLastChild());
-                textContext->UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
-            }
-            indicator->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            auto pipeline = PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->AddAfterLayoutTask([weak, context]() {
+                auto indicator = weak.Upgrade();
+                CHECK_NULL_VOID(indicator);
+                auto textContext = context.Upgrade();
+                CHECK_NULL_VOID(textContext);
+                if (textContext->swiperIndicatorType_ == SwiperIndicatorType::DIGIT) {
+                    RefPtr<FrameNode> firstTextNode;
+                    RefPtr<FrameNode> lastTextNode;
+                    auto layoutProperty = indicator->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+                    firstTextNode = DynamicCast<FrameNode>(indicator->GetFirstChild());
+                    lastTextNode = DynamicCast<FrameNode>(indicator->GetLastChild());
+                    textContext->UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
+                }
+                indicator->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            });
+            pipeline->RequestFrame();
         });
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
@@ -109,7 +111,45 @@ void SwiperIndicatorPattern::OnModifyDone()
         InitHoverMouseEvent();
         InitTouchEvent(gestureHub);
         InitLongPressEvent(gestureHub);
+        InitFocusEvent();
     }
+}
+
+void SwiperIndicatorPattern::InitFocusEvent()
+{
+    if (focusEventInitialized_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+    focusEventInitialized_ = true;
+}
+
+void SwiperIndicatorPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(dotIndicatorModifier_);
+    dotIndicatorModifier_->SetIsFocused(true);
+}
+
+void SwiperIndicatorPattern::HandleBlurEvent()
+{
+    CHECK_NULL_VOID(dotIndicatorModifier_);
+    dotIndicatorModifier_->SetIsFocused(false);
 }
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -132,6 +172,10 @@ void SwiperIndicatorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestu
 
 void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
 {
+    if (info.GetSourceDevice() == SourceType::KEYBOARD) {
+        return;
+    }
+
     if (info.GetSourceDevice() == SourceType::MOUSE) {
         isClicked_ = true;
         HandleMouseClick(info);
@@ -188,10 +232,10 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-
     auto currentIndex = swiperPattern->GetCurrentIndex();
     auto margin = HandleTouchClickMargin();
-    auto lengthBeforeCurrentIndex = margin + INDICATOR_PADDING_DEFAULT.ConvertToPx() +
+    Dimension paddingSide = theme->GetIndicatorPaddingDot();
+    auto lengthBeforeCurrentIndex = margin + paddingSide.ConvertToPx() +
                                     (INDICATOR_ITEM_SPACE.ConvertToPx() + itemWidth) * currentIndex;
     auto lengthWithCurrentIndex = lengthBeforeCurrentIndex + selectedItemWidth;
     auto axis = swiperPattern->GetDirection();
@@ -370,10 +414,12 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
         selectedItemWidthValue *= 0.5f;
     }
     // diameter calculation
-    float itemWidth = itemWidthValue * INDICATOR_ZOOM_IN_SCALE;
-    float itemHeight = itemHeightValue * INDICATOR_ZOOM_IN_SCALE;
-    float selectedItemWidth = selectedItemWidthValue * INDICATOR_ZOOM_IN_SCALE;
-    float padding = static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx());
+    double scaleIndicator = swiperTheme->GetScaleSwiper();
+    float itemWidth = itemWidthValue * scaleIndicator;
+    float itemHeight = itemHeightValue * scaleIndicator;
+    float selectedItemWidth = selectedItemWidthValue * scaleIndicator;
+    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
+    float padding = static_cast<float>(paddingSide.ConvertToPx());
     float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     int32_t currentIndex = swiperPattern->GetCurrentShownIndex();
     int32_t itemCount = swiperPattern->RealTotalCount();
@@ -511,6 +557,19 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     CHECK_NULL_VOID(host);
     touchBottomType_ = TouchBottomType::NONE;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SwiperIndicatorPattern::SetIndicatorInteractive(bool isInteractive)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (isInteractive) {
+        eventHub->SetEnabled(true);
+    } else {
+        eventHub->SetEnabled(false);
+    }
 }
 
 bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
@@ -697,7 +756,8 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
     int32_t itemCount = swiperPattern->RealTotalCount();
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount - 1));
-    auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
+    Dimension paddingSide = theme->GetIndicatorPaddingDot();
+    auto indicatorPadding = static_cast<float>(paddingSide.ConvertToPx());
     auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);

@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -378,7 +379,7 @@ void CalendarPattern::UpdateTitleNode()
     textTitleNode->MarkModifyDone();
 }
 
-void CalendarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void CalendarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -386,9 +387,10 @@ void CalendarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     CHECK_NULL_VOID(swiperNode);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
-    json->Put("needSlide", !swiperLayoutProperty->GetDisableSwipe().value_or(false) ? "true" : "false");
-    json->Put(
-        "direction", swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::VERTICAL ? "0" : "1");
+    json->PutExtAttr("needSlide",
+        !swiperLayoutProperty->GetDisableSwipe().value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("direction",
+        swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::VERTICAL ? "0" : "1", filter);
 }
 
 } // namespace OHOS::Ace::NG

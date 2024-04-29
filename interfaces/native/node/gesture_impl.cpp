@@ -23,6 +23,7 @@
 
 #include "core/gestures/gesture_event.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/event/ui_input_event_impl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,6 +69,19 @@ ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_Ges
     return ret;
 }
 
+const ArkUI_UIInputEvent* OH_ArkUI_GestureEvent_GetRawInputEvent(const ArkUI_GestureEvent* event)
+{
+    if (!event) {
+        return nullptr;
+    }
+    return reinterpret_cast<ArkUI_UIInputEvent*>(event->eventData.rawPointerEvent);
+}
+
+int32_t OH_ArkUI_LongPress_GetRepeatCount(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.repeat;
+}
+
 float OH_ArkUI_PanGesture_GetVelocity(const ArkUI_GestureEvent* event)
 {
     return event->eventData.velocity;
@@ -93,17 +107,107 @@ float OH_ArkUI_PanGesture_GetOffsetY(const ArkUI_GestureEvent* event)
     return event->eventData.y;
 }
 
+float OH_ArkUI_SwipeGesture_GetAngle(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.angle;
+}
+
+float OH_ArkUI_SwipeGesture_GetVelocity(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.velocity;
+}
+
+float OH_ArkUI_RotationGesture_GetAngle(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.angle;
+}
+
+float OH_ArkUI_PinchGesture_GetScale(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.scale;
+}
+
+float OH_ArkUI_PinchGesture_GetCenterX(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.pinchCenterX;
+}
+
+float OH_ArkUI_PinchGesture_GetCenterY(const ArkUI_GestureEvent* event)
+{
+    return event->eventData.pinchCenterY;
+}
+
 namespace OHOS::Ace::GestureModel {
+
+constexpr int32_t DEFAULT_PAN_FINGERS = 1;
+constexpr int32_t MAX_PAN_FINGERS = 10;
+constexpr double DEFAULT_PINCH_DISTANCE = 5.0f;
+constexpr double DEFAULT_SWIPE_SPEED = 100.0f;
 
 struct GestureInnerData {
     void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParam);
     void* extraParam;
 };
 
+ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
+{
+    auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createTapGesture(
+        count, fingers);
+    return new ArkUI_GestureRecognizer{ TAP_GESTURE, gesture, nullptr };
+}
+
+ArkUI_GestureRecognizer* CreateLongPressGesture(int32_t fingers, bool repeatResult, int32_t duration)
+{
+    auto* gesture =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createLongPressGesture(fingers,
+        repeatResult, duration);
+    return new ArkUI_GestureRecognizer{ LONG_PRESS_GESTURE, gesture, nullptr };
+}
+
+ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingers, double distance)
+{
+    if (LessOrEqual(distance, 0.0f)) {
+        distance = DEFAULT_PINCH_DISTANCE;
+    }
+    double distanceNum = OHOS::Ace::NodeModel::GetFullImpl()->getBasicAPI()->convertLengthMetricsUnit(
+        distance, static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_PX), static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_VP));
+    auto* gesture =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPinchGesture(fingers,
+        distanceNum);
+    return new ArkUI_GestureRecognizer{ PINCH_GESTURE, gesture, nullptr };
+}
+
+ArkUI_GestureRecognizer* CreateRotationGesture(int32_t fingers, double angle)
+{
+    auto* gesture =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createRotationGesture(fingers,
+        angle);
+    return new ArkUI_GestureRecognizer{ ROTATION_GESTURE, gesture, nullptr };
+}
+
+ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingers, ArkUI_GestureDirectionMask directions, double speed)
+{
+    if (LessOrEqual(speed, 0.0f)) {
+        speed = DEFAULT_SWIPE_SPEED;
+    }
+    double speedNum = OHOS::Ace::NodeModel::GetFullImpl()->getBasicAPI()->convertLengthMetricsUnit(
+        speed, static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_PX), static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_VP));
+    auto* gesture =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createSwipeGesture(fingers,
+        directions, speedNum);
+    return new ArkUI_GestureRecognizer{ SWIPE_GESTURE, gesture, nullptr };
+}
+
 ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirectionMask mask, double distanceNum)
 {
+    int32_t fingers = DEFAULT_PAN_FINGERS;
+    if (fingersNum < DEFAULT_PAN_FINGERS || fingersNum > MAX_PAN_FINGERS) {
+        fingers = DEFAULT_PAN_FINGERS;
+    } else {
+        fingers = fingersNum;
+    }
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPanGesture(
-        fingersNum, mask, distanceNum);
+        fingers, mask, distanceNum);
     return new ArkUI_GestureRecognizer{ PAN_GESTURE, gesture, nullptr };
 }
 
@@ -136,10 +240,28 @@ int32_t AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recogni
     return 0;
 }
 
+int32_t RemoveGestureFromNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer)
+{
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->removeGestureFromNode(
+        node->uiNodeHandle, recognizer->gesture);
+    return 0;
+}
+
+ArkUI_GestureRecognizerType GetGestureType(ArkUI_GestureRecognizer* recognizer)
+{
+    return static_cast<ArkUI_GestureRecognizerType>(recognizer->type);
+}
+
 void HandleGestureEvent(ArkUINodeEvent* event)
 {
     auto* extraData = reinterpret_cast<GestureInnerData*>(event->extraParam);
-    extraData->targetReceiver(reinterpret_cast<ArkUI_GestureEvent *>(&event->gestureAsyncEvent), extraData->extraParam);
+    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent *>(&event->gestureAsyncEvent);
+    ArkUI_UIInputEvent uiEvent;
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+    uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    uiEvent.inputEvent = gestureEvent->eventData.rawPointerEvent;
+    gestureEvent->eventData.rawPointerEvent = &uiEvent;
+    extraData->targetReceiver(gestureEvent, extraData->extraParam);
     delete event;
 }
 

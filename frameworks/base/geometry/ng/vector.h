@@ -28,16 +28,36 @@ struct VectorF {
         return NearEqual(x, other.x) && NearEqual(y, other.y);
     }
 
+    VectorF operator*(float value) const
+    {
+        return VectorF(x * value, y * value);
+    }
+
     float x = 0.0f;
     float y = 0.0f;
 };
 
 struct Vector3F {
+    Vector3F() = default;
     Vector3F(float xF, float yF, float zF) : x(xF), y(yF), z(zF) {}
 
     bool operator==(const Vector3F& other) const
     {
         return NearEqual(x, other.x) && NearEqual(y, other.y) && NearEqual(z, other.z);
+    }
+
+    float operator[](int32_t index) const
+    {
+        switch (index) {
+            case 0:
+                return x;
+            case 1:
+                return y;
+            case 2:
+                return z;
+            default:
+                return 0.0f;
+        }
     }
 
     float x = 0.0f;

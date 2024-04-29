@@ -168,6 +168,7 @@ ACE_EXPORT extern const char MATRIX_SKEW[];
 ACE_EXPORT extern const char MATRIX_ROTATE[];
 ACE_EXPORT extern const char MATRIX_TRANSFORM_POINT[];
 ACE_EXPORT extern const char MATRIX_4X4[];
+ACE_EXPORT extern const char MATRIX_SET_POLY_TO_POLY[];
 } // namespace OHOS::Ace::Framework
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_COMMON_JS_CONSTANTS_H

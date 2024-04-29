@@ -89,7 +89,7 @@ void FormManagerDelegate::Stop()
             if (delegate) {
                 delegate->UnregisterEvent();
             }
-        });
+        }, "ArkUIFormUnregisterEvent");
     }
 }
 
@@ -138,6 +138,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, info.height.Value());
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, std::to_string(info.index));
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, info.borderWidth);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, info.obscuredMode);
     auto pipelineContext = context_.Upgrade();
     if (pipelineContext) {
         auto density = pipelineContext->GetDensity();
@@ -155,6 +156,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         wantCache_.SetParam(ALLOW_UPDATE, info.allowUpdate);
         wantCache_.SetParam(IS_DYNAMIC, formInfo.isDynamic);
     }
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, formInfo.fontScaleFollowSystem);
 
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
@@ -205,7 +207,11 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         return;
     }
 
-    onFormSurfaceNodeCallback_(rsSurfaceNode, formInfo.isDynamic);
+    bool isRecoverFormToHandleClickEvent =
+        want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
+    bool isRecover = recycleStatus_ == RecycleStatus::RECYCLED || isRecoverFormToHandleClickEvent;
+
+    onFormSurfaceNodeCallback_(rsSurfaceNode, formInfo.isDynamic, isRecover);
     if (!formRendererDispatcher_) {
         sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
@@ -216,8 +222,6 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
     }
 
-    bool isRecoverFormToHandleClickEvent = want.GetBoolParam(
-        OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
     if (isDynamic_ && isRecoverFormToHandleClickEvent) {
         HandleCachedClickEvents();
     }
@@ -308,7 +312,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         delegate->state_ = State::CREATED;
         delegate->hash_ = delegate->MakeResourceHash();
         delegate->RegisterEvent();
-    });
+    }, "ArkUIFormCreatePlatformResource");
 }
 
 void FormManagerDelegate::RegisterEvent()
@@ -757,10 +761,10 @@ void FormManagerDelegate::ReAddForm()
     }
 }
 
-void FormManagerDelegate::SetVisibleChange(bool isVisible)
+void FormManagerDelegate::SetObscured(bool isObscured)
 {
     CHECK_NULL_VOID(formRendererDispatcher_);
-    formRendererDispatcher_->SetVisibleChange(isVisible);
+    formRendererDispatcher_->SetObscured(isObscured);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM

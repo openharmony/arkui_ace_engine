@@ -105,7 +105,7 @@ private:
     ScrollResult HandleDragUpdate(float delta, float mainSpeed = 0.0f);
     void HandleDragEnd(float speed);
     void HandleDragCancel();
-    float CalculateFriction();
+    float CalculatePullDownRatio();
     void TriggerStatusChange(RefreshStatus newStatus);
     void OnAttachToFrameNode() override;
     float GetFollowRatio();
@@ -137,6 +137,7 @@ private:
     void FireStateChange(int32_t value);
     void FireRefreshing();
     void FireChangeEvent(const std::string& value);
+    void FireOnOffsetChange(float value);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     void InitProgressColumn();
     bool HasLoadingText();
@@ -145,6 +146,7 @@ private:
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     float scrollOffset_;
+    float lastScrollOffset_;
     bool isSourceFromAnimation_ = false;
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;

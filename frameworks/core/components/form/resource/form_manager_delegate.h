@@ -54,7 +54,7 @@ public:
     using OnFormLinkInfoUpdateCallback = std::function<void(const std::vector<std::string>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
-    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, bool)>;
+    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, bool, bool)>;
     using OnFormSurfaceChangeCallback = std::function<void(float width, float height)>;
     using OnFormSurfaceDetachCallback = std::function<void()>;
     using ActionEventHandle = std::function<void(const std::string&)>;
@@ -110,7 +110,7 @@ public:
     void OnFormError(const std::string& code, const std::string& msg);
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
     void ReleaseRenderer();
-    void SetVisibleChange(bool isVisible);
+    void SetObscured(bool isObscured);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);

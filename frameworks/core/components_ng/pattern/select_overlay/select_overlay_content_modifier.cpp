@@ -76,21 +76,134 @@ void SelectOverlayContentModifier::onDraw(DrawingContext& drawingContext)
     ClipViewPort(canvas);
 
     if (isSingleHandle_->Get()) {
-        // Paint one handle.
-        if (firstHandleIsShow_->Get()) {
-            PaintHandle(canvas, firstHandle_->Get(), false, isHandleLineShow_->Get());
-        } else if (secondHandleIsShow_->Get()) {
-            PaintHandle(canvas, secondHandle_->Get(), false, isHandleLineShow_->Get());
-        }
+        PaintSingleHandle(canvas);
     } else {
-        if (firstHandleIsShow_->Get()) {
-            PaintHandle(canvas, firstHandle_->Get(), !handleReverse_->Get());
-        }
-        if (secondHandleIsShow_->Get()) {
-            PaintHandle(canvas, secondHandle_->Get(), handleReverse_->Get());
-        }
+        PaintDoubleHandle(canvas);
     }
+
     canvas.Restore();
+}
+
+void SelectOverlayContentModifier::PaintSingleHandle(RSCanvas& canvas)
+{
+    if (PaintSingleHandleWithPoints(canvas)) {
+        return;
+    }
+    PaintSingleHandleWithRect(canvas);
+}
+
+OffsetF SelectOverlayContentModifier::CalculateCenterPoint(
+    const OffsetF& start, const OffsetF& end, float radius, bool handleOnTop)
+{
+    float vectorX = end.GetX() - start.GetX();
+    float vectorY = end.GetY() - start.GetY();
+    if (handleOnTop) {
+        vectorX = -vectorX;
+        vectorY = -vectorY;
+    }
+    float vectorLen = std::sqrt(vectorX * vectorX + vectorY * vectorY);
+    float unitVectorX = NearZero(vectorLen) ? 0.0f : vectorX / vectorLen;
+    float unitVectorY = NearZero(vectorLen) ? 0.0f : vectorY / vectorLen;
+    float extendedVectorX = unitVectorX * radius;
+    float extendedVectorY = unitVectorY * radius;
+    float centerX = handleOnTop ? start.GetX() + extendedVectorX : end.GetX() + extendedVectorX;
+    float centerY = handleOnTop ? start.GetY() + extendedVectorY : end.GetY() + extendedVectorY;
+    return OffsetF(centerX, centerY);
+}
+
+bool SelectOverlayContentModifier::PaintSingleHandleWithPoints(RSCanvas& canvas)
+{
+    CHECK_NULL_RETURN(isPaintHandleUsePoints_, false);
+    if (firstHandleIsShow_->Get()) {
+        auto startPoint = firstHandlePaintInfo_.startPoint;
+        startPoint.SetY(startPoint.GetY() + 1.0f);
+        auto centerOffset = CalculateCenterPoint(
+            firstHandlePaintInfo_.startPoint, firstHandlePaintInfo_.endPoint, handleRadius_->Get(), false);
+        HandleDrawInfo drawInfo = { .startPoint = startPoint - centerOffset,
+            .endPoint = firstHandlePaintInfo_.endPoint - centerOffset,
+            .centerOffset = centerOffset,
+            .handleWidth = firstHandlePaintInfo_.width,
+            .isHandleLineShow = isHandleLineShow_->Get() };
+        PaintHandle(canvas, drawInfo);
+    }
+    if (secondHandleIsShow_->Get()) {
+        auto startPoint = secondHandlePaintInfo_.startPoint;
+        startPoint.SetY(startPoint.GetY() + 1.0f);
+        auto centerOffset = CalculateCenterPoint(
+            secondHandlePaintInfo_.startPoint, secondHandlePaintInfo_.endPoint, handleRadius_->Get(), false);
+        HandleDrawInfo drawInfo = { .startPoint = startPoint - centerOffset,
+            .endPoint = secondHandlePaintInfo_.endPoint - centerOffset,
+            .centerOffset = centerOffset,
+            .handleWidth = secondHandlePaintInfo_.width,
+            .isHandleLineShow = isHandleLineShow_->Get() };
+        PaintHandle(canvas, drawInfo);
+    }
+    return true;
+}
+
+void SelectOverlayContentModifier::PaintSingleHandleWithRect(RSCanvas& canvas)
+{
+    if (firstHandleIsShow_->Get()) {
+        PaintHandle(canvas, firstHandle_->Get(), false, isHandleLineShow_->Get());
+        return;
+    }
+    if (secondHandleIsShow_->Get()) {
+        PaintHandle(canvas, secondHandle_->Get(), false, isHandleLineShow_->Get());
+    }
+}
+
+void SelectOverlayContentModifier::PaintDoubleHandle(RSCanvas& canvas)
+{
+    if (PaintDoubleHandleWithPoint(canvas)) {
+        return;
+    }
+    PaintDoubleHandleWithRect(canvas);
+}
+
+bool SelectOverlayContentModifier::PaintDoubleHandleWithPoint(RSCanvas& canvas)
+{
+    CHECK_NULL_RETURN(isPaintHandleUsePoints_, false);
+    if (firstHandleIsShow_->Get()) {
+        auto handleOnTop = !handleReverse_->Get();
+        auto centerOffset = CalculateCenterPoint(
+            firstHandlePaintInfo_.startPoint, firstHandlePaintInfo_.endPoint, handleRadius_->Get(), handleOnTop);
+        auto offsetY = handleOnTop ? -1.0f : 1.0f;
+        auto startPoint = firstHandlePaintInfo_.startPoint;
+        startPoint.SetY(startPoint.GetY() + offsetY);
+        HandleDrawInfo drawInfo = {
+            .startPoint = startPoint - centerOffset,
+            .endPoint = firstHandlePaintInfo_.endPoint - centerOffset,
+            .centerOffset = centerOffset,
+            .handleWidth = firstHandlePaintInfo_.width,
+        };
+        PaintHandle(canvas, drawInfo);
+    }
+    if (secondHandleIsShow_->Get()) {
+        auto handleOnTop = handleReverse_->Get();
+        auto centerOffset = CalculateCenterPoint(
+            secondHandlePaintInfo_.startPoint, secondHandlePaintInfo_.endPoint, handleRadius_->Get(), handleOnTop);
+        auto offsetY = handleOnTop ? -1.0f : 1.0f;
+        auto startPoint = secondHandlePaintInfo_.startPoint;
+        startPoint.SetY(startPoint.GetY() + offsetY);
+        HandleDrawInfo drawInfo = {
+            .startPoint = startPoint - centerOffset,
+            .endPoint = secondHandlePaintInfo_.endPoint - centerOffset,
+            .centerOffset = centerOffset,
+            .handleWidth = secondHandlePaintInfo_.width,
+        };
+        PaintHandle(canvas, drawInfo);
+    }
+    return true;
+}
+
+void SelectOverlayContentModifier::PaintDoubleHandleWithRect(RSCanvas& canvas)
+{
+    if (firstHandleIsShow_->Get()) {
+        PaintHandle(canvas, firstHandle_->Get(), !handleReverse_->Get());
+    }
+    if (secondHandleIsShow_->Get()) {
+        PaintHandle(canvas, secondHandle_->Get(), handleReverse_->Get());
+    }
 }
 
 void SelectOverlayContentModifier::ClipViewPort(RSCanvas& canvas)
@@ -149,11 +262,20 @@ void SelectOverlayContentModifier::PaintHandle(
         startPoint.SetY(-handleRadius_->Get() + 1.0f);
         endPoint.SetY(-handleRadius_->Get() - handleRect.Height());
     }
+    HandleDrawInfo drawInfo = { .startPoint = startPoint,
+        .endPoint = endPoint,
+        .centerOffset = centerOffset,
+        .handleWidth = handleRect.Width(),
+        .isHandleLineShow = isHandleLineShow };
+    PaintHandle(canvas, drawInfo);
+}
 
+void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const HandleDrawInfo& handleInfo)
+{
     canvas.Save();
     RSBrush brush;
     brush.SetAntiAlias(true);
-    canvas.Translate(centerOffset.GetX(), centerOffset.GetY());
+    canvas.Translate(handleInfo.centerOffset.GetX(), handleInfo.centerOffset.GetY());
     // Paint outer circle.
     Color handleColor = handleColor_->Get();
     handleColor = handleColor.BlendOpacity(handleOpacity_->Get());
@@ -169,15 +291,16 @@ void SelectOverlayContentModifier::PaintHandle(
     canvas.DrawCircle(RSPoint(0.0, 0.0), innerHandleRadius_->Get());
     canvas.DetachBrush();
 
-    if (isHandleLineShow) {
+    if (handleInfo.isHandleLineShow) {
         RSPen pen;
         pen.SetAntiAlias(true);
         // Paint line of handle.
         pen.SetColor(handleColor.GetValue());
-        pen.SetWidth(handleRect.Width());
+        pen.SetWidth(handleInfo.handleWidth);
         pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
         canvas.AttachPen(pen);
-        canvas.DrawLine(RSPoint(startPoint.GetX(), startPoint.GetY()), RSPoint(endPoint.GetX(), endPoint.GetY()));
+        canvas.DrawLine(RSPoint(handleInfo.startPoint.GetX(), handleInfo.startPoint.GetY()),
+            RSPoint(handleInfo.endPoint.GetX(), handleInfo.endPoint.GetY()));
         canvas.DetachPen();
     }
     canvas.Restore();

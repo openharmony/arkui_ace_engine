@@ -35,6 +35,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_view.h"
 #include "core/common/card_scope.h"
@@ -75,17 +76,14 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_jsEnumStyle_abc_start[];
-extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
-extern const char _binary_jsUIContext_abc_end[];
 extern const char _binary_arkComponent_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
-extern const char* _binary_jsUIContext_abc_end;
 extern const char* _binary_arkComponent_abc_end;
 #endif
 
@@ -175,13 +173,6 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 {
     uint8_t* codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
     int32_t codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    return runtime->EvaluateJsCode(codeStart, codeLength);
-}
-
-inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
-{
-    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
-    int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
     return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
@@ -366,6 +357,8 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             shared_ptr<JsValue> global = runtime_->GetGlobal();
 
             PreloadConsole(runtime_, global);
+
+            // stateMgmt log method
             PreloadAceConsole(runtime_, global);
             PreloadAceTrace(runtime_, global);
 
@@ -376,7 +369,6 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             PreloadExports(runtime_, global);
             PreloadRequireNative(runtime_, global);
             PreloadStateManagement(runtime_);
-            PreloadUIContent(runtime_);
             PreloadArkComponent(runtime_);
         }
     }
@@ -403,7 +395,6 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadStateManagement(runtime_);
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
-        PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -518,8 +509,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
 
     bool evalResult = PreloadStateManagement(arkRuntime);
-
-    PreloadUIContent(arkRuntime);
 
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
@@ -665,17 +654,18 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
 {
     CHECK_RUN_ON(JS);
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
-    if (rootViewMap_.count(pageId) != 0) {
+    auto iter = rootViewMap_.find(pageId);
+    if (iter != rootViewMap_.end()) {
         auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
         if (!arkRuntime) {
             return;
         }
-        panda::Local<panda::ObjectRef> rootView = rootViewMap_[pageId].ToLocal(arkRuntime->GetEcmaVm());
+        panda::Local<panda::ObjectRef> rootView = iter->second.ToLocal(arkRuntime->GetEcmaVm());
         auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
-        rootViewMap_[pageId].FreeGlobalHandleAddr();
+        iter->second.FreeGlobalHandleAddr();
         rootViewMap_.erase(pageId);
     }
 }
@@ -840,7 +830,25 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetUIContextFunc(
     return retVal;
 }
 
-void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task)
+shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetFrameNodeByNodeIdFunc(
+    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv)
+{
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> func = global->GetProperty(runtime, "__getFrameNodeByNodeId__");
+    if (!func->IsFunction(runtime)) {
+        return nullptr;
+    }
+
+    shared_ptr<JsValue> retVal = func->Call(runtime, global, argv, argv.size());
+    if (!retVal) {
+        return nullptr;
+    }
+
+    return retVal;
+}
+
+void JsiDeclarativeEngineInstance::PostJsTask(
+    const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task, const std::string& name)
 {
     if (runtime == nullptr) {
         return;
@@ -849,7 +857,7 @@ void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runti
     if (engineInstance == nullptr) {
         return;
     }
-    engineInstance->GetDelegate()->PostJsTask(std::move(task));
+    engineInstance->GetDelegate()->PostJsTask(std::move(task), name);
 }
 
 void JsiDeclarativeEngineInstance::TriggerPageUpdate(const shared_ptr<JsRuntime>& runtime)
@@ -892,7 +900,7 @@ void JsiDeclarativeEngineInstance::SetDebuggerPostTask()
         if (delegate == nullptr) {
             return;
         }
-        delegate->PostJsTask(std::move(task));
+        delegate->PostJsTask(std::move(task), "ArkUIDebuggerTask");
     };
     std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
 }
@@ -937,7 +945,34 @@ napi_value JsiDeclarativeEngineInstance::GetContextValue()
     return napiValue;
 }
 
+napi_value JsiDeclarativeEngineInstance::GetFrameNodeValueByNodeId(int32_t nodeId)
+{
+    auto runtime = GetJsRuntime();
+
+    // obtain frameNode instance
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(instanceId_), runtime->NewNumber(nodeId) };
+    shared_ptr<JsValue> frameNode = CallGetFrameNodeByNodeIdFunc(runtime, argv);
+
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (!arkJSRuntime) {
+        return nullptr;
+    }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(frameNode);
+    if (!arkJSValue) {
+        return nullptr;
+    }
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(GetNativeEngine());
+    if (!arkNativeEngine) {
+        return nullptr;
+    }
+    napi_value napiValue = ArkNativeEngine::ArkValueToNapiValue(
+        reinterpret_cast<napi_env>(GetNativeEngine()), arkJSValue->GetValue(arkJSRuntime));
+
+    return napiValue;
+}
+
 thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
+thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> JsiDeclarativeEngine::builderMap_;
 panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
 // -----------------------
@@ -978,6 +1013,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     CHECK_RUN_ON(JS);
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::Initialize");
     ACE_DCHECK(delegate);
+    NG::UIContextHelper::RegisterRemoveUIContextFunc();
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate);
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime_);
     std::shared_ptr<ArkJSRuntime> arkRuntime;
@@ -1047,7 +1083,7 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
             }
             ContainerScope scope(id);
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
-        });
+            }, "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
 }
@@ -1119,18 +1155,15 @@ void JsiDeclarativeEngine::RegisterOffWorkerFunc()
 void JsiDeclarativeEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
-    auto && assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize, std::string& ami,
-        bool& useSecureMem, bool isRestricted) {
+    auto && assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
+        std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, bool isRestricted) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             return;
         }
         size_t index = uri.find_last_of(".");
         if (index != std::string::npos) {
-            std::vector<uint8_t> content;
             delegate->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
-            *buff = content.data();
-            *buffSize = content.size();
             useSecureMem = false;
         }
     };
@@ -1483,6 +1516,15 @@ bool JsiDeclarativeEngine::LoadPageSource(
     return true;
 }
 
+int32_t JsiDeclarativeEngine::LoadNavDestinationSource(const std::string& bundleName,
+    const std::string& moduleName, const std::string& pageSourceFile, bool isSingleton)
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    CHECK_NULL_RETURN(runtime, false);
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    return arkRuntime->LoadDestinationFile(bundleName, moduleName, pageSourceFile, isSingleton);
+}
+
 void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
     const std::string& namedRoute, panda::Local<panda::ObjectRef> params)
 {
@@ -1561,6 +1603,7 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     auto runtime = engineInstance_->GetJsRuntime();
     auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
     std::vector<Local<JSValueRef>> argv;
+    LocalScope scope(vm);
     JSViewStackProcessor::JsStartGetAccessRecordingFor(JSViewStackProcessor::JsAllocateNewElmetIdForNextComponent());
     auto ret = iter->second.pageGenerator->Call(vm, JSNApi::GetGlobalObject(vm), argv.data(), 0);
     if (!ret->IsObject()) {
@@ -1788,7 +1831,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
             if (!delegate) {
                 return;
             }
-            delegate->PostSyncTaskToPage(task);
+            delegate->PostSyncTaskToPage(task, "ArkUINativeXComponentInit");
         }
         return;
     }
@@ -1873,7 +1916,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
     if (!delegate) {
         return;
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUINativeXComponentInit");
 #endif
 }
 
@@ -2206,6 +2249,26 @@ bool JsiDeclarativeEngine::OnRestoreData(const std::string& data)
     }
     std::vector<shared_ptr<JsValue>> argv = { jsonObj };
     return CallAppFunc("onRestoreData", argv);
+}
+
+void JsiDeclarativeEngine::AddToNavigationBuilderMap(std::string name,
+    panda::Global<panda::ObjectRef> builderFunc)
+{
+    auto ret = builderMap_.insert(std::pair<std::string, panda::Global<panda::ObjectRef>>(name, builderFunc));
+    if (!ret.second) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "insert builder failed, update builder: %{public}s", name.c_str());
+        builderMap_[name] = builderFunc;
+    }
+}
+
+panda::Global<panda::ObjectRef> JsiDeclarativeEngine::GetNavigationBuilder(std::string name)
+{
+    auto targetBuilder = builderMap_.find(name);
+    if (targetBuilder == builderMap_.end()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get navDestination builder failed: %{public}s", name.c_str());
+        return panda::Global<panda::ObjectRef>();
+    }
+    return targetBuilder->second;
 }
 
 // ArkTsCard start

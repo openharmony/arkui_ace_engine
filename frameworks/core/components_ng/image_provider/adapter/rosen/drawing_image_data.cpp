@@ -64,20 +64,20 @@ std::shared_ptr<RSData> DrawingImageData::GetRSData() const
     return rsData_;
 }
 
-RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const std::optional<Color>& svgFillColor)
+RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
 {
     CHECK_NULL_RETURN(rsData_, nullptr);
     auto skData = SkData::MakeWithoutCopy(rsData_->GetData(), rsData_->GetSize());
     const auto svgStream = std::make_unique<SkMemoryStream>(skData);
     CHECK_NULL_RETURN(svgStream, nullptr);
     if (SystemProperties::GetSvgMode() <= 0) {
-        return SkiaSvgDom::CreateSkiaSvgDom(*svgStream, svgFillColor);
+        return SkiaSvgDom::CreateSkiaSvgDom(*svgStream, src.GetFillColor());
     }
 #ifdef NG_BUILD
     LOGE("NG SvgDom not support!");
     return nullptr;
 #else
-    auto svgDom_ = SvgDom::CreateSvgDom(*svgStream, svgFillColor);
+    auto svgDom_ = SvgDom::CreateSvgDom(*svgStream, src);
     if (!svgDom_) {
         return nullptr;
     }

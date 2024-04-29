@@ -83,7 +83,9 @@ public:
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
     virtual void SetBackgroundEffect(const EffectOption& effectOption) {}
+    virtual void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) = 0;
     virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
+    virtual void SetForegroundEffect(float radius) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
     virtual void SetLightUpEffect(double radio) {}
@@ -150,6 +152,7 @@ public:
     virtual void SetPositionEdges(const EdgesParam& value) {};
     virtual void SetOffsetEdges(const EdgesParam& value) {};
     virtual void MarkAnchor(const Dimension& x, const Dimension& y) = 0;
+    virtual void ResetPosition() {};
 
     // transforms
     virtual void SetScale(float x, float y, float z) = 0;
@@ -161,10 +164,11 @@ public:
     // display props
     virtual void SetOpacity(double opacity, bool passThrough = false) = 0;
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) = 0;
+    virtual void CleanTransition() {};
     virtual void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) = 0;
-    virtual void SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+    virtual void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY) = 0;
+        const std::optional<Dimension>& offsetY, NG::OverlayType type) = 0;
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
@@ -195,9 +199,13 @@ public:
     virtual void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
 
+    virtual void SetDynamicDim(float DimDegree) = 0;
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
+    virtual void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
+    virtual void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
 
     virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
+    virtual void SetMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetBlendMode(BlendMode blendMode) = 0;
     virtual void SetBlendApplyType(BlendApplyType blendApplyType) = 0;
@@ -288,7 +296,8 @@ public:
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
-
+    virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
+    virtual void SetDisallowDropForcedly(bool isDisallowDropForcedly) {};
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
     virtual void SetPrivacySensitive(bool flag) = 0;
@@ -310,14 +319,20 @@ public:
     virtual void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
-        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear) = 0;
+        std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) = 0;
     virtual void DismissContentCover() = 0;
     virtual void DismissSheet() = 0;
+    virtual void SheetSpringBack() = 0;
     virtual void DismissDialog() {};
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;
     virtual void SetAccessibilityText(const std::string& text) = 0;
+    virtual void SetAccessibilityTextHint(const std::string& text) = 0;
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;
@@ -344,9 +359,13 @@ public:
     virtual void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) = 0;
     virtual void SetLightIntensity(const float value) = 0;
+    virtual void SetLightColor(const Color& value) = 0;
     virtual void SetLightIlluminated(const uint32_t value) = 0;
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;
+
+    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) {};
+    virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {};
 
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;

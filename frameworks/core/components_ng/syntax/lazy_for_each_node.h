@@ -18,29 +18,30 @@
 
 #include <list>
 #include <optional>
-#include <stdint.h>
 #include <string>
-#include <unordered_set>
-#include <utility>
 
 #include "base/utils/utils.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT LazyForEachNode : public UINode, public V2::DataChangeListener {
-    DECLARE_ACE_TYPE(LazyForEachNode, UINode);
+class ACE_EXPORT LazyForEachNode : public ForEachBaseNode, public V2::DataChangeListener {
+    DECLARE_ACE_TYPE(LazyForEachNode, ForEachBaseNode, DataChangeListener);
 
 public:
     static RefPtr<LazyForEachNode> GetOrCreateLazyForEachNode(
         int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder);
 
+    static RefPtr<LazyForEachNode> CreateLazyForEachNode(
+        int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder);
+
     LazyForEachNode(int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
-        : UINode(V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId, false), builder_(forEachBuilder)
+        : ForEachBaseNode(V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId, false), builder_(forEachBuilder)
     {}
 
     ~LazyForEachNode() {
@@ -73,6 +74,10 @@ public:
     void OnDataBulkDeleted(size_t index, size_t count) override;
     void OnDataChanged(size_t index) override;
     void OnDataMoved(size_t from, size_t to) override;
+    void OnDatasetChange(const std::list<V2::Operation>& DataOperations) override;
+
+    void OnDataBulkChanged(size_t index, size_t count) override;
+    void OnDataMoveToNewPlace(size_t from, size_t to) override;
 
     void PostIdleTask(std::list<int32_t>&& items, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt,
         bool longPredictTask = false);
@@ -137,6 +142,17 @@ public:
     }
     void RecycleItems(int32_t from, int32_t to);
 
+    const RefPtr<LazyForEachBuilder>& GetBuilder() const
+    {
+        return builder_;
+    }
+
+    void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
+    void MoveData(int32_t from, int32_t to) override;
+    RefPtr<FrameNode> GetFrameNode(int32_t index) override;
+    int32_t GetFrameNodeIndex(RefPtr<FrameNode> node) override;
+    void InitDragManager(const RefPtr<FrameNode>& childNode);
+    void InitAllChilrenDragManager(bool init);
 private:
     void OnAttachToMainTree(bool recursive) override
     {

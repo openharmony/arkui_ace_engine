@@ -40,6 +40,7 @@ public:
     void FireChangeEvent(const BaseEventInfo* eventInfo) const
     {
         if (onTitleModeChangeEvent_) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "change titleMode eventInfo");
             onTitleModeChangeEvent_(eventInfo);
         }
     }
@@ -54,11 +55,15 @@ public:
         if (isVisible_.has_value()) {
             if (isVisible_.value() != isVisible) {
                 if (onNavBarStateChangeEvent_) {
+                    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "NavBar Visible State Change %{public}s",
+                        isVisible ? "false -> true" : "true -> false");
                     onNavBarStateChangeEvent_(isVisible);
                 }
             }
         } else {
             if (onNavBarStateChangeEvent_) {
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set NavBar Visible State as %{public}s",
+                    isVisible ? "true" : "false");
                 onNavBarStateChangeEvent_(isVisible);
             }
         }
@@ -73,6 +78,7 @@ public:
     void FireNavigationModeChangeEvent(NavigationMode mode)
     {
         if (onNavigationModeChangeEvent_) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Chanage NavigationMode as %{public}d", mode);
             onNavigationModeChangeEvent_(mode);
         }
     }

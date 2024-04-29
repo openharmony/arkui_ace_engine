@@ -560,8 +560,12 @@ LunarDate Localization::GetLunarDate(Date date)
     auto cal = Calendar::createInstance(locale, status);
     CHECK_RETURN(status, dateRet);
     // 0 means January,  1 means February, so month - 1
-    cal->set(date.year, date.month - 1, date.day);
-
+    if (date.month == 0u) {
+        date.month = 11u;
+        cal->set(date.year, date.month, date.day);
+    } else {
+        cal->set(date.year, date.month - 1u, date.day);
+    }
     UDate udate = cal->getTime(status);
     delete cal;
     CHECK_RETURN(status, dateRet);
@@ -921,25 +925,27 @@ std::shared_ptr<Localization> Localization::GetInstance()
 void Localization::SetLocale(const std::string& language, const std::string& countryOrRegion, const std::string& script,
     const std::string& selectLanguage, const std::string& keywordsAndValues)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+
     if (instance_) {
         instance_->HandleOnChange();
         instance_->HandleOnMymrChange(script == "Qaag");
     }
+
     std::shared_ptr<Localization> instance;
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!firstInstance_ || !instance_) {
-            if (instance_) {
-                auto onMymrChange = instance_->GetOnMymrChange();
-                instance_ = std::make_shared<Localization>();
-                instance_->SetOnMymrChange(onMymrChange);
-            } else {
-                instance_ = std::make_shared<Localization>();
-            }
+    if (!firstInstance_ || !instance_) {
+        if (instance_) {
+            auto onMymrChange = instance_->GetOnMymrChange();
+            instance_ = std::make_shared<Localization>();
+            instance_->SetOnMymrChange(onMymrChange);
+        } else {
+            instance_ = std::make_shared<Localization>();
         }
-        firstInstance_ = false;
-        instance = instance_;
     }
+
+    firstInstance_ = false;
+    instance = instance_;
+
     instance->SetLocaleImpl(language, countryOrRegion, script, selectLanguage, keywordsAndValues);
 }
 

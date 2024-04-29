@@ -20,33 +20,127 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/font_collection.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class LeadingMarginSize {
+public:
+    LeadingMarginSize() = default;
+    ~LeadingMarginSize() = default;
+
+    LeadingMarginSize(Dimension width, Dimension height) : width_(width), height_(height) {}
+
+    std::string ToString() const
+    {
+        static const int32_t precision = 2;
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(precision);
+        ss << "width: " << width_.ToString();
+        ss << " height: " << height_.ToString();
+        return ss.str();
+    }
+
+    bool operator==(const LeadingMarginSize& size) const
+    {
+        return NearEqual(width_, size.width_) && NearEqual(height_, size.height_);
+    }
+
+    Dimension Width() const
+    {
+        return width_;
+    }
+
+    Dimension Height() const
+    {
+        return height_;
+    }
+
+private:
+    Dimension width_;
+    Dimension height_;
+};
+
+struct LineMetrics {
+    float ascender;
+    float descender;
+    float capHeight;
+    float xHeight;
+    float width;
+    float height;
+    float x;
+    float y;
+};
 
 struct LeadingMargin {
-    SizeF size;
+    LeadingMarginSize size;
     RefPtr<PixelMap> pixmap;
 
     bool operator==(const LeadingMargin& other) const
     {
         return size == other.size && pixmap == other.pixmap;
     }
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, size);
+        jsonValue->Put("pixmap",
+            pixmap ? ("size=" + std::to_string(pixmap->GetWidth()) + "," + std::to_string(pixmap->GetHeight())).c_str()
+                   : "nullptr");
+        return jsonValue->ToString();
+    }
 };
 
 struct ParagraphStyle {
     TextDirection direction = TextDirection::AUTO;
     TextAlign align = TextAlign::LEFT;
-    uint32_t maxLines = 1;
+    uint32_t maxLines = UINT32_MAX;
     std::string fontLocale;
     WordBreak wordBreak = WordBreak::NORMAL;
     EllipsisMode ellipsisMode = EllipsisMode::TAIL;
+    LineBreakStrategy lineBreakStrategy = LineBreakStrategy::GREEDY;
     TextOverflow textOverflow = TextOverflow::CLIP;
     std::optional<LeadingMargin> leadingMargin;
     double fontSize = 14.0;
+    Dimension indent;
+    Alignment leadingMarginAlign = Alignment::TOP_CENTER;
+
+    bool operator==(const ParagraphStyle others) const
+    {
+        return direction == others.direction && align == others.align && maxLines == others.maxLines &&
+               fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
+               ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
+               leadingMargin == others.leadingMargin && fontSize == others.fontSize && indent == others.indent;
+    }
+
+    bool operator!=(const ParagraphStyle others) const
+    {
+        return !(*this == others);
+    }
+
+    std::string ToString() const
+    {
+        std::string result = "TextAlign: ";
+        result += V2::ConvertWrapTextAlignToString(align);
+        result += ", maxLines: ";
+        result += std::to_string(maxLines);
+        result += ", wordBreak: ";
+        result += V2::ConvertWrapWordBreakToString(wordBreak);
+        result += ", textOverflow: ";
+        result += V2::ConvertWrapTextOverflowToString(textOverflow);
+        result += ", leadingMargin: ";
+        result += leadingMargin.has_value() ? leadingMargin.value().ToString().c_str() : "nullptr";
+        result += ", fontSize: ";
+        result += std::to_string(fontSize);
+        result += ", indent: ";
+        result += indent.ToString();
+        return result;
+    }
 };
 
 struct CaretMetricsF {
@@ -126,6 +220,8 @@ public:
 #ifndef USE_ROSEN_DRAWING
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 #endif
+    virtual void SetParagraphId(uint32_t id) = 0;
+    virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
 };
 } // namespace OHOS::Ace::NG
 

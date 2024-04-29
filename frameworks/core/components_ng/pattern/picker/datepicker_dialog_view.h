@@ -19,17 +19,20 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_base_component.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components_ng/pattern/picker/date_time_animation_controller.h"
 
 namespace OHOS::Ace::NG {
+class DateTimeAnimationController;
 class ACE_EXPORT DatePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-        std::map<std::string, NG::DialogEvent> dialogEvent,
+        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static void SetStartDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
     static void SetEndDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
@@ -42,8 +45,8 @@ public:
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static void SetDialogDateAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static void SetDialogSwitchEvent(std::function<bool()> switchEvent);
-    static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
-        const RefPtr<FrameNode>& datePickerNode,
+    static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& dateNode,
+        const RefPtr<FrameNode>& datePickerNode, const std::vector<ButtonInfo>& buttonInfos,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static RefPtr<FrameNode> CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode);
@@ -51,9 +54,9 @@ public:
     static void CreateTitleIconNode(const RefPtr<FrameNode>& titleNode);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
-        const RefPtr<FrameNode>& datePickerNode, DialogEvent& acceptEvent);
+        const RefPtr<FrameNode>& datePickerNode, DialogEvent& acceptEvent, const std::vector<ButtonInfo>& buttonInfos);
     static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
-        const RefPtr<FrameNode>& datePickerNode);
+        const RefPtr<FrameNode>& datePickerNode, const std::vector<ButtonInfo>& buttonInfos);
     static RefPtr<FrameNode> CreateDateNode(int32_t dateNodeId, std::map<std::string, PickerDate> datePickerProperty,
         const PickerTextProperties& properties, bool isLunar, bool hasTime);
     static RefPtr<FrameNode> CreateColumnNode(int32_t nodeId, uint32_t showCount, bool isDate = true);
@@ -61,6 +64,7 @@ public:
     static void CreateSingleDateNode(const RefPtr<FrameNode>& dateNode, uint32_t showCount);
     static RefPtr<FrameNode> CreateTimeNode(std::map<std::string, PickerTime> timePickerProperty,
         const PickerTextProperties& properties, bool useMilitaryTime);
+    static RefPtr<FrameNode> CreateLunarSwitchTextNode();
 
     static bool switchFlag_;
 
@@ -68,12 +72,50 @@ private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
-    static void CreateLunarswitchNode(
-        const RefPtr<FrameNode>& contentColumn, std::function<void(const bool)>&& changeEvent, bool isLunar);
+    static void CreateLunarswitchNode(const RefPtr<FrameNode>& contentColumn, const RefPtr<FrameNode>& dateNode,
+        std::function<void(const bool)>&& changeEvent, bool isLunar);
     static void SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow);
     static void HandleMouseEvent(const RefPtr<FrameNode>& titleButton, bool isHover);
     static void PlayHoverAnimation(const RefPtr<FrameNode>& titleButton, const Color& color);
-    static void MountColumnNodeToPicker(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode);
+    static void MountColumnNodeToPicker(
+        const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode, uint32_t columnWeight = 1);
+    static void UpdateTitleRowLayoutProps(const RefPtr<FrameNode>& titleRow);
+    static void SetTimeNodeColumnWeight(const RefPtr<FrameNode>& timeNode, const DatePickerSettingData& settingData);
+    static RefPtr<FrameNode> CreateAndMountDateNode(
+        const DatePickerSettingData& settingData, const RefPtr<FrameNode>& pickerStack);
+    static RefPtr<FrameNode> CreateAndMountButtonTitleNode(
+        const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& contentColumn);
+    static std::function<void(bool)> CreateLunarChangeEvent(const RefPtr<FrameNode>& dateNode);
+    static RefPtr<FrameNode> CreateAndMountMonthDaysNode(const DatePickerSettingData& settingData,
+        const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& pickerRow,
+        std::function<void(bool)>&& lunarChangeEvent);
+    static RefPtr<FrameNode> CreateAndMountTimeNode(const DatePickerSettingData& settingData,
+        const RefPtr<FrameNode>& monthDaysNode, const RefPtr<FrameNode>& pickerRow);
+    static std::function<void()> CreateAndSetDialogSwitchEvent(
+        const RefPtr<FrameNode>& pickerStack, const RefPtr<FrameNode>& contentColumn);
+    static void SwitchPickerPage(const RefPtr<FrameNode>& pickerStack, const RefPtr<FrameNode>& contentColumn,
+        const RefPtr<DateTimeAnimationController>& animationController);
+    static void CreateAndAddTitleClickEvent(
+        std::function<void()>& titleSwitchEvent, const RefPtr<FrameNode>& buttonTitleNode);
+    static void BuildDialogAcceptAndCancelButton(const std::vector<ButtonInfo>& buttonInfos,
+        const DatePickerSettingData& settingData, const RefPtr<FrameNode>& acceptNode,
+        const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& dialogNode, const RefPtr<FrameNode>& contentColumn,
+        std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    static void UpdateConfirmButtonTextLayoutProperty(
+        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateButtonLayoutProperty(
+        const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateConfirmButtonMargin(
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
+    static void UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
+        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
+    static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
+        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+        const RefPtr<ButtonTheme>& buttonTheme);
+    static void UpdateContentPadding(const RefPtr<FrameNode>& contentColumn);
+    static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
+        const RefPtr<FrameNode>& buttonNode, bool isConfirm);
 };
 } // namespace OHOS::Ace::NG
 

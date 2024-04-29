@@ -79,8 +79,13 @@ void CheckBoxGroupLayoutAlgorithm::InitializeParam()
     CHECK_NULL_VOID(checkBoxTheme);
     defaultWidth_ = checkBoxTheme->GetDefaultWidth().ConvertToPx();
     defaultHeight_ = checkBoxTheme->GetDefaultHeight().ConvertToPx();
-    horizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
-    verticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        horizontalPadding_ = checkBoxTheme->GetDefaultPaddingSize().ConvertToPx();
+        verticalPadding_ = checkBoxTheme->GetDefaultPaddingSize().ConvertToPx();
+    } else {
+        horizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
+        verticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx();
+    }
 }
 
 } // namespace OHOS::Ace::NG

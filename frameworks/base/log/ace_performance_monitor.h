@@ -51,6 +51,7 @@ public:
 private:
     MonitorTag tag_;
     TimePoint begin_;
+    TimePoint end_;
 };
 
 class ArkUIPerfMonitor {
@@ -60,7 +61,9 @@ public:
     void StartPerf();
     void FinishPerf();
     void RecordTimeSlice(MonitorTag tag, int64_t duration);
-    void RecordNodeNum(uint64_t num);
+    void RecordStateMgmtNode(int64_t num);
+    void RecordLayoutNode(int64_t num = 1);
+    void RecordRenderNode(int64_t num = 1);
     void SetRecordingStatus(MonitorTag tag, MonitorStatus status);
 
 private:
@@ -68,11 +71,13 @@ private:
     void ClearPerfMonitor();
     void FlushPerfMonitor();
     std::map<MonitorTag, int64_t> timeSlice_;
-    uint64_t propertyNum_;
-    uint64_t nodeNum_;
+    int64_t propertyNum_;
+    int64_t stateMgmtNodeNum_;
+    int64_t layoutNodeNum_;
+    int64_t renderNodeNum_;
     TimePoint begin_;
     TimePoint end_;
-    uint64_t monitorStatus_;
+    int64_t monitorStatus_;
 };
 } // namespace OHOS::Ace
 

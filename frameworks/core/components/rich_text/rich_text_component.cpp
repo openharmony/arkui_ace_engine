@@ -65,7 +65,7 @@ RefPtr<RenderNode> RichTextComponent::CreateRenderNode()
                 if (renderRichText) {
                     renderRichText->UpdateLayoutParams(width, height, contentHeight);
                 }
-            });
+            }, "ArkUIRichTextUpdateLayoutParams");
     });
 
     renderRichText->SetDelegate(delegate_);
