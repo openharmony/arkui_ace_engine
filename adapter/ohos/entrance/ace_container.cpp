@@ -761,17 +761,21 @@ void AceContainer::InitializeCallback()
                                     const TouchEvent& event, const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, node]() {
-                if (node) {
-                    context->OnTouchEvent(event, node);
-                } else {
-                    context->OnTouchEvent(event);
-                }
-                CHECK_NULL_VOID(markProcess);
-                markProcess();
-            },
-            TaskExecutor::TaskType::UI, "ArkUIAceContainerTouchEvent");
+        auto touchTask = [context, event, markProcess, node]() {
+            if (node) {
+                context->OnTouchEvent(event, node);
+            } else {
+                context->OnTouchEvent(event);
+            }
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            touchTask();
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(touchTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerTouchEvent");
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
@@ -779,17 +783,21 @@ void AceContainer::InitializeCallback()
                                     const MouseEvent& event, const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, node]() {
-                if (node) {
-                    context->OnMouseEvent(event, node);
-                } else {
-                    context->OnMouseEvent(event);
-                }
-                CHECK_NULL_VOID(markProcess);
-                markProcess();
-            },
-            TaskExecutor::TaskType::UI, "ArkUIAceContainerMouseEvent");
+        auto mouseTask = [context, event, markProcess, node]() {
+            if (node) {
+                context->OnMouseEvent(event, node);
+            } else {
+                context->OnMouseEvent(event);
+            }
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            mouseTask();
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(mouseTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerMouseEvent");
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
@@ -797,17 +805,21 @@ void AceContainer::InitializeCallback()
                                    const AxisEvent& event, const std::function<void()>& markProcess,
                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, node]() {
-                if (node) {
-                    context->OnAxisEvent(event, node);
-                } else {
-                    context->OnAxisEvent(event);
-                }
-                CHECK_NULL_VOID(markProcess);
-                markProcess();
-            },
-            TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent");
+        auto axisTask = [context, event, markProcess, node]() {
+            if (node) {
+                context->OnAxisEvent(event, node);
+            } else {
+                context->OnAxisEvent(event);
+            }
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            axisTask();
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(axisTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent");
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
