@@ -1761,6 +1761,17 @@ typedef enum {
      */
     NODE_TEXT_WORD_BREAK,
     /**
+     * @brief Defines the line break rule. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
+     *
+     */
+    NODE_TEXT_LINE_BREAK_STRATEGY,
+    /**
      * @brief Defines the ellipsis position. This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

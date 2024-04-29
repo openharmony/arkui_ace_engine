@@ -781,6 +781,32 @@ ArkUINativeModuleValue TextBridge::ResetWordBreak(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TextBridge::SetLineBreakStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> lineBreakStrategyArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (lineBreakStrategyArg->IsNull() || lineBreakStrategyArg->IsUndefined() || !lineBreakStrategyArg->IsNumber()) {
+        GetArkUINodeModifiers()->getTextModifier()->resetLineBreakStrategy(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    uint32_t lineBreakStrategy = lineBreakStrategyArg->Uint32Value(vm);
+    GetArkUINodeModifiers()->getTextModifier()->setLineBreakStrategy(nativeNode, lineBreakStrategy);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetLineBreakStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetLineBreakStrategy(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextBridge::SetEllipsisMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

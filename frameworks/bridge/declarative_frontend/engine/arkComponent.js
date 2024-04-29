@@ -8649,6 +8649,24 @@ class TextWordBreakModifier extends ModifierWithKey {
 }
 TextWordBreakModifier.identity = Symbol('textWordBreak');
 
+class TextLineBreakStrategyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetLineBreakStrategy(node);
+    }
+    else {
+      getUINativeModule().text.setLineBreakStrategy(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextLineBreakStrategyModifier.identity = Symbol('textLineBreakStrategy');
+
 class TextFontFeatureModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9165,6 +9183,11 @@ class ArkTextComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextWordBreakModifier.identity, TextWordBreakModifier, value);
     return this;
   }
+  lineBreakStrategy(value) {
+    modifierWithKey(this._modifiersWithKeys, TextLineBreakStrategyModifier.identity,
+      TextLineBreakStrategyModifier, value);
+    return this;
+  }
   fontFeature(value) {
     modifierWithKey(this._modifiersWithKeys, TextFontFeatureModifier.identity, TextFontFeatureModifier, value);
     return this;
@@ -9317,6 +9340,24 @@ class TextAreaWordBreakModifier extends ModifierWithKey {
     }
 }
 TextAreaWordBreakModifier.identity = Symbol('textAreaWordBreak');
+
+class TextAreaLineBreakStrategyModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textArea.resetLineBreakStrategy(node);
+      }
+      else {
+          getUINativeModule().textArea.setLineBreakStrategy(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaLineBreakStrategyModifier.identity = Symbol('textAreaLineBreakStrategy');
 class TextAreaSelectedBackgroundColorModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -10035,6 +10076,11 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
     return this;
   }
+  lineBreakStrategy(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaLineBreakStrategyModifier.identity,
+      TextAreaLineBreakStrategyModifier, value);
+    return this;
+  }
   minFontSize(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaMinFontSizeModifier.identity, TextAreaMinFontSizeModifier, value);
     return this;
@@ -10266,6 +10312,25 @@ class TextInputWordBreakModifier extends ModifierWithKey {
     }
 }
 TextInputWordBreakModifier.identity = Symbol('textInputWordBreak');
+
+class TextInputLineBreakStrategyModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textInput.resetLineBreakStrategy(node);
+      }
+      else {
+          getUINativeModule().textInput.setLineBreakStrategy(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputLineBreakStrategyModifier.identity = Symbol('textInputLineBreakStrategy');
+
 class TextInputMinFontSizeModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -11219,6 +11284,11 @@ class ArkTextInputComponent extends ArkComponent {
   }
   wordBreak(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputWordBreakModifier.identity, TextInputWordBreakModifier, value);
+    return this;
+  }
+  lineBreakStrategy(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputLineBreakStrategyModifier.identity,
+      TextInputLineBreakStrategyModifier, value);
     return this;
   }
   minFontSize(value) {

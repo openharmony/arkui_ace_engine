@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 95
+#define ARKUI_FULL_API_VERSION 96
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 95
+#define ARKUI_NODE_API_VERSION 96
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -1548,6 +1548,9 @@ struct ArkUITextModifier {
     void (*setTextDataDetectorConfig)(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size);
     ArkUI_Int32 (*getTextDataDetectorConfig)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*resetTextDataDetectorConfig)(ArkUINodeHandle node);
+    void (*setLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
+    void (*resetLineBreakStrategy)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextLineBreakStrategy)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2350,6 +2353,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaOnCut)(ArkUINodeHandle node);
     void (*setTextAreaOnPaste)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnPaste)(ArkUINodeHandle node);
+    void (*setTextAreaLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
+    void (*resetTextAreaLineBreakStrategy)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2526,6 +2531,8 @@ struct ArkUITextInputModifier {
     ArkUINodeHandle (*getTextInputCustomKeyboard)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputCustomKeyboardOption)(ArkUINodeHandle node);
     void (*resetTextInputCustomKeyboard)(ArkUINodeHandle node);
+    void (*setTextInputLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
+    void (*resetTextInputLineBreakStrategy)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
