@@ -19,8 +19,6 @@
 
 #include "gtest/gtest.h"
 
-#include "core/image/image_source_info.h"
-
 #define private public
 #define protected public
 
@@ -54,6 +52,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
+#include "core/image/image_source_info.h"
 
 using namespace testing;
 using namespace testing::ext;

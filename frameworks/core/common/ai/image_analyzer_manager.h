@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_IMAGE_ANALYZER_MANAGER_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_IMAGE_ANALYZER_MANAGER_H
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -32,7 +33,7 @@ public:
     ~ImageAnalyzerManager() = default;
     
     bool IsSupportImageAnalyzerFeature();
-    void CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap);
+    void CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset = { 0.0f, 0.0f });
     void UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap);
     void UpdateAnalyzerOverlayLayout();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
