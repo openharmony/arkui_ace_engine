@@ -829,6 +829,11 @@ HWTEST_F(NavBarTestNg, NavBarPattern011, TestSize.Level1)
      */
     info.SetSourceDevice(SourceType::TOUCH);
     firstClickListener->callback_(info);
-    EXPECT_FALSE(isClick);
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
+    barNode->SetNavBarContentNode(nullptr);
+    EXPECT_EQ(barNode->navBarContentNode_, nullptr);
+    EXPECT_TRUE(isClick);
 }
 } // namespace OHOS::Ace::NG
