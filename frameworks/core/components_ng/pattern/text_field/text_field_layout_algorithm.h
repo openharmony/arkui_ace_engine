@@ -145,6 +145,7 @@ protected:
     float unitWidth_ = 0.0f;
     bool autoWidth_ = false;
     Dimension textIndent_ = 0.0_px;
+    float indent_ = 0.0f;
 private:
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
@@ -158,6 +159,7 @@ private:
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
     void ApplyIndent(double width);
     bool IsInlineFocusAdaptExceedLimit(const SizeF& maxSize);
+    LayoutConstraintF BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/for_each_model_impl.h"
 #include "bridge/declarative_frontend/engine/functions/js_foreach_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -58,7 +59,6 @@ namespace OHOS::Ace::Framework {
 // Classic:  cmpilerGenId, array, itemGenFunc, idGenFunction
 void JSForEach::Create(const JSCallbackInfo& info)
 {
-
     if (Container::IsCurrentUseNewPipeline()) {
         ForEachModel::GetInstance()->Create();
         return;
@@ -82,10 +82,10 @@ void JSForEach::Create(const JSCallbackInfo& info)
         jsForEachFunction = AceType::MakeRefPtr<JsForEachFunction>(jsArray, JSRef<JSFunc>::Cast(jsViewMapperFunc));
     }
 
-        OHOS::Ace::ForEachFunc forEachFunc = { [jsForEachFunction]() { return jsForEachFunction->ExecuteIdentityMapper(); },
-            [jsForEachFunction](int32_t index) { jsForEachFunction->ExecuteBuilderForIndex(index); } };
-        ForEachModel::GetInstance()->Create(info[0]->ToString(), forEachFunc);
-    }
+    OHOS::Ace::ForEachFunc forEachFunc = { [jsForEachFunction]() { return jsForEachFunction->ExecuteIdentityMapper(); },
+        [jsForEachFunction](int32_t index) { jsForEachFunction->ExecuteBuilderForIndex(index); } };
+    ForEachModel::GetInstance()->Create(info[0]->ToString(), forEachFunc);
+}
 
 void JSForEach::Pop()
 {
@@ -205,6 +205,20 @@ void JSForEach::CreateNewChildFinish(const JSCallbackInfo& info)
     ForEachModel::GetInstance()->CreateNewChildFinish(id);
 }
 
+void JSForEach::OnMove(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        auto onMove = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])]
+            (int32_t from, int32_t to) {
+                auto params = ConvertToJSValues(from, to);
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
+            };
+        ForEachModel::GetInstance()->OnMove(std::move(onMove));
+    } else {
+        ForEachModel::GetInstance()->OnMove(nullptr);
+    }
+}
+
 void JSForEach::JSBind(BindingTarget globalObj)
 {
     JSClass<JSForEach>::Declare("ForEach");
@@ -214,6 +228,7 @@ void JSForEach::JSBind(BindingTarget globalObj)
     JSClass<JSForEach>::StaticMethod("setIdArray", &JSForEach::SetIdArray);
     JSClass<JSForEach>::StaticMethod("createNewChildStart", &JSForEach::CreateNewChildStart);
     JSClass<JSForEach>::StaticMethod("createNewChildFinish", &JSForEach::CreateNewChildFinish);
+    JSClass<JSForEach>::StaticMethod("onMove", &JSForEach::OnMove);
     JSClass<JSForEach>::Bind<>(globalObj);
 }
 

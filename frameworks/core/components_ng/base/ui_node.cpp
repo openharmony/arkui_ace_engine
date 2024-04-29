@@ -74,7 +74,7 @@ UINode::~UINode()
 #endif
 
     if (!removeSilently_) {
-        ElementRegister::GetInstance()->RemoveItem(nodeId_, tag_);
+        ElementRegister::GetInstance()->RemoveItem(nodeId_);
     } else {
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }
@@ -90,6 +90,10 @@ UINode::~UINode()
 void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
     context_ = context;
+    instanceId_ = context->GetInstanceId();
+    if (updateJSInstanceCallback_) {
+        updateJSInstanceCallback_(instanceId_);
+    }
     if (recursive) {
         for (auto& child : children_) {
             child->AttachContext(context, recursive);
@@ -99,7 +103,10 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 
 void UINode::DetachContext(bool recursive)
 {
+    CHECK_NULL_VOID(context_);
+    context_->DetachNode(Claim(this));
     context_ = nullptr;
+    instanceId_ = INSTANCE_ID_UNDEFINED;
     if (recursive) {
         for (auto& child : children_) {
             child->DetachContext(recursive);
@@ -337,6 +344,19 @@ void UINode::DoAddChild(
     MarkNeedSyncRenderTree(true);
 }
 
+RefPtr<FrameNode> UINode::GetParentFrameNode() const
+{
+    auto parent = GetParent();
+    while (parent) {
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
+        if (parentFrame) {
+            return parentFrame;
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
+}
+
 RefPtr<FrameNode> UINode::GetFocusParent() const
 {
     auto parentUi = GetParent();
@@ -409,7 +429,7 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     if (onMainTree_) {
         return;
     }
-    context_ = context;
+    AttachContext(context, false);
     onMainTree_ = true;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
@@ -451,7 +471,7 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
-    context_ = nullptr;
+    DetachContext(false);
     OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -877,14 +897,14 @@ void UINode::UpdateChildrenVisible(bool isVisible) const
 
 void UINode::OnRecycle()
 {
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnRecycle();
     }
 }
 
 void UINode::OnReuse()
 {
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnReuse();
     }
 }
@@ -1059,6 +1079,26 @@ RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool
     return nullptr;
 }
 
+int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node)
+{
+    int32_t index = 0;
+    for (const auto& child : GetChildren()) {
+        if (InstanceOf<FrameNode>(child)) {
+            if (child == node) {
+                return index;
+            } else {
+                return -1;
+            }
+        }
+        int32_t childIndex = child->GetFrameNodeIndex(node);
+        if (childIndex >= 0) {
+            return index + childIndex;
+        }
+        index += static_cast<uint32_t>(child->FrameCount());
+    }
+    return -1;
+}
+
 void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 {
     if (isAll) {
@@ -1102,13 +1142,16 @@ std::string UINode::GetCurrentCustomNodeInfo()
             auto custom = DynamicCast<CustomNode>(parent);
             auto list = custom->GetExtraInfos();
             for (const auto& child : list) {
-                extraInfo.append("    ").append("at (").append(child.page).append(":")
-                    .append(std::to_string(child.line)).append(")\n");
+                extraInfo.append("    ")
+                    .append("at (")
+                    .append(child.page)
+                    .append(":")
+                    .append(std::to_string(child.line))
+                    .append(")\n");
             }
             break;
         }
         parent = parent->GetParent();
-       
     }
     return extraInfo;
 }

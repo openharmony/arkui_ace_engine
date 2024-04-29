@@ -77,7 +77,7 @@ type RemovedElementInfo = { elmtId: number, tag: string };
 
 declare class UINodeRegisterProxy {
   public static instance_: UINodeRegisterProxy;
-  public removeElementsInfo_: Array<RemovedElementInfo>;
+  public removeElementsInfo_: Array<number>;
   public static ElementIdToOwningViewPU_: Map<number, WeakRef<JSBuilderNode>>;
   public unregisterElmtIdsFromIViews(): void;
   private obtainDeletedElmtIds(): void;
@@ -157,3 +157,5 @@ declare class NativeUtils {
   createNativeStrongRef(nodePtr: NodePtr): NativeStrongRef;
   createNativeWeakRef(nodePtr: NodePtr): NativeWeakRef;
 }
+
+declare function __getCustomProperty__(nodeId: number, key: string): Object | undefined;

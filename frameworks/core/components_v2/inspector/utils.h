@@ -531,6 +531,18 @@ inline std::string ConvertEllipsisModeToString(EllipsisMode value)
     return index < 0 ? "EllipsisMode.END" : modalTable[index].value;
 }
 
+inline std::string ConvertWrapLineBreakStrategyToString(LineBreakStrategy lineBreakStrategy)
+{
+    static const LinearEnumMapNode<LineBreakStrategy, std::string> lineBreakStrategyTable[] = {
+        { LineBreakStrategy::GREEDY, "greedy" },
+        { LineBreakStrategy::HIGH_QUALITY, "high-quality" },
+        { LineBreakStrategy::BALANCED, "balanced" }
+    };
+
+    auto index = BinarySearchFindIndex(lineBreakStrategyTable, ArraySize(lineBreakStrategyTable), lineBreakStrategy);
+    return index < 0 ? "line-break-strategy" : lineBreakStrategyTable[index].value;
+}
+
 inline std::string ConvertColorToString(Color color)
 {
     return color.ColorToString();

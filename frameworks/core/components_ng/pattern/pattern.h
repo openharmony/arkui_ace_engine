@@ -329,6 +329,13 @@ public:
         return frameNode_.Upgrade();
     }
 
+    int32_t GetHostInstanceId() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, -1); // -1 means no valid id exists
+        return host->GetInstanceId();
+    }
+
     FrameNode* GetUnsafeHostPtr() const
     {
         return UnsafeRawPtr(frameNode_);
@@ -525,6 +532,9 @@ public:
         };
         return longPressCallback;
     }
+
+    virtual void OnAttachContext(PipelineContext *context) {}
+    virtual void OnDetachContext(PipelineContext *context) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

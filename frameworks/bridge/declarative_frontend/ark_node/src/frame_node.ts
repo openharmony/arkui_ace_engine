@@ -289,8 +289,28 @@ class FrameNode {
     return { x: position[0], y: position[1] };
   }
 
+  getPositionToScreen(): Position {
+    const position = getUINativeModule().frameNode.getPositionToScreen(this.getNodePtr());
+    return { x: position[0], y: position[1] };
+  }
+
   getPositionToWindow(): Position {
     const position = getUINativeModule().frameNode.getPositionToWindow(this.getNodePtr());
+    return { x: position[0], y: position[1] };
+  }
+
+  getPositionToParentWithTransform(): Position {
+    const position = getUINativeModule().frameNode.getPositionToParentWithTransform(this.getNodePtr());
+    return { x: position[0], y: position[1] };
+  }
+
+  getPositionToScreenWithTransform(): Position {
+    const position = getUINativeModule().frameNode.getPositionToScreenWithTransform(this.getNodePtr());
+    return { x: position[0], y: position[1] };
+  }
+
+  getPositionToWindowWithTransform(): Position {
+    const position = getUINativeModule().frameNode.getPositionToWindowWithTransform(this.getNodePtr());
     return { x: position[0], y: position[1] };
   }
 
@@ -346,6 +366,10 @@ class FrameNode {
     return getUINativeModule().frameNode.getId(this.getNodePtr());
   }
 
+  getUniqueId(): number {
+      return getUINativeModule().frameNode.getIdByNodePtr(this.getNodePtr());
+  }
+
   getNodeType(): string {
     return getUINativeModule().frameNode.getNodeType(this.getNodePtr());
   }
@@ -370,6 +394,10 @@ class FrameNode {
     const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
     const inspectorInfo = JSON.parse(inspectorInfoStr);
     return inspectorInfo;
+  }
+
+  getCustomProperty(key: string): Object | undefined {
+    return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
   }
 
   get commonAttribute(): ArkComponent {

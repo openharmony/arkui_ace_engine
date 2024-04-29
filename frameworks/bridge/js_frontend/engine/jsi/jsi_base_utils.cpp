@@ -273,15 +273,22 @@ ErrorPos JsiBaseUtils::GetErrorPos(const std::string& rawStack)
     if (findLineEnd == std::string::npos) {
         return std::make_pair(0, 0);
     }
-    int32_t lineEnd = findLineEnd - 1;
+    size_t lineEnd = findLineEnd - 1;
     if (lineEnd < 1 || rawStack[lineEnd - 1] == '?') {
         return std::make_pair(0, 0);
     }
 
-    uint32_t secondPos = rawStack.rfind(':', lineEnd);
-    uint32_t fristPos = rawStack.rfind(':', secondPos - 1);
+    size_t secondPos = rawStack.rfind(':', lineEnd);
+    if (secondPos == std::string::npos) {
+        return std::make_pair(0, 0);
+    }
 
-    std::string lineStr = rawStack.substr(fristPos + 1, secondPos - 1 - fristPos);
+    size_t firstPos = rawStack.rfind(':', secondPos - 1);
+    if (firstPos == std::string::npos) {
+        return std::make_pair(0, 0);
+    }
+
+    std::string lineStr = rawStack.substr(firstPos + 1, secondPos - 1 - firstPos);
     std::string columnStr = rawStack.substr(secondPos + 1, lineEnd - 1 - secondPos);
 
     return std::make_pair(StringToInt(lineStr), StringToInt(columnStr));
@@ -439,14 +446,12 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
     std::string ans;
     std::string tempStack = stackStr;
     std::string runningPageTag = "app_.js";
-    auto appFlag = static_cast<int32_t>(tempStack.find(runningPageTag));
-    bool isAppPage = appFlag > 0 && appMap;
+    bool isAppPage = static_cast<int32_t>(tempStack.find(runningPageTag)) > 0 && appMap;
     if (!isAppPage) {
         std::string tag = std::as_const(pageUrl);
         char* ch = strrchr((char*)tag.c_str(), '.');
         if (ch != nullptr) {
-            int index = ch - tag.c_str();
-            tag.insert(index, "_");
+            tag.insert(static_cast<int>(ch - tag.c_str()), "_");
         }
         runningPageTag = tag;
     }
@@ -459,6 +464,9 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
         std::string temp = res[i];
         uint32_t start = temp.find(openBrace);
         uint32_t end = temp.find(":");
+        if (temp.empty() || end < start + 1) {
+            break;
+        }
         std::string key = temp.substr(start + 1, end - start - 1);
         auto closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
         auto openBracePos = static_cast<int32_t>(temp.find(openBrace));

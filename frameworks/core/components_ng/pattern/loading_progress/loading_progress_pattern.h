@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_method.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -34,6 +35,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (UseContentModifier()) {
+            return nullptr;
+        }
         if (!loadingProgressModifier_) {
             auto host = GetHost();
             CHECK_NULL_RETURN(host, nullptr);
@@ -67,6 +71,17 @@ public:
     {
         return { FocusType::NODE, true };
     }
+
+    void SetBuilderFunc(LoadingProgressMakeCallback&& makeFunc)
+    {
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier() const
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
 private:
     void RegisterVisibleAreaChange();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -77,6 +92,11 @@ private:
     void OnWindowShow() override;
     void StartAnimation();
     void StopAnimation();
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
+
+    std::optional<LoadingProgressMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
 
     bool hasVisibleChangeRegistered_ = false;
     bool enableLoading_ = true;

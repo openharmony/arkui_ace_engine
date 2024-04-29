@@ -2341,13 +2341,13 @@ void ScrollablePattern::HandleHotZone(
 void ScrollablePattern::HandleMoveEventInComp(const PointF& point)
 {
     float offsetPct = IsInHotZone(point);
-    if (NearZero(offsetPct)) {
+    if ((Positive(offsetPct) && !IsAtTop()) || (Negative(offsetPct) && !IsAtBottom())) {
+        // The drag point enters the hot zone
+        HotZoneScroll(offsetPct);
+    } else {
         // Although it entered the rolling component, it is not in the rolling component hot zone.Then stop
         // scrolling
         HandleLeaveHotzoneEvent();
-    } else {
-        // The drag point enters the hot zone
-        HotZoneScroll(offsetPct);
     }
 }
 
@@ -2406,6 +2406,7 @@ void ScrollablePattern::AddHotZoneSenceInterface(SceneStatus scene)
 
 void ScrollablePattern::InitScrollBarClickEvent()
 {
+    CHECK_NULL_VOID(scrollBar_);
     auto gesture = GetHost()->GetOrCreateGestureEventHub();
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();

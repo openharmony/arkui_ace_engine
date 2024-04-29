@@ -50,6 +50,7 @@ struct ImagePaintConfig {
     ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
     float smoothEdge_ = 0.0f;
+    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     bool flipHorizontally_ = false;
     bool isSvg_ = false;
     int32_t frameCount_ = 1;

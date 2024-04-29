@@ -38,7 +38,7 @@ class MovingPhotoPattern : public Pattern {
 public:
     MovingPhotoPattern() = delete;
     explicit MovingPhotoPattern(const RefPtr<MovingPhotoController>& controller);
-    ~MovingPhotoPattern() override = default;
+    ~MovingPhotoPattern() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {

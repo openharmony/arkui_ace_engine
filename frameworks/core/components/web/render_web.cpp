@@ -970,7 +970,7 @@ void RenderWeb::OnTouchSelectionChanged(
     }
 }
 
-bool RenderWeb::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
+bool RenderWeb::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
     (void)info;
     auto context = GetContext().Upgrade();

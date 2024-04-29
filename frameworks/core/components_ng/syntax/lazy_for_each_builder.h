@@ -249,6 +249,19 @@ public:
         return needBuild;
     }
 
+    int32_t GetChildIndex(const RefPtr<FrameNode>& targetNode)
+    {
+        for (auto& [index, node] : cachedItems_) {
+            if (node.second) {
+                auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                if (frameNode == targetNode) {
+                    return index;
+                }
+            }
+        }
+        return -1;
+    }
+
     void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
     {
         for (const auto& item : cachedItems_) {
@@ -273,7 +286,7 @@ public:
         ProcessOffscreenNode(itemInfo.second, false);
         ViewStackProcessor::GetInstance()->SetPredict(itemInfo.second);
         itemInfo.second->Build(nullptr);
-        auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false));
+        auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false, true));
         if (frameNode && frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
             frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
         }

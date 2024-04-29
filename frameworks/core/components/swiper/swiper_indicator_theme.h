@@ -36,6 +36,7 @@ constexpr Dimension SWIPER_INDICATOR_DIGIT_VERTICAL_PADDING_DEFAULT = 8.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DIGIT_HEIGHT = 32.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_ITEM_SPACE = 8.0_vp;
+constexpr double INDICATOR_ZOOM_IN_SCALE = 1.33;
 } // namespace
 
 enum class GestureState {
@@ -105,6 +106,8 @@ public:
             theme->digitalIndicatorTextStyle_.SetFontSize(
                 swiperPattern->GetAttr<Dimension>("indicator_text_font_size", 14.0_vp));
             theme->selectedColor_ = swiperPattern->GetAttr<Color>("indicator_color_selected", Color::TRANSPARENT);
+            theme->focusedSelectedColor_ =
+                swiperPattern->GetAttr<Color>("indicator_color_focused_selected", Color::TRANSPARENT);
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
             theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
@@ -118,6 +121,7 @@ public:
                 swiperPattern->GetAttr<Color>(ARROW_COLOR_PRIMARY_CONTRARY, Color::TRANSPARENT);
             theme->arrowDisabledAlpha_ =
                 swiperPattern->GetAttr<double>(ARROW_DISABLED_ALPHA, SWIPER_ARROW_ALPHA_DISABLED);
+            theme->scaleSwiper_ = swiperPattern->GetAttr<double>("indicator_scale_swiper", INDICATOR_ZOOM_IN_SCALE);
             theme->arrowScale_ = SWIPER_ARROW_SCALE;
             theme->arrowHorizontalMargin_ =
                 swiperPattern->GetAttr<Dimension>(ARROW_HORIZONTAL_MARGIN, SWIPER_ARROW_HORIZONTAL_MARGIN_DEFAULT);
@@ -150,6 +154,11 @@ public:
     const Color& GetSelectedColor() const
     {
         return selectedColor_;
+    }
+
+    const Color& GetFocusedSelectedColor() const
+    {
+        return focusedSelectedColor_;
     }
 
     const Color& GetHoverColor() const
@@ -324,6 +333,11 @@ public:
         return arrowDisabledAlpha_;
     }
 
+    double GetScaleSwiper() const
+    {
+        return scaleSwiper_;
+    }
+
     const Dimension& GetArrowScale() const
     {
         return arrowScale_;
@@ -375,6 +389,7 @@ protected:
 private:
     Color color_;
     Color selectedColor_;
+    Color focusedSelectedColor_;
     Color hoverColor_;
     Color pressedColor_;
     Color focusedColor_;
@@ -410,6 +425,7 @@ private:
     Color bigArrowBackgroundColor_;
     Color bigArrowColor_;
     double arrowDisabledAlpha_ = 0.4;
+    double scaleSwiper_ = INDICATOR_ZOOM_IN_SCALE;
     Dimension arrowScale_;
     Dimension arrowHorizontalMargin_;
     Dimension arrowVerticalMargin_;

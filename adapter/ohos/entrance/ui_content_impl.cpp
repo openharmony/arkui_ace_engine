@@ -131,11 +131,11 @@ const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
-const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputEvent.enabled";
+const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const int32_t REQUEST_CODE = -1;
-constexpr uint32_t TIMEOUT_LIMIT = 60;
+constexpr uint32_t TIMEOUT_LIMIT = 5;
 constexpr int32_t COUNT_LIMIT = 3;
 
 using ContentFinishCallback = std::function<void()>;
@@ -613,7 +613,7 @@ void UIContentImpl::RunFormPage()
     LOGI("[%{public}s][%{public}s][%{public}d]: Initialize startUrl = %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
     // run page.
-    Platform::AceContainer::RunPage(instanceId_, startUrl_, "", false);
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, formData_, false);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1102,13 +1102,13 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     if (runtime_ && !isFormRender_) { // ArkTSCard not support inherit local strorage from context
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {
-            container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
+            container->SetLocalStorage(nullptr, context);
         } else {
             auto env = reinterpret_cast<napi_env>(nativeEngine);
             napi_ref ref = nullptr;
             napi_create_reference(env, storage, 1, &ref);
             container->SetLocalStorage(
-                reinterpret_cast<NativeReference*>(ref), context->GetBindingObject()->Get<NativeReference>());
+                reinterpret_cast<NativeReference*>(ref), context);
         }
     }
 
@@ -1597,13 +1597,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (runtime_) {
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {
-            container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
+            container->SetLocalStorage(nullptr, context);
         } else {
             auto env = reinterpret_cast<napi_env>(nativeEngine);
             napi_ref ref = nullptr;
             napi_create_reference(env, storage, 1, &ref);
-            container->SetLocalStorage(
-                reinterpret_cast<NativeReference*>(ref), context->GetBindingObject()->Get<NativeReference>());
+            container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
         }
     }
 
@@ -1720,12 +1719,22 @@ void UIContentImpl::Focus()
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->ChangeDarkModeBrightness(true);
 }
 
 void UIContentImpl::UnFocus()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window unfocus", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
     Platform::AceContainer::OnInactive(instanceId_);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->ChangeDarkModeBrightness(false);
 }
 
 void UIContentImpl::Destroy()
@@ -2005,6 +2014,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
         SubwindowManager::GetInstance()->ClearToastInSubwindow();
+        if (pipelineContext) {
+            pipelineContext->CheckAndUpdateKeyboardInset();
+        }
     };
     if (container->IsUseStageModel() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
         task();
@@ -2486,8 +2498,10 @@ int32_t UIContentImpl::CreateModalUIExtension(
                 overlay->CreateModalUIExtension(want, callbacks, config.isProhibitBack, config.isAsyncModalBinding);
         },
         TaskExecutor::TaskType::UI, "ArkUICreateModalUIExtension");
-    LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension create modal page end, sessionId=%{public}d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId);
+    LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension create modal page end, sessionId=%{public}d, "
+         "isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
+        config.isAsyncModalBinding);
     return sessionId;
 }
 

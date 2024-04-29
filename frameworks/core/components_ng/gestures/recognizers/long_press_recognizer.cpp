@@ -72,7 +72,8 @@ void LongPressRecognizer::OnAccepted()
     if (onLongPress_ && !touchPoints_.empty()) {
         TouchEvent trackPoint = touchPoints_.begin()->second;
         PointF localPoint(trackPoint.GetOffset().GetX(), trackPoint.GetOffset().GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+            isPostEventResult_, trackPoint.postEventNodeId);
         LongPressInfo info(trackPoint.id);
         info.SetTimeStamp(time_);
         info.SetScreenLocation(trackPoint.GetScreenOffset());
@@ -355,6 +356,7 @@ void LongPressRecognizer::SendCallbackMsg(
             info.SetTiltY(trackPoint.tiltY.value());
         }
         info.SetSourceTool(trackPoint.sourceTool);
+        info.SetPointerEvent(trackPoint.pointerEvent);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

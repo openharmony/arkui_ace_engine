@@ -143,6 +143,11 @@ public:
         return hoverRadius_;
     }
 
+    const Dimension& GetDefaultPaddingSize() const
+    {
+        return defaultPaddingSize_;
+    }
+
     const Dimension& GetFocusRadius() const
     {
         return focusRadius_;
@@ -216,6 +221,7 @@ protected:
     Dimension borderWidth_;
     Dimension shadowWidth_;
     Dimension hoverRadius_;
+    Dimension defaultPaddingSize_;
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
     Dimension focusBoardSize_;
@@ -264,8 +270,8 @@ public:
             theme->hotZoneHorizontalPadding_ = checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding", 0.0_vp);
             theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size", 0.0_vp);
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                theme->hotZoneHorizontalPadding_ =
-                    checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding_twelve", 2.0_vp);
+                theme->defaultPaddingSize_ =
+                    checkboxPattern->GetAttr<Dimension>("checkbox_default_padding_size", 2.0_vp);
                 theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size_twelve", 24.0_vp);
             }
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
@@ -314,11 +320,6 @@ public:
             theme->hotZoneHorizontalPadding_ =
                 checkboxPattern->GetAttr<Dimension>("hotzone_padding_horizontal", 11.0_vp);
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                theme->hotZoneHorizontalPadding_ =
-                    checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding_twelve", 2.0_vp);
-                theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
-            }
         }
     };
 
@@ -400,7 +401,12 @@ public:
             theme->touchDuration_ = switchPattern->GetAttr<double>("touch_animation_duration", 0.0);
             theme->colorAnimationDuration_ = switchPattern->GetAttr<double>("color_animation_duration", 0.0);
             theme->pointAnimationDuration_ = switchPattern->GetAttr<double>("point_animation_duration", 0.0);
-
+            theme->focusBoardWidth_ = switchPattern->GetAttr<Dimension>("switch_focus_board_width", 0.0_vp);
+            theme->focusBoardHeight_ = switchPattern->GetAttr<Dimension>("switch_focus_board_height", 0.0_vp);
+            theme->focusBoardRadius_ = switchPattern->GetAttr<Dimension>("switch_focus_board_radius", 0.0_vp);
+            theme->focusBoardColor_ = switchPattern->GetAttr<Color>("switch_focus_board_color", Color());
+            theme->borderWidthFocus_ = switchPattern->GetAttr<Dimension>("switch_focus_width_border", Dimension());
+            theme->borderColorFocus_ = switchPattern->GetAttr<Color>("switch_focus_color_border", Color());
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
@@ -411,6 +417,31 @@ public:
             theme->hotZoneVerticalPadding_ = switchPattern->GetAttr<Dimension>(SWITCH_VERTICAL_PADDING, 13.0_vp);
         }
     };
+
+    const Dimension& GetBorderWidthFocus() const
+    {
+        return borderWidthFocus_;
+    }
+
+    const Color& GetBorderColorFocus() const
+    {
+        return borderColorFocus_;
+    }
+
+    const Dimension& GetFocusBoardWidth() const
+    {
+        return focusBoardWidth_;
+    }
+
+    const Dimension& GetFocusBoardHeight() const
+    {
+        return focusBoardHeight_;
+    }
+
+    const Dimension& GetFocusBoardRadius() const
+    {
+        return focusBoardRadius_;
+    }
 
     float GetRatio() const
     {
@@ -430,6 +461,11 @@ public:
 private:
     double colorAnimationDuration_ = 0.0;
     double pointAnimationDuration_ = 0.0;
+    Color borderColorFocus_;
+    Dimension borderWidthFocus_;
+    Dimension focusBoardWidth_;
+    Dimension focusBoardHeight_;
+    Dimension focusBoardRadius_;
 };
 
 class RadioTheme : public CheckableTheme {

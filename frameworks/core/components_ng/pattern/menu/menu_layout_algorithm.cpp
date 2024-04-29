@@ -270,6 +270,10 @@ MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag) : t
     if (LessOrEqual(previewScale_, 0.0f)) {
         previewScale_ = 1.0f;
     }
+
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    targetSecurity_ = static_cast<float>(theme->GetMenuTargetSecuritySpace().ConvertToPx());
 }
 
 MenuLayoutAlgorithm::~MenuLayoutAlgorithm()
@@ -558,9 +562,8 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     Initialize(layoutWrapper);
 
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
-    if (!constraint) {
-        return;
-    }
+    if (!constraint) return;
+    
     auto idealSize = CreateIdealSize(
         constraint.value(), Axis::VERTICAL, menuLayoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT), true);
     const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
@@ -587,6 +590,30 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childConstraint.parentIdealSize.SetWidth(selectMenuWidth);
         childConstraint.selfIdealSize.SetWidth(selectMenuWidth);
     }
+    
+    auto parentItem = menuPattern->GetParentMenuItem();
+    CalculateIdealSize(layoutWrapper, childConstraint, padding, idealSize, parentItem);
+}
+
+void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
+    LayoutConstraintF& childConstraint, PaddingPropertyF padding, SizeF& idealSize,
+    RefPtr<FrameNode> parentItem)
+{
+    if (parentItem != nullptr) {
+        auto itemProps = parentItem->GetLayoutProperty<MenuItemLayoutProperty>();
+        CHECK_NULL_VOID(itemProps);
+        auto expandingMode = itemProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+        if (expandingMode == SubMenuExpandingMode::STACK) {
+            auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(parentPattern);
+            auto parentMenu = parentPattern->GetMenu();
+            auto parentWidth = parentMenu->GetGeometryNode()->GetFrameSize().Width();
+            childConstraint.minSize.SetWidth(parentWidth);
+            childConstraint.maxSize.SetWidth(parentWidth);
+            childConstraint.selfIdealSize.SetWidth(parentWidth);
+        }
+    }
+
     float idealHeight = 0.0f;
     float idealWidth = 0.0f;
     auto host = layoutWrapper->GetHostNode();
@@ -1243,8 +1270,9 @@ void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
 
 OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale)
 {
-    auto beforeScalePreviewOffset = OffsetF((previewSize_ * ((1.0f - beforeAnimationScale) / 2)).Width(),
-        (previewSize_ * ((1.0f - beforeAnimationScale) / 2)).Height());
+    auto beforeRate = (1.0f - beforeAnimationScale) / 2;
+    auto beforeScalePreviewOffset = OffsetF((previewSize_ * beforeRate).Width(),
+        (previewSize_ * beforeRate).Height());
     auto afterScalePreviewOffset = OffsetF((previewSize_ * ((afterAnimationScale - 1.0f) / 2)).Width(),
         (previewSize_ * ((afterAnimationScale - 1.0f) / 2)).Height());
     auto scaleOffset = afterScalePreviewOffset + beforeScalePreviewOffset;

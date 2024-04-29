@@ -112,9 +112,6 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     TextSelectOverlay::OnHandleMove(handleRect, isFirst);
     auto parentGlobalOffset = pattern->GetParentGlobalOffset();
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset;
-    float x = std::clamp(localOffset.GetX(), 0.0f, pattern->GetContentRect().Width());
-    float y = std::clamp(localOffset.GetY(), 0.0f, pattern->GetContentRect().Height());
-    localOffset = OffsetF(x, y);
     pattern->magnifierController_->SetLocalOffset(localOffset);
     if (isFirst) {
         pattern->textSelector_.firstHandle.SetOffset(localOffset);
@@ -133,16 +130,13 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
     auto pattern = GetPattern<RichEditorPattern>();
     auto& textSelector = pattern->textSelector_;
     auto currentHandleIndex = pattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
+    pattern->SetCaretPosition(currentHandleIndex);
     if (isFirst) {
         pattern->HandleSelectionChange(currentHandleIndex, textSelector.destinationOffset);
     } else {
-        pattern->SetCaretPosition(currentHandleIndex);
         if (IsSingleHandle()) {
-            float selectLineHeight = 0.0f;
             auto textOffset = handleOffset + pattern->contentRect_.GetOffset() - pattern->richTextRect_.GetOffset();
-            auto lastClickOffset =
-                pattern->paragraphs_.ComputeCursorInfoByClick(currentHandleIndex, selectLineHeight, textOffset);
-            pattern->SetLastClickOffset(lastClickOffset + pattern->richTextRect_.GetOffset());
+            pattern->CalcAndRecordLastClickCaretInfo(Offset(textOffset.GetX(), textOffset.GetY()));
             textSelector.Update(currentHandleIndex);
         } else {
             pattern->HandleSelectionChange(textSelector.baseOffset, currentHandleIndex);
@@ -316,6 +310,11 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
         pattern->ResetSelection();
         pattern->StartTwinkling();
     }
+}
+
+void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+{
+    BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
 }
 
 std::optional<SelectOverlayInfo> RichEditorSelectOverlay::GetSelectOverlayInfo()

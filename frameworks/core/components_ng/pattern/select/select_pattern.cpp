@@ -126,7 +126,7 @@ void SelectPattern::OnModifyDone()
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    menuPattern->FireBuilder();
+    menuPattern->UpdateSelectIndex(selected_);
 }
 
 void SelectPattern::OnAfterModifyDone()
@@ -153,6 +153,7 @@ void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
     CHECK_NULL_VOID(text_);
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
+    SetSelected(index);
     textProps->UpdateContent(value);
     text_->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

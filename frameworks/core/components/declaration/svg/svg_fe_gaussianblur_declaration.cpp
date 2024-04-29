@@ -22,19 +22,6 @@
 
 namespace OHOS::Ace {
 
-std::vector<double> ParseVecDouble(const std::string& value)
-{
-    if (value.empty()) {
-        return {};
-    }
-    std::vector<double> parsedValues;
-    StringUtils::StringSplitter(value, ' ', parsedValues);
-    if (parsedValues.empty()) {
-        StringUtils::StringSplitter(value, ',', parsedValues);
-    }
-    return parsedValues;
-}
-
 using namespace Framework;
 
 void SvgFeGaussianBlurDeclaration::InitSpecialized()
@@ -55,7 +42,11 @@ bool SvgFeGaussianBlurDeclaration::SetSpecializedValue(const std::pair<std::stri
             [](const std::string& val, SvgFeGaussianBlurDeclaration& declaration) { declaration.SetEdgeMode(val); } },
         { DOM_SVG_FE_STD_DEVIATION,
             [](const std::string& val, SvgFeGaussianBlurDeclaration& declaration) {
-                declaration.SetStdDeviation(ParseVecDouble(val));
+                std::vector<float> parsedValues;
+                if (!StringUtils::ParseStringToArray(val, parsedValues)) {
+                    return;
+                }
+                declaration.SetStdDeviation(parsedValues);
             } },
     };
     std::string key = attr.first;

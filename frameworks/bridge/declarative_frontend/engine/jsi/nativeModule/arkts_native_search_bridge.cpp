@@ -698,6 +698,7 @@ ArkUINativeModuleValue SearchBridge::SetDecoration(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
@@ -714,6 +715,9 @@ ArkUINativeModuleValue SearchBridge::SetDecoration(ArkUIRuntimeCallInfo* runtime
     }
     ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, Color::BLACK);
     int32_t textDecorationStyle = static_cast<int32_t>(DEFAULT_DECORATION_STYLE);
+    if (fourthArg->IsInt()) {
+        textDecorationStyle = fourthArg->Int32Value(vm);
+    }
     GetArkUINodeModifiers()->getSearchModifier()->setSearchDecoration(
         nativeNode, searchDecoration, color.GetValue(), textDecorationStyle);
     return panda::JSValueRef::Undefined(vm);
@@ -923,6 +927,10 @@ ArkUINativeModuleValue SearchBridge::SetInputFilter(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     std::string inputFilter;
+    if (valueArg->IsUndefined() || valueArg->IsNull()) {
+        SearchModelNG::SetInputFilter(frameNode, inputFilter, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (ArkTSUtils::ParseJsString(vm, valueArg, inputFilter)) {
         if (!Framework::CheckRegexValid(inputFilter)) {
             inputFilter = "";
@@ -943,7 +951,7 @@ ArkUINativeModuleValue SearchBridge::SetInputFilter(ArkUIRuntimeCallInfo* runtim
             panda::Local<panda::JSValueRef> params[1] = { eventObj };
             func->Call(vm, func.ToLocal(), params, 1);
         };
-        NG::SearchModelNG::SetInputFilter(frameNode, inputFilter, std::move(onError));
+        SearchModelNG::SetInputFilter(frameNode, inputFilter, std::move(onError));
     }
     return panda::JSValueRef::Undefined(vm);
 }

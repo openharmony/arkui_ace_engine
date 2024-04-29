@@ -240,6 +240,7 @@ public:
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
     bool StopTextureExport() override;
+    void SetSurfaceRotation(bool isLock) override;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -276,6 +277,7 @@ public:
     void ClearAccessibilityFocus() override;
 
     void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
+    void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) override;
 
     void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) override;
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
@@ -303,6 +305,7 @@ public:
 
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnOpacityUpdate(double opacity) override;
+    void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) override;
     void SetAlphaOffscreen(bool isOffScreen) override;
     void MarkContentChanged(bool isChanged) override;
     void MarkDrivenRender(bool flag) override;
@@ -452,6 +455,7 @@ private:
     {
         return transitionEffect_ != nullptr && transitionEffect_->HasDisappearTransition();
     }
+    bool HasValidBgImageResizable();
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();

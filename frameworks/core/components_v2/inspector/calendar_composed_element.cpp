@@ -190,7 +190,7 @@ std::string CalendarComposedElement::ConvertOffDayFamily(const std::vector<std::
         result += ConvertWeekToString(item);
         result += "|";
     }
-    result = result.substr(0, result.size() - 1);
+    result = result.substr(0, result.size() ? result.size() - 1 : 0);
     return result;
 }
 

@@ -23,6 +23,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/paragraph.h"
@@ -59,11 +60,6 @@ public:
     void StopTextRace();
     void SetIsFocused(const bool& isFocused);
     void SetIsHovered(const bool& isHovered);
-
-    void SetParagraph(RefPtr<Paragraph> paragraph)
-    {
-        paragraph_ = std::move(paragraph);
-    }
 
     void SetPrintOffset(const OffsetF& paintOffset)
     {
@@ -149,6 +145,7 @@ private:
     void DrawImageNodeList(const float drawingContextWidth, const float paragraph1Offset, const float paragraph2Offset);
     void UpdateImageNodeVisible(const VisibleType visible);
     void PaintImage(RSCanvas& canvas, float x, float y);
+    void PaintCustomSpan(DrawingContext& drawingContext);
 
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
@@ -205,7 +202,6 @@ private:
     RefPtr<PropertyString> fontFamilyString_;
     RefPtr<PropertyBool> fontReady_;
     RefPtr<PropertyBool> dragStatus_;
-    RefPtr<Paragraph> paragraph_;
     OffsetF paintOffset_;
     float textRaceSpaceWidth_ = 0;
 

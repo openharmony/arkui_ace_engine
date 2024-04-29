@@ -751,7 +751,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     pattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(pattern->image_, true);
+    ImagePaintMethod imagePaintMethod(pattern->image_, false, true);
     /**
      * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
      */
@@ -806,7 +806,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, false, true);
     /**
      * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
      */
@@ -1081,7 +1081,7 @@ HWTEST_F(ImageTestNg, ImageColorFilterTest001, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, false, true);
 
     ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
 
@@ -2299,6 +2299,84 @@ HWTEST_F(ImageTestNg, TestObjectFit001, TestSize.Level1)
     EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::TOP_LEFT);
     EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::TOP_LEFT);
 }
+
+/**
+ * @tc.name: TestDynamicRangeMode001
+ * @tc.desc: Test image dynamicRangeMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestDynamicRangeMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+
+    /**
+     * @tc.steps: step2. get ImagePattern ImageRenderProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+
+    /**
+     * @tc.steps: step3. set dynamicRangeMode
+     */
+    imageRenderProperty->UpdateDynamicMode(DynamicRangeMode::CONSTRAINT);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode(), DynamicRangeMode::CONSTRAINT);
+
+    /**
+     * @tc.steps: step4. set dynamicRangeMode
+     */
+    imageRenderProperty->UpdateDynamicMode(DynamicRangeMode::STANDARD);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode(), DynamicRangeMode::STANDARD);
+
+    /**
+     * @tc.steps: step5. set dynamicRangeMode
+     */
+    imageRenderProperty->UpdateDynamicMode(DynamicRangeMode::HIGH);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode(), DynamicRangeMode::HIGH);
+}
+
+/**
+ * @tc.name: TestEnhancedImageQuality001
+ * @tc.desc: Test image EnhancedImageQuality.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestEnhancedImageQuality001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+
+    /**
+     * @tc.steps: step2. get ImagePattern ImageRenderProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+
+    /**
+     * @tc.steps: step3. set EnhancedImageQuality
+     */
+    imagePattern->SetImageQuality(AIImageQuality::HIGH);
+    EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::HIGH);
+
+    /**
+     * @tc.steps: step3. set EnhancedImageQuality
+     */
+    imagePattern->SetImageQuality(AIImageQuality::NONE);
+    EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::NONE);
+
+    /**
+     * @tc.steps: step3. set EnhancedImageQuality
+     */
+    imagePattern->SetImageQuality(AIImageQuality::NORMAL);
+    EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::NORMAL);
+}
+
 /**
  * @tc.name: ImageSetDraggable0001
  * @tc.desc: Set the draggable attribute of ImageModelNG object.

@@ -50,7 +50,7 @@ const char* BUTTON_NODEPTR_OF_UINODE = "nodePtr_";
 panda::Local<panda::JSValueRef> JsButtonClickCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     auto vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
     if (argc != CALL_ARG_2) {
         return panda::JSValueRef::Undefined(vm);
     }

@@ -66,8 +66,8 @@ public:
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
     virtual bool IsAtomicNode() const = 0;
 
-    void AttachContext(PipelineContext* context, bool recursive = false);
-    void DetachContext(bool recursive = false);
+    virtual void AttachContext(PipelineContext* context, bool recursive = false);
+    virtual void DetachContext(bool recursive = false);
 
     virtual int32_t FrameCount() const;
 
@@ -85,6 +85,7 @@ public:
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false);
+    RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
@@ -398,6 +399,7 @@ public:
     }
     virtual void FastPreviewUpdateChildDone() {}
     virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false);
+    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node);
 
     void SetDebugLine(const std::string& line)
     {
@@ -543,6 +545,16 @@ public:
     void SetIsRootBuilderNode(bool isRootBuilderNode);
     bool GetIsRootBuilderNode() const;
 
+    bool IsArkTsFrameNode() const
+    {
+        return isArkTsFrameNode_;
+    }
+
+    void SetIsArkTsFrameNode(bool isArkTsFrameNode)
+    {
+        isArkTsFrameNode_ = isArkTsFrameNode;
+    }
+
     const RefPtr<ExportTextureInfo>& GetExportTextureInfo() const
     {
         return exportTextureInfo_;
@@ -590,7 +602,17 @@ public:
     }
 
     void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
-    
+
+    virtual void RegisterUpdateJSInstanceCallback(std::function<void(int32_t)>&& callback)
+    {
+        updateJSInstanceCallback_ = std::move(callback);
+    }
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -645,6 +667,8 @@ protected:
 
     virtual void PaintDebugBoundary(bool flag) {}
 
+    PipelineContext* context_ = nullptr;
+
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -669,6 +693,7 @@ private:
     bool isDisappearing_ = false;
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
+    bool isArkTsFrameNode_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
@@ -680,12 +705,11 @@ private:
     bool useOffscreenProcess_ = false;
 
     std::list<std::function<void()>> attachToMainTreeTasks_;
+    std::function<void(int32_t)> updateJSInstanceCallback_;
 
     std::string debugLine_;
     std::string viewId_;
     void* externalData_ = nullptr;
-
-    PipelineContext* context_ = nullptr;
 
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

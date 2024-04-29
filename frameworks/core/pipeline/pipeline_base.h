@@ -277,6 +277,8 @@ public:
         appBgColor_ = color;
     }
 
+    virtual void ChangeDarkModeBrightness(bool isFocus) {}
+
     void SetFormRenderingMode(int8_t renderMode)
     {
         renderingMode_ = renderMode;
@@ -309,6 +311,8 @@ public:
     virtual void LaunchPageTransition() {}
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
+
+    virtual void CheckAndUpdateKeyboardInset() {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
@@ -1141,6 +1145,11 @@ public:
     virtual void FlushSyncGeometryNodeTasks() {}
 
     virtual void ChangeSensitiveNodes(bool flag) {}
+
+    virtual bool IsContainerModalVisible()
+    {
+        return false;
+    }
 
 protected:
     virtual bool MaybeRelease() override;

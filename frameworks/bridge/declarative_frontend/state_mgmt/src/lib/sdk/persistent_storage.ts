@@ -353,6 +353,10 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
         returnValue = this.readFromPersistentStorage(propName);
       }
       link = AppStorage.setAndLink(propName, returnValue, this);
+      if(link === undefined) {
+        stateMgmtConsole.debug(`PersistentStorage: failed to set and link app storage property ${propName}`);
+        return false;
+      }
       this.links_.set(propName, link);
       stateMgmtConsole.debug(`PersistentStorage: created new persistent prop for ${propName}`);
     }

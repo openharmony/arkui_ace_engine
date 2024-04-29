@@ -342,6 +342,27 @@ void InnerMenuPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     UpdateMenuItemChildren(host);
     SetAccessibilityAction();
+
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeLineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeLineContext);
+    auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(menuTheme->GetBorderColor());
+        renderContext->UpdateBorderColor(borderColorProperty);
+    }
+
+    if (!renderContext->HasBorderWidth()) {
+        auto layoutProperty = host->GetLayoutProperty<MenuLayoutProperty>();
+        BorderWidthProperty widthProp;
+        widthProp.SetBorderWidth(menuTheme->GetBorderWidth());
+        layoutProperty->UpdateBorderWidth(widthProp);
+        renderContext->UpdateBorderWidth(widthProp);
+    }
 }
 
 // close menu on touch up
@@ -443,6 +464,16 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
             CHECK_NULL_VOID(itemProperty);
             auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
             CHECK_NULL_VOID(itemPattern);
+
+            auto expandingMode = layoutProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+            if (expandingMode != itemProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE)) {
+                itemProperty->UpdateExpandingMode(expandingMode);
+                auto expandNode = itemPattern->GetHost();
+                CHECK_NULL_VOID(expandNode);
+                expandNode->MarkModifyDone();
+                expandNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+
             UpdateMenuItemTextNode(layoutProperty, itemProperty, itemPattern);
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
             auto itemGroupNode = AceType::DynamicCast<FrameNode>(child);
@@ -529,6 +560,7 @@ void MenuPattern::HideMenu(bool isMenuOnTouch) const
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch);
+    overlayManager->EraseMenuInfo(targetId_);
 }
 
 void MenuPattern::HideSubMenu()
@@ -1022,7 +1054,7 @@ void InnerMenuPattern::RecordItemsAndGroups()
         }
         isMenu = false;
         // skip other type UiNode, such as ForEachNode
-        for (int32_t index = currentNode->GetChildren().size() - 1; index >= 0; index--) {
+        for (int32_t index = static_cast<int32_t>(currentNode->GetChildren().size()) - 1; index >= 0; index--) {
             nodeStack.push(currentNode->GetChildAtIndex(index));
         }
     }

@@ -36,10 +36,9 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuPattern);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-    auto isShowInSubWindow = props->GetShowInSubWindowValue(false);
     auto parentMenuItem = menuPattern->GetParentMenuItem();
     CHECK_NULL_VOID(parentMenuItem);
-    InitHierarchicalParameters(isShowInSubWindow, menuPattern);
+    InitHierarchicalParameters(props->GetShowInSubWindowValue(false), menuPattern);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         InitializePaddingAPI11(layoutWrapper);
         ModifySubMenuWrapper(layoutWrapper);
@@ -48,12 +47,14 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     const auto& geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    OffsetF position = MenuLayoutAvoidAlgorithm(parentMenuItem, size);
+    auto parentItemProps = parentMenuItem->GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(parentItemProps);
+    auto expandingMode = parentItemProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    OffsetF position = MenuLayoutAvoidAlgorithm(parentMenuItem, size, expandingMode == SubMenuExpandingMode::STACK);
     geometryNode->SetMarginFrameOffset(position);
     if (parentMenuItem) {
         auto parentPattern = parentMenuItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(parentPattern);
-        auto topLeftPoint = position;
         auto bottomRightPoint = position + OffsetF(size.Width(), size.Height());
 
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -71,7 +72,7 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 wrapperOffset = OffsetF(newOffsetX, newOffsetY);
             }
         }
-        parentPattern->AddHoverRegions(topLeftPoint + wrapperOffset, bottomRightPoint + wrapperOffset);
+        parentPattern->AddHoverRegions(position + wrapperOffset, bottomRightPoint + wrapperOffset);
     }
 
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
@@ -79,12 +80,13 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     child->Layout();
 }
 
-OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size)
+OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem,
+    const SizeF& size, bool stacked)
 {
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, NG::OffsetF(0.0f, 0.0f));
     auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
-    position_ = GetSubMenuPosition(parentMenuItem);
+    position_ = GetSubMenuPosition(parentMenuItem, stacked);
     float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
     x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
     float y = 0.0f;
@@ -99,10 +101,23 @@ OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>
     return NG::OffsetF(x, y);
 }
 
-OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem)
+OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem, bool stacked)
 {
-    auto parentFrameSize = parentMenuItem->GetGeometryNode()->GetMarginFrameSize();
-    auto position = parentMenuItem->GetPaintRectOffset() + OffsetF(parentFrameSize.Width(), 0.0);
+    auto parentItemFrameSize = parentMenuItem->GetGeometryNode()->GetMarginFrameSize();
+    OffsetF position;
+    if (stacked) {
+        auto parentItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+        if (parentItemPattern != nullptr) {
+            auto parentMenu = parentItemPattern->GetMenu();
+            position = parentMenu == nullptr
+                ? parentMenuItem->GetPaintRectOffset() + OffsetF(parentItemFrameSize.Width(), 0.0)
+                : OffsetF(parentMenu->GetPaintRectOffset().GetX(),
+                    parentMenuItem->GetPaintRectOffset().GetY() +
+                    parentItemFrameSize.Height()); // * 0.95
+        }
+    } else {
+        position = parentMenuItem->GetPaintRectOffset() + OffsetF(parentItemFrameSize.Width(), 0.0);
+    }
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
@@ -133,7 +148,7 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& pare
     auto scrollHeight = scrollGeometryNode->GetFrameSize().Height();
     auto bottomOffset = scrollTop + scrollHeight;
     if (parentMenuItem->GetPaintRectOffset().GetY() > bottomOffset) {
-        return scroll->GetPaintRectOffset() + OffsetF(parentFrameSize.Width(), 0.0);
+        return scroll->GetPaintRectOffset() + OffsetF(parentItemFrameSize.Width(), 0.0);
     } else {
         return position;
     }
@@ -180,7 +195,8 @@ float SubMenuLayoutAlgorithm::VerticalLayoutSubMenu(const SizeF& size, float pos
 }
 
 // returns submenu horizontal offset
-float SubMenuLayoutAlgorithm::HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize)
+float SubMenuLayoutAlgorithm::HorizontalLayoutSubMenu(
+    const SizeF& size, float position, const SizeF& menuItemSize)
 {
     float wrapperWidth = wrapperSize_.Width();
     float rightSpace = wrapperWidth - position;

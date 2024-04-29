@@ -72,6 +72,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/components_ng/pattern/text_field/text_input_response_area.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
@@ -244,6 +245,7 @@ void TextInputBase::GetFocus()
 
 class TextInputCursorTest : public TextInputBase {};
 class TextFieldControllerTest : public TextInputBase {};
+class TextFieldResponseAreaTest : public TextInputBase {};
 class TextFieldKeyEventTest : public TextInputBase {};
 class TextFiledAttrsTest : public TextInputBase {};
 class TextFieldUXTest : public TextInputBase {
@@ -4941,6 +4943,67 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction008, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     result = "👨‍👩‍👧‍👦👁️👁️‍🗨️";
     EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: TextFieldResponseArea001
+ * @tc.desc: test password response area show/hide.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldResponseAreaTest, TextFieldResponseArea001, TestSize.Level1)
+{
+    PasswordIcon myIcon =  {
+        .showResult = "1",
+        .hideResult = "2",
+        .showBundleName = "1",
+        .hideBundleName = "2",
+        .showModuleName = "1",
+        .hideModuleName = "2",
+    };
+    CreateTextField(DEFAULT_TEXT, "", [myIcon](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+        model.SetPasswordIcon(myIcon);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+    });
+    auto passwordArea = AceType::MakeRefPtr<PasswordResponseArea>(pattern_, false);
+    passwordArea->InitResponseArea();
+    EXPECT_EQ(passwordArea->GetCurrentSourceInfo()->GetSrc(), "1");
+    passwordArea->SetObscured(true);
+    EXPECT_EQ(passwordArea->GetCurrentSourceInfo()->GetSrc(), "2");
+}
+
+/**
+ * @tc.name: TextFieldResponseArea002
+ * @tc.desc: test change response area not effect response state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldResponseAreaTest, TextFieldResponseArea002, TestSize.Level1)
+{
+    PasswordIcon myIcon =  {
+        .showResult = "1",
+        .hideResult = "2",
+        .showBundleName = "1",
+        .hideBundleName = "2",
+        .showModuleName = "1",
+        .hideModuleName = "2",
+    };
+    CreateTextField(DEFAULT_TEXT, "", [myIcon](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+        model.SetPasswordIcon(myIcon);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+    });
+    RefPtr<TextInputResponseArea> responseArea = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern_);
+    auto convertedArea = AceType::DynamicCast<CleanNodeResponseArea>(responseArea);
+    convertedArea->UpdateCleanNode(true);
+    EXPECT_EQ(convertedArea->IsShow(), true);
+    responseArea = AceType::MakeRefPtr<PasswordResponseArea>(pattern_, true);
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea);
+    passwordArea->InitResponseArea();
+    EXPECT_EQ(passwordArea->GetCurrentSourceInfo()->GetSrc(), "2");
 }
 
 /**

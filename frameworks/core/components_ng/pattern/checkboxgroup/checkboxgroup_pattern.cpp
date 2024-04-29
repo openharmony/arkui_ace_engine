@@ -588,6 +588,7 @@ void CheckBoxGroupPattern::InitializeModifierParam(CheckBoxGroupModifier::Parame
     paintParameters.hoverToTouchDuration = checkBoxTheme->GetHoverToTouchDuration();
     paintParameters.uiStatus = UIStatus::UNSELECTED;
     paintParameters.status = CheckBoxGroupPaintProperty::SelectStatus::NONE;
+    paintParameters.defaultPaddingSize = checkBoxTheme->GetDefaultPaddingSize();
 }
 
 void CheckBoxGroupPattern::UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters)
@@ -644,15 +645,21 @@ void CheckBoxGroupPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto groupManager = GetGroupManager();
+    CHECK_NULL_VOID(groupManager);
     auto parent = host->GetParent();
     while (parent) {
         if (parent->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
-            navId_ = std::to_string(parent->GetId());
+            currentNavId_ = std::to_string(parent->GetId());
+            groupManager->SetLastNavId(currentNavId_);
             UpdateState();
             return;
         }
         parent = parent->GetParent();
     }
+    currentNavId_ = "";
+    groupManager->SetLastNavId(std::nullopt);
+    UpdateState();
 }
 
 std::string CheckBoxGroupPattern::GetGroupNameWithNavId()
@@ -661,7 +668,22 @@ std::string CheckBoxGroupPattern::GetGroupNameWithNavId()
     CHECK_NULL_RETURN(host, "");
     auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_RETURN(eventHub, "");
-    return eventHub->GetGroupName() + navId_;
+    if (currentNavId_.has_value()) {
+        return eventHub->GetGroupName() + currentNavId_.value();
+    }
+    auto groupManager = GetGroupManager();
+    CHECK_NULL_RETURN(groupManager, eventHub->GetGroupName());
+    return eventHub->GetGroupName() + groupManager->GetLastNavId();
+}
+
+RefPtr<GroupManager> CheckBoxGroupPattern::GetGroupManager()
+{
+    auto manager = groupManager_.Upgrade();
+    if (manager) {
+        return manager;
+    }
+    groupManager_ = GroupManager::GetGroupManager();
+    return groupManager_.Upgrade();
 }
 
 void CheckBoxGroupPattern::UpdateCheckBoxStyle()

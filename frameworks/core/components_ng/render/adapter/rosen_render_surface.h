@@ -106,7 +106,7 @@ public:
         queueSize_ = queueSize;
     }
 
-    void DrawBuffer();
+    void DrawBuffer(int32_t width = -1, int32_t height = -1);
 
     void DrawBufferForXComponent(RSCanvas& canvas, float width, float height, float offsetX, float offsetY) override;
 
@@ -115,6 +115,8 @@ public:
     {
         return producerSurface_;
     }
+
+    bool CompareBufferSize(int32_t width, int32_t height, std::shared_ptr<SurfaceBufferNode> surfaceNode);
 #endif
 
     void releaseSurfaceBuffers() override;
@@ -146,6 +148,7 @@ private:
     struct NativeWindow* nativeWindow_ = nullptr;
     sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
     std::queue<std::shared_ptr<SurfaceBufferNode>> availableBuffers_;
+    int32_t failTimes_ = 0;
 #endif
     WeakPtr<NG::RenderContext> renderContext_ = nullptr;
     RefPtr<ExtSurfaceCallbackInterface> extSurfaceCallbackInterface_ = nullptr;

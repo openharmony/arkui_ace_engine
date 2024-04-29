@@ -157,7 +157,6 @@ public:
     RefPtr<MenuPattern> GetMenuPattern(bool needTopMenu = false);
     void UpdateTextNodes();
 
-    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void OnMountToParentDone() override;
 
@@ -189,7 +188,14 @@ private:
 
     void AddSelectIcon(RefPtr<FrameNode>& row);
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
+    void AddExpandIcon(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty);
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
+    void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
+    void UpdateExpandableArea();
+    void BuildEmbeddedMenuItems(RefPtr<UINode>& node, bool needNextLevel = true);
+    RefPtr<UINode> BuildStackSubMenu(RefPtr<UINode>& node);
+    RefPtr<FrameNode> GetClickableArea();
+    void ShowEmbeddedSubMenu(bool hasFurtherExpand);
 
     bool IsDisabled();
     void UpdateDisabledStyle();
@@ -198,8 +204,9 @@ private:
 
     void ShowSubMenu();
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
+    void HideSubMenu();
 
-    OffsetF GetSubMenuPostion(const RefPtr<FrameNode>& targetNode);
+    OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& targetNode);
 
     void AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode);
     void SetAccessibilityAction();
@@ -207,6 +214,10 @@ private:
 
     void RecordChangeEvent() const;
     void ParseMenuRadius(MenuParam& param);
+
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
 
     std::list<TouchRegion> hoverRegions_;
 
@@ -218,6 +229,10 @@ private:
 
     bool isChanged_ = false;
     bool isHovered_ = false;
+    bool isFocused_ = false;
+    bool isFocusShadowSet_ = false;
+    bool isFocusBGColorSet_ = false;
+    bool isExpanded_ = false;
 
     std::function<void()> subBuilderFunc_ = nullptr;
 
@@ -228,6 +243,12 @@ private:
     RefPtr<FrameNode> startIcon_ = nullptr;
     RefPtr<FrameNode> endIcon_ = nullptr;
     RefPtr<FrameNode> selectIcon_ = nullptr;
+    RefPtr<FrameNode> expandIcon_ = nullptr;
+    std::vector<RefPtr<FrameNode>> expandableItems_;
+    bool onTouchEventSet_ = false;
+    bool onHoverEventSet_ = false;
+    bool onKeyEventSet_ = false;
+    bool onClickEventSet_ = false;
 
     Color bgBlendColor_ = Color::TRANSPARENT;
 

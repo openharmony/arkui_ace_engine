@@ -349,6 +349,13 @@ bool SessionWrapperImpl::NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::Key
     return isConsumed;
 }
 
+bool SessionWrapperImpl::NotifyKeyEventAsync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
+{
+    CHECK_NULL_RETURN(session_, false);
+    session_->TransferKeyEventAsync(keyEvent, isPreIme);
+    return true;
+}
+
 bool SessionWrapperImpl::NotifyAxisEventSync(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
 {
     return false;
@@ -557,12 +564,14 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
     if (reason == Rosen::SizeChangeReason::ROTATION) {
-        if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+        if (transaction_.lock()) {
+            transaction = transaction_.lock();
+            transaction_.reset();
+        } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            if (transaction && parentSession && pipelineContext) {
-                transaction->SetDuration(pipelineContext->GetSyncAnimationOption().GetDuration());
-            }
+        }
+        if (transaction && parentSession) {
+            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
@@ -576,7 +585,7 @@ void SessionWrapperImpl::NotifySizeChangeReason(
     auto reason = static_cast<Rosen::SizeChangeReason>(type);
     session_->UpdateSizeChangeReason(reason);
     if (rsTransaction && (type == WindowSizeChangeReason::ROTATION)) {
-        session_->UpdateRect(session_->GetSessionRect(), reason, rsTransaction);
+        transaction_ = rsTransaction;
     }
 }
 

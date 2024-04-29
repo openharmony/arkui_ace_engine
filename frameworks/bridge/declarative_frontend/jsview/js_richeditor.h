@@ -158,6 +158,7 @@ private:
     static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     static void ParseTextAlignParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     bool CheckImageSource(std::string assetSrc);
+    JSRef<JSObject> JSObjectCast(JSRef<JSVal> jsValue);
 
     WeakPtr<RichEditorControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);

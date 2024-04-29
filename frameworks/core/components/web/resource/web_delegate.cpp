@@ -30,6 +30,7 @@
 #include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
@@ -48,10 +49,12 @@
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
+#include "iservice_registry.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
+#include "system_ability_definition.h"
 #include "third_party/icu/icu4c/source/common/unicode/ucnv.h"
 #include "transaction/rs_interfaces.h"
 #include "web_configuration_observer.h"
@@ -1181,10 +1184,13 @@ void WebDelegate::AddJavascriptInterface(const std::string& objectName, const st
                 return;
             }
             if (delegate->nweb_) {
+                // Async methods list is empty
+                std::vector<std::string> asyncMethodList;
                 // webcontroller not support object, so the object_id param assign
                 // error code
                 delegate->nweb_->RegisterArkJSfunction(
-                    objectName, methodList, static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR));
+                    objectName, methodList, asyncMethodList,
+                    static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR));
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebAddJsInterface");
@@ -1794,6 +1800,13 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                                 webCom->GetNativeEmbedGestureEventId(), oldContext);
         onIntelligentTrackingPreventionResultV2_ = useNewPipe ?
             eventHub->GetOnIntelligentTrackingPreventionResultEvent() : nullptr;
+        onRenderProcessNotRespondingV2_ = useNewPipe
+                                              ? eventHub->GetOnRenderProcessNotRespondingEvent()
+                                              : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::
+                                                Create(webCom->GetRenderProcessNotRespondingId(), oldContext);
+        onRenderProcessRespondingV2_ = useNewPipe ? eventHub->GetOnRenderProcessRespondingEvent()
+                                                  : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::
+													Create(webCom->GetRenderProcessRespondingId(), oldContext);
     }
     return true;
 }
@@ -4644,9 +4657,21 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     AccessibilityEvent event;
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto accessibilityManager = context->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
+        webPattern->UpdateFocusedAccessibilityId(accessibilityId);
+        accessibilityManager->UpdateAccessibilityFocusId(context, accessibilityId, true);
+    } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
+        webPattern->UpdateFocusedAccessibilityId();
+        accessibilityManager->UpdateAccessibilityFocusId(context, accessibilityId, false);
+    } else if (eventType == AccessibilityEventType::CHANGE) {
+        auto accessibilityId = accessibilityManager->GetAccessibilityFocusId();
+        webPattern->UpdateFocusedAccessibilityId(accessibilityId);
+    }
     if (accessibilityId <= 0) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_VOID(webPattern);
         auto webNode = webPattern->GetHost();
         CHECK_NULL_VOID(webNode);
         accessibilityId = webNode->GetAccessibilityId();
@@ -5405,6 +5430,13 @@ void WebDelegate::IsNativeType(const double& x, const double& y)
     }
 }
 
+void WebDelegate::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateClippedSelectionBounds(x, y, w, h);
+}
+
 bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
@@ -5469,7 +5501,7 @@ void WebDelegate::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchH
 #endif
 }
 
-bool WebDelegate::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
+bool WebDelegate::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
 #ifdef NG_BUILD
     auto webPattern = webPattern_.Upgrade();
@@ -6253,6 +6285,29 @@ OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() cons
     return copyOption;
 }
 
+bool WebDelegate::OnOpenAppLink(
+    const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
+{
+    if (!callback) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "open app link callback is nullptr");
+        return false;
+    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), url, callback]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto openAppLinkCallback = webPattern->GetOnOpenAppLinkCallback();
+        CHECK_NULL_VOID(openAppLinkCallback);
+        openAppLinkCallback(std::make_shared<WebAppLinkEvent>(url,
+            AceType::MakeRefPtr<WebAppLinkCallbackOhos>(callback)));
+        }, "ArkUIWebOnOpenAppLink");
+    return true;
+}
+
 std::string WebDelegate::GetCanonicalEncodingName(const std::string& alias_name) const
 {
     const char* standards[3] = { "HTML", "MIME", "IANA" };
@@ -6365,5 +6420,60 @@ std::vector<int8_t> WebDelegate::GetWordSelection(const std::string& text, int8_
     std::vector<int8_t> vec = { -1, -1 };
     CHECK_NULL_RETURN(webPattern, vec);
     return webPattern->GetWordSelection(text, offset);
+}
+
+void WebDelegate::OnRenderProcessNotResponding(
+    const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), jsStack, pid, reason]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onRenderProcessNotRespondingV2 = delegate->onRenderProcessNotRespondingV2_;
+            if (onRenderProcessNotRespondingV2) {
+                onRenderProcessNotRespondingV2(std::make_shared<RenderProcessNotRespondingEvent>(
+                    jsStack, pid, static_cast<int>(reason)));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebHandleRenderProcessNotResponding");
+}
+
+void WebDelegate::OnRenderProcessResponding()
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onRenderProcessRespondingV2 = delegate->onRenderProcessRespondingV2_;
+            if (onRenderProcessRespondingV2) {
+                onRenderProcessRespondingV2(std::make_shared<RenderProcessRespondingEvent>());
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebHandleRenderProcessResponding");
+}
+
+void WebDelegate::OnShowAutofillPopup(
+    const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnShowAutofillPopup(offsetX, offsetY, menu_items);
+}
+
+void WebDelegate::SuggestionSelected(int32_t index)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SuggestionSelected(index);
+}
+
+void WebDelegate::OnHideAutofillPopup()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnHideAutofillPopup();
 }
 } // namespace OHOS::Ace

@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -74,7 +75,11 @@ void TextFieldModelNG::CreateNode(
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
     SetCaretColor(textFieldTheme->GetCursorColor());
+    CaretStyle caretStyle;
+    caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
+    SetCaretStyle(caretStyle);
     AddDragFrameNodeToManager();
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node");
     if (frameNode->IsFirstBuilding()) {
         auto draggable = pipeline->GetDraggable<TextFieldTheme>();
         SetDraggable(draggable);
@@ -94,8 +99,6 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     auto textValue = pattern->GetTextValue();
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "new text:%{public}s, old text:%{public}s", value.value_or("NA").c_str(),
-        textValue.c_str());
     if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
     }
@@ -112,6 +115,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
     ProcessDefaultStyleAndBehaviors(frameNode);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node in c-api");
     return frameNode;
 }
 
@@ -325,6 +329,11 @@ void TextFieldModelNG::SetTextAlign(TextAlign value)
         layoutProperty->UpdateTextAlignChanged(true);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, newValue);
+}
+
+void TextFieldModelNG::SetLineBreakStrategy(LineBreakStrategy value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineBreakStrategy, value);
 }
 
 void TextFieldModelNG::SetMaxLength(uint32_t value)
@@ -1130,6 +1139,14 @@ void TextFieldModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selecti
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectionMenuHidden, selectionMenuHidden, frameNode);
 }
 
+bool TextFieldModelNG::GetSelectionMenuHidden(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, SelectionMenuHidden, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules, frameNode);
@@ -1510,6 +1527,45 @@ void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace:
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, value, frameNode);
 }
 
+void TextFieldModelNG::SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue, frameNode);
+}
+
+void TextFieldModelNG::SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEditChanged(std::move(func));
+}
+
+void TextFieldModelNG::SetInputFilter(FrameNode* frameNode,
+    const std::string& value, const std::function<void(const std::string&)>& onError)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, InputFilter, value, frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnInputFilterError(onError);
+}
+
+void TextFieldModelNG::SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
 void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1526,5 +1582,20 @@ void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
     paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
     paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, Padding, paddings, frameNode);
+}
+
+void TextFieldModelNG::SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEditChanged(std::move(func));
+}
+
+void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetPadding(newPadding);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
 }
 } // namespace OHOS::Ace::NG

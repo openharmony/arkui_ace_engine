@@ -37,6 +37,7 @@ ArkUINodeHandle CreateFrameNode()
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
     node->SetExclusiveEventForChild(true);
+    node->SetIsArkTsFrameNode(true);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
@@ -184,27 +185,59 @@ ArkUI_Int32 GetIdByNodePtr(ArkUINodeHandle node)
     return nodeId;
 }
 
-ArkUI_Float32* GetPositionToParent(ArkUINodeHandle node)
+void GetPositionToParent(ArkUINodeHandle node, ArkUI_Float32* parentOffset)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
+    CHECK_NULL_VOID(currentNode);
     auto currFrameRect = currentNode->GetRectWithRender();
     auto offset = currFrameRect.GetOffset();
-    ArkUI_Float32* ret = new ArkUI_Float32[2];
-    ret[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    ret[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return ret;
+    parentOffset[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    parentOffset[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
 }
 
-ArkUI_Float32* GetPositionToWindow(ArkUINodeHandle node)
+void GetPositionToScreen(ArkUINodeHandle node, ArkUI_Float32* screenPosition)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
+    CHECK_NULL_VOID(currentNode);
+    auto offset = currentNode->GetPositionToScreen();
+    screenPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    screenPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+}
+
+void GetPositionToWindow(ArkUINodeHandle node, ArkUI_Float32* windowOffset)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(currentNode);
     auto offset = currentNode->GetOffsetRelativeToWindow();
-    ArkUI_Float32* ret = new ArkUI_Float32[2];
-    ret[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
-    ret[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
-    return ret;
+    windowOffset[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    windowOffset[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+}
+
+void GetPositionToParentWithTransform(ArkUINodeHandle node, ArkUI_Float32* parentPosition)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto offset = currentNode->GetPositionToParentWithTransform();
+    parentPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    parentPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+}
+
+void GetPositionToScreenWithTransform(ArkUINodeHandle node, ArkUI_Float32* screenPosition)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto offset = currentNode->GetPositionToScreenWithTransform();
+    screenPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    screenPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+}
+
+void GetPositionToWindowWithTransform(ArkUINodeHandle node, ArkUI_Float32* windowPosition)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto offset = currentNode->GetPositionToWindowWithTransform();
+    windowPosition[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+    windowPosition[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
 }
 
 ArkUI_Float32* GetMeasuredSize(ArkUINodeHandle node)
@@ -338,9 +371,10 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
     static const ArkUIFrameNodeModifier modifier = { IsModifiable, CreateFrameNode, InvalidateInFrameNode,
         AppendChildInFrameNode, InsertChildAfterInFrameNode, RemoveChildInFrameNode, ClearChildrenInFrameNode,
         GetChildrenCount, GetChild, GetFirst, GetNextSibling, GetPreviousSibling, GetParent, GetIdByNodePtr,
-        GetPositionToParent, GetPositionToWindow, GetMeasuredSize, GetLayoutPosition, GetInspectorId, GetNodeType,
-        IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId, GetFrameNodeByKey,
-        PropertyUpdate, GetLast };
+        GetPositionToParent, GetPositionToScreen, GetPositionToWindow, GetPositionToParentWithTransform,
+        GetPositionToScreenWithTransform, GetPositionToWindowWithTransform, GetMeasuredSize, GetLayoutPosition,
+        GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId,
+        GetFrameNodeByKey, PropertyUpdate, GetLast };
     return &modifier;
 }
 } // namespace NodeModifier

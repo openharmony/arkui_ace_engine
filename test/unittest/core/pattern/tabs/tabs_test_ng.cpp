@@ -271,7 +271,7 @@ HWTEST_F(TabsTestNg, InitSurfaceChangedCallback001, TestSize.Level1)
      * @tc.expected: Nothing happend
      */
     func(100.f, 100.f, TABS_WIDTH, TABS_HEIGHT, WindowSizeChangeReason::TRANSFORM);
-    EXPECT_EQ(tabBarPattern_->windowSizeChangeReason_, WindowSizeChangeReason::ROTATION);
+    EXPECT_EQ(tabBarPattern_->windowSizeChangeReason_, WindowSizeChangeReason::TRANSFORM);
 }
 
 /**

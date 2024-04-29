@@ -79,6 +79,8 @@ public:
             theme->innerBorderWidth_ = pattern->GetAttr<double>("menu_inner_border_width", 1.0);
             theme->innerBorderRadius_ = pattern->GetAttr<Dimension>("menu_inner_border_radius", 0.0_vp);
             theme->innerBorderColor_ = pattern->GetAttr<Color>("menu_inner_border_color", Color::TRANSPARENT);
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("menu_border_width", 0.0_vp);
+            theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::TRANSPARENT);
             theme->filterAnimationDuration_ = 250;
             theme->previewAnimationDuration_ = 300;
             theme->previewBeforeAnimationScale_ = 0.95f;
@@ -239,6 +241,16 @@ public:
         return innerBorderColor_;
     }
 
+    Color GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    Dimension GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -271,6 +283,8 @@ private:
     double innerBorderWidth_ = 1.0f;
     Dimension innerBorderRadius_;
     Color innerBorderColor_ = Color::TRANSPARENT;
+    Color borderColor_ = Color::TRANSPARENT;
+    Dimension borderWidth_;
 };
 
 } // namespace OHOS::Ace::NG

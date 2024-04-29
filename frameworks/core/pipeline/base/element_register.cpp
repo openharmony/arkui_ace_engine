@@ -142,14 +142,14 @@ bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
     return AddReferenced(node->GetId(), node);
 }
 
-bool ElementRegister::RemoveItem(ElementIdType elementId, const std::string& tag)
+bool ElementRegister::RemoveItem(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
         return false;
     }
     auto removed = itemMap_.erase(elementId);
     if (removed) {
-        removedItems_.insert(std::pair(elementId, tag));
+        removedItems_.insert(elementId);
     }
     return removed;
 }

@@ -170,7 +170,7 @@ void JSRichEditor::Create(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto controllerObj = paramObject->GetProperty("controller");
-        if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+        if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSRichEditorController>();
         }
     }
@@ -1034,6 +1034,9 @@ Local<JSValueRef> JSRichEditor::JsKeepEditableState(panda::JsiRuntimeCallInfo* i
 
 void JSRichEditor::CreateJsRichEditorCommonEvent(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
     auto jsTextFunc =
         AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -1142,8 +1145,7 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     } else {
         imageStyle.objectFit = ImageFit::COVER;
     }
-    auto layoutStyleObj = imageAttribute->GetProperty("layoutStyle");
-    auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
+    auto layoutStyleObject = JSObjectCast(imageAttribute->GetProperty("layoutStyle"));
     if (!layoutStyleObject->IsUndefined()) {
         auto marginAttr = layoutStyleObject->GetProperty("margin");
         imageStyle.marginProp = JSRichEditor::ParseMarginAttr(marginAttr);
@@ -1233,11 +1235,10 @@ void JSRichEditorController::ParseJsTextStyle(
         !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.Unit() == DimensionUnit::PERCENT) {
+    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
-        updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
     ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle);
@@ -1284,11 +1285,10 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.Unit() == DimensionUnit::PERCENT) {
+    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
-        updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
     ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle, true);
@@ -1336,8 +1336,7 @@ void JSRichEditorController::ParseTextDecoration(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    auto decorationObj = styleObject->GetProperty("decoration");
-    JSRef<JSObject> decorationObject = JSRef<JSObject>::Cast(decorationObj);
+    auto decorationObject = JSObjectCast(styleObject->GetProperty("decoration"));
     if (!decorationObject->IsUndefined()) {
         JSRef<JSVal> type = decorationObject->GetProperty("type");
         if (!type->IsNull() && !type->IsUndefined()) {
@@ -1352,7 +1351,7 @@ void JSRichEditorController::ParseTextDecoration(
             updateSpanStyle.hasResourceDecorationColor = color->IsObject();
         }
     }
-    if (!updateSpanStyle.updateTextDecorationColor.has_value()) {
+    if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
         updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
         style.SetTextDecorationColor(style.GetTextColor());
     }
@@ -1364,9 +1363,12 @@ void ParseUserGesture(
     if (args.Length() < 2) {
         return;
     }
+    if (!args[1]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args[1]);
     auto gesture = object->GetProperty("gesture");
-    if (!gesture->IsUndefined()) {
+    if (!gesture->IsUndefined() && gesture->IsObject()) {
         auto gestureObj = JSRef<JSObject>::Cast(gesture);
         auto clickFunc = gestureObj->GetProperty("onClick");
         if (clickFunc->IsUndefined() && IsDisableEventVersion()) {
@@ -1437,8 +1439,7 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
         if (!offset->IsNull() && JSContainerBase::ParseJsInt32(offset, imageOffset)) {
             options.offset = imageOffset > 0 ? imageOffset : 0;
         }
-        auto imageStyleObj = imageObject->GetProperty("imageStyle");
-        JSRef<JSObject> imageAttribute = JSRef<JSObject>::Cast(imageStyleObj);
+        auto imageAttribute = JSObjectCast(imageObject->GetProperty("imageStyle"));
         if (!imageAttribute->IsUndefined()) {
             ImageSpanAttribute imageStyle = ParseJsImageSpanAttribute(imageAttribute);
             options.imageAttribute = imageStyle;
@@ -1481,6 +1482,15 @@ bool JSRichEditorController::CheckImageSource(std::string assetSrc)
         }
     }
     return true;
+}
+
+JSRef<JSObject> JSRichEditorController::JSObjectCast(JSRef<JSVal> jsValue)
+{
+    JSRef<JSObject> jsObject;
+    if (!jsValue->IsObject()) {
+        return jsObject;
+    }
+    return JSRef<JSObject>::Cast(jsValue);
 }
 
 ImageSpanOptions JSRichEditorController::CreateJsImageOptions(const JSCallbackInfo& args)
@@ -1553,7 +1563,8 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     }
     TextSpanOptions options;
     std::string spanValue;
-    if (!args[0]->IsEmpty() && args[0]->ToString() != "" && JSContainerBase::ParseJsString(args[0], spanValue)) {
+    if (!args[0]->IsEmpty() && args[0]->IsString() && args[0]->ToString() != ""
+        && JSContainerBase::ParseJsString(args[0], spanValue)) {
         options.value = spanValue;
     } else {
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
@@ -1566,8 +1577,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         if (!offset->IsNull() && JSContainerBase::ParseJsInt32(offset, spanOffset)) {
             options.offset = spanOffset > 0 ? spanOffset : 0;
         }
-        auto styleObj = spanObject->GetProperty("style");
-        JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
+        auto styleObject = JSObjectCast(spanObject->GetProperty("style"));
         updateSpanStyle_.ResetStyle();
         if (!styleObject->IsUndefined()) {
             auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -1582,8 +1592,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
             options.hasResourceFontColor = updateSpanStyle_.hasResourceFontColor;
             options.hasResourceDecorationColor = updateSpanStyle_.hasResourceDecorationColor;
         }
-        auto paraStyle = spanObject->GetProperty("paragraphStyle");
-        auto paraStyleObj = JSRef<JSObject>::Cast(paraStyle);
+        auto paraStyleObj = JSObjectCast(spanObject->GetProperty("paragraphStyle"));
         if (!paraStyleObj->IsUndefined()) {
             struct UpdateParagraphStyle style;
             if (ParseParagraphStyle(paraStyleObj, style)) {
@@ -1626,8 +1635,7 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
         if (!offset->IsNull() && JSContainerBase::ParseJsInt32(offset, spanOffset)) {
             options.offset = spanOffset > 0 ? spanOffset : 0;
         }
-        auto styleObj = spanObject->GetProperty("style");
-        JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
+        auto styleObject = JSObjectCast(spanObject->GetProperty("style"));
         if (!styleObject->IsUndefined()) {
             auto pipelineContext = PipelineBase::GetCurrentContext();
             if (!pipelineContext) {
@@ -1738,6 +1746,9 @@ void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
     }
     SpanOptionBase options;
     {
+        if (!funcValue->IsFunction()) {
+            return;
+        }
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(funcValue));
         CHECK_NULL_VOID(builderFunc);
         ViewStackModel::GetInstance()->NewScope();
@@ -1814,7 +1825,7 @@ void JSRichEditorController::ParseJsSelectionOptions(
     JSRef<JSVal> menuPolicy = placeholderOptionObject->GetProperty("menuPolicy");
     double tempPolicy = 0.0;
     if (!menuPolicy->IsNull() && JSContainerBase::ParseJsDouble(menuPolicy, tempPolicy)) {
-        if (0 == tempPolicy || 1 == tempPolicy || 2 == tempPolicy) { // 0:DEFAULT, 1:NEVER, 2:ALWAYS
+        if (0 == tempPolicy || 1 == tempPolicy || 2 == tempPolicy) { // 0:DEFAULT, 1:HIDE, 2:SHOW
             optionTemp.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
             options = optionTemp;
         }
@@ -2002,13 +2013,13 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
             CalcDimension height;
             JSContainerBase::ParseJsDimensionVp(widthVal, width);
             JSContainerBase::ParseJsDimensionVp(heightVal, height);
-            style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), height.ConvertToPx());
+            style.leadingMargin->size = NG::LeadingMarginSize(width, height);
         } else if (sizeVal->IsUndefined()) {
             std::string resWidthStr;
             if (JSContainerBase::ParseJsString(lm, resWidthStr)) {
                 CalcDimension width;
                 JSContainerBase::ParseJsDimensionVp(lm, width);
-                style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), 0.0);
+                style.leadingMargin->size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()));
             }
         }
     } else if (!lm->IsNull()) {
@@ -2016,7 +2027,7 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         style.leadingMargin = std::make_optional<NG::LeadingMargin>();
         CalcDimension width;
         JSContainerBase::ParseJsDimensionVp(lm, width);
-        style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), 0.0);
+        style.leadingMargin->size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()));
     }
     return true;
 }
@@ -2038,9 +2049,9 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     ImageSpanAttribute imageStyle;
-    auto richEditorTextStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("textStyle"));
-    auto richEditorImageStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("imageStyle"));
-    auto richEditorSymbolSpanStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("symbolStyle"));
+    auto richEditorTextStyle = JSObjectCast(jsObject->GetProperty("textStyle"));
+    auto richEditorImageStyle = JSObjectCast(jsObject->GetProperty("imageStyle"));
+    auto richEditorSymbolSpanStyle = JSObjectCast(jsObject->GetProperty("symbolStyle"));
     updateSpanStyle_.ResetStyle();
     if (!richEditorTextStyle->IsUndefined()) {
         ParseJsTextStyle(richEditorTextStyle, textStyle, updateSpanStyle_);
@@ -2087,7 +2098,7 @@ void JSRichEditorController::UpdateParagraphStyle(const JSCallbackInfo& info)
     if (start == end) {
         return;
     }
-    auto styleObj = JSRef<JSObject>::Cast(object->GetProperty("style"));
+    auto styleObj = JSObjectCast(object->GetProperty("style"));
 
     if (styleObj->IsUndefined()) {
         return;

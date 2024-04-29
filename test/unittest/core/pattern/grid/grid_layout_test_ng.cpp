@@ -14,10 +14,19 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1704,6 +1713,71 @@ HWTEST_F(GridLayoutTestNg, GetEndOffset003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetEndOffset004
+ * @tc.desc: test EndOffset when content < viewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GetEndOffset004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions({ .irregularIndexes = { 1, 5 } });
+        model.SetColumnsGap(Dimension { 5.0f });
+        model.SetRowsGap(Dimension { 5.0f });
+        CreateFixedHeightItems(6, 100.0f);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        // make content smaller than viewport
+        ViewAbstract::SetHeight(CalcLength(700.0f));
+    });
+    auto& info = pattern_->gridLayoutInfo_;
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    // line height + gap = 105
+    for (int i = 0; i < 160; ++i) {
+        UpdateCurrentOffset(-50.0f);
+        EXPECT_EQ(pattern_->GetEndOffset(), info.startMainLineIndex_ * 105.0f);
+    }
+    EXPECT_LE(info.currentOffset_, -1000.0f);
+    EXPECT_GE(info.startMainLineIndex_, 3);
+}
+
+/**
+ * @tc.name: TestChildrenUpdate001
+ * @tc.desc: Test updating existing children and adding children
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, TestChildrenUpdate001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateFixedHeightItems(2, 100.0f);
+        model.SetLayoutOptions({});
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    });
+    auto& info = pattern_->gridLayoutInfo_;
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    EXPECT_FALSE(pattern_->irregular_);
+    for (int i = 0; i < 2; ++i) {
+        frameNode_->ChildrenUpdatedFrom(i);
+        frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        FlushLayoutTask(frameNode_);
+        EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, 0));
+        EXPECT_EQ(GetChildOffset(frameNode_, 1), OffsetF(GRID_WIDTH / 4.0f, 0));
+        const decltype(info.gridMatrix_) cmp = { { 0, { { 0, 0 }, { 1, 1 } } } };
+        EXPECT_EQ(info.gridMatrix_, cmp);
+        EXPECT_EQ(info.lineHeightMap_.size(), 1);
+    }
+
+    AddFixedHeightItems(3, 100.0f);
+    frameNode_->ChildrenUpdatedFrom(2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    const decltype(info.gridMatrix_) cmp2 = { { 0, { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 } } }, { 1, { { 0, 4 } } } };
+    EXPECT_EQ(info.gridMatrix_, cmp2);
+    EXPECT_EQ(info.lineHeightMap_.size(), 2);
+    EXPECT_EQ(GetChildOffset(frameNode_, 4), OffsetF(0.0f, 100.0f));
+}
+
+/**
  * @tc.name: GetVisibleSelectedItems001
  * @tc.desc: Test GetVisibleSelectedItems
  * @tc.type: FUNC
@@ -1720,6 +1794,7 @@ HWTEST_F(GridLayoutTestNg, GetVisibleSelectedItems001, TestSize.Level1)
     });
     GetChildPattern<GridItemPattern>(frameNode_, 1)->SetSelected(true);
     EXPECT_EQ(pattern_->GetVisibleSelectedItems().size(), 1);
+    EXPECT_FALSE(pattern_->irregular_);
 }
 
 /**

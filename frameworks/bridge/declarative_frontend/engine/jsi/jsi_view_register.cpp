@@ -36,6 +36,7 @@
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -1121,7 +1122,13 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
-    windowConfig.UpdateDesignWidthScale(width);
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        width -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
 
     double lpxValue = firstArg->ToNumber(vm)->Value();
     double pxValue = lpxValue * windowConfig.designWidthScale;
@@ -1149,7 +1156,13 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
-    windowConfig.UpdateDesignWidthScale(width);
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        width -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
     
     double pxValue = firstArg->ToNumber(vm)->Value();
     double lpxValue = pxValue / windowConfig.designWidthScale;

@@ -37,6 +37,7 @@ public:
     void SetNewIds(std::list<std::string>&& newIds) override;
     void CreateNewChildStart(const std::string& id) override;
     void CreateNewChildFinish(const std::string& id) override;
+    void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override {};
 };
 } 
 

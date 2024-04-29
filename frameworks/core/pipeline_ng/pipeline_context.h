@@ -283,6 +283,8 @@ public:
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
+    void CheckAndUpdateKeyboardInset() override;
+
     void UpdateSizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
@@ -687,9 +689,13 @@ public:
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
+    void DetachNode(RefPtr<UINode> uiNode);
+
     void CheckNeedUpdateBackgroundColor(Color& color);
+
     bool CheckNeedDisableUpdateBackgroundImage();
 
+    void ChangeDarkModeBrightness(bool isFocus) override;
     void SetLocalColorMode(ColorMode colorMode)
     {
         auto localColorModeValue = static_cast<int32_t>(colorMode);
@@ -701,6 +707,17 @@ public:
         ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
         return colorMode;
     }
+
+    void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
+    {
+        isFreezeFlushMessage_ = isFreezeFlushMessage;
+    }
+
+    bool IsFreezeFlushMessage() const
+    {
+        return isFreezeFlushMessage_;
+    }
+    bool IsContainerModalVisible() override;
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -872,6 +889,7 @@ private:
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
     bool isTabJustTriggerOnKeyEvent_ = false;
+    bool isWindowHasFocused_ = false;
     bool onShow_ = false;
     bool isNeedFlushMouseEvent_ = false;
     bool isNeedFlushAnimationStartTime_ = false;
@@ -882,6 +900,7 @@ private:
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
+    bool isFreezeFlushMessage_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
@@ -920,6 +939,8 @@ private:
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
+    bool customTitleSettedShow_ = true;
+    bool isShowTitle_ = false;
 };
 } // namespace OHOS::Ace::NG
 

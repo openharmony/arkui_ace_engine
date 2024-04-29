@@ -74,6 +74,8 @@ public:
     virtual void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) = 0;
     virtual void SetImageAnalyzerConfig(void* config) = 0;
     virtual void SetSmoothEdge(float value) = 0;
+    virtual void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) = 0;
+    virtual void SetEnhancedImageQuality(AIImageQuality imageQuality) = 0;
     virtual bool GetIsAnimation() = 0;
 private:
     static std::unique_ptr<ImageModel> instance_;

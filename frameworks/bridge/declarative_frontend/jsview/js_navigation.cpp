@@ -69,38 +69,12 @@ constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
-constexpr char BACKGROUND_COLOR_PROPERTY[] = "backgroundColor";
-constexpr char BACKGROUND_BLUR_STYLE_PROPERTY[] = "backgroundBlurStyle";
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsMiniBar() ? static_cast<int32_t>(NavigationTitleMode::MINI)
                                                               : static_cast<int32_t>(NavigationTitleMode::FULL)));
 }
-
-void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOptions& options)
-{
-    options.color.reset();
-    options.blurStyle.reset();
-    if (!obj->IsObject()) {
-        return;
-    }
-    auto optObj = JSRef<JSObject>::Cast(obj);
-    auto colorProperty = optObj->GetProperty(BACKGROUND_COLOR_PROPERTY);
-    Color color;
-    if (JSViewAbstract::ParseJsColor(colorProperty, color)) {
-        options.color = color;
-    }
-    auto blurProperty = optObj->GetProperty(BACKGROUND_BLUR_STYLE_PROPERTY);
-    if (blurProperty->IsNumber()) {
-        auto blurStyle = blurProperty->ToNumber<int32_t>();
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            options.blurStyle = static_cast<BlurStyle>(blurStyle);
-        }
-    }
-}
-
 } // namespace
 
 void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<AceType>>& items)

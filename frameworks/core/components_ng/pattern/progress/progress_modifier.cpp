@@ -78,7 +78,8 @@ ProgressModifier::ProgressModifier()
       paintShadow_(AceType::MakeRefPtr<PropertyBool>(false)),
       progressStatus_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressStatus::PROGRESSING))),
       isItalic_(AceType::MakeRefPtr<PropertyBool>(false)),
-      smoothEffect_(AceType::MakeRefPtr<PropertyBool>(true))
+      smoothEffect_(AceType::MakeRefPtr<PropertyBool>(true)),
+      useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false))
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -107,7 +108,17 @@ ProgressModifier::ProgressModifier()
 
 void ProgressModifier::onDraw(DrawingContext& context)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     ContentDrawWithFunction(context);
+}
+
+void ProgressModifier::SetUseContentModifier(bool useContentModifier)
+{
+    if (useContentModifier_) {
+        useContentModifier_->Set(useContentModifier);
+    }
 }
 
 void ProgressModifier::SetStrokeWidth(float width)
