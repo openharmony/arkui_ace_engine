@@ -40,7 +40,8 @@ Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
     return SolveBackward(mainGap, info_->currentOffset_, info_->startMainLineIndex_);
 }
 
-GridLayoutRangeSolver::RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpIdx, int32_t jumpLineIdx, float mainGap)
+using RangeInfo = GridLayoutRangeSolver::RangeInfo;
+RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpIdx, int32_t jumpLineIdx, float mainGap)
 {
     auto mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_->axis_);
     /*

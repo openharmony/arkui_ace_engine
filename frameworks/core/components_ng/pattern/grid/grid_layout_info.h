@@ -264,7 +264,7 @@ struct GridLayoutInfo {
      * 1. all irregular lines must have the same height.
      * 2. all regular items must have the same height.
      *
-     * @param options contains irregular item 
+     * @param options contains irregular item.
      * @param endIdx ending item index (exclusive).
      * @param mainGap gap between lines.
      * @return total height of the content.

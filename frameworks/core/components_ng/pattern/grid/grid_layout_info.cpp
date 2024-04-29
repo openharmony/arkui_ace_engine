@@ -361,17 +361,15 @@ float GridLayoutInfo::GetIrregularHeight(float mainGap) const
 {
     // count current number of lines
     // estimate total number of lines based on {known item / total item}
-    // get sum of existing lines
-    // use average to estimate unknown lines
     if (lineHeightMap_.empty() || childrenCount_ == 0) {
         return 0.0f;
     }
-    float lastItem = static_cast<float>(FindEndIdx(lineHeightMap_.rbegin()->first).itemIdx);
-    float itemRatio = (lastItem + 1) / static_cast<float>(childrenCount_);
-    float estTotalLines = std::round(static_cast<float>(gridMatrix_.size()) / itemRatio);
+    int32_t lastKnownLine = lineHeightMap_.rbegin()->first;
+    float itemRatio = static_cast<float>(FindEndIdx(lastKnownLine).itemIdx + 1) / static_cast<float>(childrenCount_);
+    float estTotalLines = std::round(static_cast<float>(lastKnownLine + 1) / itemRatio);
 
-    float knownHeight = GetTotalLineHeight(0.0f);
     auto knownLineCnt = static_cast<float>(lineHeightMap_.size());
+    float knownHeight = synced_ ? avgLineHeight_ * knownLineCnt : GetTotalLineHeight(0.0f);
     float avgHeight = synced_ ? avgLineHeight_ : knownHeight / knownLineCnt;
     return knownHeight + (estTotalLines - knownLineCnt) * avgHeight + (estTotalLines - 1) * mainGap;
 }
