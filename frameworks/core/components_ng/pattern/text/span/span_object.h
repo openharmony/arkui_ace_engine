@@ -36,6 +36,7 @@ enum class SpanType {
     BaselineOffset,
     LetterSpacing,
     TextShadow = 4,
+    LineHeight = 5,
     Gesture = 100,
     ParagraphStyle = 200,
     Image = 300,
@@ -48,14 +49,13 @@ struct SpanParagraphStyle {
     std::optional<WordBreak> wordBreak;
     std::optional<TextOverflow> textOverflow;
     std::optional<NG::LeadingMargin> leadingMargin;
-    std::optional<Dimension> lineHeight;
     std::optional<Dimension> textIndent;
 
     bool Equal(const SpanParagraphStyle& other) const
     {
         return align == other.align && maxLines == other.maxLines && wordBreak == other.wordBreak &&
                textOverflow == other.textOverflow && leadingMargin == other.leadingMargin &&
-               lineHeight == other.lineHeight && textIndent == other.textIndent;
+               textIndent == other.textIndent;
     }
 };
 
@@ -293,6 +293,27 @@ private:
     void RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const;
 
     SpanParagraphStyle paragraphStyle_;
+};
+
+class LineHeightSpan : public SpanBase {
+    DECLARE_ACE_TYPE(LineHeightSpan, SpanBase);
+
+public:
+    LineHeightSpan() = default;
+    explicit LineHeightSpan(Dimension lineHeight);
+    LineHeightSpan(Dimension lineHeight, int32_t start, int32_t end);
+    Dimension GetLineHeight() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    void RemoveLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+
+    Dimension lineHeight_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SPAN_OBJECT_H
