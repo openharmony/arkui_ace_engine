@@ -552,7 +552,7 @@ private:
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     bool DialogInMapHoldingFocus();
-    void PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn);
+    void PlayKeyboardTransition(const RefPtr<FrameNode>& customKeyboard, bool isTransitionIn);
     void FireNavigationStateChange(bool show, const RefPtr<UINode>& node = nullptr);
     RefPtr<FrameNode> GetModalNodeInStack(std::stack<WeakPtr<FrameNode>>& stack);
     void PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn);
