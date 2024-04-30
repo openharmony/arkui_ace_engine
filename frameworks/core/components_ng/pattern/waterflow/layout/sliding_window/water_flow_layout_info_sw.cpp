@@ -316,4 +316,26 @@ bool WaterFlowLayoutInfoSW::ItemCloseToView(int32_t idx) const
     using std::abs, std::min;
     return min(abs(idx - endIdx), abs(idx - startIdx)) < endIdx - startIdx + 1;
 }
+
+void WaterFlowLayoutInfoSW::ClearDataFrom(int32_t idx, float mainGap)
+{
+    for (auto it = idxToLane_.begin(); it != idxToLane_.end();) {
+        if (it->first >= idx) {
+            it = idxToLane_.erase(it); // Erase and get the iterator to the next element
+        } else {
+            ++it; // Move to the next element
+        }
+    }
+    for (auto& lane : lanes_) {
+        while (!lane.items_.empty()) {
+            if (lane.items_.back().idx >= idx) {
+                lane.endPos -= lane.items_.back().mainSize + mainGap;
+                lane.items_.pop_back();
+            } else {
+                lane.endPos = std::max(lane.endPos, lane.startPos);
+                break;
+            }
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

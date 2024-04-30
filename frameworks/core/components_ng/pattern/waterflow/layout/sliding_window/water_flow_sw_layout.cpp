@@ -144,20 +144,21 @@ void WaterFlowSWLayout::Init(const SizeF& frameSize)
 void WaterFlowSWLayout::CheckReset()
 {
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
-    if (info_->footerIndex_ == 0) {
-        // convert children node index to item index
-        --updateIdx;
+    if (updateIdx == -1) {
+        return;
     }
-    if (updateIdx != -1) {
-        if (info_->ItemInView(updateIdx)) {
-            info_->align_ = ScrollAlign::START;
-            info_->jumpIndex_ = std::min(info_->startIndex_, itemCnt_ - 1);
-        } else {
-            // this can disable RecoverBack / RecoverFront when the updated item is encountered
-            info_->idxToLane_.erase(updateIdx);
-        }
-        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
+    if (info_->footerIndex_ == 0 && updateIdx == 0) {
+        // footer updated, no need to reset or clear cache
+        return;
     }
+    // convert children node index to item index
+    updateIdx -= (info_->footerIndex_ + 1);
+    info_->ClearDataFrom(updateIdx, mainGap_);
+    if (updateIdx <= info_->startIndex_) {
+        info_->jumpIndex_ = std::min(info_->startIndex_, itemCnt_ - 1);
+        info_->align_ = ScrollAlign::START;
+    }
+    wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
 }
 
 void WaterFlowSWLayout::MeasureOnOffset(float delta)
@@ -389,7 +390,7 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
     if (jumpIdx == LAST_ITEM) {
         jumpIdx = itemCnt_ - 1;
     } else if (jumpIdx == itemCnt_ && info_->footerIndex_ == 0) {
-        // offset to footer
+        // jump to footer
         info_->delta_ = -Infinity<float>();
     }
     overScroll_ = false;
@@ -475,15 +476,15 @@ void WaterFlowSWLayout::AdjustOverScroll()
     if (overScroll_) {
         return;
     }
-    if (Positive(minStart)) {
+    int32_t startIdx = info_->StartIndex();
+    if (startIdx == 0 && Positive(minStart)) {
         ApplyDelta(-minStart);
-    } else if (LessNotEqual(maxEnd, mainLen_)) {
-        bool reachedTop = info_->StartIndex() == 0 && NearZero(info_->DistanceToTop(0, mainGap_));
-        if (reachedTop) {
-            // no room to adjust
-            return;
+    } else if (info_->EndIndex() == itemCnt_ - 1 && LessNotEqual(maxEnd, mainLen_)) {
+        float delta = mainLen_ - maxEnd;
+        if (startIdx == 0)  {
+            delta = std::min(-minStart, delta);
         }
-        ApplyDelta(mainLen_ - maxEnd);
+        ApplyDelta(delta);
     }
 }
 

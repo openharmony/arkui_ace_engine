@@ -128,10 +128,12 @@ public:
      */
     float StartPos() const;
 
+    void ClearDataFrom(int32_t idx, float mainGap);
+
     struct Lane;
     std::vector<Lane> lanes_;
     // mapping of all items previously or currently in lanes_.
-    std::unordered_map<size_t, size_t> idxToLane_;
+    std::unordered_map<int32_t, size_t> idxToLane_;
 
     float delta_ = 0.0f;
     float totalOffset_ = 0.0f; // record total offset when continuously scrolling. Reset when jumped

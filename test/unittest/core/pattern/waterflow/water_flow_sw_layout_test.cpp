@@ -54,6 +54,64 @@ HWTEST_F(WaterFlowSWTest, Regular001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Reset001
+ * @tc.desc: waterFlow children update
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Reset001, TestSize.Level1)
+{
+    CreateWithItem([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetFooter(GetDefaultHeaderBuilder());
+    });
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 9);
+    for (int i = 0; i < 5; i++) {
+        frameNode_->RemoveChildAtIndex(6);
+    }
+    frameNode_->ChildrenUpdatedFrom(6);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 4);
+    EXPECT_FALSE(info_->idxToLane_.count(5));
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 200.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 400.0f);
+}
+
+/**
+ * @tc.name: Reset002
+ * @tc.desc: waterFlow children update before startIdx
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
+{
+    CreateWithItem([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetFooter(GetDefaultHeaderBuilder());
+        CreateItem(100);
+    });
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 99);
+    EXPECT_EQ(info_->endIndex_, 109);
+    for (int i = 0; i < 5; i++) {
+        frameNode_->RemoveChildAtIndex(6);
+    }
+    frameNode_->ChildrenUpdatedFrom(6);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 95);
+    EXPECT_EQ(info_->endIndex_, 104);
+    EXPECT_TRUE(info_->offsetEnd_);
+    EXPECT_EQ(GetChildY(frameNode_, 95), -150.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
+}
+
+/**
  * @tc.name: Jump001
  * @tc.desc: waterFlow jump
  * @tc.type: FUNC
