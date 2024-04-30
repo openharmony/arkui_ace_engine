@@ -2430,6 +2430,9 @@ bool TextFieldPattern::FireOnTextChangeEvent()
                 return;
             }
             pattern->ScrollToSafeArea();
+            if (pattern->customKeyboardBuilder_) {
+                pattern->StartTwinkling();
+            }
         },
         TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea");
     return true;
