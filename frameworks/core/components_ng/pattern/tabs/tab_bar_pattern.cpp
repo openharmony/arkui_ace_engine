@@ -156,6 +156,10 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
         }
         if (pattern->tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && pattern->axis_ == Axis::HORIZONTAL &&
             pattern->IsOutOfBoundary()) {
+            auto scrollable = pattern->scrollableEvent_->GetScrollable();
+            if (scrollable) {
+                scrollable->SetCanOverScroll(true);
+            }
             // over scroll in drag update from normal to over scroll.
             float overScroll = 0.0f;
             // over scroll in drag update during over scroll.
@@ -198,6 +202,10 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     auto scrollable = MakeRefPtr<Scrollable>(task, axis);
     scrollable->SetNodeId(host->GetAccessibilityId());
     scrollable->Initialize(host->GetContextRefPtr());
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto property = scrollable->GetSpringProperty();
+    renderContext->AttachNodeAnimatableProperty(property);
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
     scrollableEvent_->GetScrollable()->SetEdgeEffect(EdgeEffect::SPRING);
