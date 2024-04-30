@@ -341,7 +341,7 @@ void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(
     const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand)
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, ERROR_NULL_POINTER);
+    CHECK_NULL_VOID(textFieldPattern);
     bool isPopup = false;
     if (privateCommand.find(AUTO_FILL_PARAMS_USERNAME) != privateCommand.end()) {
         auto userName = privateCommand.find(AUTO_FILL_PARAMS_USERNAME);
@@ -359,7 +359,7 @@ void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(
         textFieldPattern->SetAutoFillOtherAccount(true);
         textFieldPattern->ProcessAutoFill(isPopup, true);
     } else {
-        TAG_LOW(AceLogTag::ACE_AUTO_FILL, "invalid autofill data privateCommand");
+        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "invalid autofill data privateCommand");
     }
 }
 
