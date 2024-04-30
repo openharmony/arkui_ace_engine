@@ -939,6 +939,42 @@ struct ArkUIContext {
     ArkUI_Int32 id;
 };
 
+enum ArkUISwiperIndicatorType {
+    DOT,
+    DIGIT,
+};
+
+struct ArkUIOptionalFloat {
+    ArkUI_Int32 isSet;
+    ArkUI_Float32 value;
+};
+
+struct ArkUIOptionalInt {
+    ArkUI_Int32 isSet;
+    ArkUI_Int32 value;
+};
+
+struct ArkUIOptionalUint {
+    ArkUI_Int32 isSet;
+    ArkUI_Uint32 value;
+};
+
+struct ArkUISwiperIndicator {
+    ArkUISwiperIndicatorType type;
+    ArkUI_Int32 dimUnit;
+    ArkUIOptionalFloat dimLeft;
+    ArkUIOptionalFloat dimTop;
+    ArkUIOptionalFloat dimRight;
+    ArkUIOptionalFloat dimBottom;
+    ArkUIOptionalFloat itemWidth;
+    ArkUIOptionalFloat itemHeight;
+    ArkUIOptionalFloat selectedItemWidth;
+    ArkUIOptionalFloat selectedItemHeight;
+    ArkUIOptionalInt maskValue;
+    ArkUIOptionalUint colorValue;
+    ArkUIOptionalUint selectedColorValue;
+};
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -1591,6 +1627,8 @@ struct ArkUIImageModifier {
     void (*setImageResizable)(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
         ArkUI_Float32 right, ArkUI_Float32 bottom);
     void (*getImageResizable)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 size);
+    ArkUI_Int32 (*getFitOriginalSize)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getFillColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {
@@ -1774,6 +1812,10 @@ struct ArkUISwiperModifier {
     void (*resetSwiperNestedScroll)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperNestedScroll)(ArkUINodeHandle node);
     void (*setSwiperToIndex)(ArkUINodeHandle node, ArkUI_Int32* values);
+    ArkUI_Float32 (*getSwiperPrevMargin)(ArkUINodeHandle node, ArkUI_Int32 unit);
+    ArkUI_Float32 (*getSwiperNextMargin)(ArkUINodeHandle node, ArkUI_Int32 unit);
+    void (*setSwiperIndicatorStyle)(ArkUINodeHandle node, ArkUISwiperIndicator* swiperIndicator);
+    void (*getSwiperIndicator)(ArkUINodeHandle node, ArkUISwiperIndicator* swiperIndicator);
 };
 
 struct ArkUISwiperControllerModifier {

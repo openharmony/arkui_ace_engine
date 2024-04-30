@@ -34,6 +34,7 @@ struct ArkUI_Node {
     void* extraCustomData = nullptr;
     ArkUI_LengthMetricUnit lengthMetricUnit = ARKUI_LENGTH_METRIC_UNIT_DEFAULT;
     void* eventListeners = nullptr;
+    void* swiperIndicator = nullptr;
 };
 
 struct ArkUI_Context {

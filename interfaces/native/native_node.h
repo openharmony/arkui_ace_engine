@@ -1984,6 +1984,28 @@ typedef enum {
      */
     NODE_IMAGE_RENDER_MODE,
     /**
+     * @brief 设置图片的显示尺寸是否跟随图源尺寸，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32，设置图片的显示尺寸是否跟随图源尺寸，1表示跟随，0表示不跟随，默认值为0。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32，1表示图片的显示尺寸跟随图源尺寸，0表示图片的显示尺寸不跟随图源尺寸。\n
+     *
+     */
+    NODE_IMAGE_FIT_ORIGINAL_SIZE,
+    /**
+     * @brief 设置填充颜色，设置后填充颜色会覆盖在图片上，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：填充色数值，0xargb格式，形如 0xFFFF0000 表示红色。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：填充色数值，0xargb格式。\n
+     *
+     */
+    NODE_IMAGE_FILL_COLOR,
+    /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4113,6 +4135,39 @@ typedef enum {
     * .value[0].i32: number of cached items in the swiper adapter. \n
     */
     NODE_SWIPER_CACHED_COUNT,
+
+    /**
+     * @brief 设置 Swiper 组件的前边距，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：前边距数值，单位为vp，默认值为0。 \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：前边距数值，单位为vp。
+     */
+    NODE_SWIPER_PREV_MARGIN,
+
+    /**
+     * @brief 设置 Swiper 组件的后边距，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：后边距数值，单位为vp，默认值为0。 \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：后边距数值，单位为vp。
+     */
+    NODE_SWIPER_NEXT_MARGIN,
+
+    /**
+     * @brief 设置 Swiper 组件的导航指示器类型，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：设置导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
+     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
+     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
+     *
+     */
+    NODE_SWIPER_INDICATOR,
 
     /**
     * @brief Set the nested scrolling mode for the Swiper component and parent component.
