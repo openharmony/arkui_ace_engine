@@ -182,8 +182,8 @@ void MenuItemPattern::OnModifyDone()
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         MarginProperty margin;
-        auto defaultMargin = CalcLength(Dimension(0.0));
-        auto verticalMargin = CalcLength(static_cast<float>(theme->GetMenuItemTopBottomMargin().ConvertToPx()));
+        auto defaultMargin = CalcLength(Dimension(0.0_vp));
+        auto verticalMargin = CalcLength(theme->GetMenuItemTopBottomMargin());
         margin.SetEdges(defaultMargin, defaultMargin, verticalMargin, verticalMargin);
         layoutProp->UpdateMargin(margin);
     }
