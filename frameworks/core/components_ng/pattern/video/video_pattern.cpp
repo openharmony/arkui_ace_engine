@@ -1724,7 +1724,11 @@ void VideoPattern::CreateAnalyzerOverlay()
     auto nailPixelMap = context->GetThumbnailPixelMap();
     CHECK_NULL_VOID(nailPixelMap);
     auto pixelMap = nailPixelMap->GetCropPixelMap(contentRect_);
-    OffsetF contentOffset = {contentRect_.Left(), contentRect_.Top()};
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding  = layoutProperty->CreatePaddingAndBorder();
+    OffsetF contentOffset = { contentRect_.Left() - padding.left.value_or(0),
+                              contentRect_.Top() - padding.top.value_or(0) };
     imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap, contentOffset);
 }
 
