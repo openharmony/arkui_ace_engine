@@ -1281,16 +1281,24 @@ int32_t SetBorderRadius(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
-
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBorderRadius(
-        node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
+    if (node->type == ARKUI_NODE_IMAGE) {
+        fullImpl->getNodeModifiers()->getImageModifier()->setImageBorderRadius(
+            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
+    } else {
+        fullImpl->getNodeModifiers()->getCommonModifier()->setBorderRadius(
+            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetBorderRadius(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->resetBorderRadius(node->uiNodeHandle);
+    if (node->type == ARKUI_NODE_IMAGE) {
+        fullImpl->getNodeModifiers()->getImageModifier()->resetImageBorderRadius(node->uiNodeHandle);
+    } else {
+        fullImpl->getNodeModifiers()->getCommonModifier()->resetBorderRadius(node->uiNodeHandle);
+    }
 }
 
 const ArkUI_AttributeItem* GetBorderRadius(ArkUI_NodeHandle node)
