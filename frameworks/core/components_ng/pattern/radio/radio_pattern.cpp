@@ -672,8 +672,8 @@ void RadioPattern::InitializeParam(
     CHECK_NULL_VOID(radioTheme);
     defaultWidth = radioTheme->GetWidth();
     defaultHeight = radioTheme->GetHeight();
-    horizontalPadding = radioTheme->GetHotZoneHorizontalPadding();
-    verticalPadding = radioTheme->GetHotZoneVerticalPadding();
+    horizontalPadding = radioTheme->GetDefaultPaddingSize();
+    verticalPadding = radioTheme->GetDefaultPaddingSize();
 }
 
 CalcSize RadioPattern::GetChildContentSize()
