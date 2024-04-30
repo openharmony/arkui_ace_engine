@@ -88,6 +88,7 @@ export const defaultTheme = {
         fontFamily: "HarmonyOS Sans",
         normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
         smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
+        defaultFontSize: 14,
     },
     suffixIcon: {
         size: { width: 16, height: 16 },
@@ -665,23 +666,30 @@ export class ChipComponent extends ViewPU {
     }
 
     getLabelFontSize() {
-        try {
-            if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
-                return this.label.fontSize;
+        if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
+            return this.label.fontSize;
+        }
+        else {
+            if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+                try {
+                    resourceManager.getSystemResourceManager()
+                        .getNumberByName((this.theme.label.smallFontSize.params[0]).split('.')[2]);
+                    return this.theme.label.smallFontSize;
+                }
+                catch (x2) {
+                    return this.theme.label.defaultFontSize;
+                }
             }
             else {
-                if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
-                    return resourceManager.getSystemResourceManager()
-                        .getNumberByName((this.theme.label.smallFontSize.params[0]).split('.')[2]);
-                }
-                else {
-                    return resourceManager.getSystemResourceManager()
+                try {
+                    resourceManager.getSystemResourceManager()
                         .getNumberByName((this.theme.label.normalFontSize.params[0]).split('.')[2]);
+                    return this.theme.label.normalFontSize;
+                }
+                catch (w2) {
+                    return this.theme.label.defaultFontSize;
                 }
             }
-        }
-        catch (s3) {
-            return 0;
         }
     }
 

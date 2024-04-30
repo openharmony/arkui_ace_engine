@@ -92,6 +92,7 @@ interface LabelTheme {
   fontFamily: string;
   normalMargin: Margin;
   smallMargin: Margin;
+  defaultFontSize: Dimension;
 }
 
 interface ChipNodeOpacity {
@@ -150,6 +151,7 @@ export const defaultTheme: ChipTheme = {
     fontFamily: "HarmonyOS Sans",
     normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
     smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
+    defaultFontSize: 14,
   },
   suffixIcon: {
     size: { width: 16, height: 16 },
@@ -268,23 +270,27 @@ export struct ChipComponent {
   }
 
   private getLabelFontSize(): Dimension {
-    try {
-      if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
-        return this.label.fontSize
-      } else {
-        if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
-          return resourceManager.getSystemResourceManager()
+    if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
+      return this.label.fontSize
+    } else {
+      if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+        try {
+          resourceManager.getSystemResourceManager()
             .getNumberByName((((this.theme.label.smallFontSize as Resource).params as string[])[0]).split('.')[2])
-        } else {
-          return resourceManager.getSystemResourceManager()
+          return this.theme.label.smallFontSize
+        } catch (error) {
+          return this.theme.label.defaultFontSize
+        }
+      } else {
+        try {
+          resourceManager.getSystemResourceManager()
             .getNumberByName((((this.theme.label.normalFontSize as Resource).params as string[])[0]).split('.')[2])
+          return this.theme.label.normalFontSize
+        } catch (error) {
+          return this.theme.label.defaultFontSize
         }
       }
     }
-    catch (error) {
-      return 0
-    }
-
   }
 
   private getLabelFontColor(): ResourceColor {
