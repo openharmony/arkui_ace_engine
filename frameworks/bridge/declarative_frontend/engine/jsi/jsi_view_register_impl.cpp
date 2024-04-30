@@ -816,6 +816,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "RichEditor", JSRichEditor::JSBind },
     { "RichEditorController", JSRichEditorController::JSBind },
+    { "RichEditorStyledStringController", JSRichEditorStyledStringController::JSBind },
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
     { "SymbolGlyph", JSSymbol::JSBind },
@@ -867,6 +868,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
 #endif
 #endif
     JSRichEditorController::JSBind(globalObj);
+    JSRichEditorStyledStringController::JSBind(globalObj);
     JSTextController::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
@@ -978,6 +980,7 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 #endif
     } else if ((*func).first == V2::RICH_EDITOR_ETS_TAG) {
         JSRichEditorController::JSBind(globalObj);
+        JSRichEditorStyledStringController::JSBind(globalObj);
     } else if ((*func).first == V2::TEXT_ETS_TAG) {
         JSTextController::JSBind(globalObj);
     }

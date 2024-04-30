@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_select_overlay.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -86,8 +87,9 @@ enum class RecordType {
     DRAG = 5
 };
 
-class RichEditorPattern : public TextPattern, public ScrollablePattern, public TextInputClient, public Magnifier {
-    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, Magnifier);
+class RichEditorPattern
+    : public TextPattern, public ScrollablePattern, public TextInputClient, public Magnifier, public SpanWatcher {
+    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, Magnifier, SpanWatcher);
 
 public:
     RichEditorPattern();
@@ -215,6 +217,26 @@ public:
         richEditorController_ = controller;
     }
 
+    const RefPtr<RichEditorStyledStringController>& GetRichEditorStyledStringController()
+    {
+        return richEditorStyledStringController_;
+    }
+
+    void SetRichEditorStyledStringController(const RefPtr<RichEditorStyledStringController>& controller)
+    {
+        richEditorStyledStringController_ = controller;
+    }
+
+    void SetStyledStringMode(bool isStyledStringMode)
+    {
+        isStyledStringMode_ = isStyledStringMode;
+    }
+
+    bool IsStyledStringMode()
+    {
+        return isStyledStringMode_;
+    }
+
     long long GetTimestamp() const
     {
         return timestamp_;
@@ -228,6 +250,12 @@ public:
             span->position = static_cast<int32_t>(spanTextLength);
         }
     }
+
+    void SetStyledString(const RefPtr<SpanString>& value);
+    void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) override;
+    void InsertValueInStyledString(const std::string& insertValue);
+    void DeleteBackwardInStyledString(int32_t length);
+    void DeleteForwardInStyledString(int32_t length);
 
     void ResetBeforePaste();
     void ResetAfterPaste();
@@ -888,6 +916,7 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
+    bool isStyledStringMode_ = false;
     bool isTextChange_ = false;
     bool caretVisible_ = false;
     bool caretTwinkling_ = false;
@@ -919,6 +948,8 @@ private:
     struct UpdateSpanStyle updateSpanStyle_;
     CancelableCallback<void()> caretTwinklingTask_;
     RefPtr<RichEditorController> richEditorController_;
+    RefPtr<RichEditorStyledStringController> richEditorStyledStringController_;
+    RefPtr<MutableSpanString> styledString_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
     RectF frameRect_;
     std::optional<struct UpdateSpanStyle> typingStyle_;

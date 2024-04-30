@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
-void RichEditorModelNG::Create()
+void RichEditorModelNG::Create(bool isStyledStringMode)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -35,9 +35,15 @@ void RichEditorModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
-    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-    richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
-
+    richEditorPattern->SetStyledStringMode(isStyledStringMode);
+    isStyledStringMode_ = isStyledStringMode;
+    if (isStyledStringMode) {
+        richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
+        richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));
+    } else {
+        richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+        richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
+    }
     richEditorPattern->InitSurfaceChangedCallback();
     richEditorPattern->InitSurfacePositionChangedCallback();
     richEditorPattern->ClearSelectionMenu();
@@ -60,10 +66,13 @@ void RichEditorModelNG::SetDraggable(bool draggable)
     frameNode->SetDraggable(draggable);
 }
 
-RefPtr<RichEditorControllerBase> RichEditorModelNG::GetRichEditorController()
+RefPtr<RichEditorBaseControllerBase> RichEditorModelNG::GetRichEditorController()
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_RETURN(richEditorPattern, nullptr);
+    if (richEditorPattern->IsStyledStringMode()) {
+        return richEditorPattern->GetRichEditorStyledStringController();
+    }
     return richEditorPattern->GetRichEditorController();
 }
 
@@ -76,6 +85,7 @@ void RichEditorModelNG::SetOnReady(std::function<void()>&& func)
 
 void RichEditorModelNG::SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
 {
+    CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(func));
@@ -90,6 +100,7 @@ void RichEditorModelNG::SetOnSelectionChange(std::function<void(const BaseEventI
 
 void RichEditorModelNG::SetAboutToIMEInput(std::function<bool(const RichEditorInsertValue&)>&& func)
 {
+    CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetAboutToIMEInput(std::move(func));
@@ -97,6 +108,7 @@ void RichEditorModelNG::SetAboutToIMEInput(std::function<bool(const RichEditorIn
 
 void RichEditorModelNG::SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func)
 {
+    CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnIMEInputComplete(std::move(func));
@@ -104,6 +116,7 @@ void RichEditorModelNG::SetOnIMEInputComplete(std::function<void(const RichEdito
 
 void RichEditorModelNG::SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func)
 {
+    CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetAboutToDelete(std::move(func));
@@ -111,6 +124,7 @@ void RichEditorModelNG::SetAboutToDelete(std::function<bool(const RichEditorDele
 
 void RichEditorModelNG::SetOnDeleteComplete(std::function<void()>&& func)
 {
+    CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDeleteComplete(std::move(func));

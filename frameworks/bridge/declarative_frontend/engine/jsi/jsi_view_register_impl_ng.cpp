@@ -457,6 +457,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSScopeUtil::JSBind(globalObj);
     JSRichEditor::JSBind(globalObj);
     JSRichEditorController::JSBind(globalObj);
+    JSRichEditorStyledStringController::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);

@@ -270,11 +270,13 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
     UpdateSpansAndSpanMapWithOffsetAfterInsert(start, otherLength, useFrontStyle);
     SplitSpansByNewLine();
     KeepSpansOrder();
+    NotifySpanWatcher();
 }
 
 void MutableSpanString::RemoveString(int32_t start, int32_t length)
 {
     ReplaceString(start, length, "");
+    NotifySpanWatcher();
 }
 
 void MutableSpanString::RemoveSpecialpanText()
@@ -529,5 +531,21 @@ bool MutableSpanString::IsSpeicalNode(int32_t location, SpanType speicalType)
         }
     }
     return false;
+}
+
+void MutableSpanString::SetSpanWatcher(const WeakPtr<SpanWatcher>& watcher)
+{
+    watcher_ = watcher;
+}
+
+void MutableSpanString::NotifySpanWatcher()
+{
+    if (spans_.empty()) {
+        spans_.emplace_back(GetDefaultSpanItem(""));
+    }
+    auto watcher = watcher_.Upgrade();
+    if (watcher) {
+        watcher->UpdateSpanItems(spans_);
+    }
 }
 } // namespace OHOS::Ace
