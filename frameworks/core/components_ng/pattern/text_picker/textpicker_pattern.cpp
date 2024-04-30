@@ -625,7 +625,7 @@ void TextPickerPattern::ProcessCascadeOptions(const std::vector<NG::TextCascadeP
             reOptions.emplace_back(option);
             return ProcessCascadeOptions(options[selecteds_[index]].children, reOptions, index + 1);
         }
-        if (options.size() > 0 && i == options.size() - 1) {
+        if (options.size() > 0 && options.size() == i + 1) {
             option.children = options[0].children;
             reOptions.emplace_back(option);
             return ProcessCascadeOptions(options[0].children, reOptions, index + 1);
@@ -753,7 +753,7 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
     result += std::string(",\"index\":") + "[";
     for (uint32_t i = 0; i < indexs.size(); i++) {
         result += "\"" + std::to_string(indexs[i]);
-        if (indexs.size() > 0 && i != indexs.size() - 1) {
+        if (indexs.size() > 0 && indexs.size() != i + 1) {
             result += "\",";
         } else {
             result += "\"]";
@@ -854,7 +854,7 @@ std::string TextPickerPattern::GetOptionsCascadeStr(
             result += std::string(", \"children\":");
             result += GetOptionsCascadeStr(options[i].children);
         }
-        if (options.size() > 0 && i != options.size() - 1) {
+        if (options.size() > 0 && options.size() != i + 1) {
             result += "},";
         } else {
             result += "}]";
@@ -870,7 +870,7 @@ std::string TextPickerPattern::GetOptionsMultiStrInternal() const
         result += "[";
         for (uint32_t j = 0; j < cascadeOptions_[i].rangeResult.size(); j++) {
             result += "\"" + cascadeOptions_[i].rangeResult[j];
-            if (j != cascadeOptions_[i].rangeResult.size() - 1) {
+            if (j + 1 != cascadeOptions_[i].rangeResult.size()) {
                 result += "\",";
             } else {
                 result += "\"]";

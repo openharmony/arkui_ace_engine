@@ -565,7 +565,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectInternal(const std::vector<NG:
 {
     uint32_t selectedValue = 0;
     for (uint32_t i = 0; i < options.size(); i++) {
-        if ((values.size() > 0 && i > values.size() - 1) || values[i].empty()) {
+        if ((values.size() > 0 && values.size() < i + 1) || values[i].empty()) {
             selectedValues.emplace_back(0);
             continue;
         }
@@ -584,7 +584,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectArrayInternal(
     const std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     for (uint32_t i = 0; i < options.size(); i++) {
-        if (selectedValues.size() > 0 && i > selectedValues.size() - 1) {
+        if (selectedValues.size() > 0 && selectedValues.size() < i + 1) {
             selectedValues.emplace_back(0);
         } else {
             if (selectedValues[i] >= options[i].rangeResult.size()) {
@@ -622,7 +622,7 @@ void JSTextPickerParser::ParseMultiTextArrayValueInternal(
     const std::vector<NG::TextCascadePickerOptions>& options, std::vector<std::string>& values)
 {
     for (uint32_t i = 0; i < options.size(); i++) {
-        if (values.size() > 0 && i > values.size() - 1) {
+        if (values.size() > 0 && values.size() < i + 1) {
             if (options[i].rangeResult.size() > 0) {
                 values.emplace_back(options[i].rangeResult[0]);
             } else {
@@ -778,7 +778,8 @@ void JSTextPickerParser::SetSelectedValues(std::vector<uint32_t>& selectedValues
     if (!isHasSelectAttr && selectedValues[index] == 0 && !values[index].empty()) {
         auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
         if (valueIterator != resultStr.end()) {
-            selectedValues[index] = std::distance(resultStr.begin(), valueIterator);
+            auto localDistance = std::distance(resultStr.begin(), valueIterator);
+            selectedValues[index] = localDistance > 0 ? static_cast<uint32_t>(localDistance) : 0;
         }
     }
 }
@@ -1077,7 +1078,7 @@ void JSTextPicker::SetSelectedInternal(
     uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     for (uint32_t i = 0; i < count; i++) {
-        if (selectedValues.size() > 0 && i > selectedValues.size() - 1) {
+        if (selectedValues.size() > 0 && selectedValues.size() < i + 1) {
             selectedValues.emplace_back(0);
         } else {
             if (selectedValues[i] >= options[i].rangeResult.size()) {
