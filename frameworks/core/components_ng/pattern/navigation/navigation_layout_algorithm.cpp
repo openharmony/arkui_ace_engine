@@ -469,6 +469,10 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         RangeCalculation(hostNode, navigationLayoutProperty);
     }
     if (size.Width() == 0.0f) {
+        auto layoutAlgorithm = layoutWrapper->GetLayoutAlgorithm();
+        if (layoutAlgorithm) {
+            layoutAlgorithm->SetSkipLayout();
+        }
         return;
     }
     GetRange(hostNode);
