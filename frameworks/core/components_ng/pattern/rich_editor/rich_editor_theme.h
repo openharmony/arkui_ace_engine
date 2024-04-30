@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr Color DEFAULT_TEXT_COLOR = Color(0xe5000000);
+constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
 } // namespace
 
 class RichEditorTheme : public virtual Theme {
@@ -68,6 +69,8 @@ public:
             }
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
+            theme->dragBackgroundColor_ =
+                pattern->GetAttr<Color>("drag_background_color", Color::WHITE).ChangeOpacity(DRAG_BACKGROUND_OPACITY);
             theme->defaultCaretHeight_ = pattern->GetAttr<Dimension>("default_caret_height", 18.5_vp);
             theme->disabledAlpha_ = static_cast<float>(pattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
             theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color(0x99000000));
@@ -140,6 +143,11 @@ public:
         return textStyle_;
     }
 
+    const Color& GetDragBackgroundColor() const
+    {
+        return dragBackgroundColor_;
+    }
+
 protected:
     RichEditorTheme() = default;
 
@@ -157,6 +165,7 @@ private:
     Color placeholderColor_ = Color(0x99000000);
     Color caretColor_ = Color(0xff007dff);
     Color selectedBackgroundColor_ = Color(0xff007dff);
+    Color dragBackgroundColor_ = Color::WHITE;
     bool richeditorShowHandle_ = false;
 };
 } // namespace OHOS::Ace::NG
