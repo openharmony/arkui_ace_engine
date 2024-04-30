@@ -79,7 +79,6 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
 
 void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     OptionalSizeF frameSize;
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     auto frameNode = layoutWrapper->GetHostNode();
@@ -100,34 +99,54 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentHeight += counterSize.Height();
     }
 
+    auto finalWidth = 0;
     if (pattern->IsNormalInlineState() && pattern->HasFocus()) {
-        frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY);
+        finalWidth = LessOrEqual(contentWidth, 0) ? 0 :
+            contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY;
+        frameSize.SetWidth(finalWidth);
         frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY);
     } else {
         // The width after MeasureContent is already optimal, but the height needs to be constrained in Measure.
-        frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum());
-        auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_VOID(textFieldLayoutProperty);
-        auto contentConstraint = layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
-        auto textFieldContentConstraint =
-            CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
-        if (textFieldContentConstraint.selfIdealSize.Height().has_value()) {
-            frameSize.SetHeight(
-                textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
-        } else {
-            frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingAndBorderSum());
-        }
-        // Height is constrained by the CalcLayoutConstraint.
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
-        } else {
-            auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(frameSize,
-                layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
-                layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
-            frameSize.SetHeight(finalSize.Height());
-        }
+        finalWidth = LessOrEqual(contentWidth, 0) ? 0 : contentWidth + pattern->GetHorizontalPaddingAndBorderSum();
+        frameSize.SetWidth(finalWidth);
+        ConstraintHeight(layoutWrapper, frameSize, contentHeight);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+}
+
+void TextAreaLayoutAlgorithm::ConstraintHeight(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize,
+    float contentHeight)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto contentConstraint = layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
+    auto textFieldContentConstraint =
+        CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
+    if (textFieldContentConstraint.selfIdealSize.Height().has_value()) {
+        if (LessOrEqual(textFieldContentConstraint.maxSize.Height(), 0)) {
+            frameSize.SetHeight(textFieldContentConstraint.maxSize.Height());
+        } else {
+            frameSize.SetHeight(
+                textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
+        }
+    } else {
+        frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingAndBorderSum());
+    }
+
+    // Height is constrained by the CalcLayoutConstraint.
+    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    } else {
+        auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(frameSize,
+            layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+            layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+        frameSize.SetHeight(finalSize.Height());
+    }
 }
 
 void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
