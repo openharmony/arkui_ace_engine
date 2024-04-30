@@ -967,4 +967,22 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
     size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
     size.SetHeight(std::min(pickerContentSize.Height(), size.Height()));
 }
+
+void TextPickerPattern::SetCanLoop(bool isLoop)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->SetCanLoop(isLoop);
+    }
+}
 } // namespace OHOS::Ace::NG
