@@ -14,8 +14,11 @@
  */
 
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {
+
+constexpr float DEFAULT_OPACITY = 0.95f;
 
 void DragDropFuncWrapper::SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId)
 {
@@ -36,6 +39,30 @@ void DragDropFuncWrapper::DecideWhetherToStopDragging(
     CHECK_NULL_VOID(manager);
     if (!manager->IsDraggingPressed(currentPointerId)) {
         manager->OnDragEnd(pointerEvent, extraParams);
+    }
+}
+
+
+void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
+    std::function<void(WeakPtr<FrameNode>)> applyOnNodeSync, DragPreviewOption& option)
+{
+    // create one temporary frame node for receiving the value from the modifier
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_VOID(imageNode);
+
+    // execute the modifier
+    CHECK_NULL_VOID(applyOnNodeSync);
+    applyOnNodeSync(AceType::WeakClaim(AceType::RawPtr(imageNode)));
+
+    // get values from the temporary frame node
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto opacity = imageContext->GetOpacity();
+    if (opacity.has_value()) {
+        option.options.opacity = opacity.value();
+    } else {
+        option.options.opacity = DEFAULT_OPACITY;
     }
 }
 
