@@ -388,6 +388,9 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
 {
     if (jumpIdx == LAST_ITEM) {
         jumpIdx = itemCnt_ - 1;
+    } else if (jumpIdx == itemCnt_ && info_->footerIndex_ == 0) {
+        // offset to footer
+        info_->delta_ = -Infinity<float>();
     }
     overScroll_ = false;
 

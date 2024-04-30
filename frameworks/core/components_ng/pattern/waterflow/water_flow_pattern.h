@@ -100,6 +100,15 @@ public:
     void SetAccessibilityAction();
 
     void OnAnimateStop() override;
+    /**
+     * @brief LayoutMode::SLIDING_WINDOW doesn't support scrollTo and animateTo
+     */
+    void ScrollTo(float position) override;
+    /**
+     * @brief LayoutMode::SLIDING_WINDOW doesn't support animateTo
+     */
+    void AnimateTo(
+        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll) override;
 
     void ScrollPage(bool reverse, bool smooth = false) override;
 

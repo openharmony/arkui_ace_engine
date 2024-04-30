@@ -192,4 +192,117 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset003, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->firstIdx(), 19);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
 }
+
+/**
+ * @tc.name: onWillScrollAndOnDidScroll001
+ * @tc.desc: Test onScroll event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll001, TestSize.Level1)
+{
+    bool isOnScrollCallBack = false;
+    bool isOnWillScrollCallBack = false;
+    bool isOnDidScrollCallBack = false;
+
+    CalcDimension offsetY;
+    ScrollState scrollState = ScrollState::IDLE;
+    auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](CalcDimension offset, ScrollState state) {
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
+    };
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state) {
+        willScrollOffset = offset;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+    };
+    Dimension didScrollOffset;
+    ScrollState didScrollState = ScrollState::IDLE;
+    auto onDidScroll = [&didScrollOffset, &didScrollState, &isOnDidScrollCallBack](
+                           Dimension offset, ScrollState state) {
+        didScrollOffset = offset;
+        didScrollState = state;
+        isOnDidScrollCallBack = true;
+    };
+
+    CreateWithItem([onScroll](WaterFlowModelNG model) { model.SetOnScroll(onScroll); });
+    eventHub_->SetOnWillScroll(std::move(onWillScroll));
+    eventHub_->SetOnDidScroll(std::move(onDidScroll));
+
+    /**
+     * @tc.steps: step1. finger moves down at top
+     * @tc.expected: Trigger onWillScroll and onDidScroll with SCROLL state
+     */
+    pattern_->ScrollTo(ITEM_HEIGHT * 5);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnWillScrollCallBack);
+    EXPECT_TRUE(isOnDidScrollCallBack);
+    EXPECT_EQ(offsetY.Value(), ITEM_HEIGHT * 5);
+    EXPECT_EQ(willScrollOffset.Value(), ITEM_HEIGHT * 5);
+    EXPECT_EQ(didScrollOffset.Value(), ITEM_HEIGHT * 5);
+    EXPECT_EQ(scrollState, willScrollState);
+    EXPECT_EQ(scrollState, didScrollState);
+}
+
+/**
+ * @tc.name: onScroll
+ * @tc.desc: Test onScroll event
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll002, TestSize.Level1)
+{
+    bool isOnScrollCallBack = false;
+    bool isOnWillScrollCallBack = false;
+    bool isOnDidScrollCallBack = false;
+
+    CalcDimension offsetY;
+    ScrollState scrollState = ScrollState::IDLE;
+    auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](CalcDimension offset, ScrollState state) {
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
+    };
+    Dimension willScrollOffset;
+    ScrollState willScrollState;
+    auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
+                            Dimension offset, ScrollState state) {
+        willScrollOffset = offset;
+        willScrollState = state;
+        isOnWillScrollCallBack = true;
+    };
+    Dimension didScrollOffset;
+    ScrollState didScrollState = ScrollState::IDLE;
+    auto onDidScroll = [&didScrollOffset, &didScrollState, &isOnDidScrollCallBack](
+                           Dimension offset, ScrollState state) {
+        didScrollOffset = offset;
+        didScrollState = state;
+        isOnDidScrollCallBack = true;
+    };
+
+    CreateWithItem([onScroll](WaterFlowModelNG model) {
+        model.SetOnScroll(onScroll);
+        model.SetLayoutDirection(FlexDirection::ROW);
+    });
+    eventHub_->SetOnWillScroll(std::move(onWillScroll));
+    eventHub_->SetOnDidScroll(std::move(onDidScroll));
+
+    /**
+     * @tc.steps: step1. finger moves down at top
+     * @tc.expected: Trigger onScroll with SCROLL state
+     */
+    pattern_->ScrollTo(ITEM_HEIGHT * 5);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnWillScrollCallBack);
+    EXPECT_TRUE(isOnDidScrollCallBack);
+    EXPECT_EQ(offsetY.Value(), ITEM_HEIGHT * 5);
+    EXPECT_EQ(willScrollOffset.Value(), ITEM_HEIGHT * 5);
+    EXPECT_EQ(didScrollOffset.Value(), ITEM_HEIGHT * 5);
+    EXPECT_EQ(scrollState, willScrollState);
+    EXPECT_EQ(scrollState, didScrollState);
+}
 } // namespace OHOS::Ace::NG

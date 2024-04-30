@@ -347,7 +347,7 @@ void WaterFlowPattern::ScrollPage(bool reverse, bool smooth)
     if (smooth) {
         float distance = reverse ? mainContentSize : -mainContentSize;
         float position = layoutInfo_->offset() + distance;
-        AnimateTo(-position, -1, nullptr, true);
+        ScrollablePattern::AnimateTo(-position, -1, nullptr, true);
     } else {
         UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
     }
@@ -545,6 +545,23 @@ void WaterFlowPattern::OnAnimateStop()
 {
     scrollStop_ = true;
     MarkDirtyNodeSelf();
+}
+
+void WaterFlowPattern::AnimateTo(
+    float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
+{
+    if (layoutMode_ == WaterFlowLayoutMode::SLIDING_WINDOW) {
+        return;
+    }
+    ScrollablePattern::AnimateTo(position, duration, curve, smooth, canOverScroll);
+}
+
+void WaterFlowPattern::ScrollTo(float position)
+{
+    if (layoutMode_ == WaterFlowLayoutMode::SLIDING_WINDOW) {
+        return;
+    }
+    ScrollablePattern::ScrollTo(position);
 }
 
 bool WaterFlowPattern::NeedRender()
