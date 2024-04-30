@@ -894,7 +894,7 @@ void TextPickerModelNG::SetValues(FrameNode* frameNode, const std::vector<std::s
     std::vector<std::string> selectedValues;
     std::vector<uint32_t> valuesIndex;
     for (uint32_t i = 0; i < options_.size(); i++) {
-        if (values.size() > 0 && i > values.size() - 1) {
+        if (values.size() > 0 && values.size() < i + 1) {
             if (options_[i].rangeResult.size() > 0) {
                 selectedValues.emplace_back(options_[i].rangeResult[0]);
             } else {
