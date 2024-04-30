@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "adapter/ohos/osal/navigation_route_ohos.h"
+#include "base/error/error_code.h"
 
 #include <mutex>
 
@@ -86,7 +87,7 @@ int32_t NavigationRouteOhos::LoadPage(const std::string& name)
     AppExecFwk::RouterItem item;
     if (!GetRouteItemFromBundle(name, item)) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "get route name failed");
-        return -1;
+        return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
     }
     int32_t res = callback_(item.bundleName, item.moduleName, item.ohmurl, false);
     if (res == 0) {
