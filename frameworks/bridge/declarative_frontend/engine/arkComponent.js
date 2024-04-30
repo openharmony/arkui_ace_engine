@@ -9549,12 +9549,13 @@ class TextAreaShowCounterModifier extends ModifierWithKey {
       getUINativeModule().textArea.resetShowCounter(node);
     }
     else {
-      getUINativeModule().textArea.setShowCounter(node, this.value.value, this.value.options);
+      getUINativeModule().textArea.setShowCounter(node, this.value.value, this.value.highlightBorder, this.value.thresholdPercentage);
     }
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
-      !isBaseOrResourceEqual(this.stageValue.options, this.value.options);
+      !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
+      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
   }
 }
 TextAreaShowCounterModifier.identity = Symbol('textAreaShowCounter');
@@ -9818,9 +9819,10 @@ class ArkTextAreaComponent extends ArkComponent {
     return this;
   }
   showCounter(value, options) {
-    let arkValue = new ArkTextAreaShowCounter();
+    let arkValue = new ArkTextFieldShowCounter();
     arkValue.value = value;
-    arkValue.options = options;
+    arkValue.highlightBorder = options?.highlightBorder;
+    arkValue.thresholdPercentage = options?.thresholdPercentage;
     modifierWithKey(this._modifiersWithKeys, TextAreaShowCounterModifier.identity, TextAreaShowCounterModifier, arkValue);
     return this;
   }
@@ -10692,12 +10694,13 @@ class TextInputShowCounterModifier extends ModifierWithKey {
       getUINativeModule().textInput.resetShowCounter(node);
     }
     else {
-      getUINativeModule().textInput.setShowCounter(node, this.value.value, this.value.options);
+      getUINativeModule().textInput.setShowCounter(node, this.value.value, this.value.highlightBorder, this.value.thresholdPercentage);
     }
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
-      !isBaseOrResourceEqual(this.stageValue.options, this.value.options);
+      !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
+      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
   }
 }
 TextInputShowCounterModifier.identity = Symbol('textInputShowCounter');
@@ -10823,6 +10826,26 @@ class TextInputOnPasteModifier extends ModifierWithKey {
   }
 }
 TextInputOnPasteModifier.identity = Symbol('textInputOnPaste');
+class TextInputPaddingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetPadding(node);
+    }
+    else {
+      getUINativeModule().textInput.setPadding(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+TextInputPaddingModifier.identity = Symbol('textInputPadding');
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10844,9 +10867,10 @@ class ArkTextInputComponent extends ArkComponent {
     return this;
   }
   showCounter(value, options) {
-    let arkValue = new ArkTextInputShowCounter();
+    let arkValue = new ArkTextFieldShowCounter();
     arkValue.value = value;
-    arkValue.options = options;
+    arkValue.highlightBorder = options?.highlightBorder;
+    arkValue.thresholdPercentage = options?.thresholdPercentage;
     modifierWithKey(this._modifiersWithKeys, TextInputShowCounterModifier.identity, TextInputShowCounterModifier, arkValue);
     return this;
   }
@@ -11045,6 +11069,28 @@ class ArkTextInputComponent extends ArkComponent {
   }
   textIndent(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputTextIndentModifier.identity, TextInputTextIndentModifier, value);
+    return this;
+  }
+  padding(value) {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = value;
+        arkValue.right = value;
+        arkValue.bottom = value;
+        arkValue.left = value;
+      }
+      else {
+        arkValue.top = value.top;
+        arkValue.right = value.right;
+        arkValue.bottom = value.bottom;
+        arkValue.left = value.left;
+      }
+      modifierWithKey(this._modifiersWithKeys, TextInputPaddingModifier.identity, TextInputPaddingModifier, arkValue);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, TextInputPaddingModifier.identity, TextInputPaddingModifier, undefined);
+    }
     return this;
   }
 }
@@ -11974,24 +12020,16 @@ class ArkConstraintSizeOptions {
       this.maxHeight === another.maxHeight);
   }
 }
-class ArkTextAreaShowCounter {
+class ArkTextFieldShowCounter {
   constructor() {
     this.value = undefined;
-    this.options = undefined;
+    this.highlightBorder = undefined;
+    this.thresholdPercentage = undefined;
   }
   isEqual(another) {
     return (this.value === another.value) &&
-      (this.options === another.options);
-  }
-}
-class ArkTextInputShowCounter {
-  constructor() {
-    this.value = undefined;
-    this.options = undefined;
-  }
-  isEqual(another) {
-    return (this.value === another.value) &&
-      (this.options === another.options);
+      (this.highlightBorder === another.highlightBorder) &&
+      (this.thresholdPercentage === another.thresholdPercentage);
   }
 }
 class ArkTextInputFilter {

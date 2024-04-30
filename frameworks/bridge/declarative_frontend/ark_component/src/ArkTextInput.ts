@@ -763,8 +763,8 @@ class TextInputSelectAllModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class TextInputShowCounterModifier extends ModifierWithKey<{value: boolean, options?: InputCounterOptions}> {
-  constructor(value: {value: boolean, options?: InputCounterOptions}) {
+class TextInputShowCounterModifier extends ModifierWithKey<ArkTextFieldShowCounter> {
+  constructor(value: ArkTextFieldShowCounter) {
     super(value);
   }
   static identity = Symbol('textInputShowCounter');
@@ -773,12 +773,13 @@ class TextInputShowCounterModifier extends ModifierWithKey<{value: boolean, opti
       getUINativeModule().textInput.resetShowCounter(node);
     }
     else {
-      getUINativeModule().textInput.setShowCounter(node, this.value.value, this.value.options);
+      getUINativeModule().textInput.setShowCounter(node, this.value.value!, this.value.highlightBorder, this.value.thresholdPercentage);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
-      !isBaseOrResourceEqual(this.stageValue.options, this.value.options);
+      !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
+      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
   }
 }
 
@@ -913,6 +914,27 @@ class TextInputOnPasteModifier extends ModifierWithKey<(value: string, event: Pa
   }
 }
 
+class TextInputPaddingModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetPadding(node);
+    }
+    else {
+      getUINativeModule().textInput.setPadding(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -937,10 +959,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
       TextInputPasswordRulesModifier, value);
     return this;
   }
-  showCounter(value: boolean): TextInputAttribute {
-    let arkValue = new ArkTextInputShowCounter();
+  showCounter(value: boolean, options?: InputCounterOptions): TextInputAttribute {
+    let arkValue: ArkTextFieldShowCounter = new ArkTextFieldShowCounter();
     arkValue.value = value;
-    arkValue.options = options;
+    arkValue.highlightBorder = options?.highlightBorder;
+    arkValue.thresholdPercentage = options?.thresholdPercentage;
     modifierWithKey(this._modifiersWithKeys, TextInputShowCounterModifier.identity,
       TextInputShowCounterModifier, arkValue);
     return this;
@@ -1182,6 +1205,28 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   textIndent(value: Dimension): this {
     modifierWithKey(this._modifiersWithKeys, TextInputTextIndentModifier.identity, TextInputTextIndentModifier, value);
+    return this;
+  }
+  padding(value: Padding | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = value;
+        arkValue.right = value;
+        arkValue.bottom = value;
+        arkValue.left = value;
+      }
+      else {
+        arkValue.top = value.top;
+        arkValue.right = value.right;
+        arkValue.bottom = value.bottom;
+        arkValue.left = value.left;
+      }
+      modifierWithKey(this._modifiersWithKeys, TextInputPaddingModifier.identity, TextInputPaddingModifier, arkValue);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, TextInputPaddingModifier.identity, TextInputPaddingModifier, undefined);
+    }
     return this;
   }
 }

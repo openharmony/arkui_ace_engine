@@ -446,8 +446,8 @@ class TextAreaTextAlignModifier extends ModifierWithKey<TextAlign> {
   }
 }
 
-class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextAreaShowCounter> {
-  constructor(value: ArkTextAreaShowCounter) {
+class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextFieldShowCounter> {
+  constructor(value: ArkTextFieldShowCounter) {
     super(value);
   }
   static identity: Symbol = Symbol('textAreaShowCounter');
@@ -455,12 +455,13 @@ class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextAreaShowCounter
     if (reset) {
       getUINativeModule().textArea.resetShowCounter(node);
     } else {
-      getUINativeModule().textArea.setShowCounter(node, this.value.value!, this.value.options);
+      getUINativeModule().textArea.setShowCounter(node, this.value.value!, this.value.highlightBorder, this.value.thresholdPercentage);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
-      !isBaseOrResourceEqual(this.stageValue.options, this.value.options);
+      !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
+      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
   }
 }
 
@@ -825,9 +826,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     return this;
   }
   showCounter(value: boolean, options?: InputCounterOptions): TextAreaAttribute {
-    let arkValue: ArkTextAreaShowCounter = new ArkTextAreaShowCounter();
+    let arkValue: ArkTextFieldShowCounter = new ArkTextFieldShowCounter();
     arkValue.value = value;
-    arkValue.options = options;
+    arkValue.highlightBorder = options?.highlightBorder;
+    arkValue.thresholdPercentage = options?.thresholdPercentage;
     modifierWithKey(this._modifiersWithKeys, TextAreaShowCounterModifier.identity, TextAreaShowCounterModifier, arkValue);
     return this;
   }

@@ -934,29 +934,19 @@ class ArkConstraintSizeOptions {
   }
 }
 
-class ArkTextAreaShowCounter {
+class ArkTextFieldShowCounter {
   value: boolean;
-  options?: any;
+  highlightBorder?: any;
+  thresholdPercentage?: any;
   constructor() {
     this.value = undefined;
-    this.options = undefined;
+    this.highlightBorder = undefined;
+    this.thresholdPercentage = undefined;
   }
-  isEqual(another: ArkTextAreaShowCounter): boolean {
+  isEqual(another: ArkTextFieldShowCounter): boolean {
     return (this.value === another.value) &&
-      (this.options === another.options);
-  }
-}
-
-class ArkTextInputShowCounter {
-  value: boolean;
-  options?: any;
-  constructor() {
-    this.value = undefined;
-    this.options = undefined;
-  }
-  isEqual(another: ArkTextInputShowCounter): boolean {
-    return (this.value === another.value) &&
-      (this.options === another.options);
+      (this.highlightBorder === another.highlightBorder) &&
+      (this.thresholdPercentage === another.thresholdPercentage);
   }
 }
 
