@@ -653,6 +653,9 @@ void SwitchPattern::FireBuilder()
     if (contentModifierNode_ == node) {
         return;
     }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     host->RemoveChildAndReturnIndex(contentModifierNode_);
     contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
