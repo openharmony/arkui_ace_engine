@@ -16,7 +16,11 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -570,6 +574,17 @@ ArkUINativeModuleValue TextBridge::SetContent(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+
+    Framework::JSRef<Framework::JSVal> args = info[0];
+    if (args->IsObject() && Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSSpanString>()) {
+        auto* spanString = Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSSpanString>();
+        auto spanStringController = spanString->GetController();
+        if (spanStringController) {
+            TextModelNG::InitTextController(reinterpret_cast<FrameNode*>(nativeNode), spanStringController);
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
     std::string content;
     if (ArkTSUtils::ParseJsString(vm, secondArg, content)) {
         GetArkUINodeModifiers()->getTextModifier()->setContent(nativeNode, content.c_str());

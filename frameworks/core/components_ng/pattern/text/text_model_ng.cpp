@@ -421,6 +421,18 @@ void TextModelNG::InitText(FrameNode* frameNode, std::string& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
 }
 
+void TextModelNG::InitTextController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>(frameNode);
+    CHECK_NULL_VOID(textPattern);
+    auto spanString = AceType::DynamicCast<SpanString>(spanBase);
+    if (spanString) {
+        auto spans = spanString->GetSpanItems();
+        textPattern->SetSpanItemChildren(spans);
+        textPattern->SetSpanStringMode(true);
+    }
+}
+
 void TextModelNG::SetTextCase(FrameNode* frameNode, Ace::TextCase value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value, frameNode);

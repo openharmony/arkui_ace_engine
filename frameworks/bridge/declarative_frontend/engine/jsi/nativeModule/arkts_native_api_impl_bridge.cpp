@@ -1093,6 +1093,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "blank"), blank);
 
     auto span = panda::ObjectRef::New(vm);
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSpanSrc"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SpanBridge::SetSpanSrc));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextCase"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetTextCase));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextCase"),
@@ -2423,6 +2425,8 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
 void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto image = panda::ObjectRef::New(vm);
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageShowSrc"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetImageShowSrc));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetCopyOption));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),

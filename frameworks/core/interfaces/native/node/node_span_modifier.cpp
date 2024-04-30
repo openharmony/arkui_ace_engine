@@ -61,6 +61,13 @@ const char* GetSpanContent(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
+void SetSpanSrc(ArkUINodeHandle node, ArkUI_CharPtr src)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    SpanModelNG::InitSpan(uiNode, src);
+}
+
 void SetSpanTextCase(ArkUINodeHandle node, int32_t value)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
@@ -440,16 +447,15 @@ void ResetTextTextShadow(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISpanModifier* GetSpanModifier()
 {
-    static const ArkUISpanModifier modifier = { SetSpanContent, SetSpanTextCase, ResetSpanTextCase, SetSpanFontWeight,
-        ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle, ResetSpanFontStyle,
-        SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily, SetSpanDecoration,
-        ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing, ResetSpanLetterSpacing,
-        SetSpanBaselineOffset, ResetSpanBaselineOffset, SetSpanFont, ResetSpanFont, SetSpanFontWeightStr,
-        GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle, GetSpanFontWeight,
-        GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset, SetSpanTextBackgroundStyle,
-        ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow, ResetTextTextShadow,
-        GetTextShadow
-        };
+    static const ArkUISpanModifier modifier = { SetSpanSrc, SetSpanContent, SetSpanTextCase, ResetSpanTextCase,
+        SetSpanFontWeight, ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle,
+        ResetSpanFontStyle, SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily,
+        SetSpanDecoration, ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing,
+        ResetSpanLetterSpacing, SetSpanBaselineOffset, ResetSpanBaselineOffset, SetSpanFont, ResetSpanFont,
+        SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle,
+        GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset,
+        SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
+        ResetTextTextShadow, GetTextShadow };
     return &modifier;
 }
 } // namespace NodeModifier

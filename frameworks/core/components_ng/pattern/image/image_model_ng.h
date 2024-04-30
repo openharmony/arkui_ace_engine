@@ -69,6 +69,9 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode *frameNode, std::string& src);
+    static void SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
+        const std::string& moduleName, bool isUriPureNumber = false);
+    static void SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
     static void SetSmoothEdge(FrameNode *frameNode, float value);
     static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);
