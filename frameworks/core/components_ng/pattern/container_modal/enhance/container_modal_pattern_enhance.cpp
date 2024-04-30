@@ -119,7 +119,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     AddOrRemovePanEvent(customTitleRow);
     AddOrRemovePanEvent(gestureRow);
     gestureRow->GetLayoutProperty()->UpdateVisibility(
-        (isShow && customTitleSettedShow_) ? VisibleType::GONE : VisibleType::VISIBLE);
+        (isShow && !customTitleSettedShow_) ? VisibleType::VISIBLE : VisibleType::GONE);
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     auto stack = GetStackNode();
