@@ -708,7 +708,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetMeasuredSize(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> width = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(width->IsNumber(), defaultReturnValue);
-    Local<JSValueRef> height = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> height = runtimeCallInfo->GetCallArgRef(2);
     CHECK_NULL_RETURN(height->IsNumber(), defaultReturnValue);
     GetArkUIFullNodeAPI()->getExtendedAPI()->setMeasureWidth(nativeNode, width->ToNumber(vm)->Value());
     GetArkUIFullNodeAPI()->getExtendedAPI()->setMeasureHeight(nativeNode, height->ToNumber(vm)->Value());
