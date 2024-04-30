@@ -42,6 +42,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -145,7 +146,7 @@ void MenuItemPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    isTextFadeOut_ = IsTextFadeOut();
     RefPtr<FrameNode> leftRow =
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
@@ -189,6 +190,15 @@ void MenuItemPattern::OnModifyDone()
     }
 }
 
+bool MenuItemPattern::IsTextFadeOut()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, false);
+    return textTheme->GetIsTextFadeout();
+}
+
 void MenuItemPattern::InitFocusEvent()
 {
     auto host = GetHost();
@@ -198,6 +208,11 @@ void MenuItemPattern::InitFocusEvent()
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->content_ && pattern->isTextFadeOut_) {
+            auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
+            textLayoutProperty->UpdateTextMarqueeStart(true);
+            pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
         pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
@@ -205,6 +220,11 @@ void MenuItemPattern::InitFocusEvent()
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->content_ && pattern->isTextFadeOut_) {
+            auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
+            textLayoutProperty->UpdateTextMarqueeStart(false);
+            pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
         pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
@@ -1090,13 +1110,24 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     UpdateFont(menuProperty, theme, isLabel);
 
     textProperty->UpdateContent(content);
-    textProperty->UpdateMaxLines(1);
-    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    UpdateTexOverflow(textProperty);
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
     textProperty->UpdateTextAlign(isLabel ? TextAlign::CENTER : textAlign);
     node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
     node->MarkModifyDone();
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty)
+{
+    textProperty->UpdateMaxLines(1);
+    if (isTextFadeOut_) {
+        textProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textProperty->UpdateTextMarqueeFadeout(true);
+        textProperty->UpdateTextMarqueeStart(false);
+    } else {
+        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    }
 }
 
 void MenuItemPattern::UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel)
