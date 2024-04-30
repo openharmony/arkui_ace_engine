@@ -136,10 +136,6 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
         VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str(), filter);
     json->PutExtAttr("direction", TextDirectionToString(GetLayoutDirection()).c_str(), filter);
     json->PutExtAttr("pixelRound", PixelRoundToJsonValue().c_str(), filter);
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);
 }
 
 void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -568,15 +564,15 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float padding
         padding.bottom.value_or(paddingVerticalDefault) + borderWidth.bottomDimen.value_or(borderVerticalDefault) };
 }
 
-PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
+PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder(bool useRootConstraint)
 {
     if (layoutConstraint_.has_value()) {
         return ConvertToPaddingPropertyF(
             padding_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
     }
 
-    return ConvertToPaddingPropertyF(
-        padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+    return ConvertToPaddingPropertyF(padding_, ScaleProperty::CreateScaleProperty(),
+        useRootConstraint ? PipelineContext::GetCurrentRootWidth() : 0.0f);
 }
 
 BorderWidthPropertyF LayoutProperty::CreateBorder()
@@ -604,6 +600,20 @@ MarginPropertyF LayoutProperty::CreateMargin()
         }
     }
     return marginResult_.value_or(MarginPropertyF());
+}
+
+MarginPropertyF LayoutProperty::CreateMarginWithoutCache()
+{
+    CHECK_NULL_RETURN(margin_, MarginPropertyF());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, MarginPropertyF());
+    const auto& parentConstraint = host->GetGeometryNode()->GetParentLayoutConstraint();
+    if (parentConstraint) {
+        return ConvertToMarginPropertyF(
+            margin_, parentConstraint->scaleProperty, parentConstraint->percentReference.Width());
+    }
+    // the root width is not considered at present.
+    return ConvertToMarginPropertyF(margin_, ScaleProperty::CreateScaleProperty(), 0.0f);
 }
 
 void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)

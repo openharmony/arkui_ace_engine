@@ -4251,7 +4251,7 @@ function __removeCustomProperties__(nodeId) {
   __elementIdToCustomProperties__.delete(nodeId);
 }
 
-function getCustomProperty(nodeId, key) {
+function __getCustomProperty__(nodeId, key) {
   if (__elementIdToCustomProperties__.has(nodeId)) {
     const customProperties = __elementIdToCustomProperties__.get(nodeId);
 
@@ -4329,6 +4329,12 @@ if (globalThis.Blank !== undefined) {
     });
   };
 }
+
+globalThis.applySymbolGlyphModifierToNode = function (modifier, nodePtr) {
+  let component = new ArkSymbolGlyphComponent(nodePtr);
+  applyUIAttributes(modifier, nodePtr, component);
+  component.applyModifierPatch();
+};
 
 globalThis.applyImageModifierToNode = function (modifier, nodePtr) {
   let component = new ArkImageComponent(nodePtr);
@@ -5692,6 +5698,40 @@ class ImageeResizableModifier extends ModifierWithKey {
   }
 }
 ImageeResizableModifier.identity = Symbol('resizable');
+class ImageDynamicRangeModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetDynamicRangeMode(node);
+    }
+    else {
+      getUINativeModule().image.setDynamicRangeMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageDynamicRangeModeModifier.identity = Symbol('dynamicRangeMode');
+class ImageEnhancedImageQualityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetEnhancedImageQuality(node);
+    }
+    else {
+      getUINativeModule().image.setEnhancedImageQuality(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageObjectFitModifier.identity = Symbol('enhancedImageQuality');
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -5783,6 +5823,16 @@ class ArkImageComponent extends ArkComponent {
   }
   transition(value) {
     modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, value);
+    return this;
+  }
+  dynamicRangeMode(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
+    return this;
+  }
+  enhancedImageQuality(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageEnhancedImageQualityModifier.identity, ImageEnhancedImageQualityModifier, value);
     return this;
   }
 }
@@ -15057,7 +15107,12 @@ class ArkCheckboxComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().checkbox.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -15065,10 +15120,11 @@ class ArkCheckboxComponent extends ArkComponent {
   }
   makeContentModifierNode(context, checkBoxConfiguration) {
     checkBoxConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.checkboxNode)) {
+    if (isUndefined(this.checkboxNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.checkboxNode = new xNode.BuilderNode(context);
       this.checkboxNode.build(this.builder, checkBoxConfiguration);
+      this.needRebuild = false;
     } else {
       this.checkboxNode.update(checkBoxConfiguration);
     }
@@ -22976,13 +23032,72 @@ class ParticleEmitterModifier extends ModifierWithKey {
   }
 
   applyPeer(node, reset) {
+    let _a, _b, _c, _d, _e;
     if (reset) {
       getUINativeModule().particle.resetEmitter(node);
     }
     else {
-      getUINativeModule().particle.setEmitter(node, this.value);
+      let dataArray = [];
+      if (!Array.isArray(this.value)) {
+        return;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        let data = this.value[i];
+        let indexValue = 0;
+        if (data.index > 0 && data.index < this.value.length) {
+          indexValue = data.index;
+        }
+        dataArray.push(indexValue);
+
+        let emitRateValue = 5;
+        if (isNumber(data.emitRate)) {
+          dataArray.push(1);
+          if (data.emitRate > 0) {
+            emitRateValue = data.emitRate;
+          }
+          dataArray.push(emitRateValue);
+        } else {
+          dataArray.push(0);
+          dataArray.push(_a);
+        }
+
+        if (isObject(data.position)) {
+          if (isNumber(data.position.x) && isNumber(data.position.y)) {
+            dataArray.push(1);
+            dataArray.push(data.position.x);
+            dataArray.push(data.position.y);
+          } else {
+            dataArray.push(0);
+            dataArray.push(_b);
+            dataArray.push(_c);
+          }
+        } else {
+          dataArray.push(0);
+          dataArray.push(_b);
+          dataArray.push(_c);
+        }
+
+        if (isObject(data.size)) {
+          if (data.size.width > 0 && data.size.height > 0) {
+            dataArray.push(1);
+            dataArray.push(data.size.width);
+            dataArray.push(data.size.height);
+          } else {
+            dataArray.push(0);
+            dataArray.push(_d);
+            dataArray.push(_e);
+          }
+        }
+        else {
+          dataArray.push(0);
+          dataArray.push(_d);
+          dataArray.push(_e);
+        }
+      }
+      getUINativeModule().particle.setEmitter(node, dataArray);
     }
   }
+
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
@@ -22997,9 +23112,13 @@ class ArkParticleComponent extends ArkComponent {
   }
   disturbanceFields(value) {
      modifierWithKey(this._modifiersWithKeys, ParticleDisturbanceFieldModifier.identity, ParticleDisturbanceFieldModifier, value);
-     modifierWithKey(this._modifiersWithKeys, ParticleDisturbanceFieldModifier.identity, ParticleDisturbanceFieldModifier, value);
     return this;
   }
+
+  emitter(value) {
+    modifierWithKey(this._modifiersWithKeys, ParticleEmitterModifier.identity, ParticleEmitterModifier, value);
+   return this;
+ }
 }
 // @ts-ignore
 if (globalThis.Particle !== undefined) {

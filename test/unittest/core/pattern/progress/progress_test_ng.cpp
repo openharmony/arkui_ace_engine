@@ -3101,4 +3101,32 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest000, TestSize.Level1)
     pattern->SetBuilderFunc(node);
     pattern->BuildContentModifierNode();
 }
+
+/**
+ * @tc.name: ProgressPrivacySensitiveTest001
+ * @tc.desc: Test ProgressPrivacySensitive change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPrivacySensitiveTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the frameNode.
+     * @tc.expected: step1. Check the frameNode was created successfully.
+     */
+    ProgressModelNG progressModelNG;
+    progressModelNG.Create(5.0, 10.0, 10.0, 20.0, PROGRESS_TYPE_CAPSULE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. change privacy sensitive and check status.
+     */
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    pattern->OnSensitiveStyleChange(false);
+    EXPECT_EQ(progressPaintProperty->GetIsSensitive().value_or(false), false);
+    pattern->OnSensitiveStyleChange(true);
+    EXPECT_EQ(progressPaintProperty->GetIsSensitive().value_or(false), true);
+}
 } // namespace OHOS::Ace::NG

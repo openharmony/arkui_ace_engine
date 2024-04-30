@@ -14,6 +14,7 @@
  */
 
 #include "core/common/event_manager.h"
+#include <set>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/json/json_util.h"
@@ -42,14 +43,7 @@ constexpr int32_t DUMP_START_NUMBER = 4;
 constexpr int32_t DUMP_LIMIT_SIZE = 500;
 constexpr int64_t EVENT_CLEAR_DURATION = 1000;
 constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
-const std::string SHORT_CUT_VALUE_X = "X";
-const std::string SHORT_CUT_VALUE_Y = "Y";
-const std::string SHORT_CUT_VALUE_Z = "Z";
-const std::string SHORT_CUT_VALUE_A = "A";
-const std::string SHORT_CUT_VALUE_C = "C";
-const std::string SHORT_CUT_VALUE_V = "V";
-const std::string SHORT_CUT_VALUE_TAB = "TAB";
-enum class CtrlKeysBit {
+enum CtrlKeysBit: uint8_t {
     CTRL = 1,
     SHIFT = 2,
     ALT = 4,
@@ -1191,17 +1185,17 @@ uint8_t EventManager::GetKeyboardShortcutKeys(const std::vector<ModifierKey>& ke
     for (const auto& key : keys) {
         switch (static_cast<uint8_t>(key)) {
             case static_cast<uint8_t>(ModifierKey::CTRL): {
-                keyValue |= static_cast<uint8_t>(CtrlKeysBit::CTRL);
+                keyValue |= CtrlKeysBit::CTRL;
                 ++ctrlTimes;
                 break;
             }
             case static_cast<uint8_t>(ModifierKey::SHIFT): {
-                keyValue |= static_cast<uint8_t>(CtrlKeysBit::SHIFT);
+                keyValue |= CtrlKeysBit::SHIFT;
                 ++shiftTimes;
                 break;
             }
             case static_cast<uint8_t>(ModifierKey::ALT): {
-                keyValue |= static_cast<uint8_t>(CtrlKeysBit::ALT);
+                keyValue |= CtrlKeysBit::ALT;
                 ++altTimes;
                 break;
             }
@@ -1217,32 +1211,20 @@ uint8_t EventManager::GetKeyboardShortcutKeys(const std::vector<ModifierKey>& ke
 
 bool EventManager::IsSystemKeyboardShortcut(const std::string& value, uint8_t keys)
 {
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_C) {
+    if (value.size() != 1) {
+        return false;
+    }
+
+    const std::set<char> forbidValue{'X', 'Y', 'Z', 'A', 'C', 'V'};
+    char c = std::toupper(value.front());
+    if (forbidValue.count(c) == 0) {
+        return false;
+    }
+
+    if (keys == CtrlKeysBit::CTRL) {
         return true;
     }
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_A) {
-        return true;
-    }
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_V) {
-        return true;
-    }
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_X) {
-        return true;
-    }
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_Y) {
-        return true;
-    }
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_Z) {
-        return true;
-    }
-    if (!(keys ^ (static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT))) &&
-        value == SHORT_CUT_VALUE_Z) {
-        return true;
-    }
-    if (!(keys ^ (static_cast<uint8_t>(CtrlKeysBit::SHIFT))) && value == SHORT_CUT_VALUE_TAB) {
-        return true;
-    }
-    return false;
+    return (keys == (CTRL ^ SHIFT)) && (c == 'Z');
 }
 
 bool EventManager::IsSameKeyboardShortcutNode(const std::string& value, uint8_t keys)
@@ -1275,17 +1257,17 @@ void AddKeyboardShortcutSingleKey(
     uint8_t index = 0;
     std::vector<KeyCode> keyCode1;
     std::vector<KeyCode> keyCode2;
-    if (keys & static_cast<uint8_t>(CtrlKeysBit::CTRL)) {
+    if (keys & CtrlKeysBit::CTRL) {
         keyCode1.emplace_back(KeyCode::KEY_CTRL_LEFT);
         keyCode2.emplace_back(KeyCode::KEY_CTRL_RIGHT);
         permutation.emplace_back(++index);
     }
-    if (keys & static_cast<uint8_t>(CtrlKeysBit::SHIFT)) {
+    if (keys & CtrlKeysBit::SHIFT) {
         keyCode1.emplace_back(KeyCode::KEY_SHIFT_LEFT);
         keyCode2.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
         permutation.emplace_back(++index);
     }
-    if (keys & static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+    if (keys & CtrlKeysBit::ALT) {
         keyCode1.emplace_back(KeyCode::KEY_ALT_LEFT);
         keyCode2.emplace_back(KeyCode::KEY_ALT_RIGHT);
         permutation.emplace_back(++index);
@@ -1378,13 +1360,13 @@ void AddKeyboardShortcutDoubleKeysWithShiftAlt(
 void AddKeyboardShortcutDoubleKeys(
     uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
 {
-    if (keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT)) {
+    if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::SHIFT) {
         AddKeyboardShortcutDoubleKeysWithCtrlShift(keys, keyCodes, permutation);
     }
-    if (keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+    if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::ALT) {
         AddKeyboardShortcutDoubleKeysWithCtrlAlt(keys, keyCodes, permutation);
     }
-    if (keys == static_cast<uint8_t>(CtrlKeysBit::SHIFT) + static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+    if (keys == CtrlKeysBit::SHIFT + CtrlKeysBit::ALT) {
         AddKeyboardShortcutDoubleKeysWithShiftAlt(keys, keyCodes, permutation);
     }
 }
@@ -1450,21 +1432,20 @@ void AddKeyboardShortcutKeys(
         keyCodes.emplace_back(std::vector<KeyCode>());
     }
     // single key
-    if (keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) || keys == static_cast<uint8_t>(CtrlKeysBit::SHIFT) ||
-        keys == static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+    if (keys == CtrlKeysBit::CTRL || keys == CtrlKeysBit::SHIFT ||
+        keys == CtrlKeysBit::ALT) {
         LOGI("AddKeyboardShortcutKeys single key");
         AddKeyboardShortcutSingleKey(keys, keyCodes, permutation);
     }
     // double keys
-    if (keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT) ||
-        keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::ALT) ||
-        keys == static_cast<uint8_t>(CtrlKeysBit::SHIFT) + static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+    if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::SHIFT ||
+        keys == CtrlKeysBit::CTRL + CtrlKeysBit::ALT ||
+        keys == CtrlKeysBit::SHIFT + CtrlKeysBit::ALT) {
         LOGI("AddKeyboardShortcutKeys double keys");
         AddKeyboardShortcutDoubleKeys(keys, keyCodes, permutation);
     }
     // triple keys
-    if (keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT) +
-                    static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+    if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::SHIFT + CtrlKeysBit::ALT) {
         LOGI("AddKeyboardShortcutKeys triple keys");
         AddKeyboardShortcutTripleKeys(keys, keyCodes, permutation);
     }

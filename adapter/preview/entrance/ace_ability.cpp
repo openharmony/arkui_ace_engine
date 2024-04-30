@@ -230,7 +230,7 @@ void AceAbility::InitEnv()
         auto func = [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(id);
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIInitEnv");
+            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask");
         };
         director->SetUITaskRunner(func, id);
         director->Init();

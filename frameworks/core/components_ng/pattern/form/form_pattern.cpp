@@ -950,12 +950,12 @@ void FormPattern::InitFormManagerDelegate()
         [weak = WeakClaim(this), instanceID](
             const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover) {
             ContainerScope scope(instanceID);
-            auto form = weak.Upgrade();
-            CHECK_NULL_VOID(form);
-            auto host = form->GetHost();
-            CHECK_NULL_VOID(host);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto executor = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID(executor);
             auto uiTaskExecutor =
-                SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+                SingleTaskExecutor::Make(executor, TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask([weak, instanceID, node, isDynamic, isRecover] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();

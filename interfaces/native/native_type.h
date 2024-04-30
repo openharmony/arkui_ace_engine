@@ -359,7 +359,7 @@ typedef enum {
 }ArkUI_ProgressType;
 
 /**
- * @brief Enumerates the text decoration styles.
+ * @brief Enumerates the text decoration types.
  *
  * @since 12
  */
@@ -375,14 +375,14 @@ typedef enum {
 } ArkUI_TextDecorationType;
 
 /**
- * @brief Enumerates the text decoration line styles.
+ * @brief Enumerates the text decoration styles.
  *
  * @since 12
  */
 typedef enum {
-    /** Solid line. */
+    /** Single solid line. */
     ARKUI_TEXT_DECORATION_STYLE_SOLID = 0,
-    /** Double line. */
+    /** Double solid line. */
     ARKUI_TEXT_DECORATION_STYLE_DOUBLE,
     /** Dotted line. */
     ARKUI_TEXT_DECORATION_STYLE_DOTTED,
@@ -390,7 +390,7 @@ typedef enum {
     ARKUI_TEXT_DECORATION_STYLE_DASHED,
     /** Wavy line. */
     ARKUI_TEXT_DECORATION_STYLE_WAVY,
-} ArkUiTextDecorationStyle;
+} ArkUI_TextDecorationStyle;
 
 /**
  * @brief Enumerates the text cases.

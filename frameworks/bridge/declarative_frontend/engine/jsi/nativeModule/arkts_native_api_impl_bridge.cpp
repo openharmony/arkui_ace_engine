@@ -2515,6 +2515,14 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetResizable));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResizable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetResizable));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDynamicRangeMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetDynamicRangeMode));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDynamicRangeMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetDynamicRangeMode));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnhancedImageQuality"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetEnhancedImageQuality));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnhancedImageQuality"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetEnhancedImageQuality));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
 }
 

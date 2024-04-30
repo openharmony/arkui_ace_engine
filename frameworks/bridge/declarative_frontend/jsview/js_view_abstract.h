@@ -36,6 +36,7 @@
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
@@ -114,6 +115,8 @@ public:
     static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
 
     static void JsScale(const JSCallbackInfo& info);
+    static void SetTabBarSymbolOptionApply(const JSCallbackInfo& info, TabBarSymbol& symbolApply,
+        const JSRef<JSVal>& modifierNormalObj, const JSRef<JSVal>& modifierSelectedObj);
     static void SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::DragPreviewOption& previewOption);
     static void SetDefaultScale();
     static void JsScaleX(const JSCallbackInfo& info);

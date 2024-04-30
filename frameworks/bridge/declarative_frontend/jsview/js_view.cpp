@@ -984,6 +984,7 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
 #if defined(PREVIEW)
     return;
 #else
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", stateInfo.c_str());
     auto pipeline = NG::PipelineContext::GetContextByContainerId(GetInstanceId());
     CHECK_NULL_VOID(pipeline);
     if (!pipeline->getProfilerStatus()) {

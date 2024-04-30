@@ -121,7 +121,9 @@ void JSStateMgmtProfiler::ProfileBlock::Report(int32_t depth) const
     
     ss << std::left << std::string(depth, ' ');
     ss << name_;
-    ss << std::setw(nameAdjustWidth - name_.size() - depth);
+    if (nameAdjustWidth >= name_.size() + depth) {
+        ss << std::setw(nameAdjustWidth - name_.size() - depth);
+    }
     ss << std::right << numberOfCalls_;
     ss << std::setw(itemAdjustWidth);
     ss << std::fixed << std::setprecision(itemPrecision)

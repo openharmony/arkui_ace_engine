@@ -36,11 +36,12 @@ public:
     bool HasRadioId(const std::string& group, int32_t radioId);
     void UpdateRadioGroupValue(const std::string& group, int32_t radioId);
 
-    void AddCheckBoxToGroup(const std::string& group, int32_t checkBoxId);
-    void AddCheckBoxGroupToGroup(const std::string& group, int32_t checkBoxId);
+    void AddCheckBoxToGroup(const std::string& group, const WeakPtr<FrameNode>& checkBoxNode);
     void RemoveCheckBoxFromGroup(const std::string& group, int32_t checkBoxId);
-
-    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> GetCheckBoxGroupMap();
+    void AddCheckBoxGroup(const std::string& group, const WeakPtr<FrameNode>& checkBoxGroupNode);
+    void RemoveCheckBoxGroup(const std::string& group, int32_t checkBoxGroupId);
+    std::list<RefPtr<FrameNode>> GetCheckboxList(const std::string& group);
+    RefPtr<FrameNode> GetCheckboxGroup(const std::string& group);
 
     std::string GetLastNavId()
     {
@@ -56,7 +57,8 @@ public:
 
 private:
     std::unordered_map<std::string, std::list<int32_t>> radioGroupNotify_;
-    std::unordered_map<std::string, std::list<int32_t>> checkBoxGroupNotify_;
+    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxListMap_;
+    std::unordered_map<std::string, WeakPtr<FrameNode>> checkBoxGroupMap_;
     std::optional<std::string> lastNavId_;
 };
 

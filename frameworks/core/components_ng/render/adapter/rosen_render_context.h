@@ -231,6 +231,7 @@ public:
 
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
+    void FlushForegroundModifier(const RefPtr<Modifier>& modifier) override;
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
     void RemoveChild(const RefPtr<RenderContext>& renderContext) override;

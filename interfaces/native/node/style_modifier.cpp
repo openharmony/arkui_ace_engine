@@ -3561,6 +3561,31 @@ void ResetTextInputSelectionMenuHidden(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputSelectionMenuHidden(node->uiNodeHandle);
 }
 
+int32_t SetBlurOnSubmit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, NUM_1);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setBlurOnSubmit(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetBlurOnSubmit(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setBlurOnSubmit(node->uiNodeHandle, true);
+}
+
+const ArkUI_AttributeItem* GetBlurOnSubmit(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    g_numberValues[0].i32 =
+        fullImpl->getNodeModifiers()->getTextInputModifier()->getBlurOnSubmit(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
 // Stack Attribute functions
 int32_t SetAlignContent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -7025,16 +7050,19 @@ int32_t SetDecoration(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->value[0].i32 < 0 || item->value[0].i32 > static_cast<int32_t>(ARKUI_TEXT_DECORATION_TYPE_LINE_THROUGH)) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    if (DECORATION_STYLE_INDEX < actualSize && (item->value[DECORATION_STYLE_INDEX].i32 < 0 ||
+        item->value[DECORATION_STYLE_INDEX].i32 > static_cast<int32_t>(ARKUI_TEXT_DECORATION_STYLE_WAVY))) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     int32_t decoration = item->value[0].i32;
     auto decorationColor = Color::BLACK.GetValue();
     if (DECORATION_COLOR_INDEX < actualSize) {
         decorationColor = item->value[DECORATION_COLOR_INDEX].u32;
     }
-    if (item->value[DECORATION_STYLE_INDEX].i32 < 0 ||
-        item->value[DECORATION_STYLE_INDEX].i32 > static_cast<int32_t>(ARKUI_TEXT_DECORATION_STYLE_WAVY)) {
-        return ERROR_CODE_PARAM_INVALID;
+    int32_t decorationStyle = 0;
+    if (DECORATION_STYLE_INDEX < actualSize) {
+        decorationStyle = item->value[DECORATION_STYLE_INDEX].i32;
     }
-    int32_t decorationStyle = item->value[DECORATION_STYLE_INDEX].i32;
     switch (node->type) {
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanDecoration(
@@ -7493,6 +7521,41 @@ int32_t SetAlt(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     fullImpl->getNodeModifiers()->getImageModifier()->setAlt(node->uiNodeHandle, item->string, "", "");
     return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetResizable(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, NUM_4);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->setImageResizable(
+        node->uiNodeHandle, item->value[NUM_0].f32, item->value[NUM_1].f32,
+        item->value[NUM_2].f32, item->value[NUM_3].f32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetResizable(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->setImageResizable(
+        node->uiNodeHandle, 0.0f, 0.0f,
+        0.0f, 0.0f);
+}
+
+const ArkUI_AttributeItem* GetResizable(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    std::array<float, NUM_4> resizableArray;
+    fullImpl->getNodeModifiers()->getImageModifier()->getImageResizable(
+        node->uiNodeHandle, &resizableArray[0], NUM_4);
+    g_numberValues[NUM_0].f32 = resizableArray[NUM_0];
+    g_numberValues[NUM_1].f32 = resizableArray[NUM_1];
+    g_numberValues[NUM_2].f32 = resizableArray[NUM_2];
+    g_numberValues[NUM_3].f32 = resizableArray[NUM_3];
+    g_attributeItem.size = NUM_4;
+    return &g_attributeItem;
 }
 
 int32_t SetImageDraggable(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -8325,6 +8388,8 @@ const ArkUI_AttributeItem* GetDecoration(ArkUI_NodeHandle node)
             fullImpl->getNodeModifiers()->getSpanModifier()->getSpanDecoration(node->uiNodeHandle, &spanDecorationType);
             g_numberValues[0].i32 = spanDecorationType.decorationType;
             g_numberValues[DECORATION_COLOR_INDEX].u32 = spanDecorationType.color;
+            g_numberValues[DECORATION_STYLE_INDEX].i32 = spanDecorationType.style;
+            g_attributeItem.size = NUM_3;
             break;
         }
         case ARKUI_NODE_TEXT: {
@@ -8332,6 +8397,8 @@ const ArkUI_AttributeItem* GetDecoration(ArkUI_NodeHandle node)
             fullImpl->getNodeModifiers()->getTextModifier()->getTextDecoration(node->uiNodeHandle, &textDecorationType);
             g_numberValues[0].i32 = textDecorationType.decorationType;
             g_numberValues[DECORATION_COLOR_INDEX].u32 = textDecorationType.color;
+            g_numberValues[DECORATION_STYLE_INDEX].i32 = textDecorationType.style;
+            g_attributeItem.size = NUM_3;
             break;
         }
         default:
@@ -9698,7 +9765,7 @@ void ResetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetImageAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
     static Setter* setters[] = { SetImageSrc, SetObjectFit, SetInterpolation, SetObjectRepeat, SetColorFilter,
-        SetAutoResize, SetAlt, SetImageDraggable, SetRenderMode };
+        SetAutoResize, SetAlt, SetResizable, SetImageDraggable, SetRenderMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -9709,7 +9776,7 @@ int32_t SetImageAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_
 const ArkUI_AttributeItem* GetImageAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetImageSrc, GetObjectFit, GetInterpolation, GetObjectRepeat, GetColorFilter,
-        GetAutoResize, GetAlt, GetImageDraggable, GetRenderMode };
+        GetAutoResize, GetAlt, GetResizable, GetImageDraggable, GetRenderMode };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -9720,7 +9787,7 @@ const ArkUI_AttributeItem* GetImageAttribute(ArkUI_NodeHandle node, int32_t subT
 void ResetImageAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetImageSrc, ResetObjectFit, ResetInterpolation, ResetObjectRepeat,
-        ResetColorFilter, ResetAutoResize, ResetAlt, ResetImageDraggable, ResetRenderMode };
+        ResetColorFilter, ResetAutoResize, ResetAlt, ResetResizable, ResetImageDraggable, ResetRenderMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -9797,7 +9864,8 @@ int32_t SetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
     static Setter* setters[] = { SetTextInputPlaceholder, SetTextInputText, SetCaretColor, SetCaretStyle,
         SetShowUnderline, SetMaxLength, SetEnterKeyType, SetPlaceholderColor, SetTextInputPlaceholderFont,
         SetEnableKeyboardOnFocus, SetTextInputType, SetSelectedBackgroundColor, SetShowPasswordIcon,
-        StopTextInputEditing, SetTextInputCancelButton, SetTextInputTextSelection, SetTextInputSelectionMenuHidden };
+        StopTextInputEditing, SetTextInputCancelButton, SetTextInputTextSelection, SetTextInputSelectionMenuHidden,
+        SetBlurOnSubmit };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -9810,7 +9878,8 @@ const ArkUI_AttributeItem* GetTextInputAttribute(ArkUI_NodeHandle node, int32_t 
     static Getter* getters[] = { GetTextInputPlaceholder, GetTextInputText, GetCaretColor, GetCaretStyle,
         GetShowUnderline, GetMaxLength, GetEnterKeyType, GetPlaceholderColor, GetTextInputPlaceholderFont,
         GetEnableKeyboardOnFocus, GetTextInputType, GetSelectedBackgroundColor, GetShowPasswordIcon, GetTextInputEditing,
-        GetTextInputCancelButton, GetTextInputTextSelection, GetTextInputSelectionMenuHidden };
+        GetTextInputCancelButton, GetTextInputTextSelection, GetTextInputSelectionMenuHidden,
+        GetBlurOnSubmit };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -9823,7 +9892,8 @@ void ResetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* setters[] = { ResetTextInputPlaceholder, ResetTextInputText, ResetCaretColor, ResetCaretStyle,
         ResetShowUnderline, ResetMaxLength, ResetEnterKeyType, ResetPlaceholderColor, ResetTextInputPlaceholderFont,
         ResetEnableKeyboardOnFocus, ResetTextInputType, ResetSelectedBackgroundColor, ResetShowPasswordIcon, nullptr,
-        ResetTextInputCancelButton, ResetTextInputTextSelection, ResetTextInputSelectionMenuHidden };
+        ResetTextInputCancelButton, ResetTextInputTextSelection, ResetTextInputSelectionMenuHidden,
+        ResetBlurOnSubmit };
     if (subTypeId >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

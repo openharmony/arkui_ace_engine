@@ -57,6 +57,19 @@ std::shared_ptr<RSModifier> ConvertOverlayModifier(const RefPtr<Modifier>& modif
     return modifierAdapter;
 }
 
+std::shared_ptr<RSModifier> ConvertForegroundModifier(const RefPtr<Modifier>& modifier)
+{
+    CHECK_NULL_RETURN(modifier, nullptr);
+    std::lock_guard<std::mutex> lock(g_ModifiersMapLock);
+    const auto& iter = g_ModifiersMap.find(modifier->GetId());
+    if (iter != g_ModifiersMap.end()) {
+        return iter->second;
+    }
+    auto modifierAdapter = std::make_shared<ForegroundModifierAdapter>(modifier);
+    g_ModifiersMap.emplace(modifier->GetId(), modifierAdapter);
+    return modifierAdapter;
+}
+
 void ModifierAdapter::RemoveModifier(int32_t modifierId)
 {
     std::lock_guard<std::mutex> lock(g_ModifiersMapLock);
@@ -179,6 +192,37 @@ void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
 }
 
 void OverlayModifierAdapter::AttachProperties()
+{
+    auto modifier = modifier_.Upgrade();
+    if (attachedProperties_.empty() && modifier) {
+        for (const auto& property : modifier->GetAttachedProperties()) {
+            auto rsProperty = ConvertToRSProperty(property);
+            AttachProperty(rsProperty);
+            attachedProperties_.emplace_back(rsProperty);
+        }
+    }
+}
+
+void ForegroundModifierAdapter::Draw(RSDrawingContext& context) const
+{
+    // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
+#ifndef USE_ROSEN_DRAWING
+    std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
+    RSCanvas canvas(&skCanvas);
+#else
+    CHECK_NULL_VOID(context.canvas);
+#endif
+    auto modifier = modifier_.Upgrade();
+    CHECK_NULL_VOID(modifier);
+#ifndef USE_ROSEN_DRAWING
+    DrawingContext context_ = { canvas, context.width, context.height };
+#else
+    DrawingContext context_ = { *context.canvas, context.width, context.height };
+#endif
+    modifier->onDraw(context_);
+}
+
+void ForegroundModifierAdapter::AttachProperties()
 {
     auto modifier = modifier_.Upgrade();
     if (attachedProperties_.empty() && modifier) {

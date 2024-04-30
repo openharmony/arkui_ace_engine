@@ -20,8 +20,8 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/components_ng/pattern/text/text_layout_algorithm_base.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -138,7 +138,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
 bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto maxSize = TextLayoutAlgorithmBase::GetMaxMeasureSize(contentConstraint);
+    auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper, maxSize.Width())) {
         return false;
     }
@@ -209,7 +209,7 @@ float RichEditorLayoutAlgorithm::GetShadowOffset(const std::list<RefPtr<SpanItem
                 LessNotEqual(shadowOffsetY, upOffsetY)) {
                 upOffsetY = shadowOffsetY - shadowBlurRadius;
             } else if (GreatOrEqual(shadowOffsetY, 0.0f) &&
-                GreatNotEqual(shadowOffsetY + shadowBlurRadius, downOffsetY)) {
+                       GreatNotEqual(shadowOffsetY + shadowBlurRadius, downOffsetY)) {
                 downOffsetY = shadowOffsetY + shadowBlurRadius;
             }
         }
@@ -220,7 +220,7 @@ float RichEditorLayoutAlgorithm::GetShadowOffset(const std::list<RefPtr<SpanItem
 
 void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    TextLayoutAlgorithmBase::Measure(layoutWrapper);
+    MultipleParagraphLayoutAlgorithm::Measure(layoutWrapper);
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     OptionalSizeF idealSize =
         CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT_MAIN_AXIS);
@@ -237,7 +237,7 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto context = layoutWrapper->GetHostNode()->GetContext();
     CHECK_NULL_VOID(context);
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-    TextLayoutAlgorithmBase::Layout(layoutWrapper);
+    MultipleParagraphLayoutAlgorithm::Layout(layoutWrapper);
 }
 
 OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
@@ -254,7 +254,7 @@ OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper
 ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const
 {
-    auto style = TextLayoutAlgorithmBase::GetParagraphStyle(textStyle, content, layoutWrapper);
+    auto style = MultipleParagraphLayoutAlgorithm::GetParagraphStyle(textStyle, content, layoutWrapper);
     style.fontSize = textStyle.GetFontSize().ConvertToPx();
     if (!pManager_->minParagraphFontSize.has_value() ||
         GreatNotEqual(pManager_->minParagraphFontSize.value(), style.fontSize)) {
@@ -266,6 +266,6 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
 void RichEditorLayoutAlgorithm::GetSpanParagraphStyle(
     const std::unique_ptr<TextLineStyle>& lineStyle, ParagraphStyle& pStyle)
 {
-    TextLayoutAlgorithmBase::GetSpanParagraphStyle(lineStyle, pStyle);
+    MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(lineStyle, pStyle);
 }
 } // namespace OHOS::Ace::NG

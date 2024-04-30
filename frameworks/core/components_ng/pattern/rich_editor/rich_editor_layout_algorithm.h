@@ -16,12 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_LAYOUT_ALGORITHM_H
 
+#include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/components_ng/pattern/text/text_layout_algorithm_base.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT RichEditorLayoutAlgorithm : public TextLayoutAlgorithmBase {
-    DECLARE_ACE_TYPE(RichEditorLayoutAlgorithm, TextLayoutAlgorithmBase);
+class ACE_EXPORT RichEditorLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm {
+    DECLARE_ACE_TYPE(RichEditorLayoutAlgorithm, MultipleParagraphLayoutAlgorithm);
 
 public:
     RichEditorLayoutAlgorithm() = delete;

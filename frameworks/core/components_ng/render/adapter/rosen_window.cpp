@@ -89,7 +89,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
         ContainerScope scope(id);
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRosenWindowTask");
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRosenWindowRenderServiceTask");
     }, id);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();

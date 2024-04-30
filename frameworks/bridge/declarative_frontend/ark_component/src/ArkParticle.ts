@@ -14,7 +14,7 @@
  */
 
 /// <reference path='./import.ts' />
-class ArkParticleComponent  extends ArkComponent implements ParticleAttribute {
+class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -22,7 +22,13 @@ class ArkParticleComponent  extends ArkComponent implements ParticleAttribute {
     modifierWithKey(this._modifiersWithKeys, ParticleModifier.identity, ParticleModifier, value);
     return this;
   }
+
+  emitter(value: Array<EmitterProperty>): this {
+    modifierWithKey(this._modifiersWithKeys, ParticleEmitterModifier.identity, ParticleEmitterModifier, value);
+    return this;
+  }
 }
+
 class ParticleModifier extends ModifierWithKey<Array<DisturbanceFieldOptions>> {
   constructor(value: Array<DisturbanceFieldOptions>) {
     super(value);
@@ -62,6 +68,88 @@ class ParticleModifier extends ModifierWithKey<Array<DisturbanceFieldOptions>> {
         dataArray.push(parseWithDefaultNumber(data.noiseAmplitude, 1));
       }
       getUINativeModule().particle.setDisturbanceField(node, dataArray);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isString(this.stageValue) && isString(this.value)) {
+      return this.stageValue !== this.value;
+    } else {
+      return true;
+    }
+  }
+}
+
+class ParticleEmitterModifier extends ModifierWithKey<Array<EmitterProperty>> {
+  constructor(value: Array<EmitterProperty>) {
+    super(value);
+  }
+
+  static identity: Symbol = Symbol('emitter');
+  applyPeer(node, reset) {
+    let emitRatePlaceHolder, positionXPlaceHolder, positionYPlaceHolder, sizeXPlaceHolder, sizeYPlaceHolder;
+    if (reset) {
+      getUINativeModule().particle.resetEmitter(node);
+    }
+    else {
+      let dataArray = [];
+      if (!Array.isArray(this.value)) {
+        return;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        let data = this.value[i];
+        let indexValue = 0;
+        if (data.index > 0 && data.index < this.value.length) {
+          indexValue = data.index;
+        }
+        dataArray.push(indexValue);
+
+        let emitRateValue = 5;
+        if (isNumber(data.emitRate)) {
+          dataArray.push(1);
+          if (data.emitRate > 0) {
+            emitRateValue = data.emitRate;
+          }
+          dataArray.push(emitRateValue);
+        } else {
+          dataArray.push(0);
+          dataArray.push(emitRatePlaceHolder);
+        }
+
+        if (isObject(data.position)) {
+          if (isNumber(data.position.x) && isNumber(data.position.y)) {
+            dataArray.push(1);
+            dataArray.push(data.position.x);
+            dataArray.push(data.position.y);
+          } else {
+            dataArray.push(0);
+            dataArray.push(positionXPlaceHolder);
+            dataArray.push(positionYPlaceHolder);
+          }
+        } else {
+          dataArray.push(0);
+          dataArray.push(positionXPlaceHolder);
+          dataArray.push(positionYPlaceHolder);
+        }
+
+        if (isObject(data.size)) {
+          if (data.size.width > 0 && data.size.height > 0) {
+            dataArray.push(1);
+            dataArray.push(data.size.width);
+            dataArray.push(data.size.height);
+          } else {
+            dataArray.push(0);
+            dataArray.push(sizeXPlaceHolder);
+            dataArray.push(sizeYPlaceHolder);
+          }
+        }
+        else {
+          dataArray.push(0);
+          dataArray.push(sizeXPlaceHolder);
+          dataArray.push(sizeYPlaceHolder);
+        }
+      }
+      getUINativeModule().particle.setEmitter(node, dataArray);
     }
   }
 

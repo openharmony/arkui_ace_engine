@@ -3132,21 +3132,12 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     RichEditorAbstractSpanResult retInfo;
     retInfo.SetSpanIndex(host->GetChildIndex(spanNode));
     retInfo.SetEraseLength(insertValueLength);
-    retInfo.SetValue(spanNode->GetSpanItem()->content);
-    auto contentLength = StringUtils::ToWstring(spanNode->GetSpanItem()->content).length();
-    if (isCreate) {
-        auto spanEnd = caretPosition_ + 1;
-        auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
-        retInfo.SetSpanRangeStart(spanStart);
-        retInfo.SetSpanRangeEnd(spanEnd);
-        retInfo.SetOffsetInSpan(0);
-    } else {
-        auto spanEnd = spanNode->GetSpanItem()->position;
-        auto spanStart = spanEnd - static_cast<int32_t>(contentLength);
-        retInfo.SetSpanRangeStart(spanStart);
-        retInfo.SetSpanRangeEnd(spanEnd);
-        retInfo.SetOffsetInSpan(GetCaretPosition() - retInfo.GetSpanRangeStart());
-    }
+    auto spanItem = spanNode->GetSpanItem();
+    retInfo.SetValue(spanItem->content);
+    auto contentLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
+    retInfo.SetSpanRangeStart(spanItem->position - contentLength);
+    retInfo.SetSpanRangeEnd(spanItem->position);
+    retInfo.SetOffsetInSpan(caretPosition_ - retInfo.GetSpanRangeStart());
     retInfo.SetFontColor(spanNode->GetTextColorValue(Color::BLACK).ColorToString());
     retInfo.SetFontSize(spanNode->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp());
     retInfo.SetFontStyle(spanNode->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
@@ -5792,7 +5783,25 @@ bool RichEditorPattern::NeedAiAnalysis(
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis IsClickBoundary, return!");
         return false;
     }
+
+    if (IsIndexAfterOrInSymbolOrEmoji(pos)) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis IsIndexAfterOrInSymbolOrEmoji, return!");
+        return false;
+    }
+
     return true;
+}
+
+bool RichEditorPattern::IsIndexAfterOrInSymbolOrEmoji(int32_t index) {
+    auto it = GetSpanIter(index);
+    CHECK_NULL_RETURN((it != spans_.end()), false);
+    auto spanItem = *it;
+    CHECK_NULL_RETURN(spanItem, false);
+    auto spanEnd = spanItem->position;
+    auto spanStart = spanEnd - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
+    bool isIndexAfterOrInSymbol = spanItem->unicode != 0 && index > spanStart && index <= spanEnd;
+    bool isIndexAfterOrInEmoji = TextEmojiProcessor::IsIndexAfterOrInEmoji(index - spanStart, spanItem->content);
+    return isIndexAfterOrInSymbol || isIndexAfterOrInEmoji;
 }
 
 void RichEditorPattern::AdjustCursorPosition(int32_t& pos)

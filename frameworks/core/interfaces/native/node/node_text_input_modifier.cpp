@@ -1361,6 +1361,19 @@ void ResetTextInputOnPaste(ArkUINodeHandle node)
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
 }
 
+void SetBlurOnSubmit(ArkUINodeHandle node, ArkUI_Bool blurOnSubmit)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetBlurOnSubmit(frameNode, blurOnSubmit);
+}
+
+ArkUI_Bool GetBlurOnSubmit(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return TextFieldModelNG::GetBlurOnSubmit(frameNode);
+}
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
 {
@@ -1401,8 +1414,9 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputOnTextSelectionChange, ResetTextInputOnTextSelectionChange, SetTextInputOnContentScroll,
         ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy, SetTextInputOnCut, ResetTextInputOnCut,
         SetTextInputOnPaste, ResetTextInputOnPaste, GetTextInputSelectionMenuHidden, SetTextInputShowPassword,
-        ResetTextInputShowPassword, GetTextInputShowPassword, GetTextInputAdaptMinFontSize,
-        GetTextInputAdaptMaxFontSize, GetTextInputLineHeight, GetTextInputMaxLines, GetTextInputFontFeature };
+        ResetTextInputShowPassword, GetTextInputShowPassword, SetBlurOnSubmit, GetBlurOnSubmit,
+        GetTextInputAdaptMinFontSize, GetTextInputAdaptMaxFontSize, GetTextInputLineHeight, GetTextInputMaxLines,
+        GetTextInputFontFeature };
     return &modifier;
 }
 

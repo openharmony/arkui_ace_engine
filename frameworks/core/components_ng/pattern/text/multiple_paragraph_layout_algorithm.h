@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_BASE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_BASE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_MULTIPLE_PARAGRAPH_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_MULTIPLE_PARAGRAPH_LAYOUT_ALGORITHM_H
 
 #include <list>
 #include <optional>
@@ -34,12 +34,12 @@
 
 namespace OHOS::Ace::NG {
 // TextLayoutAlgorithm acts as the underlying text layout.
-class ACE_EXPORT TextLayoutAlgorithmBase : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(TextLayoutAlgorithmBase, BoxLayoutAlgorithm);
+class ACE_EXPORT MultipleParagraphLayoutAlgorithm : public BoxLayoutAlgorithm {
+    DECLARE_ACE_TYPE(MultipleParagraphLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    TextLayoutAlgorithmBase() = default;
-    ~TextLayoutAlgorithmBase() override = default;
+    MultipleParagraphLayoutAlgorithm() = default;
+    ~MultipleParagraphLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -122,8 +122,11 @@ private:
 
     void GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex);
 
-    ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithmBase);
+    int32_t preParagraphsPlaceholderCount_ = 0;
+    int32_t currentParagraphPlaceholderCount_ = 0;
+
+    ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_BASE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_MULTIPLE_PARAGRAPH_LAYOUT_ALGORITHM_H

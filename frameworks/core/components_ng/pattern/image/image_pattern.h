@@ -386,6 +386,7 @@ private:
     void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
     void ControlAnimation(int32_t index);
+    void SetObscured();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;

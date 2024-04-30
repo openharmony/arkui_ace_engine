@@ -17,7 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_PAINT_METHOD_H
 
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
+
+#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+
+#ifdef USE_FAST_TASKPOOL
+#include <memory>
+#endif
 
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
@@ -39,8 +45,10 @@ public:
 
     ~CanvasPaintMethod() override = default;
 
+    void GetFastTaskPool();
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
+#ifndef USE_FAST_TASKPOOL
     void PushTask(const TaskFunc& task)
     {
         tasks_.emplace_back(task);
@@ -50,6 +58,7 @@ public:
     {
         return !tasks_.empty();
     }
+#endif
 
     double GetWidth()
     {
@@ -102,8 +111,12 @@ private:
     {
         return rsCanvas_.get();
     }
-
+#ifndef USE_FAST_TASKPOOL
     std::list<TaskFunc> tasks_;
+#else
+    friend class CustomPaintPattern;
+    std::unique_ptr<CanvasPaintOp> fastTaskPool_ = std::make_unique<CanvasPaintOp>();
+#endif
 
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;
     OnModifierUpdateFunc onModifierUpdate_;

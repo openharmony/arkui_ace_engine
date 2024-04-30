@@ -45,19 +45,19 @@ void ParticleModelNG::DisturbanceField(const std::vector<ParticleDisturbance>& d
     pattern->UpdateDisturbance(disturbanceArray);
 }
 
-void ParticleModelNG::updateEmitter(const std::vector<EmitterProps>& emitterProps, FrameNode* frameNode)
+void ParticleModelNG::updateEmitter(const std::vector<EmitterProperty>& property, FrameNode* frameNode)
 {
     auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
-    pattern->updateEmitterPosition(emitterProps);
+    pattern->updateEmitterPosition(property);
 }
 
-void ParticleModelNG::updateEmitter(const std::vector<EmitterProps>& emitterProps)
+void ParticleModelNG::updateEmitter(const std::vector<EmitterProperty>& property)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
-    pattern->updateEmitterPosition(emitterProps);
+    pattern->updateEmitterPosition(property);
 }
 } // namespace OHOS::Ace::NG

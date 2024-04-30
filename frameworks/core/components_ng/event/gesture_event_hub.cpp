@@ -414,7 +414,7 @@ bool GestureEventHub::IsPixelMapNeedScale() const
     CHECK_NULL_RETURN(frameNode, false);
     auto width = pixelMap_->GetWidth();
     auto maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
-    if (frameNode->GetDragPreviewOption().mode == DragPreviewMode::DISABLE_SCALE || width == 0 || width < maxWidth) {
+    if (!frameNode->GetDragPreviewOption().isScaleEnabled || width == 0 || width < maxWidth) {
         return false;
     }
     return true;
@@ -604,8 +604,7 @@ float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t widt
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, scale);
     auto windowScale = dragDropManager->GetWindowScale();
-    if (frameNode->GetDragPreviewOption().mode == DragPreviewMode::DISABLE_SCALE ||
-        !(frameNode->GetTag() == V2::WEB_ETS_TAG)) {
+    if (!frameNode->GetDragPreviewOption().isScaleEnabled || !(frameNode->GetTag() == V2::WEB_ETS_TAG)) {
         return scale * windowScale;
     }
     int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
@@ -945,7 +944,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dipScale);
-    UpdateExtraInfo(frameNode, arkExtraInfoJson);
+    UpdateExtraInfo(frameNode, arkExtraInfoJson, scale);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto windowId = container->GetWindowId();
@@ -1021,10 +1020,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
 }
 
-void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson)
+void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode,
+    std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale)
 {
     double opacity = frameNode->GetDragPreviewOption().options.opacity;
     arkExtraInfoJson->Put("dip_opacity", opacity);
+    DragEventActuator::PrepareShadowParametersForDragData(frameNode, arkExtraInfoJson, scale);
 }
 
 int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>& context)
@@ -1041,7 +1042,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([dragDropManager]() {
             dragDropManager->HideDragPreviewOverlay();
-            }, TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
+        }, TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }

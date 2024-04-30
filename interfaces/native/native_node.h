@@ -1458,13 +1458,15 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: text decoration style {@link ArkUI_TextDecorationType}.
+     * .value[0].i32: text decoration type {@link ArkUI_TextDecorationType}.
      * The default value is <b>ARKUI_TEXT_DECORATION_TYPE_NONE</b>.\n
      * .value[1]?.u32: text decoration color, in 0xARGB format. For example, 0xFFFF0000 indicates red. Optional.\n
+     * .value[2]?.i32: text decoration style {@link ArkUI_TextDecorationStyle}. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: text decoration style {@link ArkUI_TextDecorationType}.\n
+     * .value[0].i32: text decoration type {@link ArkUI_TextDecorationType}.\n
      * .value[1].u32: text decoration color, in 0xARGB format. \n
+     * .value[2].i32: text decoration style {@link ArkUI_TextDecorationStyle}. \n
      *
      */
     NODE_TEXT_DECORATION,
@@ -1845,6 +1847,23 @@ typedef enum {
      */
     NODE_IMAGE_ALT,
     /**
+     * @brief Sets the resizable image options.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: width of the left edge. The unit is vp. \n
+     * .value[1].f32: width of the top edge. The unit is vp. \n
+     * .value[2].f32: width of the right edge. The unit is vp. \n
+     * .value[3].f32: width of the bottom edge. The unit is vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: width of the left edge. The unit is vp. \n
+     * .value[1].f32: width of the top edge. The unit is vp. \n
+     * .value[2].f32: width of the right edge. The unit is vp. \n
+     * .value[3].f32: width of the bottom edge. The unit is vp. \n
+     *
+     */
+    NODE_IMAGE_RESIZABLE,
+    /**
      * @brief Defines whether the image is draggable.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -2171,7 +2190,17 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_SELECTION_MENU_HIDDEN,
-
+    /**
+     * @brief Sets whether the text box loses focus after the Enter key is pressed to submit information.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     *
+     */
+    NODE_TEXT_INPUT_BLUR_ON_SUBMIT,
     /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -2311,7 +2340,17 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_SELECTION_MENU_HIDDEN,
-
+    /**
+     * @brief Sets whether the multi-line text box loses focus after the Enter key is pressed to submit information.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     *
+     */
+    NODE_TEXT_AREA_BLUR_ON_SUBMIT,
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4465,7 +4504,7 @@ typedef enum {
      * Condition for triggering the event: \n
      * This method is triggered once during list initialization. \n
      * It is triggered when the index value of the first or last subcomponent in the list display area changes. \n
-     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is 
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is
      * {@Link ArkUI_NodeComponentEvent}. \n
      * {@Link ArkUI_NodeComponentEvent} contains three parameters: \n
      * ArkUI_NodeComponentEvent.data[0].i32: List Displays \n
@@ -4502,9 +4541,10 @@ typedef enum {
      * Out-of-bounds rebound. \n
      * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
      * {@Link ArkUI_NodeComponentEvent}. \n
-     * {@Link ArkUI_NodeComponentEvent} contains two parameters:\n
-     * ArkUI_NodeComponentEvent.data[0].f32: offset of each frame scrolling. 
-     * The offset is positive when the list content is scrolled up and is negative when the list content is scrolled down. \n
+     * {@Link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * ArkUI_NodeComponentEvent.data[0].f32: offset of each frame scrolling. \n
+     * The offset is positive when the list content is scrolled up and is negative \n
+     * when the list content is scrolled down. \n
      * ArkUI_NodeComponentEvent.data[1].i32: Current sliding state. \n
      */
     NODE_LIST_ON_DID_SCROLL,

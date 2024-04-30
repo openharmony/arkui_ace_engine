@@ -1083,7 +1083,7 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
             }
             ContainerScope scope(id);
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
-            }, "ArkUISetNativeEngineLoop");
+        }, "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
 }

@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 94
+#define ARKUI_FULL_API_VERSION 95
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 94
+#define ARKUI_NODE_API_VERSION 95
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -1541,6 +1541,10 @@ struct ArkUIImageModifier {
     void (*resetEdgeAntialiasing)(ArkUINodeHandle node);
     void (*setResizable)(ArkUINodeHandle node, const ArkUIStringAndFloat* options);
     void (*resetResizable)(ArkUINodeHandle node);
+    void (*setDynamicRangeMode)(ArkUINodeHandle node, ArkUI_Int32 dynamicRangeMode);
+    void (*resetDynamicRangeMode)(ArkUINodeHandle node);
+    void (*setEnhancedImageQuality)(ArkUINodeHandle node, ArkUI_Int32 imageQuality);
+    void (*resetEnhancedImageQuality)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getImageSrc)(ArkUINodeHandle node);
     ArkUI_Int32 (*getAutoResize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getObjectRepeat)(ArkUINodeHandle node);
@@ -1550,6 +1554,9 @@ struct ArkUIImageModifier {
     ArkUI_CharPtr (*getAlt)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageDraggable)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRenderMode)(ArkUINodeHandle node);
+    void (*setImageResizable)(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
+        ArkUI_Float32 right, ArkUI_Float32 bottom);
+    void (*getImageResizable)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 size);
 };
 
 struct ArkUIColumnModifier {
@@ -2348,6 +2355,8 @@ struct ArkUITextInputModifier {
     void (*setTextInputShowPassword)(ArkUINodeHandle node, ArkUI_Uint32 showPassword);
     void (*resetTextInputShowPassword)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextInputShowPassword)(ArkUINodeHandle node);
+    void (*setBlurOnSubmit)(ArkUINodeHandle node, ArkUI_Bool blurOnSubmit);
+    ArkUI_Bool (*getBlurOnSubmit)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputAdaptMinFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputAdaptMaxFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputLineHeight)(ArkUINodeHandle node);

@@ -361,7 +361,7 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
 bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
-    auto maxSize = TextLayoutAlgorithmBase::GetMaxMeasureSize(contentConstraint);
+    auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     if (!CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;
     }
@@ -378,7 +378,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
 OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 {
     SetContentOffset(layoutWrapper);
-    return OffsetF(0.0, 0.0);
+    return OffsetF(0.0f, 0.0f);
 }
 
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
@@ -413,7 +413,7 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
             contentConstraint.maxSize.Height(), stepSize)) {
         return false;
     }
-    auto maxSize = TextLayoutAlgorithmBase::GetMaxMeasureSize(contentConstraint);
+    auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     while (GreatOrEqual(maxFontSize, minFontSize)) {
         textStyle.SetFontSize(Dimension(maxFontSize));
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
@@ -494,7 +494,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle
     // generally not allowed to be modified
     if (!contentConstraint.selfIdealSize.Width()) {
         float paragraphNewWidth = std::min(std::min(paragraph->GetTextWidth(), paragraph->GetMaxWidth()) + indent_,
-            TextLayoutAlgorithmBase::GetMaxMeasureSize(contentConstraint).Width());
+            MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint).Width());
         paragraphNewWidth =
             std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
         if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
@@ -567,6 +567,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     // create a paragraph with all text in 1 line
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
+    textStyle.SetTextIndent(Dimension(0.0f));
 
     if (!textStyle.GetAdaptTextSize()) {
         if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
@@ -577,7 +578,6 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
             return std::nullopt;
         }
     }
-    textStyle.SetTextIndent(Dimension(0.0));
     textStyle_ = textStyle;
     auto paragraph = GetSingleParagraph();
 

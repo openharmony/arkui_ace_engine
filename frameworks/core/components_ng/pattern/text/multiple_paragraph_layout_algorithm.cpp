@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text/text_layout_algorithm_base.h"
+#include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 
 #include "text_layout_adapter.h"
 
@@ -52,7 +52,7 @@ float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 }
 } // namespace
 
-void TextLayoutAlgorithmBase::ConstructTextStyles(
+void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle)
 {
     if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
@@ -84,7 +84,7 @@ void TextLayoutAlgorithmBase::ConstructTextStyles(
     UpdateTextColorIfForeground(frameNode, textStyle);
 }
 
-void TextLayoutAlgorithmBase::Measure(LayoutWrapper* layoutWrapper)
+void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::Measure(layoutWrapper);
     auto baselineDistance = 0.0f;
@@ -98,7 +98,7 @@ void TextLayoutAlgorithmBase::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetBaselineDistance(baselineDistance);
 }
 
-void TextLayoutAlgorithmBase::Layout(LayoutWrapper* layoutWrapper)
+void MultipleParagraphLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto contentOffset = GetContentOffset(layoutWrapper);
@@ -129,7 +129,7 @@ void TextLayoutAlgorithmBase::Layout(LayoutWrapper* layoutWrapper)
         }
         child->SetActive(true);
         auto indexTemp = placeholderIndex.at(index);
-        auto rect = rectsForPlaceholders.at(indexTemp) - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+        auto rect = rectsForPlaceholders.at(indexTemp) - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             ++index;
@@ -142,7 +142,7 @@ void TextLayoutAlgorithmBase::Layout(LayoutWrapper* layoutWrapper)
     pattern->InitSpanImageLayout(placeholderIndex, rectsForPlaceholders, contentOffset);
 }
 
-void TextLayoutAlgorithmBase::GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex)
+void MultipleParagraphLayoutAlgorithm::GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex)
 {
     for (auto && group : spans_) {
         for (const auto& child : group) {
@@ -159,7 +159,7 @@ void TextLayoutAlgorithmBase::GetChildrenPlaceholderIndex(std::vector<int32_t>& 
     }
 }
 
-void TextLayoutAlgorithmBase::GetSpanParagraphStyle(
+void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     const std::unique_ptr<TextLineStyle>& lineStyle, ParagraphStyle& pStyle)
 {
     CHECK_NULL_VOID(lineStyle);
@@ -189,7 +189,8 @@ void TextLayoutAlgorithmBase::GetSpanParagraphStyle(
     }
 }
 
-void TextLayoutAlgorithmBase::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle)
+void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
+    const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle)
 {
     auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
         auto frameNode = weakNode.Upgrade();
@@ -224,7 +225,8 @@ void TextLayoutAlgorithmBase::FontRegisterCallback(const RefPtr<FrameNode>& fram
     }
 }
 
-void TextLayoutAlgorithmBase::UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle)
+void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
+    const RefPtr<FrameNode>& frameNode, TextStyle& textStyle)
 {
     auto renderContext = frameNode->GetRenderContext();
     if (renderContext->HasForegroundColor()) {
@@ -236,7 +238,7 @@ void TextLayoutAlgorithmBase::UpdateTextColorIfForeground(const RefPtr<FrameNode
     }
 }
 
-void TextLayoutAlgorithmBase::SetPropertyToModifier(
+void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(
     const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier)
 {
     auto fontFamily = layoutProperty->GetFontFamily();
@@ -285,7 +287,7 @@ void TextLayoutAlgorithmBase::SetPropertyToModifier(
     }
 }
 
-RefPtr<Paragraph> TextLayoutAlgorithmBase::GetSingleParagraph() const
+RefPtr<Paragraph> MultipleParagraphLayoutAlgorithm::GetSingleParagraph() const
 {
     CHECK_NULL_RETURN(paragraphManager_, nullptr);
     CHECK_NULL_RETURN(!paragraphManager_->GetParagraphs().empty(), nullptr);
@@ -295,9 +297,9 @@ RefPtr<Paragraph> TextLayoutAlgorithmBase::GetSingleParagraph() const
     return paragraph;
 }
 
-OffsetF TextLayoutAlgorithmBase::SetContentOffset(LayoutWrapper* layoutWrapper)
+OffsetF MultipleParagraphLayoutAlgorithm::SetContentOffset(LayoutWrapper* layoutWrapper)
 {
-    OffsetF contentOffset(0.0, 0.0);
+    OffsetF contentOffset(0.0f, 0.0f);
     CHECK_NULL_RETURN(layoutWrapper, contentOffset);
 
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -319,7 +321,7 @@ OffsetF TextLayoutAlgorithmBase::SetContentOffset(LayoutWrapper* layoutWrapper)
     return contentOffset;
 }
 
-ParagraphStyle TextLayoutAlgorithmBase::GetParagraphStyle(
+ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
     const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const
 {
     return { .direction = GetTextDirection(content, layoutWrapper),
@@ -334,7 +336,8 @@ ParagraphStyle TextLayoutAlgorithmBase::GetParagraphStyle(
     };
 }
 
-TextDirection TextLayoutAlgorithmBase::GetTextDirection(const std::string& content, LayoutWrapper* layoutWrapper)
+TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
+    const std::string& content, LayoutWrapper* layoutWrapper)
 {
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
@@ -357,7 +360,7 @@ TextDirection TextLayoutAlgorithmBase::GetTextDirection(const std::string& conte
     return textDirection;
 }
 
-bool TextLayoutAlgorithmBase::ParagraphReLayout(const LayoutConstraintF& contentConstraint)
+bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF& contentConstraint)
 {
     // Confirmed specification: The width of the text paragraph covers the width of the component, so this code is
     // generally not allowed to be modified
@@ -380,8 +383,8 @@ bool TextLayoutAlgorithmBase::ParagraphReLayout(const LayoutConstraintF& content
     return true;
 }
 
-bool TextLayoutAlgorithmBase::UpdateParagraphBySpan(
-    LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth)
+bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layoutWrapper,
+    ParagraphStyle paraStyle, double maxWidth)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -401,6 +404,8 @@ bool TextLayoutAlgorithmBase::UpdateParagraphBySpan(
     std::vector<WeakPtr<FrameNode>> imageNodeList;
     std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholderInfo;
     int32_t paragraphIndex = -1;
+    preParagraphsPlaceholderCount_ = 0;
+    currentParagraphPlaceholderCount_ = 0;
 
     auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
     for (auto && group : spans_) {
@@ -460,6 +465,8 @@ bool TextLayoutAlgorithmBase::UpdateParagraphBySpan(
                 aiSpanMap = child->aiSpanMap;
             }
         }
+        preParagraphsPlaceholderCount_ += currentParagraphPlaceholderCount_;
+        currentParagraphPlaceholderCount_ = 0;
         shadowOffset_ += GetShadowOffset(group);
         paragraph->Build();
         ApplyIndent(spanParagraphStyle, paragraph, maxWidth);
@@ -477,7 +484,7 @@ bool TextLayoutAlgorithmBase::UpdateParagraphBySpan(
     return true;
 }
 
-void TextLayoutAlgorithmBase::AddSymbolSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
+void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
     child->SetIsParentText(frameNode->GetTag() == V2::TEXT_ETS_TAG);
@@ -487,7 +494,7 @@ void TextLayoutAlgorithmBase::AddSymbolSpanToParagraph(const RefPtr<SpanItem>& c
     child->content = "  ";
 }
 
-void TextLayoutAlgorithmBase::AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
+void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
     child->UpdateParagraph(frameNode, paragraph);
@@ -495,7 +502,7 @@ void TextLayoutAlgorithmBase::AddTextSpanToParagraph(const RefPtr<SpanItem>& chi
     child->position = spanTextLength;
 }
 
-void TextLayoutAlgorithmBase::AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem,
+void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem,
     const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain,
     const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength)
 {
@@ -506,7 +513,7 @@ void TextLayoutAlgorithmBase::AddImageToParagraph(RefPtr<ImageSpanItem>& imageSp
     CHECK_NULL_VOID(id == targetId);
     layoutWrapper->Measure(layoutConstrain);
     PlaceholderStyle placeholderStyle;
-    Dimension baselineOffset = Dimension(0.0f);
+    auto baselineOffset = Dimension(0.0f);
     auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
     if (imageLayoutProperty) {
         placeholderStyle.verticalAlign = imageLayoutProperty->GetVerticalAlign().value_or(VerticalAlign::BOTTOM);
@@ -522,12 +529,14 @@ void TextLayoutAlgorithmBase::AddImageToParagraph(RefPtr<ImageSpanItem>& imageSp
         placeholderStyle.baselineOffset = (baselineOffset - Dimension(IMAGE_SPAN_BASELINE_OFFSET)).ConvertToPx();
         imageSpanItem->placeholderIndex = imageSpanItem->UpdateParagraph(frameNode, paragraph, placeholderStyle);
     }
+    currentParagraphPlaceholderCount_++;
+    imageSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     imageSpanItem->content = " ";
     spanTextLength += 1;
     imageSpanItem->position = spanTextLength;
 }
 
-void TextLayoutAlgorithmBase::AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
+void MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
     const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain,
     const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength)
 {
@@ -546,12 +555,14 @@ void TextLayoutAlgorithmBase::AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanIt
     placeholderStyle.verticalAlign = VerticalAlign::NONE;
     placeholderSpanItem->placeholderIndex =
         placeholderSpanItem->UpdateParagraph(frameNode, paragraph, placeholderStyle);
+    currentParagraphPlaceholderCount_++;
+    placeholderSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     placeholderSpanItem->content = " ";
     spanTextLength += 1;
     placeholderSpanItem->position = spanTextLength;
 }
 
-void TextLayoutAlgorithmBase::UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem,
+void MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem,
     LayoutWrapper* layoutWrapper, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,
     CustomSpanPlaceholderInfo& customSpanPlaceholder)
 {
@@ -568,19 +579,22 @@ void TextLayoutAlgorithmBase::UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>
     if (fontSizeOpt.has_value()) {
         fontSize = fontSizeOpt.value().ConvertToVp() * context->GetFontScale();
     }
-    auto width = 0.0;
-    auto height = 0.0;
+    auto width = 0.0f;
+    auto height = 0.0f;
     if (customSpanItem->onMeasure.has_value()) {
         auto onMeasure = customSpanItem->onMeasure.value();
         CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
-        width = customSpanMetrics.width * context->GetDipScale();
-        height = customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale();
+        width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
+        height = static_cast<float>(
+            customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
     }
     PlaceholderStyle placeholderStyle;
     placeholderStyle.width = width;
     placeholderStyle.height = height;
     placeholderStyle.verticalAlign = VerticalAlign::NONE;
     customSpanItem->placeholderIndex = customSpanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    currentParagraphPlaceholderCount_++;
+    customSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     customSpanItem->content = " ";
     spanTextLength += 1;
     customSpanItem->position = spanTextLength;
@@ -590,7 +604,7 @@ void TextLayoutAlgorithmBase::UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>
     customSpanPlaceholder.customSpanIndex = customSpanItem->placeholderIndex;
 }
 
-void TextLayoutAlgorithmBase::ApplyIndent(
+void MultipleParagraphLayoutAlgorithm::ApplyIndent(
     ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width)
 {
     auto indentValue = paragraphStyle.indent;
@@ -623,7 +637,7 @@ void TextLayoutAlgorithmBase::ApplyIndent(
     paragraph->SetIndents(indents);
 }
 
-void TextLayoutAlgorithmBase::UpdateSymbolSpanEffect(
+void MultipleParagraphLayoutAlgorithm::UpdateSymbolSpanEffect(
     RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans)
 {
     for (const auto& child : spans) {
@@ -637,7 +651,7 @@ void TextLayoutAlgorithmBase::UpdateSymbolSpanEffect(
     }
 }
 
-SizeF TextLayoutAlgorithmBase::GetMaxMeasureSize(const LayoutConstraintF& contentConstraint)
+SizeF MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraintF& contentConstraint)
 {
     auto maxSize = contentConstraint.selfIdealSize;
     maxSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);

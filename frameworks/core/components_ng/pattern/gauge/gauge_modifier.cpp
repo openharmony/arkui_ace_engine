@@ -61,6 +61,9 @@ void GaugeModifier::UpdateValue()
     CHECK_NULL_VOID(paintProperty);
     UpdateProperty(paintProperty);
     float value = paintProperty->GetValueValue();
+    if (paintProperty->GetIsSensitiveValue()) {
+        value = 0.0f;
+    }
     float max = paintProperty->GetMaxValue();
     float min = paintProperty->GetMinValue();
     if (NearEqual(value, value_->Get())) {
@@ -367,22 +370,26 @@ void GaugeModifier::NewPaintCircularAndIndicator(RSCanvas& canvas)
     auto theme = pipelineContext->GetTheme<GaugeTheme>();
     data.thickness = theme->GetTrackThickness().ConvertToPx();
     CalculateStartAndSweepDegree(paintProperty, data);
-    switch (paintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT)) {
-        case GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT: {
-            PaintMultiSegmentGradientCircular(canvas, data, paintProperty);
-            break;
+    if (paintProperty->GetIsSensitiveValue()) {
+        PaintMonochromeCircular(canvas, data, paintProperty);
+    } else {
+        switch (paintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT)) {
+            case GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT: {
+                PaintMultiSegmentGradientCircular(canvas, data, paintProperty);
+                break;
+            }
+            case GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT: {
+                PaintSingleSegmentGradientCircular(canvas, data, paintProperty);
+                break;
+            }
+            case GaugeType::TYPE_CIRCULAR_MONOCHROME: {
+                PaintMonochromeCircular(canvas, data, paintProperty);
+                break;
+            }
+            default:
+                // do nothing.
+                break;
         }
-        case GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT: {
-            PaintSingleSegmentGradientCircular(canvas, data, paintProperty);
-            break;
-        }
-        case GaugeType::TYPE_CIRCULAR_MONOCHROME: {
-            PaintMonochromeCircular(canvas, data, paintProperty);
-            break;
-        }
-        default:
-            // do nothing.
-            break;
     }
     canvas.Restore();
 }
@@ -395,7 +402,11 @@ void GaugeModifier::PaintMonochromeCircular(
     if (paintProperty->HasGradientColors()) {
         color = paintProperty->GetGradientColorsValue().at(0).at(0).first;
     }
-
+    auto gaugeType = paintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
+    auto isSensitive = paintProperty->GetIsSensitive().value_or(false);
+    if (isSensitive && gaugeType != GaugeType::TYPE_CIRCULAR_MONOCHROME) {
+        color = Color::GRAY;
+    }
     Color backgroundColor = color.ChangeOpacity(MONOCHROME_CIRCULAR_BACKGROUND_COLOR_OPACITY);
     float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
     auto ratio = GetValueRatio(paintProperty);
