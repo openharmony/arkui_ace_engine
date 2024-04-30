@@ -309,6 +309,7 @@ public:
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     OffsetF CalculateEmptyValueCaretRect();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
+    void RemoveEmptySpanItems();
     RefPtr<GestureEventHub> GetGestureEventHub();
     float GetSelectedMaxWidth();
 

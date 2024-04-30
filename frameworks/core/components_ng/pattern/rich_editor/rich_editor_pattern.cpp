@@ -662,6 +662,7 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     } else {
         DeleteSpansByRange(start, end, startInfo, endInfo);
     }
+    RemoveEmptySpanItems();
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
         CloseSelectOverlay();
@@ -676,6 +677,17 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     }
     UpdateSpanPosition();
     AfterChangeText(changeValue);
+}
+
+void RichEditorPattern::RemoveEmptySpanItems()
+{
+    for (auto it = spans_.begin(); it != spans_.end();) {
+        if ((*it)->content.empty()) {
+            it = spans_.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info)
