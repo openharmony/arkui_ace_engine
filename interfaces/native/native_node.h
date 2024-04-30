@@ -1454,13 +1454,15 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: text decoration style {@link ArkUI_TextDecorationType}.
+     * .value[0].i32: text decoration type {@link ArkUI_TextDecorationType}.
      * The default value is <b>ARKUI_TEXT_DECORATION_TYPE_NONE</b>.\n
      * .value[1]?.u32: text decoration color, in 0xARGB format. For example, 0xFFFF0000 indicates red. Optional.\n
+     * .value[2]?.i32: text decoration style {@link ArkUI_TextDecorationStyle}. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: text decoration style {@link ArkUI_TextDecorationType}.\n
+     * .value[0].i32: text decoration type {@link ArkUI_TextDecorationType}.\n
      * .value[1].u32: text decoration color, in 0xARGB format. \n
+     * .value[2].i32: text decoration style {@link ArkUI_TextDecorationStyle}. \n
      *
      */
     NODE_TEXT_DECORATION,
@@ -1824,6 +1826,23 @@ typedef enum {
      */
     NODE_IMAGE_ALT,
     /**
+     * @brief Sets the resizable image options.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: width of the left edge. The unit is vp. \n
+     * .value[1].f32: width of the top edge. The unit is vp. \n
+     * .value[2].f32: width of the right edge. The unit is vp. \n
+     * .value[3].f32: width of the bottom edge. The unit is vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: width of the left edge. The unit is vp. \n
+     * .value[1].f32: width of the top edge. The unit is vp. \n
+     * .value[2].f32: width of the right edge. The unit is vp. \n
+     * .value[3].f32: width of the bottom edge. The unit is vp. \n
+     *
+     */
+    NODE_IMAGE_RESIZABLE,
+    /**
      * @brief Defines whether the image is draggable.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -2150,7 +2169,17 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_SELECTION_MENU_HIDDEN,
-
+    /**
+     * @brief Sets whether the text box loses focus after the Enter key is pressed to submit information.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     *
+     */
+    NODE_TEXT_INPUT_BLUR_ON_SUBMIT,
     /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -2290,7 +2319,17 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_SELECTION_MENU_HIDDEN,
-
+    /**
+     * @brief Sets whether the multi-line text box loses focus after the Enter key is pressed to submit information.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     *
+     */
+    NODE_TEXT_AREA_BLUR_ON_SUBMIT,
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *

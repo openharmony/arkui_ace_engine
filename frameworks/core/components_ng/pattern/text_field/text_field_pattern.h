@@ -170,7 +170,14 @@ public:
     {
         return true;
     }
-
+    void SetBlurOnSubmit(bool blurOnSubmit)
+    {
+        blurOnSubmit_ = blurOnSubmit;
+    }
+    bool GetBlurOnSubmit()
+    {
+        return blurOnSubmit_;
+    }
     bool GetNeedToRequestKeyboardOnFocus() const
     {
         return needToRequestKeyboardOnFocus_;
@@ -1539,6 +1546,7 @@ private:
     bool showCountBorderStyle_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
+    bool blurOnSubmit_ = true;
     bool isDetachFromMainTree_ = false;
     bool isFocusTextColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_px;

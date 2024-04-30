@@ -1532,6 +1532,22 @@ void TextFieldModelNG::SetSelectAllValue(FrameNode* frameNode, bool isSelectAllV
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue, frameNode);
 }
 
+void TextFieldModelNG::SetBlurOnSubmit(FrameNode* frameNode, bool blurOnSubmit)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    return pattern->SetBlurOnSubmit(blurOnSubmit);
+}
+
+bool TextFieldModelNG::GetBlurOnSubmit(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->GetBlurOnSubmit();
+}
+
 void TextFieldModelNG::SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func)
 {
     CHECK_NULL_VOID(frameNode);

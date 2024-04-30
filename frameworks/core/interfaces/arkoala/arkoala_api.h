@@ -1540,6 +1540,9 @@ struct ArkUIImageModifier {
     ArkUI_CharPtr (*getAlt)(ArkUINodeHandle node);
     ArkUI_Int32 (*getImageDraggable)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRenderMode)(ArkUINodeHandle node);
+    void (*setImageResizable)(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
+        ArkUI_Float32 right, ArkUI_Float32 bottom);
+    void (*getImageResizable)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 size);
 };
 
 struct ArkUIColumnModifier {
@@ -2333,6 +2336,8 @@ struct ArkUITextInputModifier {
     void (*setTextInputShowPassword)(ArkUINodeHandle node, ArkUI_Uint32 showPassword);
     void (*resetTextInputShowPassword)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextInputShowPassword)(ArkUINodeHandle node);
+    void (*setBlurOnSubmit)(ArkUINodeHandle node, ArkUI_Bool blurOnSubmit);
+    ArkUI_Bool (*getBlurOnSubmit)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

@@ -5554,7 +5554,11 @@ void TextFieldPattern::StopEditing()
 #else
     if (isCustomKeyboardAttached_) {
 #endif
-        FocusHub::LostFocusToViewRoot();
+        if (blurOnSubmit_) {
+            FocusHub::LostFocusToViewRoot();
+        } else {
+            NotifyOnEditChanged(false);
+        }
     }
     UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();
