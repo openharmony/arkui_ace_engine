@@ -437,9 +437,9 @@ void SubwindowOhos::HideWindow()
         rootNode->SetIsDefaultHasFocused(false);
     }
 #endif
-
-    ContainerModalUnFocus();
-
+    if (!window_->IsFocused()) {
+        ContainerModalUnFocus();
+    }
     OHOS::Rosen::WMError ret = window_->Hide();
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
