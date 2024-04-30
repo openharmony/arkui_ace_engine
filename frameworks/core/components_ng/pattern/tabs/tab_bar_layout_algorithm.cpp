@@ -424,10 +424,7 @@ void TabBarLayoutAlgorithm::ApplyLayoutMode(LayoutWrapper* layoutWrapper, float 
     auto tabBarPattern = host->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
 
-    bool isVertical = true;
-    if (GreatNotEqual(allocatedWidth, tabTheme->GetHorizontalBottomTabMinWidth().ConvertToPx())) {
-        isVertical = false;
-    }
+    bool isVertical = LessOrEqual(allocatedWidth, tabTheme->GetHorizontalBottomTabMinWidth().ConvertToPx());
 
     // Calculate the initial buffer and initial space request of each item.
     for (int32_t index = 0; index < childCount; ++index) {
@@ -451,6 +448,10 @@ void TabBarLayoutAlgorithm::ApplyLayoutMode(LayoutWrapper* layoutWrapper, float 
             linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
             linearLayoutProperty->SetIsVertical(true);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+            if (!tabBarPattern->GetBottomTabLabelStyle(index).fontSize.has_value() &&
+                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                textLayoutProperty->UpdateFontSize(tabTheme->GetBottomTabTextSize());
+            }
         } else {
             linearLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
             linearLayoutProperty->UpdateSpace(tabTheme->GetHorizontalBottomTabBarSpace());
@@ -458,6 +459,10 @@ void TabBarLayoutAlgorithm::ApplyLayoutMode(LayoutWrapper* layoutWrapper, float 
             linearLayoutProperty->UpdateCrossAxisAlign(bottomTabBarStyle.verticalAlign);
             linearLayoutProperty->SetIsVertical(false);
             textLayoutProperty->UpdateTextAlign(TextAlign::LEFT);
+            if (!tabBarPattern->GetBottomTabLabelStyle(index).fontSize.has_value() &&
+                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                textLayoutProperty->UpdateFontSize(tabTheme->GetBottomTabHorizontalTextSize());
+            }
         }
     }
 }

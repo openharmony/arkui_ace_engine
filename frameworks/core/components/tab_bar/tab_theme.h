@@ -37,6 +37,8 @@ public:
         Builder() = default;
         ~Builder() = default;
 
+        static constexpr Dimension BOTTOM_BAR_HORIZONTAL_TEXT_SIZE = 12.0_vp;
+
         RefPtr<TabTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<TabTheme> theme = AceType::Claim(new TabTheme());
@@ -70,6 +72,8 @@ public:
                 theme->bottomTabIconOff_ = pattern->GetAttr<Color>("bottom_tab_icon_off", Color::WHITE);
                 theme->bottomTabImageSize_ = pattern->GetAttr<Dimension>("bottom_tab_image_size", 0.0_vp);
                 theme->bottomTabTextSize_ = pattern->GetAttr<Dimension>("bottom_tab_text_size", 0.0_vp);
+                theme->bottomTabHorizontalTextSize_ =
+                    pattern->GetAttr<Dimension>("bottom_tab_horizontal_text_size", BOTTOM_BAR_HORIZONTAL_TEXT_SIZE);
                 theme->defaultTabBarName_ = pattern->GetAttr<std::string>("default_tab_bar_name", "");
                 theme->bottomTabBarSpace_ = pattern->GetAttr<Dimension>("bottom_tab_bar_space", 0.0_vp);
                 theme->horizontalBottomTabBarSpace_ =
@@ -281,6 +285,11 @@ public:
         return bottomTabTextSize_;
     }
 
+    const Dimension& GetBottomTabHorizontalTextSize() const
+    {
+        return bottomTabHorizontalTextSize_;
+    }
+
     const std::string& GetDefaultTabBarName() const
     {
         return defaultTabBarName_;
@@ -408,6 +417,7 @@ private:
     Color bottomTabIconOff_;
     Dimension bottomTabImageSize_;
     Dimension bottomTabTextSize_;
+    Dimension bottomTabHorizontalTextSize_;
     std::string defaultTabBarName_;
     Dimension bottomTabBarSpace_;
     Dimension horizontalBottomTabBarSpace_;

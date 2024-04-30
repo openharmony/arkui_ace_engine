@@ -437,7 +437,7 @@ void JSTabContent::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle
     if (!labelStyle.fontSize.has_value()) {
         if (isSubTabStyle) {
             labelStyle.fontSize = tabTheme->GetSubTabTextDefaultFontSize();
-        } else {
+        } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             labelStyle.fontSize = tabTheme->GetBottomTabTextSize();
         }
     }
