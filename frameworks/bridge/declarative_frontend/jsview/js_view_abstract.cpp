@@ -361,6 +361,8 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         previewOption.isScaleEnabled = false;
     } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
         previewOption.isDefaultShadowEnabled = true;
+    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS)) {
+        previewOption.isDefaultRadiusEnabled = true;
     }
     isAuto = false;
 }

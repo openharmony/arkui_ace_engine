@@ -3404,6 +3404,8 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         previewOption.isScaleEnabled = false;
     } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
         previewOption.isDefaultShadowEnabled = true;
+    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS)) {
+        previewOption.isDefaultRadiusEnabled = true;
     }
     isAuto = false;
 }
@@ -3422,7 +3424,8 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(frameNode, { true, false, false, false, false, { .isShowBadge = true } });
+    ViewAbstract::SetDragPreviewOptions(frameNode,
+        { true, false, false, false, false, false, { .isShowBadge = true } });
 }
 
 void SetMouseResponseRegion(

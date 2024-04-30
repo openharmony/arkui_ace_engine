@@ -33,6 +33,7 @@
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/common_decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/outline_style.h"
@@ -90,35 +91,11 @@ enum class SpreadMethod {
     REPEAT,
 };
 
-enum class BlurStyle {
-    NO_MATERIAL = 0,
-    THIN,
-    REGULAR,
-    THICK,
-    BACKGROUND_THIN,
-    BACKGROUND_REGULAR,
-    BACKGROUND_THICK,
-    BACKGROUND_ULTRA_THICK,
-    COMPONENT_ULTRA_THIN,
-    COMPONENT_THIN,
-    COMPONENT_REGULAR,
-    COMPONENT_THICK,
-    COMPONENT_ULTRA_THICK,
-};
 
 enum class ThemeColorMode {
     SYSTEM = 0,
     LIGHT,
     DARK,
-};
-
-enum class AdaptiveColor {
-    DEFAULT = 0,
-    AVERAGE,
-};
-
-struct BlurOption {
-    std::vector<float> grayscale;
 };
 
 struct MotionBlurAnchor {
@@ -183,40 +160,7 @@ struct MenuPreviewAnimationOptions {
     float scaleTo { -1.0f };
 };
 
-struct EffectOption {
-    Dimension radius;
-    double saturation { 1.0f };
-    double brightness { 1.0f };
-    Color color { Color::TRANSPARENT };
-    AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
-    BlurOption blurOption;
-    bool operator==(const EffectOption& other) const
-    {
-        return radius == other.radius && NearEqual(saturation, other.saturation) &&
-               NearEqual(brightness, other.brightness) && color == other.color && adaptiveColor == other.adaptiveColor;
-    }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
-    {
-        static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
-        auto jsonEffect = JsonUtil::Create(true);
-        auto jsonBrightnessOption = JsonUtil::Create(true);
-        jsonBrightnessOption->Put("radius", radius.Value());
-        jsonBrightnessOption->Put("saturation", saturation);
-        jsonBrightnessOption->Put("brightness", brightness);
-        jsonBrightnessOption->Put("color", color.ColorToString().c_str());
-        jsonBrightnessOption->Put("adaptiveColor", ADAPTIVE_COLOR[static_cast<int32_t>(adaptiveColor)]);
-        auto grayscale = "[0,0]";
-        if (blurOption.grayscale.size() > 1) {
-            grayscale =
-                ("[" + std::to_string(blurOption.grayscale[0]) + "," + std::to_string(blurOption.grayscale[1]) + "]")
-                    .c_str();
-        }
-        jsonBrightnessOption->Put("blurOption", grayscale);
-        jsonEffect->Put("options", jsonBrightnessOption);
 
-        json->PutExtAttr("backgroundEffect", jsonEffect, filter);
-    }
-};
 
 struct BrightnessOption {
     double rate { 1.0f };
