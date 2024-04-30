@@ -61,6 +61,15 @@ void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::str
 #endif
 }
 
+std::string DataAbilityHelperStandard::GetMovingPhotoImageUri(const std::string& uri)
+{
+#ifdef MEDIA_LIBRARY_EXISTS
+    return mgr_.GetMovingPhotoImageUri(uri);
+#else
+    return "";
+#endif
+}
+
 int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std::string& mode)
 {
     // FA model always uses DataAbility
