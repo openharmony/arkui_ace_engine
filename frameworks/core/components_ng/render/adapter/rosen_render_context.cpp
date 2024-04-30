@@ -1454,7 +1454,8 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
     if (needScale) {
         UpdateThumbnailPixelMapScale(scaleX, scaleY);
     }
-    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY);
+    auto ret =
+        RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY, true);
     if (!ret) {
         return nullptr;
     }
