@@ -1454,7 +1454,8 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
     if (needScale) {
         UpdateThumbnailPixelMapScale(scaleX, scaleY);
     }
-    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY);
+    auto ret =
+        RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY, true);
     if (!ret) {
         return nullptr;
     }
@@ -3376,6 +3377,21 @@ void RosenRenderContext::FlushOverlayModifier(const RefPtr<Modifier>& modifier)
     std::shared_ptr<Rosen::RectF> overlayRect =
         std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
     UpdateDrawRegion(DRAW_REGION_OVERLAY_MODIFIER_INDEX, overlayRect);
+    rsNode_->AddModifier(modifierAdapter);
+    modifierAdapter->AttachProperties();
+}
+
+void RosenRenderContext::FlushForegroundModifier(const RefPtr<Modifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+    auto modifierAdapter = std::static_pointer_cast<ForegroundModifierAdapter>(ConvertForegroundModifier(modifier));
+    auto foregroundModifier = AceType::DynamicCast<ForegroundModifier>(modifier);
+    CHECK_NULL_VOID(foregroundModifier);
+    auto rect = foregroundModifier->GetBoundsRect();
+    std::shared_ptr<Rosen::RectF> foregroundRect =
+        std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    UpdateDrawRegion(DRAW_REGION_OVERLAY_MODIFIER_INDEX, foregroundRect);
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
 }

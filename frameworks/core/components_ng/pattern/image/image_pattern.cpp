@@ -647,6 +647,7 @@ void ImagePattern::OnAnimatedModifyDone()
         AddImageLoadSuccessEvent(imageFrameNode);
     }
     UpdateFormDurationByRemainder();
+    SetObscured();
     ControlAnimation(index);
 }
 
@@ -1396,7 +1397,7 @@ void ImagePattern::SetImageAnalyzerConfig(void* config)
 bool ImagePattern::IsSupportImageAnalyzerFeature()
 {
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
-    return isEnableAnalyzer_ && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && loadingCtx_->GetFrameCount() == 1 &&
+    return isEnableAnalyzer_ && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && loadingCtx_->GetFrameCount() <= 1 &&
         imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
 }
 
@@ -1562,12 +1563,6 @@ void ImagePattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNod
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto obscuredReasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
-    const auto& castRenderContext = imageFrameNode->GetRenderContext();
-    if (castRenderContext) {
-        castRenderContext->UpdateObscured(obscuredReasons);
-    }
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -1927,5 +1922,21 @@ void ImagePattern::SetImageFit(const RefPtr<FrameNode>& imageFrameNode)
     if (layoutProperty->HasImageFit()) {
         imageLayoutProperty->UpdateImageFit(layoutProperty->GetImageFit().value());
     }
+}
+
+void ImagePattern::SetObscured()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(imageFrameNode);
+    auto obscuredReasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
+    const auto& castRenderContext = imageFrameNode->GetRenderContext();
+    if (castRenderContext) {
+        castRenderContext->UpdateObscured(obscuredReasons);
+    }
+    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->GetRenderContext()->ResetObscured();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

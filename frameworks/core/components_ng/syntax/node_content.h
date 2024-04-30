@@ -18,12 +18,13 @@
 #include <functional>
 #include <list>
 
-#include "base/memory/referenced.h"
+#include "base/memory/ace_type.h"
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
 
-class NodeContent : public Referenced {
+class NodeContent : public AceType {
+    DECLARE_ACE_TYPE(NodeContent, AceType)
 public:
     NodeContent() = default;
     ~NodeContent() override = default;

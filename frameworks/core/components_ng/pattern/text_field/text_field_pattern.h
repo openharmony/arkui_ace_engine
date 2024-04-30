@@ -29,6 +29,7 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -98,7 +99,9 @@ enum class InputOperation {
     CURSOR_UP,
     CURSOR_DOWN,
     CURSOR_LEFT,
-    CURSOR_RIGHT
+    CURSOR_RIGHT,
+    SET_PREVIEW_TEXT,
+    SET_PREVIEW_FINISH,
 };
 
 enum {
@@ -139,6 +142,11 @@ struct PreState {
     bool hasBorderColor = false;
 };
 
+struct PreviewTextInfo {
+    std::string text;
+    PreviewRange range;
+};
+
 class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
@@ -162,7 +170,14 @@ public:
     {
         return true;
     }
-
+    void SetBlurOnSubmit(bool blurOnSubmit)
+    {
+        blurOnSubmit_ = blurOnSubmit;
+    }
+    bool GetBlurOnSubmit()
+    {
+        return blurOnSubmit_;
+    }
     bool GetNeedToRequestKeyboardOnFocus() const
     {
         return needToRequestKeyboardOnFocus_;
@@ -225,6 +240,11 @@ public:
     void HandleOnDelete(bool backward) override;
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
+
+    int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
+    void FinishTextPreview() override;
+    void SetPreviewTextOperation(PreviewTextInfo info);
+    void FinishTextPreviewOperation();
 
     WeakPtr<LayoutWrapper> GetCounterNode()
     {
@@ -1134,8 +1154,45 @@ public:
         return transformContentRect;
     }
 
+    std::vector<RectF> GetPreviewTextRects() const;
+
+    bool GetIsPreviewText() const
+    {
+        return hasPreviewText;
+    }
+
+    const Color& GetPreviewDecorationColor() const
+    {
+        auto theme = GetTheme();
+        CHECK_NULL_RETURN(theme, Color::TRANSPARENT);
+        return theme->GetPreviewUnderlineColor();
+    }
+
+    bool NeedDrawPreviewText();
+
+    float GetPreviewUnderlineWidth() const
+    {
+        return static_cast<float>(previewUnderlineWidth_.Value());
+    }
+
+    void ReceivePreviewTextStyle(const std::string& style) override
+    {
+        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PreviewTextStyle, style);
+    }
+
+    PreviewTextStyle GetPreviewTextStyle() const;
+
 protected:
     virtual void InitDragEvent();
+    void OnAttachToMainTree() override
+    {
+        isDetachFromMainTree_ = false;
+    }
+
+    void OnDetachFromMainTree() override
+    {
+        isDetachFromMainTree_ = true;
+    }
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1298,7 +1355,9 @@ private:
     void InitDragDropEventWithOutDragStart();
     void UpdateBlurReason();
     AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
-    bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType);
+    bool CheckAutoFillType(const AceAutoFillType& autoFillType);
+    bool GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
+    void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     AceAutoFillType GetAutoFillType();
     bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
     void DoProcessAutoFill();
@@ -1312,6 +1371,24 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void HandleCountStyle();
     void HandleDeleteOnCounterScene();
+
+    void UpdatePreviewIndex(int32_t start, int32_t end)
+    {
+        previewTextStart_ = start;
+        previewTextEnd_ = end;
+    }
+
+    int32_t GetPreviewTextStart() const
+    {
+        return hasPreviewText ? previewTextStart_ : selectController_->GetCaretIndex();
+    }
+
+    int32_t GetPreviewTextEnd() const
+    {
+        return hasPreviewText ? previewTextEnd_ : selectController_->GetCaretIndex();
+    }
+
+    bool CheckPreviewTextValidate(PreviewTextInfo info) const;
 
     RectF frameRect_;
     RectF textRect_;
@@ -1469,8 +1546,15 @@ private:
     bool showCountBorderStyle_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
-
+    bool blurOnSubmit_ = true;
+    bool isDetachFromMainTree_ = false;
     bool isFocusTextColorSet_ = false;
+    Dimension previewUnderlineWidth_ = 2.0_px;
+    bool hasSupportedPreviewText = true;
+    bool hasPreviewText = false;
+    std::queue<PreviewTextInfo> previewTextOperation;
+    int32_t previewTextStart_ = -1;
+    int32_t previewTextEnd_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

@@ -16,9 +16,9 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_PARTICLE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_PARTICLE_H
 
+#include "core/components_ng/pattern/particle/particle_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/components_ng/pattern/particle/particle_model_ng.h"
 
 namespace OHOS::Ace::Framework {
 class JSParticle : public JSViewAbstract, public JSInteractableView {
@@ -28,7 +28,8 @@ public:
     static void JsDisturbanceFields(const JSCallbackInfo& args);
     static void AddDisturbance(std::vector<ParticleDisturbance>& dataArray, const JSRef<JSObject>& paramObj);
     static void JsEmitter(const JSCallbackInfo& args);
-    static void ParseEmitterProps(std::vector<EmitterProps>& dataArray, const JSRef<JSObject>& paramObj);
+    static void ParseEmitterProperty(
+        std::vector<EmitterProperty>& dataArray, const JSRef<JSObject>& paramObj, const int length);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_PARTICLE_H

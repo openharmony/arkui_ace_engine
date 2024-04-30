@@ -984,6 +984,7 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
     if (NotLoopOptions() && reboundAnimation_) {
         AnimationUtils::StopAnimation(reboundAnimation_);
         isReboundInProgress_ = false;
+        overscroller_.ResetVelocity();
         overscroller_.SetOverScroll(scrollDelta_);
     }
 }
@@ -1545,5 +1546,26 @@ void TextPickerColumnPattern::PlayResetAnimation()
     }
 
     CreateAnimation(scrollDelta_, 0.0);
+}
+
+void TextPickerColumnPattern::SetCanLoop(bool isLoop)
+{
+    if (isLoop_ == isLoop) {
+        return;
+    }
+
+    isLoop_ = isLoop;
+    if (overscroller_.IsOverScroll()) {
+        overscroller_.Reset();
+        isReboundInProgress_ = false;
+        yOffset_ = 0.0;
+        ScrollOption(0.0);
+    }
+
+    if (!isLoop && isTossStatus_) {
+        auto toss = GetToss();
+        CHECK_NULL_VOID(toss);
+        overscroller_.SetLoopTossOffset(toss->GetTossOffset());
+    }
 }
 } // namespace OHOS::Ace::NG

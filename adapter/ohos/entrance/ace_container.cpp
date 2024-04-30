@@ -196,6 +196,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     ACE_DCHECK(callback);
     if (useNewPipeline) {
         SetUseNewPipeline();
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            SetUsePartialUpdate();
+        }
     }
     InitializeTask();
     platformEventCallback_ = std::move(callback);
@@ -217,6 +220,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     ACE_DCHECK(callback);
     if (useNewPipeline) {
         SetUseNewPipeline();
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            SetUsePartialUpdate();
+        }
     }
     if (!isSubContainer_) {
         InitializeTask();
@@ -238,6 +244,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     ACE_DCHECK(callback);
     if (useNewPipeline) {
         SetUseNewPipeline();
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            SetUsePartialUpdate();
+        }
     }
     if (!isSubContainer_) {
         InitializeTask(taskWrapper);
@@ -761,17 +770,21 @@ void AceContainer::InitializeCallback()
                                     const TouchEvent& event, const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, node]() {
-                if (node) {
-                    context->OnTouchEvent(event, node);
-                } else {
-                    context->OnTouchEvent(event);
-                }
-                CHECK_NULL_VOID(markProcess);
-                markProcess();
-            },
-            TaskExecutor::TaskType::UI, "ArkUIAceContainerTouchEvent");
+        auto touchTask = [context, event, markProcess, node]() {
+            if (node) {
+                context->OnTouchEvent(event, node);
+            } else {
+                context->OnTouchEvent(event);
+            }
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            touchTask();
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(touchTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerTouchEvent");
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
@@ -779,17 +792,21 @@ void AceContainer::InitializeCallback()
                                     const MouseEvent& event, const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, node]() {
-                if (node) {
-                    context->OnMouseEvent(event, node);
-                } else {
-                    context->OnMouseEvent(event);
-                }
-                CHECK_NULL_VOID(markProcess);
-                markProcess();
-            },
-            TaskExecutor::TaskType::UI, "ArkUIAceContainerMouseEvent");
+        auto mouseTask = [context, event, markProcess, node]() {
+            if (node) {
+                context->OnMouseEvent(event, node);
+            } else {
+                context->OnMouseEvent(event);
+            }
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            mouseTask();
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(mouseTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerMouseEvent");
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
@@ -797,17 +814,21 @@ void AceContainer::InitializeCallback()
                                    const AxisEvent& event, const std::function<void()>& markProcess,
                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, node]() {
-                if (node) {
-                    context->OnAxisEvent(event, node);
-                } else {
-                    context->OnAxisEvent(event);
-                }
-                CHECK_NULL_VOID(markProcess);
-                markProcess();
-            },
-            TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent");
+        auto axisTask = [context, event, markProcess, node]() {
+            if (node) {
+                context->OnAxisEvent(event, node);
+            } else {
+                context->OnAxisEvent(event);
+            }
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            axisTask();
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(axisTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent");
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
@@ -1159,7 +1180,8 @@ bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
     CHECK_NULL_RETURN(uiContentImpl, false);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    uiContentImpl->DumpViewData(node, viewDataWrap);
+    auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
+    uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
@@ -1180,7 +1202,8 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     CHECK_NULL_RETURN(uiContentImpl, false);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     CHECK_NULL_RETURN(viewDataWrap, false);
-    uiContentImpl->DumpViewData(node, viewDataWrap);
+    auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
+    uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
 
     auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
@@ -1948,7 +1971,7 @@ void AceContainer::CheckAndSetFontFamily()
             return;
         }
     }
-    path = path.append("/font/");
+    path = path.append("/fonts/");
     familyName = GetFontFamilyName(path);
     if (familyName.empty()) {
         return;
@@ -1980,7 +2003,7 @@ bool AceContainer::IsFontFileExistInPath(std::string path)
         }
         if (strcmp(ent->d_name, "flag") == 0) {
             isFlagFileExist = true;
-        } else if (strcmp(ent->d_name, "font") == 0) {
+        } else if (strcmp(ent->d_name, "fonts") == 0) {
             isFontDirExist = true;
         }
     }
@@ -2117,7 +2140,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.themeTag.empty()) {
         std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
-        int fontUpdate = json->GetInt("font");
+        int fontUpdate = json->GetInt("fonts");
         configurationChange.fontUpdate = fontUpdate;
         int iconUpdate = json->GetInt("icons");
         configurationChange.iconUpdate = iconUpdate;

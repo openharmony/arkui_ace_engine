@@ -32,6 +32,7 @@
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
+#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
@@ -106,20 +107,32 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         return;
     }
 
+#ifndef USE_FAST_TASKPOOL
     if (tasks_.empty()) {
         return;
     }
+#else
+    if (!fastTaskPool_ || fastTaskPool_->Empty()) {
+        return;
+    }
+#endif
 
     if (onModifierUpdate_) {
         onModifierUpdate_();
     }
 
     rsCanvas_->Scale(viewScale, viewScale);
+#ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "There are %{public}zu tasks will be run.", tasks_.size());
     for (const auto& task : tasks_) {
         task(*this, paintWrapper);
     }
     tasks_.clear();
+#else
+    fastTaskPool_->Draw(this, paintWrapper);
+    fastTaskPool_->Reset();
+#endif
+
     CHECK_NULL_VOID(contentModifier_);
     contentModifier_->MarkModifierDirty();
 }

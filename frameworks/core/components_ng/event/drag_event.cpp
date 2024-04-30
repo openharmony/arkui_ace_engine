@@ -33,6 +33,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -64,7 +65,6 @@ constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
 constexpr int32_t PIXELMAP_ANIMATION_TIME = 800;
 constexpr float SCALE_NUMBER = 0.95f;
 constexpr int32_t FILTER_TIMES = 250;
-constexpr float PIXELMAP_ANIMATION_SCALE = 1.1f;
 constexpr int32_t PRE_DRAG_TIMER_DEADLINE = 50;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr float SPRING_RESPONSE = 0.416f;
@@ -586,7 +586,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                             CHECK_NULL_VOID(gestureHub);
                             gestureHub->SetPixelMap(customPixelMap);
                             gestureHub->SetDragPreviewPixelMap(customPixelMap);
-                            }, TaskExecutor::TaskType::UI, "ArkUIDragSetPixelMap");
+                        }, TaskExecutor::TaskType::UI, "ArkUIDragSetPixelMap");
                     }
                 };
 
@@ -754,6 +754,25 @@ void DragEventActuator::UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& i
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 }
 
+void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameTag = frameNode->GetTag();
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable() &&
+        gestureHub->GetIsTextDraggable()) {
+        return;
+    }
+    CHECK_NULL_VOID(imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    if (dragPreviewOption.options.shadow.has_value()) {
+        imageContext->UpdateBackShadow(dragPreviewOption.options.shadow.value());
+    }
+}
+
 void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -774,6 +793,7 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     props->UpdateUserDefinedIdealSize(targetSize);
 
     UpdatePreviewPositionAndScale(imageNode, frameOffset);
+    UpdatePreviewAttr(frameNode, imageNode);
     imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
@@ -921,8 +941,11 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     // create imageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_VOID(imageNode);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetSyncLoad(true);
     imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
-    ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
     renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -969,6 +992,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
 // on one temporary frame node, and then get the value user setted from the modifier
 void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode)
 {
+    UpdatePreviewOptionDefaultAttr(frameNode);
     auto modifierOnApply = frameNode->GetDragPreviewOption().onApply;
     if (modifierOnApply == nullptr) {
         TAG_LOGE(AceLogTag::ACE_DRAG, "OnApply is null");
@@ -995,21 +1019,41 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
         options.opacity = DEFAULT_OPACITY;
     }
 
+    auto shadow = imageContext->GetBackShadow();
+    if (shadow.has_value()) {
+        options.shadow = shadow;
+    }
+
     // get the old preview option
     DragPreviewOption dragPreviewOption = frameNode->GetDragPreviewOption();
     dragPreviewOption.options = options; // replace the options with the new one after applied
     frameNode->SetDragPreviewOptions(dragPreviewOption);
 }
 
+void DragEventActuator::UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& frameNode)
+{
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    dragPreviewOption.options.opacity = DEFAULT_OPACITY;
+    if (dragPreviewOption.isDefaultShadowEnabled) {
+        dragPreviewOption.options.shadow = GetDefaultShadow();
+    } else {
+        dragPreviewOption.options.shadow = std::nullopt;
+    }
+    frameNode->SetDragPreviewOptions(dragPreviewOption); // replace the options with the new one
+}
+
 void DragEventActuator::ApplyNewestOptionExecutedFromModifierToNode(
     const RefPtr<FrameNode>& optionHolderNode, const RefPtr<FrameNode>& targetNode)
 {
-    if (optionHolderNode->GetDragPreviewOption().onApply == nullptr) {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "OnApply is null");
-        return;
-    }
     auto optionsFromModifier = targetNode->GetDragPreviewOption().options;
     ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, optionsFromModifier.opacity, targetNode);
+
+    if (optionsFromModifier.shadow.has_value()) {
+        // if shadow is unfilled, set shadow after animation
+        if (optionsFromModifier.shadow->GetIsFilled()) {
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, optionsFromModifier.shadow.value(), targetNode);
+        }
+    }
 }
 
 void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator)
@@ -1106,34 +1150,21 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
 {
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
+    SetImageNodeInitAttr(frameNode, imageNode);
     // pixel map animation
     AnimationOption option;
     option.SetDuration(PIXELMAP_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
-    bool defaultAnimationBeforeLifting = frameNode->GetDragPreviewOption().defaultAnimationBeforeLifting;
-    if (defaultAnimationBeforeLifting) {
-        auto layoutProperty = frameNode->GetLayoutProperty();
-        if (layoutProperty) {
-            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-        }
-        imageContext->UpdateTransformScale({ DEFAULT_ANIMATION_SCALE, DEFAULT_ANIMATION_SCALE });
-    } else {
-        imageContext->UpdateTransformScale({ 1, 1 });
-    }
-    auto shadow = imageContext->GetBackShadow();
-    if (!shadow.has_value()) {
-        shadow = Shadow::CreateShadow(ShadowStyle::None);
-    }
-    imageContext->UpdateBackShadow(shadow.value());
-
+    option.SetOnFinishEvent([imageNode, frameNode]() {
+        DragEventActuator::SetImageNodeFinishAttr(frameNode, imageNode);
+    });
+    
     AnimationUtils::Animate(
         option,
-        [imageContext, shadow, hasContextMenu, frameNode]() mutable {
-            auto color = shadow->GetColor();
-            auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
-            shadow->SetColor(newColor);
-            imageContext->UpdateBackShadow(shadow.value());
-            imageContext->UpdateTransformScale({ PIXELMAP_ANIMATION_SCALE, PIXELMAP_ANIMATION_SCALE });
+        [imageNode, hasContextMenu, frameNode]() mutable {
+            auto imageContext = imageNode->GetRenderContext();
+            CHECK_NULL_VOID(imageContext);
+            ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
             if (hasContextMenu) {
                 BorderRadiusProperty borderRadius;
                 borderRadius.SetRadius(PIXELMAP_BORDER_RADIUS);
@@ -1241,7 +1272,6 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     auto dragNode = pattern->MoveDragNode();
     CHECK_NULL_VOID(dragNode);
     dragNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
-    ApplyNewestOptionExecutedFromModifierToNode(frameNode, dragNode);
     // create columnNode
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -1254,8 +1284,10 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     CHECK_NULL_VOID(modifier);
     modifier->UpdateHandlesShowFlag(isHandlesShow);
     auto renderContext = dragNode->GetRenderContext();
+    auto dragPreviewOption = dragNode->GetDragPreviewOption();
     if (renderContext) {
         textPixelMap_ = renderContext->GetThumbnailPixelMap();
+        renderContext->UpdateOpacity(dragPreviewOption.options.opacity);
     }
     modifier->StartFloatingAnimate();
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set text animation success.");
@@ -1339,6 +1371,58 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         option.GetOnFinishEvent());
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set hide text animation success.");
 }
+
+// update ImageNode default attr before floating
+void DragEventActuator::SetImageNodeInitAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(frameNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+
+    // update default scale
+    bool defaultAnimationBeforeLifting = dragPreviewOption.defaultAnimationBeforeLifting;
+    if (defaultAnimationBeforeLifting) {
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
+        imageContext->UpdateTransformScale({ DEFAULT_ANIMATION_SCALE, DEFAULT_ANIMATION_SCALE });
+    } else {
+        imageContext->UpdateTransformScale({ 1, 1 });
+    }
+    
+    // update shadow
+    auto shadow = Shadow::CreateShadow(ShadowStyle::None);
+    if (dragPreviewOption.options.shadow.has_value()) {
+        shadow = dragPreviewOption.options.shadow.value();
+        shadow.SetColor(Color(0x00000000));
+    }
+    imageContext->UpdateBackShadow(shadow);
+    
+    // update radius
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(0.0_vp);
+    imageContext->UpdateBorderRadius(borderRadius);
+    
+    // update opacity
+    imageContext->UpdateOpacity(1.0f);
+}
+
+void DragEventActuator::SetImageNodeFinishAttr(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(frameNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    if (dragPreviewOption.options.shadow.has_value() && !dragPreviewOption.options.shadow->GetIsFilled()) {
+        imageContext->UpdateBackShadow(dragPreviewOption.options.shadow.value());
+    }
+}
+
 bool DragEventActuator::GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator)
 {
     auto gestureHub = actuator->gestureEventHub_.Upgrade();
@@ -1770,6 +1854,71 @@ RefPtr<FrameNode> DragEventActuator::GetFrameNode()
     CHECK_NULL_RETURN(gestureHub, nullptr);
     auto frameNode = gestureHub->GetFrameNode();
     return frameNode;
+}
+
+void DragEventActuator::PrepareShadowParametersForDragData(const RefPtr<FrameNode>& frameNode,
+    std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(arkExtraInfoJson);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    auto shadow = dragPreviewOption.options.shadow;
+    if (!shadow.has_value() || !shadow->IsValid()) {
+        arkExtraInfoJson->Put("shadow_enable", false);
+        return;
+    }
+    auto frameTag = frameNode->GetTag();
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable() &&
+        gestureHub->GetIsTextDraggable()) {
+        if (frameTag != V2::RICH_EDITOR_ETS_TAG) {
+            arkExtraInfoJson->Put("shadow_enable", false);
+            return;
+        }
+        auto stringPath = dragPreviewOption.options.shadowPath;
+        RSPath path;
+        if (path.BuildFromSVGString(stringPath)) {
+            RSMatrix matrix;
+            matrix.Set(RSMatrix::SCALE_X, scale);
+            matrix.Set(RSMatrix::SCALE_Y, scale);
+            path.Transform(matrix);
+            stringPath = path.ConvertToSVGString();
+        }
+        arkExtraInfoJson->Put("drag_type", "text");
+        arkExtraInfoJson->Put("drag_shadow_path", stringPath.c_str());
+    } else {
+        arkExtraInfoJson->Put("drag_type", "non-text");
+    }
+    arkExtraInfoJson->Put("shadow_enable", true);
+    ParseShadowInfo(shadow.value(), arkExtraInfoJson);
+}
+
+void DragEventActuator::ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonValue>& arkExtraInfoJson)
+{
+    arkExtraInfoJson->Put("shadow_is_filled", shadow.GetIsFilled());
+    arkExtraInfoJson->Put("drag_shadow_OffsetX", shadow.GetOffset().GetX());
+    arkExtraInfoJson->Put("drag_shadow_OffsetY", shadow.GetOffset().GetY());
+    arkExtraInfoJson->Put("shadow_mask", shadow.GetShadowType() == ShadowType::BLUR);
+    int64_t argb = shadow.GetColor().GetValue();
+    arkExtraInfoJson->Put("drag_shadow_argb", argb);
+    int64_t strategy = static_cast<int64_t>(shadow.GetShadowColorStrategy());
+    arkExtraInfoJson->Put("shadow_color_strategy", strategy);
+    arkExtraInfoJson->Put("shadow_corner", shadow.GetBlurRadius());
+    arkExtraInfoJson->Put("shadow_elevation", shadow.GetElevation());
+    arkExtraInfoJson->Put("shadow_is_hardwareacceleration", shadow.GetHardwareAcceleration());
+}
+
+std::optional<Shadow> DragEventActuator::GetDefaultShadow()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, std::nullopt);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, std::nullopt);
+    auto colorMode = SystemProperties::GetColorMode();
+    auto shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingSM, colorMode);
+    shadow.SetIsFilled(true);
+    return shadow;
 }
 
 void DragEventActuator::ShowPreviewBadgeAnimation(

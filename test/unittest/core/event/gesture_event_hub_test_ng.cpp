@@ -2579,7 +2579,7 @@ HWTEST_F(GestureEventHubTestNg, TestSetDragGatherPixelMap001, TestSize.Level1)
     auto itemPattern2 = gridItemNode2->GetPattern<GridItemPattern>();
     ASSERT_NE(itemPattern2, nullptr);
     itemPattern2->SetSelected(true);
-    NG::DragPreviewOption option { NG::DragPreviewMode::AUTO, false, true };
+    NG::DragPreviewOption option { true, false, true };
     gridItemNode1->SetDragPreviewOptions(option);
     gridNode->AddChild(gridItemNode1);
     gridNode->AddChild(gridItemNode2);

@@ -36,8 +36,8 @@ public:
     void Create(std::function<void()>&& deepRenderFunc) override;
     void Create() override;
     void Pop() override;
-    void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
-        TabBarBuilderFunc&& builder, bool useContentOnly) override;
+    void SetTabBar(const std::optional<std::string> &text, const std::optional<std::string> &icon,
+        const std::optional<TabBarSymbol> &tabBarSymbol, TabBarBuilderFunc &&builder, bool useContentOnly) override;
     void SetTabBarStyle(TabBarStyle tabBarStyle) override;
     void SetIndicator(const IndicatorStyle& indicator) override;
     void SetBoard(const BoardStyle& board) override;
@@ -56,6 +56,7 @@ public:
     void SetOnWillShow(std::function<void()>&& onWillShow) override;
     void SetOnWillHide(std::function<void()>&& onWillHide) override;
     void SetCustomStyleNode(const RefPtr<NG::FrameNode>& customStyleNode) override;
+    static void UpdateDefaultSymbol(RefPtr<TabTheme>& tabTheme, RefPtr<TextLayoutProperty> symbolProperty);
 
 private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);

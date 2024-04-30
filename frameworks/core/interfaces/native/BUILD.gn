@@ -40,6 +40,7 @@ template("ace_core_interfaces_native_node") {
       "node/data_panel_modifier.cpp",
       "node/divider_modifier.cpp",
       "node/extension_companion_node.cpp",
+      "node/extension_custom_node.cpp",
       "node/flex_modifier.cpp",
       "node/frame_node_modifier.cpp",
       "node/gauge_modifier.cpp",

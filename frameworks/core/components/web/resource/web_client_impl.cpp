@@ -114,8 +114,7 @@ bool OnJsCommonDialog(
         if (delegate) {
             jsResult = delegate->OnCommonDialog(param, dialogEventType);
         }
-        },
-        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientCommonDialogEvent");
+    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientCommonDialogEvent");
     return jsResult;
 }
 
@@ -185,8 +184,7 @@ bool WebClientImpl::OnConsoleLog(const std::shared_ptr<OHOS::NWeb::NWebConsoleLo
         if (delegate) {
             jsMessage = delegate->OnConsoleLog(message);
         }
-        },
-        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebConsoleLog");
+    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebConsoleLog");
 
     return jsMessage;
 }
@@ -311,8 +309,7 @@ void WebClientImpl::OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceReque
         if (delegate) {
             delegate->OnHttpErrorReceive(request, response);
         }
-        },
-        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebHttpError");
+    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebHttpError");
 }
 
 void WebClientImpl::OnMessage(const std::string& param)
@@ -367,7 +364,8 @@ bool WebClientImpl::OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrl
     if (task == nullptr) {
         return false;
     }
-    task->PostSyncTask([&delegate, &webResponse, &param] {
+    task->PostSyncTask(
+        [&delegate, &webResponse, &param] {
             webResponse = delegate->OnInterceptRequest(param);
         }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebInterceptRequest");
     if (webResponse == nullptr) {
@@ -469,8 +467,7 @@ bool WebClientImpl::OnFileSelectorShow(
         if (delegate) {
             jsResult = delegate->OnFileSelectorShow(param);
         }
-        },
-        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebFileSelectorShow");
+    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebFileSelectorShow");
     return jsResult;
 }
 
@@ -491,8 +488,7 @@ void WebClientImpl::OnResource(const std::string& url)
         if (delegate) {
             delegate->OnResourceLoad(url);
         }
-        },
-        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebResourceLoad");
+    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebResourceLoad");
 }
 
 void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
@@ -526,7 +522,8 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
     if (task == nullptr) {
         return false;
     }
-    task->PostSyncTask([webClient = this, &param, &jsResult] {
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
             if (!webClient) {
                 return;
             }
@@ -549,7 +546,8 @@ bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorRe
     if (task == nullptr) {
         return false;
     }
-    task->PostSyncTask([webClient = this, &param, &jsResult] {
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
             if (!webClient) {
                 return;
             }
@@ -578,7 +576,8 @@ bool WebClientImpl::OnAllSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSAllSslE
     if (task == nullptr) {
         return false;
     }
-    task->PostSyncTask([webClient = this, &param, &jsResult] {
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
             if (!webClient) {
                 return;
             }
@@ -607,7 +606,8 @@ bool WebClientImpl::OnSslSelectCertRequestByJS(
         return false;
     }
 
-    task->PostSyncTask([webClient = this, &param, &jsResult] {
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
             if (!webClient) {
                 return;
             }
@@ -656,8 +656,7 @@ bool WebClientImpl::RunContextMenu(
         if (delegate) {
             jsResult = delegate->OnContextMenuShow(param);
         }
-        },
-        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebRunContextMenu");
+    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebRunContextMenu");
     return jsResult;
 }
 

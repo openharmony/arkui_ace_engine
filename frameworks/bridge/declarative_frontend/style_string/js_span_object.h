@@ -73,7 +73,6 @@ public:
     static RefPtr<ParagraphStyleSpan> ParseJsParagraphStyleSpan(const JSRef<JSObject>& obj);
     static void ParseJsTextAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsTextIndent(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
-    static void ParseJsLineHeight(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsMaxLines(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsTextOverflow(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsWordBreak(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
@@ -84,8 +83,6 @@ public:
     void SetTextAlign(const JSCallbackInfo& info);
     void SetTextIndent(const JSCallbackInfo& info);
     void GetTextIndent(const JSCallbackInfo& info);
-    void SetLineHeight(const JSCallbackInfo& info);
-    void GetLineHeight(const JSCallbackInfo& info);
     void SetMaxLines(const JSCallbackInfo& info);
     void GetMaxLines(const JSCallbackInfo& info);
     void SetOverflow(const JSCallbackInfo& info);
@@ -210,6 +207,27 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSTextShadowSpan);
     RefPtr<TextShadowSpan> textShadowSpan_;
+};
+
+class JSLineHeightSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSLineHeightSpan, AceType)
+
+public:
+    JSLineHeightSpan() = default;
+    ~JSLineHeightSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSLineHeightSpan* textShadowSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<LineHeightSpan> ParseJSLineHeightSpan(const JSRef<JSObject>& obj);
+    void GetLineHeight(const JSCallbackInfo& info);
+    void SetLineHeight(const JSCallbackInfo& info);
+
+    RefPtr<LineHeightSpan>& GetLineHeightSpan();
+    void SetLineHeightSpan(const RefPtr<LineHeightSpan>& lineHeightSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSLineHeightSpan);
+    RefPtr<LineHeightSpan> lineHeightSpan_;
 };
 
 class JSImageAttachment : public virtual AceType {

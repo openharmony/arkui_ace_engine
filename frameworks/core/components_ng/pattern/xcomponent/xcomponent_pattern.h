@@ -258,7 +258,7 @@ public:
         hasXComponentInit_ = isInit;
     }
 
-    void Initialize(int32_t instanceId = -1);
+    void Initialize();
 
     bool ChangeRenderType(NodeRenderType renderType);
 
@@ -297,6 +297,8 @@ private:
     void OnModifyDone() override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
 
     void InitNativeNodeCallbacks();
     void InitEvent();
@@ -366,8 +368,6 @@ private:
     RefPtr<InputEvent> mouseHoverEvent_;
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
-    WeakPtr<NG::PipelineContext> context_;
-    int32_t instanceId_;
     SizeF initSize_;
     OffsetF localPosition_;
     OffsetF globalPosition_;

@@ -157,7 +157,17 @@ public:
 
     void SetBuilderFunc(CheckBoxMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
+    }
+
+    RefPtr<FrameNode> GetContentModifierNode()
+    {
+        return contentModifierNode_;
     }
 
     void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
@@ -247,12 +257,6 @@ private:
     void StartExitAnimation();
     void UpdateState();
     void UpdateUnSelect();
-    void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, bool isSelected);
-    void NotifyCheckboxGroupStatusChange(
-        const RefPtr<FrameNode>& checkBoxGroupNode, std::vector<std::string> vec, bool isSameAsSelf, bool select);
-    void UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* frameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap);
     void CheckBoxGroupIsTrue();
     void SetPrePageIdToLastPageId();
     // Init key event
@@ -262,13 +266,15 @@ private:
     void RemoveLastHotZoneRect() const;
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
-    void ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProperty>& paintProperty,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap);
+    void ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProperty>& paintProperty);
     void ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkBoxGroupNode, const std::vector<std::string>& vec,
         bool haveCheckBoxSelected, bool isAllCheckBoxSelected);
     std::string GetGroupNameWithNavId();
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
+    void InitCheckBoxStatusByGroup(RefPtr<FrameNode> checkBoxGroupNode,
+        const RefPtr<CheckBoxGroupPaintProperty>& groupPaintProperty, const std::list<RefPtr<FrameNode>>& list);
+    void UpdateCheckBoxGroupStatus(RefPtr<FrameNode> checkBoxGroupNode, const std::list<RefPtr<FrameNode>>& list);
 
     std::optional<CheckBoxMakeCallback> makeFunc_;
     std::optional<SwitchMakeCallback> toggleMakeFunc_;

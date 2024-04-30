@@ -331,4 +331,65 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
     };
     PostTaskToUI(task, "ArkUITextFieldSetImeShow");
 }
+int32_t OnTextChangedListenerImpl::SetPreviewText(const std::u16string &text, const MiscServices::Range &range)
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText value %{public}s in range (%{public}d, %{public}d)",
+        StringUtils::Str16ToStr8(text).c_str(), range.start, range.end);
+    int32_t ret = MiscServices::ErrorCode::NO_ERROR;
+    auto task = [textFieldPattern = pattern_, text, range, &ret] {
+        ACE_SCOPED_TRACE("SetPreviewText");
+        auto client = textFieldPattern.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->GetInstanceId());
+        ret = client->SetPreviewText(StringUtils::Str16ToStr8(text), {range.start, range.end});
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText result is %{public}d}", ret);
+    };
+    PostTaskToUI(task, "ArkUITextFieldSetPreviewText");
+    return ret;
+}
+
+void OnTextChangedListenerImpl::FinishTextPreview()
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "FinishTextPreview");
+    auto task = [textFieldPattern = pattern_] {
+        ACE_SCOPED_TRACE("FinishTextPreview");
+        auto client = textFieldPattern.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->GetInstanceId());
+        client->FinishTextPreview();
+    };
+    PostTaskToUI(task, "ArkUITextFieldFinishTextPreview");
+}
+
+int32_t OnTextChangedListenerImpl::ReceivePrivateCommand(
+    const std::unordered_map<std::string, MiscServices::PrivateDataValue> &privateCommand)
+{
+    int32_t ret = MiscServices::ErrorCode::ERROR_BAD_PARAMETERS;
+    if (privateCommand.empty()) {
+        return ret;
+    }
+    for (const auto& item : privateCommand) {
+        if (item.first != PRIVATE_DATA_KEY) {
+            continue;
+        }
+        size_t idx = item.second.index();
+        if (idx != static_cast<size_t>(MiscServices::PrivateDataValueType::VALUE_TYPE_STRING)) {
+            continue;
+        }
+        auto stringValue = std::get_if<std::string>(&item.second);
+        if (stringValue != nullptr) {
+            std::string style = *stringValue;
+            auto task = [textFieldPattern = pattern_, style] {
+                ACE_SCOPED_TRACE("ReceivePrivateCommand");
+                auto client = textFieldPattern.Upgrade();
+                CHECK_NULL_VOID(client);
+                ContainerScope scope(client->GetInstanceId());
+                client->ReceivePreviewTextStyle(style);
+            };
+            PostTaskToUI(task, "ArkUITextFieldReceivePrivateCommand");
+            ret = MiscServices::ErrorCode::NO_ERROR;
+        }
+    }
+    return ret;
+}
 } // namespace OHOS::Ace::NG

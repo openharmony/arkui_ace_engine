@@ -295,6 +295,11 @@ public:
         useNewPipeline_ = true;
     }
 
+    void SetUsePartialUpdate()
+    {
+        usePartialUpdate_ = true;
+    }
+
     bool IsUseNewPipeline() const
     {
         return useNewPipeline_;

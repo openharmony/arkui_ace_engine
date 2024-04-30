@@ -218,6 +218,7 @@ void ProgressModelNG::SetText(const std::optional<std::string>& value)
         context = value.value();
         pattern->SetTextFromUser(true);
     }
+    textHost->MarkModifyDone();
     textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Text, context);
 }

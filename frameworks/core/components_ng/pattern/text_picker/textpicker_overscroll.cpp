@@ -28,6 +28,7 @@ constexpr float REBOUND_SPRING_VELOCITY = 1.f;
 constexpr float REBOUND_SPRING_MASS = 1.f;
 constexpr float REBOUND_SPRING_STIFFNESS = 228.f;
 constexpr float REBOUND_SPRING_DAMPING = 30.f;
+constexpr float LOOP_TOSS_DAMPING = 100.f;
 } //namespace
 bool TextPickerOverscroller::ApplyCurrentOffset(float yLast, float offsetY, float scrollDelta)
 {
@@ -46,8 +47,10 @@ bool TextPickerOverscroller::ApplyCurrentOffset(float yLast, float offsetY, floa
     }
 
     // start overScroll
+    isFirstStart_ = false;
     if (NearZero(overScroll_)) {
         overScrollStartOffsetY_ = yLast;
+        isFirstStart_ = true;
     }
 
     deltaScrollOffset_ = GetOverScrollOffset(yLast, offsetY);
@@ -102,7 +105,9 @@ void TextPickerOverscroller::UpdateTossSpring(float offsetY)
 
 bool TextPickerOverscroller::ShouldStartRebound()
 {
-    auto canRebound = std::abs(velocityTracker_.GetVelocity().GetVelocityY()) < MIN_VELOCITY;
+    auto damping = NearZero(loopTossOffset_) ? 1.0 : LOOP_TOSS_DAMPING / std::abs(loopTossOffset_);
+    auto velocity = std::abs(velocityTracker_.GetVelocity().GetVelocityY()) * damping;
+    auto canRebound = !isFirstStart_ && velocity < MIN_VELOCITY;
     return canRebound || InMaxOverScroll() || NearZero(deltaScrollOffset_, MIN_SCROLL);
 }
 
@@ -112,6 +117,9 @@ void TextPickerOverscroller::Reset()
     backScrollOffset_ = 0.0;
     deltaScrollOffset_ = 0.0;
     overScrollStartOffsetY_ = 0.0;
+    isFirstStart_ = false;
+    loopTossOffset_ = 0.0;
+    velocityTracker_.Reset();
 }
 
 bool TextPickerOverscroller::InMaxOverScroll() const

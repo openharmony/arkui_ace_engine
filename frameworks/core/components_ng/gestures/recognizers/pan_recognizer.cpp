@@ -590,6 +590,19 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     return GestureAcceptResult::DETECTING;
 }
 
+Offset PanRecognizer::GetRawGlobalLocation(int32_t postEventNodeId)
+{
+    PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
+    if (!lastTouchEvent_.history.empty() && (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::BOXSELECT)) {
+        auto lastPoint = lastTouchEvent_.history.back();
+        PointF rawLastPoint(lastPoint.GetOffset().GetX(), lastPoint.GetOffset().GetY());
+        NGGestureRecognizer::Transform(
+            rawLastPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
+        return Offset(rawLastPoint.GetX(), rawLastPoint.GetY());
+    }
+    return Offset(localPoint.GetX(), localPoint.GetY());
+}
+
 void PanRecognizer::OnResetStatus()
 {
     MultiFingersRecognizer::OnResetStatus();
@@ -620,6 +633,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
         NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
             isPostEventResult_, touchPoint.postEventNodeId);
+        info.SetRawGlobalLocation(GetRawGlobalLocation(touchPoint.postEventNodeId));
         info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);

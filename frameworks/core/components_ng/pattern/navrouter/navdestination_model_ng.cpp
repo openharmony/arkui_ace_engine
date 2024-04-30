@@ -64,6 +64,10 @@ bool NavDestinationModelNG::ParseCommonTitle(
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
+                    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+            }
             textLayoutProperty->UpdateContent(title);
         } else {
             // create and init main title
@@ -83,6 +87,8 @@ bool NavDestinationModelNG::ParseCommonTitle(
                 textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeS());
                 textLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
                 textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+                textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
+                    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
             }
             titleBarNode->SetTitle(mainTitle);
             titleBarNode->AddChild(mainTitle);
@@ -122,6 +128,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSizeS());
             textLayoutProperty->UpdateTextColor(theme->GetSubTitleFontColor());
+            textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
         }
         titleBarNode->SetSubtitle(subTitle);
         titleBarNode->AddChild(subTitle);
@@ -137,13 +144,7 @@ void NavDestinationModelNG::Create()
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    if (!navDestinationNode->GetTitleBarNode()) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            CreateImageButton(navDestinationNode);
-        } else {
-            CreateBackButton(navDestinationNode);
-        }
-    }
+
     // content node
     if (!navDestinationNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -152,6 +153,14 @@ void NavDestinationModelNG::Create()
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navDestinationNode->AddChild(contentNode);
         navDestinationNode->SetContentNode(contentNode);
+    }
+
+    if (!navDestinationNode->GetTitleBarNode()) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            CreateImageButton(navDestinationNode);
+        } else {
+            CreateBackButton(navDestinationNode);
+        }
     }
 
     stack->Push(navDestinationNode);
@@ -290,13 +299,6 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
             pattern->SetNavDestinationContext(context);
             return pattern;
         });
-    if (!navDestinationNode->GetTitleBarNode()) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            CreateImageButton(navDestinationNode);
-        } else {
-            CreateBackButton(navDestinationNode);
-        }
-    }
     // content node
     if (!navDestinationNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -309,6 +311,14 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
             contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        }
+    }
+
+    if (!navDestinationNode->GetTitleBarNode()) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            CreateImageButton(navDestinationNode);
+        } else {
+            CreateBackButton(navDestinationNode);
         }
     }
     stack->Push(navDestinationNode);

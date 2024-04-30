@@ -217,6 +217,8 @@ public:
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
     static void ResetTextInputPadding(FrameNode* frameNode);
     static void SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue);
+    static void SetBlurOnSubmit(FrameNode* frameNode, bool blurOnSubmit);
+    static bool GetBlurOnSubmit(FrameNode* frameNode);
     static void SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func);
     static void SetInputFilter(FrameNode* frameNode, const std::string& value,
         const std::function<void(const std::string&)>& onError);

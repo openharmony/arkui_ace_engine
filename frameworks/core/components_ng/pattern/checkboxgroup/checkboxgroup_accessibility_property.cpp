@@ -56,11 +56,10 @@ int32_t CheckBoxGroupAccessibilityProperty::GetCollectionItemCounts() const
     CHECK_NULL_RETURN(checkBoxGroupPattern, 0);
     auto groupManager = checkBoxGroupPattern->GetGroupManager();
     CHECK_NULL_RETURN(groupManager, 0);
-    auto checkBoxGroupMap = groupManager->GetCheckBoxGroupMap();
     auto checkBoxGroupEventHub = checkBoxGroupPattern->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_RETURN(checkBoxGroupEventHub, 0);
     auto group = checkBoxGroupEventHub->GetGroupName();
-    auto list = checkBoxGroupMap[group];
+    auto list = groupManager->GetCheckboxList(group);
     return list.size();
 }
 } // namespace OHOS::Ace::NG

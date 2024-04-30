@@ -298,21 +298,14 @@ void ResetTextInputEnableAutoFill(ArkUINodeHandle node)
     TextFieldModelNG::SetEnableAutoFill(frameNode, DEFAULT_ENABLE_AUTO_FILL);
 }
 
-void SetTextInputCaretStyle(ArkUINodeHandle node, const ArkUILengthType* value)
+void SetTextInputCaretStyle(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Uint32 caretColor)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension width;
-    if (value->string != nullptr) {
-        width.SetCalcValue(value->string);
-    } else {
-        width.SetValue(value->number);
-    }
-    width.SetUnit(static_cast<DimensionUnit>(value->unit));
-
     CaretStyle caretStyle;
-    caretStyle.caretWidth = width;
+    caretStyle.caretWidth = CalcDimension(value, (DimensionUnit)unit);
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
+    TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
 }
 
 void ResetTextInputCaretStyle(ArkUINodeHandle node)
@@ -327,7 +320,9 @@ void ResetTextInputCaretStyle(ArkUINodeHandle node)
 
     CaretStyle caretStyle;
     caretStyle.caretWidth = theme->GetCursorWidth();
+    uint32_t caretColor = theme->GetCursorColor().GetValue();
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
+    TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
 }
 
 void SetTextInputEnableKeyboardOnFocus(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -1330,6 +1325,19 @@ void ResetTextInputOnPaste(ArkUINodeHandle node)
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
 }
 
+void SetBlurOnSubmit(ArkUINodeHandle node, ArkUI_Bool blurOnSubmit)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetBlurOnSubmit(frameNode, blurOnSubmit);
+}
+
+ArkUI_Bool GetBlurOnSubmit(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return TextFieldModelNG::GetBlurOnSubmit(frameNode);
+}
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
 {
@@ -1371,7 +1379,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy,
         SetTextInputOnCut, ResetTextInputOnCut, SetTextInputOnPaste, ResetTextInputOnPaste,
         GetTextInputSelectionMenuHidden, SetTextInputShowPassword, ResetTextInputShowPassword,
-        GetTextInputShowPassword };
+        GetTextInputShowPassword, SetBlurOnSubmit, GetBlurOnSubmit };
     return &modifier;
 }
 

@@ -280,6 +280,34 @@ std::string ProgressPattern::ConvertProgressStatusToString(const ProgressStatus 
     return str;
 }
 
+void ProgressPattern::ObscureText(bool isSensitive)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(textHost);
+    auto renderContext = textHost->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    if (isSensitive) {
+        renderContext->UpdateObscured({ ObscuredReasons::PLACEHOLDER });
+    } else {
+        renderContext->UpdateObscured({});
+    }
+    textHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ProgressPattern::OnSensitiveStyleChange(bool isSensitive)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    progressPaintProperty->UpdateIsSensitive(isSensitive);
+    ObscureText(isSensitive);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void ProgressPattern::FireBuilder()
 {
     auto host = GetHost();

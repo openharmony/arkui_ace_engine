@@ -2231,12 +2231,12 @@ HWTEST_F(TabBarTestNg, SetTabBarStyle001, TestSize.Level1)
     * @tc.expected: Equal to TabBarStyle: SUBTABBATSTYLE.
     */
     const std::string text_test = "text_test";
-    tabContentPattern->SetTabBar(text_test, "", nullptr);
+    tabContentPattern->SetTabBar(text_test, "", std::nullopt, nullptr);
     EXPECT_EQ(tabContentPattern->GetTabBarParam().GetText(), text_test);
 
     tabContentPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     EXPECT_EQ(tabContentPattern->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
-    tabContentPattern->SetTabBar(text_test, "", nullptr);
+    tabContentPattern->SetTabBar(text_test, "", std::nullopt, nullptr);
     EXPECT_EQ(tabContentPattern->GetTabBarParam().GetText(), text_test);
 
     tabContentPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
@@ -2340,7 +2340,7 @@ HWTEST_F(TabBarTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
     tabContentFrameNode->GetTabBarItemId();
     tabContentFrameNode->MountToParent(swiperNode_);
-    tabContentPattern->SetTabBar(text_test, "", nullptr);
+    tabContentPattern->SetTabBar(text_test, "", std::nullopt, nullptr);
     EXPECT_EQ(tabContentPattern->GetTabBarParam().GetText(), text_test);
     tabContentModel.AddTabBarItem(tabContentFrameNode, DEFAULT_NODE_SLOT, true);
 
@@ -2349,7 +2349,7 @@ HWTEST_F(TabBarTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
     auto tabContentFrameNode2 = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
     auto tabContentPattern2 = tabContentFrameNode2->GetPattern<TabContentPattern>();
     tabContentFrameNode2->MountToParent(swiperNode_);
-    tabContentPattern2->SetTabBar(text_test, "", nullptr);
+    tabContentPattern2->SetTabBar(text_test, "", std::nullopt, nullptr);
     EXPECT_EQ(tabContentPattern2->GetTabBarParam().GetText(), text_test);
     tabContentModel.AddTabBarItem(tabContentFrameNode2, DEFAULT_NODE_SLOT, true);
 }

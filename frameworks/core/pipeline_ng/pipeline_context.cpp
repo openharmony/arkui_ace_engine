@@ -2160,19 +2160,24 @@ void PipelineContext::RegisterDumpInfoListener(const std::function<void(const st
     dumpListeners_.push_back(callback);
 }
 
-bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap)
+bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
+    bool skipSubAutoFillContainer)
 {
     CHECK_NULL_RETURN(viewDataWrap, false);
     RefPtr<FrameNode> pageNode = nullptr;
+    RefPtr<FrameNode> dumpNode = nullptr;
     if (node == nullptr) {
         if (stageManager_) {
             pageNode = stageManager_->GetLastPage();
+            dumpNode = pageNode;
         }
     } else {
         pageNode = node->GetPageNode();
+        dumpNode = node;
     }
     CHECK_NULL_RETURN(pageNode, false);
-    pageNode->DumpViewDataPageNodes(viewDataWrap);
+    CHECK_NULL_RETURN(dumpNode, false);
+    dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     auto pageInfo = pagePattern->GetPageInfo();
@@ -3652,17 +3657,21 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
 
 void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
 {
-    if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0) {
+    auto windowManager = GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto mode = windowManager->GetWindowMode();
+    if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
+        mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
         auto percent = SystemProperties::GetDarkModeBrightnessPercent();
         auto stage = stageManager_->GetStageNode();
         CHECK_NULL_VOID(stage);
         auto renderContext = stage->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         CalcDimension dimension;
-        if (isFocus) {
-            dimension.SetValue(1 + percent.front());
-        } else {
+        if (!isFocus && mode == WindowMode::WINDOW_MODE_FLOATING) {
             dimension.SetValue(1 + percent.back());
+        } else {
+            dimension.SetValue(1 + percent.front());
         }
         renderContext->UpdateFrontBrightness(dimension);
     }
