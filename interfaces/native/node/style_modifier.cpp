@@ -2813,6 +2813,137 @@ const ArkUI_AttributeItem* GetOutlineWidth(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetRenderFit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 ||
+        item->value[NUM_0].i32 < ArkUI_RenderFit::ARKUI_RENDER_FIT_CENTER ||
+        item->value[NUM_0].i32 > ArkUI_RenderFit::ARKUI_RENDER_FIT_RESIZE_COVER_BOTTOM_RIGHT) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setRenderFit(node->uiNodeHandle, item->value[NUM_0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetRenderFit(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetRenderFit(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetRenderFit(ArkUI_NodeHandle node)
+{
+    auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
+    g_numberValues[0].i32 = modifier->getRenderFit(node->uiNodeHandle);
+    return &g_attributeItem;
+}
+
+int32_t SetOutlineColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    uint32_t colors[ALLOW_SIZE_8] = { DEFAULT_TRUE, DEFAULT_COLOR, DEFAULT_TRUE, DEFAULT_COLOR,
+        DEFAULT_TRUE, DEFAULT_COLOR, DEFAULT_TRUE, DEFAULT_COLOR };
+    if (item->size == 1) {
+        for (int i = 0; i < ALLOW_SIZE_4; ++i) {
+            colors[NUM_2 * i + NUM_1] = item->value[0].u32;
+        }
+    } else if (item->size == ALLOW_SIZE_4) {
+        for (int i = 0; i < ALLOW_SIZE_4; ++i) {
+            colors[NUM_2 * i + NUM_1] = item->value[i].u32;
+        }
+    } else {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    fullImpl->getNodeModifiers()->getCommonModifier()->setOutlineColor(
+        node->uiNodeHandle, colors, ALLOW_SIZE_8);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetOutlineColor(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetOutlineColor(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetOutlineColor(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Uint32 colors[NUM_4];
+    fullImpl->getNodeModifiers()->getCommonModifier()->getOutlineColor(node->uiNodeHandle, colors);
+    g_numberValues[NUM_0].u32 = colors[NUM_0];
+    g_numberValues[NUM_1].u32 = colors[NUM_1];
+    g_numberValues[NUM_2].u32 = colors[NUM_2];
+    g_numberValues[NUM_3].u32 = colors[NUM_3];
+    return &g_attributeItem;
+}
+
+int32_t SetSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size <= NUM_0 || item->size > NUM_2) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Float32 size[NUM_2] = { ZERO_F, ZERO_F };
+    for (auto i = 0; i < item->size; ++i) {
+        size[i] = item->value[i].f32;
+    }
+    ArkUI_Int32 unit[NUM_2];
+    unit[NUM_0] = GetDefaultUnit(node, UNIT_VP);
+    unit[NUM_1] = GetDefaultUnit(node, UNIT_VP);
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    // 1 for vp. check in DimensionUnit.
+    fullImpl->getNodeModifiers()->getCommonModifier()->setSize(
+        node->uiNodeHandle, size, unit, nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetSize(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetSize(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetSize(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Float32 size[NUM_2];
+    fullImpl->getNodeModifiers()->getCommonModifier()->getSize(
+        node->uiNodeHandle, size, GetDefaultUnit(node, UNIT_VP));
+    g_numberValues[NUM_0].f32 = size[NUM_0];
+    g_numberValues[NUM_1].f32 = size[NUM_1];
+    return &g_attributeItem;
+}
+
+int32_t SetRenderGroup(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setRenderGroup(
+        node->uiNodeHandle, item->value[NUM_0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetRenderGroup(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetRenderGroup(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetRenderGroup(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getRenderGroup(node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
 // Text
 int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -9159,6 +9290,10 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetLayoutWeight,
         SetDisplayPriority,
         SetOutlineWidth,
+        SetRenderFit,
+        SetOutlineColor,
+        SetSize,
+        SetRenderGroup
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -9241,6 +9376,10 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetLayoutWeight,
         GetDisplayPriority,
         GetOutlineWidth,
+        GetRenderFit,
+        GetOutlineColor,
+        GetSize,
+        GetRenderGroup
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -9327,6 +9466,10 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetLayoutWeight,
         ResetDisplayPriority,
         ResetOutlineWidth,
+        ResetRenderFit,
+        ResetOutlineColor,
+        ResetSize,
+        ResetRenderGroup
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

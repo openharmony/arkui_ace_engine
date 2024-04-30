@@ -1276,6 +1276,10 @@ struct ArkUICommonModifier {
     void (*resetBackgroundImageResizable)(ArkUINodeHandle node);
     void (*setBackgroundImageSizeWithUnit)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
         ArkUI_Int32 unit);
+    ArkUI_Int32 (*getRenderFit)(ArkUINodeHandle node);
+    void (*getOutlineColor)(ArkUINodeHandle node, ArkUI_Uint32* values);
+    void (*getSize)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 unit);
+    ArkUI_Bool (*getRenderGroup)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {

@@ -2399,6 +2399,13 @@ void ResetRenderFit(ArkUINodeHandle node)
     ViewAbstract::SetRenderFit(frameNode, RenderFit::TOP_LEFT);
 }
 
+ArkUI_Int32 GetRenderFit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Int32>(ViewAbstract::GetRenderFit(frameNode));
+}
+
 void SetUseEffect(ArkUINodeHandle node, ArkUI_Bool useEffect)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4217,10 +4224,10 @@ void SetOutlineColor(ArkUINodeHandle node, const uint32_t* values, int32_t value
     CHECK_NULL_VOID(frameNode);
     int32_t colorOffset = NUM_0;
     NG::BorderColorProperty borderColors;
-    SetOptionalBorderColor(borderColors.leftColor, values, valuesSize, colorOffset);
-    SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
     SetOptionalBorderColor(borderColors.topColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
     SetOptionalBorderColor(borderColors.bottomColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.leftColor, values, valuesSize, colorOffset);
     borderColors.multiValued = true;
     ViewAbstract::SetOuterBorderColor(frameNode, borderColors);
 }
@@ -4230,6 +4237,32 @@ void ResetOutlineColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetOuterBorderColor(frameNode, Color::BLACK);
+}
+
+void GetOutlineColor(ArkUINodeHandle node, ArkUI_Uint32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto colors = ViewAbstract::GetOuterBorderColor(frameNode);
+    values[NUM_0] = colors.topColor->GetValue();
+    values[NUM_1] = colors.rightColor->GetValue();
+    values[NUM_2] = colors.bottomColor->GetValue();
+    values[NUM_3] = colors.leftColor->GetValue();
+}
+
+void GetSize(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    values[NUM_0] = ViewAbstract::GetWidth(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
+    values[NUM_1] = ViewAbstract::GetHeight(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+ArkUI_Bool GetRenderGroup(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(ViewAbstract::GetRenderGroup(frameNode));
 }
 
 void SetOutlineRadius(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize)
@@ -5118,7 +5151,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetPaddingDimension, GetConfigSize, GetKey,
         GetEnabled, GetMargin, GetMarginDimension, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask,
         GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable,
-        SetBackgroundImageSizeWithUnit};
+        SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize, GetRenderGroup };
 
     return &modifier;
 }

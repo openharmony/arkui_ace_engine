@@ -4206,4 +4206,31 @@ BiasPair ViewAbstract::GetBias(FrameNode* frameNode)
     CHECK_NULL_RETURN(flexItemProperty, biasPair);
     return flexItemProperty->GetBias().value_or(biasPair);
 }
+
+RenderFit ViewAbstract::GetRenderFit(FrameNode* frameNode)
+{
+    RenderFit defalutRenderFit = RenderFit::TOP_LEFT;
+    CHECK_NULL_RETURN(frameNode, defalutRenderFit);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defalutRenderFit);
+    return renderContext->GetRenderFit().value_or(defalutRenderFit);
+}
+
+BorderColorProperty ViewAbstract::GetOuterBorderColor(FrameNode* frameNode)
+{
+    Color defaultColor(0xff000000);
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    CHECK_NULL_RETURN(frameNode, borderColors);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, borderColors);
+    return target->GetOuterBorderColorValue(borderColors);
+}
+
+bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, false);
+    return target->GetRenderGroupValue(false);
+}
 } // namespace OHOS::Ace::NG

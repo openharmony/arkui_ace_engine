@@ -1384,6 +1384,15 @@ typedef enum {
     NODE_LAYOUT_WEIGHT,
     NODE_DISPLAY_PRIORITY,
     NODE_OUTLINE_WIDTH,
+
+    NODE_RENDER_FIT,
+
+    NODE_OUTLINE_COLOR,
+
+    NODE_SIZE,
+
+    NODE_RENDER_GROUP,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
