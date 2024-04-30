@@ -156,14 +156,6 @@ void GridIrregularLayoutAlgorithm::CheckForReset(int32_t lastCrossCount)
         return;
     }
 
-    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
-        postJumpOffset_ = info.currentOffset_;
-        info.lineHeightMap_.clear();
-        PrepareJumpOnReset(info);
-        ResetLayoutRange(info);
-        return;
-    }
-
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
     if (updateIdx != -1) {
         auto it = info.FindInMatrix(updateIdx);
@@ -175,6 +167,14 @@ void GridIrregularLayoutAlgorithm::CheckForReset(int32_t lastCrossCount)
             ResetLayoutRange(info);
         }
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
+        return;
+    }
+
+    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+        postJumpOffset_ = info.currentOffset_;
+        info.lineHeightMap_.clear();
+        PrepareJumpOnReset(info);
+        ResetLayoutRange(info);
     }
 }
 
