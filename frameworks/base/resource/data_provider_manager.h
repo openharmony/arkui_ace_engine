@@ -106,7 +106,6 @@ public:
 
     int32_t GetDataProviderFile(const std::string& uriStr, const std::string& mode) override;
     int32_t ReadMovingPhotoVideo(const std::string &uri);
-    std::string GetMovingPhotoImageUri(const std::string& uri);
 
 private:
     void InitHelper();
