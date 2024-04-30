@@ -532,6 +532,9 @@ void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* inputs, const int32_t
 void ProcessCascadeSelected(
     const std::vector<NG::TextCascadePickerOptions>& options, uint32_t index, std::vector<uint32_t>& selectedValues)
 {
+    if (options.size() == 0) {
+        return;
+    }
     std::vector<std::string> rangeResultValue;
     for (size_t i = 0; i < options.size(); i++) {
         rangeResultValue.emplace_back(options[i].rangeResult[0]);
