@@ -837,8 +837,7 @@ void DatePickerPattern::HandleAddLunarDayChange(uint32_t index)
     if (index == 0) {
         auto getOptionCount = GetOptionCount(monthNode);
         getOptionCount = getOptionCount > 0 ? getOptionCount - 1 : 0;
-        if (monthDatePickerColumnPattern->GetCurrentIndex() ==
-            getOptionCount - 1) {     // max index is count - 1
+        if (monthDatePickerColumnPattern->GetCurrentIndex() == getOptionCount) {     // max index is count - 1
             lunarDate.year = lunarDate.year + 1; // add to next year
             if (lunarDate.year > endDateLunar_.year) {
                 lunarDate.year = startDateLunar_.year;
