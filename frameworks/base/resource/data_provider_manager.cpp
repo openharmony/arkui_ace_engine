@@ -109,11 +109,4 @@ int32_t DataProviderManagerStandard::ReadMovingPhotoVideo(const std::string &uri
     return helper_->ReadMovingPhotoVideo(uri);
 }
 
-std::string DataProviderManagerStandard::GetMovingPhotoImageUri(const std::string& uri)
-{
-    InitHelper();
-    std::shared_lock lock(helperMutex_);
-    CHECK_NULL_RETURN(helper_, "");
-    return helper_->GetMovingPhotoImageUri(uri);
-}
 } // namespace OHOS::Ace
