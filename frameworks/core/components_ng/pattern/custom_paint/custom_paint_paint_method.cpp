@@ -1773,6 +1773,7 @@ bool CustomPaintPaintMethod::CheckNumberAndPercentage(const std::string& param, 
     if (param.size() == 1 && (param[0] < '0' || param[0] > '9')) {
         return false;
     }
+    CHECK_EQUAL_RETURN(param.size(), 0, false);
     // param.size() > 1, param[i] != (. || 0 ~ 9), return false (except for the last one)
     for (auto i = 0U; i < param.size() - 1; i++) {
         if (param[i] < '.' || param[i] == '/' || param[i] > '9') {

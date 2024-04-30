@@ -111,6 +111,8 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
         auto context = PipelineBase::GetCurrentContext();
         if (!context) {
             LOGW("Invalid context.");
+            delete wrapper;
+            wrapper = nullptr;
             return nullptr;
         }
         if (context->IsFormRender()) {
@@ -119,6 +121,8 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
                 (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
             if (notSupport) {
                 LOGE("Not supported src : %{public}s when form render", textString.c_str());
+                delete wrapper;
+                wrapper = nullptr;
                 return nullptr;
             }
         }

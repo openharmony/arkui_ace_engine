@@ -104,7 +104,7 @@ namespace OHOS::Ace::NG {
         }
         for (auto& [key, node] : expiringItem_) {
             if (static_cast<size_t>(node.first) >= index && node.first != -1) {
-                node.first = node.first + count;
+                node.first = node.first + static_cast<int32_t>(count);
             }
         }
 
@@ -164,7 +164,7 @@ namespace OHOS::Ace::NG {
         }
         for (auto& [key, child] : expiringItem_) {
             if (static_cast<size_t>(child.first) >= index + count) {
-                child.first -= count;
+                child.first -= static_cast<int32_t>(count);
                 continue;
             }
             if (static_cast<size_t>(child.first) >= index && static_cast<size_t>(child.first) < index + count) {
@@ -223,7 +223,7 @@ namespace OHOS::Ace::NG {
         if (from < to) {
             for (const auto& [itemIndex, child] : temp) {
                 auto position = static_cast<size_t>(itemIndex);
-                if (position > from && position <= to) {
+                if (position > from && position <= to && position >=1) {
                     cachedItems_.emplace(position - 1, child);
                 } else if (position == from) {
                     cachedItems_.emplace(to, child);

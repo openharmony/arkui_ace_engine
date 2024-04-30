@@ -215,11 +215,9 @@ void JSXComponent::Create(const JSCallbackInfo& info)
 
 void* JSXComponent::Create(const XComponentParams& params)
 {
-    auto* jsXComponent = new JSXComponent();
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(XComponentModel::GetInstance()->Create(params.elmtId,
         static_cast<float>(params.width), static_cast<float>(params.height), params.xcomponentId,
         static_cast<XComponentType>(params.xcomponentType), params.libraryName, nullptr));
-    jsXComponent->SetFrameNode(frameNode);
     auto pattern = frameNode->GetPattern<NG::XComponentPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->SetRenderType(static_cast<NodeRenderType>(params.renderType));
@@ -231,6 +229,8 @@ void* JSXComponent::Create(const XComponentParams& params)
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, nullptr);
+    auto* jsXComponent = new JSXComponent();
+    jsXComponent->SetFrameNode(frameNode);
     taskExecutor->PostTask(
         [weak = AceType::WeakClaim(AceType::RawPtr(frameNode))]() {
             auto frameNode = weak.Upgrade();
