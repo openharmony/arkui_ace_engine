@@ -1543,10 +1543,9 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<p
     // Integrated hsp adaptation
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
         auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
-        if (!integratedHsp->IsString()) {
-            return;
+        if (integratedHsp->IsString()) {
+            integratedHspName = integratedHsp->ToString(vm)->ToString();
         }
-        integratedHspName = integratedHsp->ToString(vm)->ToString();
     }
     if (integratedHspName == "true") {
         LocalScope scope(vm);
