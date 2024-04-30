@@ -370,22 +370,16 @@ ArkUINativeModuleValue TextAreaBridge::SetShowCounter(ArkUIRuntimeCallInfo *runt
     Local<JSValueRef> highlightBorderArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> thresholdArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto showCounter;
-    if (showCounterArg->IsUndefined() || showCounterArg->IsNull() || !showCounterArg->IsBoolean()) {
-        showCounter = false;
-    } else {
+    auto showCounter = false;
+    if (showCounterArg->IsBoolean()) {
         showCounter = showCounterArg->BooleaValue();
     }
-    auto highlightBorder;
-    if (highlightBorderArg->IsUndefined() || highlightBorderArg->IsNull() || !highlightBorderArg->IsBoolean()) {
-        highlightBorder = true;
-    } else {
+    auto highlightBorder = true;
+    if (highlightBorderArg->IsBoolean()) {
         highlightBorder = highlightBorderArg->BooleaValue();
     }
-    auto thresholdValue;
-    if (thresholdArg->IsNull() || thresholdArg->IsUndefined() || !thresholdArg->IsNumber()) {
-        thresholdValue = DEFAULT_MODE;
-    } else {
+    auto thresholdValue = DEFAULT_MODE;
+    if (thresholdArg->IsNumber()) {
         thresholdValue = thresholdArg->Int32Value(vm);
         if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
             thresholdValue = ILLEGAL_VALUE;
