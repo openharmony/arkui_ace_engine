@@ -64,6 +64,13 @@ enum class SpanOperation {
     REMOVE,
 };
 
+class SpanWatcher : public virtual AceType {
+    DECLARE_ACE_TYPE(SpanWatcher, AceType);
+
+public:
+    virtual void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) = 0;
+};
+
 struct GestureStyle {
     std::optional<GestureEventFunc> onClick;
     std::optional<GestureEventFunc> onLongPress;

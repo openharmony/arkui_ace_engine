@@ -125,6 +125,8 @@ RichEditorPattern::RichEditorPattern()
 {
     selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(WeakClaim(this));
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
+    styledString_ = MakeRefPtr<MutableSpanString>("");
+    styledString_->SetSpanWatcher(WeakClaim(this));
 }
 
 RichEditorPattern::~RichEditorPattern()
@@ -132,6 +134,84 @@ RichEditorPattern::~RichEditorPattern()
     if (isCustomKeyboardAttached_) {
         CloseCustomKeyboard();
     }
+}
+
+void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
+{
+    CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(styledString_);
+    auto length = styledString_->GetLength();
+    styledString_->ReplaceSpanString(0, length, value);
+    auto spans = value->GetSpanItems();
+    SetSpanItemChildren(spans);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void RichEditorPattern::UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems)
+{
+    SetSpanItemChildren(spanItems);
+}
+
+void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue)
+{
+    CHECK_NULL_VOID(styledString_);
+    if (textSelector_.IsValid()) {
+        auto start = textSelector_.GetTextStart();
+        auto end = textSelector_.GetTextEnd();
+        SetCaretPosition(start);
+        DeleteForwardInStyledString(end - start);
+        CloseSelectOverlay();
+        ResetSelection();
+    }
+    styledString_->InsertString(caretPosition_, insertValue);
+    if (!caretVisible_) {
+        StartTwinkling();
+    }
+    isTextChange_ = true;
+    moveDirection_ = MoveDirection::FORWARD;
+    moveLength_ = StringUtils::ToWstring(insertValue).length();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+}
+void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
+{
+    CHECK_NULL_VOID(styledString_);
+    if (textSelector_.IsValid()) {
+        if (!textSelector_.StartEqualToDest()) {
+            length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+        }
+        SetCaretPosition(textSelector_.GetTextEnd());
+        CloseSelectOverlay();
+        ResetSelection();
+    }
+    styledString_->RemoveString(caretPosition_ - length, length);
+    if (!caretVisible_) {
+        StartTwinkling();
+    }
+    isTextChange_ = true;
+    moveDirection_ = MoveDirection::BACKWARD;
+    moveLength_ = length;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+}
+
+void RichEditorPattern::DeleteForwardInStyledString(int32_t length)
+{
+    CHECK_NULL_VOID(styledString_);
+    styledString_->RemoveString(caretPosition_, length);
+    if (!caretVisible_) {
+        StartTwinkling();
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
 }
 
 void RichEditorPattern::OnModifyDone()
@@ -204,7 +284,11 @@ void RichEditorPattern::HandleEnabled()
 void RichEditorPattern::BeforeCreateLayoutWrapper()
 {
     ACE_SCOPED_TRACE("RichEditorBeforeCreateLayoutWrapper");
-    TextPattern::PreCreateLayoutWrapper();
+    if (!isStyledStringMode_) {
+        TextPattern::PreCreateLayoutWrapper();
+    } else if (contentMod_) {
+        contentMod_->ContentChange();
+    }
 }
 
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -2997,6 +3081,10 @@ void RichEditorPattern::InsertValueInPreview(const std::string& insertValue)
 
 void RichEditorPattern::InsertValue(const std::string& insertValue)
 {
+    if (isStyledStringMode_) {
+        InsertValueInStyledString(insertValue);
+        return;
+    }
     if (IsPreviewTextInputting()) {
         InsertValueInPreview(insertValue);
         return;
@@ -3443,6 +3531,10 @@ int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward
 void RichEditorPattern::DeleteBackward(int32_t length)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "length=%{public}d", length);
+    if (isStyledStringMode_) {
+        DeleteBackwardInStyledString(length);
+        return;
+    }
     if (IsPreviewTextInputting()) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "do not handle DeleteBackward on previewTextInputting");
         return;
@@ -3521,6 +3613,10 @@ std::wstring RichEditorPattern::GetBackwardDeleteText(int32_t length)
 void RichEditorPattern::DeleteForward(int32_t length)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "length=%{public}d", length);
+    if (isStyledStringMode_) {
+        DeleteForwardInStyledString(length);
+        return;
+    }
     if (IsPreviewTextInputting()) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "do not handle DeleteForward in previewTextInputting");
         return;
