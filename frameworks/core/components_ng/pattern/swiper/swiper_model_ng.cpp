@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 
+#include "base/error/error_code.h"
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -222,6 +223,17 @@ void SwiperModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
 
     eventHub->SetGestureSwipeEvent(
         [event = std::move(onGestureSwipe)](int32_t index, const AnimationCallbackInfo& info) { event(index, info); });
+}
+
+void SwiperModelNG::SetNestedScroll(FrameNode* frameNode, const int32_t nestedOpt)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    NestedScrollOptions option;
+    option.forward = (NestedScrollMode)nestedOpt;
+    option.backward = (NestedScrollMode)nestedOpt;
+    pattern->SetNestedScroll(option);
 }
 
 void SwiperModelNG::SetRemoteMessageEventId(RemoteCallback&& remoteCallback) {}
@@ -715,12 +727,28 @@ EdgeEffect SwiperModelNG::GetEffectMode(FrameNode* frameNode)
     return mode;
 }
 
+int32_t SwiperModelNG::GetNestedScroll(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, ERROR_CODE_PARAM_INVALID);
+    return (int)(pattern->GetNestedScroll().forward);
+}
+
 int32_t SwiperModelNG::RealTotalCount(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(pattern, 0);
     return pattern->RealTotalCount();
+}
+
+void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool useAnimation)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ChangeIndex(index, useAnimation);
 }
 
 } // namespace OHOS::Ace::NG

@@ -194,6 +194,14 @@ void ScrollModelNG::SetOnDidScroll(NG::ScrollEventWithState&& event)
     eventHub->SetOnDidScrollEvent(std::move(event));
 }
 
+void ScrollModelNG::SetOnDidScroll(FrameNode* frameNode, ScrollEventWithState&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidScrollEvent(std::move(event));
+}
+
 void ScrollModelNG::SetOnScrollEdge(NG::ScrollEdgeEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

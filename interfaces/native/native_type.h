@@ -670,6 +670,19 @@ typedef enum {
     ARKUI_SWIPER_ARROW_SHOW_ON_HOVER,
 } ArkUI_SwiperArrow;
 
+/**
+ * @brief Nested scrolling mode for Swiper components and parent components.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Swiper only scrolls on its own and is not linked to its parent component. */
+    ARKUI_SWIPER_NESTED_SRCOLL_SELF_ONLY = 0,
+    /** The Swiper itself scrolls first, and the parent component scrolls after it reaches the edge. After the parent
+     * component scrolls to the edge, if the parent component has an edge effect, the parent component triggers the edge
+     * effect; otherwise, the Swiper triggers the edge effect. */
+    ARKUI_SWIPER_NESTED_SRCOLL_SELF_FIRST,
+} ArkUI_SwiperNestedScrollMode;
 
 /**
  * @brief Enumerates the accessibility modes.
@@ -765,32 +778,38 @@ typedef enum {
 
 
 /**
- * @brief 滚动到具体item时的对齐方式。
+ * @brief Alignment when scrolling to specific items.
  *
  * @since 12
  */
 typedef enum {
-    /** 首部对齐。指定item首部与容器首部对齐。*/
+    /** Align the head. Align the head of the specified item with the head of the container.*/
     ARKUI_SCROLL_ALIGNMENT_START = 0,
-    /** 居中对齐。指定item主轴方向居中对齐于容器。*/
+    /** Center alignment. Align the axis direction of the specified item to the center of the container.*/
     ARKUI_SCROLL_ALIGNMENT_CENTER,
-    /** 尾部对齐。指定item尾部与容器尾部对齐。*/
+    /** Tail alignment. Align the tail of the specified item with the tail of the container.*/
     ARKUI_SCROLL_ALIGNMENT_END,
-    /** 自动对齐。若指定item完全处于显示区，不做调整。否则依照滑动距离最短的原则，将指定item首部对齐或尾部对齐于容器,使指定item完全处于显示区。*/
+    /** Automatic alignment. If the specified item is completely in the display area, no adjustments will be made.
+     * Otherwise, according to the principle of the shortest sliding distance, align the head or tail of the specified
+     * item with the container, so that the specified item is completely in the display area.*/
     ARKUI_SCROLL_ALIGNMENT_AUTO,
+    /** None alignment. Use default alignment by default*/
+    ARKUI_SCROLL_ALIGNMENT_NONE,
 } ArkUI_ScrollAlignment;
 
 /**
- * @brief 定义当前滚动状态。
+ * @brief Define the current scrolling state.
  *
  * @since 12
  */
 typedef enum {
-    /** 空闲状态。使用控制器提供的方法控制滚动时触发，拖动滚动条滚动时触发。*/
+    /** Idle state. Trigger when using the method provided by the controller to control scrolling, and trigger when
+     * dragging the scroll bar to scroll.*/
     ARKUI_SCROLL_STATE_IDLE = 0,
-    /** 滚动状态。使用手指拖动List滚动时触发。*/
+    /** Scroll state. Triggered when dragging the container with fingers to scroll.*/
     ARKUI_SCROLL_STATE_SCROLL,
-    /** 惯性滚动状态。快速划动松手后进行惯性滚动和划动到边缘回弹时触发。*/
+    /** Inertial rolling state. Triggered when inertia rolling and bouncing back to the edge are performed after
+     * releasing the hand quickly.*/
     ARKUI_SCROLL_STATE_FLING,
 } ArkUI_ScrollState;
 

@@ -831,6 +831,33 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return SwiperModelNG::GetCachedCount(frameNode);
 }
 
+void SetSwiperNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetNestedScroll(frameNode, values[0]);
+}
+
+void ResetSwiperNestedScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetNestedScroll(frameNode, 0);
+}
+
+ArkUI_Int32 GetSwiperNestedScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    return SwiperModelNG::GetNestedScroll(frameNode);
+}
+
+void SetSwiperToIndex(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetSwiperToIndex(frameNode, values[0], values[1]);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -847,7 +874,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         GetSwiperVertical, GetSwiperDuration, GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve,
         GetSwiperDisableSwipe, GetSwiperItemSpace, GetSwiperShowIndicator, GetSwiperShowDisplayArrow,
         GetSwiperEffectMode, SetIndicatorInteractive, ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter,
-        GetNodeAdapter, GetCachedCount };
+        GetNodeAdapter, GetCachedCount, SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll,
+        SetSwiperToIndex };
     return &modifier;
 }
 

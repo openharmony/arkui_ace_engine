@@ -21,7 +21,6 @@
 #include "base/utils/utils.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -530,13 +529,18 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return ListModelNG::GetCachedCount(frameNode);
 }
 
-void SetScrollIndexTo(ArkUINodeHandle node, ArkUI_Int32* values)
+void SetScrollToIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto* pattern = frameNode->GetPattern<ListPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ScrollToIndex(values[0], values[1], values[2]);
+    ListModelNG::SetScrollToIndex(frameNode, index, animation, alignment);
+}
+
+void SetScrollBy(ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetScrollBy(frameNode, x, y);
 }
 
 } // namespace
@@ -555,7 +559,7 @@ const ArkUIListModifier* GetListModifier()
         SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset,
         ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
         GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
-        GetNodeAdapter, GetCachedCount, SetScrollIndexTo };
+        GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy };
     return &modifier;
 }
 

@@ -92,6 +92,7 @@ public:
     static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
     static ScrollEdgeType GetOnScrollEdge(FrameNode* frameNode);
     static void SetOnWillScroll(FrameNode* frameNode, NG::ScrollEventWithState&& event);
+    static void SetOnDidScroll(FrameNode* frameNode, NG::ScrollEventWithState&& event);
 };
 
 } // namespace OHOS::Ace::NG
