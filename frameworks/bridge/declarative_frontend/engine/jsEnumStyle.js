@@ -940,10 +940,10 @@ var NavigationTitleMode;
   NavigationTitleMode[NavigationTitleMode["Mini"] = 2] = "Mini";
 })(NavigationTitleMode || (NavigationTitleMode = {}));
 
-var BarStyle;
+let BarStyle;
 (function (BarStyle) {
-  BarStyle[BarStyle["STANDARD"] = 0] = "STANDARD";
-  BarStyle[BarStyle["STACK"] = 1] = "STACK";
+  BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
+  BarStyle[BarStyle.STACK = 1] = "STACK";
 })(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
