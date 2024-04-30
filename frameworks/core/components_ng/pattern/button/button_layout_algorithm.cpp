@@ -35,7 +35,18 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->UseContentModifier()) {
-        BoxLayoutAlgorithm::Measure(layoutWrapper);
+        const auto& childList = layoutWrapper->GetAllChildrenWithBuild();
+        std::list<RefPtr<LayoutWrapper>> builderChildList;
+        for (const auto& child : childList) {
+            if (child->GetHostNode()->GetId() != pattern->GetBuilderId()) {
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+                child->Measure(layoutConstraint);
+                builderChildList.push_back(child);
+            }
+        }
+        BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, builderChildList);
         return;
     }
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();

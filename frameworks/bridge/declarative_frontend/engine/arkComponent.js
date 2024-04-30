@@ -12145,7 +12145,12 @@ class ArkButtonComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().button.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -12153,10 +12158,11 @@ class ArkButtonComponent extends ArkComponent {
   }
   makeContentModifierNode(context, buttonConfiguration) {
     buttonConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.buttonNode)) {
+    if (isUndefined(this.buttonNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.buttonNode = new xNode.BuilderNode(context);
       this.buttonNode.build(this.builder, buttonConfiguration);
+      this.needRebuild = false;
     } else {
       this.buttonNode.update(buttonConfiguration);
     }
