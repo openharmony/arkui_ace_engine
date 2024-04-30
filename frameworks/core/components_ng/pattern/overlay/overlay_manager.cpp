@@ -3193,9 +3193,6 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             if (sheetStyle.backgroundBlurStyle.has_value()) {
                 SetSheetBackgroundBlurStyle(topModalNode, sheetStyle.backgroundBlurStyle.value());
             }
-            BorderRadiusProperty radius;
-            radius.SetRadius(sheetTheme->GetSheetRadius());
-            topModalRenderContext->UpdateBorderRadius(radius);
             auto layoutProperty = topModalNode->GetLayoutProperty<SheetPresentationProperty>();
             if (sheetStyle.borderWidth.has_value()) {
                 layoutProperty->UpdateBorderWidth(sheetStyle.borderWidth.value());
@@ -3266,9 +3263,6 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     if (sheetStyle.backgroundBlurStyle.has_value()) {
         SetSheetBackgroundBlurStyle(sheetNode, sheetStyle.backgroundBlurStyle.value());
     }
-    BorderRadiusProperty radius;
-    radius.SetRadius(sheetTheme->GetSheetRadius());
-    sheetRenderContext->UpdateBorderRadius(radius);
     if (sheetStyle.borderWidth.has_value()) {
         auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
         sheetLayoutProps->UpdateBorderWidth(sheetStyle.borderWidth.value());
