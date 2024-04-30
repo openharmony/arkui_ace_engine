@@ -86,6 +86,7 @@
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
+#include "parameters.h"
 #endif
 #endif
 #include "core/common/udmf/udmf_client.h"
@@ -133,6 +134,9 @@ constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 constexpr int32_t AUTO_FILL_FAILED = 1;
+#if defined(ENABLE_STANDARD_INPUT)
+constexpr int32_t AUTO_FILL_CANCEL = 2;
+#endif
 
 // need to be moved to formatter
 const std::string DIGIT_WHITE_LIST = "[0-9]";
@@ -141,6 +145,9 @@ const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
 const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
+const std::string AUTO_FILL_TEST = "persist.sys.arkui.auto.fill.input.method.enabled";
+const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
+const std::string AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t PREVIEW_TEXT_RANGE_DEFAULT = -1;
 const std::string PREVIEW_STYLE_NORMAL = "normal";
@@ -1986,8 +1993,11 @@ bool TextFieldPattern::IsAutoFillPasswordType(const AceAutoFillType& autoFillTyp
            autoFillType == AceAutoFillType::ACE_NEW_PASSWORD);
 }
 
-bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType)
+bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType, bool isFromKeyBoard)
 {
+    if (isFromKeyBoard) {
+        return true;
+    }
     if (autoFillType == AceAutoFillType::ACE_UNSPECIFIED) {
         TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "CheckAutoFillType :autoFillType is ACE_UNSPECIFIED.");
         return false;
@@ -2049,7 +2059,7 @@ AceAutoFillType TextFieldPattern::GetAutoFillType()
     return AceAutoFillType::ACE_UNSPECIFIED;
 }
 
-bool TextFieldPattern::CheckAutoFill()
+bool TextFieldPattern::CheckAutoFill(bool isFromKeyBoard)
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
@@ -2057,12 +2067,12 @@ bool TextFieldPattern::CheckAutoFill()
     if (!isEnableAutoFill) {
         return false;
     }
-    return CheckAutoFillType(GetAutoFillType());
+    return CheckAutoFillType(GetAutoFillType(), isFromKeyBoard);
 }
 
-bool TextFieldPattern::ProcessAutoFill(bool& isPopup)
+bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool isNewPassWord)
 {
-    if (!CheckAutoFill()) {
+    if (!CheckAutoFill(isFromKeyBoard)) {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "No need to auto fill.");
         return false;
     }
@@ -2073,7 +2083,7 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup)
     CHECK_NULL_RETURN(container, false);
     SetAutoFillTriggeredStateByType(autoFillType);
     SetFillRequestFinish(false);
-    return container->RequestAutoFill(host, autoFillType, isPopup);
+    return (container->RequestAutoFill(host, autoFillType, isPopup, isNewPassWord));
 }
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -5652,7 +5662,24 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
     info->SetDepth(host->GetDepth());
     info->SetAutoFillType(autoFillType);
     info->SetTag(host->GetTag());
-    info->SetValue(contentController_->GetTextValue());
+    if (!autoFillUserName_.empty()) {
+        viewDataWrap->SetUserSelected(true);
+        info->SetValue(autoFillUserName_);
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "autoFillUserName_ : %{private}s", autoFillUserName_.c_str());
+        autoFillUserName_ = "";
+    } else if (!autoFillNewPassword_.empty()) {
+        info->SetValue(autoFillNewPassword_);
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "autoFillNewPassword_ : %{private}s", autoFillNewPassword_.c_str());
+        autoFillNewPassword_ = "";
+    } else if (autoFillOtherAccount_) {
+        viewDataWrap->SetOtherAccount(true);
+        info->SetValue(contentController_->GetTextValue());
+        autoFillOtherAccount_ = false;
+    } else {
+        info->SetValue(contentController_->GetTextValue());
+        viewDataWrap->SetUserSelected(false);
+        viewDataWrap->SetOtherAccount(false);
+    }
     info->SetPlaceholder(GetPlaceHolder());
     info->SetPasswordRules(layoutProperty->GetPasswordRulesValue(""));
     info->SetEnableAutoFill(layoutProperty->GetEnableAutoFillValue(true));
@@ -5698,13 +5725,49 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWra
     }
 }
 
-void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode)
+void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "errCode:%{public}d", errCode);
     SetFillRequestFinish(true);
     if (errCode == AUTO_FILL_FAILED) {
         return;
     }
+#if defined(ENABLE_STANDARD_INPUT)
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "fillContent is : %{private}s", fillContent.c_str());
+    std::unordered_map<std::string, MiscServices::PrivateDataValue> userNamesOrPassWordMap;
+    while (errCode == AUTO_FILL_CANCEL && IsAutoFillPasswordType(GetAutoFillType())) {
+        auto jsonObject = JsonUtil::ParseJsonString(fillContent);
+        if (jsonObject == nullptr) {
+            break;
+        }
+        if (jsonObject->Contains("userName")) {
+            userNamesOrPassWordMap.insert(std::pair<std::string, MiscServices::PrivateDataValue>(
+                AUTO_FILL_PARAMS_USERNAME, jsonObject->GetString("userName")));
+        } else if (jsonObject->Contains("newPassword")) {
+            userNamesOrPassWordMap.insert(std::pair<std::string, MiscServices::PrivateDataValue>(
+                AUTO_FILL_PARAMS_NEWPASSWORD, jsonObject->GetString("newPassword")));
+        } else {
+            TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "fillContent is empty");
+            break;
+        }
+        MiscServices::InputMethodController::GetInstance()->SendPrivateCommand(userNamesOrPassWordMap);
+        if (system::GetBoolParameter(AUTO_FILL_TEST, false)) {
+            if (textChangeListener_ == nullptr) {
+                textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
+            }
+            auto task = [textChangeListener = textChangeListener_, userNamesOrPassWordMap] {
+                CHECK_NULL_VOID(textChangeListener);
+                textChangeListener->ReceivePrivateCommand(userNamesOrPassWordMap);
+            };
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, 3000, "testInputMethodAutoFill");
+        }
+        break;
+    }
+#endif
     if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }

@@ -1014,7 +1014,7 @@ public:
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
-    void NotifyFillRequestFailed(int32_t errCode) override;
+    void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "") override;
     bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
     bool NeedPaintSelect();
@@ -1152,6 +1152,20 @@ public:
         auto transformContentRect = contentRect_;
         selectOverlay_->GetLocalRectWithTransform(transformContentRect);
         return transformContentRect;
+    }
+
+    bool ProcessAutoFill(bool& isPopup, bool isFromKeyBoard = false, bool isNewPassWord = false);
+    void SetAutoFillUserName(const std::string& userName)
+    {
+        autoFillUserName_ = userName;
+    }
+    void SetAutoFillNewPassword(const std::string& newPassword)
+    {
+        autoFillNewPassword_ = newPassword;
+    }
+    void SetAutoFillOtherAccount(bool otherAccount)
+    {
+        autoFillOtherAccount_ = otherAccount;
     }
 
     std::vector<RectF> GetPreviewTextRects() const;
@@ -1344,8 +1358,7 @@ private:
     void ProcessResponseArea();
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
-    bool CheckAutoFill();
-    bool ProcessAutoFill(bool& isPopup);
+    bool CheckAutoFill(bool isFromKeyBoard = false);
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
@@ -1355,7 +1368,7 @@ private:
     void InitDragDropEventWithOutDragStart();
     void UpdateBlurReason();
     AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
-    bool CheckAutoFillType(const AceAutoFillType& autoFillType);
+    bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType, bool isFromKeyBoard = false);
     bool GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     AceAutoFillType GetAutoFillType();
@@ -1546,6 +1559,10 @@ private:
     bool showCountBorderStyle_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
+    std::string autoFillUserName_;
+    std::string autoFillNewPassword_;
+    bool autoFillOtherAccount_ = false;
+
     bool blurOnSubmit_ = true;
     bool isDetachFromMainTree_ = false;
     bool isFocusTextColorSet_ = false;

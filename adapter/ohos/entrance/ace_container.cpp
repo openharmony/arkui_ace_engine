@@ -1149,7 +1149,7 @@ public:
             TaskExecutor::TaskType::UI, "ArkUINotifyFillRequestSuccess");
     }
 
-    void OnFillRequestFailed(int32_t errCode) override
+    void OnFillRequestFailed(int32_t errCode, const std::string& fillContent) override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, errCode: %{public}d", errCode);
         auto pipelineContext = pipelineContext_.Upgrade();
@@ -1159,9 +1159,9 @@ public:
         auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [errCode, pipelineContext, node]() {
+            [errCode, pipelineContext, node, fillContent]() {
                 if (pipelineContext) {
-                    pipelineContext->NotifyFillRequestFailed(node, errCode);
+                    pipelineContext->NotifyFillRequestFailed(node, errCode, fillContent);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUINotifyFillRequestFailed");
@@ -1189,7 +1189,8 @@ bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
     return true;
 }
 
-bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup)
+bool AceContainer::RequestAutoFill(
+    const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
@@ -1209,6 +1210,11 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isNewPassWord is: %{public}d", isNewPassWord);
+    if (isNewPassWord) {
+        callback->OnFillRequestSuccess(viewData);
+        return true;
+    }
     AbilityRuntime::AutoFill::PopupSize popupSize;
     popupSize.height = POPUPSIZE_HEIGHT;
     popupSize.width = POPUPSIZE_WIDTH;
@@ -1226,7 +1232,7 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     autoFillRequest.config = customConfig;
     autoFillRequest.autoFillType = static_cast<AbilityBase::AutoFillType>(autoFillType);
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::FILL;
-    autoFillRequest.viewData = viewDataWrapOhos->GetViewData();
+    autoFillRequest.viewData = viewData;
     if (AbilityRuntime::AutoFillManager::GetInstance().
         RequestAutoFill(uiContent, autoFillRequest, callback, isPopup) != 0) {
         return false;

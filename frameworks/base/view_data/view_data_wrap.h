@@ -50,6 +50,12 @@ public:
 
     virtual void SetPageRect(const NG::RectF& rect) {}
     virtual const NG::RectF& GetPageRect() const = 0;
+
+    virtual void SetUserSelected(bool isUserSelected) {}
+    virtual bool GetUserSelected() const = 0;
+
+    virtual void SetOtherAccount(bool isOtherAccount) {}
+    virtual bool GetOtherAccount() const = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_VIEW_DATA_WRAP_H
