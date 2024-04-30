@@ -46,6 +46,13 @@ void GridColModelNG::Create(const RefPtr<V2::GridContainerSize> &span, const Ref
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Order, *order);
 }
 
+RefPtr<FrameNode> GridColModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::GRID_COL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridColLayoutPattern>(); });
+    return frameNode;
+}
+
 void GridColModelNG::SetSpan(const RefPtr<V2::GridContainerSize> &span)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridColLayoutProperty, Span, *span);

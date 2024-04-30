@@ -163,7 +163,8 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(1);
     std::string type = firstArg->IsString() ? firstArg->ToString(vm)->ToString() : "";
     static const std::unordered_map<std::string, ArkUINodeType> typeMap = { { "Text", ARKUI_TEXT },
-        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK } };
+        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK },
+        { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }};
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     RefPtr<FrameNode> node;
     auto iter = typeMap.find(type);
