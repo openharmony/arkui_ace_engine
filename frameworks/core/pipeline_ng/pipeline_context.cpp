@@ -3630,9 +3630,9 @@ void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
         CHECK_NULL_VOID(renderContext);
         CalcDimension dimension;
         if (!isFocus && mode == WindowMode::WINDOW_MODE_FLOATING) {
-            dimension.SetValue(1 + percent.back());
+            dimension.SetValue(1 + percent.second);
         } else {
-            dimension.SetValue(1 + percent.front());
+            dimension.SetValue(1 + percent.first);
         }
         renderContext->UpdateFrontBrightness(dimension);
     }
