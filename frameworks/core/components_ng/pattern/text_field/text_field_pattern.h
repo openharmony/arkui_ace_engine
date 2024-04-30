@@ -1196,10 +1196,7 @@ public:
         return static_cast<float>(previewUnderlineWidth_.Value());
     }
 
-    void ReceivePreviewTextStyle(const std::string& style) override
-    {
-        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PreviewTextStyle, style);
-    }
+    void ReceivePreviewTextStyle(const std::string& style) override;
 
     PreviewTextStyle GetPreviewTextStyle() const;
 
@@ -1420,6 +1417,8 @@ private:
     }
 
     bool CheckPreviewTextValidate(PreviewTextInfo info) const;
+
+    void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);
 
     RectF frameRect_;
     RectF textRect_;
