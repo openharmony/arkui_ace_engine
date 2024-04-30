@@ -432,6 +432,16 @@ bool JsiCallbackInfo::GetBooleanArg(size_t index, bool& value) const
     return true;
 }
 
+bool JsiCallbackInfo::GetInt32Arg(size_t index, int32_t& value) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsNumber()) {
+        return false;
+    }
+    value = arg->Int32Value(info_->GetVM());
+    return true;
+}
+
 bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
 {
     auto arg = info_->GetCallArgRef(index);
