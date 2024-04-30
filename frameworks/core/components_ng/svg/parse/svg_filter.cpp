@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,27 +21,14 @@
 
 namespace OHOS::Ace::NG {
 
-SvgFilter::SvgFilter() : SvgQuote()
-{
-    declaration_ = AceType::MakeRefPtr<SvgFilterDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgFilter::SvgFilter() : SvgQuote() {}
 
 RefPtr<SvgNode> SvgFilter::Create()
 {
     return AceType::MakeRefPtr<SvgFilter>();
 }
 
-void SvgFilter::OnInitStyle()
-{
-    auto declaration = Ace::AceType::DynamicCast<SvgFilterDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    x_ = declaration->GetX();
-    y_ = declaration->GetY();
-    height_ = declaration->GetHeight();
-    width_ = declaration->GetWidth();
-}
+void SvgFilter::OnInitStyle() {}
 
 void SvgFilter::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
@@ -64,8 +51,6 @@ void SvgFilter::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, con
 
 void SvgFilter::OnAsPaint()
 {
-    auto declaration = Ace::AceType::DynamicCast<SvgFilterDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
 #ifndef USE_ROSEN_DRAWING
     filterPaint_.setAntiAlias(true);
     sk_sp<SkImageFilter> imageFilter = nullptr;
@@ -73,16 +58,16 @@ void SvgFilter::OnAsPaint()
     filterBrush_.SetAntiAlias(true);
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
 #endif
-    ColorInterpolationType currentColor = ColorInterpolationType::SRGB;
+    SvgColorInterpolationType currentColor = SvgColorInterpolationType::SRGB;
 
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
 
     Rect filterEffectsRegion = GetEffectFilterArea();
     Rect effectFilterArea = {
-        filterEffectsRegion.Left() + filterEffectsRegion.Width() * x_.Value(),
-        filterEffectsRegion.Top() + filterEffectsRegion.Height() * y_.Value(),
-        filterEffectsRegion.Width() * width_.Value(),
-        filterEffectsRegion.Height() * height_.Value()
+        filterEffectsRegion.Left() + filterEffectsRegion.Width() * filterAttr_.x.Value(),
+        filterEffectsRegion.Top() + filterEffectsRegion.Height() * filterAttr_.y.Value(),
+        filterEffectsRegion.Width() * filterAttr_.width.Value(),
+        filterEffectsRegion.Height() * filterAttr_.height.Value()
     };
 
     for (const auto& item : children_) {
@@ -93,7 +78,7 @@ void SvgFilter::OnAsPaint()
         nodeFe->GetImageFilter(imageFilter, currentColor, resultHash, effectFilterArea);
     }
 
-    SvgFe::ConverImageFilterColor(imageFilter, currentColor, ColorInterpolationType::SRGB);
+    SvgFe::ConverImageFilterColor(imageFilter, currentColor, SvgColorInterpolationType::SRGB);
 #ifndef USE_ROSEN_DRAWING
     filterPaint_.setImageFilter(imageFilter);
 #else
@@ -101,6 +86,36 @@ void SvgFilter::OnAsPaint()
     filter.SetImageFilter(imageFilter);
     filterBrush_.SetFilter(filter);
 #endif
+}
+
+bool SvgFilter::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgFilterAttribute&)> attrs[] = {
+        { DOM_SVG_HEIGHT,
+            [](const std::string& val, SvgFilterAttribute& attr) {
+                attr.height = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_WIDTH,
+            [](const std::string& val, SvgFilterAttribute& attr) {
+                attr.width = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_X,
+            [](const std::string& val, SvgFilterAttribute& attr) {
+                attr.x = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_Y,
+            [](const std::string& val, SvgFilterAttribute& attr) {
+                attr.y = SvgAttributesParser::ParseDimension(val);
+            } },
+    };
+    std::string key = name;
+    StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, filterAttr_);
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

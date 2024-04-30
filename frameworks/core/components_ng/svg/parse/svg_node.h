@@ -54,7 +54,7 @@ public:
     SvgNode() = default;
     ~SvgNode() override = default;
 
-    void InitStyle(const RefPtr<SvgBaseDeclaration>& parent);
+    void InitStyle(const SvgBaseAttribute& attr);
 
     void PushAnimatorOnFinishCallback(const std::function<void()>& onFinishCallback);
 
@@ -63,17 +63,20 @@ public:
 
     virtual void SetAttr(const std::string& name, const std::string& value);
 
+    virtual bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+    {
+        return false;
+    }
+
     virtual void AppendChild(const RefPtr<SvgNode>& child)
     {
         children_.emplace_back(child);
         OnAppendChild(child);
     }
 
-    virtual void Inherit(const RefPtr<SvgBaseDeclaration>& parent)
+    virtual void InheritAttr(const SvgBaseAttribute& parent)
     {
-        if (declaration_) {
-            declaration_->Inherit(parent);
-        }
+        attributes_.Inherit(parent);
     }
 
 #ifndef USE_ROSEN_DRAWING
@@ -108,11 +111,6 @@ public:
         nodeId_ = value;
     }
 
-    void SetText(const std::string& text)
-    {
-        text_ = text;
-    }
-
     void SetSmoothEdge(float value)
     {
         smoothEdge_ = value;
@@ -143,9 +141,14 @@ public:
         return colorFilter_;
     }
 
-    RefPtr<SvgBaseDeclaration> GetDeclaration()
+    SvgBaseAttribute GetBaseAttributes() const
     {
-        return declaration_;
+        return attributes_;
+    }
+
+    void SetBaseAttributes(const SvgBaseAttribute& attr)
+    {
+        attributes_ = attr;
     }
 
     void SetImagePath(const std::string& path)
@@ -204,12 +207,12 @@ protected:
     }
 
     WeakPtr<SvgContext> svgContext_;
-    RefPtr<SvgBaseDeclaration> declaration_;
     std::vector<RefPtr<SvgNode>> children_;
     std::string nodeId_;
-    std::string text_;
     std::string transform_;
     std::map<std::string, std::vector<float>> animateTransform_;
+
+    SvgBaseAttribute attributes_;
 
     std::string hrefClipPath_;
     std::string hrefMaskId_;
@@ -219,8 +222,8 @@ protected:
     float smoothEdge_ = 0.0f;
     std::optional<ImageColorFilter> colorFilter_;
     Rect effectFilterArea_;
-    double useOffsetX_ = 0.0;
-    double useOffsetY_ = 0.0;
+    float useOffsetX_ = 0.0f;
+    float useOffsetY_ = 0.0f;
 
     bool hrefFill_ = true;   // get fill attributes from reference
     bool hrefRender_ = true; // get render attr (mask, filter, transform, opacity, clip path) from reference
