@@ -216,6 +216,8 @@ public:
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
+    void AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& callback);
+
     void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
     void TriggerOnSizeChangeCallback();

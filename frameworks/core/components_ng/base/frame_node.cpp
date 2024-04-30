@@ -1155,6 +1155,13 @@ void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)
     eventHub_->SetOnSizeChanged(std::move(callback));
 }
 
+void FrameNode::AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& callback)
+{
+    if (!lastFrameNodeRect_) {
+        lastFrameNodeRect_ = std::make_unique<RectF>();
+    }
+    eventHub_->AddInnerOnSizeChanged(id, std::move(callback));
+}
 
 void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
 {
@@ -1192,7 +1199,7 @@ void FrameNode::TriggerOnSizeChangeCallback()
     if (!IsActive() || !CheckAncestorPageShow()) {
         return;
     }
-    if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
+    if ((eventHub_->HasOnSizeChanged() || eventHub_->HasInnerOnSizeChanged()) && lastFrameNodeRect_) {
         auto currFrameRect = GetRectWithRender();
         if (currFrameRect.GetSize() != (*lastFrameNodeRect_).GetSize()) {
             onSizeChangeDumpInfo dumpInfo { GetCurrentTimestamp(), *lastFrameNodeRect_, currFrameRect };
@@ -1200,7 +1207,12 @@ void FrameNode::TriggerOnSizeChangeCallback()
                 onSizeChangeDumpInfos.erase(onSizeChangeDumpInfos.begin());
             }
             onSizeChangeDumpInfos.emplace_back(dumpInfo);
-            eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            if (eventHub_->HasOnSizeChanged()) {
+                eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            }
+            if (eventHub_->HasInnerOnSizeChanged()) {
+                eventHub_->FireInnerOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            }
             eventHub_->FireJSFrameNodeOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             *lastFrameNodeRect_ = currFrameRect;
         }
