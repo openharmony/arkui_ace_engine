@@ -225,7 +225,13 @@ public:
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func);
+    static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
+    static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
+    static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
+    static Dimension GetLineHeight(FrameNode* frameNode);
+    static uint32_t GetMaxLines(FrameNode* frameNode);
     static void SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding);
+
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

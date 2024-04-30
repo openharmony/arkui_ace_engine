@@ -192,9 +192,19 @@ void WaterFlowModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFra
     ScrollableModelNG::SetOnScrollFrameBegin(std::move(ScrollFrameBegin));
 }
 
+void WaterFlowModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin)
+{
+    ScrollableModelNG::SetOnScrollFrameBegin(frameNode, std::move(ScrollFrameBegin));
+}
+
 void WaterFlowModelNG::SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll)
 {
     ScrollableModelNG::SetOnScroll(std::move(onScroll));
+}
+
+void WaterFlowModelNG::SetOnScroll(FrameNode* frameNode, std::function<void(Dimension, ScrollState)>&& onScroll)
+{
+    ScrollableModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
 
 void WaterFlowModelNG::SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
@@ -202,14 +212,32 @@ void WaterFlowModelNG::SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
     ScrollableModelNG::SetOnScrollStart(std::move(onScrollStart));
 }
 
+void WaterFlowModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
+{
+    ScrollableModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
+}
+
 void WaterFlowModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
 {
     ScrollableModelNG::SetOnScrollStop(std::move(onScrollStop));
 }
 
+void WaterFlowModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
+{
+    ScrollableModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
+}
+
 void WaterFlowModelNG::SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollIndex(std::move(onScrollIndex));
+}
+
+void WaterFlowModelNG::SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex)
+{
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -251,13 +279,51 @@ void WaterFlowModelNG::SetScrollBarMode(DisplayMode value)
 {
     ScrollableModelNG::SetScrollBarMode(value);
 }
+
+void WaterFlowModelNG::SetScrollBarMode(FrameNode* frameNode, DisplayMode value)
+{
+    ScrollableModelNG::SetScrollBarMode(frameNode, static_cast<int32_t>(value));
+}
+
+int32_t WaterFlowModelNG::GetScrollBarMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<int32_t>(
+        frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value_or(DisplayMode::AUTO));
+}
+
 void WaterFlowModelNG::SetScrollBarColor(const std::string& value)
 {
     ScrollableModelNG::SetScrollBarColor(value);
 }
+
+void WaterFlowModelNG::SetScrollBarColor(FrameNode* frameNode, const std::string& value)
+{
+    ScrollableModelNG::SetScrollBarColor(frameNode, value);
+}
+
+uint32_t WaterFlowModelNG::GetScrollBarColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarColor();
+    return value.GetValue();
+}
+
 void WaterFlowModelNG::SetScrollBarWidth(const std::string& value)
 {
     ScrollableModelNG::SetScrollBarWidth(value);
+}
+
+void WaterFlowModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::string& value)
+{
+    ScrollableModelNG::SetScrollBarWidth(frameNode, value);
+}
+
+float WaterFlowModelNG::GetScrollBarWidth(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarWidth();
+    return value.ConvertToVp();
 }
 
 RefPtr<WaterFlowSections> WaterFlowModelNG::GetOrCreateWaterFlowSections()
@@ -269,9 +335,25 @@ RefPtr<WaterFlowSections> WaterFlowModelNG::GetOrCreateWaterFlowSections()
     return pattern->GetOrCreateWaterFlowSections();
 }
 
+RefPtr<WaterFlowSections> WaterFlowModelNG::GetOrCreateWaterFlowSections(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetOrCreateWaterFlowSections();
+}
+
 void WaterFlowModelNG::ResetSections()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetSections();
+}
+
+void WaterFlowModelNG::ResetSections(FrameNode* frameNode)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
@@ -423,5 +505,93 @@ NestedScrollOptions WaterFlowModelNG::GetNestedScroll(FrameNode* frameNode)
 void WaterFlowModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
 {
     ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+}
+float WaterFlowModelNG::GetFriction(FrameNode* frameNode)
+{
+    double value = 0.0;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_RETURN(pattern, value);
+    return pattern->GetFriction();
+}
+
+int32_t WaterFlowModelNG::GetEdgeEffect(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ScrollableModelNG::GetEdgeEffect(frameNode);
+}
+
+int32_t WaterFlowModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return ScrollableModelNG::GetAlwaysEnabled(frameNode);
+}
+
+Dimension WaterFlowModelNG::GetItemMinWidth(FrameNode* frameNode)
+{
+    Dimension value = Dimension(0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    auto size = layoutProperty->GetItemMinSize();
+    if (size.has_value()) {
+        auto width = size->Width();
+        if (width.has_value()) {
+            return width.value().GetDimension();
+        }
+    }
+    return value;
+}
+
+Dimension WaterFlowModelNG::GetItemMaxWidth(FrameNode* frameNode)
+{
+    Dimension value = Dimension(0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    auto size = layoutProperty->GetItemMaxSize();
+    if (size.has_value()) {
+        auto width = size->Width();
+        if (width.has_value()) {
+            return width.value().GetDimension();
+        }
+    }
+    return value;
+}
+
+Dimension WaterFlowModelNG::GetItemMinHeight(FrameNode* frameNode)
+{
+    Dimension value = Dimension(0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    auto size = layoutProperty->GetItemMinSize();
+    if (size.has_value()) {
+        auto height = size->Height();
+        if (height.has_value()) {
+            return height.value().GetDimension();
+        }
+    }
+    return value;
+}
+
+Dimension WaterFlowModelNG::GetItemMaxHeight(FrameNode* frameNode)
+{
+    Dimension value = Dimension(0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    auto size = layoutProperty->GetItemMaxSize();
+    if (size.has_value()) {
+        auto height = size->Height();
+        if (height.has_value()) {
+            return height.value().GetDimension();
+        }
+    }
+    return value;
+}
+
+bool WaterFlowModelNG::GetScrollEnabled(FrameNode* frameNode)
+{
+    bool value = true;
+    CHECK_NULL_RETURN(frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, ScrollEnabled, value, frameNode, value);
+    return value;
 }
 } // namespace OHOS::Ace::NG

@@ -342,16 +342,22 @@ const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListScroll,
-    nullptr,
+    NodeModifier::SetOnListScrollIndex,
     NodeModifier::SetOnListScrollStart,
     NodeModifier::SetOnListScrollStop,
     NodeModifier::SetOnListScrollFrameBegin,
     NodeModifier::SetOnListWillScroll,
+    NodeModifier::SetOnListDidScroll,
 };
 
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
     NodeModifier::SetOnReachEnd,
+    NodeModifier::SetOnDidScroll,
+    NodeModifier::SetOnWaterFlowScrollStart,
+    NodeModifier::SetOnWaterFlowScrollStop,
+    NodeModifier::SetOnWaterFlowScrollFrameBegin,
+    NodeModifier::SetOnWaterFlowScrollIndex,
 };
 
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {

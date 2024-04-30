@@ -1099,23 +1099,59 @@ void ResetTextInputTextIndent(ArkUINodeHandle node)
 
 void SetTextInputShowPassword(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetShowPassword(frameNode, static_cast<bool>(value));
 }
 
 void ResetTextInputShowPassword(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetShowPassword(frameNode, false);
 }
 
 ArkUI_Bool GetTextInputShowPassword(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return TextFieldModelNG::GetShowPassword(frameNode);
+}
+
+ArkUI_CharPtr GetTextInputFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = UnParseFontFeatureSetting(TextFieldModelNG::GetFontFeature(frameNode));
+    return g_strValue.c_str();
+}
+
+ArkUI_Float32 GetTextInputAdaptMinFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetAdaptMinFontSize(frameNode).Value();
+}
+
+ArkUI_Float32 GetTextInputAdaptMaxFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetAdaptMaxFontSize(frameNode).Value();
+}
+
+ArkUI_Float32 GetTextInputLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetLineHeight(frameNode).Value();
+}
+
+ArkUI_Int32 GetTextInputMaxLines(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetMaxLines(frameNode);
 }
 } // namespace
 
@@ -1376,10 +1412,11 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputOnEditChange, ResetTextInputOnEditChange, SetTextInputFilter, ResetTextInputFilter,
         SetTextInputOnSubmitWithEvent, ResetTextInputOnSubmitWithEvent, SetTextInputOnChange, ResetTextInputOnChange,
         SetTextInputOnTextSelectionChange, ResetTextInputOnTextSelectionChange, SetTextInputOnContentScroll,
-        ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy,
-        SetTextInputOnCut, ResetTextInputOnCut, SetTextInputOnPaste, ResetTextInputOnPaste,
-        GetTextInputSelectionMenuHidden, SetTextInputShowPassword, ResetTextInputShowPassword,
-        GetTextInputShowPassword, SetBlurOnSubmit, GetBlurOnSubmit };
+        ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy, SetTextInputOnCut, ResetTextInputOnCut,
+        SetTextInputOnPaste, ResetTextInputOnPaste, GetTextInputSelectionMenuHidden, SetTextInputShowPassword,
+        ResetTextInputShowPassword, GetTextInputShowPassword, SetBlurOnSubmit, GetBlurOnSubmit,
+        GetTextInputAdaptMinFontSize, GetTextInputAdaptMaxFontSize, GetTextInputLineHeight, GetTextInputMaxLines,
+        GetTextInputFontFeature };
     return &modifier;
 }
 

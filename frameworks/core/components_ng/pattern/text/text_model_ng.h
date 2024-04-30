@@ -137,6 +137,7 @@ public:
     static std::vector<Shadow> GetTextShadow(FrameNode* frameNode);
     static Ace::WordBreak GetWordBreak(FrameNode* frameNode);
     static EllipsisMode GetEllipsisMode(FrameNode* frameNode);
+    static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

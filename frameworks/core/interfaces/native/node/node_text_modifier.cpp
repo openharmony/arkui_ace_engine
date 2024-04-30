@@ -20,6 +20,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/text_style.h"
@@ -779,94 +780,35 @@ void ResetTextLineSpacing(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING);
 }
+
+ArkUI_CharPtr GetTextFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = UnParseFontFeatureSetting(TextModelNG::GetFontFeature(frameNode));
+    return g_strValue.c_str();
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUITextModifier* GetTextModifier()
 {
-    static const ArkUITextModifier modifier = {
-        SetTextContent,
-        SetFontWeight,
-        ResetFontWeight,
-        SetFontStyle,
-        ResetFontStyle,
-        SetTextAlign,
-        ResetTextAlign,
-        SetFontColor,
-        ResetFontColor,
-        SetTextForegroundColor,
-        ResetTextForegroundColor,
-        SetFontSize,
-        ResetFontSize,
-        SetTextLineHeight,
-        ResetTextLineHeight,
-        SetTextTextOverflow,
-        ResetTextTextOverflow,
-        SetTextDecoration,
-        ResetTextDecoration,
-        SetTextTextCase,
-        ResetTextTextCase,
-        SetTextMaxLines,
-        ResetTextMaxLines,
-        SetTextMinFontSize,
-        ResetTextMinFontSize,
-        SetTextDraggable,
-        ResetTextDraggable,
-        SetTextMaxFontSize,
-        ResetTextMaxFontSize,
-        SetTextFontFamily,
-        ResetTextFontFamily,
-        SetTextCopyOption,
-        ResetTextCopyOption,
-        SetTextTextShadow,
-        ResetTextTextShadow,
-        SetTextHeightAdaptivePolicy,
-        ResetTextHeightAdaptivePolicy,
-        SetTextTextIndent,
-        ResetTextTextIndent,
-        SetTextBaselineOffset,
-        ResetTextBaselineOffset,
-        SetTextLetterSpacing,
-        ResetTextLetterSpacing,
-        SetTextFont,
-        ResetTextFont,
-        SetFontWeightStr,
-        SetWordBreak,
-        ResetWordBreak,
-        GetFontFamily,
-        GetCopyOption,
-        GetHeightAdaptivePolicy,
-        GetTextMinFontSize,
-        GetTextMaxFontSize,
-        GetFont,
-        GetFontSize,
-        GetFontWeight,
-        GetItalicFontStyle,
-        SetEllipsisMode,
-        ResetEllipsisMode,
-        SetTextDetectEnable,
-        ResetTextDetectEnable,
-        GetTextContent,
-        GetTextLineHeight,
-        GetTextDecoration,
-        GetTextTextCase,
-        GetTextLetterSpacing,
-        GetTextMaxLines,
-        GetTextAlign,
-        GetTextTextOverflow,
-        GetTextTextIndent,
-        GetFontColor,
-        GetTextBaselineOffset,
-        GetTextShadowCount,
-        GetTextShadow,
-        GetTextWordBreak,
-        GetTextEllipsisMode,
-        SetTextFontFeature,
-        ResetTextFontFeature,
-        SetTextLineSpacing,
-        GetTextLineSpacing,
-        ResetTextLineSpacing
-    };
+    static const ArkUITextModifier modifier = { SetTextContent, SetFontWeight, ResetFontWeight, SetFontStyle,
+        ResetFontStyle, SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetTextForegroundColor,
+        ResetTextForegroundColor, SetFontSize, ResetFontSize, SetTextLineHeight, ResetTextLineHeight,
+        SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration, ResetTextDecoration, SetTextTextCase,
+        ResetTextTextCase, SetTextMaxLines, ResetTextMaxLines, SetTextMinFontSize, ResetTextMinFontSize,
+        SetTextDraggable, ResetTextDraggable, SetTextMaxFontSize, ResetTextMaxFontSize, SetTextFontFamily,
+        ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption, SetTextTextShadow, ResetTextTextShadow,
+        SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy, SetTextTextIndent, ResetTextTextIndent,
+        SetTextBaselineOffset, ResetTextBaselineOffset, SetTextLetterSpacing, ResetTextLetterSpacing, SetTextFont,
+        ResetTextFont, SetFontWeightStr, SetWordBreak, ResetWordBreak, GetFontFamily, GetCopyOption,
+        GetHeightAdaptivePolicy, GetTextMinFontSize, GetTextMaxFontSize, GetFont, GetFontSize, GetFontWeight,
+        GetItalicFontStyle, SetEllipsisMode, ResetEllipsisMode, SetTextDetectEnable, ResetTextDetectEnable,
+        GetTextContent, GetTextLineHeight, GetTextDecoration, GetTextTextCase, GetTextLetterSpacing, GetTextMaxLines,
+        GetTextAlign, GetTextTextOverflow, GetTextTextIndent, GetFontColor, GetTextBaselineOffset, GetTextShadowCount,
+        GetTextShadow, GetTextWordBreak, GetTextEllipsisMode, SetTextFontFeature, ResetTextFontFeature,
+        SetTextLineSpacing, GetTextLineSpacing, ResetTextLineSpacing, GetTextFontFeature };
 
     return &modifier;
 }

@@ -126,16 +126,22 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
         case NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN:
             if (arkUINodeType == ARKUI_NODE_LIST) {
                 return ON_LIST_SCROLL_FRAME_BEGIN;
+            } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
+                return ON_WATER_FLOW_SCROLL_FRAME_BEGIN;
             }
             return ON_SCROLL_FRAME_BEGIN;
         case NODE_SCROLL_EVENT_ON_SCROLL_START:
             if (arkUINodeType == ARKUI_NODE_LIST) {
                 return ON_LIST_SCROLL_START;
+            } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
+                return ON_WATER_FLOW_SCROLL_START;
             }
             return ON_SCROLL_START;
         case NODE_SCROLL_EVENT_ON_SCROLL_STOP:
             if (arkUINodeType == ARKUI_NODE_LIST) {
                 return ON_LIST_SCROLL_STOP;
+            } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
+                return ON_WATER_FLOW_SCROLL_STOP;
             }
             return ON_SCROLL_STOP;
         case NODE_EVENT_ON_APPEAR:
@@ -206,15 +212,30 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_SWIPER_ANIMATION_END;
         case NODE_SWIPER_EVENT_ON_GESTURE_SWIPE:
             return ON_SWIPER_GESTURE_SWIPE;
-        case NODE_ON_WILL_SCROLL:
-            if (arkUINodeType == ARKUI_NODE_LIST) {
-                return ON_LIST_WILL_SCROLL;
-            }
-            return ON_WILL_SCROLL;
+        case NODE_WATER_FLOW_ON_WILL_SCROLL:
+            return ON_WATER_FLOW_WILL_SCROLL;
         case NODE_ON_TOUCH_INTERCEPT:
             return ON_TOUCH_INTERCEPT;
-        case NODE_ON_REACH_END:
-            return ON_REACH_END;
+        case NODE_SCROLL_EVENT_ON_REACH_START:
+            if (arkUINodeType == ARKUI_NODE_LIST) {
+                return ON_LIST_REACH_START;
+            } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
+                return ON_WATER_FLOW_REACH_START;
+            }
+            return ON_SCROLL_REACH_START;
+        case NODE_SCROLL_EVENT_ON_REACH_END:
+            if (arkUINodeType == ARKUI_NODE_LIST) {
+                return ON_LIST_REACH_END;
+            } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
+                return ON_WATER_FLOW_REACH_END;
+            }
+            return ON_SCROLL_REACH_END;
+        case NODE_WATER_FLOW_ON_DID_SCROLL:
+            return ON_WATER_FLOW_DID_SCROLL;
+        case NODE_LIST_ON_SCROLL_INDEX:
+            return ON_LIST_SCROLL_INDEX;
+        case NODE_WATER_FLOW_ON_SCROLL_INDEX:
+            return ON_WATER_FLOW_SCROLL_INDEX;
         default:
             return -1;
     }
@@ -308,15 +329,41 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
         case ON_LIST_SCROLL_START:
             return NODE_SCROLL_EVENT_ON_SCROLL_START;
         case ON_LIST_WILL_SCROLL:
-            return NODE_ON_WILL_SCROLL;
+            return NODE_LIST_ON_WILL_SCROLL;
         case ON_LIST_SCROLL_STOP:
             return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
-        case ON_WILL_SCROLL:
-            return NODE_ON_WILL_SCROLL;
+        case ON_WATER_FLOW_WILL_SCROLL:
+            return NODE_WATER_FLOW_ON_WILL_SCROLL;
         case ON_TOUCH_INTERCEPT:
             return NODE_ON_TOUCH_INTERCEPT;
-        case ON_REACH_END:
-            return NODE_ON_REACH_END;
+        case ON_LIST_REACH_END:
+            return NODE_SCROLL_EVENT_ON_REACH_END;
+        case ON_WATER_FLOW_REACH_END:
+            return NODE_SCROLL_EVENT_ON_REACH_END;
+        case ON_SCROLL_REACH_END:
+            return NODE_SCROLL_EVENT_ON_REACH_END;
+        case ON_WATER_FLOW_DID_SCROLL:
+            return NODE_WATER_FLOW_ON_DID_SCROLL;
+        case ON_WATER_FLOW_SCROLL:
+            return NODE_SCROLL_EVENT_ON_SCROLL;
+        case ON_WATER_FLOW_SCROLL_FRAME_BEGIN:
+            return NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN;
+        case ON_WATER_FLOW_SCROLL_START:
+            return NODE_SCROLL_EVENT_ON_SCROLL_START;
+        case ON_WATER_FLOW_SCROLL_STOP:
+            return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
+        case ON_LIST_SCROLL_INDEX:
+            return NODE_LIST_ON_SCROLL_INDEX;
+        case ON_LIST_DID_SCROLL:
+            return NODE_LIST_ON_DID_SCROLL;
+        case ON_WATER_FLOW_SCROLL_INDEX:
+            return NODE_WATER_FLOW_ON_SCROLL_INDEX;
+        case ON_WATER_FLOW_REACH_START:
+            return NODE_SCROLL_EVENT_ON_REACH_START;
+        case ON_SCROLL_REACH_START:
+            return NODE_SCROLL_EVENT_ON_REACH_START;
+        case ON_LIST_REACH_START:
+            return NODE_SCROLL_EVENT_ON_REACH_START;
         default:
             return -1;
     }
