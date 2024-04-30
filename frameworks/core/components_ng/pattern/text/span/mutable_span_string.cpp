@@ -279,15 +279,21 @@ void MutableSpanString::RemoveString(int32_t start, int32_t length)
 
 void MutableSpanString::RemoveSpecialpanText()
 {
+    std::list<int32_t> indexList;
+    auto iter = indexList.begin();
     for (const auto& type : specailTypes) {
         auto spans = spansMap_[type];
-        int32_t count = 0;
         for (const auto& span : spans) {
-            auto wStr = GetWideString();
-            wStr.erase(span->GetStartIndex() - count, 1);
-            text_ = StringUtils::ToString(wStr);
-            ++count;
+            iter = indexList.insert(iter, span->GetStartIndex());
         }
+    }
+    indexList.sort([](const int32_t& a, const int32_t& b) { return a < b; });
+    int32_t count = 0;
+    for (const auto& index : indexList) {
+        auto wStr = GetWideString();
+        wStr.erase(index - count, 1);
+        text_ = StringUtils::ToString(wStr);
+        ++count;
     }
 }
 

@@ -27,18 +27,18 @@
 namespace OHOS::Ace {
 
 struct CustomSpanMeasureInfo {
-    float fontSize;
+    float fontSize = 0.0f;
 };
 
 struct CustomSpanOptions {
-    float x;
-    float lineTop;
-    float lineBottom;
-    float baseline;
+    float x = 0.0f;
+    float lineTop = 0.0f;
+    float lineBottom = 0.0f;
+    float baseline = 0.0f;
 };
 
 struct CustomSpanMetrics {
-    float width;
+    float width = 0.0f;
     std::optional<float> height;
 };
 

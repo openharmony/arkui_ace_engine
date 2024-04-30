@@ -971,16 +971,23 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
         if (result->HasProperty("width")) {
             auto widthObj = result->GetProperty("width");
             width = widthObj->ToNumber<float>();
+            if (width < 0) {
+                width = 0;
+            }
         }
-        std::optional<float> height;
+        std::optional<float> heightOpt;
         if (result->HasProperty("height")) {
             auto heightObj = result->GetProperty("height");
-            height = heightObj->ToNumber<float>();
+            auto height = heightObj->ToNumber<float>();
+            if (height >= 0) {
+                heightOpt = height;
+            }
         }
-        return { width, height };
+        return { width, heightOpt };
     };
     return drawCallback;
 }
+
 std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseOnDrawFunc(
     const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
 {

@@ -733,9 +733,11 @@ LineMetrics TxtParagraph::GetLineMetricsByRectF(RectF& rect)
     if (metrics.empty()) {
         return lineMetrics;
     }
+    auto top = std::floor(rect.Top() + 0.5);
+    auto bottom = std::floor(rect.Bottom() + 0.5);
     auto res = metrics.size() - 1;
     for (size_t index = 0; index < metrics.size() - 1; index++) {
-        if (metrics[index].y <= rect.Top() && metrics[index + 1].y >= rect.Bottom()) {
+        if (metrics[index].y <= top && metrics[index + 1].y >= bottom) {
             res = index;
             break;
         }
