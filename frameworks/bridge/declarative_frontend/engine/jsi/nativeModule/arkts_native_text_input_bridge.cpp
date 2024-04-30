@@ -1413,13 +1413,11 @@ ArkUINativeModuleValue TextInputBridge::SetOnEditChange(ArkUIRuntimeCallInfo* ru
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnEditChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(bool)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](bool isInEditStatus) {
+        func = panda::CopyableGlobal(vm, func)](bool isInEditStatus) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
             panda::BooleanRef::New(vm, isInEditStatus) };
@@ -1459,13 +1457,11 @@ ArkUINativeModuleValue TextInputBridge::SetInputFilter(ArkUIRuntimeCallInfo* run
         !errorCallbackArg->IsFunction()) {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFilter(nativeNode, inputFilter.c_str(), nullptr);
     } else {
-        auto containerId = Container::CurrentId();
         panda::Local<panda::FunctionRef> func = errorCallbackArg->ToObject(vm);
         std::function<void(const std::string&)> callback = [vm, frameNode,
-            func = panda::CopyableGlobal(vm, func), containerId](const std::string& info) {
+            func = panda::CopyableGlobal(vm, func)](const std::string& info) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            ContainerScope scope(containerId);
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
             panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
                 panda::StringRef::NewFromUtf8(vm, info.c_str()) };
@@ -1500,13 +1496,11 @@ ArkUINativeModuleValue TextInputBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtim
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnSubmitWithEvent(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(int32_t, NG::TextFieldCommonEvent&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](int32_t key, NG::TextFieldCommonEvent& event) {
+        func = panda::CopyableGlobal(vm, func)](int32_t key, NG::TextFieldCommonEvent& event) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         auto eventObject = panda::ObjectRef::New(vm);
         eventObject->SetNativePointerFieldCount(vm, 1);
@@ -1547,13 +1541,11 @@ ArkUINativeModuleValue TextInputBridge::SetOnChange(ArkUIRuntimeCallInfo* runtim
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::string&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](const std::string& changeValue) {
+        func = panda::CopyableGlobal(vm, func)](const std::string& changeValue) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
             panda::StringRef::NewFromUtf8(vm, changeValue.c_str()) };
@@ -1587,13 +1579,11 @@ ArkUINativeModuleValue TextInputBridge::SetOnTextSelectionChange(ArkUIRuntimeCal
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnTextSelectionChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(int32_t, int32_t)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](int32_t selectionStart, int selectionEnd) {
+        func = panda::CopyableGlobal(vm, func)](int32_t selectionStart, int selectionEnd) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::NumberRef> startParam = panda::NumberRef::New(vm, selectionStart);
         panda::Local<panda::NumberRef> endParam = panda::NumberRef::New(vm, selectionEnd);
@@ -1628,13 +1618,11 @@ ArkUINativeModuleValue TextInputBridge::SetOnContentScroll(ArkUIRuntimeCallInfo*
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnContentScroll(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(float, float)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](float totalOffsetX, float totalOffsetY) {
+        func = panda::CopyableGlobal(vm, func)](float totalOffsetX, float totalOffsetY) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
             panda::NumberRef::New(vm, totalOffsetX), panda::NumberRef::New(vm, totalOffsetY) };
@@ -1668,13 +1656,11 @@ ArkUINativeModuleValue TextInputBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtimeC
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnCopy(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::string&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](const std::string& copyStr) {
+        func = panda::CopyableGlobal(vm, func)](const std::string& copyStr) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
             panda::StringRef::NewFromUtf8(vm, copyStr.c_str()) };
@@ -1707,13 +1693,11 @@ ArkUINativeModuleValue TextInputBridge::SetOnCut(ArkUIRuntimeCallInfo* runtimeCa
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnCut(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::string&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](const std::string& cutStr) {
+        func = panda::CopyableGlobal(vm, func)](const std::string& cutStr) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
             panda::StringRef::NewFromUtf8(vm, cutStr.c_str()) };
@@ -1746,13 +1730,11 @@ ArkUINativeModuleValue TextInputBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtime
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnPaste(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::string&, NG::TextCommonEvent&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](const std::string& val, NG::TextCommonEvent& info) {
+        func = panda::CopyableGlobal(vm, func)](const std::string& val, NG::TextCommonEvent& info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         auto eventObject = panda::ObjectRef::New(vm);
         eventObject->SetNativePointerFieldCount(vm, 1);

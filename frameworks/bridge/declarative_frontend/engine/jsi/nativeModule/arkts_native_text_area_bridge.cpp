@@ -979,13 +979,11 @@ ArkUINativeModuleValue TextAreaBridge::SetOnChange(ArkUIRuntimeCallInfo* runtime
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaOnChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::string&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](const std::string& changeValue) {
+        func = panda::CopyableGlobal(vm, func)](const std::string& changeValue) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
             panda::StringRef::NewFromUtf8(vm, changeValue.c_str()) };
@@ -1053,13 +1051,11 @@ ArkUINativeModuleValue TextAreaBridge::SetInputFilter(ArkUIRuntimeCallInfo* runt
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaInputFilter(
             nativeNode, inputFilter.c_str(), nullptr);
     } else {
-        auto containerId = Container::CurrentId();
         panda::Local<panda::FunctionRef> func = errorCallbackArg->ToObject(vm);
         std::function<void(const std::string&)> callback = [vm, frameNode,
-            func = panda::CopyableGlobal(vm, func), containerId](const std::string& info) {
+            func = panda::CopyableGlobal(vm, func)](const std::string& info) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            ContainerScope scope(containerId);
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
             panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
                 panda::StringRef::NewFromUtf8(vm, info.c_str()) };
@@ -1094,13 +1090,11 @@ ArkUINativeModuleValue TextAreaBridge::SetOnTextSelectionChange(ArkUIRuntimeCall
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaOnTextSelectionChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(int32_t, int32_t)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](int32_t selectionStart, int selectionEnd) {
+        func = panda::CopyableGlobal(vm, func)](int32_t selectionStart, int selectionEnd) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::NumberRef> startParam = panda::NumberRef::New(vm, selectionStart);
         panda::Local<panda::NumberRef> endParam = panda::NumberRef::New(vm, selectionEnd);
@@ -1135,13 +1129,11 @@ ArkUINativeModuleValue TextAreaBridge::SetOnContentScroll(ArkUIRuntimeCallInfo* 
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaOnContentScroll(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(float, float)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](float totalOffsetX, float totalOffsetY) {
+        func = panda::CopyableGlobal(vm, func)](float totalOffsetX, float totalOffsetY) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
             panda::NumberRef::New(vm, totalOffsetX), panda::NumberRef::New(vm, totalOffsetY) };
@@ -1175,13 +1167,11 @@ ArkUINativeModuleValue TextAreaBridge::SetOnEditChange(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaOnEditChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(bool)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](bool isInEditStatus) {
+        func = panda::CopyableGlobal(vm, func)](bool isInEditStatus) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
             panda::BooleanRef::New(vm, isInEditStatus) };
@@ -1215,13 +1205,11 @@ ArkUINativeModuleValue TextAreaBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtimeCa
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaOnCopy(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::string&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](const std::string& copyStr) {
+        func = panda::CopyableGlobal(vm, func)](const std::string& copyStr) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
             panda::StringRef::NewFromUtf8(vm, copyStr.c_str()) };
@@ -1254,13 +1242,11 @@ ArkUINativeModuleValue TextAreaBridge::SetOnCut(ArkUIRuntimeCallInfo* runtimeCal
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaOnCut(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::string&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](const std::string& cutStr) {
+        func = panda::CopyableGlobal(vm, func)](const std::string& cutStr) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
             panda::StringRef::NewFromUtf8(vm, cutStr.c_str()) };
@@ -1293,13 +1279,11 @@ ArkUINativeModuleValue TextAreaBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtimeC
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaOnPaste(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const std::string&, NG::TextCommonEvent&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func), containerId](const std::string& val, NG::TextCommonEvent& info) {
+        func = panda::CopyableGlobal(vm, func)](const std::string& val, NG::TextCommonEvent& info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         auto eventObject = panda::ObjectRef::New(vm);
         eventObject->SetNativePointerFieldCount(vm, 1);
