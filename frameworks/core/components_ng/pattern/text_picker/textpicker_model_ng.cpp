@@ -42,11 +42,7 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
                          const RefPtr<DialogTheme>& theme)
 {
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-            properties.alignment = DialogAlignment::BOTTOM;
-        } else {
-            properties.alignment = DialogAlignment::CENTER;
-        }
+        properties.alignment = theme->GetAlignment();
     }
     if (textPickerDialog.alignment.has_value()) {
         properties.alignment = textPickerDialog.alignment.value();
