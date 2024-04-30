@@ -4622,7 +4622,7 @@ std::string TextFieldPattern::TextInputTypeToString() const
         case TextInputType::NEW_PASSWORD:
             return "InputType.NEW_PASSWORD";
         default:
-            return isTextInput_ ? "InputType.Normal" : "TextAreaType.NORMAL";
+            return IsTextArea() ? "TextAreaType.NORMAL" : "InputType.Normal";
     }
 }
 
@@ -4771,12 +4771,12 @@ std::string TextFieldPattern::GetShowPasswordIconString() const
 
 std::string TextFieldPattern::GetInputStyleString() const
 {
-    std::string result = isTextInput_ ? "TextInputStyle.Default" : "TextContentStyle.DEFAULT";
+    std::string result = IsTextArea() ? "TextContentStyle.DEFAULT" : "TextInputStyle.Default";
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, result);
     switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
         case InputStyle::INLINE:
-            result = isTextInput_ ? "TextInputStyle.Inline" : "TextContentStyle.INLINE";
+            result = IsTextArea() ? "TextContentStyle.INLINE" : "TextInputStyle.Inline";
             break;
         case InputStyle::DEFAULT:
         default:
