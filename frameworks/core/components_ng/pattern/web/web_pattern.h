@@ -479,6 +479,7 @@ public:
     {
         return drawSize_;
     }
+    SizeF GetDragPixelMapSize() const;
     bool IsVirtualKeyBoardShow() const
     {
         return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
