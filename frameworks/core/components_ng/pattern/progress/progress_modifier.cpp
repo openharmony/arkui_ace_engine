@@ -21,14 +21,12 @@
 #include "core/common/container.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t DEFAULT_BORDER_COLOR = 0x33007dff;
 constexpr int32_t INT32_TWO = 2;
 constexpr int32_t ANGLE_45 = 45;
 constexpr int32_t ANGLE_90 = 90;
@@ -54,17 +52,17 @@ constexpr float RING_SHADOW_VALID_RADIUS_MIN = 10.0f;
 constexpr float RING_SHADOW_OPACITY = 0.4f;
 constexpr Dimension LINEAR_SWEEPING_LEN = 80.0_vp;
 } // namespace
-ProgressModifier::ProgressModifier()
-    : strokeWidth_(AceType::MakeRefPtr<AnimatablePropertyFloat>(FLOAT_TWO_ZERO)),
-      color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLUE)),
-      bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::GRAY)),
-      borderColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(DEFAULT_BORDER_COLOR))),
+ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAnimatableProperty_)
+    : strokeWidth_(AceType::MakeRefPtr<AnimatablePropertyFloat>(progressAnimatableProperty_.strokeWidth)),
+      color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.color))),
+      bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.bgColor))),
+      borderColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.borderColor))),
       value_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       ringProgressColors_(AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic())),
       sweepingDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingHeadDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingTailDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
-      strokeRadius_(AceType::MakeRefPtr<AnimatablePropertyFloat>(FLOAT_TWO_ZERO / INT32_TWO)),
+      strokeRadius_(AceType::MakeRefPtr<AnimatablePropertyFloat>(progressAnimatableProperty_.strokeRadius)),
       offset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       maxValue_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_MAX_VALUE)),
