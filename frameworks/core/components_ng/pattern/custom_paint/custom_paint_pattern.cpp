@@ -1159,6 +1159,7 @@ void CustomPaintPattern::Reset()
         paintMethod.Reset();
     };
     paintMethod_->PushTask(task);
+    paintMethod_->ResetTransformMatrix();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

@@ -804,6 +804,7 @@ void CanvasPaintMethod::Reset()
     if (rsCanvas_->GetSaveCount() >= DEFAULT_SAVE_COUNT) {
         rsCanvas->RestoreToCount(0);
     }
+    rsCanvas->ResetMatrix();
     rsCanvas->Clear(RSColor::COLOR_TRANSPARENT);
     rsCanvas->Save();
 }
