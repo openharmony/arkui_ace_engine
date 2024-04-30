@@ -2758,8 +2758,14 @@ void SetMinWidth(ArkUINodeHandle node, const struct ArkUISizeType* minWidth)
     CHECK_NULL_VOID(minWidth);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result(minWidth->value, static_cast<DimensionUnit>(minWidth->unit));
-    ViewAbstract::SetMinWidth(frameNode, CalcLength(result));
+    CalcLength strResult;
+    if (minWidth->string != nullptr) {
+        strResult = CalcLength(minWidth->string);
+        ViewAbstract::SetMinWidth(frameNode, strResult);
+    } else {
+        CalcDimension result(minWidth->value, static_cast<DimensionUnit>(minWidth->unit));
+        ViewAbstract::SetMinWidth(frameNode, CalcLength(result));
+    }
 }
 
 void ResetMinWidth(ArkUINodeHandle node)
@@ -2774,8 +2780,14 @@ void SetMaxWidth(ArkUINodeHandle node, const struct ArkUISizeType* maxWidth)
     CHECK_NULL_VOID(maxWidth);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result(maxWidth->value, static_cast<DimensionUnit>(maxWidth->unit));
-    ViewAbstract::SetMaxWidth(frameNode, CalcLength(result));
+    CalcLength strResult;
+    if (maxWidth->string != nullptr) {
+        strResult = CalcLength(maxWidth->string);
+        ViewAbstract::SetMaxWidth(frameNode, strResult);
+    } else {
+        CalcDimension result(maxWidth->value, static_cast<DimensionUnit>(maxWidth->unit));
+        ViewAbstract::SetMaxWidth(frameNode, CalcLength(result));
+    }
 }
 
 void ResetMaxWidth(ArkUINodeHandle node)
@@ -2790,8 +2802,14 @@ void SetMinHeight(ArkUINodeHandle node, const struct ArkUISizeType* minHeight)
     CHECK_NULL_VOID(minHeight);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result(minHeight->value, static_cast<DimensionUnit>(minHeight->unit));
-    ViewAbstract::SetMinHeight(frameNode, CalcLength(result));
+    CalcLength strResult;
+    if (minHeight->string != nullptr) {
+        strResult = CalcLength(minHeight->string);
+        ViewAbstract::SetMinHeight(frameNode, strResult);
+    } else {
+        CalcDimension result(minHeight->value, static_cast<DimensionUnit>(minHeight->unit));
+        ViewAbstract::SetMinHeight(frameNode, CalcLength(result));
+    }
 }
 
 void ResetMinHeight(ArkUINodeHandle node)
@@ -2806,8 +2824,14 @@ void SetMaxHeight(ArkUINodeHandle node, const struct ArkUISizeType* maxHeight)
     CHECK_NULL_VOID(maxHeight);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result(maxHeight->value, static_cast<DimensionUnit>(maxHeight->unit));
-    ViewAbstract::SetMaxHeight(frameNode, CalcLength(result));
+    CalcLength strResult;
+    if (maxHeight->string != nullptr) {
+        strResult = CalcLength(maxHeight->string);
+        ViewAbstract::SetMaxHeight(frameNode, strResult);
+    } else {
+        CalcDimension result(maxHeight->value, static_cast<DimensionUnit>(maxHeight->unit));
+        ViewAbstract::SetMaxHeight(frameNode, CalcLength(result));
+    }
 }
 
 void ResetMaxHeight(ArkUINodeHandle node)
