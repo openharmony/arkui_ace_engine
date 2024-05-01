@@ -244,13 +244,14 @@ public:
 
     LayoutConstraintF CreateContentConstraint() const;
 
-    PaddingPropertyF CreatePaddingWithoutBorder();
+    PaddingPropertyF CreatePaddingWithoutBorder(bool useRootConstraint = true);
     PaddingPropertyF CreatePaddingAndBorder();
     PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
         float borderHorizontalDefault, float borderVerticalDefault);
     BorderWidthPropertyF CreateBorder();
 
     MarginPropertyF CreateMargin();
+    MarginPropertyF CreateMarginWithoutCache();
 
     void SetHost(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;

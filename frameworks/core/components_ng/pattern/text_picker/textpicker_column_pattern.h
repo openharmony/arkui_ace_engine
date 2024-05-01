@@ -342,6 +342,7 @@ public:
     }
 
     int32_t GetOverScrollDeltaIndex() const;
+    void SetCanLoop(bool isLoop);
 
 private:
     void OnModifyDone() override;
@@ -413,6 +414,7 @@ private:
 
     void ResetOptionPropertyHeight();
 
+    bool isTextFadeOut_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
@@ -467,6 +469,7 @@ private:
     bool touchBreak_ = false;
     bool animationBreak_ = false;
     bool needOptionPropertyHeightReset_ = false;
+    bool isLoop_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

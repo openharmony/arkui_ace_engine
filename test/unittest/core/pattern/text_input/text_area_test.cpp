@@ -779,10 +779,10 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Set menuPolicy to be MenuPolicy::ALWAYS
+     * @tc.steps: step2. Set menuPolicy to be MenuPolicy::SHOW
      */
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::ALWAYS;
+    options.menuPolicy = MenuPolicy::SHOW;
     pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
 
     /**
@@ -800,9 +800,9 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
     pattern_->OnKeyEvent(event);
 
     /**
-     * @tc.steps: step5. Set menuPolicy to be MenuPolicy::NEVER
+     * @tc.steps: step5. Set menuPolicy to be MenuPolicy::HIDE
      */
-    options.menuPolicy = MenuPolicy::NEVER;
+    options.menuPolicy = MenuPolicy::HIDE;
     pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
 
     /**

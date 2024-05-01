@@ -148,7 +148,6 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    CHECK_NULL_VOID(textPattern->GetParagraph());
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -229,7 +228,6 @@ RectF TextSelectOverlay::GetSelectArea()
     auto pattern = GetPattern<TextPattern>();
     RectF res;
     CHECK_NULL_RETURN(pattern, res);
-    CHECK_NULL_RETURN(pattern->GetParagraph(), res);
     auto selectRects = pattern->GetTextBoxes();
     auto textPaintOffset = GetPaintOffsetWithoutTransform();
     if (selectRects.empty()) {

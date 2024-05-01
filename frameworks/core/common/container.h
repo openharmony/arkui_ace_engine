@@ -85,6 +85,11 @@ public:
         return false;
     }
 
+    virtual AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder)
+    {
+        return AceAutoFillType::ACE_UNSPECIFIED;
+    }
+
     // Get the instance id of this container
     virtual int32_t GetInstanceId() const = 0;
 
@@ -295,6 +300,11 @@ public:
         useNewPipeline_ = true;
     }
 
+    void SetUsePartialUpdate()
+    {
+        usePartialUpdate_ = true;
+    }
+
     bool IsUseNewPipeline() const
     {
         return useNewPipeline_;
@@ -453,7 +463,8 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool &isPopup)
+    virtual bool RequestAutoFill(
+        const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false)
     {
         return false;
     }
@@ -499,6 +510,8 @@ public:
     {
         return appBar_;
     }
+
+    virtual void TerminateUIExtension() {}
 
     template<ContainerType type>
     static int32_t GenerateId();

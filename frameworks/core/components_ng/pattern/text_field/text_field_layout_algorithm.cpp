@@ -263,13 +263,13 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
     }
 
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_, imageWidth);
-    auto counterNodeHeight = CounterNodeMeasure(contentWidth, layoutWrapper);
+    CounterNodeMeasure(contentWidth, layoutWrapper);
 
     auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
                       ? paragraph_->GetHeight()
                       : std::max(preferredHeight_, paragraph_->GetHeight());
 
-    auto contentHeight = std::min(contentConstraint.maxSize.Height() - counterNodeHeight, height);
+    auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
 
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
 
@@ -363,20 +363,12 @@ void TextFieldLayoutAlgorithm::UpdateCounterNode(
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
-    std::string counterText = "";
-    TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountTextStyle();
+    std::string counterText;
+    TextStyle countTextStyle =
+        pattern->GetShowCounterStyleValue() ? theme->GetOverCountTextStyle() : theme->GetCountTextStyle();
     auto counterType = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
-    uint32_t limitsize = static_cast<uint32_t>(static_cast<int32_t>(maxLength) * counterType / SHOW_COUNTER_PERCENT);
-    if ((pattern->GetCounterState() == true) && textLength == maxLength && (counterType != DEFAULT_MODE)) {
-        countTextStyle = theme->GetOverCountTextStyle();
-        counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-        countTextStyle.SetTextColor(theme->GetOverCounterColor());
-        pattern->SetCounterState(false);
-    } else if ((textLength >= limitsize) && (counterType != DEFAULT_MODE)) {
-        countTextStyle = theme->GetCountTextStyle();
-        counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-        countTextStyle.SetTextColor(theme->GetDefaultCounterColor());
-    } else if (textFieldLayoutProperty->GetShowCounterValue(false) && counterType == DEFAULT_MODE) {
+    auto limitSize = static_cast<uint32_t>(static_cast<int32_t>(maxLength) * counterType / SHOW_COUNTER_PERCENT);
+    if (counterType == DEFAULT_MODE || (textLength >= limitSize && counterType != DEFAULT_MODE)) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
     }
     textLayoutProperty->UpdateContent(counterText);
@@ -742,7 +734,7 @@ TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& cont
     return textDirection;
 }
 
-const RefPtr<Paragraph>& TextFieldLayoutAlgorithm::GetParagraph() const
+RefPtr<Paragraph> TextFieldLayoutAlgorithm::GetParagraph() const
 {
     return paragraph_;
 }
@@ -887,6 +879,8 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, co
         }
     }
     fontSize = static_cast<float>((left - 1 == length - 1) ? (maxFontSize) : (minFontSize + stepSize * (left - 1)));
+    fontSize = LessNotEqual(fontSize, minFontSize) ? minFontSize : fontSize;
+    fontSize = GreatNotEqual(fontSize, maxFontSize) ? maxFontSize : fontSize;
     textStyle.SetFontSize(Dimension(fontSize));
     return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
 }

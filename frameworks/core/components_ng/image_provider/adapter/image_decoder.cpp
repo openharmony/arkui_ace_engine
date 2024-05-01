@@ -101,7 +101,7 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
     return canvasImage;
 }
 
-RefPtr<CanvasImage> ImageDecoder::MakePixmapImage()
+RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality)
 {
     CHECK_NULL_RETURN(obj_ && data_, nullptr);
 #ifndef USE_ROSEN_DRAWING
@@ -118,9 +118,11 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage()
         obj_->GetSourceInfo().ToString().c_str(), sourceSize.first, sourceSize.second,
         static_cast<int32_t>(width),
         static_cast<int32_t>(height));
-    auto pixmap = source->CreatePixelMap({ width, height });
+    auto pixmap = source->CreatePixelMap({ width, height }, imageQuality);
+
     CHECK_NULL_RETURN(pixmap, nullptr);
     auto image = PixelMapImage::Create(pixmap);
+
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE,
             "decode to pixmap, src=%{public}s, desiredSize = %{public}s, pixmap size = %{public}d x %{public}d",

@@ -1600,10 +1600,9 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      * @tc.steps: step2. create overlayManager and call ShowDateDialog.
      * @tc.expected: dateDialogNode is created successfully
      */
-    std::vector<ButtonInfo> buttonInfos;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowDateDialog(
-        dialogProperties, datePickerSettingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+        dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
 
     /**
@@ -1617,8 +1616,8 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
     std::map<std::string, PickerTime> timePickerProperty;
     timePickerProperty["selected"] = PickerTime(1, 1, 1);
 
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, buttonInfos, timePickerProperty,
-        dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
+        dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
 
     /**
@@ -1632,13 +1631,13 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      * @tc.steps: step5. ShowTimeDialog again and call RemoveOverlay with isBackPressed
      * @tc.expected: remove  successfully
      */
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, buttonInfos, timePickerProperty,
-        dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
+        dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, buttonInfos, timePickerProperty,
-        dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
+        dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
 

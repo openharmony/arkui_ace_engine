@@ -217,12 +217,34 @@ public:
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
     static void ResetTextInputPadding(FrameNode* frameNode);
     static void SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue);
+    static void SetBlurOnSubmit(FrameNode* frameNode, bool blurOnSubmit);
+    static bool GetBlurOnSubmit(FrameNode* frameNode);
     static void SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func);
     static void SetInputFilter(FrameNode* frameNode, const std::string& value,
         const std::function<void(const std::string&)>& onError);
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func);
+    static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc,
+        bool supportAvoidance = false);
+    static void SetInputFilter(FrameNode* frameNode, const std::string& value);
+    static void SetInputFilterError(FrameNode* frameNode, const std::function<void(const std::string&)>& onError);
+    static Ace::WordBreak GetWordBreak(FrameNode* frameNode);
+    static bool GetEnableAutoFill(FrameNode* frameNode);
+    static TextContentType GetContentType(FrameNode* frameNode);
+    static UserUnderlineColor GetUnderLineColor(FrameNode* frameNode);
+    static std::string GetPasswordRules(FrameNode* frameNode);
+    static bool GetSelectAllValue(FrameNode* frameNode);
+    static std::string GetInputFilter(FrameNode* frameNode);
+    static InputStyle GetInputStyle(FrameNode* frameNode);
+    static RefPtr<TextFieldControllerBase> GetOrCreateController(FrameNode* frameNode);
+    static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
+    static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
+    static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
+    static Dimension GetLineHeight(FrameNode* frameNode);
+    static uint32_t GetMaxLines(FrameNode* frameNode);
+    static void SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding);
+ 
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

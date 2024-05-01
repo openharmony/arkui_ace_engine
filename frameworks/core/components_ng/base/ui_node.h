@@ -66,8 +66,8 @@ public:
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
     virtual bool IsAtomicNode() const = 0;
 
-    void AttachContext(PipelineContext* context, bool recursive = false);
-    void DetachContext(bool recursive = false);
+    virtual void AttachContext(PipelineContext* context, bool recursive = false);
+    virtual void DetachContext(bool recursive = false);
 
     virtual int32_t FrameCount() const;
 
@@ -164,7 +164,8 @@ public:
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
     virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout);
 
-    void DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap);
+    bool IsAutoFillContainerNode();
+    void DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false);
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
@@ -398,7 +399,8 @@ public:
         newChild->MountToParent(AceType::Claim(this), slot, false);
     }
     virtual void FastPreviewUpdateChildDone() {}
-    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false);
+    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
+        bool addToRenderTree = false);
     virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node);
 
     void SetDebugLine(const std::string& line)
@@ -602,7 +604,17 @@ public:
     }
 
     void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
-    
+
+    virtual void RegisterUpdateJSInstanceCallback(std::function<void(int32_t)>&& callback)
+    {
+        updateJSInstanceCallback_ = std::move(callback);
+    }
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -657,6 +669,8 @@ protected:
 
     virtual void PaintDebugBoundary(bool flag) {}
 
+    PipelineContext* context_ = nullptr;
+
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -693,12 +707,11 @@ private:
     bool useOffscreenProcess_ = false;
 
     std::list<std::function<void()>> attachToMainTreeTasks_;
+    std::function<void(int32_t)> updateJSInstanceCallback_;
 
     std::string debugLine_;
     std::string viewId_;
     void* externalData_ = nullptr;
-
-    PipelineContext* context_ = nullptr;
 
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

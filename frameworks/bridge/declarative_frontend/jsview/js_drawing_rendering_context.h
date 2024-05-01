@@ -53,6 +53,21 @@ public:
         instanceId_ = id;
     }
 
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
+    double GetDensity()
+    {
+        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+    }
+
 protected:
     RefPtr<AceType> canvasPattern_;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
@@ -60,6 +75,7 @@ protected:
 private:
     JSRef<JSVal> jsCanvasVal_;
     NG::OptionalSizeF size_;
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 } // namespace OHOS::Ace::Framework
 

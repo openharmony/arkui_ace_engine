@@ -209,6 +209,13 @@ public:
         return renderContextForSurface_;
     }
 
+    void SetSurfaceRotation(bool isLock);
+
+    bool GetSurfaceRotation()
+    {
+        return isSurfaceLock_;
+    }
+
     void SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext);
 
     void RestoreHandlingRenderContextForSurface();
@@ -251,7 +258,7 @@ public:
         hasXComponentInit_ = isInit;
     }
 
-    void Initialize(int32_t instanceId = -1);
+    void Initialize();
 
     bool ChangeRenderType(NodeRenderType renderType);
 
@@ -288,9 +295,10 @@ private:
     void NativeSurfaceHide();
     void NativeSurfaceShow();
     void OnModifyDone() override;
-    void BeforeCreateLayoutWrapper() override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
 
     void InitNativeNodeCallbacks();
     void InitEvent();
@@ -317,6 +325,7 @@ private:
     void HandleUnregisterOnFrameEvent();
     bool ExportTextureAvailable();
     void AddAfterLayoutTaskForExportTexture();
+    void AddAfterLayoutTaskForRotation();
     bool DoTextureExport();
     bool StopTextureExport();
     void InitializeRenderContext();
@@ -327,6 +336,7 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
+    void SetRotation();
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -358,8 +368,6 @@ private:
     RefPtr<InputEvent> mouseHoverEvent_;
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
-    WeakPtr<NG::PipelineContext> context_;
-    int32_t instanceId_;
     SizeF initSize_;
     OffsetF localPosition_;
     OffsetF globalPosition_;
@@ -373,12 +381,15 @@ private:
     std::optional<float> selfIdealSurfaceOffsetY_;
     std::string surfaceId_;
 
+    bool isSurfaceLock_ = false;
+
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     uint64_t exportTextureSurfaceId_ = 0U;
     bool hasReleasedSurface_ = false;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
+    Rotation rotation_ = Rotation::ROTATION_0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif

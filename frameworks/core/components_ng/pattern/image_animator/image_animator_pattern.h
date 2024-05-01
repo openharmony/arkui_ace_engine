@@ -111,6 +111,10 @@ public:
 
     void SetDuration(int32_t duration);
     void SetIteration(int32_t iteration);
+    int32_t GetIteration()
+    {
+        return iteration_;
+    }
 
 private:
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
@@ -132,7 +136,9 @@ private:
     void UpdateFormDurationByRemainder();
     void ResetFormAnimationStartTime();
     void ResetFormAnimationFlag();
+    void RunAnimatorByStatus(int32_t index);
 
+    int32_t iteration_ = 0;
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
     std::list<CacheImageStruct> cacheImages_;

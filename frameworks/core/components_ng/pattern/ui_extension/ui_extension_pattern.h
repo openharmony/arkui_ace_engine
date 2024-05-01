@@ -250,6 +250,7 @@ private:
     int32_t uiExtensionId_ = 0;
     int32_t callbackId_ = 0;
     RectF displayArea_;
+    bool isKeyAsync_ = false;
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;

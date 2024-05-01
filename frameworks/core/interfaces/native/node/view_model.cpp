@@ -59,9 +59,12 @@
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
+#include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
+#include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -355,6 +358,27 @@ void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createSearchNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SearchModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createGridRowNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = GridRowModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createGridColNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = GridColModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -407,6 +431,9 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createBlankNode,
         createDividerNode,
         createAlphabetIndexerNode,
+        createSearchNode,
+        createGridRowNode,
+        createGridColNode,
         createCircleNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {

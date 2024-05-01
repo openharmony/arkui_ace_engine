@@ -118,6 +118,16 @@ public:
         return true;
     }
 
+    void SetImageQuality(AIImageQuality imageQuality)
+    {
+        imageQuality_ = imageQuality;
+    }
+
+    AIImageQuality GetImageQuality()
+    {
+        return imageQuality_;
+    }
+
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
@@ -177,6 +187,7 @@ public:
     }
     void EnableAnalyzer(bool value);
     bool hasSceneChanged();
+    void OnSensitiveStyleChange(bool isSensitive) override;
 
     //animation
     struct CacheImageStruct {
@@ -374,6 +385,8 @@ private:
     void OnImageModifyDone();
     void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
+    void ControlAnimation(int32_t index);
+    void SetObscured();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;
@@ -399,8 +412,10 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
+    bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     OffsetF parentGlobalOffset_;
 

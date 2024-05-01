@@ -121,3 +121,46 @@ abstract class SubscribedAbstractProperty<T> {
       */
      public abstract createOneWaySync(subscribeMe?: IPropertySubscriber, info?: string): SubscribedAbstractProperty<T>;
 }
+
+/**
+ *
+ *  AbstractProperty can be understood as a handler or an alias
+ *  to a property inside LocalStorage / AppStorage singleton
+ *  allows to read the value with @see get and to change the
+ *  value with @see set.
+ *
+ * Functions
+ *   reads the referenced AppStorage/LocalStorage property value with given name @see get()
+ *   write a new value to the AppStorage/LocalStorage property value @see set()
+ *   returns the referenced AppStorage/LocalStorage property name @see info()
+ *
+ * Use ref or setAndRef to obtain a AbstractProperty.
+ *
+ * @since 12
+ */
+interface AbstractProperty<T> {
+     /**
+      * reads value of the referenced AppStorage/LocalStorage property.
+      *
+      * @returns { T } value of the referenced AppStorage/LocalStorage property.
+      * @since 12
+      */
+     get(): T;
+
+     /**
+      * Set new value, must be of type T, can be 'undefined' or 'null'.
+      * Updates the value of the referenced AppStorage/LocalStorage property.
+      *
+      * @param { T } newValue new value set to AppStorage/LocalStorage
+      * @since 12
+      */
+     set(newValue: T): void;
+
+     /**
+      * returns the name of the referenced property
+      *
+      * @returns { string } name of the referenced property
+      * @since 12
+      */
+     info(): string;
+}

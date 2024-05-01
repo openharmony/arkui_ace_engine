@@ -819,19 +819,25 @@ void JSParticle::JsDisturbanceFields(const JSCallbackInfo& args)
     std::vector<ParticleDisturbance> dataArray;
     JSRef<JSArray> dataJsArray = JSRef<JSArray>::Cast(args[0]);
     for (size_t i = 0; i < dataJsArray->Length(); i++) {
-        auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
-        AddDisturbance(dataArray, jsObject);
+        if (dataJsArray->GetValueAt(i)->IsObject()) {
+            auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
+            AddDisturbance(dataArray, jsObject);
+        }
     }
 
     ParticleModel::GetInstance()->DisturbanceField(dataArray);
 }
 
-void JSParticle::ParseEmitterProps(std::vector<OHOS::Ace::EmitterProps>& data, const JSRef<JSObject>& paramObj)
+void JSParticle::ParseEmitterProperty(
+    std::vector<OHOS::Ace::EmitterProperty>& data, const JSRef<JSObject>& paramObj, const int length)
 {
-    EmitterProps emitterProperty;
-    auto index = 0;
-    auto indexJsValue = paramObj->GetProperty("index")->ToNumber<int32_t>();
-    emitterProperty.index = indexJsValue > 0 ? indexJsValue : index;
+    EmitterProperty emitterProperty;
+    uint32_t index = 0u;
+    uint32_t indexJsValue = paramObj->GetProperty("index")->ToNumber<uint32_t>();
+    if (indexJsValue > 0 && indexJsValue < length) {
+        index = indexJsValue;
+    }
+    emitterProperty.index = index;
 
     auto emitRateProperty = paramObj->GetProperty("emitRate");
     if (emitRateProperty->IsNumber()) {
@@ -850,7 +856,7 @@ void JSParticle::ParseEmitterProps(std::vector<OHOS::Ace::EmitterProps>& data, c
         auto sizeValue = Framework::JSRef<Framework::JSObject>::Cast(sizeProperty);
         auto sizeXValue = sizeValue->GetProperty("width")->ToNumber<float>();
         auto sizeYValue = sizeValue->GetProperty("height")->ToNumber<float>();
-        if (sizeXValue >= 0 && sizeYValue >= 0) {
+        if (sizeXValue > 0 && sizeYValue > 0) {
             emitterProperty.size = { sizeXValue, sizeYValue };
         }
     }
@@ -862,13 +868,15 @@ void JSParticle::JsEmitter(const JSCallbackInfo& args)
     if (args.Length() != 1 || !args[0]->IsArray()) {
         return;
     }
-    std::vector<EmitterProps> dataArray;
+    std::vector<EmitterProperty> dataArray;
     JSRef<JSArray> dataJsArray = JSRef<JSArray>::Cast(args[0]);
-    for (size_t i = 0; i < dataJsArray->Length(); i++) {
-        auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
-        ParseEmitterProps(dataArray, jsObject);
+    int length = dataJsArray->Length();
+    for (size_t i = 0; i < length; i++) {
+        if (dataJsArray->GetValueAt(i)->IsObject()) {
+            auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
+            ParseEmitterProperty(dataArray, jsObject, length);
+        }
     }
-
     ParticleModel::GetInstance()->updateEmitter(dataArray);
 }
 

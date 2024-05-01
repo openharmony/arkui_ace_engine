@@ -32,6 +32,9 @@ constexpr uint32_t KEY_SHIFT = 1 << 1;
 constexpr uint32_t KEY_CTRL = 1 << 2;
 constexpr uint32_t KEY_META = 1 << 3;
 
+constexpr int32_t INVALID_VALUE = -1;
+const std::string PRIVATE_DATA_KEY = "previewTextStyle";
+
 enum class CaretMoveIntent {
     Left,
     Right,
@@ -45,6 +48,15 @@ enum class CaretMoveIntent {
     LineEnd,
     Home,
     End,
+};
+
+struct PreviewRange {
+    int32_t start = INVALID_VALUE;
+    int32_t end = INVALID_VALUE;
+    bool operator==(const PreviewRange &range) const
+    {
+        return start == range.start && end == range.end;
+    }
 };
 
 struct KeyComb final {
@@ -166,6 +178,14 @@ public:
     {
         return false;
     }
+
+    virtual int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range)
+    {
+        return 0;
+    }
+
+    virtual void FinishTextPreview() {}
+    virtual void ReceivePreviewTextStyle (const std::string& style) {}
 
     static std::map<KeyComb, std::function<bool(TextInputClient*)>> functionKeys_;
 

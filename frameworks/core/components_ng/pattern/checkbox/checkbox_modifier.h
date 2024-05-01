@@ -42,6 +42,9 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
+        if (useContentModifier_->Get()) {
+            return;
+        }
         RSCanvas& canvas = context.canvas;
         PaintCheckBox(canvas, offset_->Get(), size_->Get());
     }
@@ -159,6 +162,13 @@ public:
         }
     }
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
     void SetSize(SizeF& size)
     {
         if (size_) {
@@ -202,6 +212,11 @@ public:
         hasBuilder_ = hasBuilder;
     }
 
+    void SetHasUnselectedColor(bool hasUnselectedColor)
+    {
+        hasUnselectedColor_ = hasUnselectedColor;
+    }
+
 private:
     void DrawRectOrCircle(RSCanvas& canvas, const RSRoundRect& rrect) const;
 
@@ -222,6 +237,7 @@ private:
     Dimension hoverRadius_;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
+    Dimension defaultPaddingSize_;
     Dimension shadowWidth_;
     Dimension focusBoardSize_;
     float hoverDuration_ = 0.0f;
@@ -229,6 +245,7 @@ private:
     float touchDuration_ = 0.0f;
     float colorAnimationDuration_ = 0.0f;
     bool hasBuilder_ = false;
+    bool hasUnselectedColor_ = false;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
@@ -237,6 +254,7 @@ private:
     RefPtr<PropertyInt> checkBoxShape_;
 
     RefPtr<PropertyBool> enabled_;
+    RefPtr<PropertyBool> useContentModifier_;
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;
     RefPtr<AnimatablePropertyColor> animatableCheckColor_;
     RefPtr<AnimatablePropertyColor> animatableBorderColor_;

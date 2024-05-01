@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include "securec.h"
 #include <vector>
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
@@ -90,11 +91,16 @@ constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
 constexpr float DEFAULT_SATURATE = 1.0f;
 constexpr float DEFAULT_BRIGHTNESS = 1.0f;
-
+constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
+constexpr int32_t OUTLINE_TOP_WIDTH_INDEX = 1;
+constexpr int32_t OUTLINE_RIGHT_WIDTH_INDEX = 2;
+constexpr int32_t OUTLINE_BOTTOM_WIDTH_INDEX = 3;
+constexpr int32_t OUTLINE_WIDTH_VECTOR_SIZE = 4;
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
+constexpr int32_t MAX_ANCHOR_ID_LENGTH = 50;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -845,6 +851,82 @@ void ResetPosition(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetPosition(frameNode, { 0.0_vp, 0.0_vp });
+}
+
+bool ParseEdges(OHOS::Ace::EdgesParam& edges, const ArkUIStringAndFloat* options)
+{
+    bool result = false;
+    std::optional<CalcDimension> top;
+    std::optional<CalcDimension> left;
+    std::optional<CalcDimension> bottom;
+    std::optional<CalcDimension> right;
+    SetCalcDimension(top, options, NUM_13, NUM_0);
+    SetCalcDimension(left, options, NUM_13, NUM_3);
+    SetCalcDimension(bottom, options, NUM_13, NUM_6);
+    SetCalcDimension(right, options, NUM_13, NUM_9);
+    if (top.has_value()) {
+        result = true;
+        edges.SetTop(top.value());
+    }
+    if (left.has_value()) {
+        result = true;
+        edges.SetLeft(left.value());
+    }
+    if (bottom.has_value()) {
+        result = true;
+        edges.SetBottom(bottom.value());
+    }
+    if (right.has_value()) {
+        result = true;
+        edges.SetRight(right.value());
+    }
+    return result;
+}
+
+void SetPositionEdges(ArkUINodeHandle node, const int32_t useEdges, const ArkUIStringAndFloat* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool vaild = false;
+
+    if (useEdges) {
+        OHOS::Ace::EdgesParam edges;
+        if (ParseEdges(edges, options)) {
+            ViewAbstract::SetPositionEdges(frameNode, edges);
+        } else {
+            ViewAbstract::ResetPosition(frameNode);
+        }
+    } else {
+        OffsetT<Dimension> offset;
+        std::optional<CalcDimension> x;
+        std::optional<CalcDimension> y;
+        SetCalcDimension(x, options, NUM_7, NUM_0);
+        SetCalcDimension(y, options, NUM_7, NUM_3);
+        if (x.has_value()) {
+            vaild = true;
+            offset.SetX(x.value());
+        }
+        if (y.has_value()) {
+            vaild = true;
+            offset.SetY(y.value());
+        }
+        if (vaild) {
+            ViewAbstract::SetPosition(frameNode, offset);
+        } else {
+            ViewAbstract::ResetPosition(frameNode);
+        }
+    }
+}
+
+void ResetPositionEdges(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        ViewAbstract::ResetPosition();
+    } else {
+        ViewAbstract::SetPosition(frameNode, { 0.0_vp, 0.0_vp });
+    }
 }
 
 /**
@@ -2088,6 +2170,31 @@ void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_In
     ViewAbstract::SetOffset(frameNode, { xVal, yVal });
 }
 
+void SetOffsetEdges(ArkUINodeHandle node, ArkUI_Bool useEdges, const ArkUIStringAndFloat* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (useEdges) {
+        OHOS::Ace::EdgesParam edges;
+        ParseEdges(edges, options);
+        ViewAbstract::SetOffsetEdges(frameNode, edges);
+    } else {
+        OffsetT<Dimension> offset;
+        std::optional<CalcDimension> x;
+        std::optional<CalcDimension> y;
+        SetCalcDimension(x, options, NUM_7, NUM_0);
+        SetCalcDimension(y, options, NUM_7, NUM_3);
+        if (x.has_value()) {
+            offset.SetX(x.value());
+        }
+        if (y.has_value()) {
+            offset.SetY(y.value());
+        }
+        ViewAbstract::SetOffset(frameNode, offset);
+    }
+}
+
 ArkUIOffsetType GetOffset(ArkUINodeHandle node)
 {
     ArkUIOffsetType offsetVp = { 0.0f, 0.0f };
@@ -2458,6 +2565,13 @@ void ResetDisplayPriority(ArkUINodeHandle node)
     ViewAbstract::SetDisplayIndex(frameNode, DEFAULT_DISPLAY_PRIORITY);
 }
 
+ArkUI_Int32 GetDisplayPriority(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_DISPLAY_PRIORITY);
+    return ViewAbstract::GetDisplayIndex(frameNode);
+}
+
 void SetMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
 {
@@ -2632,13 +2746,26 @@ void ResetLayoutWeight(ArkUINodeHandle node)
     ViewAbstract::SetLayoutWeight(frameNode, DEFAULT_COMMON_LAYOUTWEIGHT);
 }
 
+ArkUI_Float32 GetLayoutWeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return ViewAbstract::GetLayoutWeight(frameNode);
+}
+
 void SetMinWidth(ArkUINodeHandle node, const struct ArkUISizeType* minWidth)
 {
     CHECK_NULL_VOID(minWidth);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result(minWidth->value, static_cast<DimensionUnit>(minWidth->unit));
-    ViewAbstract::SetMinWidth(frameNode, CalcLength(result));
+    CalcLength strResult;
+    if (minWidth->string != nullptr) {
+        strResult = CalcLength(minWidth->string);
+        ViewAbstract::SetMinWidth(frameNode, strResult);
+    } else {
+        CalcDimension result(minWidth->value, static_cast<DimensionUnit>(minWidth->unit));
+        ViewAbstract::SetMinWidth(frameNode, CalcLength(result));
+    }
 }
 
 void ResetMinWidth(ArkUINodeHandle node)
@@ -2653,8 +2780,14 @@ void SetMaxWidth(ArkUINodeHandle node, const struct ArkUISizeType* maxWidth)
     CHECK_NULL_VOID(maxWidth);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result(maxWidth->value, static_cast<DimensionUnit>(maxWidth->unit));
-    ViewAbstract::SetMaxWidth(frameNode, CalcLength(result));
+    CalcLength strResult;
+    if (maxWidth->string != nullptr) {
+        strResult = CalcLength(maxWidth->string);
+        ViewAbstract::SetMaxWidth(frameNode, strResult);
+    } else {
+        CalcDimension result(maxWidth->value, static_cast<DimensionUnit>(maxWidth->unit));
+        ViewAbstract::SetMaxWidth(frameNode, CalcLength(result));
+    }
 }
 
 void ResetMaxWidth(ArkUINodeHandle node)
@@ -2669,8 +2802,14 @@ void SetMinHeight(ArkUINodeHandle node, const struct ArkUISizeType* minHeight)
     CHECK_NULL_VOID(minHeight);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result(minHeight->value, static_cast<DimensionUnit>(minHeight->unit));
-    ViewAbstract::SetMinHeight(frameNode, CalcLength(result));
+    CalcLength strResult;
+    if (minHeight->string != nullptr) {
+        strResult = CalcLength(minHeight->string);
+        ViewAbstract::SetMinHeight(frameNode, strResult);
+    } else {
+        CalcDimension result(minHeight->value, static_cast<DimensionUnit>(minHeight->unit));
+        ViewAbstract::SetMinHeight(frameNode, CalcLength(result));
+    }
 }
 
 void ResetMinHeight(ArkUINodeHandle node)
@@ -2685,8 +2824,14 @@ void SetMaxHeight(ArkUINodeHandle node, const struct ArkUISizeType* maxHeight)
     CHECK_NULL_VOID(maxHeight);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension result(maxHeight->value, static_cast<DimensionUnit>(maxHeight->unit));
-    ViewAbstract::SetMaxHeight(frameNode, CalcLength(result));
+    CalcLength strResult;
+    if (maxHeight->string != nullptr) {
+        strResult = CalcLength(maxHeight->string);
+        ViewAbstract::SetMaxHeight(frameNode, strResult);
+    } else {
+        CalcDimension result(maxHeight->value, static_cast<DimensionUnit>(maxHeight->unit));
+        ViewAbstract::SetMaxHeight(frameNode, CalcLength(result));
+    }
 }
 
 void ResetMaxHeight(ArkUINodeHandle node)
@@ -2935,6 +3080,31 @@ void SetAlignRules(ArkUINodeHandle node, char** anchors, const ArkUI_Int32* dire
     ViewAbstract::SetAlignRules(frameNode, rulesMap);
 }
 
+void SetAlignRulesWidthType(ArkUINodeHandle node, const ArkUIAlignRulesType* alignRulesType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(alignRulesType);
+    std::map<AlignDirection, AlignRule> rulesMap;
+    for (int32_t i = 0; i < alignRulesType->anchorCount && i < NUM_6; i++) {
+        std::string anchorId(alignRulesType->anchorIds[i]);
+        if (anchorId.empty()) {
+            continue;
+        }
+        AlignRule alignRule;
+        alignRule.anchor = anchorId;
+        if (i < NUM_3) {
+            alignRule.horizontal = static_cast<HorizontalAlign>(alignRulesType->alignTypes[i]);
+        } else {
+            alignRule.vertical = static_cast<VerticalAlign>(alignRulesType->alignTypes[i]);
+        }
+        rulesMap[static_cast<AlignDirection>(i)] = alignRule;
+    }
+    ViewAbstract::SetAlignRules(frameNode, rulesMap);
+    BiasPair biasPair(alignRulesType->biasHorizontalValue, alignRulesType->biasVerticalValue);
+    ViewAbstract::SetBias(frameNode, biasPair);
+}
+
 void ResetAlignRules(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2957,36 +3127,28 @@ void GetAlignRules(ArkUINodeHandle node, ArkUIAlignRulesType* alignRulesType)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto alignRules = ViewAbstract::GetAlignRules(frameNode);
-    auto leftIterator = alignRules.find(AlignDirection::LEFT);
-    if (leftIterator != alignRules.end()) {
-        alignRulesType->leftAlignAnchor = std::atoi(leftIterator->second.anchor.c_str());
-        alignRulesType->leftAlignType = static_cast<int32_t>(leftIterator->second.horizontal);
+    std::string emptyStr;
+    for (int32_t i = 0; i < NUM_6; i++) {
+        auto iterator = alignRules.find(static_cast<AlignDirection>(i));
+        if (iterator == alignRules.end()) {
+            if (strcpy_s(alignRulesType->anchorIds[i], MAX_ANCHOR_ID_LENGTH, emptyStr.c_str()) != 0) {
+                break;
+            }
+            alignRulesType->alignTypes[i] = 0;
+            continue;
+        }
+        if (strcpy_s(alignRulesType->anchorIds[i], MAX_ANCHOR_ID_LENGTH, iterator->second.anchor.c_str()) != 0) {
+            break;
+        }
+        if (i < NUM_3) {
+            alignRulesType->alignTypes[i] = static_cast<int32_t>(iterator->second.horizontal);
+        } else {
+            alignRulesType->alignTypes[i] = static_cast<int32_t>(iterator->second.vertical);
+        }
     }
-    auto middleIterator = alignRules.find(AlignDirection::MIDDLE);
-    if (alignRules.find(AlignDirection::MIDDLE) != alignRules.end()) {
-        alignRulesType->middleAlignAnchor = std::atoi(middleIterator->second.anchor.c_str());
-        alignRulesType->middleAlignType = static_cast<int32_t>(middleIterator->second.horizontal);
-    }
-    auto rightIterator = alignRules.find(AlignDirection::RIGHT);
-    if (rightIterator != alignRules.end()) {
-        alignRulesType->rightAlignAnchor = std::atoi(rightIterator->second.anchor.c_str());
-        alignRulesType->rightAlignType = static_cast<int32_t>(rightIterator->second.horizontal);
-    }
-    auto topIterator = alignRules.find(AlignDirection::TOP);
-    if (topIterator != alignRules.end()) {
-        alignRulesType->topAlignAnchor = std::atoi(topIterator->second.anchor.c_str());
-        alignRulesType->topAlignType = static_cast<int32_t>(topIterator->second.vertical);
-    }
-    auto centerIterator = alignRules.find(AlignDirection::CENTER);
-    if (centerIterator != alignRules.end()) {
-        alignRulesType->verticalCenterAlignAnchor = std::atoi(centerIterator->second.anchor.c_str());
-        alignRulesType->verticalCenterAlignType = static_cast<int32_t>(centerIterator->second.vertical);
-    }
-    auto bottomIterator = alignRules.find(AlignDirection::BOTTOM);
-    if (bottomIterator != alignRules.end()) {
-        alignRulesType->bottomAlignAnchor = std::atoi(bottomIterator->second.anchor.c_str());
-        alignRulesType->bottomAlignType = static_cast<int32_t>(bottomIterator->second.vertical);
-    }
+    BiasPair biasPair = ViewAbstract::GetBias(frameNode);
+    alignRulesType->biasHorizontalValue = biasPair.first;
+    alignRulesType->biasVerticalValue = biasPair.second;
 }
 
 void SetAccessibilityDescription(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -3123,6 +3285,21 @@ void ResetResponseRegion(ArkUINodeHandle node)
     ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
+void SetForegroundEffect(ArkUINodeHandle node, ArkUI_Float32 radius)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    radius = std::max(radius, 0.0f);
+    ViewAbstract::SetForegroundEffect(frameNode, static_cast<float>(radius));
+}
+
+void ResetForegroundEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetForegroundEffect(frameNode, 0.0f);
+}
+
 void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Float32 saturationArg,
     ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
     ArkUI_Int32 blurValuesSize)
@@ -3241,15 +3418,27 @@ void ResetForegroundBrightness(ArkUINodeHandle node)
     ViewAbstract::SetFgDynamicBrightness(frameNode, brightnessOption);
 }
 
+void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
+{
+    if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::AUTO)) {
+        previewOption.ResetDragPreviewMode();
+        isAuto = true;
+        return;
+    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
+        previewOption.isScaleEnabled = false;
+    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
+        previewOption.isDefaultShadowEnabled = true;
+    }
+    isAuto = false;
+}
+
 void SetDragPreviewOptions(ArkUINodeHandle node, ArkUI_Int32 dragPreviewMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!(dragPreviewMode >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
-            dragPreviewMode <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE))) {
-        dragPreviewMode = static_cast<int32_t>(NG::DragPreviewMode::AUTO);
-    }
-    NG::DragPreviewOption option { static_cast<NG::DragPreviewMode>(dragPreviewMode) };
+    NG::DragPreviewOption option;
+    bool isAuto = true;
+    ParseDragPreviewMode(option, dragPreviewMode, isAuto);
     ViewAbstract::SetDragPreviewOptions(frameNode, option);
 }
 
@@ -3257,7 +3446,7 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(frameNode, { NG::DragPreviewMode::AUTO });
+    ViewAbstract::SetDragPreviewOptions(frameNode, { true, false, false, false, false, { .isShowBadge = true } });
 }
 
 void SetMouseResponseRegion(
@@ -4105,6 +4294,38 @@ void SetOutlineWidth(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t 
     ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
 }
 
+void SetOutlineWidthFloat(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
+    ArkUI_Float32 right, ArkUI_Float32 bottom)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::BorderWidthProperty borderWidth;
+    borderWidth.leftDimen = Dimension(left, DimensionUnit::VP);
+    borderWidth.topDimen = Dimension(top, DimensionUnit::VP);
+    borderWidth.rightDimen = Dimension(right, DimensionUnit::VP);
+    borderWidth.bottomDimen = Dimension(bottom, DimensionUnit::VP);
+    borderWidth.multiValued = true;
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
+}
+
+void GetOutlineWidthFloat(ArkUINodeHandle node, ArkUI_Float32* borderWidthVector, ArkUI_Int32 borderWidthSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (borderWidthSize < OUTLINE_WIDTH_VECTOR_SIZE) {
+        return;
+    }
+    NG::BorderWidthProperty borderWidth = ViewAbstract::GetOuterBorderWidth(frameNode);
+    borderWidthVector[OUTLINE_LEFT_WIDTH_INDEX] = borderWidth.leftDimen.has_value() ?
+        borderWidth.leftDimen->Value() : 0.0f;
+    borderWidthVector[OUTLINE_TOP_WIDTH_INDEX] = borderWidth.topDimen.has_value() ?
+        borderWidth.topDimen->Value() : 0.0f;
+    borderWidthVector[OUTLINE_RIGHT_WIDTH_INDEX] = borderWidth.rightDimen.has_value() ?
+        borderWidth.rightDimen->Value() : 0.0f;
+    borderWidthVector[OUTLINE_BOTTOM_WIDTH_INDEX] = borderWidth.bottomDimen.has_value() ?
+        borderWidth.bottomDimen->Value() : 0.0f;
+}
+
 void ResetOutlineWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4842,13 +5063,6 @@ ArkUI_Float32 GetAspectRatio(ArkUINodeHandle node)
     return ViewAbstract::GetAspectRatio(frameNode);
 }
 
-ArkUI_Float32 GetLayoutWeight(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return ViewAbstract::GetLayoutWeight(frameNode);
-}
-
 void SetBackgroundImageSizeWithUnit(
     ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight, ArkUI_Int32 unit)
 {
@@ -4875,8 +5089,9 @@ const ArkUICommonModifier* GetCommonModifier()
 {
     static const ArkUICommonModifier modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
         SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
-        ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetBorderStyle, ResetBorderStyle,
-        SetBackShadow, ResetBackShadow, SetHitTestBehavior, ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity,
+        ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetPositionEdges,
+        ResetPositionEdges, SetBorderStyle, ResetBorderStyle, SetBackShadow, ResetBackShadow,
+        SetHitTestBehavior, ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity,
         ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur, ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert,
         ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
         ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur,
@@ -4893,8 +5108,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
         ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
         ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
-        ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor, SetVisibility,
-        ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
+        SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
+        SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
         SetAccessibilityLevel, ResetAccessibilityLevel, SetDirection, ResetDirection, SetLayoutWeight,
         ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight,
         SetMaxHeight, ResetMaxHeight, SetSize, ResetSize, ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf,
@@ -4902,7 +5117,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea, ResetExpandSafeArea, SetFlexBasis,
         ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription, ResetAccessibilityDescription,
         SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
-        ResetObscured, SetResponseRegion, ResetResponseRegion, SetBackgroundEffect, ResetBackgroundEffect,
+        ResetObscured, SetResponseRegion, ResetResponseRegion,
+        SetForegroundEffect, ResetForegroundEffect, SetBackgroundEffect, ResetBackgroundEffect,
         SetBackgroundBrightness, ResetBackgroundBrightness, SetBackgroundBrightnessInternal, ResetBackgroundBrightnessInternal, 
         SetForegroundBrightness, ResetForegroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions,
         SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching,
@@ -4919,13 +5135,14 @@ const ArkUICommonModifier* GetCommonModifier()
         GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient, GetRadialGradient, GetMask,
         GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition, GetRotateTransition,
         GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules, GetBackgroundBlurStyle,
-        GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetScale, GetRotate, GetBrightness, GetSaturate,
+        GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, SetOutlineWidthFloat, GetOutlineWidthFloat,
+        GetDisplayPriority, SetAlignRulesWidthType, GetLayoutWeight, GetScale, GetRotate, GetBrightness, GetSaturate,
         GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale,
         GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur, GetLinearGradient, GetAlign, GetWidth,
         GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetPaddingDimension, GetConfigSize, GetKey,
         GetEnabled, GetMargin, GetMarginDimension, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask,
-        GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable, GetLayoutWeight,
-        SetBackgroundImageSizeWithUnit };
+        GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable,
+        SetBackgroundImageSizeWithUnit};
 
     return &modifier;
 }

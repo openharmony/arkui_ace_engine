@@ -45,12 +45,30 @@ public:
         return sections_;
     }
 
+    /**
+     * @brief check if last update was a special case where only itemCount in the last section is modified.
+     *
+     * @return true only if itemCount in the last section has changed and everything else remains the same.
+     */
+    bool IsSpecialUpdate() const;
+
 private:
+    std::vector<Section> prevSections_; // for comparing and handling special cases
     std::vector<Section> sections_;
     std::function<void(int32_t start)> onSectionDataChange_;
 };
 
 struct WaterFlowSections::Section {
+    bool operator==(const Section& other) const
+    {
+        return itemsCount == other.itemsCount && crossCount == other.crossCount && columnsGap == other.columnsGap &&
+               rowsGap == other.rowsGap && margin == other.margin;
+    }
+    bool operator!=(const Section& other) const
+    {
+        return !(*this == other);
+    }
+
     int32_t itemsCount = 0;
 
     std::optional<int32_t> crossCount;

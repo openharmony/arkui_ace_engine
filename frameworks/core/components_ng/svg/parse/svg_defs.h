@@ -26,9 +26,6 @@ class SvgDefs : public SvgNode {
 public:
     SvgDefs() : SvgNode()
     {
-        declaration_ = AceType::MakeRefPtr<SvgBaseDeclaration>();
-        declaration_->Init();
-        declaration_->InitializeStyle();
         InitDefsFlag();
     }
 

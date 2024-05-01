@@ -1080,7 +1080,7 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
     ASSERT_NE(externalRenderContext, nullptr);
     auto renderContext = host->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, true);
+    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, true, false);
     ASSERT_EQ(host->GetLastChild(), nullptr);
 }
 } // namespace OHOS::Ace::NG

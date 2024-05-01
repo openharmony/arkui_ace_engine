@@ -29,6 +29,11 @@
 #include "base/geometry/vec3.h"
 #include "core/components_ng/pattern/model/model_paint_property.h"
 #include "core/components_ng/pattern/model/model_touch_handler.h"
+#include "core/components_ng/pattern/model/model_view.h"
+
+#if defined(KIT_3D_ENABLE)
+#include "scene_adapter/intf_scene_adapter.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -48,8 +53,7 @@ class ModelAdapterWrapper : public virtual AceType {
 public:
     using PaintFinishCallback = std::function<void()>;
 
-    ModelAdapterWrapper(uint32_t key, Render3D::SurfaceType surfaceType, const std::string& bundleName,
-        const std::string& moduleName);
+    ModelAdapterWrapper(uint32_t key, const ModelViewContext& context);
     ~ModelAdapterWrapper() override;
 
     void SetPaintFinishCallback(PaintFinishCallback callback);
@@ -60,10 +64,7 @@ public:
     void OnPaintFinish();
     void OnRebuildFrame(RefPtr<RenderContext>& context);
     void OnAttachToFrameNode(const RefPtr<RenderContext>& context);
-    void OnDirtyLayoutWrapperSwap(float offsetX, float offsetY, float width, float height, float scale,
-        bool recreateWindow);
     void OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeInfo& windowChangeInfo);
-    void OnPaint3DSceneTexture(SkCanvas* skCanvas);
     void Deinit();
 
     OHOS::Render3D::SurfaceType GetSurfaceType()
@@ -98,12 +99,16 @@ private:
     bool needsRepaint_ = true;
 
     std::shared_ptr<Render3D::WidgetAdapter> widgetAdapter_;
-    std::unique_ptr<Render3D::TextureLayer> textureLayer_;
+    std::shared_ptr<Render3D::TextureLayer> textureLayer_;
     RefPtr<ModelTouchHandler> touchHandler_;
     Render3D::SurfaceType surfaceType_;
 
     std::string bundleName_;
     std::string moduleName_;
+
+#if defined(KIT_3D_ENABLE)
+    std::shared_ptr<Render3D::ISceneAdapter> sceneAdapter_;
+#endif
     ACE_DISALLOW_COPY_AND_MOVE(ModelAdapterWrapper);
 };
 } // namespace OHOS::Ace::NG

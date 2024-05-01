@@ -1651,7 +1651,8 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
     ParagraphStyle paragraphStyle;
-    richEditorPattern->paragraph_ = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    richEditorPattern->pManager_->AddParagraph({ .paragraph = paragraph, .paragraphStyle = paragraphStyle });
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
@@ -3175,7 +3176,7 @@ HWTEST_F(RichEditorTestNg, Selection005, TestSize.Level1)
     int32_t start = 0;
     int32_t end = 1;
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::NEVER;
+    options.menuPolicy = MenuPolicy::HIDE;
     richEditorPattern->OnModifyDone();
     richEditorPattern->SetSelection(start, end, options);
     ClearSpan();
@@ -3221,7 +3222,7 @@ HWTEST_F(RichEditorTestNg, Selection006, TestSize.Level1)
     int32_t start = -1;
     int32_t end = -1;
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::NEVER;
+    options.menuPolicy = MenuPolicy::HIDE;
     richEditorPattern->SetSelection(start, end, options);
     ClearSpan();
     EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
@@ -3256,7 +3257,7 @@ HWTEST_F(RichEditorTestNg, Selection007, TestSize.Level1)
     int32_t start = 0;
     int32_t end = 1;
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::ALWAYS;
+    options.menuPolicy = MenuPolicy::SHOW;
     richEditorPattern->OnModifyDone();
     richEditorPattern->SetSelection(start, end, options);
     ClearSpan();
@@ -3302,7 +3303,7 @@ HWTEST_F(RichEditorTestNg, Selection008, TestSize.Level1)
     int32_t start = -1;
     int32_t end = -1;
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::ALWAYS;
+    options.menuPolicy = MenuPolicy::SHOW;
     richEditorPattern->SetSelection(start, end, options);
     ClearSpan();
     EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
@@ -4106,7 +4107,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController014, TestSize.Level1)
     option2.start = 0;
     option2.end = 1;
     richEditorController->DeleteSpans(option2); // delete half symbol span, will fail
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 
     ClearSpan();
 }
@@ -4445,7 +4446,7 @@ HWTEST_F(RichEditorTestNg, GetTextSpansInfo, TestSize.Level1)
     struct UpdateParagraphStyle style1;
     style1.textAlign = TextAlign::END;
     style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
-    style1.leadingMargin->size = NG::SizeF(5.0, 10.0);
+    style1.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
     richEditorPattern->UpdateParagraphStyle(0, 6, style1);
 
     auto info = richEditorController->GetSpansInfo(0, 6);
@@ -4454,8 +4455,8 @@ HWTEST_F(RichEditorTestNg, GetTextSpansInfo, TestSize.Level1)
     auto textStyle = info.selection_.resultObjects.begin()->textStyle;
 
     EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
-    EXPECT_EQ(textStyle.leadingMarginSize[0], 5.0);
-    EXPECT_EQ(textStyle.leadingMarginSize[1], 10.0);
+    EXPECT_EQ(textStyle.leadingMarginSize[0], "5.00px");
+    EXPECT_EQ(textStyle.leadingMarginSize[1], "10.00px");
 
     ClearSpan();
 }
@@ -4498,8 +4499,8 @@ HWTEST_F(RichEditorTestNg, GetImageSpansInfo, TestSize.Level1)
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
     auto imageStyleout = info.selection_.resultObjects.begin()->imageStyle;
     EXPECT_EQ(imageStyleout.borderRadius,
-        "{\"topLeft\":\"10.00\",\"topRight\":\"10.00\",\"bottomLeft\":\"10.00\",\"bottomRight\":\"10.00\"}");
-    EXPECT_EQ(imageStyleout.margin, "left: [10.00]right: [10.00]top: [10.00]bottom: [10.00]");
+        "{\"topLeft\":\"10.00px\",\"topRight\":\"10.00px\",\"bottomLeft\":\"10.00px\",\"bottomRight\":\"10.00px\"}");
+    EXPECT_EQ(imageStyleout.margin, "left: [10.00px]right: [10.00px]top: [10.00px]bottom: [10.00px]");
     ClearSpan();
 }
 
@@ -4526,7 +4527,7 @@ HWTEST_F(RichEditorTestNg, DeleteValueSetTextSpan, TestSize.Level1)
     struct UpdateParagraphStyle style1;
     style1.textAlign = TextAlign::END;
     style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
-    style1.leadingMargin->size = NG::SizeF(5.0, 10.0);
+    style1.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
     richEditorPattern->UpdateParagraphStyle(0, 6, style1);
     auto info = richEditorController->GetSpansInfo(0, 6);
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
@@ -4541,8 +4542,8 @@ HWTEST_F(RichEditorTestNg, DeleteValueSetTextSpan, TestSize.Level1)
     richEditorPattern->DeleteValueSetTextSpan(spanItem, 0, 1, spanResult);
 
     EXPECT_EQ(spanResult.GetTextStyle().textAlign, int(TextAlign::END));
-    EXPECT_EQ(spanResult.GetTextStyle().leadingMarginSize[0], 5.0);
-    EXPECT_EQ(spanResult.GetTextStyle().leadingMarginSize[1], 10.0);
+    EXPECT_EQ(spanResult.GetTextStyle().leadingMarginSize[0], "5.00px");
+    EXPECT_EQ(spanResult.GetTextStyle().leadingMarginSize[1], "10.00px");
 
     ClearSpan();
 }
@@ -4570,7 +4571,7 @@ HWTEST_F(RichEditorTestNg, onIMEInputComplete, TestSize.Level1)
     struct UpdateParagraphStyle style1;
     style1.textAlign = TextAlign::END;
     style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
-    style1.leadingMargin->size = NG::SizeF(5.0, 10.0);
+    style1.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
     richEditorPattern->UpdateParagraphStyle(0, 6, style1);
     auto info = richEditorController->GetSpansInfo(0, 6);
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
@@ -4583,8 +4584,8 @@ HWTEST_F(RichEditorTestNg, onIMEInputComplete, TestSize.Level1)
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
     richEditorPattern->AfterIMEInsertValue(it1, 1, false);
     EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
-    EXPECT_EQ(textStyle.leadingMarginSize[0], 5.0);
-    EXPECT_EQ(textStyle.leadingMarginSize[1], 10.0);
+    EXPECT_EQ(textStyle.leadingMarginSize[0], "5.00px");
+    EXPECT_EQ(textStyle.leadingMarginSize[1], "10.00px");
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -4630,9 +4631,9 @@ HWTEST_F(RichEditorTestNg, DeleteValueSetImageSpan, TestSize.Level1)
     spanResult.SetSpanIndex(0);
     auto spanItem = richEditorPattern->spans_.front();
     richEditorPattern->DeleteValueSetImageSpan(spanItem, spanResult);
-    EXPECT_EQ(spanResult.GetMargin(), "left: [10.00]right: [10.00]top: [10.00]bottom: [10.00]");
+    EXPECT_EQ(spanResult.GetMargin(), "left: [10.00px]right: [10.00px]top: [10.00px]bottom: [10.00px]");
     EXPECT_EQ(spanResult.GetBorderRadius(),
-        "{\"topLeft\":\"10.00\",\"topRight\":\"10.00\",\"bottomLeft\":\"10.00\",\"bottomRight\":\"10.00\"}");
+        "{\"topLeft\":\"10.00px\",\"topRight\":\"10.00px\",\"bottomLeft\":\"10.00px\",\"bottomRight\":\"10.00px\"}");
 
     ClearSpan();
 }
@@ -6296,27 +6297,83 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts001, TestSize.Level1)
     /**
      * @tc.steps: step2. add text span
      */
+    richEditorPattern->paragraphs_.minParagraphFontSize = 19.0;
+    EXPECT_EQ(richEditorPattern->paragraphs_.minParagraphFontSize.value(), 19.0);
     TextSpanOptions textOptions;
     textOptions.value = INIT_VALUE_3;
     richEditorController->AddTextSpan(textOptions);
     EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::Left);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->CursorMove(CaretMoveIntent::LeftWord);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 13);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::RightWord);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 24);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::ParagraghBegin);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::ParagraghEnd);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), textOptions.value.length());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::Home);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::End);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), textOptions.value.length());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::LineBegin);
-    richEditorPattern->SetCaretPosition(20);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
+}
+
+/**
+ * @tc.name: RichEditorKeyBoardShortCuts002 about cursor move
+ * @tc.desc: test the cursor move line end and down
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->paragraphs_.minParagraphFontSize = 19.0;
+    EXPECT_EQ(richEditorPattern->paragraphs_.minParagraphFontSize.value(), 19.0);
+    AddSpan(INIT_VALUE_1);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    TestParagraphItem testParagraphItem = {
+        .start = 0, .end = 6, .indexOffsetMap = { { 0, Offset(0, 5) }, { 6, Offset(50, 0) } }
+    };
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 6 });
+    CaretMetricsF metricsDown;
+    CaretMetricsF metricsUp;
+    for (const auto& [index, offset] : testParagraphItem.indexOffsetMap) {
+        metricsDown.offset.SetX(offset.GetX());
+        metricsDown.offset.SetY(offset.GetY());
+        metricsUp.offset.SetX(offset.GetX());
+        metricsUp.offset.SetY(offset.GetY());
+        EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(6));
+        EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
+        EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+        EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(index, _, _))
+            .WillRepeatedly(DoAll(SetArgReferee<1>(metricsDown), Return(true)));
+        EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream(index, _, _))
+            .WillRepeatedly(DoAll(SetArgReferee<1>(metricsUp), Return(true)));
+    }
+    richEditorPattern->SetCaretPosition(0);
     richEditorPattern->CursorMove(CaretMoveIntent::LineEnd);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 6);
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->HandleSelect(CaretMoveIntent::LineEnd);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->HandleSelect(CaretMoveIntent::Down);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
 }
 
 /**
@@ -6337,6 +6394,8 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts101, TestSize.Level1)
      */
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->paragraphs_.minParagraphFontSize = 19.0;
+    EXPECT_EQ(richEditorPattern->paragraphs_.minParagraphFontSize.value(), 19.0);
     /**
      * @tc.steps: step2. add text span
      */
@@ -6346,25 +6405,30 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts101, TestSize.Level1)
     EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleSelect(CaretMoveIntent::Left);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 19);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleSelect(CaretMoveIntent::Right);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 21);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleSelect(CaretMoveIntent::LeftWord);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 19);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleSelect(CaretMoveIntent::RightWord);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 24);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghBegin);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), textOptions.value.length());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleSelect(CaretMoveIntent::LineBegin);
-    richEditorPattern->SetCaretPosition(20);
-    richEditorPattern->HandleSelect(CaretMoveIntent::LineEnd);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
 }
 
 /**
  * @tc.name: RichEditorKeyBoardShortCuts101 about Handle select
- * @tc.desc: test the select move position, up and down
+ * @tc.desc: test the select move position, up
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts102, TestSize.Level1)
@@ -6401,8 +6465,7 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts102, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->caretPosition_, 20);
     richEditorPattern->paragraphs_.minParagraphFontSize = style.GetFontSize().ConvertToPx();
     richEditorPattern->HandleSelect(CaretMoveIntent::Up);
-    richEditorPattern->SetCaretPosition(20);
-    richEditorPattern->HandleSelect(CaretMoveIntent::Down);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
 }
 
 /**
@@ -6432,7 +6495,9 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts201, TestSize.Level1)
     EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleOnDeleteComb(true);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->HandleOnDeleteComb(false);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
 }
 
 /**
@@ -6464,7 +6529,9 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts202, TestSize.Level1)
     EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->textSelector_.Update(4, 20);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 4);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
+    EXPECT_EQ(richEditorController->updateSpanStyle_.updateFontWeight, Ace::FontWeight::BOLD);
 }
 
 /**
@@ -6496,7 +6563,9 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts203, TestSize.Level1)
     EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->textSelector_.Update(4, 20);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 20);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
+    EXPECT_EQ(richEditorController->updateSpanStyle_.updateItalicFontStyle, OHOS::Ace::FontStyle::ITALIC);
 }
 
 /**
@@ -6529,6 +6598,7 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts204, TestSize.Level1)
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->textSelector_.Update(4, 20);
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
+    EXPECT_EQ(richEditorController->updateSpanStyle_.updateTextDecoration, TextDecoration::UNDERLINE);
 }
 
 /**

@@ -17,7 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_PAINT_METHOD_H
 
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
+
+#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+
+#ifdef USE_FAST_TASKPOOL
+#include <memory>
+#endif
 
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
@@ -39,8 +45,10 @@ public:
 
     ~CanvasPaintMethod() override = default;
 
+    void GetFastTaskPool();
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
+#ifndef USE_FAST_TASKPOOL
     void PushTask(const TaskFunc& task)
     {
         tasks_.emplace_back(task);
@@ -50,6 +58,7 @@ public:
     {
         return !tasks_.empty();
     }
+#endif
 
     double GetWidth()
     {
@@ -67,13 +76,12 @@ public:
     }
 
     void CloseImageBitmap(const std::string& src);
-    void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     void DrawPixelMapWithoutGlobalState(const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(
         RefPtr<RosenRenderContext> renderContext, double left, double top, double width, double height);
     void GetImageData(const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Ace::ImageData>& imageData);
-    void TransferFromImageBitmap(PaintWrapper* paintWrapper, const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
+    void TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
     std::string ToDataURL(RefPtr<RosenRenderContext> renderContext, const std::string& args);
     bool DrawBitmap(RefPtr<RosenRenderContext> renderContext, RSBitmap& currentBitmap);
     std::string GetJsonData(const std::string& path);
@@ -91,24 +99,24 @@ public:
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
-    void PaintText(const OffsetF& offset, const SizeF& contentSize, double x, double y, std::optional<double> maxWidth,
+    void PaintText(const SizeF& contentSize, double x, double y, std::optional<double> maxWidth,
         bool isStroke, bool hasShadow = false);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
-    bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = false);
-    void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow);
+    bool UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow = false);
+    void UpdateTextStyleForeground(bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
         const RSBrush* brush = nullptr, const RSPen* pen = nullptr) override;
-    OffsetF GetContentOffset(PaintWrapper* paintWrapper) const override
-    {
-        return OffsetF(0.0f, 0.0f);
-    }
-    void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
+    void Path2DRect(const PathArgs& args) override;
     RSCanvas* GetRawPtrOfRSCanvas() override
     {
         return rsCanvas_.get();
     }
-
+#ifndef USE_FAST_TASKPOOL
     std::list<TaskFunc> tasks_;
+#else
+    friend class CustomPaintPattern;
+    std::unique_ptr<CanvasPaintOp> fastTaskPool_ = std::make_unique<CanvasPaintOp>();
+#endif
 
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;
     OnModifierUpdateFunc onModifierUpdate_;

@@ -126,7 +126,7 @@ public:
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
 private:
-    RefPtr<Subwindow> GetOrCreateSubWindow();
+    RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
 
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;

@@ -96,4 +96,29 @@ void GridLayoutProperty::OnRowsGapUpdate(const Dimension& /* rowsGap */) const
         ResetGridLayoutInfoAndMeasure();
     }
 }
+
+void GridLayoutProperty::UpdateIrregularFlag(const GridLayoutOptions& layoutOptions) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIrregular(false);
+    CHECK_NULL_VOID(layoutOptions.getSizeByIndex);
+
+    bool vertical = IsVertical();
+    for (int32_t idx : layoutOptions.irregularIndexes) {
+        auto size = layoutOptions.getSizeByIndex(idx);
+        if ((!vertical && size.columns > 1) || (vertical && size.rows > 1)) {
+            pattern->SetIrregular(true);
+            return;
+        }
+    }
+}
+
+void GridLayoutProperty::OnLayoutOptionsUpdate(const GridLayoutOptions& layoutOptions) const
+{
+    UpdateIrregularFlag(layoutOptions);
+    ResetGridLayoutInfoAndMeasure();
+}
 } // namespace OHOS::Ace::NG

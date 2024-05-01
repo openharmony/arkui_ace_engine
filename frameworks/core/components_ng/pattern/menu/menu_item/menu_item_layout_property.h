@@ -62,6 +62,8 @@ public:
         value->propLabel_ = CloneLabel();
         value->propSelectIconStyle_ = CloneSelectIconStyle();
         value->propMenuWidth_ = CloneMenuWidth();
+        value->propExpandingMode_ = CloneExpandingMode();
+        value->propHasFurtherExpand_ = CloneHasFurtherExpand();
         return value;
     }
 
@@ -76,6 +78,8 @@ public:
         ResetLabel();
         ResetSelectIconStyle();
         ResetMenuWidth();
+        ResetExpandingMode();
+        ResetHasFurtherExpand();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartIcon, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
@@ -83,6 +87,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndIcon, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Label, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ExpandingMode, SubMenuExpandingMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasFurtherExpand, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(SelectIconStyle, MenuItemSelectIconStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectIconStyle, SelectIcon, bool, PROPERTY_UPDATE_MEASURE);

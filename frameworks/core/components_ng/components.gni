@@ -108,6 +108,24 @@ template("build_component_ng") {
       if (enable_graphic_text_gine) {
         include_dirs += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export" ]
       }
+      if (is_arkui_x) {
+        include_dirs += [
+          "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
+          "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
+          "//foundation/graphic/graphic_2d/rosen/modules",
+          "//foundation/graphic/graphic_2d/rosen/modules/platform/utils",
+          "//foundation/graphic/graphic_2d/rosen/modules/render_service_base",
+          "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export/rosen_text",
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics",
+          "//foundation/graphic/graphic_2d/utils/color_manager/export",
+          "//foundation/multimedia/image_framework/interfaces/innerkits/include",
+        ]
+        defines += [ "CROSS_PLATFORM" ]
+        if (ace_enable_gpu) {
+          defines += [ "ACE_ENABLE_GPU" ]
+        }
+      }
       deps += [ "$skia_root_new:skia_$platform" ]
       if (!is_arkui_x && defined(config.enable_drag_framework) &&
           config.enable_drag_framework) {

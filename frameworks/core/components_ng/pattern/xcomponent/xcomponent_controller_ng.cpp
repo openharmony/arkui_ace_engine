@@ -179,4 +179,18 @@ void XComponentControllerNG::StopImageAnalyzer()
     CHECK_NULL_VOID(pattern);
     pattern->StopImageAnalyzer();
 }
+
+void XComponentControllerNG::SetSurfaceRotation(bool isLock)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSurfaceRotation(isLock);
+}
+
+bool XComponentControllerNG::GetSurfaceRotation()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSurfaceRotation();
+}
 } // namespace OHOS::Ace::NG

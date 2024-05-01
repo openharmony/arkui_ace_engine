@@ -59,7 +59,8 @@ public:
 
     bool IsValid() const
     {
-        return width_ && height_;
+        return (width_ && height_) && (width_->GetDimension().Unit() != DimensionUnit::AUTO &&
+                                          height_->GetDimension().Unit() != DimensionUnit::AUTO);
     }
 
     const std::optional<CalcLength>& Width() const
@@ -352,6 +353,14 @@ struct PaddingPropertyT {
         right = padding;
         top = padding;
         bottom = padding;
+    }
+
+    void SetEdges(const T& leftValue, const T& rightValue, const T& topValue, const T& bottomValue)
+    {
+        left = leftValue;
+        right = rightValue;
+        top = topValue;
+        bottom = bottomValue;
     }
 
     bool operator==(const PaddingPropertyT& value) const

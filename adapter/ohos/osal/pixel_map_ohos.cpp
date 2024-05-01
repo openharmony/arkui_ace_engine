@@ -87,6 +87,20 @@ RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
     return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
 }
 
+RefPtr<PixelMap> PixelMap::CopyPixelMap(const RefPtr<PixelMap>& pixelMap)
+{
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    OHOS::Media::InitializationOptions opts;
+    auto mediaPixelMap = pixelMap->GetPixelMapSharedPtr();
+    std::unique_ptr<Media::PixelMap> uniquePixelMap = Media::PixelMap::Create(*mediaPixelMap, opts);
+    CHECK_NULL_RETURN(uniquePixelMap, nullptr);
+    Media::PixelMap* pixelMapRelease = uniquePixelMap.release();
+    CHECK_NULL_RETURN(pixelMapRelease, nullptr);
+    std::shared_ptr<Media::PixelMap> newPixelMap(pixelMapRelease);
+    CHECK_NULL_RETURN(newPixelMap, nullptr);
+    return AceType::MakeRefPtr<PixelMapOhos>(newPixelMap);
+}
+
 RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
 {
     CHECK_NULL_RETURN(ptr, nullptr);
@@ -267,6 +281,20 @@ void PixelMapOhos::SavePixelMapToFile(const std::string& dst) const
     }
     outFile.write(reinterpret_cast<const char*>(pixmap_->GetPixels()), totalSize);
     TAG_LOGI(AceLogTag::ACE_IMAGE, "write success, path=%{public}s", path.c_str());
+}
+
+RefPtr<PixelMap> PixelMapOhos::GetCropPixelMap(const Rect& srcRect)
+{
+    Media::InitializationOptions options;
+    options.size.width = static_cast<int32_t>(srcRect.Width());
+    options.size.height = static_cast<int32_t>(srcRect.Height());
+    options.pixelFormat = Media::PixelFormat::RGBA_8888;
+    options.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    options.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+
+    Media::Rect rect {srcRect.Left(), srcRect.Top(), srcRect.Width(), srcRect.Height()};
+    auto resPixelmap = OHOS::Media::PixelMap::Create(*pixmap_, rect, options);
+    return AceType::MakeRefPtr<PixelMapOhos>(std::move(resPixelmap));
 }
 
 } // namespace OHOS::Ace

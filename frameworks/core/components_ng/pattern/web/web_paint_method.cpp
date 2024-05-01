@@ -20,12 +20,19 @@
 namespace OHOS::Ace::NG {
 CanvasDrawFunction WebPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
-    return [weak = WeakClaim(this)](RSCanvas& canvas) {
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, nullptr);
+    auto frameRect = geometryNode->GetFrameRect();
+    int32_t componentWidth = frameRect.Width();
+    int32_t componentHeight = frameRect.Height();
+    TAG_LOGD(AceLogTag::ACE_WEB, "web pattern geometryNode width: %{public}d, height: %{public}d.",
+             componentWidth, componentHeight);
+    return [weak = WeakClaim(this), width = componentWidth, height = componentHeight](RSCanvas& canvas) {
         auto painter = weak.Upgrade();
         CHECK_NULL_VOID(painter);
         auto surface = DynamicCast<NG::RosenRenderSurface>(painter->renderSuface_);
         if (surface) {
-            surface->DrawBuffer();
+            surface->DrawBuffer(width, height);
         }
     };
 }

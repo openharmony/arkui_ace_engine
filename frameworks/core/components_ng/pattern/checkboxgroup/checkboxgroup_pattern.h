@@ -186,9 +186,7 @@ private:
     void UpdateState();
     void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select);
     void UpdateRepeatedGroupStatus(const RefPtr<FrameNode>& frameNode, bool select);
-    void UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, const std::string& group,
-        bool select);
+    void UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode, bool select);
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -197,15 +195,13 @@ private:
     void InitializeModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
+    void InitPreGroup();
     std::string GetGroupNameWithNavId();
 
     void SetCheckBoxStyle(const RefPtr<CheckBoxPaintProperty>& paintProperty, const RefPtr<FrameNode>& frameNode,
         CheckBoxStyle checkBoxGroupStyle);
     void GetCheckBoxGroupStyle(const RefPtr<FrameNode>& frameNode, CheckBoxStyle& checkboxGroupStyle);
     void InnerFocusPaintCircle(RoundRect& paintRect);
-    void GetCheckBoxNameList(const RefPtr<FrameNode>& frameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, const std::string& group,
-        bool select, std::vector<std::string>& vec);
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
     RefPtr<ClickEvent> clickListener_;

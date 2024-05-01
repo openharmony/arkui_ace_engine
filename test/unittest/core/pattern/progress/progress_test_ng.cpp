@@ -3069,4 +3069,64 @@ HWTEST_F(ProgressTestNg, ProgressModifier009, TestSize.Level1)
     modifier->StartLinearSweepingAnimation(100.f);
     EXPECT_EQ(modifier->isVisible_, false);
 }
+
+/**
+ * @tc.name: ProgressPatternTest000
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternTest000, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Progress node
+     */
+    TestProperty testProperty;
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_LINEAR);
+    testProperty.value = std::make_optional(VALUE_OF_PROGRESS);
+
+    RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
+    CheckValue(frameNode, testProperty);
+
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto node = [](ProgressConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(config.value_, VALUE_OF_PROGRESS);
+        return nullptr;
+    };
+
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: ProgressPrivacySensitiveTest001
+ * @tc.desc: Test ProgressPrivacySensitive change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPrivacySensitiveTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the frameNode.
+     * @tc.expected: step1. Check the frameNode was created successfully.
+     */
+    ProgressModelNG progressModelNG;
+    progressModelNG.Create(5.0, 10.0, 10.0, 20.0, PROGRESS_TYPE_CAPSULE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. change privacy sensitive and check status.
+     */
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    pattern->OnSensitiveStyleChange(false);
+    EXPECT_EQ(progressPaintProperty->GetIsSensitive().value_or(false), false);
+    pattern->OnSensitiveStyleChange(true);
+    EXPECT_EQ(progressPaintProperty->GetIsSensitive().value_or(false), true);
+}
 } // namespace OHOS::Ace::NG

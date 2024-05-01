@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -615,7 +616,7 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
                 animationProperties_[i - 1].currentColor = animationProperties_[i].currentColor;
                 animationProperties_[i - 1].downColor = animationProperties_[i].downColor;
             }
-            if (i == (animationProperties_.size() - 1)) {
+            if (i + 1 == animationProperties_.size()) {
                 animationProperties_[i].upFontSize = animationProperties_[i].fontSize;
                 animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
                 animationProperties_[i].downFontSize = Dimension();
@@ -628,7 +629,7 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
             }
         }
     } else {
-        for (size_t i = animationProperties_.size() - 1;; i--) {
+        for (size_t i = animationProperties_.size() ? animationProperties_.size() - 1 : 0;; i--) {
             if (i == 0) {
                 animationProperties_[i].upFontSize = Dimension();
                 animationProperties_[i].downFontSize = animationProperties_[i].fontSize;
@@ -672,6 +673,9 @@ void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
         pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetDisappearFontStyle().value_or(
         pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextMarqueeStart(false);
+    }
 }
 
 void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -694,6 +698,9 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
         pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
     textLayoutProperty->UpdateItalicFontStyle(
         textPickerLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextMarqueeStart(false);
+    }
 }
 
 void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
@@ -715,6 +722,9 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
         pickerTheme->GetOptionStyle(true, false).GetFontFamilies()));
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetSelectedFontStyle().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextMarqueeStart(true);
+    }
 }
 
 void TextPickerColumnPattern::AddAnimationTextProperties(
@@ -764,6 +774,16 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    isTextFadeOut_ = textTheme->GetIsTextFadeout();
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textLayoutProperty->UpdateTextMarqueeFadeout(true);
+        textLayoutProperty->UpdateTextMarqueeStart(false);
+    }
     if (currentIndex == middleIndex) {
         UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
@@ -785,7 +805,7 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLay
     uint32_t idx, uint32_t showCount, bool isDown, double scaleSize)
 {
     auto deltaIdx = GetOverScrollDeltaIndex();
-    auto index = idx + (scrollDelta_ > 0.0 ? 1 : -1) * deltaIdx;
+    auto index = static_cast<int32_t>(idx) + (scrollDelta_ > 0.0 ? 1 : -1) * deltaIdx;
     auto percent = distancePercent_ - deltaIdx;
     auto scale = scaleSize - deltaIdx;
 
@@ -964,6 +984,7 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
     if (NotLoopOptions() && reboundAnimation_) {
         AnimationUtils::StopAnimation(reboundAnimation_);
         isReboundInProgress_ = false;
+        overscroller_.ResetVelocity();
         overscroller_.SetOverScroll(scrollDelta_);
     }
 }
@@ -1398,7 +1419,8 @@ bool TextPickerColumnPattern::InnerHandleScroll(
     if (isDown) {
         currentIndex = (totalOptionCount + currentIndex + 1) % totalOptionCount; // index add one
     } else {
-        currentIndex = (totalOptionCount + currentIndex - 1) % totalOptionCount; // index reduce one
+        auto totalCountAndIndex = totalOptionCount + currentIndex;
+        currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
     FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
@@ -1432,7 +1454,8 @@ bool TextPickerColumnPattern::HandleDirectionKey(KeyCode code)
         return false;
     }
     if (code == KeyCode::KEY_DPAD_UP) {
-        SetCurrentIndex((totalOptionCount + currernIndex - 1) % totalOptionCount);
+        auto totalCountAndIndex = totalOptionCount + currernIndex;
+        SetCurrentIndex((totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount);
         FlushCurrentOptions();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
@@ -1484,7 +1507,7 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
     int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
     int32_t step = param->itemIndex - middleIndex;
     auto overFirst = currentIndex_ == 0 && step < 0;
-    auto overLast = currentIndex_ == GetOptionCount() -1 && step > 0;
+    auto overLast = currentIndex_ == (GetOptionCount() ? GetOptionCount() - 1 : 0) && step > 0;
     if (NotLoopOptions() && (overscroller_.IsOverScroll() || overFirst || overLast)) {
         return;
     }
@@ -1525,5 +1548,26 @@ void TextPickerColumnPattern::PlayResetAnimation()
     }
 
     CreateAnimation(scrollDelta_, 0.0);
+}
+
+void TextPickerColumnPattern::SetCanLoop(bool isLoop)
+{
+    if (isLoop_ == isLoop) {
+        return;
+    }
+
+    isLoop_ = isLoop;
+    if (overscroller_.IsOverScroll()) {
+        overscroller_.Reset();
+        isReboundInProgress_ = false;
+        yOffset_ = 0.0;
+        ScrollOption(0.0);
+    }
+
+    if (!isLoop && isTossStatus_) {
+        auto toss = GetToss();
+        CHECK_NULL_VOID(toss);
+        overscroller_.SetLoopTossOffset(toss->GetTossOffset());
+    }
 }
 } // namespace OHOS::Ace::NG

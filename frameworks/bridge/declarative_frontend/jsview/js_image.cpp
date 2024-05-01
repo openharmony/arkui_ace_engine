@@ -564,13 +564,11 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         return;
     }
     if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
-#ifndef PREVIEW
         auto drawingColorFilter = CreateDrawingColorFilter(tmpInfo);
         if (drawingColorFilter) {
             ImageModel::GetInstance()->SetDrawingColorFilter(drawingColorFilter);
             return;
         }
-#endif
         JSColorFilter* colorFilter;
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
             colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
@@ -619,6 +617,38 @@ void JSImage::SetSmoothEdge(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetSmoothEdge(static_cast<float>(parseRes));
 }
 
+void JSImage::SetDynamicRangeMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        ImageModel::GetInstance()->SetDynamicRangeMode(DynamicRangeMode::STANDARD);
+        return;
+    }
+    int32_t parseRes = static_cast<int32_t>(DynamicRangeMode::STANDARD);
+    ParseJsInteger(info[0], parseRes);
+    if (parseRes < static_cast<int32_t>(DynamicRangeMode::HIGH) ||
+        parseRes > static_cast<int32_t>(DynamicRangeMode::STANDARD)) {
+        parseRes = static_cast<int32_t>(DynamicRangeMode::STANDARD);
+    }
+    DynamicRangeMode dynamicRangeMode = static_cast<DynamicRangeMode>(parseRes);
+    ImageModel::GetInstance()->SetDynamicRangeMode(dynamicRangeMode);
+}
+
+void JSImage::SetEnhancedImageQuality(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        ImageModel::GetInstance()->SetEnhancedImageQuality(AIImageQuality::NONE);
+        return;
+    }
+    int32_t parseRes = static_cast<int32_t>(AIImageQuality::NONE);
+    ParseJsInteger(info[0], parseRes);
+    if (parseRes < static_cast<int32_t>(AIImageQuality::NONE) ||
+        parseRes > static_cast<int32_t>(AIImageQuality::HIGH)) {
+        parseRes = static_cast<int32_t>(AIImageQuality::NONE);
+    }
+    AIImageQuality resolutionQuality  = static_cast<AIImageQuality>(parseRes);
+    ImageModel::GetInstance()->SetEnhancedImageQuality(resolutionQuality);
+}
+
 void JSImage::CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iterations)
 {
     std::vector<ImageProperties> imageList;
@@ -646,6 +676,8 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
     JSClass<JSImage>::StaticMethod("colorFilter", &JSImage::SetColorFilter, opt);
     JSClass<JSImage>::StaticMethod("edgeAntialiasing", &JSImage::SetSmoothEdge, opt);
+    JSClass<JSImage>::StaticMethod("dynamicRangeMode", &JSImage::SetDynamicRangeMode, opt);
+    JSClass<JSImage>::StaticMethod("enhancedImageQuality", &JSImage::SetEnhancedImageQuality, opt);
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);

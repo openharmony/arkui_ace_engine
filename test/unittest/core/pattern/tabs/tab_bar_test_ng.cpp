@@ -286,14 +286,14 @@ HWTEST_F(TabBarTestNg, TabBarPatternGetSelectedMode001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarModifierSetIndicator001, TestSize.Level1)
 {
-    RectF rect(0.0f, 0.0f, 1.0f, 1.0f);
+    OffsetF indicatorOffset = { 0.0f, 0.0f };
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
-    tabBarModifier->SetIndicator(rect);
+    tabBarModifier->SetIndicatorOffset(indicatorOffset);
     EXPECT_EQ(tabBarModifier->indicatorLeft_->Get(), 0.0f);
     EXPECT_EQ(tabBarModifier->indicatorTop_->Get(), 0.0f);
     tabBarModifier->indicatorLeft_ = nullptr;
     tabBarModifier->indicatorTop_ = nullptr;
-    tabBarModifier->SetIndicator(rect);
+    tabBarModifier->SetIndicatorOffset(indicatorOffset);
     EXPECT_EQ(tabBarModifier->indicatorLeft_, nullptr);
     EXPECT_EQ(tabBarModifier->indicatorTop_, nullptr);
 }
@@ -379,17 +379,17 @@ HWTEST_F(TabBarTestNg, TabBarModifierSetIndicatorMarginTop001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarModifierSetSelectedMode001
+ * @tc.name: TabBarModifierSetHasIndicator001
  * @tc.desc: test SetSelectedMode
  * @tc.type: FUNC
  */
-HWTEST_F(TabBarTestNg, TabBarModifierSetSelectedMode001, TestSize.Level1)
+HWTEST_F(TabBarTestNg, TabBarModifierSetHasIndicator001, TestSize.Level1)
 {
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
     ASSERT_NE(tabBarModifier->hasIndicator_, nullptr);
     EXPECT_TRUE(tabBarModifier->hasIndicator_->Get());
     tabBarModifier->hasIndicator_ = nullptr;
-    tabBarModifier->SetSelectedMode(SelectedMode::INDICATOR);
+    tabBarModifier->SetHasIndicator(true);
     EXPECT_EQ(tabBarModifier->hasIndicator_, nullptr);
 }
 
@@ -415,7 +415,7 @@ HWTEST_F(TabBarTestNg, TabBarModifierOnDraw001, TestSize.Level1)
     float indicatorMarginTop = 1.0f;
     float indicatorBorderRadius = 1.0f;
 
-    tabBarModifier->SetSelectedMode(SelectedMode::INDICATOR);
+    tabBarModifier->SetHasIndicator(true);
     tabBarModifier->SetIndicatorHeight(indicatorHeight);
     tabBarModifier->SetIndicatorWidth(indicatorWidth);
     tabBarModifier->SetIndicatorMarginTop(indicatorMarginTop);
@@ -433,7 +433,7 @@ HWTEST_F(TabBarTestNg, TabBarModifierOnDraw001, TestSize.Level1)
     indicatorMarginTop = -1.0f;
     indicatorBorderRadius = -1.0f;
 
-    tabBarModifier->SetSelectedMode(SelectedMode::INDICATOR);
+    tabBarModifier->SetHasIndicator(true);
     tabBarModifier->SetIndicatorHeight(indicatorHeight);
     tabBarModifier->SetIndicatorWidth(indicatorWidth);
     tabBarModifier->SetIndicatorMarginTop(indicatorMarginTop);
@@ -446,7 +446,7 @@ HWTEST_F(TabBarTestNg, TabBarModifierOnDraw001, TestSize.Level1)
     EXPECT_EQ(tabBarModifier->indicatorMarginTop_->Get(), indicatorMarginTop);
     EXPECT_EQ(tabBarModifier->indicatorBorderRadius_->Get(), indicatorBorderRadius);
 
-    tabBarModifier->SetSelectedMode(SelectedMode::BOARD);
+    tabBarModifier->SetHasIndicator(false);
     tabBarModifier->onDraw(context);
     EXPECT_FALSE(tabBarModifier->hasIndicator_->Get());
 
@@ -554,7 +554,7 @@ HWTEST_F(TabBarTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level1)
     std::vector<bool> gradientRegions = { true, true, true, true, true };
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
     auto paintMethod = AceType::MakeRefPtr<TabBarPaintMethod>(
-        tabBarModifier, gradientRegions, Color::BLACK, indicator, 0.0, selectedMode);
+        tabBarModifier, gradientRegions, Color::BLACK, indicator, OffsetF(), true);
 
     PaintWrapper paintWrapper(tabBarNode_->GetRenderContext(), tabBarNode_->GetGeometryNode(), tabBarPaintProperty_);
     auto drawFunction = paintMethod->GetForegroundDrawFunction(&paintWrapper);
@@ -568,7 +568,7 @@ HWTEST_F(TabBarTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level1)
 
     gradientRegions[0] = false;
     paintMethod = AceType::MakeRefPtr<TabBarPaintMethod>(
-        tabBarModifier, gradientRegions, Color::BLACK, indicator, 0.0, selectedMode);
+        tabBarModifier, gradientRegions, Color::BLACK, indicator, OffsetF(), true);
     PaintWrapper paintWrapper2(tabBarNode_->GetRenderContext(), tabBarNode_->GetGeometryNode(), tabBarPaintProperty_);
     drawFunction = paintMethod->GetForegroundDrawFunction(&paintWrapper2);
     drawFunction(rsCanvas);
@@ -834,10 +834,8 @@ HWTEST_F(TabBarTestNg, TabBarmodifieronDraw002, TestSize.Level1)
      * @tc.steps: step2. Test function onDraw.
      * @tc.expected: Related function runs ok.
      */
-    float height = 1.0f;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     tabBarModifier->hasIndicator_ = nullptr;
-    tabBarModifier->indicator_.SetHeight(height);
     tabBarModifier->onDraw(context);
 }
 
@@ -912,7 +910,6 @@ HWTEST_F(TabBarTestNg, TabBarmodifierPaintIndicator001, TestSize.Level1)
     EXPECT_CALL(rsCanvas, Restore()).Times(AnyNumber());
 
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
-    RectF indicator(0.0f, 0.0f, 1.0f, 1.0f);
     tabBarModifier->indicatorHeight_->SetUpCallbacks([]() { return 1.0f; }, [](const float&) {});
     tabBarModifier->indicatorWidth_->SetUpCallbacks([]() { return 1.0f; }, [](const float&) {});
     tabBarModifier->indicatorMarginTop_->SetUpCallbacks([]() { return 1.0f; }, [](const float&) {});
@@ -923,7 +920,7 @@ HWTEST_F(TabBarTestNg, TabBarmodifierPaintIndicator001, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        tabBarModifier->PaintIndicator(context, indicator);
+        tabBarModifier->PaintIndicator(context);
         tabBarModifier->indicatorHeight_->SetUpCallbacks([]() { return 0.0f; }, [](const float&) {});
         tabBarModifier->indicatorWidth_->SetUpCallbacks([]() { return 0.0f; }, [](const float&) {});
         tabBarModifier->indicatorMarginTop_->SetUpCallbacks([]() { return 0.0f; }, [](const float&) {});
@@ -1588,25 +1585,24 @@ HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorStyle001, TestSize.Level1)
     indicator1.width = -1.0_vp;
     tabBarPattern_->SetIndicatorStyle(indicator1, 1);
     EXPECT_EQ(tabBarPattern_->indicatorStyles_[1], indicator1);
+    auto firstRect = tabBarLayoutProperty_->GetIndicatorRect(0);
+    EXPECT_EQ(firstRect.GetY(), 33.f);
+    auto secondRect = tabBarLayoutProperty_->GetIndicatorRect(1);
+    EXPECT_EQ(secondRect.GetY(), 33.f);
+
     tabBarPattern_->indicator_ = 0;
     tabBarPattern_->turnPageRate_ = -0.9f;
     IndicatorStyle indicator2;
-    tabBarPattern_->GetIndicatorStyle(indicator2);
+    OffsetF indicatorOffset;
+    tabBarPattern_->GetIndicatorStyle(indicator2, indicatorOffset);
+    EXPECT_EQ(indicatorOffset.GetY(), 33.f);
     indicator1.width = 1.0_vp;
     tabBarPattern_->SetIndicatorStyle(indicator1, 1);
     EXPECT_EQ(tabBarPattern_->indicatorStyles_[1], indicator1);
-    tabBarPattern_->GetIndicatorStyle(indicator2);
-    tabBarPattern_->indicator_ = 0;
+    tabBarPattern_->GetIndicatorStyle(indicator2, indicatorOffset);
     tabBarPattern_->turnPageRate_ = 0.9f;
     IndicatorStyle indicator3;
-    tabBarPattern_->GetIndicatorStyle(indicator3);
-    tabBarPattern_->SetIndicatorStyle(indicator3, 0);
-    EXPECT_EQ(tabBarPattern_->indicatorStyles_[0], indicator3);
-    tabBarPattern_->indicator_ = -1;
-    tabBarPattern_->GetIndicatorStyle(indicator2);
-    tabBarPattern_->SetIndicatorStyle(indicator1, 1);
-    EXPECT_EQ(tabBarPattern_->indicatorStyles_[1], indicator1);
-    tabBarPattern_->GetIndicatorStyle(indicator3);
+    tabBarPattern_->GetIndicatorStyle(indicator3, indicatorOffset);
     tabBarPattern_->SetIndicatorStyle(indicator3, 0);
     EXPECT_EQ(tabBarPattern_->indicatorStyles_[0], indicator3);
 }
@@ -1896,43 +1892,45 @@ HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorStyle002, TestSize.Level1)
     IndicatorStyle indicator;
     IndicatorStyle indicator2;
     tabBarPattern_->indicator_ = -1;
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    OffsetF indicatorOffset;
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(tabBarPattern_->indicator_, -1);
     tabBarPattern_->indicator_ = 0;
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     tabBarPattern_->indicatorStyles_.push_back(indicator2);
     tabBarPattern_->indicatorStyles_.push_back(indicator);
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
     indicator.width.SetValue(1.0);
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(indicator.width.Value(), 10);
     tabBarPattern_->isTouchingSwiper_ = false;
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     tabBarPattern_->axis_ = Axis::FREE;
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(tabBarPattern_->axis_, Axis::FREE);
     tabBarPattern_->isTouchingSwiper_ = true;
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_TRUE(tabBarPattern_->isTouchingSwiper_);
     tabBarPattern_->axis_ = Axis::HORIZONTAL;
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(tabBarPattern_->axis_, Axis::HORIZONTAL);
     tabBarPattern_->turnPageRate_ = 2.0f;
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(tabBarPattern_->turnPageRate_, 1.0f);
     tabBarPattern_->swiperStartIndex_ = 1;
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(tabBarPattern_->swiperStartIndex_, 1);
     tabBarPattern_->swiperStartIndex_ = 1;
     auto tabBarStyles1 = TabBarStyle::NOSTYLE;
     auto tabBarStyles2 = TabBarStyle::SUBTABBATSTYLE;
     tabBarPattern_->tabBarStyles_ = { tabBarStyles1, tabBarStyles2 };
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(tabBarPattern_->swiperStartIndex_, 1);
     tabBarPattern_->swiperStartIndex_ = -1;
-    tabBarPattern_->GetIndicatorStyle(indicator);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(tabBarPattern_->swiperStartIndex_, -1);
+    EXPECT_EQ(indicatorOffset.GetY(), 0.f);
 }
 
 /**
@@ -2231,12 +2229,12 @@ HWTEST_F(TabBarTestNg, SetTabBarStyle001, TestSize.Level1)
     * @tc.expected: Equal to TabBarStyle: SUBTABBATSTYLE.
     */
     const std::string text_test = "text_test";
-    tabContentPattern->SetTabBar(text_test, "", nullptr);
+    tabContentPattern->SetTabBar(text_test, "", std::nullopt, nullptr);
     EXPECT_EQ(tabContentPattern->GetTabBarParam().GetText(), text_test);
 
     tabContentPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     EXPECT_EQ(tabContentPattern->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
-    tabContentPattern->SetTabBar(text_test, "", nullptr);
+    tabContentPattern->SetTabBar(text_test, "", std::nullopt, nullptr);
     EXPECT_EQ(tabContentPattern->GetTabBarParam().GetText(), text_test);
 
     tabContentPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
@@ -2263,26 +2261,26 @@ HWTEST_F(TabBarTestNg, TabBarPatternProvideRestoreInfo003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarModifierSetSelectedMode002
+ * @tc.name: TabBarModifierHasIndicator002
  * @tc.desc: test SetSelectedMode
  * @tc.type: FUNC
  */
-HWTEST_F(TabBarTestNg, TabBarModifierSetSelectedMode002, TestSize.Level1)
+HWTEST_F(TabBarTestNg, TabBarModifierHasIndicator002, TestSize.Level1)
 {
     /**
      * @tc.steps: steps1. Select mode as BOARD
      */
-    SelectedMode selectedMode = SelectedMode::BOARD;
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
-    tabBarModifier->SetSelectedMode(selectedMode);
     ASSERT_NE(tabBarModifier->hasIndicator_, nullptr);
-    tabBarModifier->hasIndicator_ = nullptr;
+    tabBarModifier->SetHasIndicator(false);
+    EXPECT_FALSE(tabBarModifier->hasIndicator_->Get());
 
     /**
      * @tc.steps: steps2.Calling the SetSelectedMode interface to pass in SelectedMode:: BOARD
      * @tc.expected: steps2. TabBarModifier -> has Indicator_ nullptr
      */
-    tabBarModifier->SetSelectedMode(selectedMode);
+    tabBarModifier->hasIndicator_ = nullptr;
+    tabBarModifier->SetHasIndicator(false);
     EXPECT_EQ(tabBarModifier->hasIndicator_, nullptr);
 }
 
@@ -2340,7 +2338,7 @@ HWTEST_F(TabBarTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
     tabContentFrameNode->GetTabBarItemId();
     tabContentFrameNode->MountToParent(swiperNode_);
-    tabContentPattern->SetTabBar(text_test, "", nullptr);
+    tabContentPattern->SetTabBar(text_test, "", std::nullopt, nullptr);
     EXPECT_EQ(tabContentPattern->GetTabBarParam().GetText(), text_test);
     tabContentModel.AddTabBarItem(tabContentFrameNode, DEFAULT_NODE_SLOT, true);
 
@@ -2349,7 +2347,7 @@ HWTEST_F(TabBarTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
     auto tabContentFrameNode2 = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
     auto tabContentPattern2 = tabContentFrameNode2->GetPattern<TabContentPattern>();
     tabContentFrameNode2->MountToParent(swiperNode_);
-    tabContentPattern2->SetTabBar(text_test, "", nullptr);
+    tabContentPattern2->SetTabBar(text_test, "", std::nullopt, nullptr);
     EXPECT_EQ(tabContentPattern2->GetTabBarParam().GetText(), text_test);
     tabContentModel.AddTabBarItem(tabContentFrameNode2, DEFAULT_NODE_SLOT, true);
 }

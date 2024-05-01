@@ -170,8 +170,8 @@ public:
             theme->contentHeight_ = pattern->GetAttr<Dimension>("textfield_content_height", 0.0_vp);
             auto showPasswordDirectly = pattern->GetAttr<std::string>("show_password_directly", "0");
             theme->showPasswordDirectly_ = StringUtils::StringToInt(showPasswordDirectly);
-            auto textfield_show_handle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
-            theme->textfieldShowHandle_ = StringUtils::StringToInt(textfield_show_handle);
+            auto textfieldShowHandle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
+            theme->textfieldShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
 
             theme->textInputBorderColor_ = pattern->GetAttr<Color>("text_input_border_color", Color());
             theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_vp);
@@ -182,6 +182,8 @@ public:
 
             theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
             theme->cancelButtonIconHeight_ = pattern->GetAttr<Dimension>("cancel_button_icon_height", Dimension());
+            theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
+            theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
         }
     };
 
@@ -552,6 +554,16 @@ public:
         return cancelButtonIconColor_;
     }
 
+    const Color& GetPreviewUnderlineColor() const
+    {
+        return previewUnderlineColor_;
+    }
+
+    const Color& GetPreviewBoardColor() const
+    {
+        return previewBoardColor_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -645,6 +657,8 @@ private:
     Color cancelButtonIconColor_;
     Dimension cancelButtonIconHeight_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
+    Color previewUnderlineColor_;
+    Color previewBoardColor_;
 };
 
 } // namespace OHOS::Ace

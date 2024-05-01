@@ -214,9 +214,8 @@ void ScrollBarPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
 
 void ScrollBarPattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)
 {
-    scrollBarOutBoundaryExtent_ = scrollBarOutBoundaryExtent;
     CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedScrollBar());
-    scrollBar_->SetOutBoundary(std::abs(scrollBarOutBoundaryExtent_));
+    scrollBar_->SetOutBoundary(std::abs(scrollBarOutBoundaryExtent));
 }
 
 void ScrollBarPattern::UpdateScrollBarOffset()
@@ -231,14 +230,6 @@ void ScrollBarPattern::UpdateScrollBarOffset()
     CHECK_NULL_VOID(layoutProperty);
     auto estimatedHeight = GetControlDistance() + (GetAxis() == Axis::VERTICAL ? viewSize.Height() : viewSize.Width());
 
-    float scrollBarOutBoundaryExtent = 0.0f;
-    if (Negative(currentOffset_)) {
-        scrollBarOutBoundaryExtent = currentOffset_;
-    } else if (GreatOrEqual(currentOffset_, (estimatedHeight - GetMainAxisSize(viewSize, axis_)))) {
-        scrollBarOutBoundaryExtent = currentOffset_ - (estimatedHeight - GetMainAxisSize(viewSize, axis_));
-    }
-    HandleScrollBarOutBoundary(scrollBarOutBoundaryExtent);
-    
     UpdateScrollBarRegion(currentOffset_, estimatedHeight,
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
@@ -324,10 +315,10 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
     }
     if (displayMode_ != DisplayMode::OFF) {
-        updateFlag |= UpdateScrollBarDisplay();
+        updateFlag = UpdateScrollBarDisplay() || updateFlag;
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        updateFlag |= CheckChildState();
+        updateFlag = CheckChildState() || updateFlag;
     }
     return updateFlag;
 }

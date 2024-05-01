@@ -31,6 +31,7 @@ namespace OHOS::Ace {
 
 struct NodeInfoPU {
     std::function<void()> appearFunc;
+    std::function<void()> didBuildFunc;
     std::function<RefPtr<AceType>()> renderFunc;
     std::function<void()> updateFunc;
     std::function<void()> removeFunc;

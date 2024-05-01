@@ -60,6 +60,10 @@ public:
 
     void StopImageAnalyzer() override;
 
+    void SetSurfaceRotation(bool isLock) override;
+
+    bool GetSurfaceRotation() override;
+
 private:
     WeakPtr<XComponentPattern> pattern_;
 };

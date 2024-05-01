@@ -128,6 +128,11 @@ enum class ContextType {
     RENDER_3D,
 };
 
+enum class CanvasUnit {
+    DEFAULT = 0,
+    PX,
+};
+
 // following the definition of FillType in skPath
 enum class CanvasFillRule {
     NONZERO = 0,

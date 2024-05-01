@@ -575,7 +575,7 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
 std::string_view Base64ImageLoader::GetBase64ImageCode(const std::string& uri)
 {
     auto iter = uri.find_first_of(',');
-    if (iter == std::string::npos || iter == uri.size() - 1) {
+    if (iter == std::string::npos || ((uri.size() > 0) && (iter == uri.size() - 1))) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "wrong code format!");
         return std::string_view();
     }

@@ -114,7 +114,6 @@ void MarqueePattern::OnModifyDone()
         StopMarqueeAnimation(playStatus);
     }
     StoreProperties();
-    RegistVisibleAreaChangeCallback();
     RegistOritationListener();
 }
 
@@ -347,31 +346,11 @@ float MarqueePattern::GetTextOffset()
     return offsetX;
 }
 
-void MarqueePattern::RegistVisibleAreaChangeCallback()
+void MarqueePattern::OnVisibleChange(bool isVisible)
 {
-    if (isRegistedAreaCallback_) {
-        return;
-    }
-    isRegistedAreaCallback_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnVisibleAreaChange(visible);
-    };
-    std::vector<double> ratioList = {0.0};
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
-}
-
-void MarqueePattern::OnVisibleAreaChange(bool visible)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(!playStatus_);
     CHECK_NULL_VOID(animation_);
-    if (visible) {
+    if (isVisible) {
         AnimationUtils::ResumeAnimation(animation_);
     } else {
         AnimationUtils::PauseAnimation(animation_);
@@ -516,7 +495,11 @@ float MarqueePattern::CalculateEnd()
 
 void MarqueePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    measureChanged_ = true;
+    if (width != lastWindowWidth_ || height != lastWindowHeight_) {
+        measureChanged_ = true;
+    }
+    lastWindowHeight_ = height;
+    lastWindowWidth_ = width;
 }
 
 void MarqueePattern::RegistOritationListener()

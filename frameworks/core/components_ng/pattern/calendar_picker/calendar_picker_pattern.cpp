@@ -343,8 +343,7 @@ void CalendarPickerPattern::ShowDialog()
     calendarData_.entryNode = AceType::DynamicCast<FrameNode>(host);
     DialogProperties properties;
     InitDialogProperties(properties);
-    std::vector<ButtonInfo> buttonInfos;
-    overlayManager->ShowCalendarDialog(properties, calendarData_, buttonInfos, dialogEvent, dialogCancelEvent);
+    overlayManager->ShowCalendarDialog(properties, calendarData_, dialogEvent, dialogCancelEvent);
     SetDialogShow(true);
 }
 
@@ -889,25 +888,26 @@ void CalendarPickerPattern::HandleSubButtonClick()
     PickerDate dateObj = PickerDate(json->GetUInt("year"), json->GetUInt("month"), json->GetUInt("day"));
     switch (GetSelectedType()) {
         case CalendarPickerSelectedType::YEAR: {
-            dateObj.SetYear(dateObj.GetYear() == MIN_YEAR ? MAX_YEAR : dateObj.GetYear() - 1);
+            auto getYear = dateObj.GetYear();
+            dateObj.SetYear(dateObj.GetYear() == MIN_YEAR ? MAX_YEAR : (getYear > 0 ? getYear - 1 : 0));
             auto maxDay = PickerDate::GetMaxDay(dateObj.GetYear(), dateObj.GetMonth());
-            if (maxDay < dateObj.GetDay()) {
+            if (maxDay < dateObj.GetDay())
                 dateObj.SetDay(maxDay);
-            }
             break;
         }
         case CalendarPickerSelectedType::MONTH: {
-            auto newMonth = dateObj.GetMonth() - 1;
+            auto getMonth = dateObj.GetMonth();
+            auto newMonth = getMonth > 0 ? getMonth - 1 : 0;
             if (newMonth == 0) {
                 dateObj.SetMonth(MAX_MONTH);
-                dateObj.SetYear(dateObj.GetYear() == MIN_YEAR ? MAX_YEAR : dateObj.GetYear() - 1);
+                auto getYear = dateObj.GetYear();
+                dateObj.SetYear(dateObj.GetYear() == MIN_YEAR ? MAX_YEAR : (getYear > 0 ? getYear - 1 : 0));
             } else {
                 dateObj.SetMonth(newMonth);
             }
             auto maxDay = PickerDate::GetMaxDay(dateObj.GetYear(), dateObj.GetMonth());
-            if (maxDay < dateObj.GetDay()) {
+            if (maxDay < dateObj.GetDay())
                 dateObj.SetDay(maxDay);
-            }
             break;
         }
         case CalendarPickerSelectedType::DAY:
@@ -919,9 +919,11 @@ void CalendarPickerPattern::HandleSubButtonClick()
             }
             if (dateObj.GetMonth() == 1) {
                 dateObj.SetMonth(MAX_MONTH);
-                dateObj.SetYear(dateObj.GetYear() == MIN_YEAR ? MAX_YEAR : dateObj.GetYear() - 1);
+                auto getYear = dateObj.GetYear();
+                dateObj.SetYear(dateObj.GetYear() == MIN_YEAR ? MAX_YEAR : (getYear > 0 ? getYear - 1 : 0));
             } else {
-                dateObj.SetMonth(dateObj.GetMonth() - 1);
+                auto getMonth = dateObj.GetMonth();
+                dateObj.SetMonth(getMonth > 0 ? getMonth - 1 : 0);
             }
             dateObj.SetDay(PickerDate::GetMaxDay(dateObj.GetYear(), dateObj.GetMonth()));
             break;

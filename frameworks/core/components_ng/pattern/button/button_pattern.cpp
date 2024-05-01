@@ -26,6 +26,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -163,6 +164,9 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    isTextFadeOut_ = textTheme->GetIsTextFadeout();
     auto && graphics = buttonRenderContext->GetOrCreateGraphics();
     CHECK_NULL_VOID(graphics);
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
@@ -170,6 +174,12 @@ void ButtonPattern::InitButtonLabel()
         ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowNormal());
         Shadow shadow = Shadow::CreateShadow(shadowStyle);
         buttonRenderContext->UpdateBackShadow(shadow);
+    }
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textLayoutProperty->UpdateTextMarqueeFadeout(true);
+        textLayoutProperty->UpdateTextMarqueeStart(false);
+        textNode->MarkDirtyNode();
     }
 }
 
@@ -218,6 +228,11 @@ void ButtonPattern::HandleFocusEvent(RefPtr<ButtonLayoutProperty> layoutProperty
             textNode->MarkDirtyNode();
         }
     }
+    isFocus_ = true;
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextMarqueeStart(true);
+        textNode->MarkDirtyNode();
+    }
 }
 
 void ButtonPattern::HandleBlurEvent(RefPtr<ButtonLayoutProperty> layoutProperty,
@@ -244,6 +259,11 @@ void ButtonPattern::HandleBlurEvent(RefPtr<ButtonLayoutProperty> layoutProperty,
     if (buttonStyle != ButtonStyleMode::EMPHASIZE && focusTextColorModify_) {
         focusTextColorModify_ = false;
         textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
+        textNode->MarkDirtyNode();
+    }
+    isFocus_ = false;
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextMarqueeStart(isHover_);
         textNode->MarkDirtyNode();
     }
 }
@@ -302,9 +322,6 @@ void ButtonPattern::OnModifyDone()
 
 void ButtonPattern::HandleBackgroundColor()
 {
-    if (UseContentModifier()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -317,6 +334,11 @@ void ButtonPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(buttonTheme);
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    if (UseContentModifier()) {
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->ResetBackgroundColor();
+        return;
+    }
     if (!renderContext->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
     }
@@ -504,6 +526,20 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
         AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,
             MOUSE_HOVER_DURATION, Curves::FRICTION);
     }
+    if (isTextFadeOut_) {
+        auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textLayoutProperty->UpdateTextMarqueeFadeout(true);
+        if (isHover) {
+            textLayoutProperty->UpdateTextMarqueeStart(isHover);
+        } else {
+            textLayoutProperty->UpdateTextMarqueeStart(isFocus_);
+        }
+        textNode->MarkDirtyNode();
+    }
 }
 
 void ButtonPattern::HandleEnabled()
@@ -580,22 +616,31 @@ void ButtonPattern::SetButtonPress(double xPos, double yPos)
 
 void ButtonPattern::FireBuilder()
 {
-    if (!makeFunc_.has_value()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
-    if (!makeFunc_) {
+    if (!makeFunc_.has_value()) {
         gestureEventHub->SetRedirectClick(false);
+        auto children = host->GetChildren();
+        for (const auto& child : children) {
+            if (child->GetId() == nodeId_) {
+                host->RemoveChildAndReturnIndex(child);
+                host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+                break;
+            }
+        }
         return;
     } else {
         gestureEventHub->SetRedirectClick(true);
     }
-    host->RemoveChildAtIndex(0);
+    if (contentModifierNode_ == BuildContentModifierNode()) {
+        return;
+    }
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
     contentModifierNode_ = BuildContentModifierNode();
     CHECK_NULL_VOID(contentModifierNode_);
+    nodeId_ = contentModifierNode_->GetId();
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
     clickEventFunc_ = gestureEventHub->GetClickEvent();
@@ -603,10 +648,6 @@ void ButtonPattern::FireBuilder()
 
 RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
 {
-    if (!makeFunc_.has_value()) {
-        return nullptr;
-    }
-    CHECK_NULL_RETURN(makeFunc_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();

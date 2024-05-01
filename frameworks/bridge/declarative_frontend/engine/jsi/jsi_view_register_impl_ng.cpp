@@ -440,6 +440,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSGestureSpan::JSBind(globalObj);
     JSTextShadowSpan::JSBind(globalObj);
     JSImageAttachment::JSBind(globalObj);
+    JSParagraphStyleSpan::JSBind(globalObj);
+    JSLineHeightSpan::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
@@ -455,6 +457,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSScopeUtil::JSBind(globalObj);
     JSRichEditor::JSBind(globalObj);
     JSRichEditorController::JSBind(globalObj);
+    JSRichEditorStyledStringController::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);

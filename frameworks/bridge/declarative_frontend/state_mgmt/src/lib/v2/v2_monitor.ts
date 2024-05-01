@@ -154,14 +154,14 @@ class MonitorV2 {
 
   // analysisProp for each monitored path
   private bindRun(isInit: boolean = false): boolean {
-    ObserveV2.getObserve().startBind(this, this.watchId_);
+    ObserveV2.getObserve().startRecordDependencies(this, this.watchId_);
     let ret = false;
     this.values_.forEach((item) => {
       let dirty = item.setValue(isInit, this.analysisProp(isInit, item));
       ret = ret || dirty;
     });
 
-    ObserveV2.getObserve().startBind(null, -1);
+    ObserveV2.getObserve().stopRecordDependencies();
     return ret;
   }
 

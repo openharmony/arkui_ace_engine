@@ -146,6 +146,7 @@ private:
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     float scrollOffset_;
+    float lastScrollOffset_;
     bool isSourceFromAnimation_ = false;
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;

@@ -1808,7 +1808,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg0, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->isSelectMenu_ = true;
@@ -1855,7 +1855,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg1, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
     Placement placements[] = { Placement::TOP, Placement::BOTTOM, Placement::RIGHT, Placement::LEFT,
         Placement::TOP_LEFT, Placement::BOTTOM_LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP,
         Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP, Placement::TOP_RIGHT, Placement::BOTTOM_RIGHT };
@@ -2574,7 +2574,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon001, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -2610,13 +2610,14 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
 
     EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
     // call AddSelectIcon
@@ -2658,13 +2659,14 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
 
     EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
     // call AddSelectIcon
@@ -2707,12 +2709,13 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon004, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
     EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
     // call AddSelectIcon
@@ -2749,7 +2752,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon001, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2788,7 +2791,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2838,7 +2841,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2875,7 +2878,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -2922,7 +2925,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Level1)
     itemPattern->OnModifyDone();
 
     EXPECT_FALSE(itemEventHub->IsEnabled());
-    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 2u);
     auto startIconNode = AceType::DynamicCast<FrameNode>(leftRow->GetChildAtIndex(0));
@@ -2968,7 +2971,9 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestEvent001, TestSize.Level1)
      */
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
-    auto gestureHub = itemNode->GetOrCreateGestureEventHub();
+    auto clickableNode = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(CLICKABLE_AREA_VIEW_INDEX));
+    ASSERT_NE(clickableNode, nullptr);
+    auto gestureHub = clickableNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     auto clickEventActuator = gestureHub->clickEventActuator_;
     ASSERT_NE(clickEventActuator, nullptr);
@@ -3366,7 +3371,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNg009, TestSize.Level1)
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
     mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
-    auto position = menuItemPattern->GetSubMenuPostion(mainMenu);
+    auto position = menuItemPattern->GetSubMenuPosition(mainMenu);
     EXPECT_EQ(position, OffsetF(100, 0));
 }
 
@@ -4112,7 +4117,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg009, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
     layoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
@@ -4185,7 +4190,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg011, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
     layoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
@@ -4225,10 +4230,10 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg012, TestSize.Level1)
 
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF(POSITION_OFFSET, POSITION_OFFSET));
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF(0, 0));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
     layoutAlgorithm->Layout(&layoutWrapper);
-    EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(POSITION_OFFSET, POSITION_OFFSET));
+    EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0, 0));
 }
 
 /**
@@ -5780,9 +5785,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg4900, TestSize.Level1)
      * @tc.expected: the placement of the menu defaults to RIGHT_TOP
      */
     menuAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(menuAlgorithm->placement_, OHOS::Ace::Placement::RIGHT_TOP);
-    ASSERT_TRUE(menuLayoutProperty->GetMenuPlacement().has_value());
-    EXPECT_EQ(menuLayoutProperty->GetMenuPlacement().value(), OHOS::Ace::Placement::RIGHT_TOP);
+    EXPECT_EQ(menuAlgorithm->placement_, OHOS::Ace::Placement::BOTTOM_LEFT);
 }
 
 /**
@@ -5824,9 +5827,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5000, TestSize.Level1)
      * @tc.expected: the placement of the menu defaults to RIGHT_TOP
      */
     menuAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(menuAlgorithm->placement_, OHOS::Ace::Placement::RIGHT_TOP);
-    ASSERT_TRUE(menuLayoutProperty->GetMenuPlacement().has_value());
-    EXPECT_EQ(menuLayoutProperty->GetMenuPlacement().value(), OHOS::Ace::Placement::RIGHT_TOP);
+    EXPECT_EQ(menuAlgorithm->placement_, OHOS::Ace::Placement::BOTTOM_LEFT);
 }
 
 /**
@@ -6366,7 +6367,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5910, TestSize.Level1)
     EXPECT_EQ(menuPattern->GetPreviewBeforeAnimationScale(), scaleOptions.scaleFrom);
     EXPECT_EQ(menuPattern->GetPreviewAfterAnimationScale(), scaleOptions.scaleTo);
     layoutAlgorithm->LayoutNormalPreviewMenu(&layoutWrapper);
-    EXPECT_EQ(layoutAlgorithm->previewScale_, scaleOptions.scaleTo);
+    EXPECT_EQ(layoutAlgorithm->previewScale_, scaleOptions.scaleTo - 1);
 }
 
     /**
@@ -6413,7 +6414,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5920, TestSize.Level1)
     EXPECT_EQ(menuPattern->GetPreviewBeforeAnimationScale(), scaleOptions.scaleFrom);
     EXPECT_EQ(menuPattern->GetPreviewAfterAnimationScale(), scaleOptions.scaleTo);
     layoutAlgorithm->LayoutNormalPreviewMenu(&layoutWrapper);
-    EXPECT_EQ(layoutAlgorithm->previewScale_, scaleOptions.scaleTo);
+    EXPECT_EQ(layoutAlgorithm->previewScale_, scaleOptions.scaleTo - 1);
 }
 
 /**
@@ -7960,7 +7961,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5900, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
 }
 
 /**
@@ -8011,7 +8012,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg6000, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0, 0));
 }
 
 /**

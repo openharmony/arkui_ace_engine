@@ -314,7 +314,6 @@ private:
     float dragStartPosition_ = 0.0f;
     float dragEndPosition_ = 0.0f;
 
-    double scrollBarOutBoundaryExtent_ = 0.0;
     RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     RefPtr<ScrollBar> scrollBar_;
 

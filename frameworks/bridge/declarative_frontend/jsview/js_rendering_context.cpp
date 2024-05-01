@@ -175,6 +175,11 @@ void JSRenderingContext::Constructor(const JSCallbackInfo& args)
             jsRenderContext->SetAnti(anti);
         }
     }
+
+    int32_t unit = 0;
+    if (args.GetInt32Arg(1, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+        jsRenderContext->SetUnit(CanvasUnit::PX);
+    }
 }
 
 void JSRenderingContext::Destructor(JSRenderingContext* controller)
@@ -190,8 +195,9 @@ void JSRenderingContext::JsGetWidth(const JSCallbackInfo& info)
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
     canvasRenderingContext2DModel->GetWidth(canvasPattern_, width);
-
-    width = PipelineBase::Px2VpWithCurrentDensity(width);
+    double density = GetDensity();
+    density = (density == 0.0 ? 1.0 : density);
+    width /= density;
     auto returnValue = JSVal(ToJSValue(width));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
@@ -213,8 +219,9 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
     canvasRenderingContext2DModel->GetHeight(canvasPattern_, height);
-
-    height = PipelineBase::Px2VpWithCurrentDensity(height);
+    double density = GetDensity();
+    density = (density == 0.0 ? 1.0 : density);
+    height /= density;
     auto returnValue = JSVal(ToJSValue(height));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);

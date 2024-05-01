@@ -65,7 +65,7 @@ CalendarDataAdapter::CalendarDataAdapter(
     Date currentDate = Date::Current();
     today_.day = static_cast<int32_t>(currentDate.day);
     today_.month.year = static_cast<int32_t>(currentDate.year);
-    today_.month.month = static_cast<int32_t>(currentDate.month - 1);
+    today_.month.month = static_cast<int32_t>(currentDate.month) - 1;
 }
 
 bool CalendarDataAdapter::ParseData(int32_t indexOfContainer, const std::string& source, CalendarDaysOfMonth& result)

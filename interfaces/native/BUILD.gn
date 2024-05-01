@@ -23,7 +23,7 @@ if (!is_arkui_x) {
     ]
   }
 
-  ohos_ndk_library("libace_ndk") {
+  ohos_ndk_library("libace_ndk_rom") {
     ndk_description_file = "./libace.ndk.json"
     min_compact_version = "7"
     output_name = "ace_ndk"
@@ -61,6 +61,7 @@ ohos_shared_library("ace_ndk") {
     "node/node_extened.cpp",
     "node/node_model.cpp",
     "node/style_modifier.cpp",
+    "node/waterflow_section_option.cpp",
   ]
 
   deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
@@ -73,14 +74,14 @@ ohos_shared_library("ace_ndk") {
       "USE_HILOG",
     ]
     sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
-    deps += [ ":libace_ndk" ]
+    deps += [ ":libace_ndk_rom" ]
     external_deps = [
       "hilog:libhilog",
       "napi:ace_napi",
     ]
     version_script =
-        get_label_info(":libace_ndk", "target_gen_dir") + "/" +
-        get_label_info(":libace_ndk", "name") + version_script_suffix
+        get_label_info(":libace_ndk_rom", "target_gen_dir") + "/" +
+        get_label_info(":libace_ndk_rom", "name") + version_script_suffix
   } else if (target_os == "android") {
     sources += [ "$ace_root/adapter/android/osal/log_wrapper.cpp" ]
     libs = [ "log" ]

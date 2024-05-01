@@ -355,6 +355,30 @@ private:
     int32_t parentNWebId_ = -1;
 };
 
+class WebAppLinkCallbackOhos : public WebAppLinkCallback {
+    DECLARE_ACE_TYPE(WebAppLinkCallbackOhos, WebAppLinkCallback)
+public:
+    WebAppLinkCallbackOhos(const std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback>& callback)
+        : callback_(callback) {}
+
+    void ContinueLoad() override
+    {
+        if (callback_) {
+            callback_->ContinueLoad();
+        }
+    }
+
+    void CancelLoad() override
+    {
+        if (callback_) {
+            callback_->CancelLoad();
+        }
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback_;
+};
+
 class DataResubmittedOhos : public DataResubmitted {
     DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted)
 
@@ -650,6 +674,7 @@ public:
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
     void OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request);
+    void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
@@ -736,6 +761,9 @@ public:
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
     bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
     void OnTooltip(const std::string& tooltip);
+    void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void SuggestionSelected(int32_t index);
+    void OnHideAutofillPopup();
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
@@ -833,7 +861,14 @@ public:
     bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void ScaleGestureChange(double scale, double centerX, double centerY);
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
-    
+    // Backward
+    void Backward();
+    bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
+
+    void OnRenderProcessNotResponding(
+        const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
+    void OnRenderProcessResponding();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -882,8 +917,7 @@ private:
     void RegisterConfigObserver();
     void UnRegisterConfigObserver();
 
-    // Backward and forward
-    void Backward();
+    // forward
     void Forward();
     void ClearHistory();
     void ClearSslCache();
@@ -974,6 +1008,8 @@ private:
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
+    EventCallbackV2 onRenderProcessNotRespondingV2_;
+    EventCallbackV2 onRenderProcessRespondingV2_;
 
     int32_t renderMode_;
     std::string bundlePath_;

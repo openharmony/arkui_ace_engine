@@ -195,6 +195,7 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg006, TestSize.Level1)
      * @tc.steps: step2. Create some node
      */
     const auto root = FrameNode::CreateFrameNode(TAG_CHILD, 0, AceType::MakeRefPtr<RootPattern>(), true);
+    root->onMainTree_ = false;
     const auto child = FrameNode::CreateFrameNode(TAG_CHILD, 1, AceType::MakeRefPtr<RootPattern>(), true);
     const auto child2 = FrameNode::CreateFrameNode(TAG_CHILD, 2, AceType::MakeRefPtr<Pattern>(), true);
     /**

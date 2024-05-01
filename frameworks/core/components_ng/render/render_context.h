@@ -320,6 +320,8 @@ public:
 
     virtual void GetPointTransform(PointF& point) {}
 
+    virtual void GetPointTransformRotate(PointF& point) {}
+
     virtual RectF GetPaintRectWithoutTransform()
     {
         return {};
@@ -410,6 +412,7 @@ public:
     virtual void ClearAccessibilityFocus() {};
 
     virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {};
+    virtual void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
@@ -421,6 +424,7 @@ public:
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
+    virtual void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) {}
     virtual void SetAlphaOffscreen(bool isOffScreen) {}
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
@@ -488,6 +492,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundEffect, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicRangeMode, DynamicRangeMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
 
     // CustomBackground
@@ -578,6 +583,7 @@ public:
 
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocusRect, RectT<int32_t>);
 
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
@@ -621,6 +627,8 @@ public:
     {
         return false;
     }
+
+    virtual void SetSurfaceRotation(bool isLock) {}
 
 protected:
     RenderContext() = default;

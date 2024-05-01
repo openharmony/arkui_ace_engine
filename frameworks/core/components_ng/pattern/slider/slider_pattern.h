@@ -38,9 +38,6 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (UseContentModifier()) {
-            return nullptr;
-        }
         if (!IsSliderVisible()) {
             return nullptr;
         }
@@ -59,6 +56,7 @@ public:
                     pattern->UpdateImagePositionY(y);
                 });
         }
+        sliderContentModifier_->SetUseContentModifier(UseContentModifier());
         auto overlayGlobalOffset = CalculateGlobalSafeOffset();
         std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
         SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, BubbleVertex.first, overlayGlobalOffset };
@@ -137,6 +135,11 @@ public:
 
     void SetBuilderFunc(SliderMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
     }
 

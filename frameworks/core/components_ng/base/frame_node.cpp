@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,7 @@ namespace OHOS::Ace::NG {
 const std::set<std::string> FrameNode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
     "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 
-class FrameProxy {
+class FrameNode::FrameProxy final : public RecursiveLock {
 public:
     struct FrameChildNode {
         RefPtr<UINode> node;
@@ -83,28 +83,46 @@ public:
         uint32_t count = 0;
     };
 
-    struct RecursionGuard {
-        FrameProxy* proxy_;
-        bool inUse_;
-        explicit RecursionGuard(FrameProxy* proxy) : proxy_(proxy), inUse_(proxy->inUse_)
-        {
-            proxy_->inUse_ = true;
-        }
-        ~RecursionGuard()
-        {
-            proxy_->inUse_ = inUse_;
-            if (!proxy_->inUse_ && proxy_->delayReset_) {
-                proxy_->ResetChildren(proxy_->needResetChild_);
+    void Lock() override
+    {
+        ++inUse_;
+    }
+
+    void Unlock() override
+    {
+        --inUse_;
+        if (!inUse_ && delayReset_) {
+            auto it = &hostNode_->frameProxy_;
+            while ((*it)) {
+                if (this == (*it)->prevFrameProxy_.get()) {
+                    auto me = std::move((*it)->prevFrameProxy_);
+                    (*it)->prevFrameProxy_ = std::move(me->prevFrameProxy_);
+                    break;
+                }
+                it = &(*it)->prevFrameProxy_;
             }
         }
-    };
+    }
 
     RecursionGuard GetGuard()
     {
-        return RecursionGuard { this };
+        return RecursionGuard(*this);
     }
 
-    explicit FrameProxy(FrameNode* frameNode) : hostNode_(frameNode) {}
+    explicit FrameProxy(FrameNode* frameNode) : hostNode_(frameNode)
+    {
+        prevFrameProxy_ = std::move(hostNode_->frameProxy_);
+        if (prevFrameProxy_ && !prevFrameProxy_->needResetChild_) {
+            children_ = prevFrameProxy_->children_;
+            cursor_ = children_.end();
+            if (prevFrameProxy_->cursor_ != prevFrameProxy_->children_.end()) {
+                cursor_ = std::find_if(children_.begin(), children_.end(),
+                    [this](FrameChildNode& node) {
+                        return prevFrameProxy_->cursor_->node == node.node;
+                    });
+            }
+        }
+    }
 
     void Build()
     {
@@ -154,23 +172,20 @@ public:
         }
     }
 
-    const std::list<RefPtr<LayoutWrapper>>& GetAllFrameChildren()
+    ChildrenListWithGuard GetAllFrameChildren()
     {
-        if (!allFrameNodeChildren_.empty()) {
-            return allFrameNodeChildren_;
-        }
-        Build();
-        {
+        if (allFrameNodeChildren_.empty()) {
+            Build();
             uint32_t count = 0;
             auto guard = GetGuard();
             for (const auto& child : children_) {
                 AddFrameNode(child.node, allFrameNodeChildren_, partFrameNodeChildren_, count);
             }
         }
-        return allFrameNodeChildren_;
+        return ChildrenListWithGuard(allFrameNodeChildren_, *this);
     }
 
-    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache)
+    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
     {
         while (cursor_ != children_.end()) {
             if (cursor_->startIndex > index) {
@@ -180,7 +195,8 @@ public:
 
             if (cursor_->startIndex + cursor_->count > index) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(
-                    cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex, needBuild, isCache));
+                    cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex,
+                        needBuild, isCache, addToRenderTree));
                 return frameNode;
             }
             cursor_++;
@@ -192,12 +208,12 @@ public:
         return nullptr;
     }
 
-    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache)
+    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
     {
         auto itor = partFrameNodeChildren_.find(index);
         if (itor == partFrameNodeChildren_.end()) {
             Build();
-            auto child = FindFrameNodeByIndex(index, needBuild, isCache);
+            auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
             if (child && !isCache) {
                 partFrameNodeChildren_[index] = child;
             }
@@ -225,10 +241,19 @@ public:
     void ResetChildren(bool needResetChild = false)
     {
         if (inUse_) {
+            LOGF("[%{public}d:%{public}s] reset children while in use",
+                hostNode_->GetId(), hostNode_->GetTag().c_str());
+            if (SystemProperties::GetDebugEnabled()) {
+                abort();
+            } else {
+                LogBacktrace();
+            }
             delayReset_ = true;
             needResetChild_ = needResetChild;
+            hostNode_->frameProxy_ = std::make_unique<FrameProxy>(hostNode_);
             return;
         }
+        auto guard = GetGuard();
         delayReset_ = false;
         allFrameNodeChildren_.clear();
         partFrameNodeChildren_.clear();
@@ -292,10 +317,8 @@ public:
         }
     }
 
-    void RemoveAllChildInRenderTree()
+    void RemoveAllChildInRenderTreeAfterReset()
     {
-        SetAllChildrenInActive();
-        ResetChildren();
         Build();
         auto guard = GetGuard();
         for (const auto& child : children_) {
@@ -303,12 +326,19 @@ public:
         }
     }
 
+    void RemoveAllChildInRenderTree()
+    {
+        SetAllChildrenInactive();
+        ResetChildren();
+        hostNode_->frameProxy_->RemoveAllChildInRenderTreeAfterReset();
+    }
+
     uint32_t GetTotalCount()
     {
         return totalCount_;
     }
 
-    void SetAllChildrenInActive()
+    void SetAllChildrenInactive()
     {
         auto guard = GetGuard();
         for (const auto& child : partFrameNodeChildren_) {
@@ -354,17 +384,18 @@ private:
     std::list<FrameChildNode>::iterator cursor_ = children_.begin();
     std::list<RefPtr<LayoutWrapper>> allFrameNodeChildren_;
     std::map<uint32_t, RefPtr<LayoutWrapper>> partFrameNodeChildren_;
+    std::unique_ptr<FrameProxy> prevFrameProxy_;
     uint32_t totalCount_ = 0;
     FrameNode* hostNode_ { nullptr };
-    bool inUse_ = false;
+    uint32_t inUse_ = 0;
     bool delayReset_ = false;
     bool needResetChild_ = false;
 }; // namespace OHOS::Ace::NG
 
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
-    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
-      frameProxy_(std::make_unique<FrameProxy>(this))
+    : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern)
 {
+    frameProxy_ = std::make_unique<FrameProxy>(this);
     renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam());
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
@@ -379,6 +410,11 @@ FrameNode::~FrameNode()
 {
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
+    }
+
+    if (removeCustomProperties_) {
+        removeCustomProperties_();
+        removeCustomProperties_ = nullptr;
     }
 
     pattern_->DetachFromFrameNode(this);
@@ -605,9 +641,6 @@ void FrameNode::DumpDragInfo()
     dragPreviewStr.append(" extraInfo: ").append(dragPreviewInfo_.extraInfo.c_str());
     dragPreviewStr.append(" inspectorId: ").append(dragPreviewInfo_.inspectorId.c_str());
     DumpLog::GetInstance().AddDesc(dragPreviewStr);
-    DumpLog::GetInstance().AddDesc(
-        std::string("DragPreviewMode: ")
-            .append(previewOption_.mode == DragPreviewMode::DISABLE_SCALE ? "DISABLE_SCALE" : "AUTO"));
     auto eventHub = GetEventHub<EventHub>();
     DumpLog::GetInstance().AddDesc(std::string("Event: ")
                                         .append("OnDragStart: ")
@@ -888,6 +921,9 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
     }
     if (configurationChange.colorModeUpdate) {
         pattern_->OnColorConfigurationUpdate();
+        if (colorModeUpdateCallback_) {
+            colorModeUpdateCallback_();
+        }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -1120,6 +1156,13 @@ void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)
     eventHub_->SetOnSizeChanged(std::move(callback));
 }
 
+void FrameNode::AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& callback)
+{
+    if (!lastFrameNodeRect_) {
+        lastFrameNodeRect_ = std::make_unique<RectF>();
+    }
+    eventHub_->AddInnerOnSizeChanged(id, std::move(callback));
+}
 
 void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
 {
@@ -1157,7 +1200,7 @@ void FrameNode::TriggerOnSizeChangeCallback()
     if (!IsActive() || !CheckAncestorPageShow()) {
         return;
     }
-    if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
+    if ((eventHub_->HasOnSizeChanged() || eventHub_->HasInnerOnSizeChanged()) && lastFrameNodeRect_) {
         auto currFrameRect = GetRectWithRender();
         if (currFrameRect.GetSize() != (*lastFrameNodeRect_).GetSize()) {
             onSizeChangeDumpInfo dumpInfo { GetCurrentTimestamp(), *lastFrameNodeRect_, currFrameRect };
@@ -1165,7 +1208,12 @@ void FrameNode::TriggerOnSizeChangeCallback()
                 onSizeChangeDumpInfos.erase(onSizeChangeDumpInfos.begin());
             }
             onSizeChangeDumpInfos.emplace_back(dumpInfo);
-            eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            if (eventHub_->HasOnSizeChanged()) {
+                eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            }
+            if (eventHub_->HasInnerOnSizeChanged()) {
+                eventHub_->FireInnerOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            }
             eventHub_->FireJSFrameNodeOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             *lastFrameNodeRect_ = currFrameRect;
         }
@@ -1656,6 +1704,18 @@ RefPtr<FrameNode> FrameNode::GetPageNode()
     return AceType::DynamicCast<FrameNode>(parent);
 }
 
+RefPtr<FrameNode> FrameNode::GetFirstAutoFillContainerNode()
+{
+    if (IsAutoFillContainerNode()) {
+        return Claim(this);
+    }
+    auto parent = GetParent();
+    while (parent && !parent->IsAutoFillContainerNode()) {
+        parent = parent->GetParent();
+    }
+    return AceType::DynamicCast<FrameNode>(parent);
+}
+
 void FrameNode::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
 {
     if (pattern_) {
@@ -1663,10 +1723,10 @@ void FrameNode::NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceA
     }
 }
 
-void FrameNode::NotifyFillRequestFailed(int32_t errCode)
+void FrameNode::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent)
 {
     if (pattern_) {
-        pattern_->NotifyFillRequestFailed(errCode);
+        pattern_->NotifyFillRequestFailed(errCode, fillContent);
     }
 }
 
@@ -2332,6 +2392,60 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     return offset;
 }
 
+OffsetF FrameNode::GetPositionToScreen()
+{
+    auto offsetCurrent = GetOffsetRelativeToWindow();
+    auto pipelineContext = GetContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
+    return offset;
+}
+
+OffsetF FrameNode::GetPositionToParentWithTransform() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithoutTransform().GetOffset();
+    PointF pointTmp(offset.GetX(), offset.GetY());
+    context->GetPointTransformRotate(pointTmp);
+    offset.SetX(pointTmp.GetX());
+    offset.SetY(pointTmp.GetY());
+    return offset;
+}
+
+OffsetF FrameNode::GetPositionToScreenWithTransform()
+{
+    auto pipelineContext = GetContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    OffsetF nodeOffset = GetPositionToWindowWithTransform();
+    OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
+    return offset;
+}
+
+OffsetF FrameNode::GetPositionToWindowWithTransform() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithoutTransform().GetOffset();
+    PointF pointNode(offset.GetX(), offset.GetY());
+    context->GetPointTransformRotate(pointNode);
+    auto parent = GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        offset = parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
+        PointF pointTmp(offset.GetX() + pointNode.GetX(), offset.GetY() + pointNode.GetY());
+        parentRenderContext->GetPointTransformRotate(pointTmp);
+        pointNode.SetX(pointTmp.GetX());
+        pointNode.SetY(pointTmp.GetY());
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    offset.SetX(pointNode.GetX());
+    offset.SetY(pointNode.GetY());
+    return offset;
+}
+
 RectF FrameNode::GetTransformRectRelativeToWindow() const
 {
     auto context = GetRenderContext();
@@ -2376,7 +2490,7 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
-OffsetF FrameNode::GetPaintRectCenter() const
+OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
@@ -2385,6 +2499,9 @@ OffsetF FrameNode::GetPaintRectCenter() const
     auto center = offset + OffsetF(trans.Width() / 2.0f, trans.Height() / 2.0f);
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
+        if (checkWindowBoundary && parent->IsWindowBoundary()) {
+            break;
+        }
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         auto scale = renderContext->GetTransformScale();
@@ -2745,8 +2862,7 @@ double FrameNode::GetPreviewScaleVal() const
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, scale);
     auto width = geometryNode->GetFrameRect().Width();
-    if (GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth &&
-        previewOption_.mode != DragPreviewMode::DISABLE_SCALE) {
+    if (GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption_.isScaleEnabled) {
         scale = maxWidth / width;
     }
     return scale;
@@ -3084,17 +3200,17 @@ void FrameNode::Layout()
         CHECK_NULL_VOID(safeAreaManager);
         safeAreaManager->SetRootMeasureNodeId(GetId());
     }
-    // if a node has geo transition but not the root node, add task only but not flush
-    // or add to expand list, self node will be added to expand list in next layout
-    if (geometryTransition != nullptr && !IsRootMeasureNode()) {
-        return;
-    }
     if (SelfOrParentExpansive()) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_VOID(safeAreaManager);
         safeAreaManager->AddNeedExpandNode(GetHostNode());
+    }
+    // if a node has geo transition but not the root node, add task only but not flush
+    // or add to expand list, self node will be added to expand list in next layout
+    if (geometryTransition != nullptr && !IsRootMeasureNode()) {
+        return;
     }
     if (geometryTransition != nullptr) {
         pipeline->FlushSyncGeometryNodeTasks();
@@ -3256,7 +3372,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache);
+    auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
         child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         if (addToRenderTree) {
@@ -3268,12 +3384,12 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
-    return frameProxy_->GetFrameNodeByIndex(index, false, isCache);
+    return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
 
 FrameNode* FrameNode::GetFrameNodeChildByIndex(uint32_t index, bool isCache)
 {
-    auto frameNode = DynamicCast<FrameNode>(frameProxy_->GetFrameNodeByIndex(index, true, isCache));
+    auto frameNode = DynamicCast<FrameNode>(frameProxy_->GetFrameNodeByIndex(index, true, isCache, false));
     return RawPtr(frameNode);
 }
 
@@ -3287,7 +3403,7 @@ uint32_t FrameNode::GetChildTrueTotalCount() const
     return frameProxy_->GetTotalCount();
 }
 
-const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
+ChildrenListWithGuard FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
 {
     const auto& children = frameProxy_->GetAllFrameChildren();
     {
@@ -3386,7 +3502,7 @@ void FrameNode::MarkNeedSyncRenderTree(bool needRebuild)
     needSyncRenderTree_ = true;
 }
 
-RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
+RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
     if (index != 0) {
         return nullptr;
@@ -3854,6 +3970,19 @@ void FrameNode::ChangeSensitiveStyle(bool isSensitive)
     pattern_->OnSensitiveStyleChange(isSensitive);
 }
 
+void FrameNode::AttachContext(PipelineContext* context, bool recursive)
+{
+    UINode::AttachContext(context, recursive);
+    pattern_->OnAttachContext(context);
+}
+
+void FrameNode::DetachContext(bool recursive)
+{
+    CHECK_NULL_VOID(context_);
+    pattern_->OnDetachContext(context_);
+    UINode::DetachContext(recursive);
+}
+
 RectF FrameNode::ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const
 {
     RectF newRect = rect;
@@ -3892,6 +4021,9 @@ void FrameNode::GetVisibleRect(RectF& visibleRect, RectF& frameRect) const
         visibleRect = ApplyFrameNodeTranformToRect(visibleRect, parentUi);
         auto parentRect = parentUi->GetPaintRectWithTransform();
         visibleRect = visibleRect.Constrain(parentRect);
+        if (visibleRect.IsEmpty()) {
+            return;
+        }
         frameRect = ApplyFrameNodeTranformToRect(frameRect, parentUi);
         parentUi = parentUi->GetAncestorNodeOfFrame(true);
     }

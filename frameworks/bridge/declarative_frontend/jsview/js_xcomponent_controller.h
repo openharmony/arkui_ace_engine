@@ -65,6 +65,9 @@ public:
     void StartImageAnalyzer(const JSCallbackInfo& args);
     void StopImageAnalyzer(const JSCallbackInfo& args);
 
+    void SetXComponentSurfaceRotation(const JSCallbackInfo& args);
+    void GetXComponentSurfaceRotation(const JSCallbackInfo& args);
+
 private:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     std::shared_ptr<InnerXComponentController> xcomponentController_;

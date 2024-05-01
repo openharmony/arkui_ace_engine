@@ -275,7 +275,7 @@ ArkUI_CharPtr GetTextPickerSelectedTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
@@ -304,7 +304,7 @@ ArkUI_CharPtr GetTextPickerTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
@@ -333,7 +333,7 @@ ArkUI_CharPtr GetTextPickerDisappearTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
@@ -500,7 +500,8 @@ void SetSelectedInternal(
     uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     for (uint32_t i = 0; i < count; i++) {
-        if (i > selectedValues.size() - 1) {
+        uint32_t val = selectedValues.size() > 0 ? selectedValues.size() - 1 : 0;
+        if (i > val) {
             selectedValues.emplace_back(0);
         } else {
             if (selectedValues[i] >= options[i].rangeResult.size()) {
@@ -531,12 +532,15 @@ void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* inputs, const int32_t
 void ProcessCascadeSelected(
     const std::vector<NG::TextCascadePickerOptions>& options, uint32_t index, std::vector<uint32_t>& selectedValues)
 {
+    if (options.size() == 0) {
+        return;
+    }
     std::vector<std::string> rangeResultValue;
     for (size_t i = 0; i < options.size(); i++) {
         rangeResultValue.emplace_back(options[i].rangeResult[0]);
     }
-
-    if (index > selectedValues.size() - 1) {
+    uint32_t val = selectedValues.size() > 0 ? selectedValues.size() - 1 : 0;
+    if (index > val) {
         selectedValues.emplace_back(0);
     }
     if (selectedValues[index] >= rangeResultValue.size()) {

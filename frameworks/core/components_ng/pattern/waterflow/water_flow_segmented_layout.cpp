@@ -128,7 +128,7 @@ float PrepareJump(WaterFlowLayoutInfo& info)
         // implies that LayoutInfo has already been reset, no need to jump
         return 0.0f;
     }
-    info.jumpIndex_ = info.startIndex_;
+    info.jumpIndex_ = std::min(info.startIndex_, info.childrenCount_ - 1);
     info.align_ = ScrollAlign::START;
     float itemOffset = (info.itemInfos_.size() <= static_cast<size_t>(info.startIndex_))
                            ? info.storedOffset_
@@ -172,7 +172,9 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
         }
         info_.ClearCacheAfterIndex(updateIdx - 1);
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
+        return;
     }
+
     if (!wrapper_->IsContraintNoChanged()) {
         postJumpOffset_ = PrepareJump(info_);
     }
@@ -394,7 +396,7 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx)
 {
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     targetIdx = std::min(targetIdx, info_.childrenCount_ - 1);
-    for (int32_t i = info_.itemInfos_.size(); i <= targetIdx; ++i) {
+    for (int32_t i = static_cast<int32_t>(info_.itemInfos_.size()); i <= targetIdx; ++i) {
         int32_t seg = info_.GetSegment(i);
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[seg]);
         float itemHeight = GetUserDefHeight(sections_, seg, i);

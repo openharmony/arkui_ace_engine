@@ -513,16 +513,20 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     auto customTitleRow = GetCustomTitleRow();
     CHECK_NULL_VOID(customTitleRow);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
-    CHECK_NULL_VOID(customTitleLayoutProperty);
     auto containerModalLayoutProperty = GetHost()->GetLayoutProperty();
+    auto gestureRow = GetGestureRow();
+    CHECK_NULL_VOID(gestureRow);
+    auto gestureRowProp = gestureRow->GetLayoutProperty();
     PaddingProperty padding;
     if (customTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        gestureRowProp->UpdateVisibility(VisibleType::VISIBLE);
     } else if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN &&
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY && customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        gestureRowProp->UpdateVisibility(VisibleType::GONE);
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
             CalcLength(CONTENT_PADDING) };
     }
@@ -541,11 +545,6 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     auto buttonsRow = GetControlButtonRow();
     CHECK_NULL_VOID(buttonsRow);
     buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
-    auto gestureRow = GetGestureRow();
-    CHECK_NULL_VOID(gestureRow);
-    auto gestureRowProp = gestureRow->GetLayoutProperty();
-    auto customVisible = customTitleLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
-    gestureRowProp->UpdateVisibility(customVisible == VisibleType::VISIBLE ? VisibleType::GONE : VisibleType::VISIBLE);
 }
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
@@ -556,8 +555,6 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
     titleHeight_ = Dimension(Dimension(height, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
     auto customTitleRow = GetCustomTitleRow();
     UpdateRowHeight(customTitleRow, titleHeight_);
-    auto floatingTitleRow = GetFloatingTitleRow();
-    UpdateRowHeight(floatingTitleRow, titleHeight_);
     auto controlButtonsRow = GetControlButtonRow();
     UpdateRowHeight(controlButtonsRow, titleHeight_);
     auto gestureRow = GetGestureRow();
