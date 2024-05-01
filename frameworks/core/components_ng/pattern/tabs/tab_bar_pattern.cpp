@@ -71,6 +71,7 @@ constexpr float FULL_OPACITY = 1.0f;
 constexpr float NEAR_FULL_OPACITY = 0.99f;
 constexpr float NO_OPACITY = 0.0f;
 constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
+constexpr int8_t HALF_OF_WIDTH = 2;
 
 constexpr double BIG_FONT_SIZE_SCALE = 1.75f;
 constexpr double LARGE_FONT_SIZE_SCALE = 2.0f;
@@ -2058,41 +2059,55 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
         indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
         return nullptr;
     }
-    Color bgColor;
-    auto tabBarNode = GetHost();
-    CHECK_NULL_RETURN(tabBarNode, nullptr);
-    auto tabBarCtx = tabBarNode->GetRenderContext();
-    CHECK_NULL_RETURN(tabBarCtx, nullptr);
-    if (tabBarCtx->GetBackgroundColor()) {
-        bgColor = *tabBarCtx->GetBackgroundColor();
-    } else {
-        auto tabsNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetParent());
-        CHECK_NULL_RETURN(tabsNode, nullptr);
-        auto tabsCtx = tabsNode->GetRenderContext();
-        CHECK_NULL_RETURN(tabsCtx, nullptr);
-        if (tabsCtx->GetBackgroundColor()) {
-            bgColor = *tabsCtx->GetBackgroundColor();
-        } else {
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_RETURN(pipeline, nullptr);
-            auto tabTheme = pipeline->GetTheme<TabTheme>();
-            CHECK_NULL_RETURN(tabTheme, nullptr);
-            bgColor = tabTheme->GetBackgroundColor().ChangeAlpha(0xff);
-        }
-    }
 
     if (!tabBarModifier_) {
         tabBarModifier_ = AceType::MakeRefPtr<TabBarModifier>();
     }
 
+    Color bgColor = GetTabBarBackgroundColor();
+    RectF tabBarItemRect;
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    if (paintProperty) {
+        RectF rect;
+        tabBarItemRect = paintProperty->GetIndicator().value_or(rect);
+    }
     IndicatorStyle indicatorStyle;
-    GetIndicatorStyle(indicatorStyle);
-
+    OffsetF indicatorOffset = { currentIndicatorOffset_, tabBarItemRect.GetY() };
+    GetIndicatorStyle(indicatorStyle, indicatorOffset);
+    indicatorOffset.AddX(-indicatorStyle.width.ConvertToPx() / HALF_OF_WIDTH);
+    auto hasIndicator = selectedModes_[indicator_] == SelectedMode::INDICATOR && !NearZero(tabBarItemRect.Height());
     return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, bgColor, indicatorStyle,
-        currentIndicatorOffset_, selectedModes_[indicator_]);
+        indicatorOffset, hasIndicator);
 }
 
-void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
+Color TabBarPattern::GetTabBarBackgroundColor() const
+{
+    Color bgColor = Color::WHITE;
+    auto tabBarNode = GetHost();
+    CHECK_NULL_RETURN(tabBarNode, bgColor);
+    auto tabBarCtx = tabBarNode->GetRenderContext();
+    CHECK_NULL_RETURN(tabBarCtx, bgColor);
+    if (tabBarCtx->GetBackgroundColor()) {
+        bgColor = *tabBarCtx->GetBackgroundColor();
+    } else {
+        auto tabsNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetParent());
+        CHECK_NULL_RETURN(tabsNode, bgColor);
+        auto tabsCtx = tabsNode->GetRenderContext();
+        CHECK_NULL_RETURN(tabsCtx, bgColor);
+        if (tabsCtx->GetBackgroundColor()) {
+            bgColor = *tabsCtx->GetBackgroundColor();
+        } else {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_RETURN(pipeline, bgColor);
+            auto tabTheme = pipeline->GetTheme<TabTheme>();
+            CHECK_NULL_RETURN(tabTheme, bgColor);
+            bgColor = tabTheme->GetBackgroundColor().ChangeAlpha(0xff);
+        }
+    }
+    return bgColor;
+}
+
+void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset)
 {
     if (indicator_ < 0 || indicator_ >= static_cast<int32_t>(indicatorStyles_.size())) {
         return;
@@ -2137,14 +2152,14 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
     }
 
     indicatorStyle = indicatorStyles_[swiperStartIndex_];
-
+    auto startItemRect = layoutProperty->GetIndicatorRect(swiperStartIndex_);
     if (NonPositive(indicatorStyle.width.Value())) {
-        indicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(swiperStartIndex_).Width());
+        indicatorStyle.width = Dimension(startItemRect.Width());
     }
-
     IndicatorStyle nextIndicatorStyle = indicatorStyles_[nextIndex];
+    auto nextItemRect = layoutProperty->GetIndicatorRect(nextIndex);
     if (NonPositive(nextIndicatorStyle.width.Value())) {
-        nextIndicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(nextIndex).Width());
+        nextIndicatorStyle.width = Dimension(nextItemRect.Width());
     }
     indicatorStyle.width =
         Dimension(indicatorStyle.width.ConvertToPx() +
@@ -2158,6 +2173,7 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
     LinearColor color = LinearColor(indicatorStyle.color) +
                         (LinearColor(nextIndicatorStyle.color) - LinearColor(indicatorStyle.color)) * turnPageRate_;
     indicatorStyle.color = color.ToColor();
+    indicatorOffset.SetY(startItemRect.GetY() + (nextItemRect.GetY() - startItemRect.GetY()) * turnPageRate_);
 }
 
 float TabBarPattern::GetSpace(int32_t indicator)
