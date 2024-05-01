@@ -510,7 +510,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     return true;
 }
 
-void TextFieldPattern::HandleContentSizeChange(RectF textRect)
+void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
 {
     if (textRect_ == textRect) {
         return;
