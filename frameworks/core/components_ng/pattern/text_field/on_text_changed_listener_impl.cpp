@@ -27,8 +27,6 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-constexpr uint32_t NO_ERROR = 0;
-constexpr uint32_t ERROR_NULL_POINTER = 1;
 const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
 const std::string AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
 const std::string AUTO_FILL_PARAMS_OTHERACCOUNT = "com.autofill.params.otherAccount";
