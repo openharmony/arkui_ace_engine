@@ -1436,7 +1436,7 @@ HWTEST_F(GridIrregularLayoutTest, DeleteItem001, TestSize.Level1)
         frameNode_->RemoveChildAtIndex(3);
     }
     frameNode_->ChildrenUpdatedFrom(3);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startMainLineIndex_, 3);
     EXPECT_EQ(info.endMainLineIndex_, 4);
@@ -1447,7 +1447,7 @@ HWTEST_F(GridIrregularLayoutTest, DeleteItem001, TestSize.Level1)
 
     frameNode_->RemoveChildAtIndex(2);
     frameNode_->ChildrenUpdatedFrom(2);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startMainLineIndex_, 3);
     EXPECT_EQ(info.endMainLineIndex_, 3);
