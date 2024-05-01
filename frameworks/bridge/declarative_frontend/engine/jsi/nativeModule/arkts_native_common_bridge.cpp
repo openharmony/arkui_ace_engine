@@ -3280,9 +3280,9 @@ ArkUINativeModuleValue CommonBridge::SetMotionBlur(ArkUIRuntimeCallInfo *runtime
     Local<JSValueRef> xArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> yArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CalcDimension radius;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) || LessNotEqual(radius.Value(), 0.0f)) {
-        radius.SetValue(0.0f);
+    double radius = 0.0;
+    if (!ArkTSUtils::ParseJsDouble(vm, radiusArg, radius) || LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
     }
     double x = 0.0;
     double y = 0.0;
@@ -3294,8 +3294,7 @@ ArkUINativeModuleValue CommonBridge::SetMotionBlur(ArkUIRuntimeCallInfo *runtime
     }
     x = std::clamp(x, 0.0, 1.0);
     y = std::clamp(y, 0.0, 1.0);
-    GetArkUINodeModifiers()->getCommonModifier()->setMotionBlur(nativeNode,
-        static_cast<ArkUI_Float32>(radius.Value()), x, y);
+    GetArkUINodeModifiers()->getCommonModifier()->setMotionBlur(nativeNode, radius, x, y);
     return panda::JSValueRef::Undefined(vm);
 }
 

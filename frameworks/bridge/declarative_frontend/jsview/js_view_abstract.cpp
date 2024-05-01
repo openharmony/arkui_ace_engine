@@ -4391,9 +4391,9 @@ void JSViewAbstract::JsMotionBlur(const JSCallbackInfo& info)
         ParseJsDouble(jsAnchorObj->GetProperty("x"), x);
         ParseJsDouble(jsAnchorObj->GetProperty("y"), y);
     }
-    CalcDimension radius;
-    if (!ParseJsDimensionVp(jsObj->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
-        radius.SetValue(0.0f);
+    double radius = 0.0;
+    if (!ParseJsDouble(jsObj->GetProperty("radius"), radius) || LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
     }
     if (LessNotEqual(x, 0.0)) {
         x = 0.0;
