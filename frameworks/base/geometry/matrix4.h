@@ -43,11 +43,15 @@ public:
     static Matrix4 CreateSkew(double x, double y);
     // Multiplies this matrix by another that skew through shear factors.
     static Matrix4 CreateFactorSkew(double x, double y);
+    // Multiplies this matrix by another that perspective through axis factors.
+    static Matrix4 CreateFactorPerspective(double x, double y);
     // Create an perspective matrix, the distance value represents the distance between the user and the z=0 plane. not
     // support percent
     static Matrix4 CreatePerspective(double distance);
     // Returns the inverse of this matrix. Returns the identity if this matrix cannot be inverted;
     static Matrix4 Invert(const Matrix4& matrix);
+    // Returns the matrix by quaternion;
+    static Matrix4 QuaternionToMatrix(double x, double y, double z, double w);
 
     Matrix4();
     Matrix4(const Matrix4& matrix);

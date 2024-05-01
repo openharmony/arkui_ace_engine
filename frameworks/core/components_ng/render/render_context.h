@@ -320,6 +320,8 @@ public:
 
     virtual void GetPointTransform(PointF& point) {}
 
+    virtual void GetPointTransformRotate(PointF& point) {}
+
     virtual RectF GetPaintRectWithoutTransform()
     {
         return {};

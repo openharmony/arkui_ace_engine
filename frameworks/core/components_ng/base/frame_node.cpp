@@ -2408,7 +2408,7 @@ OffsetF FrameNode::GetPositionToParentWithTransform() const
     CHECK_NULL_RETURN(context, OffsetF());
     auto offset = context->GetPaintRectWithoutTransform().GetOffset();
     PointF pointTmp(offset.GetX(), offset.GetY());
-    context->GetPointTransform(pointTmp);
+    context->GetPointTransformRotate(pointTmp);
     offset.SetX(pointTmp.GetX());
     offset.SetY(pointTmp.GetY());
     return offset;
@@ -2430,13 +2430,13 @@ OffsetF FrameNode::GetPositionToWindowWithTransform() const
     CHECK_NULL_RETURN(context, OffsetF());
     auto offset = context->GetPaintRectWithoutTransform().GetOffset();
     PointF pointNode(offset.GetX(), offset.GetY());
-    context->GetPointTransform(pointNode);
+    context->GetPointTransformRotate(pointNode);
     auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         offset = parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
         PointF pointTmp(offset.GetX() + pointNode.GetX(), offset.GetY() + pointNode.GetY());
-        parentRenderContext->GetPointTransform(pointTmp);
+        parentRenderContext->GetPointTransformRotate(pointTmp);
         pointNode.SetX(pointTmp.GetX());
         pointNode.SetY(pointTmp.GetY());
         parent = parent->GetAncestorNodeOfFrame(true);
