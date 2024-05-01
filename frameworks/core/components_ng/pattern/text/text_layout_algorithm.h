@@ -117,7 +117,6 @@ private:
 
     std::optional<TextStyle> textStyle_;
     RefPtr<PropertyBool> showSelect_;
-    bool isSpanStringMode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
