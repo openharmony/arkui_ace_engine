@@ -29,6 +29,7 @@
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
@@ -4558,6 +4559,32 @@ void ResetButtonLabel(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonLabel(node->uiNodeHandle);
+}
+
+int32_t SetButtonType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (LessNotEqual(actualSize, 0) ||
+        !InRegion(ARKUI_BUTTON_TYPE_NORMAL, ARKUI_BUTTON_TYPE_CIRCLE, item->value[NUM_0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getButtonModifier()->setButtonType(node->uiNodeHandle, item->value[NUM_0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetButtonType(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getButtonModifier()->getButtonType(node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
+void ResetButtonType(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonType(node->uiNodeHandle);
 }
 
 int32_t SetProgressValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -9097,6 +9124,35 @@ void ResetSliderStyle(ArkUI_NodeHandle node)
     GetFullImpl()->getNodeModifiers()->getSliderModifier()->resetSliderStyle(node->uiNodeHandle);
 }
 
+int32_t SetSliderTrackThickness(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (LessNotEqual(actualSize, 0) || LessOrEqual(item->value[NUM_0].f32, 0.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getSliderModifier()->setThickness(
+        node->uiNodeHandle, item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP));
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetSliderTrackThickness(ArkUI_NodeHandle node)
+{
+    auto modifier = GetFullImpl()->getNodeModifiers()->getSliderModifier();
+    g_numberValues[0].f32 = modifier->getThickness(node->uiNodeHandle, GetDefaultUnit(node, UNIT_VP));
+    if (LessOrEqual(g_numberValues[0].f32, 0.0f)) {
+        return nullptr;
+    }
+    return &g_attributeItem;
+}
+
+void ResetSliderTrackThickness(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getSliderModifier()->resetThickness(node->uiNodeHandle);
+}
+
 int32_t SetRefreshRefreshing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
@@ -9954,7 +10010,7 @@ void ResetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetButtonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
-    static Setter* setters[] = { SetButtonLabel };
+    static Setter* setters[] = { SetButtonLabel, SetButtonType };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "button node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -9964,7 +10020,7 @@ int32_t SetButtonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
 
 const ArkUI_AttributeItem* GetButtonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetButtonLabel };
+    static Getter* getters[] = { GetButtonLabel, GetButtonType };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "button node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -9975,7 +10031,7 @@ const ArkUI_AttributeItem* GetButtonAttribute(ArkUI_NodeHandle node, int32_t sub
 
 void ResetButtonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetButtonLabel };
+    static Resetter* resetters[] = { ResetButtonLabel, ResetButtonType };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "button node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -10234,6 +10290,7 @@ int32_t SetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetSliderDirection,
         SetSliderReverse,
         SetSliderStyle,
+        SetSliderTrackThickness,
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -10257,6 +10314,7 @@ const ArkUI_AttributeItem* GetSliderAttribute(ArkUI_NodeHandle node, int32_t sub
         GetSliderDirection,
         GetSliderReverse,
         GetSliderStyle,
+        GetSliderTrackThickness,
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -10281,6 +10339,7 @@ void ResetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetSliderDirection,
         ResetSliderReverse,
         ResetSliderStyle,
+        ResetSliderTrackThickness,
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);

@@ -147,6 +147,13 @@ void addGestureToGestureGroup(ArkUIGesture* group, ArkUIGesture* child)
     gestureGroup->AddGesture(AceType::Claim(childGesture));
 }
 
+void removeGestureFromGestureGroup(ArkUIGesture* group, ArkUIGesture* child)
+{
+    auto* gestureGroup = reinterpret_cast<GestureGroup*>(group);
+    auto* childGesture = reinterpret_cast<Gesture*>(child);
+    gestureGroup->RemoveGesture(AceType::Claim(childGesture));
+}
+
 void dispose(ArkUIGesture* recognizer)
 {
     Gesture* gestureRef = reinterpret_cast<Gesture*>(recognizer);
@@ -361,6 +368,7 @@ const ArkUIGestureModifier* GetGestureModifier()
         createSwipeGestureByModifier,
         createGestureGroup,
         addGestureToGestureGroup,
+        removeGestureFromGestureGroup,
         dispose,
         registerGestureEvent,
         addGestureToNode,

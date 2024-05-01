@@ -580,6 +580,13 @@ ArkUI_CharPtr GetSliderBlockShape(ArkUINodeHandle node, ArkUI_Float32* value)
     }
     return nullptr;
 }
+
+ArkUI_Float32 GetThickness(ArkUINodeHandle node, int unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return SliderModelNG::GetThickness(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
+}
 } // namespace SliderModifier
 
 namespace NodeModifier {
@@ -644,7 +651,8 @@ const ArkUISliderModifier* GetSliderModifier()
         SliderModifier::GetReverse,
         SliderModifier::GetSliderStyle,
         SliderModifier::GetBlockImageValue,
-        SliderModifier::GetSliderBlockShape
+        SliderModifier::GetSliderBlockShape,
+        SliderModifier::GetThickness,
     };
 
     return &modifier;
