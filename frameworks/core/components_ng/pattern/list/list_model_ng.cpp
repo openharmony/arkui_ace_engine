@@ -695,6 +695,27 @@ void ListModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onSc
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
+void ListModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment));
+}
+
+void ListModelNG::SetScrollBy(FrameNode* frameNode, double x, double y)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->StopAnimate();
+    auto offset = pattern->GetAxis() == Axis::VERTICAL ? y : x;
+    if (NearZero(offset)) {
+        return;
+    }
+    pattern->UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
+}
+
 RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

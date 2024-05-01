@@ -538,6 +538,20 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return ListModelNG::GetCachedCount(frameNode);
 }
 
+void SetScrollToIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetScrollToIndex(frameNode, index, animation, alignment);
+}
+
+void SetScrollBy(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetScrollBy(frameNode, x, y);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -554,7 +568,7 @@ const ArkUIListModifier* GetListModifier()
         ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset,
         SetContentEndOffset, ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions,
         ResetChainAnimationOptions, GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge,
-        SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, GetCachedCount };
+        SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy };
     return &modifier;
 }
 

@@ -3709,6 +3709,27 @@ typedef enum {
     NODE_SCROLL_ENABLE_PAGING,
 
     /**
+     * @brief Scroll to the next or previous page.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32 Indicates whether to scroll to next page. Value 1 indicates scroll to next page and value 0
+     * indicates scroll to previous page. \n
+     * .value[1]?.i32 Indicates whether to enable animation. Value 1 indicates enable and 0 indicates disable. \n
+     *
+     */
+    NODE_SCROLL_PAGE,
+
+    /**
+     * @brief Scroll a specified distance.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32：Horizontal scrolling distance in vp; \n
+     * .value[1].f32: Vertical scrolling distance in vp; \n
+     *
+     */
+    NODE_SCROLL_BY,
+
+    /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
      * obtained as required through APIs.
      *
@@ -3766,6 +3787,22 @@ typedef enum {
     * .value[0].i32: number of cached items in the list adapter. \n
     */
     NODE_LIST_CACHED_COUNT,
+
+    /**
+     * @brief Scroll to the specified index.
+     * 
+     * When activating the smooth animation, all items passed through will be loaded and layout calculated, which can
+     * lead to performance issues when loading a large number of items.\n
+     * \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32：The index value of the target element to be slid to in the current container.\n
+     * .value[1]?.i32：Set whether there is an action when sliding to the index value of a list item in the list, where
+     * 1 indicates an action and 0 indicates no action. Default value: 0。\n
+     * .value[2]?.i32：Specify the alignment of the sliding element with the current container,The parameter type is
+     * {@link ArkUI_ScrollAlignment}, default value is ARKUI_SCROLL_ALIGNMENT_START. \n
+     *
+     */
+    NODE_LIST_SCROLL_TO_INDEX,
 
     /**
     * @brief 设置List交叉轴方向宽度大于ListItem交叉轴宽度 * lanes时，
@@ -3981,6 +4018,30 @@ typedef enum {
     * .value[0].i32: number of cached items in the swiper adapter. \n
     */
     NODE_SWIPER_CACHED_COUNT,
+
+    /**
+    * @brief Set the nested scrolling mode for the Swiper component and parent component.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32：Nested scrolling patterns for Swiper components and parent components. The parameter type is
+    * {@link ArkUI_SwiperNestedScrollMode} \n
+    * The default value is <b>ARKUI_SWIPER_NESTED_SRCOLL_SELF_ONLY<b> \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32：Nested scrolling patterns for Swiper components and parent components. The parameter type is
+    * {@link ArkUI_SwiperNestedScrollMode} \n
+    */
+    NODE_SWIPER_NESTED_SCROLL,
+
+    /**
+    * @brief Set the switcher component to flip to the specified page.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32：Specify the index value of the page in Swiper.\n
+    * .value[1]?.i32：Set whether there is an animation effect when flipping to the specified page. 1 indicates active
+    * effect, 0 indicates no active effect, default value is 0。\n
+    */
+    NODE_SWIPER_SWIPE_TO_INDEX,
 
     /**
      * @brief Defines the header of the list item group.
@@ -4254,6 +4315,22 @@ typedef enum {
     *
     */
     NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE,
+
+    /**
+     * @brief Scroll to the specified index.
+     * 
+     * When activating the smooth animation, all items passed through will be loaded and layout calculated, which can
+     * lead to performance issues when loading a large number of items.\n
+     * \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32：The index value of the target element to be slid to in the current container.\n
+     * .value[1]?.i32：Set whether there is an action when sliding to the index value of a list item in the list, where
+     * 1 indicates an action and 0 indicates no action. Default value is 0。\n
+     * .value[2]?.i32：Specify the alignment of the sliding element with the current container，The parameter type is
+     * {@link ArkUI_ScrollAlignment}. Default value is </b>ARKUI_SCROLL_ALIGNMENT_START</b>。\n
+     *
+     */
+    NODE_WATER_FLOW_SCROLL_TO_INDEX,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -4813,6 +4890,47 @@ typedef enum {
      * needs to scroll based on the real-world situation and return the result in this parameter. \n
      */
     NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN,
+
+
+    /**
+     * @brief Define the enumeration value of the pre sliding trigger event for the scrolling container component.
+     *
+     * The conditions that trigger this event: \n
+     * 1. When the scrolling component triggers scrolling, it supports input settings such as keyboard and mouse
+     * operations that trigger scrolling.\n
+     * 2. Called through the rolling controller API interface.\n
+     * 3. Cross boundary rebound.\n
+     * When an event callback occurs, the union type in the event parameter {@ link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains three parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: The offset for each frame of scrolling is positive when scrolling to
+     * the left and negative when scrolling to the right, measured in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: The offset of each frame scrolling, with a positive offset when
+     * scrolling up and a negative offset when scrolling down, measured in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: Current sliding state, parameter type is
+     * {@link ArkUI_ScrollState}.\n
+     */
+    NODE_SCROLL_EVENT_ON_WILL_SCROLL,
+
+    /**
+     * @brief Define the event enumeration value triggered when sliding a scrolling container component.
+     *
+     * The conditions that trigger this event: \n
+     * 1. When the scrolling component triggers scrolling, it supports input settings such as keyboard and mouse
+     * operations that trigger scrolling.\n
+     * 2. Called through the rolling controller API interface.\n
+     * 3. Cross boundary rebound.\n
+     * When an event callback occurs, the union type in the event parameter {@ link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains three parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: The offset for each frame of scrolling is positive when scrolling to
+     * the left and negative when scrolling to the right, measured in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: The offset of each frame scrolling, with a positive offset when
+     * scrolling up and a negative offset when scrolling down, measured in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: Current sliding state, parameter type is
+     * {@link ArkUI_ScrollState}.\n
+     */
+    NODE_SCROLL_EVENT_ON_DID_SCROLL,
     /**
      * @brief Defines the event triggered when scrolling starts in the <b>ARKUI_NODE_SCROLL</b> component.
      *
