@@ -468,9 +468,9 @@ void WaterFlowSWLayout::AdjustOverScroll()
     float maxEnd = info_->EndPos();
     float minStart = info_->StartPos();
 
-    if (LessNotEqual(maxEnd, mainLen_) && info_->footerIndex_ == 0) {
-        float footerMainLen = WaterFlowLayoutUtils::MeasureFooter(wrapper_, axis_);
-        maxEnd += mainGap_ + footerMainLen;
+    if (LessOrEqual(maxEnd, mainLen_) && info_->footerIndex_ == 0) {
+        info_->footerHeight_ = WaterFlowLayoutUtils::MeasureFooter(wrapper_, axis_);
+        maxEnd += info_->footerHeight_;
     }
 
     if (overScroll_) {
@@ -506,7 +506,7 @@ void WaterFlowSWLayout::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
     auto footer = wrapper_->GetOrCreateChildByIndex(0);
     float mainPos = endPos + mainGap_;
     if (reverse) {
-        mainPos = mainLen_ - footer->GetGeometryNode()->GetMarginFrameSize().MainSize(axis_) - mainPos;
+        mainPos = mainLen_ - info_->footerHeight_ - mainPos;
     }
     footer->GetGeometryNode()->SetMarginFrameOffset(
         (axis_ == Axis::VERTICAL) ? OffsetF(0.0f, mainPos) + paddingOffset : OffsetF(mainPos, 0.0f) + paddingOffset);

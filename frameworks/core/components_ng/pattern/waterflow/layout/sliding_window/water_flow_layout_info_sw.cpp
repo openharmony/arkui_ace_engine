@@ -33,8 +33,11 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, float mainGap)
 
     itemStart_ = startIndex_ == 0 && NonNegative(DistanceToTop(0, mainGap_));
     itemEnd_ = endIndex_ == itemCnt - 1;
-    offsetEnd_ = itemEnd_ && std::all_of(lanes_.begin(), lanes_.end(),
-                                 [mainSize](const Lane& lane) { return LessOrEqual(lane.endPos, mainSize); });
+    if (!itemEnd_) {
+        footerHeight_ = 0.0f;
+    }
+    offsetEnd_ = itemEnd_ && LessOrEqual(EndPos() + footerHeight_, mainSize);
+
     synced_ = true;
 }
 
@@ -160,7 +163,7 @@ bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos) const
         return false;
     }
     float prevEndPos = EndPos() - (totalOffset_ - prevPos);
-    return GreatNotEqual(prevEndPos, lastMainSize_);
+    return GreatNotEqual(prevEndPos + footerHeight_, lastMainSize_);
 }
 
 float WaterFlowLayoutInfoSW::GetContentHeight() const
