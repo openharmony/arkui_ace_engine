@@ -401,6 +401,15 @@ public:
         return bottomTabBarStyles_[position];
     }
 
+    LabelStyle GetBottomTabLabelStyle(uint32_t position) const
+    {
+        if (position < 0 || position >= labelStyles_.size()) {
+            LabelStyle labelStyle{};
+            return labelStyle;
+        }
+        return labelStyles_[position];
+    }
+
     void DumpAdvanceInfo() override;
 
     std::optional<int32_t> GetAnimationDuration();

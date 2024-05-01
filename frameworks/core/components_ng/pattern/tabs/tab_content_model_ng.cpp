@@ -314,9 +314,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         textLayoutProperty->UpdateFontSize(tabTheme->GetSubTabTextDefaultFontSize());
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     }
-    if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE && bottomTabBarStyle.layoutMode == LayoutMode::HORIZONTAL) {
-        textLayoutProperty->UpdateTextAlign(TextAlign::LEFT);
-    }
     if (!isFrameNode) {
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -332,6 +329,13 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     } else if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE && !isFrameNode) {
         textLayoutProperty->UpdateFontWeight(myIndex == indicator ? FontWeight::MEDIUM : FontWeight::NORMAL);
+    }
+    if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE && bottomTabBarStyle.layoutMode == LayoutMode::HORIZONTAL) {
+        textLayoutProperty->UpdateTextAlign(TextAlign::LEFT);
+        if (!labelStyle.fontSize.has_value() &&
+            Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            textLayoutProperty->UpdateFontSize(tabTheme->GetBottomTabHorizontalTextSize());
+        }
     }
     if (!isFrameNode) {
         UpdateLabelStyle(labelStyle, textLayoutProperty);
