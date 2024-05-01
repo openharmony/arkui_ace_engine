@@ -627,11 +627,13 @@ std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
 
 void TextLayoutAlgorithm::UpdateSensitiveContent(std::string& content)
 {
+    auto wContent = StringUtils::ToWstring(content);
     std::replace_if(
-        content.begin(), content.end(),
-        [](char c) {
-            return c != '\n';
-        }, '-');
+        wContent.begin(), wContent.end(),
+        [](wchar_t ch) {
+            return ch != L'\n';
+        }, L'-');
+    content = StringUtils::ToString(wContent);
 }
 
 size_t TextLayoutAlgorithm::GetLineCount() const
