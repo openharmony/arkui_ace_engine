@@ -1384,6 +1384,7 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void HandleCountStyle();
     void HandleDeleteOnCounterScene();
+    void HandleContentSizeChange();
 
     void UpdatePreviewIndex(int32_t start, int32_t end)
     {

@@ -464,6 +464,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         needToRefreshSelectOverlay_ = false;
     }
     paragraphWidth_ = paragraphWidth;
+    HandleContentSizeChange(textRect);
     textRect_ = textRect;
 
     if (textFieldContentModifier_) {
@@ -507,6 +508,24 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         }
     }
     return true;
+}
+
+void TextFieldPattern::HandleContentSizeChange(RectF textRect)
+{
+    if (textRect_ == textRect) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (eventHub->GetOnContentSizeChange()) {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterLayoutTask([textRect, eventHub]() {
+            eventHub->FireOnContentSizeChange(textRect.Width(), textRect.Height());
+        });
+    }
 }
 
 void TextFieldPattern::ProcessOverlayAfterLayout(bool isGlobalAreaChanged)
@@ -1476,7 +1495,6 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnChange(text);
-    eventHub->FireOnContentSizeChange(textRect_.Width(), textRect_.Height());
 }
 
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -2474,7 +2492,6 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
     eventHub->FireOnChange(contentController_->GetTextValue());
-    eventHub->FireOnContentSizeChange(textRect_.Width(), textRect_.Height());
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();

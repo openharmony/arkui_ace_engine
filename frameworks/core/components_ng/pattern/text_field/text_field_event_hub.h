@@ -142,10 +142,14 @@ public:
         onContentSizeChange_ = std::move(func);
     }
 
+    const std::function<void(float, float)>& GetOnContentSizeChange() const
+    {
+        return onContentSizeChange_;
+    }
+
     void FireOnContentSizeChange(float width, float height)
     {
         if (onContentSizeChange_) {
-            LOGI("On Content Size Change width %{private}f, height %{private}f", width, height);
             onContentSizeChange_(width, height);
         }
     }

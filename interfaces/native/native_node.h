@@ -5761,6 +5761,14 @@ typedef struct {
      * @return Returns <b>0</b> if the operation is successful; returns <b>401</b> if a parameter error occurs.
      */
     int32_t (*setLengthMetricUnit)(ArkUI_NodeHandle node, ArkUI_LengthMetricUnit unit);
+
+     /**
+     * @brief 获取父节点。
+     *
+     * @param node 目标节点对象。
+     * @return 返回组件的指针，如果没有返回NULL
+     */
+    ArkUI_NodeHandle (*getParent)(ArkUI_NodeHandle node);
 } ArkUI_NativeNodeAPI_1;
 
 /**

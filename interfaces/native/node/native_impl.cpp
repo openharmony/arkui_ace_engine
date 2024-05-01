@@ -88,6 +88,7 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     nullptr,
     nullptr,
     OHOS::Ace::NodeModel::SetLengthMetricUnit,
+    OHOS::Ace::NodeModel::GetParent,
 };
 
 ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
