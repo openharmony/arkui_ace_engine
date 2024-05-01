@@ -59,14 +59,12 @@ void SvgGraphic::UpdateGradient(const Size& viewPort)
     if (gradient->GetType() == GradientType::LINEAR) {
         const auto& linearGradient = gradient->GetLinearGradient();
         auto gradientInfo = LinearGradientInfo();
-        auto x1 = linearGradient.x1 ? ConvertDimensionToPx(linearGradient.x1.value(), width) : 0.0;
-        gradientInfo.x1 = x1 + bounds.Left();
-        auto y1 = linearGradient.y1 ? ConvertDimensionToPx(linearGradient.y1.value(), height) : 0.0;
-        gradientInfo.y1 = y1 + bounds.Top();
-        auto x2 = ConvertDimensionToPx((linearGradient.x2 ? linearGradient.x2.value() : 1.0_pct), width);
-        gradientInfo.x2 = x2 + bounds.Left();
-        auto y2 = linearGradient.y2 ? ConvertDimensionToPx(linearGradient.y2.value(), height) : 0.0;
-        gradientInfo.y2 = y2 + bounds.Top();
+        gradientInfo.x1 = linearGradient.x1 ? ConvertDimensionToPx(linearGradient.x1.value(), width) : 0.0;
+        gradientInfo.y1 = linearGradient.y1 ? ConvertDimensionToPx(linearGradient.y1.value(), height) : 0.0;
+        gradientInfo.x2 = linearGradient.y1
+                              ? ConvertDimensionToPx((linearGradient.x2 ? linearGradient.x2.value() : 1.0_pct), width)
+                              : 0.0;
+        gradientInfo.y2 = linearGradient.y2 ? ConvertDimensionToPx(linearGradient.y2.value(), height) : 0.0;
         gradient->SetLinearGradientInfo(gradientInfo);
     }
     if (gradient->GetType() == GradientType::RADIAL) {
