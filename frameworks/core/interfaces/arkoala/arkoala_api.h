@@ -588,6 +588,7 @@ enum ArkUIEventSubKind {
     ON_GESTURE = 10,
     ON_FOCUS = 11,
     ON_TOUCH_INTERCEPT = 12,
+    ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
     ON_IMAGE_SVG_PLAY_FINISH,
@@ -612,6 +613,8 @@ enum ArkUIEventSubKind {
     ON_TEXT_INPUT_CUT,
     ON_TEXT_INPUT_PASTE,
     ON_TEXT_INPUT_TEXT_SELECTION_CHANGE,
+    ON_TEXT_INPUT_INPUT_FILTER_ERROR,
+    ON_TEXT_INPUT_CONTENT_SCROLL,
 
     ON_TEXTAREA_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXTAREA,
     ON_TEXTAREA_SUBMIT,
@@ -619,6 +622,8 @@ enum ArkUIEventSubKind {
     ON_TEXTAREA_PASTE,
     ON_TEXTAREA_TEXT_SELECTION_CHANGE,
     ON_TEXTAREA_ON_SUBMIT,
+    ON_TEXT_AREA_INPUT_FILTER_ERROR,
+    ON_TEXT_AREA_CONTENT_SCROLL,
 
     ON_SWIPER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SWIPER,
     ON_SWIPER_ANIMATION_START,
@@ -1451,6 +1456,10 @@ struct ArkUITextModifier {
     ArkUI_Float32 (*getTextLineSpacing)(ArkUINodeHandle node);
     void (*resetTextLineSpacing)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextFontFeature)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getEnableDataDetector)(ArkUINodeHandle node);
+    void (*setTextDataDetectorConfig)(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size);
+    ArkUI_Int32 (*getTextDataDetectorConfig)(ArkUINodeHandle node, ArkUI_Int32* values);
+    void (*resetTextDataDetectorConfig)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2296,7 +2305,7 @@ struct ArkUITextInputModifier {
     void (*setTextInputBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetTextInputBackgroundColor)(ArkUINodeHandle node);
     void (*setTextInputNormalUnderlineColor)(ArkUINodeHandle node, ArkUI_Uint32 typingColor);
-    void (*setTextInputUserUnderlineColor)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 length);
+    void (*setTextInputUserUnderlineColor)(ArkUINodeHandle node, const ArkUI_Uint32* values, ArkUI_Int32 length);
     void (*resetTextInputUserUnderlineColor)(ArkUINodeHandle node);
     void (*setTextInputTextSelection)(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end);
     ArkUI_Int32 (*getTextInputTextSelectionIndex)(ArkUINodeHandle node, ArkUI_Bool isEnd);
@@ -2355,6 +2364,22 @@ struct ArkUITextInputModifier {
     void (*setTextInputShowPassword)(ArkUINodeHandle node, ArkUI_Uint32 showPassword);
     void (*resetTextInputShowPassword)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextInputShowPassword)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputWordBreak)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputEnableAutoFill)(ArkUINodeHandle node);
+    void (*setTextInputContentType)(ArkUINodeHandle node, ArkUI_Uint32 contentType);
+    void (*resetTextInputContentType)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputContentType)(ArkUINodeHandle node);
+    void (*getTextInputUserUnderlineColor)(ArkUINodeHandle node, ArkUI_Uint32* values);
+    ArkUI_CharPtr (*getTextInputPasswordRules)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputSelectAll)(ArkUINodeHandle node);
+    void (*setTextInputInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr inputFilter);
+    ArkUI_CharPtr (*getTextInputInputFilter)(ArkUINodeHandle node);
+    void (*resetTextInputInputFilter)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputCaretIndex)(ArkUINodeHandle node);
+    void (*getTextInputCaretOffset)(ArkUINodeHandle node, ArkUI_Float32* values);
+    ArkUI_Int32 (*getTextInputStyle)(ArkUINodeHandle node);
+    void (*getTextInputContentRect)(ArkUINodeHandle node, ArkUI_Float32* values);
+    ArkUI_Int32 (*getTextInputContentLinesNum)(ArkUINodeHandle node);
     void (*setBlurOnSubmit)(ArkUINodeHandle node, ArkUI_Bool blurOnSubmit);
     ArkUI_Bool (*getBlurOnSubmit)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputAdaptMinFontSize)(ArkUINodeHandle node);

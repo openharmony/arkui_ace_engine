@@ -930,7 +930,7 @@ ArkUINativeModuleValue TextInputBridge::SetUnderlineColor(ArkUIRuntimeCallInfo* 
             userColor.disable = disableColor;
         }
         uint32_t size = ARG_GROUP_LENGTH;
-        ArkUI_Float32 values[size];
+        ArkUI_Uint32 values[size];
         values[CALL_ARG_0] = userColor.typing->GetValue();
         values[CALL_ARG_1] = userColor.normal->GetValue();
         values[CALL_ARG_2] = userColor.error->GetValue();
