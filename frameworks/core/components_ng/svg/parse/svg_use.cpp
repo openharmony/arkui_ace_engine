@@ -66,7 +66,7 @@ void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Co
         canvas.Translate(useAttr_.x.Value(), useAttr_.y.Value());
     }
     AttributeScope scope(refSvgNode);
-    refSvgNode->InheritAttr(attributes_);
+    refSvgNode->InheritUseAttr(attributes_);
 
     refSvgNode->Draw(canvas, layout, color);
 }

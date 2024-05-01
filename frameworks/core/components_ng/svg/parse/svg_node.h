@@ -79,6 +79,11 @@ public:
         attributes_.Inherit(parent);
     }
 
+    void InheritUseAttr(const SvgBaseAttribute& parent)
+    {
+        attributes_.InheritFromUse(parent);
+    }
+
 #ifndef USE_ROSEN_DRAWING
     virtual SkPath AsPath(const Size& viewPort) const
 #else
