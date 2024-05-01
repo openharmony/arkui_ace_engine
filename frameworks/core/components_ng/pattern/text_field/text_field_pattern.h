@@ -1378,6 +1378,7 @@ private:
     void ProcessScroll();
     void ProcessCounter();
     void HandleParentGlobalOffsetChange();
+    AceAutoFillType GetHintType();
     void SetThemeAttr();
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();

@@ -1189,6 +1189,35 @@ bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
     return true;
 }
 
+AceAutoFillType AceContainer::PlaceHolderToType(const std::string& onePlaceHolder)
+{
+    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+    CHECK_NULL_RETURN(viewDataWrap, AceAutoFillType::ACE_UNSPECIFIED);
+    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
+    CHECK_NULL_RETURN(viewDataWrapOhos, AceAutoFillType::ACE_UNSPECIFIED);
+    std::vector<std::string> placeHolder;
+    std::vector<int> intType;
+    placeHolder.push_back(onePlaceHolder);
+    auto isSuccess = viewDataWrapOhos->LoadHint2Type(placeHolder, intType);
+    if (!isSuccess) {
+        TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "Load Hint2Type Failed !");
+        return AceAutoFillType::ACE_UNSPECIFIED;
+    }
+    if (intType.empty()) {
+        return AceAutoFillType::ACE_UNSPECIFIED;
+    }
+    return static_cast<AceAutoFillType>(viewDataWrapOhos->HintToAutoFillType(intType[0]));
+}
+
+bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
+{
+    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+    CHECK_NULL_RETURN(viewDataWrap, false);
+    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
+    CHECK_NULL_RETURN(viewDataWrapOhos, false);
+    return viewDataWrapOhos->GetPlaceHolderValue(viewData);
+}
+
 bool AceContainer::RequestAutoFill(
     const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord)
 {
@@ -1205,11 +1234,12 @@ bool AceContainer::RequestAutoFill(
     CHECK_NULL_RETURN(viewDataWrap, false);
     auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
     uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
-
+    
     auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
+    ChangeType(viewData);
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isNewPassWord is: %{public}d", isNewPassWord);
     if (isNewPassWord) {
         callback->OnFillRequestSuccess(viewData);

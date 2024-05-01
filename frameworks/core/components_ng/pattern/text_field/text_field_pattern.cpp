@@ -1993,6 +1993,17 @@ bool TextFieldPattern::IsAutoFillPasswordType(const AceAutoFillType& autoFillTyp
            autoFillType == AceAutoFillType::ACE_NEW_PASSWORD);
 }
 
+AceAutoFillType TextFieldPattern::GetHintType()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, AceAutoFillType::ACE_UNSPECIFIED);
+    auto onePlaceHolder = GetPlaceHolder();
+    if (onePlaceHolder.empty()) {
+        return AceAutoFillType::ACE_UNSPECIFIED;
+    }
+    return container->PlaceHolderToType(onePlaceHolder);
+}
+
 bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType, bool isFromKeyBoard)
 {
     if (isFromKeyBoard) {
@@ -2053,10 +2064,10 @@ AceAutoFillType TextFieldPattern::GetAutoFillType()
         if (IsAutoFillPasswordType(aceInputType)) {
             return aceInputType;
         } else {
-            return AceAutoFillType::ACE_UNSPECIFIED;
+            return GetHintType();
         }
     }
-    return AceAutoFillType::ACE_UNSPECIFIED;
+    return GetHintType();
 }
 
 bool TextFieldPattern::CheckAutoFill(bool isFromKeyBoard)

@@ -85,6 +85,11 @@ public:
         return false;
     }
 
+    virtual AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder)
+    {
+        return AceAutoFillType::ACE_UNSPECIFIED;
+    }
+
     // Get the instance id of this container
     virtual int32_t GetInstanceId() const = 0;
 
