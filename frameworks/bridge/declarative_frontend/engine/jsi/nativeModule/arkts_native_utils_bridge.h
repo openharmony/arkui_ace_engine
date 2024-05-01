@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_UTILS_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "core/common/task_runner_adapter_factory.h"
 
 namespace OHOS::Ace::NG {
 struct NativeWeakRef {
@@ -49,17 +50,12 @@ template<typename T>
 void DestructorInterceptor(void* env, void* nativePtr, void* data)
 {
     auto* typePtr = reinterpret_cast<T*>(nativePtr);
-    auto taskExecutor = Container::CurrentTaskExecutor();
+    auto taskExecutor = TaskRunnerAdapterFactory::Create(true, "");
     if (!taskExecutor) {
         delete typePtr;
         return;
     }
-    auto result =
-        taskExecutor->PostTask([typePtr]() { delete typePtr; }, TaskExecutor::TaskType::UI, "DestructorInterceptor");
-    if (result) {
-        return;
-    }
-    delete typePtr;
+    taskExecutor->PostTask([taskExecutor, typePtr]() { delete typePtr; }, "DestructorInterceptor");
 }
 
 template<typename T>
