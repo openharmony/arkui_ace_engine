@@ -32,6 +32,17 @@ public:
     ~OffsetT() = default;
     OffsetT(T x, T y) : x_(x), y_(y) {}
 
+    OffsetT(T crossOffset, T mainOffset, Axis axis)
+    {
+        if (axis == Axis::HORIZONTAL) {
+            x_ = mainOffset;
+            y_ = crossOffset;
+        } else { // Axis::VERTICAL and others
+            x_ = crossOffset;
+            y_ = mainOffset;
+        }
+    }
+
     void Reset()
     {
         x_ = 0;
