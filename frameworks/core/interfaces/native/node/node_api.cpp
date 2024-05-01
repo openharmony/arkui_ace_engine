@@ -268,6 +268,8 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScroll,
     NodeModifier::SetOnScrollFrameBegin,
+    NodeModifier::SetScrollOnWillScroll,
+    NodeModifier::SetScrollOnDidScroll,
     NodeModifier::SetOnScrollStart,
     NodeModifier::SetOnScrollStop,
     NodeModifier::SetOnScrollEdge,

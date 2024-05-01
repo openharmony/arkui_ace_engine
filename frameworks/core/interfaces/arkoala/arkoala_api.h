@@ -634,6 +634,8 @@ enum ArkUIEventSubKind {
 
     ON_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_SCROLL,
     ON_SCROLL_FRAME_BEGIN,
+    ON_SCROLL_WILL_SCROLL,
+    ON_SCROLL_DID_SCROLL,
     ON_SCROLL_START,
     ON_SCROLL_STOP,
     ON_SCROLL_EDGE,
@@ -1672,6 +1674,8 @@ struct ArkUIListModifier {
     void (*resetNodeAdapter)(ArkUINodeHandle node);
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
+    void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment);
+    void (*setScrollBy)(ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -1745,6 +1749,10 @@ struct ArkUISwiperModifier {
     void (*resetNodeAdapter)(ArkUINodeHandle node);
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
+    void (*setSwiperNestedScroll)(ArkUINodeHandle node, ArkUI_Int32* value);
+    void (*resetSwiperNestedScroll)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperNestedScroll)(ArkUINodeHandle node);
+    void (*setSwiperToIndex)(ArkUINodeHandle node, ArkUI_Int32* values);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -1921,6 +1929,8 @@ struct ArkUIScrollModifier {
     void (*getScrollNestedScroll)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*getScrollOffset)(ArkUINodeHandle node, ArkUI_Float32* values);
     ArkUI_Int32 (*getScrollEdge)(ArkUINodeHandle node);
+    void (*setScrollPage)(ArkUINodeHandle node, ArkUI_Int32 next, ArkUI_Int32 animation);
+    void (*setScrollBy)(ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y);
 };
 
 struct ArkUIListItemModifier {
@@ -2558,6 +2568,7 @@ struct ArkUIWaterFlowModifier {
     ArkUI_Float32 (*getItemMaxHeight)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUI_Int32 (*getWaterFlowEnableScrollInteraction)(ArkUINodeHandle node);
     ArkUI_Float32 (*getWaterFlowFriction)(ArkUINodeHandle node);
+    void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment);
 };
 
 struct ArkUIMenuItemModifier {

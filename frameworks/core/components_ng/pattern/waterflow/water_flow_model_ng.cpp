@@ -594,4 +594,13 @@ bool WaterFlowModelNG::GetScrollEnabled(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, ScrollEnabled, value, frameNode, value);
     return value;
 }
+
+void WaterFlowModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ScrollToIndex(index, animation, (ScrollAlign)alignment);
+}
+
 } // namespace OHOS::Ace::NG
