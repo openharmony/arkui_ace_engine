@@ -458,7 +458,8 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool &isPopup)
+    virtual bool RequestAutoFill(
+        const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false)
     {
         return false;
     }

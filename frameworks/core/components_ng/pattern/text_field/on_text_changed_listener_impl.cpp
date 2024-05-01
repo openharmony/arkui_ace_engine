@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,14 @@
 #include "core/common/container_scope.h"
 #include "core/common/ime/text_input_client.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/event/key_event.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-
+const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
+const std::string AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
+const std::string AUTO_FILL_PARAMS_OTHERACCOUNT = "com.autofill.params.otherAccount";
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
 {
     if (text.empty()) {
@@ -331,6 +334,33 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
     };
     PostTaskToUI(task, "ArkUITextFieldSetImeShow");
 }
+
+void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(
+    const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand)
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    bool isPopup = false;
+    if (privateCommand.find(AUTO_FILL_PARAMS_USERNAME) != privateCommand.end()) {
+        auto userName = privateCommand.find(AUTO_FILL_PARAMS_USERNAME);
+        textFieldPattern->SetAutoFillUserName(std::get<std::string>(userName->second));
+        textFieldPattern->ProcessAutoFill(isPopup, true);
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL,
+            "com.autofill.params.userName : %{private}s", std::get<std::string>(userName->second).c_str());
+    } else if (privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD) != privateCommand.end()) {
+        auto newPassword = privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD);
+        textFieldPattern->SetAutoFillNewPassword(std::get<std::string>(newPassword->second));
+        textFieldPattern->ProcessAutoFill(isPopup, true, true);
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL,
+            "com.autofill.params.newPassword : %{private}s", std::get<std::string>(newPassword->second).c_str());
+    } else if (privateCommand.find(AUTO_FILL_PARAMS_OTHERACCOUNT) != privateCommand.end()) {
+        textFieldPattern->SetAutoFillOtherAccount(true);
+        textFieldPattern->ProcessAutoFill(isPopup, true);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "invalid autofill data privateCommand");
+    }
+}
+
 int32_t OnTextChangedListenerImpl::SetPreviewText(const std::u16string &text, const MiscServices::Range &range)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText value %{public}s in range (%{public}d, %{public}d)",
@@ -364,6 +394,7 @@ void OnTextChangedListenerImpl::FinishTextPreview()
 int32_t OnTextChangedListenerImpl::ReceivePrivateCommand(
     const std::unordered_map<std::string, MiscServices::PrivateDataValue> &privateCommand)
 {
+    AutoFillReceivePrivateCommand(privateCommand);
     int32_t ret = MiscServices::ErrorCode::ERROR_BAD_PARAMETERS;
     if (privateCommand.empty()) {
         return ret;
