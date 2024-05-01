@@ -29,4 +29,9 @@ std::string MarqueeAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(textLayoutProperty, "");
     return textLayoutProperty->GetContent().value_or("");
 }
+
+std::string MarqueeAccessibilityProperty::GetGroupText(bool) const
+{
+    return GetText();
+}
 } // namespace OHOS::Ace::NG
