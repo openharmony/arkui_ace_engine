@@ -284,7 +284,10 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto directionVal = layoutProperty->GetDirectionValue();
     auto width = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
-
+    auto textDirection = layoutProperty->GetLayoutDirection();
+    if (textDirection == TextDirection::AUTO) {
+        textDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
     auto padding = layoutProperty->CreatePaddingAndBorder();
     OffsetF paddingOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
 
@@ -294,7 +297,8 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto& newLineOffset = pair.second;
 
             float offsetWidth = 0.0;
-            if (directionVal == V2::GridRowDirection::RowReverse) {
+            if (((directionVal == V2::GridRowDirection::RowReverse) && (textDirection == TextDirection::LTR)) ||
+				((directionVal == V2::GridRowDirection::Row) && (textDirection == TextDirection::RTL))) {
                 offsetWidth = ((newLineOffset.span + newLineOffset.offset) * columnUnitWidth_ +
                                ((newLineOffset.span + newLineOffset.offset) - 1) * gutterInDouble_.first);
                 offsetWidth = width - offsetWidth;

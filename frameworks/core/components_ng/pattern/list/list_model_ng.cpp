@@ -287,6 +287,14 @@ void ListModelNG::SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
 
+void ListModelNG::SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollIndex(std::move(onScrollIndex));
+}
+
 void ListModelNG::SetOnScrollVisibleContentChange(OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -489,6 +497,15 @@ void ListModelNG::SetListNestedScroll(FrameNode* frameNode, const NestedScrollOp
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNestedScroll(nestedOpt);
+}
+
+NestedScrollOptions ListModelNG::GetListNestedScroll(FrameNode* frameNode)
+{
+    NestedScrollOptions defaultOptions;
+    CHECK_NULL_RETURN(frameNode, defaultOptions);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, defaultOptions);
+    return pattern->GetNestedScroll();
 }
 
 int32_t ListModelNG::GetListScrollBar(FrameNode* frameNode)

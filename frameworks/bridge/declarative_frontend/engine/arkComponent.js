@@ -4251,7 +4251,7 @@ function __removeCustomProperties__(nodeId) {
   __elementIdToCustomProperties__.delete(nodeId);
 }
 
-function getCustomProperty(nodeId, key) {
+function __getCustomProperty__(nodeId, key) {
   if (__elementIdToCustomProperties__.has(nodeId)) {
     const customProperties = __elementIdToCustomProperties__.get(nodeId);
 
@@ -4329,6 +4329,12 @@ if (globalThis.Blank !== undefined) {
     });
   };
 }
+
+globalThis.applySymbolGlyphModifierToNode = function (modifier, nodePtr) {
+  let component = new ArkSymbolGlyphComponent(nodePtr);
+  applyUIAttributes(modifier, nodePtr, component);
+  component.applyModifierPatch();
+};
 
 globalThis.applyImageModifierToNode = function (modifier, nodePtr) {
   let component = new ArkImageComponent(nodePtr);
@@ -4643,6 +4649,99 @@ class GridRowAlignItemsModifier extends ModifierWithKey {
   }
 }
 GridRowAlignItemsModifier.identity = Symbol('gridRowAlignItems');
+class SetDirectionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridRow.resetDirection(node);
+    }
+    else {
+      getUINativeModule().gridRow.setDirection(node,  this.value);
+    }
+  }
+}
+SetDirectionModifier.identity = Symbol('gridRowDirection');
+class SetBreakpointsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridRow.resetBreakpoints(node);
+    }
+    else {
+      getUINativeModule().gridRow.setBreakpoints(node, this.value.value, this.value.reference);
+    }
+  }
+}
+SetBreakpointsModifier.identity = Symbol('gridRowBreakpoints');
+class SetColumnsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridRow.resetColumns(node);
+    }
+    else {
+      if (isUndefined(this.value) || isNull(this.value)) {
+        getUINativeModule().gridRow.resetColumns(node);
+      } else if (isNumber(this.value)) {
+        getUINativeModule().gridRow.setColumns(node, this.value, this.value, this.value,
+          this.value, this.value, this.value);
+      } else {
+        getUINativeModule().gridRow.setColumns(node, this.value.xs, this.value.sm, this.value.md,
+          this.value.lg, this.value.xl, this.value.xxl);
+      }
+    }
+  }
+}
+SetColumnsModifier.identity = Symbol('gridRowColumns');
+class SetGutterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridRow.resetGutter(node);
+    }
+    else {
+      if (isUndefined(this.value) || isNull(this.value)) {
+        getUINativeModule().gridRow.resetGutter(node);
+      }
+      if (isNumber(this.value)) {
+        getUINativeModule().gridRow.setGutter(node, this.value,
+          this.value, this.value, this.value, this.value, this.value,
+          this.value, this.value, this.value, this.value, this.value, this.value);
+      } else {
+        if (isNumber(this.value.x)) {
+          if (isNumber(this.value.y)) {
+            getUINativeModule().gridRow.setGutter(node,
+              this.value.x, this.value.x, this.value.x, this.value.x, this.value.x, this.value.x,
+              this.value.y, this.value.y, this.value.y, this.value.y, this.value.y, this.value.y);
+          } else {
+            getUINativeModule().gridRow.setGutter(node,
+              this.value.x, this.value.x, this.value.x, this.value.x, this.value.x, this.value.x,
+              this.value.y.xs, this.value.y.sm, this.value.y.md, this.value.y.lg, this.value.y.xl, this.value.y.xxl);
+          }
+        } else {
+          if (isNumber(this.value.y)) {
+            getUINativeModule().gridRow.setGutter(node,
+              this.value.x.xs, this.value.x.sm, this.value.x.md, this.value.x.lg, this.value.x.xl, this.value.x.xxl,
+              this.value.y, this.value.y, this.value.y, this.value.y, this.value.y, this.value.y);
+          } else {
+            getUINativeModule().gridRow.setGutter(node,
+              this.value.x.xs, this.value.x.sm, this.value.x.md, this.value.x.lg, this.value.x.xl, this.value.x.xxl,
+              this.value.y.xs, this.value.y.sm, this.value.y.md, this.value.y.lg, this.value.y.xl, this.value.y.xxl);
+          }
+        }
+      }
+    }
+  }
+}
+SetGutterModifier.identity = Symbol('gridRowGutter');
 class ArkGridRowComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -4652,6 +4751,31 @@ class ArkGridRowComponent extends ArkComponent {
   }
   alignItems(value) {
     modifierWithKey(this._modifiersWithKeys, GridRowAlignItemsModifier.identity, GridRowAlignItemsModifier, value);
+    return this;
+  }
+  setDirection(value) {
+    modifierWithKey(this._modifiersWithKeys, SetDirectionModifier.identity, SetDirectionModifier, value);
+    return this;
+  }
+  setBreakpoints(value) {
+    modifierWithKey(this._modifiersWithKeys, SetBreakpointsModifier.identity, SetBreakpointsModifier, value);
+    return this;
+  }
+  setColumns(value) {
+    modifierWithKey(this._modifiersWithKeys, SetColumnsModifier.identity, SetColumnsModifier, value);
+    return this;
+  }
+  setGutter(value) {
+    modifierWithKey(this._modifiersWithKeys, SetGutterModifier.identity, SetGutterModifier, value);
+    return this;
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      this.setGutter(value[0].gutter);
+      this.setColumns(value[0].columns);
+      this.setBreakpoints(value[0].breakpoints);
+      this.setDirection(value[0].direction);
+    }
     return this;
   }
 }
@@ -5234,6 +5358,14 @@ class ArkGridColComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, value);
     return this;
   }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value.span);
+      modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity, GridColOffsetModifier, value.offset);
+      modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, value.order);
+    }
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.GridCol !== undefined) {
@@ -5692,6 +5824,40 @@ class ImageeResizableModifier extends ModifierWithKey {
   }
 }
 ImageeResizableModifier.identity = Symbol('resizable');
+class ImageDynamicRangeModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetDynamicRangeMode(node);
+    }
+    else {
+      getUINativeModule().image.setDynamicRangeMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageDynamicRangeModeModifier.identity = Symbol('dynamicRangeMode');
+class ImageEnhancedImageQualityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetEnhancedImageQuality(node);
+    }
+    else {
+      getUINativeModule().image.setEnhancedImageQuality(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageObjectFitModifier.identity = Symbol('enhancedImageQuality');
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -5783,6 +5949,16 @@ class ArkImageComponent extends ArkComponent {
   }
   transition(value) {
     modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, value);
+    return this;
+  }
+  dynamicRangeMode(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
+    return this;
+  }
+  enhancedImageQuality(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageEnhancedImageQualityModifier.identity, ImageEnhancedImageQualityModifier, value);
     return this;
   }
 }
@@ -12275,7 +12451,12 @@ class ArkButtonComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().button.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -12283,10 +12464,11 @@ class ArkButtonComponent extends ArkComponent {
   }
   makeContentModifierNode(context, buttonConfiguration) {
     buttonConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.buttonNode)) {
+    if (isUndefined(this.buttonNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.buttonNode = new xNode.BuilderNode(context);
       this.buttonNode.build(this.builder, buttonConfiguration);
+      this.needRebuild = false;
     } else {
       this.buttonNode.update(buttonConfiguration);
     }
@@ -15237,7 +15419,12 @@ class ArkCheckboxComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().checkbox.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -15245,10 +15432,11 @@ class ArkCheckboxComponent extends ArkComponent {
   }
   makeContentModifierNode(context, checkBoxConfiguration) {
     checkBoxConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.checkboxNode)) {
+    if (isUndefined(this.checkboxNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.checkboxNode = new xNode.BuilderNode(context);
       this.checkboxNode.build(this.builder, checkBoxConfiguration);
+      this.needRebuild = false;
     } else {
       this.checkboxNode.update(checkBoxConfiguration);
     }
@@ -23156,13 +23344,72 @@ class ParticleEmitterModifier extends ModifierWithKey {
   }
 
   applyPeer(node, reset) {
+    let _a, _b, _c, _d, _e;
     if (reset) {
       getUINativeModule().particle.resetEmitter(node);
     }
     else {
-      getUINativeModule().particle.setEmitter(node, this.value);
+      let dataArray = [];
+      if (!Array.isArray(this.value)) {
+        return;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        let data = this.value[i];
+        let indexValue = 0;
+        if (data.index > 0 && data.index < this.value.length) {
+          indexValue = data.index;
+        }
+        dataArray.push(indexValue);
+
+        let emitRateValue = 5;
+        if (isNumber(data.emitRate)) {
+          dataArray.push(1);
+          if (data.emitRate > 0) {
+            emitRateValue = data.emitRate;
+          }
+          dataArray.push(emitRateValue);
+        } else {
+          dataArray.push(0);
+          dataArray.push(_a);
+        }
+
+        if (isObject(data.position)) {
+          if (isNumber(data.position.x) && isNumber(data.position.y)) {
+            dataArray.push(1);
+            dataArray.push(data.position.x);
+            dataArray.push(data.position.y);
+          } else {
+            dataArray.push(0);
+            dataArray.push(_b);
+            dataArray.push(_c);
+          }
+        } else {
+          dataArray.push(0);
+          dataArray.push(_b);
+          dataArray.push(_c);
+        }
+
+        if (isObject(data.size)) {
+          if (data.size.width > 0 && data.size.height > 0) {
+            dataArray.push(1);
+            dataArray.push(data.size.width);
+            dataArray.push(data.size.height);
+          } else {
+            dataArray.push(0);
+            dataArray.push(_d);
+            dataArray.push(_e);
+          }
+        }
+        else {
+          dataArray.push(0);
+          dataArray.push(_d);
+          dataArray.push(_e);
+        }
+      }
+      getUINativeModule().particle.setEmitter(node, dataArray);
     }
   }
+
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
@@ -23177,9 +23424,13 @@ class ArkParticleComponent extends ArkComponent {
   }
   disturbanceFields(value) {
      modifierWithKey(this._modifiersWithKeys, ParticleDisturbanceFieldModifier.identity, ParticleDisturbanceFieldModifier, value);
-     modifierWithKey(this._modifiersWithKeys, ParticleDisturbanceFieldModifier.identity, ParticleDisturbanceFieldModifier, value);
     return this;
   }
+
+  emitter(value) {
+    modifierWithKey(this._modifiersWithKeys, ParticleEmitterModifier.identity, ParticleEmitterModifier, value);
+   return this;
+ }
 }
 // @ts-ignore
 if (globalThis.Particle !== undefined) {

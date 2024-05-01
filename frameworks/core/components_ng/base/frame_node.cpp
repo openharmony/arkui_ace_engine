@@ -185,7 +185,7 @@ public:
         return ChildrenListWithGuard(allFrameNodeChildren_, *this);
     }
 
-    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache)
+    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
     {
         while (cursor_ != children_.end()) {
             if (cursor_->startIndex > index) {
@@ -195,7 +195,8 @@ public:
 
             if (cursor_->startIndex + cursor_->count > index) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(
-                    cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex, needBuild, isCache));
+                    cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex,
+                        needBuild, isCache, addToRenderTree));
                 return frameNode;
             }
             cursor_++;
@@ -207,12 +208,12 @@ public:
         return nullptr;
     }
 
-    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache)
+    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
     {
         auto itor = partFrameNodeChildren_.find(index);
         if (itor == partFrameNodeChildren_.end()) {
             Build();
-            auto child = FindFrameNodeByIndex(index, needBuild, isCache);
+            auto child = FindFrameNodeByIndex(index, needBuild, isCache, addToRenderTree);
             if (child && !isCache) {
                 partFrameNodeChildren_[index] = child;
             }
@@ -640,9 +641,6 @@ void FrameNode::DumpDragInfo()
     dragPreviewStr.append(" extraInfo: ").append(dragPreviewInfo_.extraInfo.c_str());
     dragPreviewStr.append(" inspectorId: ").append(dragPreviewInfo_.inspectorId.c_str());
     DumpLog::GetInstance().AddDesc(dragPreviewStr);
-    DumpLog::GetInstance().AddDesc(
-        std::string("DragPreviewMode: ")
-            .append(previewOption_.mode == DragPreviewMode::DISABLE_SCALE ? "DISABLE_SCALE" : "AUTO"));
     auto eventHub = GetEventHub<EventHub>();
     DumpLog::GetInstance().AddDesc(std::string("Event: ")
                                         .append("OnDragStart: ")
@@ -1158,6 +1156,13 @@ void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)
     eventHub_->SetOnSizeChanged(std::move(callback));
 }
 
+void FrameNode::AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& callback)
+{
+    if (!lastFrameNodeRect_) {
+        lastFrameNodeRect_ = std::make_unique<RectF>();
+    }
+    eventHub_->AddInnerOnSizeChanged(id, std::move(callback));
+}
 
 void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
 {
@@ -1195,7 +1200,7 @@ void FrameNode::TriggerOnSizeChangeCallback()
     if (!IsActive() || !CheckAncestorPageShow()) {
         return;
     }
-    if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
+    if ((eventHub_->HasOnSizeChanged() || eventHub_->HasInnerOnSizeChanged()) && lastFrameNodeRect_) {
         auto currFrameRect = GetRectWithRender();
         if (currFrameRect.GetSize() != (*lastFrameNodeRect_).GetSize()) {
             onSizeChangeDumpInfo dumpInfo { GetCurrentTimestamp(), *lastFrameNodeRect_, currFrameRect };
@@ -1203,7 +1208,12 @@ void FrameNode::TriggerOnSizeChangeCallback()
                 onSizeChangeDumpInfos.erase(onSizeChangeDumpInfos.begin());
             }
             onSizeChangeDumpInfos.emplace_back(dumpInfo);
-            eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            if (eventHub_->HasOnSizeChanged()) {
+                eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            }
+            if (eventHub_->HasInnerOnSizeChanged()) {
+                eventHub_->FireInnerOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
+            }
             eventHub_->FireJSFrameNodeOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             *lastFrameNodeRect_ = currFrameRect;
         }
@@ -2852,8 +2862,7 @@ double FrameNode::GetPreviewScaleVal() const
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, scale);
     auto width = geometryNode->GetFrameRect().Width();
-    if (GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth &&
-        previewOption_.mode != DragPreviewMode::DISABLE_SCALE) {
+    if (GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption_.isScaleEnabled) {
         scale = maxWidth / width;
     }
     return scale;
@@ -3363,7 +3372,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache);
+    auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
         child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         if (addToRenderTree) {
@@ -3375,12 +3384,12 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
-    return frameProxy_->GetFrameNodeByIndex(index, false, isCache);
+    return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
 
 FrameNode* FrameNode::GetFrameNodeChildByIndex(uint32_t index, bool isCache)
 {
-    auto frameNode = DynamicCast<FrameNode>(frameProxy_->GetFrameNodeByIndex(index, true, isCache));
+    auto frameNode = DynamicCast<FrameNode>(frameProxy_->GetFrameNodeByIndex(index, true, isCache, false));
     return RawPtr(frameNode);
 }
 
@@ -3493,7 +3502,7 @@ void FrameNode::MarkNeedSyncRenderTree(bool needRebuild)
     needSyncRenderTree_ = true;
 }
 
-RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
+RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
     if (index != 0) {
         return nullptr;

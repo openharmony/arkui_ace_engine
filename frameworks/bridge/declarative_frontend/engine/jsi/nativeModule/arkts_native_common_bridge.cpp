@@ -3773,32 +3773,48 @@ ArkUINativeModuleValue CommonBridge::SetConstraintSize(ArkUIRuntimeCallInfo* run
 
     bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, minWidth, false)) {
-        minWidthValue.value = minWidth.Value();
-        minWidthValue.unit = static_cast<int8_t>(minWidth.Unit());
+        if (minWidth.CalcValue() != "") {
+            minWidthValue.string = minWidth.CalcValue().c_str();
+        } else {
+            minWidthValue.value = minWidth.Value();
+            minWidthValue.unit = static_cast<int8_t>(minWidth.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMinWidth(nativeNode, &minWidthValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMinWidth(nativeNode);
     }
 
     if (ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, maxWidth, false)) {
-        maxWidthValue.value = maxWidth.Value();
-        maxWidthValue.unit = static_cast<int8_t>(maxWidth.Unit());
+        if (maxWidth.CalcValue() != "") {
+            maxWidthValue.string = maxWidth.CalcValue().c_str();
+        } else {
+            maxWidthValue.value = maxWidth.Value();
+            maxWidthValue.unit = static_cast<int8_t>(maxWidth.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMaxWidth(nativeNode, &maxWidthValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMaxWidth(nativeNode);
     }
 
     if (ArkTSUtils::ParseJsDimensionVp(vm, forthArg, minHeight, false)) {
-        minHeightValue.value = minHeight.Value();
-        minHeightValue.unit = static_cast<int8_t>(minHeight.Unit());
+        if (minHeight.CalcValue() != "") {
+            minHeightValue.string = minHeight.CalcValue().c_str();
+        } else {
+            minHeightValue.value = minHeight.Value();
+            minHeightValue.unit = static_cast<int8_t>(minHeight.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMinHeight(nativeNode, &minHeightValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMinHeight(nativeNode);
     }
 
     if (ArkTSUtils::ParseJsDimensionVp(vm, fifthArg, maxHeight, false)) {
-        maxHeightValue.value = maxHeight.Value();
-        maxHeightValue.unit = static_cast<int8_t>(maxHeight.Unit());
+        if (maxHeight.CalcValue() != "") {
+            maxHeightValue.string = maxHeight.CalcValue().c_str();
+        } else {
+            maxHeightValue.value = maxHeight.Value();
+            maxHeightValue.unit = static_cast<int8_t>(maxHeight.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMaxHeight(nativeNode, &maxHeightValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMaxHeight(nativeNode);

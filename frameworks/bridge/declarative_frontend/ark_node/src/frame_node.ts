@@ -447,6 +447,10 @@ class FrameNode {
     this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonEvent;
   }
+  updateInstance(uiContext: UIContext) {
+      this.uiContext_ = uiContext;
+      this.instanceId_ = uiContext.instanceId_;
+  }
 }
 
 class ImmutableFrameNode extends FrameNode {
@@ -588,6 +592,16 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
     ["Stack", (context: UIContext) => {
       return new TypedFrameNode(context, "Stack", (node: NodePtr, type: ModifierType) => {
         return new ArkStackComponent(node, type);
+      })
+    }],
+    ["GridRow", (context: UIContext) => {
+      return new TypedFrameNode(context, "GridRow", (node: NodePtr, type: ModifierType) => {
+        return new ArkGridRowComponent(node, type);
+      })
+    }],
+    ["GridCol", (context: UIContext) => {
+      return new TypedFrameNode(context, "GridCol", (node: NodePtr, type: ModifierType) => {
+        return new ArkGridColComponent(node, type);
       })
     }],
   ]

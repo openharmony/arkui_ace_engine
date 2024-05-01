@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+
 #include <numeric>
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 int32_t GridLayoutInfo::GetItemIndexByPosition(int32_t position)
@@ -333,6 +335,43 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
     totalHeight += AddLinesInBetween(lastIndex, endIdx, crossCount_, regularHeight);
     totalHeight -= mainGap;
     return totalHeight;
+}
+
+float GridLayoutInfo::GetIrregularOffset(float mainGap) const
+{
+    // need to calculate total line height before startMainLine_
+    // gridMatrix ready up to endLine, so lineCnt is known.
+    // get sum of existing lines
+    // use average to estimate unknown lines
+    if (lineHeightMap_.empty() || childrenCount_ == 0) {
+        return 0.0f;
+    }
+
+    auto it = lineHeightMap_.lower_bound(startMainLineIndex_);
+    auto knownLineCnt = static_cast<float>(std::distance(lineHeightMap_.begin(), it));
+    float knownHeight = GetHeightInRange(lineHeightMap_.begin()->first, startMainLineIndex_, 0.0f);
+    float avgHeight = synced_ ? avgLineHeight_ : GetTotalLineHeight(0.0f) / static_cast<float>(lineHeightMap_.size());
+
+    auto startLine = static_cast<float>(startMainLineIndex_);
+    float estTotal = knownHeight + avgHeight * (startLine - knownLineCnt);
+    return estTotal + startLine * mainGap - currentOffset_;
+}
+
+float GridLayoutInfo::GetIrregularHeight(float mainGap) const
+{
+    // count current number of lines
+    // estimate total number of lines based on {known item / total item}
+    if (lineHeightMap_.empty() || childrenCount_ == 0) {
+        return 0.0f;
+    }
+    int32_t lastKnownLine = lineHeightMap_.rbegin()->first;
+    float itemRatio = static_cast<float>(FindEndIdx(lastKnownLine).itemIdx + 1) / static_cast<float>(childrenCount_);
+    float estTotalLines = std::round(static_cast<float>(lastKnownLine + 1) / itemRatio);
+
+    auto knownLineCnt = static_cast<float>(lineHeightMap_.size());
+    float knownHeight = synced_ ? avgLineHeight_ * knownLineCnt : GetTotalLineHeight(0.0f);
+    float avgHeight = synced_ ? avgLineHeight_ : knownHeight / knownLineCnt;
+    return knownHeight + (estTotalLines - knownLineCnt) * avgHeight + (estTotalLines - 1) * mainGap;
 }
 
 float GridLayoutInfo::GetCurrentLineHeight() const
@@ -745,5 +784,28 @@ bool GridLayoutInfo::HeightSumSmaller(float other, float mainGap) const
         }
     }
     return true;
+}
+
+std::pair<int32_t, float> GridLayoutInfo::FindItemCenter(int32_t startLine, int32_t lineCnt, float mainGap) const
+{
+    float halfLen = (GetHeightInRange(startLine, startLine + lineCnt, mainGap) - mainGap) / 2.0f;
+    auto it = lineHeightMap_.find(startLine);
+    float len = 0.0f;
+    while (it != lineHeightMap_.end() && LessNotEqual(len + it->second + mainGap, halfLen)) {
+        len += it->second + mainGap;
+        ++it;
+    }
+    return { it->first, halfLen - len };
+}
+
+void GridLayoutInfo::PrepareJumpToBottom()
+{
+    if (gridMatrix_.empty() || gridMatrix_.rbegin()->second.empty()) {
+        TAG_LOGW(ACE_GRID, "Matrix setup is incorrect");
+        jumpIndex_ = LAST_ITEM;
+    } else {
+        jumpIndex_ = std::abs(gridMatrix_.rbegin()->second.begin()->second);
+    }
+    scrollAlign_ = ScrollAlign::END;
 }
 } // namespace OHOS::Ace::NG

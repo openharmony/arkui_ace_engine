@@ -244,6 +244,16 @@ public:
     {
         return pointerEvent_;
     }
+
+    void SetRawGlobalLocation(const Offset& rawGlobalLocation)
+    {
+        rawGlobalLocation_ = rawGlobalLocation;
+    }
+
+    const Offset& GetRawGlobalLocation() const
+    {
+        return rawGlobalLocation_;
+    }
 #ifdef SECURITY_COMPONENT_ENABLE
     void SetDisplayX(double displayX)
     {
@@ -303,6 +313,8 @@ private:
     Offset localLocation_;
     // Will be used in drag.
     Offset screenLocation_;
+    // Raw last touchPoint global location.
+    Offset rawGlobalLocation_;
     Offset pinchCenter_;
     Offset delta_;
     std::list<FingerInfo> fingerList_;

@@ -296,7 +296,18 @@ public:
 
     void SetBuilderFunc(ButtonMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
+    }
+
+    int32_t GetBuilderId()
+    {
+        return nodeId_;
     }
 
     void SetButtonPress(double xPos, double yPos);
@@ -370,6 +381,7 @@ private:
     std::optional<ButtonMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     std::optional<GestureEventFunc> clickEventFunc_;
+    int32_t nodeId_ = -1;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> hoverListener_;
     bool isHover_ = false;

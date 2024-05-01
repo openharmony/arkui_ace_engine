@@ -190,6 +190,8 @@ private:
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void AddExpandIcon(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty);
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
+    void UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty);
+    bool IsTextFadeOut();
     void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
     void UpdateExpandableArea();
     void BuildEmbeddedMenuItems(RefPtr<UINode>& node, bool needNextLevel = true);
@@ -223,6 +225,7 @@ private:
 
     RefPtr<InputEvent> wrapperMouseEvent_;
 
+    bool isTextFadeOut_ = false;
     bool isSelected_ = false;
     bool isSubMenuShowed_ = false;
     bool isSubMenuHovered_ = false;

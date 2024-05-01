@@ -1914,7 +1914,6 @@ void CustomPaintPaintMethod::ResetStates()
     smoothingEnabled_ = true;
     smoothingQuality_ = "low";
     filterParam_ = "";
-    matrix_.reset();
     fillState_ = PaintState();
     strokeState_ = StrokePaintState();
     globalState_ = GlobalPaintState();

@@ -26,6 +26,7 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t HANDLE_RING_DEGREE = 360;
@@ -129,7 +130,7 @@ void RichEditorDragOverlayModifier::PaintBackground(const RSPath& path, RSCanvas
 {
     auto shadow = Shadow(DEFAULT_ELEVATION, {0.0, 0.0}, Color(DEFAULT_SHADOW_COLOR), ShadowStyle::OuterFloatingSM);
     PaintShadow(path, shadow, canvas);
-    Color color = Color::WHITE;
+    Color color = GetDragBackgroundColor(Color::WHITE);
     if (richEditorPattern && type_ == DragAnimType::FLOATING) {
         color = color.BlendOpacity(1 - selectedBackgroundOpacity_->Get());
     } else if (richEditorPattern && type_ == DragAnimType::FLOATING_CANCEL) {
@@ -404,5 +405,14 @@ void RichEditorDragOverlayModifier::StartSelBackgroundCancelAnimate()
         modifier->SetSelectedBackgroundOpacity(modifier->IsHandlesShow() ? 1.0 : 0.0);
     };
     AnimationUtils::Animate(selOption, selPropertyCallback, selOption.GetOnFinishEvent());
+}
+
+Color RichEditorDragOverlayModifier::GetDragBackgroundColor(const Color& defaultColor)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, defaultColor);
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, defaultColor);
+    return richEditorTheme->GetDragBackgroundColor();
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
@@ -149,9 +150,6 @@ void AtomicServicePattern::UpdateColor()
     auto theme = pipeline->GetTheme<AppBarTheme>();
     auto isLight = SystemProperties::GetColorMode() != ColorMode::DARK;
 
-    auto menuBar = GetMenuBar();
-    UpdateMenuBarColor(theme, menuBar, isLight);
-
     auto menuButton = GetMenuButton();
     UpdateButtonColor(theme, menuButton);
     auto divider = GetDivider();
@@ -224,13 +222,9 @@ void AtomicServicePattern::UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<Fr
     CHECK_NULL_VOID(theme);
     CHECK_NULL_VOID(icon);
     // fill color
-    auto layoutProperty = icon->GetLayoutProperty<ImageLayoutProperty>();
-    auto imageSourceInfo = layoutProperty->GetImageSourceInfo();
-    imageSourceInfo->SetFillColor(theme->GetIconColor());
-    layoutProperty->UpdateImageSourceInfo(imageSourceInfo.value());
-
-    icon->MarkModifyDone();
-    icon->MarkDirtyNode();
+    auto color = theme->GetIconColor();
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color, icon);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, icon);
 }
 
 void AtomicServicePattern::UpdateLayout()

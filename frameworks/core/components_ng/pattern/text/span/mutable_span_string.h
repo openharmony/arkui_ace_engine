@@ -43,8 +43,11 @@ public:
     void InsertSpanString(int32_t start, const RefPtr<SpanString>& spanString);
     void AppendSpanString(const RefPtr<SpanString>& spanString);
     bool IsSpeicalNode(int32_t location, SpanType speicalType);
+    void SetSpanWatcher(const WeakPtr<SpanWatcher>& watcher);
+    void NotifySpanWatcher();
 
 private:
+    WeakPtr<SpanWatcher> watcher_;
     void KeepSpansOrder();
     void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
     void ApplyInsertStringToSpans(int32_t start, const std::string& other);

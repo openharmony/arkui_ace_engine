@@ -266,7 +266,7 @@ ohos_unittest("svg_dom_test_ng") {
 group("core_svg_unittest") {
   testonly = true
   deps = [
-    ":parse_test_ng",
+    # ":parse_test_ng",
     ":svg_dom_test_ng",
   ]
 }

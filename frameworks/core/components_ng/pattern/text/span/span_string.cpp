@@ -253,29 +253,23 @@ int32_t SpanString::GetStepsByPosition(int32_t pos)
 
 void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type)
 {
+    auto wStr = GetWideString();
+    text_ = StringUtils::ToString(
+        wStr.substr(0, span->GetStartIndex()) + StringUtils::ToWstring(" ") + wStr.substr(span->GetStartIndex()));
     auto iter = spans_.begin();
     auto step = GetStepsByPosition(span->GetStartIndex());
     std::advance(iter, step);
+    RefPtr<NG::SpanItem> spanItem;
     if (type == SpanType::Image) {
         auto imageSpan = DynamicCast<ImageSpan>(span);
         CHECK_NULL_VOID(imageSpan);
-        auto spanItem = MakeRefPtr<NG::ImageSpanItem>();
-        spanItem->content = " ";
-        spanItem->interval.first = span->GetStartIndex();
-        spanItem->interval.second = span->GetEndIndex();
-        spanItem->SetImageSpanOptions(imageSpan->GetImageSpanOptions());
-        iter = spans_.insert(iter, spanItem);
+        spanItem = MakeImageSpanItem(imageSpan);
     } else if (type == SpanType::CustomSpan) {
         auto customSpan = AceType::DynamicCast<CustomSpan>(span);
         CHECK_NULL_VOID(customSpan);
-        auto spanItem = MakeRefPtr<NG::CustomSpanItem>();
-        spanItem->content = " ";
-        spanItem->interval.first = span->GetStartIndex();
-        spanItem->interval.second = span->GetEndIndex();
-        spanItem->onDraw = customSpan->GetOnDraw();
-        spanItem->onMeasure = customSpan->GetOnMeasure();
-        iter = spans_.insert(iter, spanItem);
+        spanItem = MakeCustomSpanItem(customSpan);
     }
+    iter = spans_.insert(iter, spanItem);
     for (++iter; iter != spans_.end(); ++iter) {
         ++(*iter)->interval.first;
         ++(*iter)->interval.second;
@@ -303,17 +297,34 @@ void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type)
     }
 }
 
+RefPtr<NG::ImageSpanItem> SpanString::MakeImageSpanItem(const RefPtr<ImageSpan>& imageSpan)
+{
+    auto spanItem = MakeRefPtr<NG::ImageSpanItem>();
+    spanItem->content = " ";
+    spanItem->interval.first = imageSpan->GetStartIndex();
+    spanItem->interval.second = imageSpan->GetEndIndex();
+    spanItem->SetImageSpanOptions(imageSpan->GetImageSpanOptions());
+    return spanItem;
+}
+
+RefPtr<NG::CustomSpanItem> SpanString::MakeCustomSpanItem(const RefPtr<CustomSpan>& customSpan)
+{
+    auto spanItem = MakeRefPtr<NG::CustomSpanItem>();
+    spanItem->content = " ";
+    spanItem->interval.first = customSpan->GetStartIndex();
+    spanItem->interval.second = customSpan->GetEndIndex();
+    spanItem->onDraw = customSpan->GetOnDraw();
+    spanItem->onMeasure = customSpan->GetOnMeasure();
+    return spanItem;
+}
+
 void SpanString::AddSpan(const RefPtr<SpanBase>& span)
 {
     if (!span || !CheckRange(span)) {
         return;
     }
-    if (span->GetSpanType() == SpanType::Image) {
-        AddSpecialSpan(span, SpanType::Image);
-        return;
-    }
-    if (span->GetSpanType() == SpanType::CustomSpan) {
-        AddSpecialSpan(span, SpanType::CustomSpan);
+    if (span->GetSpanType() == SpanType::Image || span->GetSpanType() == SpanType::CustomSpan) {
+        AddSpecialSpan(span, span->GetSpanType());
         return;
     }
     auto start = span->GetStartIndex();
@@ -384,6 +395,8 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<LetterSpacingSpan>();
         case SpanType::ParagraphStyle:
             return MakeRefPtr<ParagraphStyleSpan>();
+        case SpanType::LineHeight:
+            return MakeRefPtr<LineHeightSpan>();
         default:
             return nullptr;
     }

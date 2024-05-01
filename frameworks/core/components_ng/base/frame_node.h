@@ -216,6 +216,8 @@ public:
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
+    void AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& callback);
+
     void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
     void TriggerOnSizeChangeCallback();
@@ -732,7 +734,8 @@ public:
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
     void SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config);
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
+        bool addToRenderTree = false) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
@@ -1017,7 +1020,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { DragPreviewMode::AUTO, false, false, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, { .isShowBadge = true } };
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

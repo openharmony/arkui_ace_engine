@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,17 +26,32 @@ const char ANIMATION_CALC_MODE_DISCRETE[] = "discrete";
 const char ANIMATION_CALC_MODE_PACED[] = "paced";
 const char ANIMATION_CALC_MODE_SPLINE[] = "spline";
 
+double ConvertTimeStr(const std::string& str)
+{
+    std::string time(str);
+    StringUtils::TrimStr(time);
+    double result = 0.0;
+    if (StringUtils::EndWith(time, "ms")) {
+        result = StringUtils::StringToDouble(std::string(time.begin(), time.end() - 2.0));
+    } else if (StringUtils::EndWith(time, "s")) {
+        result = StringUtils::StringToDouble(std::string(time.begin(), time.end() - 1.0)) * 1000.0;
+    } else if (StringUtils::EndWith(time, "m")) {
+        result = StringUtils::StringToDouble(std::string(time.begin(), time.end() - 1.0)) * 60.0 * 1000.0;
+    } else {
+        result = StringUtils::StringToDouble(str);
+    }
+    return result;
+}
+
 const std::unordered_map<std::string, CalcMode> CALC_MODE_MAP = { { ANIMATION_CALC_MODE_DISCRETE, CalcMode::DISCRETE },
     { ANIMATION_CALC_MODE_PACED, CalcMode::PACED }, { ANIMATION_CALC_MODE_SPLINE, CalcMode::SPLINE } };
 } // namespace
 
+using SvgAnimateMap = std::unordered_map<std::string, void (*)(const std::string&, SvgAnimateAttribute&)>;
+
 SvgAnimation::SvgAnimation(SvgAnimateType svgAnimateType)
 {
     svgAnimateType_ = svgAnimateType;
-    animDeclaration_ = AceType::MakeRefPtr<SvgAnimateDeclaration>();
-    animDeclaration_->Init();
-    animDeclaration_->InitializeStyle();
-
     InitNoneFlag();
 }
 
@@ -59,34 +74,122 @@ RefPtr<SvgNode> SvgAnimation::CreateAnimateTransform()
 
 void SvgAnimation::SetAttr(const std::string& name, const std::string& value)
 {
-    animDeclaration_->SetSpecializedAttr({ name, value });
+    static const SvgAnimateMap svgMap = {
+        { DOM_SVG_ANIMATION_BEGIN,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                attr.begin = ConvertTimeStr(val);
+            } },
+        { DOM_SVG_ANIMATION_DUR,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                if (val == "indefinite") {
+                    attr.dur = 0;
+                } else {
+                    attr.dur = ConvertTimeStr(val);
+                }
+            } },
+        { DOM_SVG_ANIMATION_END,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                attr.end = ConvertTimeStr(val);
+            } },
+        { DOM_SVG_ANIMATION_REPEAT_COUNT,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                if (val == "indefinite") {
+                    attr.repeatCount = -1;
+                } else {
+                    attr.repeatCount = StringUtils::StringToInt(val);
+                }
+            } },
+        { DOM_SVG_ANIMATION_FILL,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                attr.fillMode = val;
+            } },
+        { DOM_SVG_ANIMATION_CALC_MODE,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                attr.calcMode = val;
+            } },
+        { DOM_SVG_ANIMATION_VALUES,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                StringUtils::SplitStr(val, ";", attr.values);
+            } },
+        { DOM_SVG_ANIMATION_KEY_TIMES,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                if (val.empty()) {
+                    return;
+                }
+                StringUtils::StringSplitter(val, ';', attr.keyTimes);
+            } },
+        { DOM_SVG_ANIMATION_KEY_SPLINES,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                if (val.empty()) {
+                    return;
+                }
+                StringUtils::SplitStr(val, ";", attr.keySplines);
+            } },
+        { DOM_SVG_ANIMATION_FROM,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                attr.from = val;
+            } },
+        { DOM_SVG_ANIMATION_TO,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                attr.to = val;
+            } },
+        { DOM_SVG_ANIMATION_ATTRIBUTE_NAME,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                attr.attributeName = val;
+            } },
+        { DOM_SVG_ANIMATION_KEY_POINTS,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                if (val.empty()) {
+                    return;
+                }
+                StringUtils::StringSplitter(val, ';', attr.keyPoints);
+            } },
+        { DOM_SVG_ANIMATION_PATH,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                attr.path = val;
+            } },
+        { DOM_SVG_ANIMATION_ROTATE,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                attr.rotate = val;
+            } },
+        { DOM_SVG_ANIMATION_TYPE,
+            [](const std::string& val, SvgAnimateAttribute& attr) {
+                attr.transformType = val;
+            } },
+    };
+    std::string key = name;
+    // convert key to lower case to match dom_type strings
+    std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+    auto attrIter = svgMap.find(key);
+    if (attrIter != svgMap.end()) {
+        attrIter->second(value, animateAttr_);
+    }
 }
 
 // sync attributes from declaration to SvgAnimate
 void SvgAnimation::UpdateAttr()
 {
-    CHECK_NULL_VOID(animDeclaration_);
-    SetBegin(animDeclaration_->GetBegin());
-    SetDur(animDeclaration_->GetDur());
-    SetEnd(animDeclaration_->GetEnd());
-    SetRepeatCount(animDeclaration_->GetRepeatCount());
-    Fill fillMode = (animDeclaration_->GetFillMode() == ANIMATION_FILL_MODE_FREEZE ? Fill::FREEZE : Fill::REMOVE);
+    SetBegin(animateAttr_.begin);
+    SetDur(animateAttr_.dur);
+    SetEnd(animateAttr_.end);
+    SetRepeatCount(animateAttr_.repeatCount);
+    Fill fillMode = (animateAttr_.fillMode == ANIMATION_FILL_MODE_FREEZE ? Fill::FREEZE : Fill::REMOVE);
     SetFillMode(fillMode);
-    SetCalcMode(ConvertCalcMode(animDeclaration_->GetCalcMode()));
-    SetValues(animDeclaration_->GetValues());
-    SetKeyTimes(animDeclaration_->GetKeyTimes());
-    SetKeySplines(animDeclaration_->GetKeySplines());
-    SetFrom(animDeclaration_->GetFrom());
-    SetTo(animDeclaration_->GetTo());
-    SetAttributeName(animDeclaration_->GetAttributeName());
+    SetCalcMode(ConvertCalcMode(animateAttr_.calcMode));
+    SetValues(animateAttr_.values);
+    SetKeyTimes(animateAttr_.keyTimes);
+    SetKeySplines(animateAttr_.keySplines);
+    SetFrom(animateAttr_.from);
+    SetTo(animateAttr_.to);
+    SetAttributeName(animateAttr_.attributeName);
 
     if (GetSvgAnimateType() == SvgAnimateType::MOTION) {
-        SetKeyPoints(animDeclaration_->GetKeyPoints());
-        SetPath(animDeclaration_->GetPath());
-        SetRotate(animDeclaration_->GetRotate());
+        SetKeyPoints(animateAttr_.keyPoints);
+        SetPath(animateAttr_.path);
+        SetRotate(animateAttr_.rotate);
     }
     if (GetSvgAnimateType() == SvgAnimateType::TRANSFORM) {
-        SetTransformType(animDeclaration_->GetTransformType());
+        SetTransformType(animateAttr_.transformType);
     }
 }
 

@@ -341,6 +341,9 @@ public:
     {
         return value_;
     }
+
+    void SetCanLoop(bool isLoop);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

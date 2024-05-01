@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/textpicker_model_impl.h"
@@ -90,77 +91,6 @@ TextPickerDialogModel* TextPickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-
-std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args)
-{
-    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
-    if (!args->IsObject()) {
-        return prop;
-    }
-
-    std::optional<CalcDimension> radiusTopLeft;
-    std::optional<CalcDimension> radiusTopRight;
-    std::optional<CalcDimension> radiusBottomLeft;
-    std::optional<CalcDimension> radiusBottomRight;
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-    CalcDimension topLeft;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
-        radiusTopLeft = topLeft;
-    }
-    CalcDimension topRight;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
-        radiusTopRight = topRight;
-    }
-    CalcDimension bottomLeft;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
-        radiusBottomLeft = bottomLeft;
-    }
-    CalcDimension bottomRight;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
-        radiusBottomRight = bottomRight;
-    }
-    if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
-        !radiusBottomRight.has_value()) {
-        return prop;
-    }
-    NG::BorderRadiusProperty borderRadius;
-    if (radiusTopLeft.has_value()) {
-        borderRadius.radiusTopLeft = radiusTopLeft;
-    }
-    if (radiusTopRight.has_value()) {
-        borderRadius.radiusTopRight = radiusTopRight;
-    }
-    if (radiusBottomLeft.has_value()) {
-        borderRadius.radiusBottomLeft = radiusBottomLeft;
-    }
-    if (radiusBottomRight.has_value()) {
-        borderRadius.radiusBottomRight = radiusBottomRight;
-    }
-    borderRadius.multiValued = true;
-    prop = borderRadius;
-
-    return prop;
-}
-
-std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
-{
-    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
-    CalcDimension radiusDim;
-    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        return prop;
-    }
-    if (JSViewAbstract::ParseJsDimensionVpNG(args, radiusDim)) {
-        NG::BorderRadiusProperty borderRadius;
-        borderRadius.SetRadius(radiusDim);
-        borderRadius.multiValued = false;
-        prop = borderRadius;
-    } else if (args->IsObject()) {
-        prop = HandleDifferentRadius(args);
-    }
-    return prop;
-}
-
 void ParseFontOfButtonStyle(const JSRef<JSObject>& pickerButtonParamObject, ButtonInfo& buttonInfo)
 {
     CalcDimension fontSize;
@@ -177,13 +107,13 @@ void ParseFontOfButtonStyle(const JSRef<JSObject>& pickerButtonParamObject, Butt
     }
     auto fontWeight = pickerButtonParamObject->GetProperty("fontWeight");
     if (fontWeight->IsString() || fontWeight->IsNumber()) {
-        buttonInfo.fontWeight = ConvertStrToFontWeight(fontWeight->ToString());
+        buttonInfo.fontWeight = ConvertStrToFontWeight(fontWeight->ToString(), FontWeight::MEDIUM);
     }
     JSRef<JSVal> style = pickerButtonParamObject->GetProperty("fontStyle");
     if (style->IsNumber()) {
         auto value = style->ToNumber<int32_t>();
-        if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
-            buttonInfo.fontStyle = FONT_STYLES[value];
+        if (value >= 0 && value < static_cast<int32_t>(FontStyle::NONE)) {
+            buttonInfo.fontStyle = static_cast<FontStyle>(value);
         }
     }
     JSRef<JSVal> family = pickerButtonParamObject->GetProperty("fontFamily");
@@ -240,6 +170,9 @@ std::vector<ButtonInfo> ParseButtonStyles(const JSRef<JSObject>& paramObject)
         auto acceptButtonStyleParamObject = JSRef<JSObject>::Cast(acceptButtonStyle);
         buttonInfos.emplace_back(ParseButtonStyle(acceptButtonStyleParamObject));
         buttonInfos[0].isAcceptButton = true;
+    } else {
+        ButtonInfo buttonInfo;
+        buttonInfos.emplace_back(buttonInfo);
     }
     auto cancelButtonStyle = paramObject->GetProperty("cancelButtonStyle");
     if (cancelButtonStyle->IsObject()) {
@@ -565,7 +498,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectInternal(const std::vector<NG:
 {
     uint32_t selectedValue = 0;
     for (uint32_t i = 0; i < options.size(); i++) {
-        if ((values.size() > 0 && i > values.size() - 1) || values[i].empty()) {
+        if ((values.size() > 0 && values.size() < i + 1) || values[i].empty()) {
             selectedValues.emplace_back(0);
             continue;
         }
@@ -584,7 +517,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectArrayInternal(
     const std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     for (uint32_t i = 0; i < options.size(); i++) {
-        if (selectedValues.size() > 0 && i > selectedValues.size() - 1) {
+        if (selectedValues.size() > 0 && selectedValues.size() < i + 1) {
             selectedValues.emplace_back(0);
         } else {
             if (selectedValues[i] >= options[i].rangeResult.size()) {
@@ -622,7 +555,7 @@ void JSTextPickerParser::ParseMultiTextArrayValueInternal(
     const std::vector<NG::TextCascadePickerOptions>& options, std::vector<std::string>& values)
 {
     for (uint32_t i = 0; i < options.size(); i++) {
-        if (values.size() > 0 && i > values.size() - 1) {
+        if (values.size() > 0 && values.size() < i + 1) {
             if (options[i].rangeResult.size() > 0) {
                 values.emplace_back(options[i].rangeResult[0]);
             } else {
@@ -778,7 +711,8 @@ void JSTextPickerParser::SetSelectedValues(std::vector<uint32_t>& selectedValues
     if (!isHasSelectAttr && selectedValues[index] == 0 && !values[index].empty()) {
         auto valueIterator = std::find(resultStr.begin(), resultStr.end(), values[index]);
         if (valueIterator != resultStr.end()) {
-            selectedValues[index] = std::distance(resultStr.begin(), valueIterator);
+            auto localDistance = std::distance(resultStr.begin(), valueIterator);
+            selectedValues[index] = localDistance > 0 ? static_cast<uint32_t>(localDistance) : 0;
         }
     }
 }
@@ -1077,7 +1011,7 @@ void JSTextPicker::SetSelectedInternal(
     uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     for (uint32_t i = 0; i < count; i++) {
-        if (selectedValues.size() > 0 && i > selectedValues.size() - 1) {
+        if (selectedValues.size() > 0 && selectedValues.size() < i + 1) {
             selectedValues.emplace_back(0);
         } else {
             if (selectedValues[i] >= options[i].rangeResult.size()) {
@@ -1564,15 +1498,13 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
     }
-    std::vector<ButtonInfo> buttonInfos;
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
-            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTextDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowTextPicker");
 }

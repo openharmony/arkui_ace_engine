@@ -752,21 +752,29 @@ void ToggleButtonPattern::FireBuilder()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!toggleMakeFunc_.has_value()) {
-        host->RemoveChildAtIndex(0);
-        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        auto children = host->GetChildren();
+        for (const auto& child : children) {
+            if (child->GetId() == nodeId_) {
+                host->RemoveChildAndReturnIndex(child);
+                host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+                break;
+            }
+        }
         return;
     }
-    host->RemoveChildAtIndex(0);
-    contentModifierNode_ = BuildContentModifierNode();
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
+    nodeId_ = contentModifierNode_->GetId();
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
-    const auto& renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto buttonPaintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
-    CHECK_NULL_VOID(buttonPaintProperty);
-    auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(ITEM_FILL_COLOR);
-    renderContext->UpdateBackgroundColor(bgColor);
 }
 
 RefPtr<FrameNode> ToggleButtonPattern::BuildContentModifierNode()

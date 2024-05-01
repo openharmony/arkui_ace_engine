@@ -34,7 +34,7 @@ class BaseNode extends __JSBaseNode__ {
         return this.instanceId_;
     }
     updateInstance(uiContext) {
-        this.intanceId_ = uiContext.instanceId_;
+        this.instanceId_ = uiContext.instanceId_;
     }
 }
 /*
@@ -82,13 +82,6 @@ class BuilderNode {
     }
     dispose() {
         this._JSBuilderNode.dispose();
-    }
-    updateInstance(uiContext) {
-        this.uiContext_ = uiContext;
-        this.instanceId_ = uiContext.instanceId_;
-        if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
-            this.frameNode_.updateInstance(uiContext);
-        }
     }
 }
 class JSBuilderNode extends BaseNode {
@@ -328,6 +321,13 @@ class JSBuilderNode extends BaseNode {
         this._nativeRef = null;
         this.frameNode_?.resetNodePtr();
     }
+    updateInstance(uiContext) {
+        this.uiContext_ = uiContext;
+        this.instanceId_ = uiContext.instanceId_;
+        if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
+            this.frameNode_.updateInstance(uiContext);
+        }
+    }
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -349,7 +349,7 @@ class BuilderNodeFinalizationRegisterProxy {
             if (heldValue.name === 'BuilderRootFrameNode') {
                 const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
                 BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
-                builderNode.disposeNode();
+                builderNode.dispose();
             }
         });
     }
@@ -801,6 +801,7 @@ class FrameNode {
     }
     updateInstance(uiContext) {
         this.uiContext_ = uiContext;
+        this.instanceId_ = uiContext.instanceId_;
     }
 }
 class ImmutableFrameNode extends FrameNode {
@@ -929,6 +930,16 @@ const __creatorMap__ = new Map([
                 return new ArkStackComponent(node, type);
             });
         }],
+    ["GridRow", (context) => {
+            return new TypedFrameNode(context, "GridRow", (node, type) => {
+                return new ArkGridRowComponent(node, type);
+            });
+        }],
+    ["GridCol", (context) => {
+            return new TypedFrameNode(context, "GridCol", (node, type) => {
+                return new ArkGridColComponent(node, type);
+            });
+        }],
 ]);
 class TypedNode {
     static createNode(context, type) {
@@ -968,6 +979,11 @@ var LengthUnit;
     LengthUnit[LengthUnit["PERCENT"] = 3] = "PERCENT";
     LengthUnit[LengthUnit["LPX"] = 4] = "LPX";
 })(LengthUnit || (LengthUnit = {}));
+var LengthMetricsUnit;
+(function (LengthMetricsUnit) {
+    LengthMetricsUnit[LengthMetricsUnit["DEFAULT"] = 0] = "DEFAULT";
+    LengthMetricsUnit[LengthMetricsUnit["PX"] = 1] = "PX";
+})(LengthMetricsUnit || (LengthMetricsUnit = {}));
 class LengthMetrics {
     constructor(value, unit) {
         if (unit in LengthUnit) {
@@ -1607,6 +1623,6 @@ class NodeContent extends Content {
 
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
-    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, ShapeMask,
+    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent, TypedNode
 };

@@ -96,6 +96,20 @@ void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->GetGeometryNode()->SetFrameSize(SizeF());
         }
+        PerformMeasureSelf(layoutWrapper);
+    }  else if (pattern->UseContentModifier()) {
+        const auto& childList = layoutWrapper->GetAllChildrenWithBuild();
+        std::list<RefPtr<LayoutWrapper>> list;
+        for (const auto& child : childList) {
+            if (pattern->GetContentModifierNode()->GetId() != child->GetHostNode()->GetId()) {
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+                child->Measure(layoutConstraint);
+                list.push_back(child);
+            }
+        }
+        BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, list);
     } else {
         auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         const auto& content = layoutWrapper->GetGeometryNode()->GetContent();

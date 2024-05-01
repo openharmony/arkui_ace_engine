@@ -400,10 +400,11 @@ void DatePickerColumnPattern::UpdatePickerTextProperties(uint32_t index, uint32_
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
+    uint32_t val = selectedIndex > 0 ? selectedIndex - 1 : 0;
     if (index == selectedIndex) {
         UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
-    } else if ((index == selectedIndex + 1) || (index == static_cast<int32_t>(selectedIndex) - 1)) {
+    } else if ((index == selectedIndex + 1) || (index == val)) {
         UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);
     } else {
         UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, dataPickerRowLayoutProperty);

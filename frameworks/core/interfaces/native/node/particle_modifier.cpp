@@ -51,9 +51,9 @@ void setEmitter(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_I
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::vector<EmitterProps> emitterProps;
+    std::vector<EmitterProperty> emitterProperties;
     for (ArkUI_Int32 i = 0; i < length / 9; i++) {
-        EmitterProps prop;
+        EmitterProperty prop;
 
         //The numbers 0-9 represent each attribute in the object, corresponding to index，hasEmitRate，emitRate,
         //hasPosition，positionX，positionY，hasSize，sizeX，sizeY. Among them, index 1, 3, and 6 are marker values,
@@ -68,16 +68,16 @@ void setEmitter(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_I
         if (values[i * 9 + 6].i32 == 1) {
             prop.size = VectorF(values[i * 9 + 7].f32, values[i * 9 + 8].f32);
         }
-        emitterProps.push_back(prop);
+        emitterProperties.push_back(prop);
     }
-    ParticleModelNG::updateEmitter(emitterProps, frameNode);
+    ParticleModelNG::updateEmitter(emitterProperties, frameNode);
 }
 
 void resetEmitter(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::vector<EmitterProps> dataArray;
+    std::vector<EmitterProperty> dataArray;
     ParticleModelNG::updateEmitter(dataArray, frameNode);
 }
 } // namespace

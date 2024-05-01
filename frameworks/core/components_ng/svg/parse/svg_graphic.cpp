@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 
-#include "core/components/declaration/svg/svg_declaration.h"
 #include "base/utils/utils.h"
+#include "core/components/declaration/svg/svg_declaration.h"
 
 namespace OHOS::Ace::NG {
 void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
@@ -50,7 +50,7 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optiona
 
 void SvgGraphic::UpdateGradient(const Size& viewPort)
 {
-    fillState_ = declaration_->GetFillState();
+    fillState_ = attributes_.fillState;
     auto& gradient = fillState_.GetGradient();
     CHECK_NULL_VOID(gradient);
     auto bounds = AsBounds(viewPort);
@@ -59,14 +59,12 @@ void SvgGraphic::UpdateGradient(const Size& viewPort)
     if (gradient->GetType() == GradientType::LINEAR) {
         const auto& linearGradient = gradient->GetLinearGradient();
         auto gradientInfo = LinearGradientInfo();
-        auto x1 = linearGradient.x1 ? ConvertDimensionToPx(linearGradient.x1.value(), width) : 0.0;
-        gradientInfo.x1 = x1 + bounds.Left();
-        auto y1 = linearGradient.y1 ? ConvertDimensionToPx(linearGradient.y1.value(), height) : 0.0;
-        gradientInfo.y1 = y1 + bounds.Top();
-        auto x2 = ConvertDimensionToPx((linearGradient.x2 ? linearGradient.x2.value() : 1.0_pct), width);
-        gradientInfo.x2 = x2 + bounds.Left();
-        auto y2 = linearGradient.y2 ? ConvertDimensionToPx(linearGradient.y2.value(), height) : 0.0;
-        gradientInfo.y2 = y2 + bounds.Top();
+        gradientInfo.x1 = linearGradient.x1 ? ConvertDimensionToPx(linearGradient.x1.value(), width) : 0.0;
+        gradientInfo.y1 = linearGradient.y1 ? ConvertDimensionToPx(linearGradient.y1.value(), height) : 0.0;
+        gradientInfo.x2 = linearGradient.y1
+                              ? ConvertDimensionToPx((linearGradient.x2 ? linearGradient.x2.value() : 1.0_pct), width)
+                              : 0.0;
+        gradientInfo.y2 = linearGradient.y2 ? ConvertDimensionToPx(linearGradient.y2.value(), height) : 0.0;
         gradient->SetLinearGradientInfo(gradientInfo);
     }
     if (gradient->GetType() == GradientType::RADIAL) {
@@ -195,7 +193,7 @@ void SvgGraphic::SetGradientStyle(double opacity)
 
 bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
 {
-    const auto& strokeState = declaration_->GetStrokeState();
+    const auto& strokeState = attributes_.strokeState;
     auto colorFilter = GetColorFilter();
     if (!colorFilter.has_value() && strokeState.GetColor() == Color::TRANSPARENT) {
         return false;
@@ -254,7 +252,7 @@ bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
 }
 void SvgGraphic::UpdateLineDash()
 {
-    const auto& strokeState = declaration_->GetStrokeState();
+    const auto& strokeState = attributes_.strokeState;
     if (!strokeState.GetLineDash().lineDash.empty()) {
         auto lineDashState = strokeState.GetLineDash().lineDash;
 #ifndef USE_ROSEN_DRAWING

@@ -61,6 +61,8 @@ bool GetPixelMapListFromAnimatedDrawable(JSRef<JSVal> obj, std::vector<RefPtr<Pi
     int32_t& duration, int32_t& iterations);
 #endif
 
+std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args);
+std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
 bool IsDisableEventVersion();
 void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vector<Shadow>& shadows);
 bool IsDrawable(const JSRef<JSVal>& jsValue);

@@ -940,10 +940,10 @@ var NavigationTitleMode;
   NavigationTitleMode[NavigationTitleMode["Mini"] = 2] = "Mini";
 })(NavigationTitleMode || (NavigationTitleMode = {}));
 
-var BarStyle;
+let BarStyle;
 (function (BarStyle) {
-  BarStyle[BarStyle["STANDARD"] = 0] = "STANDARD";
-  BarStyle[BarStyle["STACK"] = 1] = "STACK";
+  BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
+  BarStyle[BarStyle.STACK = 1] = "STACK";
 })(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
@@ -2882,6 +2882,7 @@ var DragPreviewMode;
 (function (DragPreviewMode) {
   DragPreviewMode["AUTO"] = 1;
   DragPreviewMode["DISABLE_SCALE"] = 2;
+  DragPreviewMode["ENABLE_DEFAULT_SHADOW"] = 3;
 })(DragPreviewMode || (DragPreviewMode = {}));
 
 var FoldStatus;
@@ -3019,6 +3020,7 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
   StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
   StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
+  StyledStringKey[StyledStringKey["LINE_HEIGHT"] = 5] = "LINE_HEIGHT";
   StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";

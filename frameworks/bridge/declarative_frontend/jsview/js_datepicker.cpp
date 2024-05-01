@@ -22,6 +22,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/picker_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/timepicker_model_impl.h"
@@ -141,8 +142,6 @@ TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-
 JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -196,75 +195,6 @@ JSRef<JSVal> DatePickerDateChangeEventToJSValue(const DatePickerChangeEvent& eve
     return JSRef<JSVal>::Cast(dateObj);
 }
 
-std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args)
-{
-    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
-    if (!args->IsObject()) {
-        return prop;
-    }
-
-    std::optional<CalcDimension> radiusTopLeft;
-    std::optional<CalcDimension> radiusTopRight;
-    std::optional<CalcDimension> radiusBottomLeft;
-    std::optional<CalcDimension> radiusBottomRight;
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-    CalcDimension topLeft;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
-        radiusTopLeft = topLeft;
-    }
-    CalcDimension topRight;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
-        radiusTopRight = topRight;
-    }
-    CalcDimension bottomLeft;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
-        radiusBottomLeft = bottomLeft;
-    }
-    CalcDimension bottomRight;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
-        radiusBottomRight = bottomRight;
-    }
-    if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
-        !radiusBottomRight.has_value()) {
-        return prop;
-    }
-    NG::BorderRadiusProperty borderRadius;
-    if (radiusTopLeft.has_value()) {
-        borderRadius.radiusTopLeft = radiusTopLeft;
-    }
-    if (radiusTopRight.has_value()) {
-        borderRadius.radiusTopRight = radiusTopRight;
-    }
-    if (radiusBottomLeft.has_value()) {
-        borderRadius.radiusBottomLeft = radiusBottomLeft;
-    }
-    if (radiusBottomRight.has_value()) {
-        borderRadius.radiusBottomRight = radiusBottomRight;
-    }
-    borderRadius.multiValued = true;
-    prop = borderRadius;
-
-    return prop;
-}
-
-std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
-{
-    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
-    CalcDimension radiusDim;
-    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        return prop;
-    }
-    if (JSViewAbstract::ParseJsDimensionVpNG(args, radiusDim)) {
-        NG::BorderRadiusProperty borderRadius;
-        borderRadius.SetRadius(radiusDim);
-        borderRadius.multiValued = false;
-        prop = borderRadius;
-    } else if (args->IsObject()) {
-        prop = HandleDifferentRadius(args);
-    }
-    return prop;
-}
-
 void ParseFontOfButtonStyle(const JSRef<JSObject>& pickerButtonParamObject, ButtonInfo& buttonInfo)
 {
     CalcDimension fontSize;
@@ -281,13 +211,13 @@ void ParseFontOfButtonStyle(const JSRef<JSObject>& pickerButtonParamObject, Butt
     }
     auto fontWeight = pickerButtonParamObject->GetProperty("fontWeight");
     if (fontWeight->IsString() || fontWeight->IsNumber()) {
-        buttonInfo.fontWeight = ConvertStrToFontWeight(fontWeight->ToString());
+        buttonInfo.fontWeight = ConvertStrToFontWeight(fontWeight->ToString(), FontWeight::MEDIUM);
     }
     JSRef<JSVal> style = pickerButtonParamObject->GetProperty("fontStyle");
     if (style->IsNumber()) {
         auto value = style->ToNumber<int32_t>();
-        if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
-            buttonInfo.fontStyle = FONT_STYLES[value];
+        if (value >= 0 && value < static_cast<int32_t>(FontStyle::NONE)) {
+            buttonInfo.fontStyle = static_cast<FontStyle>(value);
         }
     }
     JSRef<JSVal> family = pickerButtonParamObject->GetProperty("fontFamily");
@@ -344,6 +274,9 @@ std::vector<ButtonInfo> ParseButtonStyles(const JSRef<JSObject>& paramObject)
         auto acceptButtonStyleParamObject = JSRef<JSObject>::Cast(acceptButtonStyle);
         buttonInfos.emplace_back(ParseButtonStyle(acceptButtonStyleParamObject));
         buttonInfos[0].isAcceptButton = true;
+    } else {
+        ButtonInfo buttonInfo;
+        buttonInfos.emplace_back(buttonInfo);
     }
     auto cancelButtonStyle = paramObject->GetProperty("cancelButtonStyle");
     if (cancelButtonStyle->IsObject()) {
@@ -1178,13 +1111,11 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     JSDatePicker::ParseTextProperties(paramObj, settingData.properties);
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
-            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowDateDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowDateDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowDatePicker");
 }
@@ -1754,14 +1685,12 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent,
+        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(
-                properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowTimePicker");
 }

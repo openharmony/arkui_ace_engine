@@ -22,12 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-SvgImage::SvgImage() : SvgNode()
-{
-    declaration_ = AceType::MakeRefPtr<SvgImageDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgImage::SvgImage() : SvgNode() {}
 
 RefPtr<SvgNode> SvgImage::Create()
 {
@@ -36,30 +31,28 @@ RefPtr<SvgNode> SvgImage::Create()
 
 void SvgImage::OnDraw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
-    auto declaration = AceType::DynamicCast<SvgImageDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    if (declaration->GetHref().empty()) {
+    if (imageAttr_.href.empty()) {
         LOGW("Svg image href is empty");
         return;
     }
 
-    auto x = ConvertDimensionToPx(declaration->GetX(), viewPort, SvgLengthType::HORIZONTAL);
-    auto y = ConvertDimensionToPx(declaration->GetY(), viewPort, SvgLengthType::VERTICAL);
-    auto width = ConvertDimensionToPx(declaration->GetWidth(), viewPort, SvgLengthType::HORIZONTAL);
-    auto height = ConvertDimensionToPx(declaration->GetHeight(), viewPort, SvgLengthType::VERTICAL);
+    auto x = ConvertDimensionToPx(imageAttr_.x, viewPort, SvgLengthType::HORIZONTAL);
+    auto y = ConvertDimensionToPx(imageAttr_.y, viewPort, SvgLengthType::VERTICAL);
+    auto width = ConvertDimensionToPx(imageAttr_.width, viewPort, SvgLengthType::HORIZONTAL);
+    auto height = ConvertDimensionToPx(imageAttr_.height, viewPort, SvgLengthType::VERTICAL);
     if (LessOrEqual(width, 0.0f) || LessOrEqual(height, 0.0f)) {
         LOGW("Svg image size is illegal");
         return;
     }
 
-    auto srcType = ParseHrefAttr(declaration->GetHref());
+    auto srcType = ParseHrefAttr(imageAttr_.href);
     auto data = std::make_shared<RSData>();
     switch (srcType) {
         case SrcType::BASE64:
-            data = LoadBase64Image(declaration->GetHref());
+            data = LoadBase64Image(imageAttr_.href);
             break;
         case SrcType::ASSET:
-            data = LoadLocalImage(declaration->GetHref());
+            data = LoadLocalImage(imageAttr_.href);
             break;
         default:
             LOGW("Unknown svg href src type");
@@ -164,4 +157,43 @@ RSRect SvgImage::CalcDstRect(const Size& realSize, const Rect& viewBox)
     auto offsetY = viewBox.Top() + spaceY * 0.5f; // 0.5f Align Center
     return RSRect(offsetX, offsetY, realSize.Width() * scaleValue + offsetX, realSize.Height() * scaleValue + offsetY);
 }
+
+bool SvgImage::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgImageAttribute&)> attrs[] = {
+        { DOM_SVG_HEIGHT,
+            [](const std::string& val, SvgImageAttribute& attr) {
+                attr.height = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_HREF,
+            [](const std::string& val, SvgImageAttribute& attr) {
+                attr.href = val;
+            } },
+        { DOM_SVG_WIDTH,
+            [](const std::string& val, SvgImageAttribute& attr) {
+                attr.width = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_X,
+            [](const std::string& val, SvgImageAttribute& attr) {
+                attr.x = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_XLINK_HREF,
+            [](const std::string& val, SvgImageAttribute& attr) {
+                attr.href = val;
+            } },
+        { DOM_SVG_Y,
+            [](const std::string& val, SvgImageAttribute& attr) {
+                attr.y = SvgAttributesParser::ParseDimension(val);
+            } },
+    };
+    std::string key = name;
+    StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, imageAttr_);
+        return true;
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

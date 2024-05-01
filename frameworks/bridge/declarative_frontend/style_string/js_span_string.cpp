@@ -27,8 +27,8 @@
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 namespace OHOS::Ace::Framework {
 const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
-    SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::Image, SpanType::CustomSpan,
-    SpanType::ParagraphStyle };
+    SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::LineHeight,
+    SpanType::Image, SpanType::CustomSpan, SpanType::ParagraphStyle };
 
 void JSSpanString::Constructor(const JSCallbackInfo& args)
 {
@@ -170,6 +170,13 @@ JSRef<JSObject> JSSpanString::CreateJsSpanBaseObject(const RefPtr<SpanBase>& spa
     resultObj->SetProperty<int32_t>("start", spanObject->GetStartIndex());
     resultObj->SetProperty<int32_t>("length", spanObject->GetLength());
     resultObj->SetProperty<int32_t>("styledKey", static_cast<int32_t>(spanObject->GetSpanType()));
+    JSRef<JSObject> obj = CreateJsSpanObject(spanObject);
+    resultObj->SetPropertyObject("styledValue", obj);
+    return resultObj;
+}
+
+JSRef<JSObject> JSSpanString::CreateJsSpanObject(const RefPtr<SpanBase>& spanObject)
+{
     JSRef<JSObject> obj;
     switch (spanObject->GetSpanType()) {
         case SpanType::Font: {
@@ -196,6 +203,10 @@ JSRef<JSObject> JSSpanString::CreateJsSpanBaseObject(const RefPtr<SpanBase>& spa
             obj = CreateJsTextShadowSpan(spanObject);
             break;
         }
+        case SpanType::LineHeight: {
+            obj = CreateJsLineHeightSpan(spanObject);
+            break;
+        }
         case SpanType::Image: {
             obj = CreateJsImageSpan(spanObject);
             break;
@@ -206,12 +217,12 @@ JSRef<JSObject> JSSpanString::CreateJsSpanBaseObject(const RefPtr<SpanBase>& spa
         }
         case SpanType::ParagraphStyle: {
             obj = CreateJsParagraphStyleSpan(spanObject);
+            break;
         }
         default:
             break;
     }
-    resultObj->SetPropertyObject("styledValue", obj);
-    return resultObj;
+    return obj;
 }
 
 JSRef<JSObject> JSSpanString::CreateJsParagraphStyleSpan(const RefPtr<SpanBase>& spanObject)
@@ -284,6 +295,16 @@ JSRef<JSObject> JSSpanString::CreateJsTextShadowSpan(const RefPtr<SpanBase>& spa
     return obj;
 }
 
+JSRef<JSObject> JSSpanString::CreateJsLineHeightSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<LineHeightSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSLineHeightSpan>::NewInstance();
+    auto lineHeightSpan = Referenced::Claim(obj->Unwrap<JSLineHeightSpan>());
+    lineHeightSpan->SetLineHeightSpan(span);
+    return obj;
+}
+
 JSRef<JSObject> JSSpanString::CreateJsImageSpan(const RefPtr<SpanBase>& spanObject)
 {
     auto span = AceType::DynamicCast<ImageSpan>(spanObject);
@@ -318,6 +339,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, Sp
             return ParseJsGestureSpan(start, length, obj);
         case SpanType::TextShadow:
             return ParseJsTextShadowSpan(start, length, obj);
+        case SpanType::LineHeight:
+            return ParseJsLineHeightSpan(start, length, obj);
         case SpanType::Image:
             return GetImageAttachment(start, length, obj);
         case SpanType::ParagraphStyle:
@@ -401,6 +424,17 @@ RefPtr<SpanBase> JSSpanString::ParseJsTextShadowSpan(int32_t start, int32_t leng
     if (textShadowSpan && textShadowSpan->GetTextShadowSpan()) {
         return AceType::MakeRefPtr<TextShadowSpan>(
             textShadowSpan->GetTextShadowSpan()->GetTextShadow(), start, start + length);
+    }
+    return nullptr;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJsLineHeightSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj)
+{
+    auto* base = obj->Unwrap<AceType>();
+    auto* lineHeightSpan = AceType::DynamicCast<JSLineHeightSpan>(base);
+    if (lineHeightSpan && lineHeightSpan->GetLineHeightSpan()) {
+        return AceType::MakeRefPtr<LineHeightSpan>(
+            lineHeightSpan->GetLineHeightSpan()->GetLineHeight(), start, start + length);
     }
     return nullptr;
 }

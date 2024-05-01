@@ -666,5 +666,57 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_GetNodeContentFromNapiValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_SetSize"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_SetItemCount"
+    },    
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_SetCrossCount"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_SetColumnGap"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_SetRowGap"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_SetMargin"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_GetItemCount"
+    },      
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_GetCrossCount"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_GetColumnGap"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_GetRowGap"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_GetMargin"
     }
 ]

@@ -315,4 +315,39 @@ void GaugePattern::OnImageLoadSuccess()
     indicatorIconCanvasImage_ = indicatorIconLoadingCtx_->MoveCanvasImage();
     indicatorIconCanvasImage_->SetPaintConfig(config);
 }
+
+void GaugePattern::ObscureLimitValueText(bool isSensitive)
+{
+    if (minValueTextId_.has_value()) {
+        ObscureText(GetMinValueTextId(), isSensitive);
+    }
+    if (maxValueTextId_.has_value()) {
+        ObscureText(GetMaxValueTextId(), isSensitive);
+    }
+}
+
+void GaugePattern::ObscureText(int32_t valueTextId, bool isSensitive)
+{
+    auto textNode = FrameNode::GetFrameNode(V2::TEXT_ETS_TAG, valueTextId);
+    CHECK_NULL_VOID(textNode);
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (isSensitive) {
+        renderContext->UpdateObscured({ ObscuredReasons::PLACEHOLDER });
+    } else {
+        renderContext->UpdateObscured({});
+    }
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void GaugePattern::OnSensitiveStyleChange(bool isSensitive)
+{
+    ObscureLimitValueText(isSensitive);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto gaugePaintProperty = frameNode->GetPaintProperty<NG::GaugePaintProperty>();
+    CHECK_NULL_VOID(gaugePaintProperty);
+    gaugePaintProperty->UpdateIsSensitive(isSensitive);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 } // namespace OHOS::Ace::NG

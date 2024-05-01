@@ -46,6 +46,7 @@ constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
+const float ERROR_FLOAT_CODE = -1.0f;
 std::string g_strValue;
 
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
@@ -826,6 +827,41 @@ void ResetTextAreaLineSpacing(ArkUINodeHandle node)
     TextFieldModelNG::SetLineSpacing(frameNode, value);
 }
 
+ArkUI_CharPtr GetTextAreaFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = UnParseFontFeatureSetting(TextFieldModelNG::GetFontFeature(frameNode));
+    return g_strValue.c_str();
+}
+
+ArkUI_Float32 GetTextAreaAdaptMinFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetAdaptMinFontSize(frameNode).Value();
+}
+
+ArkUI_Float32 GetTextAreaAdaptMaxFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetAdaptMaxFontSize(frameNode).Value();
+}
+
+ArkUI_Float32 GetTextAreaLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetLineHeight(frameNode).Value();
+}
+
+ArkUI_Int32 GetgetTextAreaMaxLines(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetMaxLines(frameNode);
+}
 void SetTextAreaPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
 {
@@ -1074,7 +1110,9 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         ResetTextAreaHeightAdaptivePolicy, SetTextAreaSelectedBackgroundColor, ResetTextAreaSelectedBackgroundColor,
         SetTextAreaCaretStyle, ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow,
         SetTextAreaTextIndent, ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing,
-        GetTextAreaSelectionMenuHidden, SetTextAreaPadding, ResetTextAreaPadding,
+        GetTextAreaSelectionMenuHidden, GetTextAreaAdaptMinFontSize, GetTextAreaAdaptMaxFontSize,
+        GetTextAreaLineHeight, GetgetTextAreaMaxLines,
+        SetTextAreaPadding, ResetTextAreaPadding, GetTextAreaFontFeature,
         SetTextAreaOnChange, ResetTextAreaOnChange,
         SetTextAreaEnterKeyType, ResetTextAreaEnterKeyType, SetTextAreaInputFilter, ResetTextAreaInputFilter,
         SetTextAreaOnTextSelectionChange, ResetTextAreaOnTextSelectionChange,
@@ -1143,6 +1181,37 @@ void SetOnTextAreaEditChange(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnEditChanged(frameNode, std::move(onChange));
+}
+
+void SetOnTextAreaInputFilterError(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onInputFilterError = [node, extraParam](const std::string& str) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_TEXT_AREA_INPUT_FILTER_ERROR;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetInputFilterError(frameNode, std::move(onInputFilterError));
+}
+
+void SetTextAreaOnTextContentScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScroll = [node, extraParam](float totalOffsetX, float totalOffsetY) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXT_AREA_CONTENT_SCROLL;
+        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetX);
+        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetY);
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onScroll));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

@@ -69,6 +69,7 @@ public:
         paintProperty->propIndicatorIconSourceInfo_ = CloneIndicatorIconSourceInfo();
         paintProperty->propIndicatorSpace_ = CloneIndicatorSpace();
         paintProperty->propIndicatorChange_ = CloneIndicatorChange();
+        paintProperty->propIsSensitive_ = CloneIsSensitive();
         return paintProperty;
     }
 
@@ -89,6 +90,7 @@ public:
         ResetIsShowIndicator();
         ResetIndicatorIconSourceInfo();
         ResetIndicatorSpace();
+        ResetIsSensitive();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -99,6 +101,7 @@ public:
         json->PutExtAttr("min", StringUtils::DoubleToString(propMin_.value_or(0)).c_str(), filter);
         json->PutExtAttr("startAngle", StringUtils::DoubleToString(propStartAngle_.value_or(0)).c_str(), filter);
         json->PutExtAttr("endAngle", StringUtils::DoubleToString(propEndAngle_.value_or(360)).c_str(), filter);
+        json->PutExtAttr("isSensitive", std::to_string(GetIsSensitive().value_or(false)).c_str(), filter);
         if (propStrokeWidth_.has_value()) {
             json->PutExtAttr("strokeWidth", propStrokeWidth_.value().ToString().c_str(), filter);
         } else {
@@ -244,6 +247,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorIconSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorSpace, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorChange, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSensitive, bool, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(GaugePaintProperty);
 };
 

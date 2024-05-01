@@ -346,7 +346,7 @@ void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
 
 void JSTextField::SetInputStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (info.Length() < 1) {
         return;
     }
     auto styleString = info[0]->ToString();

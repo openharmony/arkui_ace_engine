@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -68,6 +69,11 @@ public:
         textRect_ = textRect;
     }
 
+    void SetShowPreviewTextDecoration(bool value);
+    void SetPreviewTextRects(bool value);
+    void SetPreviewTextDecorationColor(const Color& value);
+    void SetPreviewTextStyle(PreviewTextStyle style);
+
 private:
     void PaintSelection(DrawingContext& context) const;
     void PaintCursor(DrawingContext& context) const;
@@ -80,8 +86,11 @@ private:
     std::shared_ptr<RSPath> GetPathByPoints(std::vector<TextPoint> points);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
     void GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius);
+    void PaintPreviewTextDecoration(DrawingContext& context) const;
 
     bool needPaintSelect_ = false;
+    bool needPaintPreviewText = false;
+    PreviewTextStyle previewTextStyle;
     WeakPtr<Pattern> pattern_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
@@ -101,6 +110,9 @@ private:
     InputStyle inputStyle_ = InputStyle::DEFAULT;
     RefPtr<PropertySizeF> frameSize_;
     RefPtr<PropertyBool> changeSelectedRects_;
+    RefPtr<PropertyBool> showPreviewText_;
+    RefPtr<PropertyBool> changePreviewTextRects_;
+    RefPtr<PropertyColor> previewTextDecorationColor_;
     RectF textRect_;
     MagnifierPainter magnifierPainter_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);

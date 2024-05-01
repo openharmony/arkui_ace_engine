@@ -73,11 +73,21 @@ public:
         return MakeRefPtr<TabContentLayoutProperty>();
     }
 
-    void SetTabBar(const std::string& text, const std::string& icon, TabBarBuilderFunc&& builder)
+    void SetTabBar(const std::string& text, const std::string& icon,
+                   const std::optional<TabBarSymbol>& tabBarSymbol, TabBarBuilderFunc&& builder)
     {
         tabBarParam_.SetText(text);
         tabBarParam_.SetIcon(icon);
+        tabBarParam_.SetSymbol(tabBarSymbol);
+        if (tabBarSymbol.has_value()) {
+            symbol_ = tabBarSymbol.value();
+        }
         tabBarParam_.SetBuilder(move(builder));
+    }
+
+    const TabBarSymbol& GetSymbol()
+    {
+        return symbol_;
     }
 
     const TabBarParam& GetTabBarParam() const
@@ -248,7 +258,8 @@ private:
     std::string tabBarInspectorId_;
     BottomTabBarStyle bottomTabBarStyle_;
     RefPtr<FrameNode> customStyleNode_ = nullptr;
-
+    TabBarSymbol symbol_;
+    
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);
 };
 

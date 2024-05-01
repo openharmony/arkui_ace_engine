@@ -121,6 +121,11 @@ const OHOS::Ace::DisplayMode DEFAULT_DISPLAY_MODE = OHOS::Ace::DisplayMode::AUTO
 const TextInputAction DEFAULT_ENTER_KEY_TYPE = TextInputAction::BEGIN;
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const PreviewTextInfo PREVIEW_ONE = {"ni", {-1, -1}};
+const PreviewTextInfo PREVIEW_TWO = {"你", {-1, -1}};
+const PreviewTextInfo PREVIEW_THR = {"hello", {0, 5}};
+const PreviewTextInfo PREVIEW_FOR = {"ab", {0, 2}};
+const PreviewTextInfo PREVIEW_BAD_DATA = {"bad", {0, -1}};
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;
@@ -5223,5 +5228,135 @@ HWTEST_F(TextFieldUXTest, IsPointInRect, TestSize.Level1)
     point = OffsetF(-1.0f, -1.0f);
     ret = pattern_->selectOverlay_->IsPointInRect(point, leftBottom, rightBottom, rightTop, leftTop);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SetPreviewTextOperation001
+ * @tc.desc: Test set preview text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, SetPreviewTextOperation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    EXPECT_EQ(pattern_->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size()));
+
+    /**
+     * @tc.steps: Set caretPosition and call SetPreviewTextOperation
+     */
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(0);
+    pattern_->SetPreviewTextOperation(PREVIEW_ONE);
+
+    /**
+     * @tc.expected: Check if the text and cursor position are correct
+     */
+    EXPECT_EQ(pattern_->GetTextValue(), "niabcdefghijklmnopqrstuvwxyz");
+    EXPECT_EQ(controller->GetCaretIndex(), 2);
+
+    /**
+     * @tc.steps:step2 continue call SetPreviewTextOperation
+     */
+    pattern_->SetPreviewTextOperation(PREVIEW_TWO);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.expected: Check if the text and cursor position are correct
+     */
+    EXPECT_EQ(pattern_->GetTextValue(), "你abcdefghijklmnopqrstuvwxyz");
+    EXPECT_EQ(controller->GetCaretIndex(), 1);
+    pattern_->FinishTextPreview();
+}
+/**
+ * @tc.name: SetPreviewTextOperation002
+ * @tc.desc: Test set preview text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, SetPreviewTextOperation002, TestSize.Level1)
+{
+        /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    EXPECT_EQ(pattern_->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size()));
+
+    /**
+     * @tc.steps: Set caretPosition and call SetPreviewTextOperation
+     */
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(0);
+    pattern_->SetPreviewTextOperation(PREVIEW_THR);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.expected: Check if the text and cursor position are correct
+     */
+    EXPECT_EQ(pattern_->GetTextValue(), "hellofghijklmnopqrstuvwxyz");
+    EXPECT_EQ(controller->GetCaretIndex(), 5);
+
+    /**
+     * @tc.steps:step2 continue call SetPreviewTextOperation
+     */
+    pattern_->SetPreviewTextOperation(PREVIEW_FOR);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.expected: Check if the text and cursor position are correct
+     */
+    EXPECT_EQ(pattern_->GetTextValue(), "abllofghijklmnopqrstuvwxyz");
+    EXPECT_EQ(controller->GetCaretIndex(), 2);
+}
+/**
+ * @tc.name: CheckPreviewTextValidate001
+ * @tc.desc: Test CheckPreviewTextValidate before set preview text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, CheckPreviewTextValidate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    EXPECT_EQ(pattern_->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size()));
+
+    /**
+     * @tc.expected: call CheckPreviewTextValidate and check return false
+     */
+    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_BAD_DATA}));
+    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
+
+    /**
+     * @tc.steps:Set select and call CheckPreviewTextValidate
+     * @tc.expected: check return false
+     */
+    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_BAD_DATA}));
+    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
+
+    /**
+     * @tc.steps:Set caretPosition and call CheckPreviewTextValidate
+     * @tc.expected: check return true
+     */
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(5);
+    pattern_->HandleSelectionLeftWord();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
 }
 } // namespace OHOS::Ace::NG

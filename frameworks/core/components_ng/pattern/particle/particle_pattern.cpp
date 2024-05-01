@@ -77,7 +77,7 @@ void ParticlePattern::UpdateDisturbance(const std::vector<ParticleDisturbance>& 
     RosenRenderParticle::UpdateDisturbance(frameNode, disturbanceArray);
 }
 
-void ParticlePattern::updateEmitterPosition(const std::vector<EmitterProps>& props)
+void ParticlePattern::updateEmitterPosition(const std::vector<EmitterProperty>& props)
 {
     auto frameNode = GetHost();
     RosenRenderParticle::updateEmitterPosition(frameNode, props);

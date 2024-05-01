@@ -351,6 +351,20 @@ bool ParseMotionPath(const JSRef<JSVal>& jsValue, MotionPathOption& option)
     return true;
 }
 
+void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
+{
+    if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::AUTO)) {
+        previewOption.ResetDragPreviewMode();
+        isAuto = true;
+        return;
+    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
+        previewOption.isScaleEnabled = false;
+    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
+        previewOption.isDefaultShadowEnabled = true;
+    }
+    isAuto = false;
+}
+
 void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
     BackgroundImagePosition& bgImgPosition)
 {
@@ -4747,7 +4761,7 @@ bool JSViewAbstract::ParseJsLengthNG(
     } else if (jsValue->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> value = jsObj->GetProperty("value");
-        if (value->IsNull() || (value->IsNumber() && std::isnan(value->ToNumber<double>()))) {
+        if (value->IsNull() || (value->IsNumber() && std::isnan(value->ToNumber<double>())) || value->IsUndefined()) {
             return false;
         }
         DimensionUnit unit = defaultUnit;
@@ -5376,6 +5390,43 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
     return false;
 }
 
+void JSViewAbstract::SetTabBarSymbolOptionApply(const JSCallbackInfo& info, TabBarSymbol& symbolApply,
+    const JSRef<JSVal>& modifierNormalObj, const JSRef<JSVal>& modifierSelectedObj)
+{
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        return;
+    }
+    if (modifierNormalObj->IsUndefined()) {
+        symbolApply.onApply = nullptr;
+    } else {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+        auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            modifierNormal = std::move(modifierNormalObj),
+                            modifierSelected = std::move(modifierSelectedObj)](
+                            WeakPtr<NG::FrameNode> frameNode, std::string type) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto node = frameNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            JSRef<JSVal> params[SECOND_INDEX];
+            if (type == "normal") {
+                params[0] = modifierNormal;
+            } else if (!modifierSelected->IsUndefined()) {
+                params[0] = modifierSelected;
+            }
+            params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(SECOND_INDEX, params);
+        };
+        symbolApply.onApply = onApply;
+    }
+}
+
 bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
 {
     if (!jsValue->IsBoolean() && !jsValue->IsObject()) {
@@ -5746,11 +5797,19 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
     NG::DragPreviewOption previewOption;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
+    bool isAuto = true;
     if (mode->IsNumber()) {
-        int32_t modeValue = mode->ToNumber<int>();
-        if (modeValue >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
-            modeValue <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
-            previewOption.mode = static_cast<NG::DragPreviewMode>(modeValue);
+        ParseDragPreviewMode(previewOption, mode->ToNumber<int>(), isAuto);
+    } else if (mode->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(mode);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            if (value->IsNumber()) {
+                ParseDragPreviewMode(previewOption, value->ToNumber<int>(), isAuto);
+            }
+            if (isAuto) {
+                break;
+            }
         }
     }
 
@@ -5779,7 +5838,7 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
             previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
         }
     }
-    
+
     JSViewAbstract::SetDragPreviewOptionApply(info, previewOption);
 
     return previewOption;

@@ -183,6 +183,22 @@ public:
         return anti_;
     }
 
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
+    double GetDensity()
+    {
+        ContainerScope scope(instanceId_);
+        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+    }
+
     void SetInstanceId(int32_t id)
     {
         instanceId_ = id;
@@ -221,6 +237,7 @@ private:
     bool isInitializeShadow_ = false;
     bool isOffscreenInitializeShadow_ = false;
     Dimension GetDimensionValue(const std::string& str);
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 
 } // namespace OHOS::Ace::Framework

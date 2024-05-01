@@ -76,6 +76,11 @@ public:
         }
         toggleMakeFunc_ = std::move(toggleMakeFunc);
     }
+
+    int32_t GetBuilderId()
+    {
+        return nodeId_;
+    }
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnClick();
@@ -118,6 +123,7 @@ private:
     RefPtr<FrameNode> contentModifierNode_;
     void SetIsFocus(bool isFocus);
     RefPtr<TouchEventImpl> touchListener_;
+    int32_t nodeId_ = -1;
 
     RefPtr<ClickEvent> clickListener_;
     std::optional<bool> isOn_;

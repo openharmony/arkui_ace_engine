@@ -82,6 +82,29 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
     return size;
 }
 
+void RadioLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->UseContentModifier()) {
+        BoxLayoutAlgorithm::Measure(layoutWrapper);
+        return;
+    }
+    auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    if (content) {
+        auto contentSize = content->GetRect().GetSize();
+        childConstraint.maxSize.SetSizeT(contentSize);
+        childConstraint.percentReference.SetSizeT(contentSize);
+    }
+    for (auto &&child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(childConstraint);
+    }
+    PerformMeasureSelf(layoutWrapper);
+}
+
 void RadioLayoutAlgorithm::InitializeParam()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -90,13 +113,19 @@ void RadioLayoutAlgorithm::InitializeParam()
     CHECK_NULL_VOID(radioTheme);
     defaultWidth_ = radioTheme->GetWidth().ConvertToPx();
     defaultHeight_ = radioTheme->GetHeight().ConvertToPx();
-    horizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding().ConvertToPx();
-    verticalPadding_ = radioTheme->GetHotZoneVerticalPadding().ConvertToPx();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        horizontalPadding_ = radioTheme->GetDefaultPaddingSize().ConvertToPx();
+        verticalPadding_ = radioTheme->GetDefaultPaddingSize().ConvertToPx();
+    } else {
+        horizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding().ConvertToPx();
+        verticalPadding_ = radioTheme->GetHotZoneVerticalPadding().ConvertToPx();
+    }
 }
 
 void RadioLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    BoxLayoutAlgorithm::Layout(layoutWrapper);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);

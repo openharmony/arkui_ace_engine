@@ -83,6 +83,11 @@ enum LengthUnit {
   LPX = 4,
 }
 
+enum LengthMetricsUnit {
+  DEFAULT = 0,
+  PX = 1,
+}
+
 type EdgeWidths = EdgesT<Number>;
 
 type EdgeColors = EdgesT<Number>;

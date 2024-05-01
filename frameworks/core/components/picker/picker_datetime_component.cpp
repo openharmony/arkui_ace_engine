@@ -216,7 +216,7 @@ void PickerDateTimeComponent::OnDataLinking(const std::string& tag, bool isAdd, 
     if (tag == PICKER_MONTHDAY_COLUMN) {
         // linked by month day column itself.
         auto days = currentDate_.ToDays();
-        days = (isAdd ? days + 1 : days - 1); // add one day or reduce one day.
+        days = (isAdd ? days + 1 : (days ? days - 1 : 0)); // add one day or reduce one day.
         PickerDate date;
         date.FromDays(days);
         FillSolarLunarDays(lunar_, date);

@@ -135,6 +135,7 @@ private:
     void PaintHandleHold(RSCanvas& canvas, const RectF& handleRect, const OffsetF& startPoint,
         const OffsetF& endPoint);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
+    Color GetDragBackgroundColor(const Color& defaultColor);
 
     DragAnimType type_ = DragAnimType::DEFAULT;
     const WeakPtr<TextPattern> hostPattern_;
