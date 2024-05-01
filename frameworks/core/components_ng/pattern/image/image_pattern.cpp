@@ -623,6 +623,7 @@ void ImagePattern::OnAnimatedModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ChangeRenderContextProperties();
     Pattern::OnModifyDone();
     auto size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
@@ -685,6 +686,7 @@ void ImagePattern::ControlAnimation(int32_t index)
 
 void ImagePattern::OnImageModifyDone()
 {
+    ChangeRenderContextProperties();
     Pattern::OnModifyDone();
     LoadImageDataIfNeed();
     UpdateGestureAndDragWhenModify();
@@ -916,20 +918,16 @@ void ImagePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderCtx = host->GetRenderContext();
-    if (isAnimation_) {
-        CHECK_NULL_VOID(renderCtx);
-        renderCtx->SetClipToFrame(true);
-    } else {
-        renderCtx->SetClipToBounds(false);
-        renderCtx->SetUsingContentRectForRenderFrame(true);
+    CHECK_NULL_VOID(renderCtx);
+    renderCtx->SetClipToBounds(false);
+    renderCtx->SetUsingContentRectForRenderFrame(true);
 
-        // register image frame node to pipeline context to receive memory level notification and window state change
-        // notification
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
-        pipeline->AddWindowStateChangedCallback(host->GetId());
-    }
+    // register image frame node to pipeline context to receive memory level notification and window state change
+    // notification
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+    pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1921,6 +1919,23 @@ void ImagePattern::SetImageFit(const RefPtr<FrameNode>& imageFrameNode)
     if (layoutProperty->HasImageFit()) {
         imageLayoutProperty->UpdateImageFit(layoutProperty->GetImageFit().value());
     }
+}
+
+void ImagePattern::ChangeRenderContextProperties()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderCtx = host->GetRenderContext();
+    CHECK_NULL_VOID(renderCtx);
+
+    if (isAnimation_) {
+        renderCtx->SetClipToBounds(true);
+        renderCtx->SetUsingContentRectForRenderFrame(false);
+    } else {
+        renderCtx->SetClipToBounds(false);
+        renderCtx->SetUsingContentRectForRenderFrame(true);
+    }
+    renderCtx->SyncGeometryProperties(nullptr);
 }
 
 void ImagePattern::SetObscured()
