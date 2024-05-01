@@ -113,6 +113,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
             !NearEqual(sheetOffsetY_, sheetLayoutAlgorithm->GetSheetOffsetY())) {
             sheetOffsetX_ = sheetLayoutAlgorithm->GetSheetOffsetX();
             sheetOffsetY_ = sheetLayoutAlgorithm->GetSheetOffsetY();
+            arrowOffset_ = OffsetF(sheetLayoutAlgorithm->GetArrowOffsetX(), .0f);
             windowChanged_ = true;
         }
     }
@@ -1406,18 +1407,17 @@ void SheetPresentationPattern::SetColumnMinSize(bool reset)
 
 std::string SheetPresentationPattern::GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius)
 {
-    float half = 0.5f;
     std::string path = MoveTo(0.0f, SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius.ConvertToPx());
     path += ArcTo(sheetRadius.ConvertToPx(), sheetRadius.ConvertToPx(), 0.0f, 0, sheetRadius.ConvertToPx(),
         SHEET_ARROW_HEIGHT.ConvertToPx());
-    path += LineTo(sheetSize.Width() * half - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx(),
+    path += LineTo(arrowOffset_.GetX() - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx(),
         SHEET_ARROW_HEIGHT.ConvertToPx()); // P1
-    path += LineTo(sheetSize.Width() * half - ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx(),
+    path += LineTo(arrowOffset_.GetX() - ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx(),
         SHEET_ARROW_HEIGHT.ConvertToPx() - ARROW_VERTICAL_P2_OFFSET_Y.ConvertToPx()); // P2
     path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
-        sheetSize.Width() * half + ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx(),
+        arrowOffset_.GetX() + ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx(),
         SHEET_ARROW_HEIGHT.ConvertToPx() - ARROW_VERTICAL_P4_OFFSET_Y.ConvertToPx()); // P4
-    path += LineTo(sheetSize.Width() * half + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx(),
+    path += LineTo(arrowOffset_.GetX() + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx(),
         SHEET_ARROW_HEIGHT.ConvertToPx()); // P5
     path += LineTo(sheetSize.Width() - sheetRadius.ConvertToPx(), SHEET_ARROW_HEIGHT.ConvertToPx());
     path += ArcTo(sheetRadius.ConvertToPx(), sheetRadius.ConvertToPx(), 0.0f, 0, sheetSize.Width(),
