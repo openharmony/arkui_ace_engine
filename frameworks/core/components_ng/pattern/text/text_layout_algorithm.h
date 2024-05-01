@@ -114,6 +114,7 @@ private:
     void UpdateSensitiveContent(std::string& content);
     bool AdaptMaxTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
+    void ResetAiSpanTextStyle(const RefPtr<FrameNode>& frameNode, TextStyle& aiSpanTextStyle);
 
     std::optional<TextStyle> textStyle_;
     RefPtr<PropertyBool> showSelect_;

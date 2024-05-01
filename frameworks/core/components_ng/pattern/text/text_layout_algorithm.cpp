@@ -19,6 +19,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
@@ -186,8 +187,6 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
     CHECK_NULL_VOID(layoutProperty);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     auto textForAI = pattern->GetTextForAI();
@@ -199,12 +198,7 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
     dragSpanPosition.dragEnd = pattern->GetRecoverEnd();
     bool isDragging = pattern->IsDragging();
     TextStyle aiSpanTextStyle = textStyle;
-    auto hyerlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
-    CHECK_NULL_VOID(hyerlinkTheme);
-    auto hyerlinkColor = hyerlinkTheme->GetTextColor();
-    aiSpanTextStyle.SetTextColor(hyerlinkColor);
-    aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-    aiSpanTextStyle.SetTextDecorationColor(hyerlinkColor);
+    ResetAiSpanTextStyle(frameNode, aiSpanTextStyle);
     for (auto kv : pattern->GetAISpanMap()) {
         if (preEnd >= wTextForAILength) {
             break;
@@ -229,6 +223,19 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
         dragSpanPosition.spanEnd = wTextForAILength;
         GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, isDragging, paragraph);
     }
+}
+
+void TextLayoutAlgorithm::ResetAiSpanTextStyle(const RefPtr<FrameNode>& frameNode, TextStyle& aiSpanTextStyle)
+{
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto hyerlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(hyerlinkTheme);
+    auto hyerlinkColor = hyerlinkTheme->GetTextColor();
+    aiSpanTextStyle.SetTextColor(hyerlinkColor);
+    aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
+    aiSpanTextStyle.SetTextDecorationColor(hyerlinkColor);
+    aiSpanTextStyle.SetTextDecorationStyle(TextDecorationStyle::SOLID);
 }
 
 void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring wTextForAI,

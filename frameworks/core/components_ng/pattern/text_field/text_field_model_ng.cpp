@@ -59,6 +59,7 @@ void TextFieldModelNG::CreateNode(
     if (!isTextArea) {
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+        pattern->SetTextInputFlag(true);
     } else {
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(Infinity<uint32_t>());
     }
