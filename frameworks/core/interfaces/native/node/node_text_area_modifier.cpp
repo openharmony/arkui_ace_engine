@@ -1183,6 +1183,24 @@ void SetOnTextAreaEditChange(ArkUINodeHandle node, void* extraParam)
     TextFieldModelNG::SetOnEditChanged(frameNode, std::move(onChange));
 }
 
+void SetOnTextAreaContentSizeChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [node, extraParam](float width, float height) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXTAREA_CONTENT_SIZE_CHANGE;
+        //0 width
+        event.componentAsyncEvent.data[0].f32 = width;
+        //1 height
+        event.componentAsyncEvent.data[1].f32 = height;
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnContentSizeChange(frameNode, std::move(onChange));
+}
+
 void SetOnTextAreaInputFilterError(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

@@ -168,6 +168,7 @@ public:
     static void SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void SetTextFieldText(FrameNode* frameNode, const std::string& value);
     static void SetTextFieldPlaceHolder(FrameNode* frameNode, const std::string& placeholder);

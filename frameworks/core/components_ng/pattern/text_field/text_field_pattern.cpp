@@ -464,6 +464,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         needToRefreshSelectOverlay_ = false;
     }
     paragraphWidth_ = paragraphWidth;
+    HandleContentSizeChange(textRect);
     textRect_ = textRect;
 
     if (textFieldContentModifier_) {
@@ -507,6 +508,24 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         }
     }
     return true;
+}
+
+void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
+{
+    if (textRect_ == textRect) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (eventHub->GetOnContentSizeChange()) {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterLayoutTask([textRect, eventHub]() {
+            eventHub->FireOnContentSizeChange(textRect.Width(), textRect.Height());
+        });
+    }
 }
 
 void TextFieldPattern::ProcessOverlayAfterLayout(bool isGlobalAreaChanged)

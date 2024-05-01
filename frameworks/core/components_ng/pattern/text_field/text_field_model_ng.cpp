@@ -1185,6 +1185,14 @@ void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(cons
     eventHub->SetOnChange(std::move(func));
 }
 
+void TextFieldModelNG::SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnContentSizeChange(std::move(func));
+}
+
 void TextFieldModelNG::SetTextFieldText(FrameNode* frameNode, const std::string& value)
 {
     CHECK_NULL_VOID(frameNode);

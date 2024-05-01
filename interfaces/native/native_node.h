@@ -4516,6 +4516,19 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_ON_EDIT_CHANGE,
+
+    /**
+     * @brief textInput输入内容发生变化时触发该事件。
+     *
+     * 触发该事件的条件：输入内容发生变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>：表示文本的宽度。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：表示文本的高度。\n
+     *
+     */
+    NODE_TEXT_INPUT_ON_CONTENT_SIZE_CHANGE,
+
     /**
      * @brief Defines the event triggered when matching with the regular expression specified by
      * <b>NODE_TEXT_INPUT_INPUT_FILTER</b> fails.
@@ -4617,6 +4630,18 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_CONTENT_SCROLL,
+
+    /**
+     * @brief textArea输入内容发生变化时触发该事件。
+     *
+     * 触发该事件的条件：输入内容发生变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>：表示文本的宽度。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：表示文本的高度。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_CONTENT_SIZE_CHANGE,
 
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
@@ -5736,6 +5761,14 @@ typedef struct {
      * @return Returns <b>0</b> if the operation is successful; returns <b>401</b> if a parameter error occurs.
      */
     int32_t (*setLengthMetricUnit)(ArkUI_NodeHandle node, ArkUI_LengthMetricUnit unit);
+
+     /**
+     * @brief 获取父节点。
+     *
+     * @param node 目标节点对象。
+     * @return 返回组件的指针，如果没有返回NULL
+     */
+    ArkUI_NodeHandle (*getParent)(ArkUI_NodeHandle node);
 } ArkUI_NativeNodeAPI_1;
 
 /**
