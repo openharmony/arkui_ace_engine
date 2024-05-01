@@ -33,6 +33,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -70,6 +71,9 @@ constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr float SPRING_RESPONSE = 0.416f;
 constexpr float SPRING_DAMPING_FRACTION = 0.73f;
 constexpr Dimension PIXELMAP_BORDER_RADIUS = 16.0_vp;
+constexpr Dimension PREVIEW_BORDER_RADIUS = 12.0_vp;
+constexpr float BLUR_SIGMA_SCALE = 0.57735f;
+constexpr float SCALE_HALF = 0.5f;
 constexpr float DEFAULT_ANIMATION_SCALE = 0.95f;
 constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
 constexpr float DEFAULT_OPACITY = 0.95f;
@@ -773,6 +777,14 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     if (dragPreviewOption.options.shadow.has_value()) {
         imageContext->UpdateBackShadow(dragPreviewOption.options.shadow.value());
     }
+    if (dragPreviewOption.options.borderRadius.has_value()) {
+        imageContext->UpdateBorderRadius(dragPreviewOption.options.borderRadius.value());
+        imageContext->UpdateClipEdge(true);
+    }
+    auto optionsFromModifier = frameNode->GetDragPreviewOption().options;
+    if (optionsFromModifier.blurbgEffect.backGroundEffect.radius.IsValid()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundEffect, optionsFromModifier.blurbgEffect.backGroundEffect, frameNode);
+    }
 }
 
 void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode)
@@ -1026,8 +1038,25 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
         options.shadow = shadow;
     }
 
+    auto borderRadius = imageContext->GetBorderRadius();
+    if (borderRadius.has_value()) {
+        options.borderRadius = borderRadius;
+    }
+
     // get the old preview option
     DragPreviewOption dragPreviewOption = frameNode->GetDragPreviewOption();
+    auto bgEffect = imageContext->GetBackgroundEffect();
+    if (bgEffect.has_value()) {
+        options.blurbgEffect.backGroundEffect = bgEffect.value();
+    } else {
+        auto blurstyletmp = imageContext->GetBackBlurStyle();
+        if (blurstyletmp.has_value()) {
+            bgEffect = BrulStyleToEffection(blurstyletmp);
+            if (bgEffect.has_value()) {
+                options.blurbgEffect.backGroundEffect = bgEffect.value();
+            }
+        }
+    }
     dragPreviewOption.options = options; // replace the options with the new one after applied
     frameNode->SetDragPreviewOptions(dragPreviewOption);
 }
@@ -1041,7 +1070,44 @@ void DragEventActuator::UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& 
     } else {
         dragPreviewOption.options.shadow = std::nullopt;
     }
+    if (dragPreviewOption.isDefaultRadiusEnabled) {
+        dragPreviewOption.options.borderRadius = GetDefaultBorderRadius();
+    } else {
+        dragPreviewOption.options.borderRadius = std::nullopt;
+    }
     frameNode->SetDragPreviewOptions(dragPreviewOption); // replace the options with the new one
+}
+
+float DragEventActuator::RadiusToSigma(float radius)
+{
+    return GreatNotEqual(radius, 0.0f) ? BLUR_SIGMA_SCALE * radius + SCALE_HALF : 0.0f;
+}
+
+std::optional<EffectOption> DragEventActuator::BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
+    if (!blurStyleTheme) {
+        LOGW("cannot find theme of blurStyle, create blurStyle failed");
+        return std::nullopt;
+    }
+    ThemeColorMode colorMode = blurStyleOp->colorMode;
+    if (blurStyleOp->colorMode == ThemeColorMode::SYSTEM) {
+        colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
+    }
+    auto blurParam = blurStyleTheme->GetBlurParameter(blurStyleOp->blurStyle, colorMode);
+    CHECK_NULL_RETURN(blurParam, std::nullopt);
+    auto ratio = blurStyleOp->scale;
+    auto maskColor = blurParam->maskColor.BlendOpacity(ratio);
+    auto radiusPx = blurParam->radius * pipeline->GetDipScale();
+    auto radiusBlur = RadiusToSigma(radiusPx) * ratio;
+    auto saturation = (blurParam->saturation - 1) * ratio + 1.0;
+    auto brightness = (blurParam->brightness - 1) * ratio + 1.0;
+    Dimension dimen(radiusBlur);
+    EffectOption bgEffection = {dimen, saturation, brightness, maskColor,
+        blurStyleOp->adaptiveColor, blurStyleOp->blurOption};
+    return std::optional<EffectOption>(bgEffection);
 }
 
 void DragEventActuator::ApplyNewestOptionExecutedFromModifierToNode(
@@ -1049,12 +1115,20 @@ void DragEventActuator::ApplyNewestOptionExecutedFromModifierToNode(
 {
     auto optionsFromModifier = targetNode->GetDragPreviewOption().options;
     ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, optionsFromModifier.opacity, targetNode);
-
+    if (optionsFromModifier.blurbgEffect.backGroundEffect.radius.IsValid()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundEffect, optionsFromModifier.blurbgEffect.backGroundEffect, targetNode);
+    }
     if (optionsFromModifier.shadow.has_value()) {
         // if shadow is unfilled, set shadow after animation
         if (optionsFromModifier.shadow->GetIsFilled()) {
             ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, optionsFromModifier.shadow.value(), targetNode);
         }
+    }
+
+    const auto& target = targetNode->GetRenderContext();
+    if (optionsFromModifier.borderRadius.has_value()) {
+        target->UpdateBorderRadius(optionsFromModifier.borderRadius.value());
+        target->UpdateClipEdge(true);
     }
 }
 
@@ -1921,6 +1995,27 @@ std::optional<Shadow> DragEventActuator::GetDefaultShadow()
     auto shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingSM, colorMode);
     shadow.SetIsFilled(true);
     return shadow;
+}
+
+void DragEventActuator::PrepareRadiusParametersForDragData(const RefPtr<FrameNode>& frameNode,
+    std::unique_ptr<JsonValue>& arkExtraInfoJson)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(arkExtraInfoJson);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    auto borderRadius = dragPreviewOption.options.borderRadius;
+    if (borderRadius.has_value()) {
+        if (borderRadius.value().radiusTopLeft.has_value()) {
+            arkExtraInfoJson->Put("drag_corner_radius", borderRadius.value().radiusTopLeft.value().Value());
+        }
+    }
+}
+
+std::optional<BorderRadiusProperty> DragEventActuator::GetDefaultBorderRadius()
+{
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(PREVIEW_BORDER_RADIUS);
+    return borderRadius;
 }
 
 void DragEventActuator::ShowPreviewBadgeAnimation(

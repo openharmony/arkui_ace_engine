@@ -24,6 +24,7 @@
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 #include "core/gestures/drag_event.h"
+#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -217,8 +218,11 @@ public:
     RefPtr<FrameNode> GetFrameNode();
     static void PrepareShadowParametersForDragData(const RefPtr<FrameNode>& frameNode,
        std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale);
+    static void PrepareRadiusParametersForDragData(const RefPtr<FrameNode>& frameNode,
+        std::unique_ptr<JsonValue>& arkExtraInfoJson);
     static void ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonValue>& arkExtraInfoJson);
     static std::optional<Shadow> GetDefaultShadow();
+    static std::optional<BorderRadiusProperty> GetDefaultBorderRadius();
 
     inline static void FlushSyncGeometryNodeTasks();
 
@@ -239,6 +243,8 @@ private:
     // check the current node's status to decide if it can initiate one drag operation
     bool IsCurrentNodeStatusSuitableForDragging(
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+    std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
+    float RadiusToSigma(float radius);
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;

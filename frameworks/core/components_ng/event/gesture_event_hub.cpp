@@ -1024,8 +1024,13 @@ void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode,
     std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale)
 {
     double opacity = frameNode->GetDragPreviewOption().options.opacity;
+    auto optionInfo = frameNode->GetDragPreviewOption().options;
     arkExtraInfoJson->Put("dip_opacity", opacity);
+    if (optionInfo.blurbgEffect.backGroundEffect.radius.IsValid()) {
+        optionInfo.blurbgEffect.ToJsonValue(arkExtraInfoJson);
+    }
     DragEventActuator::PrepareShadowParametersForDragData(frameNode, arkExtraInfoJson, scale);
+    DragEventActuator::PrepareRadiusParametersForDragData(frameNode, arkExtraInfoJson);
 }
 
 int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>& context)

@@ -142,6 +142,7 @@ ohos_source_set("ace_components_event") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
+    "$ace_root/frameworks/core/components/theme/blur_style_theme.cpp",
     "$ace_root/frameworks/core/components_ng/event/click_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/drag_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
