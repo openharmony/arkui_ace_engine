@@ -17,45 +17,36 @@
 #include <map>
 #include <memory>
 
-#include "gtest/gtest.h"
+#ifndef TEST_SEGMENTED_WATER_FLOW
 #include "test/mock/base/mock_system_properties.h"
+#endif
 #include "test/mock/core/rosen/mock_canvas.h"
-#include "water_flow_item_maps.h"
 
-#include "base/utils/system_properties.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/property/property.h"
 
 #define protected public
 #define private public
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/unittest/core/pattern/test_ng.h"
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/constants.h"
 #undef private
 #undef protected
 

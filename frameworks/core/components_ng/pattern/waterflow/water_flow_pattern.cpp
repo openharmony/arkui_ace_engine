@@ -26,8 +26,6 @@
 #include "core/components_ng/pattern/waterflow/water_flow_segmented_layout.h"
 
 namespace OHOS::Ace::NG {
-using LayoutMode = WaterFlowLayoutMode;
-
 SizeF WaterFlowPattern::GetContentSize() const
 {
     auto host = GetHost();

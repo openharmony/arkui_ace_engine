@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
@@ -42,7 +42,12 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void UpdateScrollBarOffset() override;
 
-    void SetLayoutMode(WaterFlowLayoutMode mode);
+    using LayoutMode = WaterFlowLayoutMode;
+    void SetLayoutMode(LayoutMode mode);
+    LayoutMode GetLayoutMode() const
+    {
+        return layoutMode_;
+    }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
@@ -162,7 +167,7 @@ private:
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
     std::optional<int32_t> targetIndex_;
-    WaterFlowLayoutMode layoutMode_ = WaterFlowLayoutMode::TOP_DOWN;
+    LayoutMode layoutMode_ = LayoutMode::TOP_DOWN;
     RefPtr<WaterFlowLayoutInfoBase> layoutInfo_ = WaterFlowLayoutInfoBase::Create(layoutMode_);
     RefPtr<WaterFlowSections> sections_;
 

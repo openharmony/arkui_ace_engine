@@ -305,4 +305,34 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll002, TestSize.Level1)
     EXPECT_EQ(scrollState, willScrollState);
     EXPECT_EQ(scrollState, didScrollState);
 }
+
+/**
+ * @tc.name: ModifyItem001
+ * @tc.desc: Test WaterFlow reacting to child height change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ModifyItem002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Calling the ScrollToIndex interface to set values to 20 and true.
+     * @tc.expected: pattern_->targetIndex_ is 20
+     */
+    CreateWithItem([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(80);
+    });
+    auto info = pattern_->layoutInfo_;
+    
+    pattern_->ScrollToIndex(50, false, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 43);
+    EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
+    auto child = GetChildFrameNode(frameNode_, 49);
+    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
+    child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 43);
+    EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f);
+}
 } // namespace OHOS::Ace::NG

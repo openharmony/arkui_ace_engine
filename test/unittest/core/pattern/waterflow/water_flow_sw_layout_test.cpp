@@ -149,7 +149,7 @@ HWTEST_F(WaterFlowSWTest, Jump001, TestSize.Level1)
  * @tc.desc: waterFlow change lane count
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowTestNg, ChangeTemplate001, TestSize.Level1)
+HWTEST_F(WaterFlowSWTest, ChangeTemplate001, TestSize.Level1)
 {
     CreateWithItem([](WaterFlowModelNG model) {
         ViewAbstract::SetWidth(CalcLength(600.0f));
@@ -157,9 +157,8 @@ HWTEST_F(WaterFlowTestNg, ChangeTemplate001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
     UpdateCurrentOffset(-300.0f);
-    auto info = pattern_->layoutInfo_;
-    EXPECT_EQ(info->startIndex_, 5);
-    EXPECT_EQ(info->endIndex_, 9);
+    EXPECT_EQ(info_->startIndex_, 5);
+    EXPECT_EQ(info_->endIndex_, 9);
     EXPECT_EQ(GetChildOffset(frameNode_, 5), OffsetF(200.0f, -100.0f));
     EXPECT_EQ(GetChildOffset(frameNode_, 6), OffsetF(400.0f, -100.0f));
     EXPECT_EQ(GetChildOffset(frameNode_, 7), OffsetF(0.0f, 0.0f));
@@ -167,11 +166,63 @@ HWTEST_F(WaterFlowTestNg, ChangeTemplate001, TestSize.Level1)
     EXPECT_EQ(GetChildOffset(frameNode_, 9), OffsetF(200.0f, 100.0f));
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr");
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info->startIndex_, 5);
-    EXPECT_EQ(info->endIndex_, 8);
+    EXPECT_EQ(info_->startIndex_, 5);
+    EXPECT_EQ(info_->endIndex_, 8);
     EXPECT_EQ(GetChildOffset(frameNode_, 5), OffsetF(0.0f, -100.0f));
     EXPECT_EQ(GetChildOffset(frameNode_, 6), OffsetF(300.0f, -100.0f));
     EXPECT_EQ(GetChildOffset(frameNode_, 7), OffsetF(300.0f, 0.0f));
     EXPECT_EQ(GetChildOffset(frameNode_, 8), OffsetF(0.0f, 100.0f));
+}
+
+/**
+ * @tc.name: ModifyItem002
+ * @tc.desc: Test WaterFlow reacting to child height change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Calling the ScrollToIndex interface to set values to 20 and true.
+     * @tc.expected: pattern_->targetIndex_ is 20
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetFooter(GetDefaultHeaderBuilder());
+        CreateItem(80);
+    });
+    
+    pattern_->ScrollToIndex(50, false, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 44);
+    EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 51), 350.0f);
+    auto child = GetChildFrameNode(frameNode_, 49);
+    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
+    child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 44);
+    EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f);
+
+    child = GetChildFrameNode(frameNode_, 40);
+    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(10.0)));
+    child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 44);
+    EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
+    EXPECT_FALSE(child->IsActive());
+    EXPECT_FALSE(info_->idxToLane_.count(40));
+
+    // update footer
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 80), 550.0f);
+
+    child = GetChildFrameNode(frameNode_, 0);
+    child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1.0)));
+    child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 80), 599.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 0), 1.0f);
 }
 } // namespace OHOS::Ace::NG
