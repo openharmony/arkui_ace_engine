@@ -687,6 +687,7 @@ void ImagePattern::OnImageModifyDone()
 {
     Pattern::OnModifyDone();
     LoadImageDataIfNeed();
+    UpdateGestureAndDragWhenModify();
 
     if (copyOption_ != CopyOptions::None) {
         auto host = GetHost();
@@ -707,8 +708,6 @@ void ImagePattern::OnImageModifyDone()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
-    UpdateGestureAndDragWhenModify();
 
     if (imageAnalyzerManager_ && imageAnalyzerManager_->IsOverlayCreated()) {
         if (!IsSupportImageAnalyzerFeature()) {
