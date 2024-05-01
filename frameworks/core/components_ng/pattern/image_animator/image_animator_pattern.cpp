@@ -268,35 +268,8 @@ bool ImageAnimatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     return false;
 }
 
-void ImageAnimatorPattern::OnModifyDone()
+void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    Pattern::OnModifyDone();
-    auto size = static_cast<int32_t>(images_.size());
-    if (size <= 0) {
-        LOGE("image size is less than 0.");
-        return;
-    }
-    GenerateCachedImages();
-    auto index = nowImageIndex_;
-    if ((status_ == Animator::Status::IDLE || status_ == Animator::Status::STOPPED) && !firstUpdateEvent_) {
-        index = isReverse_ ? (size - 1) : 0;
-    }
-
-    if (imagesChangedFlag_) {
-        animator_->ClearInterpolators();
-        animator_->AddInterpolator(CreatePictureAnimation(size));
-        AdaptSelfSize();
-        imagesChangedFlag_ = false;
-    }
-    if (firstUpdateEvent_) {
-        UpdateEventCallback();
-        firstUpdateEvent_ = false;
-        auto imageFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
-        AddImageLoadSuccessEvent(imageFrameNode);
-    }
-    UpdateFormDurationByRemainder();
     switch (status_) {
         case Animator::Status::IDLE:
             animator_->Cancel();
@@ -319,6 +292,39 @@ void ImageAnimatorPattern::OnModifyDone()
             }
             isReverse_ ? animator_->Backward() : animator_->Forward();
     }
+}
+
+void ImageAnimatorPattern::OnModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    Pattern::OnModifyDone();
+    auto size = static_cast<int32_t>(images_.size());
+    if (size <= 0) {
+        LOGE("image size is less than 0.");
+        return;
+    }
+    GenerateCachedImages();
+    auto index = nowImageIndex_;
+    if ((status_ == Animator::Status::IDLE || status_ == Animator::Status::STOPPED) && !firstUpdateEvent_) {
+        index = isReverse_ ? (size - 1) : 0;
+    }
+
+    if (imagesChangedFlag_) {
+        animator_->ClearInterpolators();
+        animator_->AddInterpolator(CreatePictureAnimation(size));
+        AdaptSelfSize();
+        imagesChangedFlag_ = false;
+    }
+    animator_->SetIteration(GetIteration());
+    if (firstUpdateEvent_) {
+        UpdateEventCallback();
+        firstUpdateEvent_ = false;
+        auto imageFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+        AddImageLoadSuccessEvent(imageFrameNode);
+    }
+    UpdateFormDurationByRemainder();
+    RunAnimatorByStatus(index);
 }
 
 void ImageAnimatorPattern::OnAttachToFrameNode()
@@ -547,7 +553,7 @@ void ImageAnimatorPattern::SetIteration(int32_t iteration)
     if (IsFormRender()) {
         iteration = DEFAULT_ITERATIONS;
     }
-    animator_->SetIteration(iteration);
+    iteration_ = iteration;
 }
 
 void ImageAnimatorPattern::SetDuration(int32_t duration)
