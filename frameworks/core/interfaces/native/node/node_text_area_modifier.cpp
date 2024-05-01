@@ -1007,5 +1007,36 @@ void SetOnTextAreaEditChange(ArkUINodeHandle node, void* extraParam)
     };
     TextFieldModelNG::SetOnEditChanged(frameNode, std::move(onChange));
 }
+
+void SetOnTextAreaInputFilterError(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onInputFilterError = [node, extraParam](const std::string& str) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_TEXT_AREA_INPUT_FILTER_ERROR;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetInputFilterError(frameNode, std::move(onInputFilterError));
+}
+
+void SetTextAreaOnTextContentScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScroll = [node, extraParam](float totalOffsetX, float totalOffsetY) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXT_AREA_CONTENT_SCROLL;
+        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetX);
+        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetY);
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onScroll));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

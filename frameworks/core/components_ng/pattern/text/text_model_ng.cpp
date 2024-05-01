@@ -866,6 +866,37 @@ EllipsisMode TextModelNG::GetEllipsisMode(FrameNode* frameNode)
     return value;
 }
 
+bool TextModelNG::GetTextDetectEnable(FrameNode* frameNode)
+{
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    return textPattern->GetTextDetectEnable();
+}
+
+void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextDetectTypes(value);
+}
+
+void TextModelNG::SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnResult(std::move(onResult));
+}
+
+std::string TextModelNG::GetTextDetectConfig(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, "");
+    return textPattern->GetTextDetectTypes();
+}
+
 FONT_FEATURES_LIST TextModelNG::GetFontFeature(FrameNode* frameNode)
 {
     FONT_FEATURES_LIST value;

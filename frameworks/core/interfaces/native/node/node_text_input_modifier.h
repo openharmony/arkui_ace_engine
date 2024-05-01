@@ -25,4 +25,6 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetOnTextInputPaste(ArkUINodeHandle node, void* extraParam);
     void SetOnTextInputSelectionChange(ArkUINodeHandle node, void* extraParam);
     void SetOnTextInputEditChange(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextInputInputFilterError(ArkUINodeHandle node, void* extraParam);
+    void SetTextInputOnTextContentScroll(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

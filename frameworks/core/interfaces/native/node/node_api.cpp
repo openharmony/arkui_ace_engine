@@ -41,6 +41,7 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
@@ -272,6 +273,10 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScrollEdge,
 };
 
+const ComponentAsyncEventHandler TEXT_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnDetectResultUpdate,
+};
+
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputEditChange,
     NodeModifier::SetTextInputOnSubmit,
@@ -279,6 +284,8 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputCut,
     NodeModifier::SetOnTextInputPaste,
     NodeModifier::SetOnTextInputSelectionChange,
+    NodeModifier::SetOnTextInputInputFilterError,
+    NodeModifier::SetTextInputOnTextContentScroll,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -287,7 +294,9 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaChange,
     NodeModifier::SetOnTextAreaPaste,
     NodeModifier::SetOnTextAreaSelectionChange,
-    NodeModifier::SetTextInputOnSubmit,
+    nullptr,
+    NodeModifier::SetOnTextAreaInputFilterError,
+    NodeModifier::SetTextAreaOnTextContentScroll,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -414,6 +423,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = scrollNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_TEXT: {
+            // text event type.
+            if (subKind >= sizeof(TEXT_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_TEXT_INPUT: {

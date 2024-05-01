@@ -1703,6 +1703,28 @@ typedef enum {
     NODE_FONT_FEATURE,
 
     /**
+     * @brief 设置使能文本识别。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：使能文本识别，默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：使能文本识别。\n
+     *
+     */
+    NODE_TEXT_ENABLE_DATA_DETECTOR,
+    /**
+     * @brief 设置文本识别配置。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0...].i32: 实体类型数组，参数类型{@link ArkUI_TextDataDetectorType}。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0...].i32：实体类型数组，参数类型{@link ArkUI_TextDataDetectorType}。\n
+     *
+     */
+    NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG,
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -2178,7 +2200,135 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_TEXT_SELECTION,
-
+    /**
+    * @brief Sets the color of the text underline when it is enabled.
+    *
+    * The default underline color configured for the theme is <b>'0x33182431'</b>.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].u32: color of the underline applied to the text being typed in.
+    * The value is in 0xARGB format. \n
+    * .value[1].u32: color of the underline applied to the text in the normal state.
+    * The value is in 0xARGB format. \n
+    * .value[2].u32: color of the underline applied to the text when an error is detected.
+    * The value is in 0xARGB format. \n
+    * .value[3].u32: color of the underline applied to the text when it is disabled.
+    * The value is in 0xARGB format. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].u32: color of the underline applied to the text being typed in. The value is in 0xARGB format. \n
+    * .value[1].u32: color of the underline applied to the text in the normal state. The value is in 0xARGB format. \n
+    * .value[2].u32: color of the underline applied to the text when an error is detected.
+    * The value is in 0xARGB format. \n
+    * .value[3].u32: color of the underline applied to the text when it is disabled. The value is in 0xARGB format. \n
+    *
+    */
+    NODE_TEXT_INPUT_UNDERLINE_COLOR,
+    /**
+    * @brief Sets whether to enable autofill.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: whether to enable autofill. The default value is <b>true</b>. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: whether to enable autofill. \n
+    *
+    */
+    NODE_TEXT_INPUT_ENABLE_AUTO_FILL,
+    /**
+    * @brief Sets the autofill type.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: autofill type. The parameter type is {@link ArkUI_TextInputContentType}. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: autofill type. The parameter type is {@link ArkUI_TextInputContentType}. \n
+    *
+    */
+    NODE_TEXT_INPUT_CONTENT_TYPE,
+    /**
+    * @brief Defines the rules for generating passwords. When autofill is used, these rules are transparently
+    * transmitted to Password Vault for generating a new password.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .string: rules for generating passwords. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .string: rules for generating passwords. \n
+    *
+    */
+    NODE_TEXT_INPUT_PASSWORD_RULES,
+    /**
+    * @brief Sets whether to select all text in the initial state. The inline mode is not supported.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: whether to select all text in the initial state. The default value is b>false</b>. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: whether to select all text in the initial state. \n
+    *
+    */
+    NODE_TEXT_INPUT_SELECT_ALL,
+    /**
+    * @brief Sets the regular expression for input filtering. Only inputs that comply with the regular expression can be
+    * displayed. Other inputs are filtered out. The specified regular expression can match single characters,
+    * but not strings.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .string: regular expression. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .string: regular expression. \n
+    *
+    */
+    NODE_TEXT_INPUT_INPUT_FILTER,
+    /**
+    * @brief Sets the text box to the default style or inline input style.
+    *
+    * For the inline input style, only <b>InputType.Normal</b> is supported.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: text input style. The parameter type is {@link ArkUI_TextInputStyle}. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: text input style. The parameter type is {@link ArkUI_TextInputStyle}. \n
+    *
+    */
+    NODE_TEXT_INPUT_STYLE,
+    /**
+    * @brief Sets or obtains the caret position.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * In the case of setting the caret position:
+    * .value[0].i32: character count from the beginning of a string to the caret position. \n
+    * 
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * In the case of obtaining the caret position: If this API is called when the caret position is updated in the
+    * current frame, it will not take effect.
+    * .value[0].i32: index of the caret position. \n
+    * .value[1].f32: X coordinate of the caret relative to the text box. \n
+    * .value[2].f32: Y coordinate of the caret relative to the text box. \n
+    */
+    NODE_TEXT_INPUT_CARET_OFFSET,
+    /**
+    * @brief Obtains the position of the edited text area relative to the component and its size.
+    * 
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].f32: horizontal coordinate. \n
+    * .value[1].f32: vertical coordinate. \n
+    * .value[2].f32: content width. \n
+    * .value[3].f32: content height. \n
+    *
+    */
+    NODE_TEXT_INPUT_CONTENT_RECT,
+    /**
+    * @brief Obtains the number of lines of the edited text.
+    * 
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: number of lines of the edited text. \n
+    *
+    */
+    NODE_TEXT_INPUT_CONTENT_LINE_COUNT,
     /**
      * @brief 设置长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单，支持属性设置，属性重置和属性获取接口。
      * 
@@ -2201,6 +2351,30 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_BLUR_ON_SUBMIT,
+    /**
+     * @brief 设置自定义键盘。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .object：自定义键盘，参数类型{@Link ArkUI_NodeHandle}。\n
+     * .value[0]?.i32：设置自定义键盘是否支持避让功能，默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .object：自定义键盘，参数类型{@Link ArkUI_NodeHandle}。\n
+     * .value[0].i32：设置自定义键盘是否支持避让功能。\n
+     *
+     */
+    NODE_TEXT_INPUT_CUSTOM_KEYBOARD,
+    /**
+     * @brief 文本断行规则属性，支持属性设置，属性重置，属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 参数类型{@link ArkUI_WordBreak}。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 参数类型{@link ArkUI_WordBreak}。\n
+     *
+     */
+    NODE_TEXT_INPUT_WORD_BREAK,
     /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -2351,6 +2525,118 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_BLUR_ON_SUBMIT,
+    /**
+    * @brief 通过正则表达式设置输入过滤器。匹配表达式的输入允许显示，不匹配的输入将被过滤。仅支持单个字符匹配，不支持字符串匹配。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+    * .string： 正则表达式。\n
+    * \n
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * .string： 正则表达式。\n
+    *
+    */
+    NODE_TEXT_AREA_INPUT_FILTER,
+    /**
+     * @brief 设置文本选中底板颜色，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式。\n
+     *
+     */
+    NODE_TEXT_AREA_SELECTED_BACKGROUND_COLOR,
+    /**
+     * @brief 设置输入法回车键类型，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：回车键类型枚举{@link ArkUI_EnterKeyType}，默认值为ARKUI_ENTER_KEY_TYPE_DONE。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：回车键类型枚举{@link ArkUI_EnterKeyType}。\n
+     *
+     */
+    NODE_TEXT_AREA_ENTER_KEY_TYPE,
+    /**
+     * @brief 设置TextArea通过点击以外的方式获焦时，是否绑定输入法，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：false表示聚焦不拉起输入法，true表示拉起，默认值为true。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：0表示聚焦不拉起输入法，1表示拉起。\n
+     *
+     */
+    NODE_TEXT_AREA_ENABLE_KEYBOARD_ON_FOCUS,
+    /**
+    * @brief 设置或获取光标所在位置信息。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+    * 设置输入光标的位置。
+    * .value[0].i32： 从字符串开始到光标所在位置的字符长度。\n
+    * 
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * 返回当前光标所在位置信息。在当前帧更新光标位置同时调用该接口，该接口不生效
+    * value[0].i32：光标所在位置的索引值。\n
+    * value[1].f32：光标相对输入框的x坐标位值。\n
+    * value[2].f32：光标相对输入框的y坐标位值。\n
+    */
+    NODE_TEXT_AREA_CARET_OFFSET,
+    /**
+    * @brief 获取已编辑文本内容区域相对组件的位置和大小。
+    * 
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * value[0].f32：水平方向横坐标。\n
+    * value[1].f32：竖直方向纵坐标。\n
+    * value[2].f32：内容宽度大小。\n
+    * value[3].f32：内容高度大小。\n
+    *
+    */
+    NODE_TEXT_AREA_CONTENT_RECT,
+    /**
+    * @brief 获取已编辑文本内容的行数。
+    * 
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * value[0].i32：已编辑文本内容行数。\n
+    *
+    */
+    NODE_TEXT_AREA_CONTENT_LINE_COUNT,
+    /**
+     * @brief 组件在获焦状态下，调用该接口设置文本选择区域并高亮显示，且只有在selectionStart小于selectionEnd时，文字才会被选取、高亮显示。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：选中文本的起始位置；\n
+     * .value[1].i32：选中文本的终止位置；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：选中文本的起始位置；\n
+     * .value[1].i32：选中文本的终止位置；\n
+     *
+     */
+    NODE_TEXT_AREA_TEXT_SELECTION,
+    /**
+    * @brief 设置是否启用自动填充。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 是否启用自动填充，默认值true。\n
+    * \n
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 是否启用自动填充。\n
+    *
+    */
+    NODE_TEXT_AREA_ENABLE_AUTO_FILL,
+    /**
+    * @brief 自动填充类型。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 参数类型{@link ArkUI_TextInputContentType}。\n
+    * \n
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 参数类型{@link ArkUI_TextInputContentType}。\n
+    *
+    */
+    NODE_TEXT_AREA_CONTENT_TYPE,
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4099,6 +4385,16 @@ typedef enum {
      */
     NODE_ON_TOUCH_INTERCEPT,
     /**
+     * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
+     *
+     * 触发该事件的条件：文本设置TextDataDetectorConfig且识别成功后。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
+     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>：表示文本识别的结果，Json格式。\n
+     *
+     */
+    NODE_TEXT_ON_DETECT_RESULT_UPDATE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
+    /**
      * @brief Defines the image loading success event.
      *
      * This event is triggered when an image is successfully loaded or decoded. \n
@@ -4221,6 +4517,29 @@ typedef enum {
      */
     NODE_TEXT_INPUT_ON_EDIT_CHANGE,
     /**
+     * @brief Defines the event triggered when matching with the regular expression specified by
+     * <b>NODE_TEXT_INPUT_INPUT_FILTER</b> fails.
+     *
+      \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: content that is filtered out when regular expression matching fails. \n
+     *
+     */
+    NODE_TEXT_INPUT_ON_INPUT_FILTER_ERROR,
+    /**
+     * @brief 文本内容滚动时，触发该回调。
+     *
+     * 触发该事件的条件：文本内容滚动时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示文本在内容区的横坐标偏移。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示文本在内容区的纵坐标偏移。\n
+     *
+     */
+    NODE_TEXT_INPUT_ON_CONTENT_SCROLL,
+    /**
      * @brief Defines the event triggered when the input in the text box changes.
      *
       \n
@@ -4277,6 +4596,27 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_SUBMIT,
+        /**
+     * @brief 设置NODE_TEXT_AREA_INPUT_FILTER，正则匹配失败时触发。
+     *
+     * 触发该事件的条件：正则匹配失败时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
+     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>：表示正则匹配失败时，被过滤的内容。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_INPUT_FILTER_ERROR,
+    /**
+     * @brief 文本内容滚动时，触发该回调。
+     *
+     * 触发该事件的条件：文本内容滚动时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示文本在内容区的横坐标偏移。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示文本在内容区的纵坐标偏移。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_CONTENT_SCROLL,
 
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
