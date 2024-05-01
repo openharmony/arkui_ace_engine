@@ -1239,7 +1239,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
         }
         return;
     }
-    selectOverlay_->ProcessSelectAllOverlay({ .animation = true });
+    selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = false, .animation = true });
 }
 
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
