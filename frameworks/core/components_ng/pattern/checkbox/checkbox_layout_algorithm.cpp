@@ -87,11 +87,7 @@ void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
-    if (pattern->UseContentModifier()) {
-        BoxLayoutAlgorithm::Measure(layoutWrapper);
-        return;
-    }
-    if (layoutWrapper->GetHostTag() == V2::CHECKBOX_ETS_TAG) {
+    if (layoutWrapper->GetHostTag() == V2::CHECKBOX_ETS_TAG && !pattern->UseContentModifier()) {
         // Checkbox does not have child nodes. If a child is added to a toggle, then hide the child.
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->GetGeometryNode()->SetFrameSize(SizeF());
@@ -121,8 +117,8 @@ void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         for (auto &&child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Measure(childConstraint);
         }
+        PerformMeasureSelf(layoutWrapper);
     }
-    PerformMeasureSelf(layoutWrapper);
 }
 
 void CheckBoxLayoutAlgorithm::InitializeParam()
@@ -151,7 +147,6 @@ void CheckBoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->UseContentModifier()) {
-        host->GetGeometryNode()->Reset();
         return;
     }
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();

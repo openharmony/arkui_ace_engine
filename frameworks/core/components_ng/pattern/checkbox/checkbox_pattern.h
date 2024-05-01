@@ -174,7 +174,6 @@ public:
     {
         if (toggleMakeFunc == nullptr) {
             toggleMakeFunc_ = std::nullopt;
-            contentModifierNode_ = nullptr;
             OnModifyDone();
             return;
         }
