@@ -930,6 +930,16 @@ const __creatorMap__ = new Map([
                 return new ArkStackComponent(node, type);
             });
         }],
+    ["GridRow", (context) => {
+            return new TypedFrameNode(context, "GridRow", (node, type) => {
+                return new ArkGridRowComponent(node, type);
+            });
+        }],
+    ["GridCol", (context) => {
+            return new TypedFrameNode(context, "GridCol", (node, type) => {
+                return new ArkGridColComponent(node, type);
+            });
+        }],
 ]);
 class TypedNode {
     static createNode(context, type) {

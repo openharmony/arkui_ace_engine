@@ -594,6 +594,16 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkStackComponent(node, type);
       })
     }],
+    ["GridRow", (context: UIContext) => {
+      return new TypedFrameNode(context, "GridRow", (node: NodePtr, type: ModifierType) => {
+        return new ArkGridRowComponent(node, type);
+      })
+    }],
+    ["GridCol", (context: UIContext) => {
+      return new TypedFrameNode(context, "GridCol", (node: NodePtr, type: ModifierType) => {
+        return new ArkGridColComponent(node, type);
+      })
+    }],
   ]
 )
 

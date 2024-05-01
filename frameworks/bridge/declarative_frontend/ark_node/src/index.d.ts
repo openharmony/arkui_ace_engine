@@ -124,6 +124,10 @@ declare class ArkRowComponent extends ArkComponent {}
 
 declare class ArkStackComponent extends ArkComponent {}
 
+declare class ArkGridRowComponent extends ArkComponent {}
+
+declare class ArkGridColComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;

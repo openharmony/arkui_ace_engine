@@ -557,6 +557,8 @@ enum ArkUINodeType {
     ARKUI_DIVIDER,
     ARKUI_ALPHABET_INDEXER,
     ARKUI_SEARCH,
+    ARKUI_GRID_ROW,
+    ARKUI_GRID_COL,
 };
 
 enum ArkUIEventCategory {
@@ -3142,6 +3144,15 @@ struct ArkUIGridColModifier {
 struct ArkUIGridRowModifier {
     void (*setAlignItems)(ArkUINodeHandle node, ArkUI_Int32 alignItems);
     void (*resetAlignItems)(ArkUINodeHandle node);
+    void (*setDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
+    void (*resetDirection)(ArkUINodeHandle node);
+    void (*setBreakpoints)(ArkUINodeHandle node, ArkUI_Int32 reference, const ArkUI_Float32* pointValues,
+        ArkUI_CharPtr pointStr[], ArkUI_Int32 size);
+    void (*resetBreakpoints)(ArkUINodeHandle node);
+    void (*setColumns)(ArkUINodeHandle node, ArkUI_Int32* containerSizeArray, ArkUI_Int32 size);
+    void (*resetColumns)(ArkUINodeHandle node);
+    void (*setGutter)(ArkUINodeHandle node, ArkUI_Int32* containerSizeArray, ArkUI_Int32 size);
+    void (*resetGutter)(ArkUINodeHandle node);
 };
 
 struct ArkUIPanelModifier {

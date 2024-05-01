@@ -4649,6 +4649,99 @@ class GridRowAlignItemsModifier extends ModifierWithKey {
   }
 }
 GridRowAlignItemsModifier.identity = Symbol('gridRowAlignItems');
+class SetDirectionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridRow.resetDirection(node);
+    }
+    else {
+      getUINativeModule().gridRow.setDirection(node,  this.value);
+    }
+  }
+}
+SetDirectionModifier.identity = Symbol('gridRowDirection');
+class SetBreakpointsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridRow.resetBreakpoints(node);
+    }
+    else {
+      getUINativeModule().gridRow.setBreakpoints(node, this.value.value, this.value.reference);
+    }
+  }
+}
+SetBreakpointsModifier.identity = Symbol('gridRowBreakpoints');
+class SetColumnsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridRow.resetColumns(node);
+    }
+    else {
+      if (isUndefined(this.value) || isNull(this.value)) {
+        getUINativeModule().gridRow.resetColumns(node);
+      } else if (isNumber(this.value)) {
+        getUINativeModule().gridRow.setColumns(node, this.value, this.value, this.value,
+          this.value, this.value, this.value);
+      } else {
+        getUINativeModule().gridRow.setColumns(node, this.value.xs, this.value.sm, this.value.md,
+          this.value.lg, this.value.xl, this.value.xxl);
+      }
+    }
+  }
+}
+SetColumnsModifier.identity = Symbol('gridRowColumns');
+class SetGutterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridRow.resetGutter(node);
+    }
+    else {
+      if (isUndefined(this.value) || isNull(this.value)) {
+        getUINativeModule().gridRow.resetGutter(node);
+      }
+      if (isNumber(this.value)) {
+        getUINativeModule().gridRow.setGutter(node, this.value,
+          this.value, this.value, this.value, this.value, this.value,
+          this.value, this.value, this.value, this.value, this.value, this.value);
+      } else {
+        if (isNumber(this.value.x)) {
+          if (isNumber(this.value.y)) {
+            getUINativeModule().gridRow.setGutter(node,
+              this.value.x, this.value.x, this.value.x, this.value.x, this.value.x, this.value.x,
+              this.value.y, this.value.y, this.value.y, this.value.y, this.value.y, this.value.y);
+          } else {
+            getUINativeModule().gridRow.setGutter(node,
+              this.value.x, this.value.x, this.value.x, this.value.x, this.value.x, this.value.x,
+              this.value.y.xs, this.value.y.sm, this.value.y.md, this.value.y.lg, this.value.y.xl, this.value.y.xxl);
+          }
+        } else {
+          if (isNumber(this.value.y)) {
+            getUINativeModule().gridRow.setGutter(node,
+              this.value.x.xs, this.value.x.sm, this.value.x.md, this.value.x.lg, this.value.x.xl, this.value.x.xxl,
+              this.value.y, this.value.y, this.value.y, this.value.y, this.value.y, this.value.y);
+          } else {
+            getUINativeModule().gridRow.setGutter(node,
+              this.value.x.xs, this.value.x.sm, this.value.x.md, this.value.x.lg, this.value.x.xl, this.value.x.xxl,
+              this.value.y.xs, this.value.y.sm, this.value.y.md, this.value.y.lg, this.value.y.xl, this.value.y.xxl);
+          }
+        }
+      }
+    }
+  }
+}
+SetGutterModifier.identity = Symbol('gridRowGutter');
 class ArkGridRowComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -4658,6 +4751,31 @@ class ArkGridRowComponent extends ArkComponent {
   }
   alignItems(value) {
     modifierWithKey(this._modifiersWithKeys, GridRowAlignItemsModifier.identity, GridRowAlignItemsModifier, value);
+    return this;
+  }
+  setDirection(value) {
+    modifierWithKey(this._modifiersWithKeys, SetDirectionModifier.identity, SetDirectionModifier, value);
+    return this;
+  }
+  setBreakpoints(value) {
+    modifierWithKey(this._modifiersWithKeys, SetBreakpointsModifier.identity, SetBreakpointsModifier, value);
+    return this;
+  }
+  setColumns(value) {
+    modifierWithKey(this._modifiersWithKeys, SetColumnsModifier.identity, SetColumnsModifier, value);
+    return this;
+  }
+  setGutter(value) {
+    modifierWithKey(this._modifiersWithKeys, SetGutterModifier.identity, SetGutterModifier, value);
+    return this;
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      this.setGutter(value[0].gutter);
+      this.setColumns(value[0].columns);
+      this.setBreakpoints(value[0].breakpoints);
+      this.setDirection(value[0].direction);
+    }
     return this;
   }
 }
@@ -5238,6 +5356,14 @@ class ArkGridColComponent extends ArkComponent {
   }
   order(value) {
     modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, value);
+    return this;
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value.span);
+      modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity, GridColOffsetModifier, value.offset);
+      modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, value.order);
+    }
     return this;
   }
 }
