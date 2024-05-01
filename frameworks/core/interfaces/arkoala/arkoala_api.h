@@ -2219,6 +2219,24 @@ struct ArkUITextAreaModifier {
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetTextAreaPadding)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextAreaFontFeature)(ArkUINodeHandle node);
+    void (*setTextAreaOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnChange)(ArkUINodeHandle node);
+    void (*setTextAreaEnterKeyType)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextAreaEnterKeyType)(ArkUINodeHandle node);
+    void (*setTextAreaInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback);
+    void (*resetTextAreaInputFilter)(ArkUINodeHandle node);
+    void (*setTextAreaOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnTextSelectionChange)(ArkUINodeHandle node);
+    void (*setTextAreaOnContentScroll)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnContentScroll)(ArkUINodeHandle node);
+    void (*setTextAreaOnEditChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnEditChange)(ArkUINodeHandle node);
+    void (*setTextAreaOnCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnCopy)(ArkUINodeHandle node);
+    void (*setTextAreaOnCut)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnCut)(ArkUINodeHandle node);
+    void (*setTextAreaOnPaste)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnPaste)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2325,6 +2343,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputPasswordRules)(ArkUINodeHandle node);
     void (*setTextInputEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
     void (*resetTextInputEnableAutoFill)(ArkUINodeHandle node);
+    void (*setTextInputPadding)(ArkUINodeHandle node, const struct ArkUISizeType* top,
+        const struct ArkUISizeType* right, const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetTextInputPadding)(ArkUINodeHandle node);
     void (*setTextInputAdaptMinFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextInputAdaptMinFontSize)(ArkUINodeHandle node);
