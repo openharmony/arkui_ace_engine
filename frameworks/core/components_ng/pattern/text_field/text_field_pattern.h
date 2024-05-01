@@ -920,6 +920,11 @@ public:
         return isTextInput_;
     }
 
+    void SetTextInputFlag(bool isTextInput)
+    {
+        isTextInput_ = isTextInput;
+    }
+
     void SetSingleLineHeight(float height)
     {
         inlineSingleLineHeight_ = height;

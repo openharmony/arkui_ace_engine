@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -336,6 +337,7 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     aiSpanTextStyle.SetTextColor(hyerlinkColor);
     aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
     aiSpanTextStyle.SetTextDecorationColor(hyerlinkColor);
+    aiSpanTextStyle.SetTextDecorationStyle(TextDecorationStyle::SOLID);
     for (auto kv : pattern->GetAISpanMap()) {
         if (preEnd >= wTextForAILength) {
             break;

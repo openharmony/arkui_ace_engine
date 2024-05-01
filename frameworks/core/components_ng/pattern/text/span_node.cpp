@@ -404,6 +404,7 @@ void SpanItem::SetAiSpanTextStyle(std::optional<TextStyle>& aiSpanTextStyle)
         aiSpanTextStyle.value().SetTextColor(hyerlinkColor);
         aiSpanTextStyle.value().SetTextDecoration(TextDecoration::UNDERLINE);
         aiSpanTextStyle.value().SetTextDecorationColor(hyerlinkColor);
+        aiSpanTextStyle.value().SetTextDecorationStyle(TextDecorationStyle::SOLID);
     }
 }
 
