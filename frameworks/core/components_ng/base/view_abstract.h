@@ -651,6 +651,9 @@ public:
     static NG::BorderWidthProperty GetOuterBorderWidth(FrameNode* frameNode);
     static void SetBias(FrameNode* frameNode, const BiasPair& biasPair);
     static BiasPair GetBias(FrameNode* frameNode);
+    static RenderFit GetRenderFit(FrameNode* frameNode);
+    static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
+    static bool GetRenderGroup(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();
