@@ -165,7 +165,7 @@ const Event = (target, propertyKey): void => {
 const Provider = (aliasName?: string) => {
   return (proto: Object, varName: string): void => {
     const providedUnderName: string = aliasName || varName;
-    ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, '@provide');
+    ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, '@Provider');
     trackInternal(proto, varName);
   };
 }; // @Provider
@@ -174,7 +174,7 @@ const Provider = (aliasName?: string) => {
  * @Consumer variable decorator of @ComponentV2 variable
  *
  * @Consumer(alias? : string) varName : typeName = defaultValue
- *
+*
  * @param alias defaults to varName
  *
  * allowed value: simple or object type value allowed. Objects must be instances of
@@ -193,7 +193,7 @@ const Consumer = (aliasName?: string) => {
 
     // redefining the property happens when owning ViewV2 gets constructed
     // and @Consumer gets connected to @provide counterpart
-    ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@consume');
+    ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
   };
 }; // @Consumer
 
