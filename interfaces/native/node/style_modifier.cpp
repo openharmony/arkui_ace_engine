@@ -4427,15 +4427,23 @@ int32_t SetScrollBy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < NUM_0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    ArkUI_Float32 values[ALLOW_SIZE_2] = { 0.0f, 0.0f };
-    values[NUM_0] = item->value[NUM_0].f32;
-    values[NUM_1] = item->value[NUM_1].f32;
+    DimensionUnit unit = static_cast<DimensionUnit>(GetDefaultUnit(node, UNIT_VP));
+    if (unit != DimensionUnit::VP && unit != DimensionUnit::PX) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    double x = item->value[NUM_0].f32;
+    double y = item->value[NUM_1].f32;
+    if (unit == DimensionUnit::VP) {
+        x = OHOS::Ace::NodeModel::GetFullImpl()->getBasicAPI()->convertLengthMetricsUnit(
+            x, static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_VP), static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_PX));
+        y = OHOS::Ace::NodeModel::GetFullImpl()->getBasicAPI()->convertLengthMetricsUnit(
+            y, static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_VP), static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_PX));
+    }
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_SCROLL || node->type == ARKUI_NODE_WATER_FLOW) {
-        fullImpl->getNodeModifiers()->getScrollModifier()->setScrollBy(
-            node->uiNodeHandle, values[NUM_0], values[NUM_1]);
+        fullImpl->getNodeModifiers()->getScrollModifier()->setScrollBy(node->uiNodeHandle, x, y);
     } else if (node->type == ARKUI_NODE_LIST) {
-        fullImpl->getNodeModifiers()->getListModifier()->setScrollBy(node->uiNodeHandle, values[NUM_0], values[NUM_1]);
+        fullImpl->getNodeModifiers()->getListModifier()->setScrollBy(node->uiNodeHandle, x, y);
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }

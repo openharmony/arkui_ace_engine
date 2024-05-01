@@ -119,7 +119,7 @@ public:
     static void SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex);
     static NestedScrollOptions GetListNestedScroll(FrameNode* frameNode);
     static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
-    static void SetScrollBy(FrameNode* frameNode, float x, float y);
+    static void SetScrollBy(FrameNode* frameNode, double x, double y);
 
 private:
     void AddDragFrameNodeToManager() const;

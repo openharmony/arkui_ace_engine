@@ -231,8 +231,8 @@ void SwiperModelNG::SetNestedScroll(FrameNode* frameNode, const int32_t nestedOp
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     NestedScrollOptions option;
-    option.forward = (NestedScrollMode)nestedOpt;
-    option.backward = (NestedScrollMode)nestedOpt;
+    option.forward = static_cast<NestedScrollMode>(nestedOpt);
+    option.backward = static_cast<NestedScrollMode>(nestedOpt);
     pattern->SetNestedScroll(option);
 }
 
@@ -732,7 +732,7 @@ int32_t SwiperModelNG::GetNestedScroll(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(pattern, ERROR_CODE_PARAM_INVALID);
-    return (int)(pattern->GetNestedScroll().forward);
+    return static_cast<int>(pattern->GetNestedScroll().forward);
 }
 
 int32_t SwiperModelNG::RealTotalCount(FrameNode* frameNode)

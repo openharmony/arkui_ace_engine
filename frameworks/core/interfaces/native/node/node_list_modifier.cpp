@@ -545,7 +545,7 @@ void SetScrollToIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 anima
     ListModelNG::SetScrollToIndex(frameNode, index, animation, alignment);
 }
 
-void SetScrollBy(ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y)
+void SetScrollBy(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

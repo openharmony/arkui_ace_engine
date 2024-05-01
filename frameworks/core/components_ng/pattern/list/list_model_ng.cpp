@@ -700,10 +700,10 @@ void ListModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t 
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->ScrollToIndex(index, animation, (ScrollAlign)alignment);
+    pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment));
 }
 
-void ListModelNG::SetScrollBy(FrameNode* frameNode, float x, float y)
+void ListModelNG::SetScrollBy(FrameNode* frameNode, double x, double y)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();

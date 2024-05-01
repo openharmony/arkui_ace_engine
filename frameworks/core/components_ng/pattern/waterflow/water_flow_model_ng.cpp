@@ -600,7 +600,7 @@ void WaterFlowModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->ScrollToIndex(index, animation, (ScrollAlign)alignment);
+    pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment));
 }
 
 } // namespace OHOS::Ace::NG
