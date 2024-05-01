@@ -35,6 +35,7 @@ public:
     MOCK_METHOD0(StopTextureExport, bool());
     MOCK_METHOD1(GetPointTransform, void(PointF&));
     MOCK_METHOD1(GetPointWithRevert, void(PointF&));
+    MOCK_METHOD1(SetSurfaceRotation, void(bool));
 
     void SetVisible(bool visible) override
     {
@@ -70,6 +71,12 @@ public:
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propBlurStyleOption = bgBlurStyle;
+    }
+
+    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
+    {
+        const auto& groupProperty = GetOrCreateForeground();
+        groupProperty->propMotionBlur = motionBlurOption;
     }
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed)

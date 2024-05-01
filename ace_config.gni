@@ -41,6 +41,9 @@ declare_args() {
   # Enable test coverage
   ace_engine_feature_enable_coverage = false
 
+  # Enalbe point light
+  ace_engine_feature_enable_point_light = true
+
   # Disable in OH Core
   ace_engine_standard_fonts_enable = true
 

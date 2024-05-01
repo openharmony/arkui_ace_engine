@@ -18,6 +18,7 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   checkboxNode: BuilderNode<[CheckBoxConfiguration]> | null = null;
   modifier: ContentModifier<CheckBoxConfiguration>;
+  needRebuild: boolean = false;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -86,7 +87,12 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
   }
   setContentModifier(modifier: ContentModifier<CheckBoxConfiguration>): this {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().checkbox.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -94,10 +100,11 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
   }
   makeContentModifierNode(context: UIContext, checkBoxConfiguration: CheckBoxConfiguration): FrameNode | null {
     checkBoxConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.checkboxNode)) {
+    if (isUndefined(this.checkboxNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.checkboxNode = new xNode.BuilderNode(context);
       this.checkboxNode.build(this.builder, checkBoxConfiguration);
+      this.needRebuild = false;
     } else {
       this.checkboxNode.update(checkBoxConfiguration);
     }

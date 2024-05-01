@@ -64,6 +64,11 @@ public:
     virtual void UpdateSurfaceBounds() {}
     virtual void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed) {}
     virtual void StopImageAnalyzer() {}
+    virtual void SetSurfaceRotation(bool isLock) {}
+    virtual bool GetSurfaceRotation()
+    {
+        return false;
+    }
 
 private:
     ConfigSurfaceImpl configSurfaceImpl_;

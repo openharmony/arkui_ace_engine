@@ -21,6 +21,7 @@
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/property/measure_property.h"
@@ -93,7 +94,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     std::string infoStr;
     if (ParseJsString(tabBarInfo, infoStr)) {
         TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
-        TabContentModel::GetInstance()->SetTabBar(infoStr, std::nullopt, nullptr, true);
+        TabContentModel::GetInstance()->SetTabBar(infoStr, std::nullopt, std::nullopt, nullptr, true);
         return;
     }
 
@@ -114,7 +115,8 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
             }
         };
         TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
-        TabContentModel::GetInstance()->SetTabBar(std::nullopt, std::nullopt, std::move(tabBarBuilderFunc), false);
+        TabContentModel::GetInstance()->SetTabBar(
+            std::nullopt, std::nullopt, std::nullopt, std::move(tabBarBuilderFunc), false);
         return;
     }
     JSRef<JSVal> typeParam = paramObject->GetProperty("type");
@@ -125,7 +127,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
             return;
         }
         if (type == "BottomTabBarStyle") {
-            SetBottomTabBarStyle(paramObject);
+            SetBottomTabBarStyle(info);
             return;
         }
     }
@@ -150,7 +152,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
         }
     }
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
-    TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, std::nullopt, nullptr, false);
 }
 
 void JSTabContent::Pop()
@@ -160,7 +162,10 @@ void JSTabContent::Pop()
 
 void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    if (info->IsObject()) {
+        obj = JSRef<JSObject>::Cast(info);
+    }
     IndicatorStyle indicator;
     CalcDimension indicatorHeight;
     CalcDimension indicatorWidth;
@@ -207,7 +212,10 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
 
 void JSTabContent::SetBoard(const JSRef<JSVal>& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    if (info->IsObject()) {
+        obj = JSRef<JSObject>::Cast(info);
+    }
     BoardStyle board;
     CalcDimension borderRadius;
     if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("borderRadius"), borderRadius) ||
@@ -516,7 +524,7 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     SetId(idParam);
 
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-    TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, std::nullopt, nullptr, false);
 }
 
 void JSTabContent::SetLayoutMode(const JSRef<JSVal>& info)
@@ -549,8 +557,9 @@ void JSTabContent::SetSymmetricExtensible(const JSRef<JSVal>& info)
     TabContentModel::GetInstance()->SetSymmetricExtensible(isExtensible);
 }
 
-void JSTabContent::SetBottomTabBarStyle(const JSRef<JSObject>& paramObject)
+void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
 {
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> textParam = paramObject->GetProperty("text");
     std::optional<std::string> textOpt = std::nullopt;
     std::string text;
@@ -561,8 +570,21 @@ void JSTabContent::SetBottomTabBarStyle(const JSRef<JSObject>& paramObject)
     JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
     std::optional<std::string> iconOpt = std::nullopt;
     std::string icon;
+    std::optional<TabBarSymbol> tabBarSymbol = std::nullopt;
     if (ParseJsMedia(iconParam, icon)) {
         iconOpt = icon;
+    } else {
+        TabBarSymbol symbolApply;
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(iconParam);
+        JSRef<JSVal> normalModifier = jsObj->GetProperty("normal");
+        JSRef<JSVal> selectedModifier = jsObj->GetProperty("selected");
+        if (normalModifier->IsObject()) {
+            JSViewAbstract::SetTabBarSymbolOptionApply(info, symbolApply, normalModifier, selectedModifier);
+        }
+        if (selectedModifier->IsObject()) {
+            symbolApply.selectedFlag = true;
+        }
+        tabBarSymbol = symbolApply;
     }
 
     JSRef<JSVal> paddingParam = paramObject->GetProperty("padding");
@@ -586,7 +608,7 @@ void JSTabContent::SetBottomTabBarStyle(const JSRef<JSObject>& paramObject)
     SetId(idParam);
 
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-    TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, tabBarSymbol, nullptr, false);
 }
 
 void JSTabContent::SetOnWillShow(const JSCallbackInfo& info)

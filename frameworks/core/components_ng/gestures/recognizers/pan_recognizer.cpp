@@ -153,7 +153,8 @@ void PanRecognizer::OnRejected()
 void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end)
 {
     PointF windowPoint(event.x, event.y);
-    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
 
     TouchEvent transformEvent = event;
     transformEvent.x = windowPoint.GetX();
@@ -362,8 +363,10 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     PointF windowPoint(event.GetOffset().GetX(), event.GetOffset().GetY());
     PointF windowTouchPoint(touchPoints_[event.id].GetOffset().GetX(), touchPoints_[event.id].GetOffset().GetY());
-    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false, isPostEventResult_);
-    NGGestureRecognizer::Transform(windowTouchPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(windowTouchPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
 
@@ -587,6 +590,19 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     return GestureAcceptResult::DETECTING;
 }
 
+Offset PanRecognizer::GetRawGlobalLocation(int32_t postEventNodeId)
+{
+    PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
+    if (!lastTouchEvent_.history.empty() && (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::BOXSELECT)) {
+        auto lastPoint = lastTouchEvent_.history.back();
+        PointF rawLastPoint(lastPoint.GetOffset().GetX(), lastPoint.GetOffset().GetY());
+        NGGestureRecognizer::Transform(
+            rawLastPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
+        return Offset(rawLastPoint.GetX(), rawLastPoint.GetY());
+    }
+    return Offset(localPoint.GetX(), localPoint.GetY());
+}
+
 void PanRecognizer::OnResetStatus()
 {
     MultiFingersRecognizer::OnResetStatus();
@@ -615,7 +631,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         }
         info.SetPointerId(touchPoint.id);
         PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+            isPostEventResult_, touchPoint.postEventNodeId);
+        info.SetRawGlobalLocation(GetRawGlobalLocation(touchPoint.postEventNodeId));
         info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
@@ -866,6 +884,19 @@ bool PanRecognizer::AboutToAddCurrentFingers(int32_t touchId)
     }
     currentFingers_++;
     return true;
+}
+
+bool PanRecognizer::AboutToMinusCurrentFingers(int32_t touchId)
+{
+    if (fingersId_.find(touchId) != fingersId_.end()) {
+        return true;
+    }
+    auto node = GetAttachedNode().Upgrade();
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "Pan recognizer has already receive touchId: %{public}d up event, node tag = %{public}s, id = %{public}s",
+        touchId, node ? node->GetTag().c_str() : "null",
+        node ? std::to_string(node->GetId()).c_str() : "invalid");
+    return false;
 }
 
 void PanRecognizer::AddOverTimeTrace()

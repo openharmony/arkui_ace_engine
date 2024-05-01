@@ -49,6 +49,7 @@ class JSMeasureLayoutParamNG : public NG::MeasureLayoutParam {
 public:
     JSMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrapper);
     JSRef<JSObject> GetConstraint();
+    JSRef<JSObject> GetPlaceChildrenConstraint();
     JSRef<JSArray> GetChildArray()
     {
         return childArray_;
@@ -74,6 +75,9 @@ public:
     static panda::Local<panda::JSValueRef> JSMeasure(panda::JsiRuntimeCallInfo* info);
     static panda::Local<panda::JSValueRef> JSLayout(panda::JsiRuntimeCallInfo* info);
     static panda::Local<panda::JSValueRef> JSPlaceChildren(panda::JsiRuntimeCallInfo* info);
+    static panda::Local<panda::JSValueRef> JSGetMargin(panda::JsiRuntimeCallInfo* info);
+    static panda::Local<panda::JSValueRef> JSGetPadding(panda::JsiRuntimeCallInfo* info);
+    static panda::Local<panda::JSValueRef> JSGetBorderWidth(panda::JsiRuntimeCallInfo* info);
 #endif
 };
 

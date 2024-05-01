@@ -45,6 +45,8 @@ public:
     void SetOnUpdate(VideoEventFunc&& onUpdate) override;
     void SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange) override;
     void SetOnStop(VideoEventFunc&& onStop) override;
+    void EnableAnalyzer(bool enable) override;
+    void SetImageAnalyzerConfig(void* config) override;
     static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
     static void SetControls(FrameNode* frameNode, bool controls);
     static void SetObjectFit(FrameNode* frameNode, ImageFit objectFit);

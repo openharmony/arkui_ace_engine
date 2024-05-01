@@ -891,12 +891,6 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     }
 #if !defined(PREVIEW)
     if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
-        if (!CheckOhmUrlValid(target.url)) {
-            if (target.errorCallback != nullptr) {
-                target.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
-            }
-            return;
-        }
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto pageUrlChecker = container->GetPageUrlChecker();
@@ -1177,9 +1171,11 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     if (!result) {
-        if (!target.isNamedRouterMode) {
+#if !defined(PREVIEW)
+        if (!target.isNamedRouterMode && target.url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
             ThrowError("Load Page Failed: " + target.url, ERROR_CODE_LOAD_PAGE_ERROR);
         }
+#endif
         pageRouterStack_.pop_back();
         return;
     }
@@ -1464,17 +1460,20 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         auto stageManager = pipelineContext->GetStageManager();
         auto stageNode = stageManager->GetStageNode();
         auto popNode = stageNode->GetChildren().back();
-        auto popIndex = stageNode->GetChildren().size() - 1;
+        int8_t popIndex = static_cast<int8_t>(stageNode->GetChildren().size() - 1);
+        bool findPage = false;
         if (info.routerMode == RouterMode::SINGLE) {
             auto pageInfo = FindPageInStack(info.url);
             if (pageInfo.second) {
                 // find page in stack, move position and update params.
                 MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
+                findPage = true;
             }
-        } else {
+        }
+        if (!findPage) {
             LoadPage(GenerateNextPageId(), info, true, false);
         }
-        if (popNode == stageNode->GetChildren().back()) {
+        if (popIndex < 0 || popNode == stageNode->GetChildren().back()) {
             return;
         }
         auto iter = pageRouterStack_.begin();

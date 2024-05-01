@@ -311,6 +311,9 @@ void CalendarDialogPattern::InitOnKeyEvent()
         if (pattern->isFocused_ && event.action == KeyAction::DOWN) {
             return pattern->HandleKeyEvent(event);
         }
+        if (!pattern->isFocused_ && !pattern->hasTabKeyDown_ && event.action == KeyAction::DOWN) {
+            pattern->OnEnterKeyEvent(event);
+        }
         return false;
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
@@ -519,6 +522,7 @@ bool CalendarDialogPattern::IsIndexInCurrentMonth(int32_t focusedDayIndex, const
 
 bool CalendarDialogPattern::HandleTabKeyEvent(const KeyEvent& event)
 {
+    hasTabKeyDown_ = true;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto childSize = static_cast<int32_t>(host->GetChildren().size());
@@ -679,8 +683,8 @@ void CalendarDialogPattern::PaintNonCurrentMonthFocusState(int32_t focusedDayInd
     calendarPattern->SetCurrentMonthData(currentMonthData);
 
     if (focusedDayIndex == -1) {
-        focusedDay_ = preMonthData.days[preMonthData.days.size() - 1];
-        preMonthData.days[preMonthData.days.size() - 1].isKeyFocused = true;
+        focusedDay_ = preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0];
+        preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0].isKeyFocused = true;
         calendarPattern->SetPreMonthData(preMonthData);
         swiperPattern->ShowPrevious();
         return;
@@ -1074,5 +1078,33 @@ RefPtr<SwiperPattern> CalendarDialogPattern::GetSwiperPattern()
     auto swiperFrameNode = GetSwiperFrameNode();
     CHECK_NULL_RETURN(swiperFrameNode, nullptr);
     return swiperFrameNode->GetPattern<SwiperPattern>();
+}
+
+void CalendarDialogPattern::OnEnterKeyEvent(const KeyEvent& event)
+{
+    bool checkKeyCode = (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER ||
+        event.code == KeyCode::KEY_SPACE);
+    if (!checkKeyCode) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
+    CHECK_NULL_VOID(options);
+
+    for (const auto& child : options->GetChildren()) {
+        CHECK_NULL_VOID(child);
+        if (child->GetTag() != V2::BUTTON_ETS_TAG) {
+            continue;
+        }
+        auto button = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(button);
+        auto focusHub = button->GetOrCreateFocusHub();
+        if (focusHub && focusHub->IsDefaultFocus()) {
+            auto gesture = button->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gesture);
+            gesture->ActClick();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

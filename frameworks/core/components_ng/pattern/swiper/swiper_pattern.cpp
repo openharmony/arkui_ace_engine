@@ -141,6 +141,9 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     if (jumpIndex_) {
         swiperLayoutAlgorithm->SetJumpIndex(jumpIndex_.value());
     } else if (targetIndex_) {
+        auto isMeasureOneMoreItem = AceType::InstanceOf<TabsNode>(host->GetParent()) &&
+            !NearZero(velocity_.value_or(0)) && !hasCachedCapture_ && !SupportSwiperCustomAnimation();
+        swiperLayoutAlgorithm->SetIsMeasureOneMoreItem(isMeasureOneMoreItem);
         swiperLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
     }
     swiperLayoutAlgorithm->SetCurrentIndex(currentIndex_);
@@ -280,18 +283,18 @@ void SwiperPattern::ResetOnForceMeasure()
     StopIndicatorAnimation();
     currentOffset_ = 0.0f;
     mainSizeIsMeasured_ = false;
+    currentDelta_ = 0.0f;
     itemPosition_.clear();
     isVoluntarilyClear_ = true;
     jumpIndex_ = currentIndex_;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    for (const auto& child : host->GetChildren()) {
-        if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
-            auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
-            CHECK_NULL_VOID(lazyForEachNode);
-            lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
-        }
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value()) {
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+        CHECK_NULL_VOID(lazyForEachNode);
+        lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -479,11 +482,11 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetIndex, int32_t captureId
     CHECK_NULL_VOID(host);
     auto targetNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(targetIndex));
     CHECK_NULL_VOID(targetNode);
-    auto callback = [weak = WeakClaim(this), id = Container::CurrentId(), captureId, targetIndex](
+    auto callback = [weak = WeakClaim(this), captureId, targetIndex](
                         std::shared_ptr<Media::PixelMap> pixelMap) {
-        ContainerScope scope(id);
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
+        ContainerScope scope(swiper->GetHostInstanceId());
         swiper->UpdateCaptureSource(pixelMap, captureId, targetIndex);
     };
     if (forceUpdate) {
@@ -576,12 +579,11 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 swiper->MarkDirtyNodeSelf();
                 auto swiperNode = swiper->GetHost();
                 CHECK_NULL_VOID(swiperNode);
-                for (const auto& child : swiperNode->GetChildren()) {
-                    if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
-                        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
-                        CHECK_NULL_VOID(lazyForEachNode);
-                        lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
-                    }
+                auto targetNode = swiper->FindLazyForEachNode(swiperNode);
+                if (targetNode.has_value()) {
+                    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+                    CHECK_NULL_VOID(lazyForEachNode);
+                    lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
                 }
             });
         UpdateSurfaceChangedCallbackId(callbackId);
@@ -632,6 +634,9 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
     if (swiperFocusHub->IsCurrentFocus()) {
         needFocusNode->RequestFocusImmediately();
     } else {
+        if (swiperFocusHub->AcceptFocusOfPriorityChild()) {
+            return;
+        }
         swiperFocusHub->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(needFocusNode)));
     }
 }
@@ -840,12 +845,13 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     currentOffset_ -= swiperLayoutAlgorithm->GetCurrentOffset();
     if (!itemPosition_.empty()) {
         const auto& turnPageRateCallback = swiperController_->GetTurnPageRateCallback();
-        if (turnPageRateCallback && isDragging_ && !NearZero(GetTranslateLength())) {
-            turnPageRateCallback(
-                itemPosition_.begin()->first, -itemPosition_.begin()->second.startPos / GetTranslateLength());
+        auto firstItem = GetFirstItemInfoInVisibleArea();
+        auto translateLength = firstItem.second.endPos - firstItem.second.startPos;
+        if (turnPageRateCallback && isDragging_ && !NearZero(translateLength)) {
+            turnPageRateCallback(firstItem.first, -firstItem.second.startPos / translateLength);
         }
 
-        placeItemWidth_ = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        placeItemWidth_ = translateLength;
     }
     if (hasCachedCapture_) {
         isCaptureReverse_ = swiperLayoutAlgorithm->GetIsCaptureReverse();
@@ -930,14 +936,14 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                 PlayTranslateAnimation(
                     currentOffset_, currentOffset_ - targetPos, iter->first, false, velocity_.value_or(0.0f));
             }
-            velocity_.reset();
         } else if (!itemPosition_.empty() && SwiperUtils::IsStretch(layoutProperty)) {
-            auto targetPos =
-                itemPosition_.begin()->second.startPos +
-                (targetIndexValue - itemPosition_.begin()->first) * (placeItemWidth_.value() + GetItemSpace());
+            auto firstItem = GetFirstItemInfoInVisibleArea();
+            auto targetPos = firstItem.second.startPos +
+                (targetIndexValue - firstItem.first) * (placeItemWidth_.value() + GetItemSpace());
             PlayTranslateAnimation(
                 currentOffset_, currentOffset_ - targetPos, targetIndexValue, false, velocity_.value_or(0.0f));
         }
+        velocity_.reset();
         pauseTargetIndex_ = targetIndex_;
     }
     mainSizeIsMeasured_ = swiperLayoutAlgorithm->GetMainSizeIsMeasured();
@@ -1409,12 +1415,12 @@ void SwiperPattern::ShowNext()
     indicatorDoingAnimation_ = false;
     auto childrenSize = TotalCount();
     std::optional<int32_t> preIndex;
+    auto loopIndex = usePropertyAnimation_ ? GetLoopIndex(propertyAnimationIndex_) : GetLoopIndex(currentIndex_);
     if (preTargetIndex_.has_value()) {
-        if (GetLoopIndex(preTargetIndex_.value()) >= childrenSize - GetDisplayCount() && !IsLoop()) {
-            return;
-        }
+        loopIndex = GetLoopIndex(preTargetIndex_.value());
         preIndex = preTargetIndex_.value();
-    } else if (GetLoopIndex(currentIndex_) >= childrenSize - GetDisplayCount() && !IsLoop()) {
+    }
+    if (loopIndex >= childrenSize - GetDisplayCount() && !IsLoop()) {
         return;
     }
     if (childrenSize <= 0 || GetDisplayCount() == 0) {
@@ -1425,7 +1431,7 @@ void SwiperPattern::ShowNext()
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
     StopIndicatorAnimation();
-    if (preIndex) {
+    if (preIndex || usePropertyAnimation_) {
         isUserFinish_ = false;
         FinishAnimation();
         if (!ContentWillChange(currentIndex_ + 1)) {
@@ -1464,12 +1470,12 @@ void SwiperPattern::ShowPrevious()
     indicatorDoingAnimation_ = false;
     auto childrenSize = TotalCount();
     std::optional<int32_t> preIndex;
+    auto loopIndex = usePropertyAnimation_ ? GetLoopIndex(propertyAnimationIndex_) : GetLoopIndex(currentIndex_);
     if (preTargetIndex_.has_value()) {
-        if (GetLoopIndex(preTargetIndex_.value()) <= 0 && !IsLoop()) {
-            return;
-        }
+        loopIndex = GetLoopIndex(preTargetIndex_.value());
         preIndex = preTargetIndex_.value();
-    } else if (GetLoopIndex(currentIndex_) <= 0 && !IsLoop()) {
+    }
+    if (loopIndex <= 0 && !IsLoop()) {
         return;
     }
     if (childrenSize <= 0 || GetDisplayCount() == 0) {
@@ -1480,7 +1486,7 @@ void SwiperPattern::ShowPrevious()
     StopFadeAnimation();
     StopIndicatorAnimation();
 
-    if (preIndex) {
+    if (preIndex || usePropertyAnimation_) {
         isUserFinish_ = false;
         FinishAnimation();
         if (!ContentWillChange(currentIndex_ - 1)) {
@@ -1595,22 +1601,27 @@ void SwiperPattern::DoPreloadItems(const std::set<int32_t>& indexSet, int32_t er
         CHECK_NULL_VOID(swiperPattern);
         auto host = swiperPattern->GetHost();
         CHECK_NULL_VOID(host);
+        auto targetNode = swiperPattern->FindLazyForEachNode(host);
+        if (targetNode.has_value()) {
+            auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+            CHECK_NULL_VOID(lazyForEachNode);
+            for (auto index : indexSet) {
+                if (lazyForEachNode) {
+                    lazyForEachNode->GetFrameChildByIndex(index, true);
+                }
+            }
+        }
         const auto& children = host->GetChildren();
         for (const auto& child : children) {
-            if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG && child->GetTag() != V2::JS_LAZY_FOR_EACH_ETS_TAG) {
+            if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG) {
                 continue;
             }
 
             auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
-            auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
             for (auto index : indexSet) {
                 if (forEachNode && forEachNode->GetChildAtIndex(index)) {
                     forEachNode->GetChildAtIndex(index)->Build(nullptr);
                     continue;
-                }
-
-                if (lazyForEachNode) {
-                    lazyForEachNode->GetFrameChildByIndex(index, true);
                 }
             }
         }
@@ -2180,9 +2191,16 @@ void SwiperPattern::HandleTouchBottomLoop()
 void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex)
 {
     // Keep follow hand
-    if ((preFirstIndex == 0 && currentFirstIndex_ == TotalCount() - 1) ||
-        (preFirstIndex == TotalCount() - 1 && currentFirstIndex_ == 0)) {
+    if (preFirstIndex == 0 && currentFirstIndex_ == TotalCount() - 1) {
         needTurn_ = true;
+        if (isTouchDown_ && LessOrEqual(mainDeltaSum_, 0.0f)) {
+            needTurn_ = false;
+        }
+    } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex_ == 0) {
+        needTurn_ = true;
+        if (isTouchDown_ && GreatOrEqual(mainDeltaSum_, 0.0f)) {
+            needTurn_ = false;
+        }
     }
 
     if (GreatNotEqual(additionalOffset, 0.0f)) {
@@ -2960,11 +2978,11 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
     host->CreateAnimatablePropertyFloat(INDICATOR_PROPERTY_NAME, 0, [weak](float value) {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
-            auto currentContentOffset = -(swiper->itemPosition_.begin()->second.startPos);
-            auto index = swiper->itemPosition_.begin()->first;
             const auto& turnPageRateCallback = swiper->swiperController_->GetTurnPageRateCallback();
-            if (turnPageRateCallback && !NearZero(swiper->GetTranslateLength())) {
-                turnPageRateCallback(index, (currentContentOffset - value) / swiper->GetTranslateLength());
+            auto firstItem = swiper->GetFirstItemInfoInVisibleArea();
+            auto translateLength = firstItem.second.endPos - firstItem.second.startPos;
+            if (turnPageRateCallback && !NearZero(translateLength)) {
+                turnPageRateCallback(firstItem.first, (- firstItem.second.startPos - value) / translateLength);
             }
         });
 
@@ -3567,33 +3585,20 @@ int32_t SwiperPattern::RealTotalCount() const
     return host->TotalChildCount() - num;
 }
 
-float SwiperPattern::GetTranslateLength() const
-{
-    if (itemPosition_.empty()) {
-        return 0.0f;
-    }
-    return itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-}
-
 std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetFirstItemInfoInVisibleArea() const
 {
     if (itemPosition_.empty()) {
         return std::make_pair(0, SwiperItemInfo {});
     }
-    auto targetIndex = 0;
-    if (GetPrevMargin() != 0.0f) {
-        for (const auto& item : itemPosition_) {
-            if (item.second.startPos < 0 && item.second.endPos < 0) {
-                continue;
-            }
-            if (item.second.startPos <= 0 && item.second.endPos > 0) {
-                targetIndex = item.first;
-                return std::make_pair(targetIndex, SwiperItemInfo { item.second.startPos, item.second.endPos });
-            }
-            if (item.second.startPos > 0 && item.second.endPos > 0) {
-                targetIndex = item.first;
-                return std::make_pair(targetIndex, SwiperItemInfo { item.second.startPos, item.second.endPos });
-            }
+    for (const auto& item : itemPosition_) {
+        if (item.second.startPos < 0 && item.second.endPos < 0) {
+            continue;
+        }
+        if (item.second.startPos <= 0 && item.second.endPos > 0) {
+            return std::make_pair(item.first, SwiperItemInfo { item.second.startPos, item.second.endPos });
+        }
+        if (item.second.startPos > 0 && item.second.endPos > 0) {
+            return std::make_pair(item.first, SwiperItemInfo { item.second.startPos, item.second.endPos });
         }
     }
     return std::make_pair(itemPosition_.begin()->first,
@@ -3606,9 +3611,8 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetLastItemInfoInVisibleArea()
         return std::make_pair(0, SwiperItemInfo {});
     }
     auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
-    auto targetVisableIndex = firstItemInfoInVisibleArea.first;
-    targetVisableIndex += GetDisplayCount() - 1;
-    auto iter = itemPosition_.find(targetVisableIndex);
+    auto lastItemIndex = firstItemInfoInVisibleArea.first + GetDisplayCount() - 1;
+    auto iter = itemPosition_.find(lastItemIndex);
     if (iter != itemPosition_.end()) {
         return std::make_pair(iter->first, SwiperItemInfo { iter->second.startPos, iter->second.endPos });
     }
@@ -3621,27 +3625,11 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetSecondItemInfoInVisibleArea
     if (itemPosition_.empty()) {
         return std::make_pair(0, SwiperItemInfo {});
     }
-    auto targetIndex = itemPosition_.begin()->first;
-    if (GetPrevMargin() != 0.0f) {
-        for (const auto& item : itemPosition_) {
-            if (item.second.startPos < 0 && item.second.endPos < 0) {
-                continue;
-            }
-            if (item.second.startPos <= 0 && item.second.endPos > 0) {
-                targetIndex = item.first;
-                break;
-            }
-            if (item.second.startPos > 0 && item.second.endPos > 0) {
-                targetIndex = item.first;
-                break;
-            }
-        }
-    }
-
-    targetIndex++;
-    auto iter = itemPosition_.find(targetIndex);
+    auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
+    auto secondItemIndex = firstItemInfoInVisibleArea.first + 1;
+    auto iter = itemPosition_.find(secondItemIndex);
     if (iter != itemPosition_.end()) {
-        return std::make_pair(targetIndex, SwiperItemInfo { iter->second.startPos, iter->second.endPos });
+        return std::make_pair(iter->first, SwiperItemInfo { iter->second.startPos, iter->second.endPos });
     }
     return std::make_pair(itemPosition_.begin()->first,
         SwiperItemInfo { itemPosition_.begin()->second.startPos, itemPosition_.begin()->second.endPos });
@@ -3994,12 +3982,11 @@ void SwiperPattern::SetLazyForEachLongPredict(bool useLazyLoad) const
     // lazyBuild feature.
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& children = host->GetChildren();
-    for (auto&& child : children) {
-        auto lazyForEach = DynamicCast<LazyForEachNode>(child);
-        if (lazyForEach) {
-            lazyForEach->SetRequestLongPredict(useLazyLoad);
-        }
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value()) {
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+        CHECK_NULL_VOID(lazyForEachNode);
+        lazyForEachNode->SetRequestLongPredict(useLazyLoad);
     }
 }
 
@@ -4007,12 +3994,11 @@ void SwiperPattern::SetLazyLoadIsLoop() const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& children = host->GetChildren();
-    for (auto&& child : children) {
-        auto lazyForEach = DynamicCast<LazyForEachNode>(child);
-        if (lazyForEach) {
-            lazyForEach->SetIsLoop(IsLoop());
-        }
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value()) {
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+        CHECK_NULL_VOID(lazyForEachNode);
+        lazyForEachNode->SetIsLoop(IsLoop());
     }
 }
 
@@ -4330,15 +4316,6 @@ float SwiperPattern::GetCustomPropertyOffset() const
     }
 
     return Dimension(paddingAndBorderValue + preMarginPX, DimensionUnit::PX).ConvertToVp();
-}
-
-float SwiperPattern::GetCurrentFirstIndexStartPos() const
-{
-    if (itemPosition_.empty()) {
-        return 0.0;
-    }
-
-    return itemPosition_.begin()->second.startPos;
 }
 
 int32_t SwiperPattern::TotalDisPlayCount() const
@@ -5146,5 +5123,22 @@ void SwiperPattern::SetOnHiddenChangeForParent()
         CHECK_NULL_VOID(navDestinationEventHub);
         navDestinationEventHub->SetOnHiddenChange(std::move(onHiddenChange));
     }
+}
+
+std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode) const
+{
+    if (AceType::DynamicCast<LazyForEachNode>(baseNode)) {
+        return baseNode;
+    }
+    if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
+        return std::nullopt;
+    }
+    for (const auto& child : baseNode->GetChildren()) {
+        auto targetNode = FindLazyForEachNode(child, false);
+        if (targetNode.has_value()) {
+            return targetNode;
+        }
+    }
+    return std::nullopt;
 }
 } // namespace OHOS::Ace::NG

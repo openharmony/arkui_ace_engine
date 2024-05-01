@@ -338,17 +338,23 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg009, TestSize.Level1)
     EXPECT_TRUE(FRAME_NODE->IsSupportDrawModifier());
 
     /**
-     * @tc.steps: step 3. call GetContentModifier when drawModifier is null .
+     * @tc.steps: step 3. call GetContentModifier when drawModifier is null.
      * @tc.expect: expect the return value to be correct.
      */
     EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
 
     /**
-     * @tc.steps: step 4. Nodes created by virtual classes, call GetContentModifier when drawModifier is null .
+     * @tc.steps: step 4. Nodes created by virtual classes, call GetContentModifier when drawModifier is null.
      * @tc.expect: expect the return value to be correct.
      */
     FRAME_NODE->SetDrawModifier(drawModifier);
     EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
+
+    /**
+     * @tc.steps: step 5. Nodes created by virtual classes, call SetRemoveCustomProperties.
+     * @tc.expect: expect call successfully.
+     */
+    FRAME_NODE->SetRemoveCustomProperties([]()->void {});
 }
 
 /**
@@ -2297,7 +2303,7 @@ HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal002, TestSize.Level1)
      */
     auto geometryNode = frameNode->GetGeometryNode();
     geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
-    NG::DragPreviewOption option { static_cast<NG::DragPreviewMode>(NG::DragPreviewMode::DISABLE_SCALE) };
+    NG::DragPreviewOption option { false };
     frameNode->SetDragPreviewOptions(option);
     EXPECT_FLOAT_EQ(frameNode->GetPreviewScaleVal(), 1.0f);
 
@@ -2305,9 +2311,36 @@ HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal002, TestSize.Level1)
      * @tc.steps: step3. set set drag preview options to auto and call GetPreviewScaleVal.
      * @tc.expected: expect GetPreviewScaleVal return scale value.
      */
-    option = { static_cast<NG::DragPreviewMode>(NG::DragPreviewMode::AUTO) };
+    option = { true };
     frameNode->SetDragPreviewOptions(option);
     EXPECT_LT(frameNode->GetPreviewScaleVal(), 1.0f);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetPreviewApplyVal001
+ * @tc.desc: Test frame node method GetPreviewApplyVal001
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewApplyVal001, TestSize.Level1)
+{
+    auto frameNode = FRAME_NODE;
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    /**
+     * @tc.steps: step2. set drag preview options and call GetDragPreviewOption.
+     * @tc.expected: expect GetDragPreviewOption return apply .
+     */
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {};
+    frameNode->SetDragPreviewOptions(previewOption);
+    EXPECT_NE(frameNode->GetDragPreviewOption().onApply, nullptr);
 }
 
 /**
@@ -2672,5 +2705,26 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0040, TestSize.Level1)
     frameNode->SetAllowDrop(allowDropSet);
     std::set<std::string> allowDrop = frameNode->GetAllowDrop();
     EXPECT_TRUE(allowDrop.empty());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg0050
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0050, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    node->GetOrCreateGestureEventHub();
+    node->AttachContext(AceType::RawPtr(context));
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    EXPECT_EQ(node->context_, AceType::RawPtr(context));
+
+    node->DetachContext(true);
+    EXPECT_EQ(node->context_, nullptr);
 }
 } // namespace OHOS::Ace::NG

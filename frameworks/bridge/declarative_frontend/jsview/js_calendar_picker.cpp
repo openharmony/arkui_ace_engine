@@ -20,6 +20,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/calendar_picker_model_impl.h"
 #include "core/components/calendar/calendar_theme.h"
@@ -54,38 +55,6 @@ CalendarPickerModel* CalendarPickerModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-
-std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
-{
-    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
-    CalcDimension radiusDim;
-    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        return prop;
-    }
-    if (JSViewAbstract::ParseJsDimensionVpNG(args, radiusDim)) {
-        NG::BorderRadiusProperty borderRadius;
-        borderRadius.SetRadius(radiusDim);
-        borderRadius.multiValued = false;
-        prop = borderRadius;
-    } else if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        CalcDimension topRight;
-        CalcDimension bottomLeft;
-        CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
-        NG::BorderRadiusProperty borderRadius;
-        borderRadius.radiusTopLeft = topLeft;
-        borderRadius.radiusTopRight = topRight;
-        borderRadius.radiusBottomLeft = bottomLeft;
-        borderRadius.radiusBottomRight = bottomRight;
-        borderRadius.multiValued = true;
-        prop = borderRadius;
-    }
-    return prop;
-}
-
 void ParseFontOfButtonStyle(const JSRef<JSObject>& pickerButtonParamObject, ButtonInfo& buttonInfo)
 {
     CalcDimension fontSize;
@@ -102,13 +71,13 @@ void ParseFontOfButtonStyle(const JSRef<JSObject>& pickerButtonParamObject, Butt
     }
     auto fontWeight = pickerButtonParamObject->GetProperty("fontWeight");
     if (fontWeight->IsString() || fontWeight->IsNumber()) {
-        buttonInfo.fontWeight = ConvertStrToFontWeight(fontWeight->ToString());
+        buttonInfo.fontWeight = ConvertStrToFontWeight(fontWeight->ToString(), FontWeight::MEDIUM);
     }
     JSRef<JSVal> style = pickerButtonParamObject->GetProperty("fontStyle");
     if (style->IsNumber()) {
         auto value = style->ToNumber<int32_t>();
-        if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
-            buttonInfo.fontStyle = FONT_STYLES[value];
+        if (value >= 0 && value < static_cast<int32_t>(FontStyle::NONE)) {
+            buttonInfo.fontStyle = static_cast<FontStyle>(value);
         }
     }
     JSRef<JSVal> family = pickerButtonParamObject->GetProperty("fontFamily");
@@ -149,6 +118,11 @@ ButtonInfo ParseButtonStyle(const JSRef<JSObject>& pickerButtonParamObject)
         buttonInfo.borderRadius = radius.value();
     }
 
+    auto primaryValue = pickerButtonParamObject->GetProperty("primary");
+    if (primaryValue->IsBoolean()) {
+        buttonInfo.isPrimary = primaryValue->ToBoolean();
+    }
+
     return buttonInfo;
 }
 
@@ -159,6 +133,10 @@ std::vector<ButtonInfo> ParseButtonStyles(const JSRef<JSObject>& paramObject)
     if (acceptButtonStyle->IsObject()) {
         auto acceptButtonStyleParamObject = JSRef<JSObject>::Cast(acceptButtonStyle);
         buttonInfos.emplace_back(ParseButtonStyle(acceptButtonStyleParamObject));
+        buttonInfos[0].isAcceptButton = true;
+    } else {
+        ButtonInfo buttonInfo;
+        buttonInfos.emplace_back(buttonInfo);
     }
     auto cancelButtonStyle = paramObject->GetProperty("cancelButtonStyle");
     if (cancelButtonStyle->IsObject()) {
@@ -596,6 +574,9 @@ std::map<std::string, NG::DialogGestureEvent> JSCalendarPickerDialog::DialogCanc
 
 void AppearDialogEvent(const JSCallbackInfo& info, std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
@@ -625,6 +606,9 @@ void AppearDialogEvent(const JSCallbackInfo& info, std::map<std::string, NG::Dia
 void DisappearDialogEvent(
     const JSCallbackInfo& info, std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
@@ -760,12 +744,12 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+        [properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowCalendarDialog(
-                properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+                properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker");
 }

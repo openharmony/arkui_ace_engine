@@ -117,10 +117,9 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     auto gestureRow = GetGestureRow();
     CHECK_NULL_VOID(gestureRow);
     AddOrRemovePanEvent(customTitleRow);
-    AddOrRemovePanEvent(floatingTitleRow);
     AddOrRemovePanEvent(gestureRow);
     gestureRow->GetLayoutProperty()->UpdateVisibility(
-        (isShow && customTitleSettedShow_) ? VisibleType::GONE : VisibleType::VISIBLE);
+        (isShow && !customTitleSettedShow_) ? VisibleType::VISIBLE : VisibleType::GONE);
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     auto stack = GetStackNode();
@@ -275,9 +274,10 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
         buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
         SetControlButtonVisibleBeforeAnim(controlButtonsLayoutProperty->GetVisibilityValue());
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        AnimationUtils::Animate(option, [buttonsContext, height]() {
+        AnimationUtils::Animate(option, [buttonsContext, titlePopupDistance, height]() {
             auto rect = buttonsContext->GetPaintRectWithoutTransform();
-            buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
+            buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height -
+                (titlePopupDistance - CONTAINER_TITLE_HEIGHT.ConvertToPx())/2 - rect.GetY()), 0.0f });
         });
     }
 

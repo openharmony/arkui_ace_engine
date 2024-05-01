@@ -103,7 +103,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
     auto iter = imageDataCache_.find(key);
     bool inCache = (iter != imageDataCache_.end());
     bool largerHalfSize = dataSize > (dataSizeLimit_ >> 1);
-    size_t oldSize = inCache ? 0 : iter->second->cacheObj->GetSize();
+    size_t oldSize = !inCache ? 0 : iter->second->cacheObj->GetSize();
     if (largerHalfSize && inCache) {
         // if data is longer than half limit, do not cache it.
         // and if the key is in Cache, erase it.

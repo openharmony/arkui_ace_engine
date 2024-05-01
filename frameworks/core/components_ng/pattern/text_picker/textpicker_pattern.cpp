@@ -625,7 +625,7 @@ void TextPickerPattern::ProcessCascadeOptions(const std::vector<NG::TextCascadeP
             reOptions.emplace_back(option);
             return ProcessCascadeOptions(options[selecteds_[index]].children, reOptions, index + 1);
         }
-        if (i == options.size() - 1) {
+        if (options.size() > 0 && options.size() == i + 1) {
             option.children = options[0].children;
             reOptions.emplace_back(option);
             return ProcessCascadeOptions(options[0].children, reOptions, index + 1);
@@ -744,7 +744,7 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
     result = std::string("{\"value\":") + "[";
     for (uint32_t i = 0; i < values.size(); i++) {
         result += "\"" + values[i];
-        if (i != values.size() - 1) {
+        if (values.size() > 0 && i != values.size() - 1) {
             result += "\",";
         } else {
             result += "\"]";
@@ -753,7 +753,7 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
     result += std::string(",\"index\":") + "[";
     for (uint32_t i = 0; i < indexs.size(); i++) {
         result += "\"" + std::to_string(indexs[i]);
-        if (i != indexs.size() - 1) {
+        if (indexs.size() > 0 && indexs.size() != i + 1) {
             result += "\",";
         } else {
             result += "\"]";
@@ -854,7 +854,7 @@ std::string TextPickerPattern::GetOptionsCascadeStr(
             result += std::string(", \"children\":");
             result += GetOptionsCascadeStr(options[i].children);
         }
-        if (i != options.size() - 1) {
+        if (options.size() > 0 && options.size() != i + 1) {
             result += "},";
         } else {
             result += "}]";
@@ -870,13 +870,13 @@ std::string TextPickerPattern::GetOptionsMultiStrInternal() const
         result += "[";
         for (uint32_t j = 0; j < cascadeOptions_[i].rangeResult.size(); j++) {
             result += "\"" + cascadeOptions_[i].rangeResult[j];
-            if (j != cascadeOptions_[i].rangeResult.size() - 1) {
+            if (j + 1 != cascadeOptions_[i].rangeResult.size()) {
                 result += "\",";
             } else {
                 result += "\"]";
             }
         }
-        if (i != cascadeOptions_.size() - 1) {
+        if (cascadeOptions_.size() > 0 && i != cascadeOptions_.size() - 1) {
             result += ",";
         } else {
             result += "]";
@@ -966,5 +966,23 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
 
     size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
     size.SetHeight(std::min(pickerContentSize.Height(), size.Height()));
+}
+
+void TextPickerPattern::SetCanLoop(bool isLoop)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->SetCanLoop(isLoop);
+    }
 }
 } // namespace OHOS::Ace::NG

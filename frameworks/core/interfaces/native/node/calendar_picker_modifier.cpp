@@ -270,15 +270,18 @@ void ParseDateByStr(const std::string& date, ArkUISelectedDateType& selectedDate
     }
     auto year = json->GetValue("year");
     if (year && year->IsNumber()) {
-        selectedDate.year = year->GetInt(); // local date start from 1900
+        uint32_t yearVal = year->GetInt() > 0 ? static_cast<uint32_t>(year->GetInt()) : 0;
+        selectedDate.year = yearVal; // local date start from 1900
     }
     auto month = json->GetValue("month");
     if (month && month->IsNumber()) {
-        selectedDate.month = month->GetInt();
+        uint32_t monthVal = month->GetInt() > 0 ? static_cast<uint32_t>(month->GetInt()) : 0;
+        selectedDate.month = monthVal;
     }
     auto day = json->GetValue("day");
     if (day && day->IsNumber()) {
-        selectedDate.day = day->GetInt();
+        uint32_t dayVal = day->GetInt() > 0 ? static_cast<uint32_t>(day->GetInt()) : 0;
+        selectedDate.day = dayVal;
     }
 }
 
@@ -291,6 +294,9 @@ void SetCalendarPickerOnChange(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         ArkUISelectedDateType selectedDate;
+        selectedDate.year = 0;
+        selectedDate.month = 0;
+        selectedDate.day = 0;
         ParseDateByStr(dateStr, selectedDate);
         event.componentAsyncEvent.subKind = ON_CALENDAR_PICKER_CHANGE;
         event.componentAsyncEvent.data[NUM_0].u32 = selectedDate.year;

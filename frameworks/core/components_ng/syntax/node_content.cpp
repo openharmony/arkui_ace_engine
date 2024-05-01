@@ -53,6 +53,7 @@ void NodeContent::AddNode(UINode* node, int32_t position)
     auto child = Claim(node);
     if (slot) {
         slot->AddChild(child, position);
+        slot->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         return;
     }
     auto it = std::find(children_.begin(), children_.end(), child);
@@ -71,6 +72,7 @@ void NodeContent::RemoveNode(UINode* node)
     auto slot = nodeSlot_.Upgrade();
     if (slot) {
         slot->RemoveChild(nodeRef);
+        slot->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         return;
     }
     auto it = std::find(children_.begin(), children_.end(), nodeRef);

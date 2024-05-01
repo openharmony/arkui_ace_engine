@@ -38,6 +38,7 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     overlayMod->SetPrintOffset(richEditorPattern->GetTextRect().GetOffset());
     overlayMod->SetTextHeight(richEditorPattern->GetTextRect().Height());
     overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
+    SetPreviewTextDecoration(paintWrapper);
     if (!richEditorPattern->HasFocus()) {
         overlayMod->UpdateScrollBar(paintWrapper);
         overlayMod->SetCaretVisible(false);
@@ -69,15 +70,25 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     overlayMod->SetIsClip(false);
 }
 
+void RichEditorPaintMethod::SetPreviewTextDecoration(PaintWrapper* paintWrapper)
+{
+    auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
+    CHECK_NULL_VOID(overlayMod);
+    overlayMod->SetPreviewTextDecorationColor(richEditorPattern->GetPreviewTextDecorationColor());
+    overlayMod->SetPreviewTextUnderlineWidth(richEditorPattern->GetPreviewTextUnderlineWidth());
+    overlayMod->SetShowPreviewTextDecoration(richEditorPattern->IsPreviewTextInputting());
+    overlayMod->SetPreviewTextStyle(richEditorPattern->GetPreviewTextStyle());
+}
+
 void RichEditorPaintMethod::SetCaretOffsetAndHeight(PaintWrapper* paintWrapper)
 {
     auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
     CHECK_NULL_VOID(overlayMod);
-    OffsetF caretOffset;
-    float caretHeight = 0.0f;
-    richEditorPattern->CalculateCaretOffsetAndHeight(caretOffset, caretHeight);
+    auto [caretOffset, caretHeight] = richEditorPattern->CalculateCaretOffsetAndHeight();
     overlayMod->SetCaretOffsetAndHeight(caretOffset, caretHeight);
 }
 

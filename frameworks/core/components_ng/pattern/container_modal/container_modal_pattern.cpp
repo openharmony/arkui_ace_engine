@@ -38,13 +38,13 @@ constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 } // namespace
 
-void UpdateRowHeight(const RefPtr<FrameNode>& row, int height)
+void UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
 {
     CHECK_NULL_VOID(row);
     auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height, DimensionUnit::PX)));
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
     row->MarkModifyDone();
     row->MarkDirtyNode();
 }
@@ -299,11 +299,7 @@ void ContainerModalPattern::AddOrRemovePanEvent(const RefPtr<FrameNode>& control
         };
         panEvent_ = MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
     }
-    if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN) {
-        eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-    } else {
-        eventHub->RemovePanEvent(panEvent_);
-    }
+    eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 void ContainerModalPattern::OnWindowFocused()
@@ -517,16 +513,20 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     auto customTitleRow = GetCustomTitleRow();
     CHECK_NULL_VOID(customTitleRow);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
-    CHECK_NULL_VOID(customTitleLayoutProperty);
     auto containerModalLayoutProperty = GetHost()->GetLayoutProperty();
+    auto gestureRow = GetGestureRow();
+    CHECK_NULL_VOID(gestureRow);
+    auto gestureRowProp = gestureRow->GetLayoutProperty();
     PaddingProperty padding;
     if (customTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        gestureRowProp->UpdateVisibility(VisibleType::VISIBLE);
     } else if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN &&
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY && customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        gestureRowProp->UpdateVisibility(VisibleType::GONE);
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
             CalcLength(CONTENT_PADDING) };
     }
@@ -545,31 +545,20 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     auto buttonsRow = GetControlButtonRow();
     CHECK_NULL_VOID(buttonsRow);
     buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
-    auto gestureRow = GetGestureRow();
-    CHECK_NULL_VOID(gestureRow);
-    auto gestureRowProp = gestureRow->GetLayoutProperty();
-    auto customVisible = customTitleLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
-    gestureRowProp->UpdateVisibility(customVisible == VisibleType::VISIBLE ? VisibleType::GONE : VisibleType::VISIBLE);
 }
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (height < 0) {
         height = 0;
     }
     titleHeight_ = Dimension(Dimension(height, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
-    auto column = host->GetChildAtIndex(0);
-    CHECK_NULL_VOID(column);
     auto customTitleRow = GetCustomTitleRow();
-    UpdateRowHeight(customTitleRow, height);
-    auto floatingTitleRow = GetFloatingTitleRow();
-    UpdateRowHeight(floatingTitleRow, height);
+    UpdateRowHeight(customTitleRow, titleHeight_);
     auto controlButtonsRow = GetControlButtonRow();
-    UpdateRowHeight(controlButtonsRow, height);
+    UpdateRowHeight(controlButtonsRow, titleHeight_);
     auto gestureRow = GetGestureRow();
-    UpdateRowHeight(gestureRow, height);
+    UpdateRowHeight(gestureRow, titleHeight_);
     CallButtonsRectChange();
 }
 

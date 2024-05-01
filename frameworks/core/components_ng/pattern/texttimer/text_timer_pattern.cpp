@@ -369,13 +369,11 @@ void TextTimerPattern::ResetCount()
 
 void TextTimerPattern::FireBuilder()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (!makeFunc_.has_value()) {
-        host->RemoveChildAtIndex(0);
-        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->RemoveChildAtIndex(0);
     contentModifierNode_ = BuildContentModifierNode();
     CHECK_NULL_VOID(contentModifierNode_);

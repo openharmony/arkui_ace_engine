@@ -72,6 +72,8 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void OnLanguageConfigurationUpdate() override;
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -409,6 +411,7 @@ private:
     void StartTransition(const RefPtr<NavDestinationGroupNode>& preDestination,
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible = false);
+    void ProcessAutoSave(const RefPtr<FrameNode>& node);
     void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
 
     void FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,
@@ -453,6 +456,7 @@ private:
     RefPtr<NavDestinationContext> preContext_;
     WeakPtr<UINode> parentNode_;
     int32_t preStackSize_ = 0;
+    bool isRightToLeft_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -359,7 +359,7 @@ typedef enum {
 }ArkUI_ProgressType;
 
 /**
- * @brief Enumerates the text decoration styles.
+ * @brief Enumerates the text decoration types.
  *
  * @since 12
  */
@@ -375,14 +375,14 @@ typedef enum {
 } ArkUI_TextDecorationType;
 
 /**
- * @brief Enumerates the text decoration line styles.
+ * @brief Enumerates the text decoration styles.
  *
  * @since 12
  */
 typedef enum {
-    /** Solid line. */
+    /** Single solid line. */
     ARKUI_TEXT_DECORATION_STYLE_SOLID = 0,
-    /** Double line. */
+    /** Double solid line. */
     ARKUI_TEXT_DECORATION_STYLE_DOUBLE,
     /** Dotted line. */
     ARKUI_TEXT_DECORATION_STYLE_DOTTED,
@@ -390,7 +390,7 @@ typedef enum {
     ARKUI_TEXT_DECORATION_STYLE_DASHED,
     /** Wavy line. */
     ARKUI_TEXT_DECORATION_STYLE_WAVY,
-} ArkUiTextDecorationStyle;
+} ArkUI_TextDecorationStyle;
 
 /**
  * @brief Enumerates the text cases.
@@ -1502,6 +1502,97 @@ typedef enum {
 } ArkUI_LengthMetricUnit;
 
 /**
+ * @brief Enumerates the autofill types.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Username. Password Vault, when enabled, can automatically save and fill in usernames. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_USER_NAME = 0,
+    /** Password. Password Vault, when enabled, can automatically save and fill in passwords. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_PASSWORD,
+    /** New password. Password Vault, when enabled, can automatically generate a new password. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_NEW_PASSWORD,
+    /** Full street address. The scenario-based autofill feature, when enabled, can automatically save and fill in full
+     *  street addresses. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_FULL_STREET_ADDRESS,
+    /** House number. The scenario-based autofill feature, when enabled, can automatically save and fill in house
+     *  numbers. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_HOUSE_NUMBER,
+    /** District and county. The scenario-based autofill feature, when enabled, can automatically save and fill in
+     *  districts and counties. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_DISTRICT_ADDRESS,
+    /** City. The scenario-based autofill feature, when enabled, can automatically save and fill in cities. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_CITY_ADDRESS,
+    /** Province. The scenario-based autofill feature, when enabled, can automatically save and fill in provinces. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_PROVINCE_ADDRESS,
+    /** Country. The scenario-based autofill feature, when enabled, can automatically save and fill in countries. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_COUNTRY_ADDRESS,
+    /** Full name. The scenario-based autofill feature, when enabled, can automatically save and fill in full names. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_PERSON_FULL_NAME,
+    /** Last name. The scenario-based autofill feature, when enabled, can automatically save and fill in last names. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_PERSON_LAST_NAME,
+    /** First name. The scenario-based autofill feature, when enabled, can automatically save and fill in first names.
+     */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_PERSON_FIRST_NAME,
+    /** Phone number. The scenario-based autofill feature, when enabled, can automatically save and fill in phone
+     *  numbers. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_PHONE_NUMBER,
+    /** Country code. The scenario-based autofill feature, when enabled, can automatically save and fill in country
+     *  codes. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_PHONE_COUNTRY_CODE,
+    /** Phone number with country code. The scenario-based autofill feature, when enabled, can automatically save and
+     *  fill in phone numbers with country codes. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_FULL_PHONE_NUMBER,
+    /** Email address. The scenario-based autofill feature, when enabled, can automatically save and fill in email
+     *  addresses. */
+    ARKUI_TEXTINPUT_CONTENT_EMAIL_ADDRESS,
+    /** Bank card number. The scenario-based autofill feature, when enabled, can automatically save and fill in bank
+     *  card numbers. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_BANK_CARD_NUMBER,
+    /** ID card number. The scenario-based autofill feature, when enabled, can automatically save and fill in ID card
+     *  numbers. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_ID_CARD_NUMBER,
+    /** Nickname. The scenario-based autofill feature, when enabled, can automatically save and fill in nicknames. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_NICKNAME,
+    /** Address information without street address. The scenario-based autofill feature, when enabled, can automatically
+     *  save and fill in address information without street addresses. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_DETAIL_INFO_WITHOUT_STREET,
+    /** Standard address. The scenario-based autofill feature, when enabled, can automatically save and fill in standard
+     *  addresses. */
+    ARKUI_TEXTINPUT_CONTENT_TYPE_FORMAT_ADDRESS,
+}ArkUI_TextInputContentType;
+
+/**
+ * @brief Defines the text input style.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Default style. The caret width is fixed at 1.5 vp, and the caret height is subject to the background height and
+     *  font size of the selected text. */
+    ARKUI_TEXTINPUT_STYLE_DEFAULT = 0,
+    /** Inline input style. The background height of the selected text is the same as the height of the text box. */
+    ARKUI_TEXTINPUT_STYLE_INLINE
+} ArkUI_TextInputStyle;
+
+/**
+ * @brief 定义文本识别的实体类型。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 电话号码。*/
+    ARKUI_TEXT_DATA_DETECTOR_TYPE_PHONE_NUMBER = 0,
+    /** 链接。 */
+    ARKUI_TEXT_DATA_DETECTOR_TYPE_URL,
+    /** 邮箱。 */
+    ARKUI_TEXT_DATA_DETECTOR_TYPE_EMAIL,
+    /** 地址。 */
+    ARKUI_TEXT_DATA_DETECTOR_TYPE_ADDRESS,
+} ArkUI_TextDataDetectorType;
+
+/**
 * @brief Creates a size constraint.
 *
 * @since 12
@@ -1667,6 +1758,16 @@ ArkUI_WaterFlowSectionOption* OH_ArkUI_WaterFlowSectionOption_Create();
 * @since 12
 */
 void OH_ArkUI_WaterFlowSectionOption_Dispose(ArkUI_WaterFlowSectionOption* option);
+
+/**
+* @brief Sets the FlowItem block configuration information array length.
+*
+* @param option FlowItem Indicates the packet configuration.
+* @param size Array Length.
+* @since 12
+*/
+void OH_ArkUI_WaterFlowSectionOption_SetSize(ArkUI_WaterFlowSectionOption* option,
+    int32_t size);
 
 /**
 * @brief Sets the number of items in a water flow section.

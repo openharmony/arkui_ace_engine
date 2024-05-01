@@ -166,6 +166,8 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedLifecycleChange, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedGesture, void);
     ACE_WEB_EVENT_PROPERTY(OnIntelligentTrackingPreventionResult, void);
+    ACE_WEB_EVENT_PROPERTY(OnRenderProcessNotResponding, void);
+    ACE_WEB_EVENT_PROPERTY(OnRenderProcessResponding, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

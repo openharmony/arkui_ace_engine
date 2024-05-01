@@ -439,7 +439,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest005, TestSize.Leve
     auto pipelineContext = PipelineContext::GetCurrentContext();
     EXPECT_NE(pipelineContext, nullptr);
     pipelineContext->FlushBuildFinishCallbacks();
-    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false);
+    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false, true);
 
     /**
      * @tc.steps:step3. set event in destination A
@@ -458,7 +458,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest005, TestSize.Leve
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
     pipelineContext->FlushBuildFinishCallbacks();
-    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false);
+    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false, true);
     auto contentNode = navigationNode->GetContentNode();
     EXPECT_NE(contentNode, nullptr);
     contentNode->RemoveChild(frameNode);
@@ -497,7 +497,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest006, TestSize.
     auto pipelineContext = PipelineContext::GetCurrentContext();
     EXPECT_NE(pipelineContext, nullptr);
     pipelineContext->FlushBuildFinishCallbacks();
-    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false);
+    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false, true);
 
     /**
      * @tc.steps: step3. create destination B and set lifecycle
@@ -529,7 +529,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest006, TestSize.
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
     pipelineContext->FlushBuildFinishCallbacks();
-    navigationPattern->FireShowAndHideLifecycle(frameNode, destinationB, false);
+    navigationPattern->FireShowAndHideLifecycle(frameNode, destinationB, false, true);
     auto contentNode = navigationNode->GetContentNode();
     EXPECT_NE(contentNode, nullptr);
     contentNode->RemoveChild(frameNode);
@@ -613,7 +613,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest008, TestSize.Leve
     auto pipelineContext = PipelineContext::GetCurrentContext();
     EXPECT_NE(pipelineContext, nullptr);
     pipelineContext->FlushBuildFinishCallbacks();
-    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false);
+    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false, true);
 
     /**
      * @tc.steps:step3. set event in destination A
@@ -663,12 +663,13 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest009, TestSize.
      */
     auto frameNode = NavigationLifecycleTestNg::CreateDestination("A");
     stack->Add("pageA", frameNode);
+    stack->UpdateAnimatedValue(false);
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     EXPECT_NE(pipelineContext, nullptr);
     pipelineContext->FlushBuildFinishCallbacks();
-    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false);
+    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false, false);
 
     /**
      * @tc.steps: step3. create destination B and set lifecycle

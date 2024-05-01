@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,13 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_pattern.h"
 
+#include "base/geometry/rect.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "frameworks/core/components/declaration/svg/svg_pattern_declaration.h"
 
 namespace OHOS::Ace::NG {
 
-SvgPattern::SvgPattern() : SvgQuote()
-{
-    declaration_ = AceType::MakeRefPtr<SvgPatternDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgPattern::SvgPattern() : SvgQuote() {}
 
 RefPtr<SvgNode> SvgPattern::Create()
 {
@@ -33,12 +30,10 @@ RefPtr<SvgNode> SvgPattern::Create()
 
 void SvgPattern::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
-    auto declaration = AceType::DynamicCast<SvgPatternDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    auto patternUnits = declaration->GetPatternUnits();
+    auto patternUnits = patternAttr_.patternUnits;
 
-    auto scaleX = viewPort.Width() / declaration->GetWidth().ConvertToPx();
-    auto scaleY = viewPort.Height() / declaration->GetHeight().ConvertToPx();
+    auto scaleX = viewPort.Width() / patternAttr_.width.ConvertToPx();
+    auto scaleY = viewPort.Height() / patternAttr_.height.ConvertToPx();
     canvas.Save();
     canvas.Scale(scaleX, scaleY);
 }
@@ -47,4 +42,55 @@ void SvgPattern::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, co
 {
     canvas.Restore();
 }
+
+bool SvgPattern::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgPatternAttribute&)> attrs[] = {
+        { DOM_SVG_HEIGHT,
+            [](const std::string& val, SvgPatternAttribute& attr) {
+                attr.height = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_PATTERN_CONTENT_UNITS,
+            [](const std::string& val, SvgPatternAttribute& attr) {
+                attr.patternContentUnits = val;
+            } },
+        { DOM_SVG_PATTERN_UNITS,
+            [](const std::string& val, SvgPatternAttribute& attr) {
+                attr.patternUnits = val;
+            } },
+        { DOM_SVG_VIEW_BOX,
+            [](const std::string& val, SvgPatternAttribute& attr) {
+                if (val.empty()) {
+                    return;
+                }
+                std::vector<double> viewBox;
+                StringUtils::StringSplitter(val, ' ', viewBox);
+                if (viewBox.size() == 4) {
+                    attr.viewBox = Rect(viewBox[0], viewBox[1], viewBox[2], viewBox[3]);
+                }
+            } },
+        { DOM_SVG_WIDTH,
+            [](const std::string& val, SvgPatternAttribute& attr) {
+                attr.width = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_X,
+            [](const std::string& val, SvgPatternAttribute& attr) {
+                attr.x = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_Y,
+            [](const std::string& val, SvgPatternAttribute& attr) {
+                attr.y = SvgAttributesParser::ParseDimension(val);
+            } },
+    };
+
+    std::string key = name;
+    StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, patternAttr_);
+        return true;
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

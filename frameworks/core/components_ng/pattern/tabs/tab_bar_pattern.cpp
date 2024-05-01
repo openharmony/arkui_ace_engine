@@ -39,14 +39,21 @@
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/symbol/constants.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
-
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components/toast/toast_theme.h"
+#include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int8_t LEFT_GRADIENT = 0;
@@ -64,9 +71,93 @@ constexpr float FULL_OPACITY = 1.0f;
 constexpr float NEAR_FULL_OPACITY = 0.99f;
 constexpr float NO_OPACITY = 0.0f;
 constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
+constexpr int8_t HALF_OF_WIDTH = 2;
 
+constexpr double BIG_FONT_SIZE_SCALE = 1.75f;
+constexpr double LARGE_FONT_SIZE_SCALE = 2.0f;
+constexpr double MAX_FONT_SIZE_SCALE = 3.2f;
+constexpr double BIG_DIALOG_WIDTH = 216.0f;
+constexpr double MAX_DIALOG_WIDTH = 256.0f;
+constexpr int8_t GRIDCOUNT = 2;
+constexpr int8_t MAXLINES = 6;
+constexpr uint16_t DIALOG_DEFAULT_FONT_SIZE = 32;
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 } // namespace
+
+void findTextAndImageNode(
+    const RefPtr<FrameNode>& columnNode, RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& imageNode)
+{
+    if (columnNode->GetTag() == V2::TEXT_ETS_TAG) {
+        textNode = columnNode;
+    } else if (columnNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        imageNode = columnNode;
+    } else {
+        std::list<RefPtr<UINode>> children = columnNode->GetChildren();
+        for (auto child : children) {
+            findTextAndImageNode(AceType::DynamicCast<FrameNode>(child), textNode, imageNode);
+        }
+    }
+}
+
+void CreateDialogIconNode(const RefPtr<FrameNode> &columnNode, const RefPtr<PipelineBase> &pipelineContext,
+    const RefPtr<FrameNode>& imageNode)
+{
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    auto color = tabTheme->GetDialogIconColor();
+    imageSourceInfo.SetFillColor(Color(color.GetValue()));
+    auto iconNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(iconProps);
+    iconProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(64.0_vp), CalcLength(64.0_vp)));
+    iconProps->UpdateImageFit(ImageFit::FILL);
+    iconProps->UpdateImageSourceInfo(imageSourceInfo);
+    // add image margin
+    MarginProperty margin = {
+        .top = CalcLength(48.0_vp),
+        .bottom = CalcLength(16.0_vp),
+    };
+    iconProps->UpdateMargin(margin);
+    iconNode->MountToParent(columnNode);
+    iconNode->MarkModifyDone();
+}
+
+void CreateDialogTextNode(const RefPtr<FrameNode>& columnNode, const RefPtr<PipelineBase> &pipelineContext,
+    const RefPtr<FrameNode>& textNode)
+{
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto textValue = textLayoutProperty->GetContent();
+    
+    auto dialogTextNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(dialogTextNode);
+    auto titleProp = AceType::DynamicCast<TextLayoutProperty>(dialogTextNode->GetLayoutProperty());
+    CHECK_NULL_VOID(titleProp);
+    titleProp->UpdateContent(textValue.value_or(""));
+    float scale = pipelineContext->GetFontScale();
+    if (scale == BIG_FONT_SIZE_SCALE) {
+        titleProp->UpdateFontSize(Dimension(DIALOG_DEFAULT_FONT_SIZE, DimensionUnit::FP));
+    } else if (scale == LARGE_FONT_SIZE_SCALE || scale == MAX_FONT_SIZE_SCALE) {
+        titleProp->UpdateFontSize(Dimension(DIALOG_DEFAULT_FONT_SIZE / BIG_FONT_SIZE_SCALE * scale, DimensionUnit::FP));
+    }
+    titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    titleProp->UpdateMaxLines(MAXLINES);
+    MarginProperty margin = {
+        .left = CalcLength(8.0_vp),
+        .right = CalcLength(8.0_vp),
+        .bottom = CalcLength(24.0_vp),
+    };
+    titleProp->UpdateMargin(margin);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto color = tabTheme->GetDialogFontColor();
+    titleProp->UpdateTextColor(Color(color.GetValue()));
+    columnNode->AddChild(dialogTextNode);
+}
 
 void TabBarPattern::OnAttachToFrameNode()
 {
@@ -106,9 +197,9 @@ void TabBarPattern::InitSurfaceChangedCallback()
                 if (!pattern) {
                     return;
                 }
-                if (type == WindowSizeChangeReason::UNDEFINED) {
-                    pattern->windowSizeChangeReason_ = type;
-                }
+
+                pattern->windowSizeChangeReason_ = type;
+                pattern->prevRootSize_ = std::make_pair(prevWidth, prevHeight);
 
                 if (type == WindowSizeChangeReason::ROTATION) {
                     pattern->windowSizeChangeReason_ = type;
@@ -134,6 +225,48 @@ void TabBarPattern::InitClick(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddClickEvent(clickEvent_);
 }
 
+void TabBarPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (longPressEvent_) {
+        return;
+    }
+
+    auto longPressTask = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto tabBar = weak.Upgrade();
+        if (tabBar) {
+            tabBar->HandleLongPressEvent(info);
+        }
+    };
+    longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>(std::move(longPressTask));
+    gestureHub->SetLongPressEvent(longPressEvent_);
+}
+
+void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID(!dragEvent_);
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto tabBar = weak.Upgrade();
+        auto index = tabBar->CalculateSelectedIndex(info.GetLocalLocation());
+        auto host = tabBar->GetHost();
+        CHECK_NULL_VOID(host);
+        auto totalCount = host->TotalChildCount() - MASK_COUNT;
+        if (tabBar && tabBar->dialogNode_ && index >= 0 && index < totalCount) {
+            if (!tabBar->moveIndex_.has_value()) {
+                tabBar->moveIndex_ = index;
+            }
+
+            if (tabBar->moveIndex_ != index) {
+                tabBar->CloseDialog(tabBar->dialogNode_);
+                tabBar->moveIndex_ = index;
+                tabBar->ShowDialogWithNode(index);
+            }
+        }
+    };
+    dragEvent_ = MakeRefPtr<DragEvent>(nullptr, std::move(actionUpdateTask), nullptr, nullptr);
+    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
+    gestureHub->SetDragEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
 void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
 {
     auto host = GetHost();
@@ -156,6 +289,10 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
         }
         if (pattern->tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && pattern->axis_ == Axis::HORIZONTAL &&
             pattern->IsOutOfBoundary()) {
+            auto scrollable = pattern->scrollableEvent_->GetScrollable();
+            if (scrollable) {
+                scrollable->SetCanOverScroll(true);
+            }
             // over scroll in drag update from normal to over scroll.
             float overScroll = 0.0f;
             // over scroll in drag update during over scroll.
@@ -198,6 +335,10 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     auto scrollable = MakeRefPtr<Scrollable>(task, axis);
     scrollable->SetNodeId(host->GetAccessibilityId());
     scrollable->Initialize(host->GetContextRefPtr());
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto property = scrollable->GetSpringProperty();
+    renderContext->AttachNodeAnimatableProperty(property);
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
     scrollableEvent_->GetScrollable()->SetEdgeEffect(EdgeEffect::SPRING);
@@ -567,6 +708,18 @@ void TabBarPattern::OnModifyDone()
 
     InitClick(gestureHub);
     InitTurnPageRateEvent();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    float scale = pipelineContext->GetFontScale();
+    if (scale >= BIG_FONT_SIZE_SCALE) {
+        InitLongPressEvent(gestureHub);
+        InitDragEvent(gestureHub);
+    } else {
+        gestureHub->RemoveDragEvent();
+        gestureHub->SetLongPressEvent(nullptr);
+        longPressEvent_ = nullptr;
+        dragEvent_ = nullptr;
+    }
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -714,13 +867,14 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             animationTargetIndex_ != indicator) {
             swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
             animationTargetIndex_.reset();
-        } else if (*windowSizeChangeReason_ == WindowSizeChangeReason::UNDEFINED ||
-            *windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
+            windowSizeChangeReason_.reset();
+        } else if (prevRootSize_.first != PipelineContext::GetCurrentRootWidth() ||
+            prevRootSize_.second != PipelineContext::GetCurrentRootHeight()) {
             // UNDEFINED currently implies window change on foldable
             PlayTabBarTranslateAnimation(indicator_);
             UpdateIndicator(indicator_);
+            windowSizeChangeReason_.reset();
         }
-        windowSizeChangeReason_.reset();
     }
     UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
     if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&
@@ -728,6 +882,70 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         ApplyTurnPageRateToIndicator(turnPageRate_);
     }
     return false;
+}
+
+void TabBarPattern::HandleLongPressEvent(const GestureEvent& info)
+{
+    auto index = CalculateSelectedIndex(info.GetLocalLocation());
+    HandleClick(info);
+    ShowDialogWithNode(index);
+}
+
+void TabBarPattern::ShowDialogWithNode(int32_t index)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto columnNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
+    RefPtr<FrameNode> imageNode = nullptr;
+    RefPtr<FrameNode> textNode = nullptr;
+    findTextAndImageNode(columnNode, textNode, imageNode);
+    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(textNode);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    RefPtr<FrameNode> dialogColumnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_VOID(dialogColumnNode);
+    CreateDialogIconNode(dialogColumnNode, pipelineContext, imageNode);
+    CreateDialogTextNode(dialogColumnNode, pipelineContext, textNode);
+
+    DialogProperties dialogProperties;
+    dialogProperties.alignment = DialogAlignment::CENTER;
+    dialogProperties.gridCount = GRIDCOUNT;
+    dialogProperties.isModal = false;
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = static_cast<BlurStyle>(
+        dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+    auto renderContext = dialogColumnNode->GetRenderContext();
+    renderContext->UpdateBackBlurStyle(styleOption);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    BorderRadiusProperty radius;
+    radius.SetRadius(tabTheme->GetDialogRadiusLevel10());
+    renderContext->UpdateBorderRadius(radius);
+    renderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::OuterDefaultLG));
+    float scale = pipelineContext->GetFontScale();
+    if (scale == BIG_FONT_SIZE_SCALE || scale == LARGE_FONT_SIZE_SCALE) {
+        dialogProperties.width = CalcDimension(BIG_DIALOG_WIDTH, DimensionUnit::VP);
+    } else if (scale == MAX_FONT_SIZE_SCALE) {
+        dialogProperties.width = CalcDimension(MAX_DIALOG_WIDTH, DimensionUnit::VP);
+    }
+    dialogNode_ = overlayManager->ShowDialogWithNode(dialogProperties, dialogColumnNode, false);
+}
+
+void TabBarPattern::CloseDialog(int32_t index)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    overlayManager->CloseDialog(dialogNode_);
+    dialogNode_.Reset();
 }
 
 void TabBarPattern::HandleClick(const GestureEvent& info)
@@ -806,6 +1024,7 @@ void TabBarPattern::HandleBottomTabBarChange(int32_t index)
     AnimationUtils::CloseImplicitAnimation();
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
     UpdateImageColor(index);
+    UpdateSymbolStats(index, preIndex);
     if (preIndex != index && (tabBarStyles_[preIndex] == TabBarStyle::BOTTOMTABBATSTYLE ||
                                    tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE)) {
         int32_t selectedIndex = -1;
@@ -861,7 +1080,7 @@ void TabBarPattern::HandleBottomTabBarClick(int32_t selectedIndex, int32_t unsel
     ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset, FULL_OPACITY,
         FULL_MASK_RADIUS_RATIO, false);
 
-    host->MarkDirtyNode();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
 }
@@ -1154,22 +1373,31 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
 
 void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto touchType = info.GetTouchType();
+    auto index = CalculateSelectedIndex(info.GetLocalLocation());
+    if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && dialogNode_) {
+        TabBarClickEvent(index);
+        ClickTo(host, index);
+        CloseDialog(index);
+    }
+
     if (IsContainsBuilder()) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+
     auto totalCount = host->TotalChildCount() - MASK_COUNT;
     if (totalCount < 0) {
         return;
     }
-    auto touchType = info.GetTouchType();
-    auto index = CalculateSelectedIndex(info.GetLocalLocation());
+   
     if (touchType == TouchType::DOWN && index >= 0 && index < totalCount) {
         HandleTouchDown(index);
         touchingIndex_ = index;
         return;
     }
+
     if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && touchingIndex_.has_value()) {
         HandleTouchUp(index);
         touchingIndex_.reset();
@@ -1483,7 +1711,10 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         CHECK_NULL_VOID(columnNode);
         auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         CHECK_NULL_VOID(imageNode);
-
+        if (imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
+            index++;
+            continue;
+        }
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto isSelected = columnNode->GetId() == selectedColumnId;
@@ -1506,6 +1737,75 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         index++;
     }
     SetImageColorOnIndex(indicator);
+}
+
+void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    if (tabBarPattern->IsContainsBuilder()) {
+        return;
+    }
+    std::vector<int32_t> indexes = {index, preIndex};
+    for (uint32_t i = 0; i < indexes.size(); i++) {
+        auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indexes[i]));
+        CHECK_NULL_VOID(columnNode);
+        auto symbolNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+        CHECK_NULL_VOID(symbolNode);
+        if (symbolNode->GetTag() != V2::SYMBOL_ETS_TAG) {
+            continue;
+        }
+        auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        TabContentModelNG::UpdateDefaultSymbol(tabTheme, symbolLayoutProperty);
+        if (i == 0) {
+            auto symbolEffectOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+            symbolEffectOptions.SetIsTxtActive(true);
+            symbolEffectOptions.SetIsTxtActiveSource(0);
+            symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+            symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOn()});
+            auto modifierOnApply = symbolArray_[indexes[i]].onApply;
+            if (symbolArray_[indexes[i]].selectedFlag && modifierOnApply != nullptr) {
+                modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)),
+                    "selected");
+            }
+        } else {
+            symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOff()});
+            auto modifierOnApply = symbolArray_[indexes[i]].onApply;
+            if (modifierOnApply != nullptr) {
+                modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)),
+                    "normal");
+            }
+        }
+        symbolNode->MarkModifyDone();
+        symbolNode->MarkDirtyNode();
+    }
+}
+
+void TabBarPattern::UpdateSymbolEffect(int32_t index)
+{
+    if (index != GetImageColorOnIndex().value_or(indicator_)) {
+        return;
+    }
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
+    CHECK_NULL_VOID(columnNode);
+    auto symbolNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    CHECK_NULL_VOID(symbolNode);
+    if (symbolNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        auto symbolEffectOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.SetIsTxtActive(false);
+        symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    }
 }
 
 void TabBarPattern::UpdateSubTabBoard()
@@ -1751,41 +2051,55 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
         indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
         return nullptr;
     }
-    Color bgColor;
-    auto tabBarNode = GetHost();
-    CHECK_NULL_RETURN(tabBarNode, nullptr);
-    auto tabBarCtx = tabBarNode->GetRenderContext();
-    CHECK_NULL_RETURN(tabBarCtx, nullptr);
-    if (tabBarCtx->GetBackgroundColor()) {
-        bgColor = *tabBarCtx->GetBackgroundColor();
-    } else {
-        auto tabsNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetParent());
-        CHECK_NULL_RETURN(tabsNode, nullptr);
-        auto tabsCtx = tabsNode->GetRenderContext();
-        CHECK_NULL_RETURN(tabsCtx, nullptr);
-        if (tabsCtx->GetBackgroundColor()) {
-            bgColor = *tabsCtx->GetBackgroundColor();
-        } else {
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_RETURN(pipeline, nullptr);
-            auto tabTheme = pipeline->GetTheme<TabTheme>();
-            CHECK_NULL_RETURN(tabTheme, nullptr);
-            bgColor = tabTheme->GetBackgroundColor().ChangeAlpha(0xff);
-        }
-    }
 
     if (!tabBarModifier_) {
         tabBarModifier_ = AceType::MakeRefPtr<TabBarModifier>();
     }
 
+    Color bgColor = GetTabBarBackgroundColor();
+    RectF tabBarItemRect;
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    if (paintProperty) {
+        RectF rect;
+        tabBarItemRect = paintProperty->GetIndicator().value_or(rect);
+    }
     IndicatorStyle indicatorStyle;
-    GetIndicatorStyle(indicatorStyle);
-
+    OffsetF indicatorOffset = { currentIndicatorOffset_, tabBarItemRect.GetY() };
+    GetIndicatorStyle(indicatorStyle, indicatorOffset);
+    indicatorOffset.AddX(-indicatorStyle.width.ConvertToPx() / HALF_OF_WIDTH);
+    auto hasIndicator = selectedModes_[indicator_] == SelectedMode::INDICATOR && !NearZero(tabBarItemRect.Height());
     return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, bgColor, indicatorStyle,
-        currentIndicatorOffset_, selectedModes_[indicator_]);
+        indicatorOffset, hasIndicator);
 }
 
-void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
+Color TabBarPattern::GetTabBarBackgroundColor() const
+{
+    Color bgColor = Color::WHITE;
+    auto tabBarNode = GetHost();
+    CHECK_NULL_RETURN(tabBarNode, bgColor);
+    auto tabBarCtx = tabBarNode->GetRenderContext();
+    CHECK_NULL_RETURN(tabBarCtx, bgColor);
+    if (tabBarCtx->GetBackgroundColor()) {
+        bgColor = *tabBarCtx->GetBackgroundColor();
+    } else {
+        auto tabsNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetParent());
+        CHECK_NULL_RETURN(tabsNode, bgColor);
+        auto tabsCtx = tabsNode->GetRenderContext();
+        CHECK_NULL_RETURN(tabsCtx, bgColor);
+        if (tabsCtx->GetBackgroundColor()) {
+            bgColor = *tabsCtx->GetBackgroundColor();
+        } else {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_RETURN(pipeline, bgColor);
+            auto tabTheme = pipeline->GetTheme<TabTheme>();
+            CHECK_NULL_RETURN(tabTheme, bgColor);
+            bgColor = tabTheme->GetBackgroundColor().ChangeAlpha(0xff);
+        }
+    }
+    return bgColor;
+}
+
+void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset)
 {
     if (indicator_ < 0 || indicator_ >= static_cast<int32_t>(indicatorStyles_.size())) {
         return;
@@ -1830,14 +2144,14 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
     }
 
     indicatorStyle = indicatorStyles_[swiperStartIndex_];
-
+    auto startItemRect = layoutProperty->GetIndicatorRect(swiperStartIndex_);
     if (NonPositive(indicatorStyle.width.Value())) {
-        indicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(swiperStartIndex_).Width());
+        indicatorStyle.width = Dimension(startItemRect.Width());
     }
-
     IndicatorStyle nextIndicatorStyle = indicatorStyles_[nextIndex];
+    auto nextItemRect = layoutProperty->GetIndicatorRect(nextIndex);
     if (NonPositive(nextIndicatorStyle.width.Value())) {
-        nextIndicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(nextIndex).Width());
+        nextIndicatorStyle.width = Dimension(nextItemRect.Width());
     }
     indicatorStyle.width =
         Dimension(indicatorStyle.width.ConvertToPx() +
@@ -1851,6 +2165,7 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
     LinearColor color = LinearColor(indicatorStyle.color) +
                         (LinearColor(nextIndicatorStyle.color) - LinearColor(indicatorStyle.color)) * turnPageRate_;
     indicatorStyle.color = color.ToColor();
+    indicatorOffset.SetY(startItemRect.GetY() + (nextItemRect.GetY() - startItemRect.GetY()) * turnPageRate_);
 }
 
 float TabBarPattern::GetSpace(int32_t indicator)

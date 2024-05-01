@@ -41,6 +41,7 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
@@ -49,6 +50,7 @@
 #include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -208,6 +210,12 @@ ArkUI_Bool IsBuilderNode(ArkUINodeHandle node)
     return ViewModel::IsBuilderNode(node);
 }
 
+ArkUI_Float64 ConvertLengthMetricsUnit(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit)
+{
+    Dimension lengthMetric(value, static_cast<DimensionUnit>(originUnit));
+    return lengthMetric.GetNativeValue(static_cast<DimensionUnit>(targetUnit));
+}
+
 ArkUI_Int32 InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
@@ -265,6 +273,10 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScrollEdge,
 };
 
+const ComponentAsyncEventHandler TEXT_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnDetectResultUpdate,
+};
+
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputEditChange,
     NodeModifier::SetTextInputOnSubmit,
@@ -272,6 +284,8 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputCut,
     NodeModifier::SetOnTextInputPaste,
     NodeModifier::SetOnTextInputSelectionChange,
+    NodeModifier::SetOnTextInputInputFilterError,
+    NodeModifier::SetTextInputOnTextContentScroll,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -280,6 +294,9 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaChange,
     NodeModifier::SetOnTextAreaPaste,
     NodeModifier::SetOnTextAreaSelectionChange,
+    nullptr,
+    NodeModifier::SetOnTextAreaInputFilterError,
+    NodeModifier::SetTextAreaOnTextContentScroll,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -334,16 +351,22 @@ const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListScroll,
-    nullptr,
+    NodeModifier::SetOnListScrollIndex,
     NodeModifier::SetOnListScrollStart,
     NodeModifier::SetOnListScrollStop,
     NodeModifier::SetOnListScrollFrameBegin,
     NodeModifier::SetOnListWillScroll,
+    NodeModifier::SetOnListDidScroll,
 };
 
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
     NodeModifier::SetOnReachEnd,
+    NodeModifier::SetOnDidScroll,
+    NodeModifier::SetOnWaterFlowScrollStart,
+    NodeModifier::SetOnWaterFlowScrollStop,
+    NodeModifier::SetOnWaterFlowScrollFrameBegin,
+    NodeModifier::SetOnWaterFlowScrollIndex,
 };
 
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -359,6 +382,14 @@ const ComponentAsyncEventHandler ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[] = 
     NodeModifier::SetOnIndexerPopupSelected,
     NodeModifier::SetIndexerChangeEvent,
     NodeModifier::SetIndexerCreatChangeEvent,
+};
+
+const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnSearchSubmit,
+    NodeModifier::SetOnSearchChange,
+    NodeModifier::SetOnSearchCopy,
+    NodeModifier::SetOnSearchCut,
+    NodeModifier::SetOnSearchPaste,
 };
 
 /* clang-format on */
@@ -392,6 +423,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = scrollNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_TEXT: {
+            // text event type.
+            if (subKind >= sizeof(TEXT_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_TEXT_INPUT: {
@@ -536,6 +576,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_SEARCH: {
+            // search event type.
+            if (subKind >= sizeof(SEARCH_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SEARCH_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }
@@ -663,7 +712,7 @@ void RegisterCustomNodeAsyncEvent(ArkUINodeHandle node, int32_t eventType, void*
         companion->SetExtraParam(eventType, extraParam);
     } else {
         auto originEventType = companion->GetFlags();
-        companion->SetFlags(originEventType | eventType);
+        companion->SetFlags(static_cast<uint32_t>(originEventType) | static_cast<uint32_t>(eventType));
         companion->SetExtraParam(eventType, extraParam);
     }
 }
@@ -677,7 +726,7 @@ ArkUI_Int32 UnregisterCustomNodeEvent(ArkUINodeHandle node, ArkUI_Int32 eventTyp
     if ((originEventType & eventType) != eventType) {
         return -1;
     }
-    companion->SetFlags(originEventType ^ eventType);
+    companion->SetFlags(static_cast<uint32_t>(originEventType) ^ static_cast<uint32_t>(eventType));
     companion->EraseExtraParam(eventType);
     return 0;
 }
@@ -841,6 +890,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         ApplyModifierFinish,
         MarkDirty,
         IsBuilderNode,
+        ConvertLengthMetricsUnit,
     };
     /* clang-format on */
 

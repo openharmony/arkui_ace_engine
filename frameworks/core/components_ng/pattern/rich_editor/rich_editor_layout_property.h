@@ -26,6 +26,7 @@ public:
     RichEditorLayoutProperty();
     ~RichEditorLayoutProperty() override;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutProperty);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreviewTextStyle, std::string, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

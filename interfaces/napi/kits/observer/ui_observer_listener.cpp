@@ -67,8 +67,7 @@ void UIObserverListener::OnScrollEventStateChange(
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
 }
 
-void UIObserverListener::OnRouterPageStateChange(napi_value context, int32_t index,
-    const std::string& name, const std::string& path, NG::RouterPageState state)
+void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo)
 {
     if (!env_ || !callback_) {
         TAG_LOGW(AceLogTag::ACE_OBSERVER,
@@ -79,20 +78,23 @@ void UIObserverListener::OnRouterPageStateChange(napi_value context, int32_t ind
     napi_get_reference_value(env_, callback_, &callback);
     napi_value objValue = nullptr;
     napi_create_object(env_, &objValue);
-    napi_value napiCtx = context;
+    napi_value napiCtx = pageInfo.context;
     napi_value napiIndex = nullptr;
     napi_value napiName = nullptr;
     napi_value napiPath = nullptr;
     napi_value napiState = nullptr;
-    napi_create_int32(env_, index, &napiIndex);
-    napi_create_string_utf8(env_, name.c_str(), name.length(), &napiName);
-    napi_create_string_utf8(env_, path.c_str(), path.length(), &napiPath);
-    napi_create_int32(env_, static_cast<int32_t>(state), &napiState);
+    napi_value napiPageId = nullptr;
+    napi_create_int32(env_, pageInfo.index, &napiIndex);
+    napi_create_string_utf8(env_, pageInfo.name.c_str(), pageInfo.name.length(), &napiName);
+    napi_create_string_utf8(env_, pageInfo.path.c_str(), pageInfo.path.length(), &napiPath);
+    napi_create_int32(env_, static_cast<int32_t>(pageInfo.state), &napiState);
+    napi_create_string_utf8(env_, pageInfo.pageId.c_str(), pageInfo.pageId.length(), &napiPageId);
     napi_set_named_property(env_, objValue, "context", napiCtx);
     napi_set_named_property(env_, objValue, "index", napiIndex);
     napi_set_named_property(env_, objValue, "name", napiName);
     napi_set_named_property(env_, objValue, "path", napiPath);
     napi_set_named_property(env_, objValue, "state", napiState);
+    napi_set_named_property(env_, objValue, "pageId", napiPageId);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
 }

@@ -127,6 +127,8 @@ public:
 
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
+    Rect GetUIExtensionHostWindowRect() const override;
+    bool CheckHostWindowStatus() const override;
 
     bool IsFocused() override;
     void RequestFocus() override;
@@ -194,7 +196,7 @@ private:
     int32_t targetId_ = -1;
     bool isToastWindow_ = false;
     int32_t popupTargetId_ = -1;
-    bool haveDialog_;
+    bool haveDialog_ = false;
     bool isShowed_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
 };

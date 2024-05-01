@@ -125,13 +125,16 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     auto animationValue = obj->GetProperty("animation");
     if (animationValue->IsObject()) {
         auto animationObj = JSRef<JSObject>::Cast(animationValue);
+        auto curveArgs = animationObj->GetProperty("curve");
+        bool hasDuration = true;
         if (!ConvertFromJSValue(animationObj->GetProperty("duration"), duration) || Negative(duration)) {
             duration = DEFAULT_DURATION;
+            hasDuration = false;
         }
-
-        auto curveArgs = animationObj->GetProperty("curve");
-        ParseCurveParams(curve, curveArgs);
-        ConvertFromJSValue(animationObj->GetProperty("canOverScroll"), canOverScroll);
+        bool hasCurve = ParseCurveParams(curve, curveArgs);
+        bool hasCanOverScroll =
+            ConvertFromJSValue(animationObj->GetProperty("canOverScroll"), canOverScroll) ? true : false;
+        smooth = !hasDuration && !hasCurve && !hasCanOverScroll ? true : false;
     } else if (animationValue->IsBoolean()) {
         smooth = animationValue->ToBoolean();
     }
@@ -145,20 +148,23 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth, canOverScroll);
 }
 
-void JSScroller::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
+bool JSScroller::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
 {
     std::string curveName;
     if (ConvertFromJSValue(jsValue, curveName)) {
         auto index = BinarySearchFindIndex(CURVE_MAP, ArraySize(CURVE_MAP), curveName.c_str());
         if (index >= 0) {
             curve = CURVE_MAP[index].value;
+            return true;
         }
     } else if (jsValue->IsObject()) {
         JSRef<JSVal> curveString = JSRef<JSObject>::Cast(jsValue)->GetProperty("__curveString");
         if (curveString->IsString()) {
             curve = CreateCurve(curveString->ToString());
+            return true;
         }
     }
+    return false;
 }
 
 void JSScroller::ScrollEdge(const JSCallbackInfo& args)

@@ -136,10 +136,21 @@ enum class CleanNodeStyle {
     INPUT,
 };
 
-enum class MenuPolicy { DEFAULT = 0, NEVER, ALWAYS };
+enum class CancelButtonStyle {
+    CONSTANT,
+    INVISIBLE,
+    INPUT,
+};
+
+enum class MenuPolicy { DEFAULT = 0, HIDE, SHOW };
 
 struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
+};
+
+enum class PreviewTextStyle {
+    NORMAL,
+    UNDERLINE,
 };
 
 class ACE_EXPORT TextFieldControllerBase : public AceType {

@@ -63,6 +63,7 @@ public:
         return end_;
     }
 
+    double GetTossOffset() const;
 private:
     double GetCurrentTime() const;
     void CreatePropertyCallback();
@@ -74,6 +75,7 @@ private:
     double speed_ = 0.0;
     int32_t showCount_ = 0;
     double end_ = 0.0;
+    bool isManualStopToss_ = false;
     WeakPtr<TextPickerColumnPattern> column_;
     WeakPtr<PipelineContext> pipeline_;
     RefPtr<NodeAnimatablePropertyFloat> property_;

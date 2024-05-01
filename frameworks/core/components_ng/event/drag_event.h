@@ -121,6 +121,7 @@ public:
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     static void UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset);
+    static void UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
     static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
@@ -214,6 +215,10 @@ public:
     void HandleTouchCancelEvent();
     RefPtr<FrameNode> GetItemFatherNode();
     RefPtr<FrameNode> GetFrameNode();
+    static void PrepareShadowParametersForDragData(const RefPtr<FrameNode>& frameNode,
+       std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale);
+    static void ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonValue>& arkExtraInfoJson);
+    static std::optional<Shadow> GetDefaultShadow();
 
     inline static void FlushSyncGeometryNodeTasks();
 
@@ -221,10 +226,19 @@ public:
         const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
     static RefPtr<FrameNode> CreateBadgeTextNode(
         const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
+
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
-    void ApplyNewestOptionExecutedFromModifierToNode(
+    void UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& frameNode);
+    static void SetImageNodeInitAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
+    static void SetImageNodeFinishAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
+    static void ApplyNewestOptionExecutedFromModifierToNode(
         const RefPtr<FrameNode>& optionHolderNode, const RefPtr<FrameNode>& targetNode);
+    // check global dragging status
+    bool IsGlobalStatusSuitableForDragging();
+    // check the current node's status to decide if it can initiate one drag operation
+    bool IsCurrentNodeStatusSuitableForDragging(
+        const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;

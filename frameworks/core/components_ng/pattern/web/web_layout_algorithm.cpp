@@ -31,14 +31,6 @@ constexpr int32_t MAX_SURFACE_SIZE = 8000;
 namespace OHOS::Ace::NG {
 WebLayoutAlgorithm::WebLayoutAlgorithm() = default;
 
-std::optional<SizeF> WebLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
-{
-    auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
-                                                                : contentConstraint.maxSize;
-    return layoutSize;
-}
-
 void WebLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -51,7 +43,13 @@ void WebLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto renderMode = pattern->GetRenderMode();
     if (pattern->GetLayoutMode() == WebLayoutMode::FIT_CONTENT && IsValidRootLayer(rootLayerWidth, renderMode) &&
         IsValidRootLayer(rootLayerHeight, renderMode)) {
-        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(rootLayerWidth, rootLayerHeight));
+        auto drawSize = SizeF(rootLayerWidth, rootLayerHeight);
+        auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+        MinusPaddingToSize(padding, drawSize);
+        layoutWrapper->GetGeometryNode()->SetFrameSize(drawSize);
+    } else if (pattern->IsVirtualKeyBoardShow()) {
+        Size drawSize = pattern->GetDrawSize();
+        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(drawSize.Width(), drawSize.Height()));
     } else {
         BoxLayoutAlgorithm::Measure(layoutWrapper);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,12 +53,7 @@ RefPtr<SvgNode> SvgFeColorMatrix::Create()
     return AceType::MakeRefPtr<SvgFeColorMatrix>();
 }
 
-SvgFeColorMatrix::SvgFeColorMatrix() : SvgFe()
-{
-    declaration_ = AceType::MakeRefPtr<SvgFeColorMatrixDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgFeColorMatrix::SvgFeColorMatrix() : SvgFe() {}
 
 void SvgFeColorMatrix::MakeMatrix(const std::string& value)
 {
@@ -66,8 +61,8 @@ void SvgFeColorMatrix::MakeMatrix(const std::string& value)
     if (!StringUtils::ParseStringToArray(value, matrix)) {
         return;
     }
-    // when matrix length < 20, then return
-    if (matrix.size() < matrix_.size()) {
+    // when matrix length not equal 20, then return
+    if (matrix.size() != matrix_.size()) {
         return;
     }
     matrix_ = matrix;
@@ -123,32 +118,28 @@ void SvgFeColorMatrix::MakeLuminanceToAlpha()
 
 void SvgFeColorMatrix::OnInitStyle()
 {
-    auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    auto type = declaration->GetType();
+    auto type = matrixAttr_.type;
     switch (type) {
-        case SvgFeColorMatrixType::Saturate:
-            MakeSaturate(declaration->GetValues());
+        case SvgFeColorMatrixType::SATURATE:
+            MakeSaturate(matrixAttr_.values);
             break;
-        case SvgFeColorMatrixType::HueRotate:
-            MakeHueRotate(declaration->GetValues());
+        case SvgFeColorMatrixType::HUE_ROTATE:
+            MakeHueRotate(matrixAttr_.values);
             break;
-        case SvgFeColorMatrixType::LuminanceToAlpha:
+        case SvgFeColorMatrixType::LUMINACE_TO_ALPHA:
             MakeLuminanceToAlpha();
             break;
         default:
-            MakeMatrix(declaration->GetValues());
+            MakeMatrix(matrixAttr_.values);
             break;
     }
 }
 
 void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
-    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor,
+    const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
-    auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
+    imageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
 
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix_.data());
@@ -157,7 +148,33 @@ void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilt
 
     imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
-    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
+    RegisterResult(feAttr_.result, imageFilter, resultHash);
+}
+
+bool SvgFeColorMatrix::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgFeColorMatrixAttribute&)> attrs[] = {
+        { DOM_SVG_FE_TYPE,
+            [](const std::string& type, SvgFeColorMatrixAttribute& attr) {
+                if (type == "saturate") {
+                    attr.type = SvgFeColorMatrixType::SATURATE;
+                } else if (type == "hueRotate") {
+                    attr.type = SvgFeColorMatrixType::HUE_ROTATE;
+                } else if (type == "luminanceToAlpha") {
+                    attr.type = SvgFeColorMatrixType::LUMINACE_TO_ALPHA;
+                }
+            } },
+        { DOM_SVG_FE_VALUES,
+            [](const std::string& val, SvgFeColorMatrixAttribute& attr) {
+                attr.values = val;
+            } },
+    };
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), name.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, matrixAttr_);
+        return true;
+    }
+    return SvgFe::ParseAndSetSpecializedAttr(name, value);
 }
 
 } // namespace OHOS::Ace::NG

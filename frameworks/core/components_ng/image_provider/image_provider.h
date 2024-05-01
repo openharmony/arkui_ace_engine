@@ -44,6 +44,13 @@ struct LoadNotifier {
     LoadFailNotifyTask onLoadFail_;
 };
 
+struct ImageDecoderOptions {
+    bool forceResize = false;
+    bool sync = false;
+    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
+    AIImageQuality imageQuality = AIImageQuality::NONE;
+};
+
 class ImageObject;
 
 // load & decode images
@@ -65,10 +72,12 @@ public:
      *    @param targetSize           target size of canvasImage
      *    @param forceResize          force resize image to target size
      *    @param sync                 if true, run task synchronously
+     *    @param dynamicMode          set dynamic range mode of image
+     *    @param imageQuality         set the image quality enhancement level of image
      *    @return                     true if MakeCanvasImage was successful
      */
     static void MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
-        const SizeF& targetSize, bool forceResize = false, bool sync = false);
+        const SizeF& targetSize, const ImageDecoderOptions& imageDecoderOptions);
 
     /** Check if data is present in imageObj, if not, reload image data.
      *
@@ -107,7 +116,7 @@ private:
     static void CreateImageObjHelper(const ImageSourceInfo& src, bool sync = false);
 
     static void MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& targetSize, const std::string& key,
-        bool forceResize, bool sync = false);
+        const ImageDecoderOptions& imagedecoderOptions);
 
     // helper functions to end task and callback to LoadingContexts
     static void SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false);

@@ -146,6 +146,10 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
     if (args.Length() < 3) {
         return;
     }
+    int32_t unit = 0;
+    if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+        jsRenderContext->SetUnit(CanvasUnit::PX);
+    }
     if (args[0]->IsNumber() && args[1]->IsNumber()) {
         double fWidth = 0.0;
         double fHeight = 0.0;
@@ -153,12 +157,13 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         int height = 0;
         JSViewAbstract::ParseJsDouble(args[0], fWidth);
         JSViewAbstract::ParseJsDouble(args[1], fHeight);
-
-        fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
-        fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
+        double density = jsRenderContext->GetDensity();
+        fWidth *= density;
+        fHeight *= density;
         width = round(fWidth);
         height = round(fHeight);
-
+        jsRenderContext->SetWidth(width);
+        jsRenderContext->SetHeight(height);
         auto renderingContext =
             AceType::DynamicCast<OffscreenCanvasRenderingContext2DModel>(jsRenderContext->renderingContext2DModel_);
         auto offscreenPattern = renderingContext->CreateOffscreenPattern(width, height);
@@ -223,6 +228,9 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
         return;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
+    jsImage->SetUnit(GetUnit());
+    jsImage->SetWidth(GetWidth());
+    jsImage->SetHeight(GetHeight());
     jsImage->SetContextId(id);
 
     info.SetReturnValue(JsConverter::ConvertNapiValueToJsVal(renderImage));

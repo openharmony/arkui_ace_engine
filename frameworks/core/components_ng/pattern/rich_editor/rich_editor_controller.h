@@ -18,37 +18,30 @@
 
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 
 namespace OHOS::Ace::NG {
 class RichEditorPattern;
 
-class ACE_EXPORT RichEditorController : public RichEditorControllerBase {
-    DECLARE_ACE_TYPE(RichEditorController, RichEditorControllerBase);
+class ACE_EXPORT RichEditorController : public RichEditorBaseController, public RichEditorControllerBase {
+    DECLARE_ACE_TYPE(RichEditorController, RichEditorBaseController, RichEditorControllerBase);
 
 public:
-    void SetPattern(const WeakPtr<RichEditorPattern>& pattern);
     int32_t AddImageSpan(const ImageSpanOptions& options) override;
     int32_t AddTextSpan(const TextSpanOptions& options) override;
     int32_t AddSymbolSpan(const SymbolSpanOptions& options) override;
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options) override;
-    int32_t GetCaretOffset() override;
-    bool SetCaretOffset(int32_t caretPosition) override;
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) override;
-    void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) override;
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) override;
     SelectionInfo GetSpansInfo(int32_t start, int32_t end) override;
     SelectionInfo GetSelectionSpansInfo() override;
     std::vector<ParagraphInfo> GetParagraphsInfo(int32_t start, int32_t end) override;
     void DeleteSpans(const RangeOptions& options) override;
-    void CloseSelectionMenu() override;
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style) override;
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
-    bool IsEditing() override;
-    void StopEditing() override;
 
 private:
-    WeakPtr<RichEditorPattern> pattern_;
     struct UpdateSpanStyle updateSpanStyle_;
 };
 } // namespace OHOS::Ace::NG

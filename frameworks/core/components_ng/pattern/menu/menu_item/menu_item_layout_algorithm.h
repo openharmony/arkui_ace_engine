@@ -20,6 +20,10 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr static int32_t EXPANDABLE_AREA_VIEW_INDEX = 2;
+    constexpr static int32_t CLICKABLE_AREA_VIEW_INDEX = 3;
+}
 class ACE_EXPORT MenuItemLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(MenuItemLayoutAlgorithm, BoxLayoutAlgorithm);
 
@@ -31,9 +35,20 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void MeasureItemViews(float maxRowWidth, float middleSpace,
+        float minRowWidth, float minItemHeight, double iconSize,
+        LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint,
+        PaddingPropertyF padding, LayoutWrapper* layoutWrapper);
     void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
+    void MeasureExpandableArea(const RefPtr<LayoutWrapper>& area, const LayoutConstraintF& constraint);
+    void CheckNeedExpandContent(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
+    void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight,
+        float minItemHeight, float expandableHeight);
 
     float horInterval_ = 0.0f;
+    float idealWidth_ = 0.0f;
+    float emptyWidth_ = 0.0f;
+    bool needExpandContent_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutAlgorithm);
 };

@@ -304,7 +304,7 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
 
 void JSSlider::SetMinLabel(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsString()) {
+    if (!info[0]->IsString() && !info[0]->IsNumber()) {
         return;
     }
     SliderModel::GetInstance()->SetMinLabel(info[0]->ToNumber<float>());
@@ -312,7 +312,7 @@ void JSSlider::SetMinLabel(const JSCallbackInfo& info)
 
 void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsString()) {
+    if (!info[0]->IsString() && !info[0]->IsNumber()) {
         return;
     }
     SliderModel::GetInstance()->SetMaxLabel(info[0]->ToNumber<float>());

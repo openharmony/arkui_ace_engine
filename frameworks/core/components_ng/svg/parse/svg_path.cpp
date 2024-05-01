@@ -20,31 +20,32 @@
 #include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_path_declaration.h"
 
+
 namespace OHOS::Ace::NG {
 
-SvgPath::SvgPath() : SvgGraphic()
-{
-    declaration_ = AceType::MakeRefPtr<SvgPathDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgPath::SvgPath() : SvgGraphic() {}
 
 RefPtr<SvgNode> SvgPath::Create()
 {
     return AceType::MakeRefPtr<SvgPath>();
 }
 
+bool SvgPath::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    if (name == DOM_SVG_D) {
+        d_ = value;
+        return true;
+    }
+    return false;
+}
+
 #ifndef USE_ROSEN_DRAWING
 SkPath SvgPath::AsPath(const Size& /* viewPort */) const
 {
     SkPath out;
-    auto declaration = AceType::DynamicCast<SvgPathDeclaration>(declaration_);
-    CHECK_NULL_RETURN(declaration, out);
-
-    auto pathD = declaration->GetD();
     if (!pathD.empty()) {
-        SkParsePath::FromSVGString(pathD.c_str(), &out);
-        if (declaration->GetFillState().IsEvenodd()) {
+        SkParsePath::FromSVGString(d_.c_str(), &out);
+        if (attributes_.fillState.IsEvenodd()) {
             out.setFillType(SkPathFillType::kEvenOdd);
         }
     }
@@ -54,13 +55,9 @@ SkPath SvgPath::AsPath(const Size& /* viewPort */) const
 RSRecordingPath SvgPath::AsPath(const Size& /* viewPort */) const
 {
     RSRecordingPath out;
-    auto declaration = AceType::DynamicCast<SvgPathDeclaration>(declaration_);
-    CHECK_NULL_RETURN(declaration, out);
-
-    auto pathD = declaration->GetD();
-    if (!pathD.empty()) {
-        out.BuildFromSVGString(pathD);
-        if (declaration->GetFillState().IsEvenodd()) {
+    if (!d_.empty()) {
+        out.BuildFromSVGString(d_);
+        if (attributes_.fillState.IsEvenodd()) {
             out.SetFillStyle(RSPathFillType::EVENTODD);
         }
     }

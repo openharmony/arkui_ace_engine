@@ -547,6 +547,12 @@ void ButtonModelNG::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
 {
     auto pattern = frameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    if (!gestureEventHub->IsClickable()) {
+        return;
+    }
     pattern->SetButtonPress(xPos, yPos);
 }
 

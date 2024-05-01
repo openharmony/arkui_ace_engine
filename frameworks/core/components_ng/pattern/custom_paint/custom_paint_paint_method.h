@@ -76,26 +76,26 @@ public:
     void SetFillRuleForPath(const CanvasFillRule& rule);
     void SetFillRuleForPath2D(const CanvasFillRule& rule);
 
-    void FillRect(PaintWrapper* paintWrapper, const Rect& rect);
-    void StrokeRect(PaintWrapper* paintWrapper, const Rect& rect);
-    void ClearRect(PaintWrapper* paintWrapper, const Rect& rect);
-    void Fill(PaintWrapper* paintWrapper);
-    void Fill(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
-    void Stroke(PaintWrapper* paintWrapper);
-    void Stroke(PaintWrapper* paintWrapper, const RefPtr<CanvasPath2D>& path);
+    void FillRect(const Rect& rect);
+    void StrokeRect(const Rect& rect);
+    void ClearRect(const Rect& rect);
+    void Fill();
+    void Fill(const RefPtr<CanvasPath2D>& path);
+    void Stroke();
+    void Stroke(const RefPtr<CanvasPath2D>& path);
     void Clip();
     void Clip(const RefPtr<CanvasPath2D>& path);
     void BeginPath();
     void ClosePath();
-    void MoveTo(PaintWrapper* paintWrapper, double x, double y);
-    void LineTo(PaintWrapper* paintWrapper, double x, double y);
-    void Arc(PaintWrapper* paintWrapper, const ArcParam& param);
-    void ArcTo(PaintWrapper* paintWrapper, const ArcToParam& param);
-    void AddRect(PaintWrapper* paintWrapper, const Rect& rect);
-    void Ellipse(PaintWrapper* paintWrapper, const EllipseParam& param);
-    void BezierCurveTo(PaintWrapper* paintWrapper, const BezierCurveParam& param);
-    void QuadraticCurveTo(PaintWrapper* paintWrapper, const QuadraticCurveParam& param);
-    void PutImageData(PaintWrapper* paintWrapper, const Ace::ImageData& imageData);
+    void MoveTo(double x, double y);
+    void LineTo(double x, double y);
+    void Arc(const ArcParam& param);
+    void ArcTo(const ArcToParam& param);
+    void AddRect(const Rect& rect);
+    void Ellipse(const EllipseParam& param);
+    void BezierCurveTo(const BezierCurveParam& param);
+    void QuadraticCurveTo(const QuadraticCurveParam& param);
+    void PutImageData(const Ace::ImageData& imageData);
 
     void Save();
     void Restore();
@@ -324,8 +324,9 @@ public:
     void SetTransformMatrix(const TransformParam& param);
     void TransformMatrix(const TransformParam& param);
     void TranslateMatrix(double tx, double ty);
-    void DrawSvgImage(PaintWrapper* paintWrapper, RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& canvasImage,
+    void DrawSvgImage(RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& canvasImage,
         const ImageFit& imageFit);
+    void DrawImage(const Ace::CanvasImage& canvasImage, double width, double height);
 
     void UpdateRecordingCanvas(float width, float height);
     void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback);
@@ -334,27 +335,27 @@ protected:
     std::optional<double> CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth);
     bool HasShadow() const;
     void UpdateLineDash(RSPen& pen);
-    void UpdatePaintShader(const OffsetF& offset, RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
+    void UpdatePaintShader(RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush);
     void InitPaintBlend(RSBrush& brush);
     void InitPaintBlend(RSPen& pen);
     std::shared_ptr<RSShaderEffect> MakeConicGradient(RSBrush* brush, const Ace::Gradient& gradient);
 
-    void Path2DFill(const OffsetF& offset);
-    void Path2DStroke(const OffsetF& offset);
+    void Path2DFill();
+    void Path2DStroke();
     void Path2DClip();
-    void ParsePath2D(const OffsetF& offset, const RefPtr<CanvasPath2D>& path);
-    void Path2DAddPath(const OffsetF& offset, const PathArgs& args);
-    void Path2DClosePath(const OffsetF& offset, const PathArgs& args);
-    void Path2DMoveTo(const OffsetF& offset, const PathArgs& args);
-    void Path2DLineTo(const OffsetF& offset, const PathArgs& args);
-    void Path2DArc(const OffsetF& offset, const PathArgs& args);
-    void Path2DArcTo(const OffsetF& offset, const PathArgs& args);
-    virtual void Path2DRect(const OffsetF& offset, const PathArgs& args) = 0;
-    void Path2DEllipse(const OffsetF& offset, const PathArgs& args);
-    void Path2DBezierCurveTo(const OffsetF& offset, const PathArgs& args);
-    void Path2DQuadraticCurveTo(const OffsetF& offset, const PathArgs& args);
-    void Path2DSetTransform(const OffsetF& offset, const PathArgs& args);
+    void ParsePath2D(const RefPtr<CanvasPath2D>& path);
+    void Path2DAddPath(const PathArgs& args);
+    void Path2DClosePath();
+    void Path2DMoveTo(const PathArgs& args);
+    void Path2DLineTo(const PathArgs& args);
+    void Path2DArc(const PathArgs& args);
+    void Path2DArcTo(const PathArgs& args);
+    virtual void Path2DRect(const PathArgs& args) = 0;
+    void Path2DEllipse(const PathArgs& args);
+    void Path2DBezierCurveTo(const PathArgs& args);
+    void Path2DQuadraticCurveTo(const PathArgs& args);
+    void Path2DSetTransform(const PathArgs& args);
     RSMatrix GetMatrixFromPattern(const Ace::Pattern& pattern);
 
     void SetGrayFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
@@ -391,20 +392,16 @@ protected:
     std::shared_ptr<RSImage> GetImage(const std::string& src);
     void GetSvgRect(const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage,
         RSRect* srcRect, RSRect* dstRect);
-    void DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage);
+    void DrawSvgImage(const Ace::CanvasImage& canvasImage);
     virtual RSCanvas* GetRawPtrOfRSCanvas() = 0;
     virtual void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
         const RSBrush* brush, const RSPen* pen) = 0;
-    virtual OffsetF GetContentOffset(PaintWrapper* paintWrapper) const
-    {
-        return OffsetF(0.0f, 0.0f);
-    }
-
     double GetAlignOffset(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
     OHOS::Rosen::TextAlign GetEffectiveAlign(OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const;
     double GetFontBaseline(const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const;
     double GetFontAlign(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph) const;
     void ResetStates();
+    void DrawImageInternal(const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image);
 
     PaintState fillState_;
     StrokePaintState strokeState_;

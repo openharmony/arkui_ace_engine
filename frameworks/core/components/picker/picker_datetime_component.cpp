@@ -63,7 +63,7 @@ std::string PickerDateTimeComponent::GetSelectedObject(bool isColumnChange,
 
     auto date = selectedDate_;
     // W3C's month is between 0 to 11, need to reduce one.
-    date.SetMonth(date.GetMonth() - 1);
+    date.SetMonth(date.GetMonth() ? date.GetMonth() - 1 : 0);
     PickerDateTime dateTime(date, GetSelectedTime());
     return dateTime.ToString(true, status);
 }
@@ -178,7 +178,7 @@ std::string PickerDateTimeComponent::GetMonthDayFormatString(bool lunar, uint32_
     if (!lunar) {
         DateTime dateTime;
         dateTime.year = outDate.GetYear();
-        dateTime.month = outDate.GetMonth() - 1; // W3C's month start from 0 to 11
+        dateTime.month = outDate.GetMonth() ? outDate.GetMonth() - 1 : 0; // W3C's month start from 0 to 11
         dateTime.day = outDate.GetDay();
         return Localization::GetInstance()->FormatDateTime(dateTime, "MMMd");
     }
@@ -216,7 +216,7 @@ void PickerDateTimeComponent::OnDataLinking(const std::string& tag, bool isAdd, 
     if (tag == PICKER_MONTHDAY_COLUMN) {
         // linked by month day column itself.
         auto days = currentDate_.ToDays();
-        days = (isAdd ? days + 1 : days - 1); // add one day or reduce one day.
+        days = (isAdd ? days + 1 : (days ? days - 1 : 0)); // add one day or reduce one day.
         PickerDate date;
         date.FromDays(days);
         FillSolarLunarDays(lunar_, date);
@@ -227,7 +227,7 @@ void PickerDateTimeComponent::OnDataLinking(const std::string& tag, bool isAdd, 
     if (it != resultTags.end()) {
         // linked by other column
         auto days = currentDate_.ToDays();
-        days = (isAdd ? days + 1 : days - 1);
+        days = (isAdd ? days + 1 : (days ? days - 1 : 0));
         PickerDate date;
         date.FromDays(days);
         FillSolarLunarDays(lunar_, date);

@@ -107,6 +107,14 @@ public:
     virtual void SendExtensionAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset) {}
 #endif
+#ifdef WEB_SUPPORTED
+    virtual void UpdateAccessibilityFocusId(const RefPtr<PipelineBase>& context, int64_t accessibilityId,
+        bool isFocus) {}
+    virtual int64_t GetAccessibilityFocusId() const
+    {
+        return -1;
+    }
+#endif
     void SetVersion(AccessibilityVersion version)
     {
         version_ = version;

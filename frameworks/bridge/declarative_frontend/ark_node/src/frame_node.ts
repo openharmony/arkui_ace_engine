@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+interface LayoutConstraint {
+  maxSize: Size;
+  minSize: Size;
+  percentReference: Size;
+}
+
 class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
@@ -289,8 +295,28 @@ class FrameNode {
     return { x: position[0], y: position[1] };
   }
 
+  getPositionToScreen(): Position {
+    const position = getUINativeModule().frameNode.getPositionToScreen(this.getNodePtr());
+    return { x: position[0], y: position[1] };
+  }
+
   getPositionToWindow(): Position {
     const position = getUINativeModule().frameNode.getPositionToWindow(this.getNodePtr());
+    return { x: position[0], y: position[1] };
+  }
+
+  getPositionToParentWithTransform(): Position {
+    const position = getUINativeModule().frameNode.getPositionToParentWithTransform(this.getNodePtr());
+    return { x: position[0], y: position[1] };
+  }
+
+  getPositionToScreenWithTransform(): Position {
+    const position = getUINativeModule().frameNode.getPositionToScreenWithTransform(this.getNodePtr());
+    return { x: position[0], y: position[1] };
+  }
+
+  getPositionToWindowWithTransform(): Position {
+    const position = getUINativeModule().frameNode.getPositionToWindowWithTransform(this.getNodePtr());
     return { x: position[0], y: position[1] };
   }
 
@@ -346,6 +372,10 @@ class FrameNode {
     return getUINativeModule().frameNode.getId(this.getNodePtr());
   }
 
+  getUniqueId(): number {
+      return getUINativeModule().frameNode.getIdByNodePtr(this.getNodePtr());
+  }
+
   getNodeType(): string {
     return getUINativeModule().frameNode.getNodeType(this.getNodePtr());
   }
@@ -372,6 +402,34 @@ class FrameNode {
     return inspectorInfo;
   }
 
+  getCustomProperty(key: string): Object | undefined {
+    return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
+  }
+
+  setMeasuredSize(size: Size): void {
+    getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), size.width, size.height);
+  }
+
+  setLayoutPosition(position: Position): void {
+    getUINativeModule().frameNode.setLayoutPosition(this.getNodePtr(), position.x, position.y);
+  }
+
+  measure(constraint: LayoutConstraint): void {
+    const minSize: Size = constraint.minSize;
+    const maxSize: Size = constraint.maxSize;
+    const percentReference: Size = constraint.percentReference;
+    getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
+      maxSize.height, percentReference.width, percentReference.height);
+  }
+
+  layout(position: Position): void {
+    getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
+  }
+
+  setNeedsLayout(): void {
+    getUINativeModule().frameNode.setNeedsLayout(this.getNodePtr());
+  }
+
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
       this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
@@ -388,6 +446,10 @@ class FrameNode {
     this._commonEvent.setNodePtr(node);
     this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonEvent;
+  }
+  updateInstance(uiContext: UIContext) {
+      this.uiContext_ = uiContext;
+      this.instanceId_ = uiContext.instanceId_;
   }
 }
 
@@ -530,6 +592,16 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
     ["Stack", (context: UIContext) => {
       return new TypedFrameNode(context, "Stack", (node: NodePtr, type: ModifierType) => {
         return new ArkStackComponent(node, type);
+      })
+    }],
+    ["GridRow", (context: UIContext) => {
+      return new TypedFrameNode(context, "GridRow", (node: NodePtr, type: ModifierType) => {
+        return new ArkGridRowComponent(node, type);
+      })
+    }],
+    ["GridCol", (context: UIContext) => {
+      return new TypedFrameNode(context, "GridCol", (node: NodePtr, type: ModifierType) => {
+        return new ArkGridColComponent(node, type);
       })
     }],
   ]

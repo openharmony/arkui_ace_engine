@@ -341,8 +341,8 @@ ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState
 {
     if (!handleScrollCallback_) {
         ExecuteScrollBegin(offset);
-        moved_ = UpdateScrollPosition(offset, source);
         canOverScroll_ = false;
+        moved_ = UpdateScrollPosition(offset, source);
         return { 0, false };
     }
     // call NestableScrollContainer::HandleScroll

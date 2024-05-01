@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "core/components/rating/rating_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rating/rating_accessibility_property.h"
 #include "core/components_ng/pattern/rating/rating_event_hub.h"
@@ -102,6 +103,12 @@ public:
 
     void SetBuilderFunc(RatingMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
     }
 
@@ -115,12 +122,14 @@ public:
 private:
     void UpdateRatingScore(double ratingScore);
     void MarkDirtyNode(const PropertyChangeFlag& flag);
-    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
-    void ConstrainsRatingScore();
-    void LoadForeground();
-    void LoadSecondary();
-    void LoadBackground();
+    void ConstrainsRatingScore(const RefPtr<RatingLayoutProperty>& layoutProperty);
+    void LoadForeground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
+        const RefPtr<IconTheme>& iconTheme);
+    void LoadSecondary(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
+        const RefPtr<IconTheme>& iconTheme);
+    void LoadBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
+        const RefPtr<IconTheme>& iconTheme);
     void UpdatePaintConfig();
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
@@ -128,7 +137,6 @@ private:
     void OnImageLoadSuccess(int32_t imageFlag);
     void CheckImageInfoHasChangedOrNot(
         int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag);
-    static ImageSourceInfo GetImageSourceInfoFromTheme(int32_t imageFlag);
 
     // Init pan recognizer to update render when drag updates, fire change event when drag ends.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -156,10 +164,9 @@ private:
     void HandleTouchDown(const Offset& localPosition);
     void HandleTouchUp();
     void HandleClick(const GestureEvent& info);
-    void FireChangeEvent() const;
+    void FireChangeEvent();
     void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX, bool isDrag);
     bool IsIndicator();
-    void UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag);
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
 

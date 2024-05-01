@@ -39,12 +39,17 @@ bool ParseDividerDimension(const EcmaVM* vm, const Local<JSValueRef>& value, Cal
            (valueDim.Unit() != DimensionUnit::PX && valueDim.Unit() != DimensionUnit::VP);
 }
 
-void PopulateValuesAndUnits(const CalcDimension& dividerStrokeWidth, const CalcDimension& dividerStartMargin,
-    const CalcDimension& dividerEndMargin, ArkUI_Float32 values[], int32_t units[])
+void PopulateValues(const CalcDimension& dividerStrokeWidth, const CalcDimension& dividerStartMargin,
+    const CalcDimension& dividerEndMargin, ArkUI_Float32 values[], uint32_t size)
 {
     values[NODE_INDEX] = static_cast<ArkUI_Float32>(dividerStrokeWidth.Value());
     values[STROKE_WIDTH_INDEX] = static_cast<ArkUI_Float32>(dividerStartMargin.Value());
     values[COLOR_INDEX] = static_cast<ArkUI_Float32>(dividerEndMargin.Value());
+}
+
+void PopulateUnits(const CalcDimension& dividerStrokeWidth, const CalcDimension& dividerStartMargin,
+    const CalcDimension& dividerEndMargin, int32_t units[], uint32_t size)
+{
     units[NODE_INDEX] = static_cast<int32_t>(dividerStrokeWidth.Unit());
     units[STROKE_WIDTH_INDEX] = static_cast<int32_t>(dividerStartMargin.Unit());
     units[COLOR_INDEX] = static_cast<int32_t>(dividerEndMargin.Unit());
@@ -400,7 +405,8 @@ ArkUINativeModuleValue TextPickerBridge::SetDivider(ArkUIRuntimeCallInfo* runtim
     uint32_t size = ARG_GROUP_LENGTH;
     ArkUI_Float32 values[size];
     int32_t units[size];
-    PopulateValuesAndUnits(dividerStrokeWidth, dividerStartMargin, dividerEndMargin, values, units);
+    PopulateValues(dividerStrokeWidth, dividerStartMargin, dividerEndMargin, values, size);
+    PopulateUnits(dividerStrokeWidth, dividerStartMargin, dividerEndMargin, units, size);
     GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerDivider(
         nativeNode, colorObj.GetValue(), values, units, size);
     return panda::JSValueRef::Undefined(vm);

@@ -318,4 +318,11 @@ class JSBuilderNode extends BaseNode {
     this._nativeRef = null;
     this.frameNode_?.resetNodePtr();
   }
+  updateInstance(uiContext: UIContext) {
+      this.uiContext_ = uiContext;
+      this.instanceId_ = uiContext.instanceId_;
+      if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
+          this.frameNode_.updateInstance(uiContext);
+      }
+  }
 }

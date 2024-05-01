@@ -93,19 +93,27 @@ JSRenderImage::JSRenderImage() {}
 
 napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     size_t argc = 0;
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, nullptr, &thisVar, nullptr));
     auto wrapper = new (std::nothrow) JSRenderImage();
     wrapper->SetInstanceId(OHOS::Ace::Container::CurrentId());
     if (argc > 0) {
-        napi_value argv = nullptr;
-        napi_get_cb_info(env, info, &argc, &argv, nullptr, nullptr);
+        napi_value argv[2] = { nullptr };
+        napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+        if (argc == 2) {
+            int32_t unit = 0;
+            napi_get_value_int32(env, argv[1], &unit);
+            if (static_cast<CanvasUnit>(unit) == CanvasUnit::PX) {
+                wrapper->SetUnit(CanvasUnit::PX);
+            }
+        }
         size_t textLen = 0;
         std::string textString = "";
-        napi_get_value_string_utf8(env, argv, nullptr, 0, &textLen);
+        napi_get_value_string_utf8(env, argv[0], nullptr, 0, &textLen);
         std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen + 1);
-        napi_get_value_string_utf8(env, argv, text.get(), textLen + 1, &textLen);
+        napi_get_value_string_utf8(env, argv[0], text.get(), textLen + 1, &textLen);
         textString = text.get();
         auto context = PipelineBase::GetCurrentContext();
         if (!context) {
@@ -205,8 +213,10 @@ napi_value JSRenderImage::JsSetHeight(napi_env env, napi_callback_info info)
 napi_value JSRenderImage::OnGetWidth(napi_env env)
 {
     double width = 0.0;
+    double density = GetDensity();
     width = width_;
-    width = PipelineBase::Px2VpWithCurrentDensity(width);
+    density = (density == 0.0 ? 1.0 : density);
+    width /= density;
     napi_value jsWidth = nullptr;
     napi_create_double(env, width, &jsWidth);
     return jsWidth;
@@ -215,8 +225,10 @@ napi_value JSRenderImage::OnGetWidth(napi_env env)
 napi_value JSRenderImage::OnGetHeight(napi_env env)
 {
     double height = 0.0;
+    double density = GetDensity();
     height = height_;
-    height = PipelineBase::Px2VpWithCurrentDensity(height);
+    density = (density == 0.0 ? 1.0 : density);
+    height /= density;
     napi_value jsHeight = nullptr;
     napi_create_double(env, height, &jsHeight);
     return jsHeight;
@@ -311,9 +323,19 @@ double JSRenderImage::GetWidth()
     return width_;
 }
 
+void JSRenderImage::SetWidth(double width)
+{
+    width_ = width;
+}
+
 double JSRenderImage::GetHeight()
 {
     return height_;
+}
+
+void JSRenderImage::SetHeight(double height)
+{
+    height_ = height;
 }
 
 void JSRenderImage::SetCloseCallback(std::function<void()>&& callback)

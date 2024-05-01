@@ -74,7 +74,7 @@ UINode::~UINode()
 #endif
 
     if (!removeSilently_) {
-        ElementRegister::GetInstance()->RemoveItem(nodeId_, tag_);
+        ElementRegister::GetInstance()->RemoveItem(nodeId_);
     } else {
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }
@@ -90,6 +90,10 @@ UINode::~UINode()
 void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
     context_ = context;
+    instanceId_ = context->GetInstanceId();
+    if (updateJSInstanceCallback_) {
+        updateJSInstanceCallback_(instanceId_);
+    }
     if (recursive) {
         for (auto& child : children_) {
             child->AttachContext(context, recursive);
@@ -99,7 +103,10 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 
 void UINode::DetachContext(bool recursive)
 {
+    CHECK_NULL_VOID(context_);
+    context_->DetachNode(Claim(this));
     context_ = nullptr;
+    instanceId_ = INSTANCE_ID_UNDEFINED;
     if (recursive) {
         for (auto& child : children_) {
             child->DetachContext(recursive);
@@ -422,7 +429,7 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     if (onMainTree_) {
         return;
     }
-    context_ = context;
+    AttachContext(context, false);
     onMainTree_ = true;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
@@ -464,7 +471,7 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
-    context_ = nullptr;
+    DetachContext(false);
     OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -574,11 +581,22 @@ void UINode::OnAttachToMainTree(bool)
     }
 }
 
-void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap)
+bool UINode::IsAutoFillContainerNode()
+{
+    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG;
+}
+
+void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer)
 {
     DumpViewDataPageNode(viewDataWrap);
     for (const auto& item : GetChildren()) {
-        item->DumpViewDataPageNodes(viewDataWrap);
+        if (!item) {
+            continue;
+        }
+        if (skipSubAutoFillContainer && item->IsAutoFillContainerNode()) {
+            continue;
+        }
+        item->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
     }
 }
 
@@ -890,14 +908,14 @@ void UINode::UpdateChildrenVisible(bool isVisible) const
 
 void UINode::OnRecycle()
 {
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnRecycle();
     }
 }
 
 void UINode::OnReuse()
 {
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnReuse();
     }
 }
@@ -1060,12 +1078,12 @@ RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
     return nullptr;
 }
 
-RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
+RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
     for (const auto& child : GetChildren()) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
         if (count > index) {
-            return child->GetFrameChildByIndex(index, needBuild, isCache);
+            return child->GetFrameChildByIndex(index, needBuild, isCache, addToRenderTree);
         }
         index -= count;
     }
@@ -1135,13 +1153,16 @@ std::string UINode::GetCurrentCustomNodeInfo()
             auto custom = DynamicCast<CustomNode>(parent);
             auto list = custom->GetExtraInfos();
             for (const auto& child : list) {
-                extraInfo.append("    ").append("at (").append(child.page).append(":")
-                    .append(std::to_string(child.line)).append(")\n");
+                extraInfo.append("    ")
+                    .append("at (")
+                    .append(child.page)
+                    .append(":")
+                    .append(std::to_string(child.line))
+                    .append(")\n");
             }
             break;
         }
         parent = parent->GetParent();
-       
     }
     return extraInfo;
 }

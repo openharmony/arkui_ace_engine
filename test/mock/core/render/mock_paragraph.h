@@ -75,6 +75,12 @@ public:
         return false;
     }
 
+    LineMetrics GetLineMetricsByRectF(RectF& rect) override
+    {
+        LineMetrics lineMetrics;
+        return lineMetrics;
+    }
+
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();
     static void TearDown();
 

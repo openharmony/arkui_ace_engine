@@ -160,11 +160,10 @@ XComponentPattern::XComponentPattern(const std::string& id, XComponentType type,
     SetLibraryName(libraryname);
 }
 
-void XComponentPattern::Initialize(int32_t instanceId)
+void XComponentPattern::Initialize()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    instanceId_ = (instanceId <= 0) ? Container::CurrentIdSafely() : instanceId;
     auto renderContext = host->GetRenderContext();
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         renderContext->SetClipToFrame(true);
@@ -174,7 +173,7 @@ void XComponentPattern::Initialize(int32_t instanceId)
 #else
         renderSurface_ = RenderSurface::Create();
 #endif
-        renderSurface_->SetInstanceId(instanceId_);
+        renderSurface_->SetInstanceId(GetHostInstanceId());
         if (type_ == XComponentType::SURFACE) {
             InitializeRenderContext();
             if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -280,9 +279,7 @@ void XComponentPattern::RequestFocus()
 
 void XComponentPattern::OnAttachToFrameNode()
 {
-    instanceId_ = Container::CurrentIdSafely();
-    Initialize(instanceId_);
-
+    Initialize();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -421,16 +418,36 @@ void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHei
     renderSurface_->ConfigSurface(surfaceWidth, surfaceHeight);
 }
 
-void XComponentPattern::BeforeCreateLayoutWrapper()
+void XComponentPattern::OnAttachContext(PipelineContext* context)
 {
-    Pattern::BeforeCreateLayoutWrapper();
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    context->AddWindowStateChangedCallback(host->GetId());
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->SetInstanceId(context->GetInstanceId());
+}
+
+void XComponentPattern::OnDetachContext(PipelineContext* context)
+{
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    context->RemoveWindowStateChangedCallback(host->GetId());
+}
+
+void XComponentPattern::SetRotation()
+{
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
     auto dmRotation = displayInfo->GetRotation();
-    CHECK_NULL_VOID(renderSurface_);
-    renderSurface_->SetTransformHint(dmRotation);
+    if (rotation_ != dmRotation) {
+        rotation_ = dmRotation;
+        CHECK_NULL_VOID(renderSurface_);
+        renderSurface_->SetTransformHint(dmRotation);
+    }
 }
 
 void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
@@ -482,6 +499,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
         AddAfterLayoutTaskForExportTexture();
     }
     host->MarkNeedSyncRenderTree();
+    AddAfterLayoutTaskForRotation();
 }
 
 void XComponentPattern::DumpInfo()
@@ -573,7 +591,7 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 void XComponentPattern::XComponentSizeInit()
 {
     CHECK_RUN_ON(UI);
-    ContainerScope scope(instanceId_);
+    ContainerScope scope(GetHostInstanceId());
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
@@ -597,7 +615,7 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
 {
     // do not trigger when the size is first initialized
     if (needFireNativeEvent) {
-        ContainerScope scope(instanceId_);
+        ContainerScope scope(GetHostInstanceId());
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto viewScale = context->GetViewScale();
@@ -759,12 +777,17 @@ void XComponentPattern::InitAxisEvent(const RefPtr<InputEventHub>& inputHub)
 void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub)
 {
     gestureHub->SetOnTouchIntercept(
-        [pattern = Claim(this)](
+        [weak = WeakClaim(this)](
             const TouchEventInfo& touchEvent) -> HitTestMode {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, NG::HitTestMode::HTMDEFAULT);
+            auto hostNode = pattern->GetHost();
+            CHECK_NULL_RETURN(hostNode, NG::HitTestMode::HTMDEFAULT);
+            CHECK_NULL_RETURN(pattern->nativeXComponentImpl_, hostNode->GetHitTestMode());
+            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
+            CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
             auto event = touchEvent.ConvertToTouchEvent();
             ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event };
-            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
-            CHECK_NULL_RETURN(onTouchInterceptCallback, NG::HitTestMode::HTMDEFAULT);
             return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
         });
 }
@@ -1019,13 +1042,13 @@ void XComponentPattern::FireExternalEvent(RefPtr<NG::PipelineContext> context,
 
 ExternalEvent XComponentPattern::CreateExternalEvent()
 {
-    return [weak = AceType::WeakClaim(this), instanceId = instanceId_](
+    return [weak = AceType::WeakClaim(this)](
                const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
-        ContainerScope scope(instanceId);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        ContainerScope scope(pattern->GetHostInstanceId());
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
         pattern->FireExternalEvent(context, componentId, nodeId, isDestroy);
     };
 }
@@ -1173,6 +1196,17 @@ void XComponentPattern::AddAfterLayoutTaskForExportTexture()
     });
 }
 
+void XComponentPattern::AddAfterLayoutTaskForRotation()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetRotation();
+    });
+}
+
 bool XComponentPattern::ExportTextureAvailable()
 {
     auto host = GetHost();
@@ -1310,6 +1344,8 @@ void XComponentPattern::NativeSurfaceHide()
     const auto surfaceHideCallback = nativeXComponentImpl_->GetSurfaceHideCallback();
     CHECK_NULL_VOID(surfaceHideCallback);
     surfaceHideCallback(nativeXComponent_.get(), surface);
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->releaseSurfaceBuffers();
 }
 
 void XComponentPattern::NativeSurfaceShow()
@@ -1333,11 +1369,7 @@ void XComponentPattern::OnWindowHide()
         || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
     }
-    CHECK_NULL_VOID(renderSurface_);
     NativeSurfaceHide();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        renderSurface_->releaseSurfaceBuffers();
-    }
     hasReleasedSurface_ = true;
 }
 
@@ -1383,7 +1415,7 @@ void XComponentPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onA
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto* context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
@@ -1521,5 +1553,16 @@ float XComponentPattern::RoundValueToPixelGrid(float value, bool isRound, bool f
         }
     }
     return value;
+}
+
+void XComponentPattern::SetSurfaceRotation(bool isLock)
+{
+    if (type_ != XComponentType::SURFACE) {
+        return;
+    }
+    isSurfaceLock_ = isLock;
+
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    handlingSurfaceRenderContext_->SetSurfaceRotation(isLock);
 }
 } // namespace OHOS::Ace::NG

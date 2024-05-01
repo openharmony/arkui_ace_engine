@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_algorithm.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
+#include "core/components_ng/pattern/text_picker/textpicker_overscroll.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 
@@ -113,7 +114,12 @@ public:
 
     void UpdateCurrentOffset(float offset);
 
-    void UpdateColumnChildPosition(double offsetY, bool isUpatePropertiesOnly = true);
+    void UpdateColumnChildPosition(double offsetY);
+
+    TextPickerOverscroller& GetOverscroller()
+    {
+        return overscroller_;
+    }
 
     bool CanMove(bool isDown) const;
 
@@ -304,6 +310,10 @@ public:
     void SetTossStatus(bool status)
     {
         isTossStatus_ = status;
+        if (!status && NotLoopOptions() && !pressed_ && !isReboundInProgress_ && overscroller_.IsOverScroll()) {
+            // Start rebound animation when toss stoped
+            CreateReboundAnimation(overscroller_.GetOverScroll(), 0.0);
+        }
     }
 
     bool GetTossStatus() const
@@ -331,6 +341,9 @@ public:
         return isHover_;
     }
 
+    int32_t GetOverScrollDeltaIndex() const;
+    void SetCanLoop(bool isLoop);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -345,6 +358,7 @@ private:
     void HandleDragEnd();
     void CreateAnimation();
     void CreateAnimation(double from, double to);
+    void CreateReboundAnimation(double from, double to);
     void ScrollOption(double delta);
     std::vector<TextPickerOptionProperty> optionProperties_;
     std::vector<int32_t> algorithmOffset_;
@@ -400,6 +414,7 @@ private:
 
     void ResetOptionPropertyHeight();
 
+    bool isTextFadeOut_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
@@ -436,11 +451,12 @@ private:
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
     RefPtr<NodeAnimatablePropertyFloat> aroundClickProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
+    std::shared_ptr<AnimationUtils::Animation> reboundAnimation_;
     std::vector<TextProperties> animationProperties_;
     float dividerSpacing_ = 0.0f;
     float gradientHeight_ = 0.0f;
-    bool isDragMoving_ = false;
-
+    bool isReboundInProgress_ = false;
+    TextPickerOverscroller overscroller_;
     ColumnChangeCallback changeCallback_;
 
     int32_t halfDisplayCounts_ = 0;
@@ -453,6 +469,7 @@ private:
     bool touchBreak_ = false;
     bool animationBreak_ = false;
     bool needOptionPropertyHeightReset_ = false;
+    bool isLoop_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

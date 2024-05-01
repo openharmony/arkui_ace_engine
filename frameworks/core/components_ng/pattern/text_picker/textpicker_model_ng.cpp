@@ -269,6 +269,11 @@ void TextPickerModelNG::SetGradientHeight(const Dimension& value)
 
 void TextPickerModelNG::SetCanLoop(const bool value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetCanLoop(value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, value);
 }
 
@@ -629,12 +634,12 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+        [properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTextDialog(
-                properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+                properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowTextPicker");
 }
@@ -642,6 +647,9 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
 void TextPickerModelNG::SetCanLoop(FrameNode* frameNode, const bool value)
 {
     CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetCanLoop(value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, value, frameNode);
 }
 
@@ -886,7 +894,7 @@ void TextPickerModelNG::SetValues(FrameNode* frameNode, const std::vector<std::s
     std::vector<std::string> selectedValues;
     std::vector<uint32_t> valuesIndex;
     for (uint32_t i = 0; i < options_.size(); i++) {
-        if (i > values.size() - 1) {
+        if (values.size() > 0 && values.size() < i + 1) {
             if (options_[i].rangeResult.size() > 0) {
                 selectedValues.emplace_back(options_[i].rangeResult[0]);
             } else {
@@ -1019,14 +1027,14 @@ std::string TextPickerModelNG::getTextPickerRange(FrameNode* frameNode)
             result.append(range.text_ + ";");
         }
         if (result.length() > 0) {
-            result = result.substr(0, result.length() - 1);
+            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
         }
     } else {
         for (auto option : options_) {
             for (auto range : option.rangeResult) {
                 result.append(range + ",");
             }
-            result = result.substr(0, result.length() - 1);
+            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
             result.append(";");
         }
         if (result.length() > 0) {

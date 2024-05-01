@@ -299,7 +299,7 @@ public:
 
     void ForceFullGC() override;
 
-    void SetLocalStorage(NativeReference* storage, NativeReference* context);
+    void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
     bool ParseThemeConfig(const std::string& themeConfig);
 
@@ -529,9 +529,12 @@ public:
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         StopDragCallback&& stopDragCallback) override;
 
-    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup) override;
+    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node,
+        AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
+    bool ChangeType(AbilityBase::ViewData& viewData);
+    AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
 
     void SearchElementInfoByAccessibilityIdNG(
         int64_t elementId, int32_t mode, int64_t baseParent,
@@ -555,6 +558,8 @@ public:
 
     void HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
         int32_t eventType, int64_t timeMs);
+
+    void TerminateUIExtension() override;
 
     void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
     {

@@ -25,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -52,6 +53,9 @@ const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VI
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 {
     auto builder = info[0];
+    if (!builder->IsFunction()) {
+        return;
+    }
     auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
@@ -85,6 +89,19 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     viewNode_ = newNode;
     ProccessNode(isSupportExportTexture);
     UpdateEnd(info);
+
+    JSRef<JSObject> thisObj = info.This();
+    JSWeak<JSObject> jsObject(thisObj);
+    viewNode_->RegisterUpdateJSInstanceCallback([jsObject, vm = info.GetVm()](int32_t id) {
+        JSRef<JSObject> jsThis = jsObject.Lock();
+        JSRef<JSVal> jsUpdateFunc = jsThis->GetProperty("updateInstance");
+        if (jsUpdateFunc->IsFunction()) {
+            auto jsFunc = JSRef<JSFunc>::Cast(jsUpdateFunc);
+            auto uiContext = NG::UIContextHelper::GetUIContext(vm, id);
+            auto jsVal = JSRef<JSVal>::Make(uiContext);
+            jsFunc->Call(jsThis, 1, &jsVal);
+        }
+    });
 }
 
 void JSBaseNode::ProccessNode(bool isSupportExportTexture)
@@ -212,6 +229,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
             point.y = itemObj->GetPropertyValue<float>("y", 0.0f);
             point.screenX = itemObj->GetPropertyValue<float>("screenX", 0.0f);
             point.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
+            point.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
             touchEvent.pointers.emplace_back(point);
         }
     }
@@ -241,6 +259,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         touchEvent.y = itemObj->GetPropertyValue<float>("y", 0.0f);
         touchEvent.screenX = itemObj->GetPropertyValue<float>("screenX", 0.0f);
         touchEvent.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
+        touchEvent.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
     }
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     if (!pipelineContext) {

@@ -488,8 +488,9 @@ void TimePickerColumnPattern::ChangeTextStyle(uint32_t index, uint32_t showOptio
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
+    uint32_t val = selectedIndex > 0 ? selectedIndex - 1 : 0;
     if (index != selectedIndex) {
-        if ((index == selectedIndex + 1) || (index == selectedIndex - 1)) {
+        if ((index == selectedIndex + 1) || (index == val)) {
             UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, timePickerLayoutProperty);
         } else {
             UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, timePickerLayoutProperty);
@@ -1073,7 +1074,8 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
     if (isDown) {
         currentIndex = (totalOptionCount + currentIndex + 1) % totalOptionCount; // index add one
     } else {
-        currentIndex = (totalOptionCount + currentIndex - 1) % totalOptionCount; // index reduce one
+        auto totalCountAndIndex = totalOptionCount + currentIndex;
+        currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
     FlushCurrentOptions(isDown, isUpatePropertiesOnly);

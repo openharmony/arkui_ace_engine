@@ -49,6 +49,8 @@ public:
     static void SetSyncLoad(const JSCallbackInfo& info);
     static void SetColorFilter(const JSCallbackInfo& info);
     static void SetSmoothEdge(const JSCallbackInfo& info);
+    static void SetDynamicRangeMode(const JSCallbackInfo& info);
+    static void SetEnhancedImageQuality(const JSCallbackInfo& info);
 
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);

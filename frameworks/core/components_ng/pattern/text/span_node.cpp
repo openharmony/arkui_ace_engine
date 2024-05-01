@@ -98,8 +98,10 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
         json->PutExtAttr("renderingStrategy",
             GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
-        json->PutExtAttr("effectStrategy",
-            GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
+        json->PutExtAttr(
+            "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
+        json->Put("symbolEffect",
+            GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
 
         auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
         // Determines if there are multiple textShadows
@@ -232,6 +234,8 @@ void SpanNode::DumpInfo()
         dumpLog.AddDesc(std::string("SymbolColor:").append(spanItem_->SymbolColorToString()));
         dumpLog.AddDesc(std::string("RenderStrategy: ").append(std::to_string(textStyle->GetRenderStrategy())));
         dumpLog.AddDesc(std::string("EffectStrategy: ").append(std::to_string(textStyle->GetEffectStrategy())));
+        dumpLog.AddDesc(std::string("SymbolEffect:").append(
+            spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString()));
     }
 }
 
@@ -574,6 +578,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = SelectSpanType::TYPESPAN;
+        resultObject.span = WeakClaim(this);
         resultObject.valueString = content;
         resultObject.isInit = true;
     }
@@ -786,12 +791,12 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
 
     int32_t endPosition = interval.second;
     int32_t startPosition = interval.first;
+    resultObject.type = SelectSpanType::TYPEIMAGE;
     if ((start <= startPosition) && (end >= endPosition)) {
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
-        resultObject.type = SelectSpanType::TYPEIMAGE;
         if (options.image.has_value()) {
             resultObject.valueString = options.image.value();
         }
@@ -826,6 +831,14 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     return index;
 }
 
+RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
+{
+    auto sameSpan = MakeRefPtr<CustomSpanItem>();
+    sameSpan->onMeasure = onMeasure;
+    sameSpan->onDraw = onDraw;
+    return sameSpan;
+}
+
 void BaseSpan::SetTextBackgroundStyle(const TextBackgroundStyle& style)
 {
     textBackgroundStyle_ = style;
@@ -847,7 +860,9 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::BASELINE_OFFSET, PropertyInfo::LINEHEIGHT,
         PropertyInfo::TEXT_ALIGN, PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
         PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
-        PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING };
+        PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING,
+        PropertyInfo::SYMBOL_EFFECT_OPTIONS };
+
     set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
     return inheritPropertyInfo;

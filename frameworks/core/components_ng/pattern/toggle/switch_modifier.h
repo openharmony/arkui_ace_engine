@@ -40,6 +40,9 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
+        if (useContentModifier_->Get()) {
+            return;
+        }
         RSCanvas& canvas = context.canvas;
         PaintSwitch(canvas, offset_->Get(), size_->Get());
     }
@@ -116,6 +119,9 @@ public:
     void PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize);
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const OffsetF& offset) const;
     float GetSwitchWidth(const SizeF& contentSize) const;
+    void DrawFocusBorder(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize);
+    void DrawFocusBoard(RSCanvas& canvas, const OffsetF& offset, const SizeF& size, double& actualGap);
+    void DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize, double& actualGap);
 
     void SetUserActiveColor(const Color& color)
     {
@@ -149,6 +155,20 @@ public:
         }
     }
 
+    void SetIsFocused(bool isFocused)
+    {
+        if (isFocused_) {
+            isFocused_->Set(isFocused);
+        }
+    }
+
+    void SetIsOn(bool isOn)
+    {
+        if (isOn_) {
+            isOn_->Set(isOn);
+        }
+    }
+
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
     {
         hotZoneOffset_ = hotZoneOffset;
@@ -163,6 +183,13 @@ public:
     {
         if (offset_) {
             offset_->Set(offset);
+        }
+    }
+
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
         }
     }
 
@@ -247,6 +274,7 @@ private:
     Color inactiveColor_;
     Color userActiveColor_;
     Dimension hoverRadius_ = 8.0_vp;
+    Dimension focusRadius_ = 8.0_vp;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
@@ -269,9 +297,12 @@ private:
     RefPtr<PropertyFloat> dragOffsetX_;
     RefPtr<PropertyBool> isSelect_;
     RefPtr<PropertyBool> isHover_;
+    RefPtr<PropertyBool> isFocused_;
+    RefPtr<PropertyBool> isOn_;
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<PropertyBool> enabled_;
+    RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyFloat> animatePointRadius_;
     RefPtr<PropertyFloat> animateTrackRadius_;
 

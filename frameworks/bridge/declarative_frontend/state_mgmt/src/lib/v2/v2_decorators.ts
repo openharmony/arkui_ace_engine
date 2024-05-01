@@ -38,34 +38,7 @@ type ConstructorV2 = { new(...args: any[]): any };
 
 function ObservedV2<T extends ConstructorV2>(BaseClass: T): T {
   ConfigureStateMgmt.instance.usingV2ObservedTrack(`@observed`, BaseClass?.name);
-
-  // prevent @Track inside @observed class
-  if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
-    const error = `'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
-    stateMgmtConsole.applicationError(error);
-    throw new Error(error);
-  }
-
-
-  if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
-    // not an error, suspicious of developer oversight
-    stateMgmtConsole.warn(`'@observed class ${BaseClass?.name}': no @track property inside. Is this intended? Check our application.`);
-  }
-
-  // Use ID_REFS only if number of observed attrs is significant
-  const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
-  const count = attrList.filter(attr => attr.startsWith(ObserveV2.OB_PREFIX)).length;
-  if (count > 5) {
-    stateMgmtConsole.log(`'@observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
-    BaseClass.prototype[ObserveV2.ID_REFS] = {};
-  }
-  return class extends BaseClass {
-    constructor(...args) {
-      super(...args);
-      AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
-      AsyncAddComputedV2.addComputed(this, BaseClass.name);
-    }
-  };
+  return observedV2Internal<T>(BaseClass);
 }
 
 /**
@@ -81,7 +54,6 @@ const Trace = (target: Object, propertyKey: string): void => {
   ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
   return trackInternal(target, propertyKey);
 };
-
 
 /**
  * @Local @ComponentV2/ViewV2 variable decorator
@@ -193,7 +165,7 @@ const Event = (target, propertyKey): void => {
 const Provider = (aliasName?: string) => {
   return (proto: Object, varName: string): void => {
     const providedUnderName: string = aliasName || varName;
-    ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, '@provide');
+    ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, '@Provider');
     trackInternal(proto, varName);
   };
 }; // @Provider
@@ -202,7 +174,7 @@ const Provider = (aliasName?: string) => {
  * @Consumer variable decorator of @ComponentV2 variable
  *
  * @Consumer(alias? : string) varName : typeName = defaultValue
- *
+*
  * @param alias defaults to varName
  *
  * allowed value: simple or object type value allowed. Objects must be instances of
@@ -221,7 +193,7 @@ const Consumer = (aliasName?: string) => {
 
     // redefining the property happens when owning ViewV2 gets constructed
     // and @Consumer gets connected to @provide counterpart
-    ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@consume');
+    ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
   };
 }; // @Consumer
 
@@ -290,7 +262,7 @@ interface IMonitor {
    *
    */
 const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescriptor): void => {
-  stateMgmtConsole.debug(`@computed ${propertyKey}`);
+  stateMgmtConsole.debug(`@Computed ${propertyKey}`);
   let watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + target.constructor.name);
   const computeFunction = descriptor.get;
   target[watchProp] ? target[watchProp][propertyKey] = computeFunction

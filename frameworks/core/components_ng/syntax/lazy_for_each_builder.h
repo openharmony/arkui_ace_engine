@@ -40,12 +40,12 @@ namespace OHOS::Ace::NG {
 
 typedef struct OperationInfo {
     OperationInfo():node(nullptr) {}
-    int32_t changeCount;
+    int32_t changeCount = 0;
     std::string key;
     RefPtr<UINode> node;
-    bool isDeleting;
-    bool isChanged;
-    bool moveIn;
+    bool isDeleting = false;
+    bool isChanged = false;
+    bool moveIn = false;
     std::vector<std::string> extraKey;
 } OperationInfo;
 
@@ -286,7 +286,7 @@ public:
         ProcessOffscreenNode(itemInfo.second, false);
         ViewStackProcessor::GetInstance()->SetPredict(itemInfo.second);
         itemInfo.second->Build(nullptr);
-        auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false));
+        auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false, true));
         if (frameNode && frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
             frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
         }

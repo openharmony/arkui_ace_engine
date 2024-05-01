@@ -49,7 +49,7 @@ public:
         paragraph_->Reset();
     }
 
-    const RefPtr<Paragraph>& GetParagraph() const override;
+    RefPtr<Paragraph> GetParagraph() const override;
     void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override;
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
@@ -159,6 +159,7 @@ private:
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
     void ApplyIndent(double width);
     bool IsInlineFocusAdaptExceedLimit(const SizeF& maxSize);
+    LayoutConstraintF BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

@@ -63,14 +63,14 @@ void ForEachNode::CreateTempItems()
     std::swap(ModifyChildren(), tempChildren_);
 
     // RepeatNode only
-    tempChildrenOfRepeat_ = std::vector<RefPtr<UINode>>(tempChildren_.begin(), tempChildren_.end());
+    if (isThisRepeatNode_) {
+        tempChildrenOfRepeat_ = std::vector<RefPtr<UINode>>(tempChildren_.begin(), tempChildren_.end());
+    }
 }
 
 // same as foundation/arkui/ace_engine/frameworks/core/components_part_upd/foreach/foreach_element.cpp.
 void ForEachNode::CompareAndUpdateChildren()
 {
-    ACE_SCOPED_TRACE("ForEachNode::CompareAndUpdateChildren");
-
     if (isThisRepeatNode_) {
         return;
     }
@@ -133,14 +133,12 @@ void ForEachNode::CompareAndUpdateChildren()
         }
     }
 
-    {
     ACE_SCOPED_TRACE("ForEachNode::Update Id[%d] preIds[%zu] newIds[%zu] oldIdsSet[%zu] additionalChildComps[%zu]",
         GetId(), tempIds_.size(), ids_.size(), oldIdsSet.size(), additionalChildComps.size());
-    }
 
     if (IsOnMainTree()) {
         for (const auto& newChild : additionalChildComps) {
-            newChild->AttachToMainTree();
+            newChild->AttachToMainTree(false, GetContext());
         }
     }
 

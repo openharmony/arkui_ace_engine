@@ -43,8 +43,10 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/udmf/udmf_client.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/event/ace_events.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/base/json/json_util.h"
 #include "drag_preview.h"
 #endif
 namespace OHOS::Ace::Napi {
@@ -57,8 +59,9 @@ constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 constexpr size_t STR_BUFFER_SIZE = 1024;
 constexpr int32_t PARAMETER_NUM = 2;
-
 constexpr int32_t argCount3 = 3;
+constexpr int32_t SOURCE_TYPE_MOUSE = 1;
+constexpr int32_t MOUSE_POINTER_ID = 1001;
 
 using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using DragRet = OHOS::Ace::DragRet;
@@ -598,8 +601,10 @@ void HandleOnDragStart(DragControllerAsyncCtx* asyncCtx)
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [globalX = asyncCtx->globalX, globalY = asyncCtx->globalY, context = pipelineContext]() {
-            context->OnDragEvent({ globalX, globalY }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
+        [ctx = asyncCtx, context = pipelineContext]() {
+            context->OnDragEvent({ ctx->globalX, ctx->globalY }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
+            NG::DragDropFuncWrapper::DecideWhetherToStopDragging(
+                { ctx->globalX, ctx->globalY }, ctx->extraParams, ctx->pointerId, ctx->instanceId);
         },
         TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart");
 }
@@ -683,13 +688,16 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
-    int32_t recordSize = (dataSize != 0 ? dataSize : shadowInfos.size());
+    int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
         recordSize = badgeNumber.value();
     }
     auto windowId = container->GetWindowId();
-    dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, "", asyncCtx->sourceType,
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    double opacity = asyncCtx->dragPreviewOption.options.opacity;
+    arkExtraInfoJson->Put("dip_opacity", opacity);
+    dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(), asyncCtx->sourceType,
         recordSize, pointerId, asyncCtx->globalX, asyncCtx->globalY,
         asyncCtx->displayId, windowId, true, false, summary };
 }
@@ -708,7 +716,7 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
     };
-
+    NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(asyncCtx->pointerId, asyncCtx->instanceId);
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
     napi_handle_scope scope = nullptr;
@@ -842,7 +850,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
                 HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
             };
-
+            NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(asyncCtx->pointerId, asyncCtx->instanceId);
             int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData,
                 std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
             if (ret != 0) {
@@ -1116,6 +1124,62 @@ bool ParseDragParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
     return ParseDragItemInfoParam(asyncCtx, errMsg);
 }
 
+bool ApplyPreviewOptionsFromModifier(
+    DragControllerAsyncCtx* asyncCtx, napi_value modifierObj, NG::DragPreviewOption& option)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(asyncCtx->env, modifierObj, &valueType);
+    if (valueType != napi_object) {
+        return false;
+    }
+
+    napi_value globalObj = nullptr;
+    napi_get_global(asyncCtx->env, &globalObj);
+    napi_value globalFunc = nullptr;
+    napi_get_named_property(asyncCtx->env, globalObj, "applyImageModifierToNode", &globalFunc);
+    napi_typeof(asyncCtx->env, globalFunc, &valueType);
+    if (globalFunc == nullptr || valueType != napi_function) {
+        return false;
+    }
+
+    auto applyOnNodeSync =
+        [modifierObj, globalFunc, asyncCtx](WeakPtr<NG::FrameNode> frameNode) {
+            // convert nodeptr to js value
+            auto nodePtr = frameNode.Upgrade();
+            const size_t size = 64; // fake size for gc
+            napi_value nodeJsValue = nullptr;
+            napi_create_external_with_size(
+                asyncCtx->env, static_cast<void*>(AceType::RawPtr(nodePtr)),
+                [](napi_env env, void* data, void* hint) {}, static_cast<void*>(AceType::RawPtr(nodePtr)),
+                &nodeJsValue, size);
+            if (nodeJsValue == nullptr) {
+                return;
+            }
+            // apply modifier
+            napi_value ret;
+            napi_value params[2];
+            params[0] = modifierObj;
+            params[1] = nodeJsValue;
+            napi_call_function(asyncCtx->env, nullptr, globalFunc, 2, params, &ret);
+        };
+
+    NG::DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
+    return true;
+}
+
+bool GetNamedPropertyModifier(
+    DragControllerAsyncCtx* asyncCtx, napi_value previewOptionsNApi, std::string& errMsg)
+{
+    napi_value modifierObj = nullptr;
+    napi_get_named_property(asyncCtx->env, previewOptionsNApi, "modifier", &modifierObj);
+    if (!ApplyPreviewOptionsFromModifier(asyncCtx, modifierObj, asyncCtx->dragPreviewOption)) {
+        errMsg = "apply modifier failed.";
+        return false;
+    }
+    return true;
+}
+
 bool ParsePreviewOptions(
     DragControllerAsyncCtx* asyncCtx, napi_valuetype& valueType, std::string& errMsg)
 {
@@ -1134,7 +1198,8 @@ bool ParsePreviewOptions(
         if (valueType == napi_number) {
             int32_t dragPreviewMode = 0;
             napi_get_value_int32(asyncCtx->env, modeNApi, &dragPreviewMode);
-            asyncCtx->dragPreviewOption.mode = static_cast<NG::DragPreviewMode>(dragPreviewMode);
+            auto mode = static_cast<NG::DragPreviewMode>(dragPreviewMode);
+            asyncCtx->dragPreviewOption.isScaleEnabled = mode == NG::DragPreviewMode::AUTO ? true : false;
         } else if (valueType != napi_undefined) {
             errMsg = "mode type is wrong";
             napi_close_handle_scope(asyncCtx->env, scope);
@@ -1152,6 +1217,11 @@ bool ParsePreviewOptions(
             napi_get_value_bool(asyncCtx->env, numberBadgeNApi, &asyncCtx->dragPreviewOption.isShowBadge);
         } else if (valueType != napi_undefined) {
             errMsg = "numberBadge type is wrong.";
+            napi_close_handle_scope(asyncCtx->env, scope);
+            return false;
+        }
+
+        if (!(GetNamedPropertyModifier(asyncCtx, previewOptionsNApi, errMsg))) {
             napi_close_handle_scope(asyncCtx->env, scope);
             return false;
         }
@@ -1314,6 +1384,9 @@ bool ConfirmCurPointerEventInfo(DragControllerAsyncCtx *asyncCtx, const RefPtr<C
     };
     bool getPointSuccess = container->GetCurPointerEventInfo(
         asyncCtx->pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->sourceType, std::move(stopDragCallback));
+    if (asyncCtx->sourceType == SOURCE_TYPE_MOUSE) {
+        asyncCtx->pointerId = MOUSE_POINTER_ID;
+    }
     return getPointSuccess;
 }
 
@@ -1392,7 +1465,7 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     }
     InitializeDragControllerCtx(env, info, dragAsyncContext);
 
-    std::string errMsg;
+    std::string errMsg = "";
     if (!CheckAndParseParams(dragAsyncContext, errMsg)) {
         NapiThrow(env, errMsg, ERROR_CODE_PARAM_INVALID);
         napi_close_escapable_handle_scope(env, scope);

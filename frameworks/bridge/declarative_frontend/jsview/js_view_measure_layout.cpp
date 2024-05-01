@@ -52,6 +52,42 @@ JSRef<JSObject> GenConstraintNG(const NG::LayoutConstraintF& parentConstraint)
     return constraint;
 }
 
+JSRef<JSObject> GenPlaceChildrenConstraintNG(const NG::SizeF& size, RefPtr<NG::LayoutProperty> layoutProperty)
+{
+    JSRef<JSObject> constraint = JSRef<JSObject>::New();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, JSRef<JSObject>::New());
+    if (!layoutProperty) {
+        constraint->SetProperty<double>("minWidth", 0.0f);
+        constraint->SetProperty<double>("minHeight", 0.0f);
+        constraint->SetProperty<double>("maxWidth", 0.0f);
+        constraint->SetProperty<double>("maxHeight", 0.0f);
+        return constraint;
+    }
+    auto minSize = layoutProperty->GetLayoutConstraint().value().minSize;
+    constraint->SetProperty<double>("minWidth", minSize.Width() / pipeline->GetDipScale());
+    constraint->SetProperty<double>("minHeight", minSize.Height() / pipeline->GetDipScale());
+    auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutProperty->GetHost()->GetParent());
+    if (parentNode && parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+        layoutProperty = parentNode->GetLayoutProperty();
+    }
+    const std::unique_ptr<NG::PaddingProperty>& padding =  layoutProperty->GetPaddingProperty();
+    const std::unique_ptr<NG::BorderWidthProperty>& borderWidth =  layoutProperty->GetBorderWidthProperty();
+    auto topPadding = padding ? padding->top->GetDimension().ConvertToVp() : 0.0f;
+    auto bottomPadding = padding ? padding->bottom->GetDimension().ConvertToVp() : 0.0f;
+    auto leftPadding = padding ? padding->left->GetDimension().ConvertToVp() : 0.0f;
+    auto rightPadding = padding ? padding->right->GetDimension().ConvertToVp() : 0.0f;
+    auto topBorder = borderWidth ? borderWidth->topDimen->ConvertToVp() : 0.0f;
+    auto bottomBorder = borderWidth ? borderWidth->bottomDimen->ConvertToVp() : 0.0f;
+    auto leftBorder = borderWidth ? borderWidth->leftDimen->ConvertToVp() : 0.0f;
+    auto rightBorder = borderWidth ? borderWidth->rightDimen->ConvertToVp() : 0.0f;
+    constraint->SetProperty<double>("maxWidth", size.Width() / pipeline->GetDipScale() - leftPadding - rightPadding -
+        leftBorder - rightBorder);
+    constraint->SetProperty<double>("maxHeight", size.Height() / pipeline->GetDipScale() - topPadding - bottomPadding -
+        topBorder - bottomBorder);
+    return constraint;
+}
+
 JSRef<JSObject> GenPadding(const std::unique_ptr<NG::PaddingProperty>& paddingNative)
 {
     JSRef<JSObject> padding = JSRef<JSObject>::New();
@@ -82,27 +118,37 @@ JSRef<JSObject> GenEdgeWidths(const std::unique_ptr<NG::BorderWidthProperty>& ed
     return edgeWidths;
 }
 
-JSRef<JSObject> GenEdgesFloat(const NG::PaddingPropertyT<float>& edgeNative)
+JSRef<JSObject> GenEdgesGlobalized(const NG::PaddingPropertyT<float>& edgeNative, TextDirection direction)
 {
     JSRef<JSObject> edges = JSRef<JSObject>::New();
     auto pipeline = PipelineBase::GetCurrentContext();
     double px2vpScale = pipeline ? 1.0 / pipeline->GetDipScale() : 1.0;
     edges->SetProperty("top", edgeNative.top.value_or(0) * px2vpScale);
-    edges->SetProperty("right", edgeNative.right.value_or(0) * px2vpScale);
     edges->SetProperty("bottom", edgeNative.bottom.value_or(0) * px2vpScale);
-    edges->SetProperty("left", edgeNative.left.value_or(0) * px2vpScale);
+    if (direction != TextDirection::RTL) {
+        edges->SetProperty("start", edgeNative.left.value_or(0) * px2vpScale);
+        edges->SetProperty("end", edgeNative.right.value_or(0) * px2vpScale);
+    } else {
+        edges->SetProperty("start", edgeNative.right.value_or(0) * px2vpScale);
+        edges->SetProperty("end", edgeNative.left.value_or(0) * px2vpScale);
+    }
     return edges;
 }
 
-JSRef<JSObject> GenBorderWidthFloat(const NG::BorderWidthPropertyT<float>& edgeNative)
+JSRef<JSObject> GenBorderWidthGlobalized(const NG::BorderWidthPropertyT<float>& edgeNative, TextDirection direction)
 {
     JSRef<JSObject> edges = JSRef<JSObject>::New();
     auto pipeline = PipelineBase::GetCurrentContext();
     double px2vpScale = pipeline ? 1.0 / pipeline->GetDipScale() : 1.0;
     edges->SetProperty("top", edgeNative.topDimen.value_or(0) * px2vpScale);
-    edges->SetProperty("right", edgeNative.rightDimen.value_or(0) * px2vpScale);
     edges->SetProperty("bottom", edgeNative.bottomDimen.value_or(0) * px2vpScale);
-    edges->SetProperty("left", edgeNative.leftDimen.value_or(0) * px2vpScale);
+    if (direction != TextDirection::RTL) {
+        edges->SetProperty("start", edgeNative.leftDimen.value_or(0) * px2vpScale);
+        edges->SetProperty("end", edgeNative.rightDimen.value_or(0) * px2vpScale);
+    } else {
+        edges->SetProperty("start", edgeNative.rightDimen.value_or(0) * px2vpScale);
+        edges->SetProperty("end", edgeNative.leftDimen.value_or(0) * px2vpScale);
+    }
     return edges;
 }
 
@@ -130,34 +176,6 @@ JSRef<JSObject> GenBorderInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
         GenPadding(layoutProperty->GetPaddingProperty() ? layoutProperty->GetPaddingProperty() : defaultPadding));
 
     return borderInfo;
-}
-
-void FillBorderInfo(Local<ObjectRef>& obj, const RefPtr<NG::LayoutWrapper>& layoutWrapper, const EcmaVM* vm)
-{
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    if (!layoutProperty) {
-        obj->Set(vm, ToJSValue("borderWidth"), GenBorderWidthFloat({}).Get().GetLocalHandle());
-        obj->Set(vm, ToJSValue("margin"), GenEdgesFloat({}).Get().GetLocalHandle());
-        obj->Set(vm, ToJSValue("padding"), GenEdgesFloat({}).Get().GetLocalHandle());
-        return;
-    }
-    obj->Set(vm, ToJSValue("borderWidth"), GenBorderWidthFloat(layoutProperty->CreateBorder()).Get().GetLocalHandle());
-    obj->Set(vm, ToJSValue("margin"), GenEdgesFloat(layoutProperty->CreateMargin()).Get().GetLocalHandle());
-    obj->Set(
-        vm, ToJSValue("padding"), GenEdgesFloat(layoutProperty->CreatePaddingWithoutBorder()).Get().GetLocalHandle());
-}
-
-void FillBorderInfo(const JSRef<JSObject>& result, const RefPtr<NG::LayoutProperty>& layoutProperty)
-{
-    if (!layoutProperty) {
-        result->SetPropertyObject("borderWidth", GenBorderWidthFloat({}));
-        result->SetPropertyObject("margin", GenEdgesFloat({}));
-        result->SetPropertyObject("padding", GenEdgesFloat({}));
-        return;
-    }
-    result->SetPropertyObject("borderWidth", GenBorderWidthFloat(layoutProperty->CreateBorder()));
-    result->SetPropertyObject("margin", GenEdgesFloat(layoutProperty->CreateMargin()));
-    result->SetPropertyObject("padding", GenEdgesFloat(layoutProperty->CreatePaddingWithoutBorder()));
 }
 
 JSRef<JSObject> GenPositionInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
@@ -232,15 +250,13 @@ void FillSubComponentProperty(
     info->SetPropertyObject("position", GenPositionInfo(layoutWrapper));
 }
 
-void FillPlaceSizeProperty(
-    JSRef<JSObjTemplate>& info, const NG::SizeF& size, const RefPtr<NG::LayoutProperty>& property)
+void FillPlaceSizeProperty(JSRef<JSObjTemplate>& info, const NG::SizeF& size)
 {
     JSRef<JSObject> measureResult = JSRef<JSObject>::New();
     Dimension measureWidth(size.Width(), DimensionUnit::PX);
     Dimension measureHeight(size.Height(), DimensionUnit::PX);
     measureResult->SetProperty("width", measureWidth.ConvertToVp());
     measureResult->SetProperty("height", measureHeight.ConvertToVp());
-    FillBorderInfo(measureResult, property);
     info->SetPropertyObject("measureResult", measureResult);
 }
 } // namespace
@@ -336,6 +352,9 @@ void JSMeasureLayoutParamNG::GenChildArray(int32_t start, int32_t end)
     size->SetProperty("height", 0);
     JSRef<JSFunc> measureFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSMeasure);
     JSRef<JSFunc> layoutFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSPlaceChildren);
+    JSRef<JSFunc> getMarginFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSGetMargin);
+    JSRef<JSFunc> getPaddingFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSGetPadding);
+    JSRef<JSFunc> getBorderWidthFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSGetBorderWidth);
     for (int32_t index = start; index < end; index++) {
         JSRef<JSObjTemplate> info = JSRef<JSObjTemplate>::New();
         info->SetInternalFieldCount(1);
@@ -343,6 +362,9 @@ void JSMeasureLayoutParamNG::GenChildArray(int32_t start, int32_t end)
         info->Wrap<NG::MeasureLayoutChild>(&Get(index));
         info->SetPropertyObject("measure", measureFunc);
         info->SetPropertyObject("layout", layoutFunc);
+        info->SetPropertyObject("getMargin", getMarginFunc);
+        info->SetPropertyObject("getPadding", getPaddingFunc);
+        info->SetPropertyObject("getBorderWidth", getBorderWidthFunc);
         childArray_->SetValueAt(index, info);
     }
 }
@@ -352,6 +374,13 @@ JSRef<JSObject> JSMeasureLayoutParamNG::GetConstraint()
     auto layoutWrapper = GetLayoutWrapper();
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint().value();
     return GenConstraintNG(layoutConstraint);
+}
+
+JSRef<JSObject> JSMeasureLayoutParamNG::GetPlaceChildrenConstraint()
+{
+    auto layoutWrapper = GetLayoutWrapper();
+    auto layoutFrameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    return GenPlaceChildrenConstraintNG(layoutFrameSize, layoutWrapper->GetLayoutProperty());
 }
 
 JSRef<JSObject> JSMeasureLayoutParamNG::GetSelfLayoutInfo()
@@ -364,8 +393,7 @@ void JSMeasureLayoutParamNG::UpdateSize(int32_t index, const NG::SizeF& size)
 {
     auto info = JSRef<JSObjTemplate>::Cast(childArray_->GetValueAt(index));
     auto layoutWrapper = GetChildByIndex(index);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    FillPlaceSizeProperty(info, size, layoutProperty);
+    FillPlaceSizeProperty(info, size);
 }
 
 void JSMeasureLayoutParamNG::Update(NG::LayoutWrapper* layoutWrapper)
@@ -484,7 +512,6 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCa
     Local<ObjectRef> measureResultObject = ObjectRef::New(vm);
     measureResultObject->Set(vm, ToJSValue("width"), ToJSValue(measureWidth.ConvertToVp()));
     measureResultObject->Set(vm, ToJSValue("height"), ToJSValue(measureHeight.ConvertToVp()));
-    FillBorderInfo(measureResultObject, child, vm);
     return measureResultObject;
 }
 
@@ -560,6 +587,44 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSPlaceChildren(panda::JsiRun
     return panda::JSValueRef::Undefined(vm);
 }
 
+panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetMargin(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
+    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto child = ptr->GetOrCreateChild();
+    if (!(child && child->GetLayoutProperty())) {
+        return GenEdgesGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();
+    }
+    auto layoutProperty = child->GetLayoutProperty();
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
+    return GenEdgesGlobalized(layoutProperty->CreateMarginWithoutCache(), direction).Get().GetLocalHandle();
+}
+
+panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetPadding(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
+    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto child = ptr->GetOrCreateChild();
+    if (!(child && child->GetLayoutProperty())) {
+        return GenEdgesGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();
+    }
+    auto layoutProperty = child->GetLayoutProperty();
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
+    return GenEdgesGlobalized(layoutProperty->CreatePaddingWithoutBorder(false), direction).Get().GetLocalHandle();
+}
+
+panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetBorderWidth(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
+    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto child = ptr->GetOrCreateChild();
+    if (!(child && child->GetLayoutProperty())) {
+        return GenBorderWidthGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();
+    }
+    auto layoutProperty = child->GetLayoutProperty();
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
+    return GenBorderWidthGlobalized(layoutProperty->CreateBorder(), direction).Get().GetLocalHandle();
+}
 #endif
 
 } // namespace OHOS::Ace::Framework
