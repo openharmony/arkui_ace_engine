@@ -17428,16 +17428,20 @@ class ArkDataPanelComponent extends ArkComponent {
       getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, this);
   }
   makeContentModifierNode(context, dataPanelConfig) {
     dataPanelConfig.contentModifier = this.modifier;
-    if (isUndefined(this.dataPanelNode)) {
+    if (isUndefined(this.dataPanelNode) || this.needRebuild) {
       let xNode = globalThis.requireNapi('arkui.node');
       this.dataPanelNode = new xNode.BuilderNode(context);
       this.dataPanelNode.build(this.builder, dataPanelConfig);
+      this.needRebuild = false;
     } else {
       this.dataPanelNode.update(dataPanelConfig);
     }
