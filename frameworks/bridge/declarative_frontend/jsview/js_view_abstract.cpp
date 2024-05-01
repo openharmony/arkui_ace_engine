@@ -9519,7 +9519,8 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
         if (ParseBorderColorProps(colorValue, borderColor)) {
             properties.borderColor = borderColor;
         } else {
-                NG::BorderColorProperty({ Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK });
+            borderColor.SetColor(Color::BLACK);
+            properties.borderColor = borderColor;
         }
         // Parse border style
         auto styleValue = obj->GetProperty("borderStyle");
