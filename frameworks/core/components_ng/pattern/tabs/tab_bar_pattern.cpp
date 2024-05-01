@@ -133,8 +133,6 @@ void CreateDialogTextNode(const RefPtr<FrameNode>& columnNode, const RefPtr<Pipe
     CHECK_NULL_VOID(textLayoutProperty);
     auto textValue = textLayoutProperty->GetContent();
     
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
     auto dialogTextNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(dialogTextNode);
@@ -710,9 +708,8 @@ void TabBarPattern::OnModifyDone()
 
     InitClick(gestureHub);
     InitTurnPageRateEvent();
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     float scale = pipelineContext->GetFontScale();
     if (scale >= BIG_FONT_SIZE_SCALE) {
         InitLongPressEvent(gestureHub);
@@ -774,7 +771,6 @@ void TabBarPattern::OnModifyDone()
         auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         gestureHub->AddClickEvent(tabBarPattern->clickEvent_);
-        gestureHub->SetLongPressEvent(tabBarPattern->longPressEvent_);
         if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             gestureHub->AddScrollableEvent(tabBarPattern->scrollableEvent_);
         }
@@ -906,9 +902,7 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     CHECK_NULL_VOID(imageNode);
     CHECK_NULL_VOID(textNode);
 
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
@@ -945,9 +939,7 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
 
 void TabBarPattern::CloseDialog(int32_t index)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
