@@ -278,6 +278,11 @@ public:
         return std::move(itemPositionInAnimation_);
     }
 
+    void SetIsMeasureOneMoreItem(bool isMeasureOneMoreItem)
+    {
+        isMeasureOneMoreItem_ = isMeasureOneMoreItem;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
@@ -350,6 +355,7 @@ private:
     bool hasCachedCapture_ = false;
     bool isCaptureReverse_ = false;
     bool isNeedUpdateCapture_ = false;
+    bool isMeasureOneMoreItem_ = false;
 };
 
 } // namespace OHOS::Ace::NG
