@@ -196,6 +196,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXT_INPUT_TEXT_SELECTION_CHANGE;
         case NODE_TEXT_INPUT_ON_EDIT_CHANGE:
             return ON_TEXT_INPUT_EDIT_CHANGE;
+        case NODE_TEXT_INPUT_ON_CONTENT_SIZE_CHANGE:
+            return ON_TEXT_INPUT_CONTENT_SIZE_CHANGE;
         case NODE_TEXT_INPUT_ON_INPUT_FILTER_ERROR:
             return ON_TEXT_INPUT_INPUT_FILTER_ERROR;
         case NODE_TEXT_INPUT_ON_CONTENT_SCROLL:
@@ -206,6 +208,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXTAREA_EDIT_CHANGE;
         case NODE_TEXT_AREA_ON_SUBMIT:
             return ON_TEXTAREA_ON_SUBMIT;
+        case NODE_TEXT_AREA_ON_CONTENT_SIZE_CHANGE:
+            return ON_TEXTAREA_CONTENT_SIZE_CHANGE;
         case NODE_TEXT_AREA_ON_PASTE:
             return ON_TEXTAREA_PASTE;
         case NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE:
@@ -316,6 +320,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_INPUT_ON_TEXT_SELECTION_CHANGE;
         case ON_TEXT_INPUT_EDIT_CHANGE:
             return NODE_TEXT_INPUT_ON_EDIT_CHANGE;
+        case ON_TEXT_INPUT_CONTENT_SIZE_CHANGE:
+            return NODE_TEXT_INPUT_ON_CONTENT_SIZE_CHANGE;
         case ON_TEXT_INPUT_INPUT_FILTER_ERROR:
             return NODE_TEXT_INPUT_ON_INPUT_FILTER_ERROR;
         case ON_TEXT_INPUT_CONTENT_SCROLL:
@@ -326,6 +332,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_AREA_ON_EDIT_CHANGE;
         case ON_TEXTAREA_ON_SUBMIT:
             return NODE_TEXT_AREA_ON_SUBMIT;
+        case ON_TEXTAREA_CONTENT_SIZE_CHANGE:
+            return NODE_TEXT_AREA_ON_CONTENT_SIZE_CHANGE;
         case ON_TEXTAREA_PASTE:
             return NODE_TEXT_AREA_ON_PASTE;
         case ON_TEXTAREA_TEXT_SELECTION_CHANGE:

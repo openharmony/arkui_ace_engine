@@ -137,6 +137,19 @@ public:
         lastValue_ = value;
     }
 
+    void SetOnContentSizeChange(std::function<void(float, float)>&& func)
+    {
+        onContentSizeChange_ = std::move(func);
+    }
+
+    void FireOnContentSizeChange(float width, float height)
+    {
+        if (onContentSizeChange_) {
+            LOGI("On Content Size Change width %{private}f, height %{private}f", width, height);
+            onContentSizeChange_(width, height);
+        }
+    }
+
     void SetOnSelectionChange(std::function<void(int32_t, int32_t)>&& func)
     {
         onSelectionChange_ = std::move(func);
@@ -294,6 +307,7 @@ private:
     std::function<void(bool)> onSecurityStateChanged_;
     std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
     std::function<void(const std::string&)> onChange_;
+    std::function<void(float, float)> onContentSizeChange_;
     std::function<void(int32_t, int32_t)> onSelectionChange_;
 
     std::function<void(const std::string&)> onCopy_;

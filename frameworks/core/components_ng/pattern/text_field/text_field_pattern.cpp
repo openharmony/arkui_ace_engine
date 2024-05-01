@@ -1476,6 +1476,7 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnChange(text);
+    eventHub->FireOnContentSizeChange(textRect_.Width(), textRect_.Height());
 }
 
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -2473,6 +2474,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
     eventHub->FireOnChange(contentController_->GetTextValue());
+    eventHub->FireOnContentSizeChange(textRect_.Width(), textRect_.Height());
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();

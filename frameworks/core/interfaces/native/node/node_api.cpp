@@ -284,6 +284,7 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputCut,
     NodeModifier::SetOnTextInputPaste,
     NodeModifier::SetOnTextInputSelectionChange,
+    NodeModifier::SetOnTextInputContentSizeChange,
     NodeModifier::SetOnTextInputInputFilterError,
     NodeModifier::SetTextInputOnTextContentScroll,
 };
@@ -294,6 +295,8 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaChange,
     NodeModifier::SetOnTextAreaPaste,
     NodeModifier::SetOnTextAreaSelectionChange,
+    NodeModifier::SetTextInputOnSubmit,
+    NodeModifier::SetOnTextAreaContentSizeChange,
     nullptr,
     NodeModifier::SetOnTextAreaInputFilterError,
     NodeModifier::SetTextAreaOnTextContentScroll,
