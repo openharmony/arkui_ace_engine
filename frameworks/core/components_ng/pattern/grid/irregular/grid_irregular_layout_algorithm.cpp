@@ -340,16 +340,21 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
 {
-    Alignment align = gridLayoutInfo_.axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
-    const auto& positionProp = wrapper_->GetLayoutProperty()->GetPositionProperty();
+    const auto& info = gridLayoutInfo_;
+    Alignment align = info.axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
+    const auto& props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    const auto& positionProp = props->GetPositionProperty();
     if (positionProp) {
         align = positionProp->GetAlignment().value_or(align);
     }
 
     const auto& padding = *wrapper_->GetGeometryNode()->GetPadding();
-    mainOffset += gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? padding.left.value_or(0.0f) : padding.top.value_or(0.0f);
+    mainOffset += info.axis_ == Axis::HORIZONTAL ? 0.0f : padding.top.value_or(0.0f);
     auto crossPos = CalculateCrossPositions(padding);
-    const auto& info = gridLayoutInfo_;
+
+    auto frameSize = wrapper_->GetGeometryNode()->GetFrameSize();
+    MinusPaddingToSize(padding, frameSize);
+    const bool isRtl = props->GetNonAutoLayoutDirection() == TextDirection::RTL;
 
     for (int32_t r = info.startMainLineIndex_; r <= info.endMainLineIndex_; ++r) {
         const auto& row = info.gridMatrix_.at(r);
@@ -365,13 +370,16 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
                 continue;
             }
 
-            SizeF blockSize = info.axis_ == Axis::VERTICAL ? SizeF { crossLens_.at(c), info.lineHeightMap_.at(r) }
-                                                           : SizeF { info.lineHeightMap_.at(r), crossLens_.at(c) };
-            auto alignPos =
-                Alignment::GetAlignPosition(blockSize, child->GetGeometryNode()->GetMarginFrameSize(), align);
+            SizeF blockSize = SizeF(crossLens_.at(c), info.lineHeightMap_.at(r), info.axis_);
+            auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+            auto alignPos = Alignment::GetAlignPosition(blockSize, childSize, align);
 
-            OffsetF offset = info.axis_ == Axis::VERTICAL ? OffsetF { crossPos[c], mainOffset }
-                                                          : OffsetF { mainOffset, crossPos[c] };
+            OffsetF offset = OffsetF(crossPos[c], mainOffset, info.axis_);
+
+            if (isRtl) {
+                offset.SetX(frameSize.Width() - offset.GetX() - childSize.Width());
+            }
+            offset += OffsetF { padding.left.value_or(0.0f), 0.0f };
             child->GetGeometryNode()->SetMarginFrameOffset(offset + alignPos);
             if (child->CheckNeedForceMeasureAndLayout()) {
                 child->Layout();
@@ -391,7 +399,7 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
 std::vector<float> GridIrregularLayoutAlgorithm::CalculateCrossPositions(const PaddingPropertyF& padding)
 {
     std::vector<float> res(gridLayoutInfo_.crossCount_, 0.0f);
-    res[0] = gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? padding.top.value_or(0.0f) : padding.left.value_or(0.0f);
+    res[0] = gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? padding.top.value_or(0.0f) : 0.0f;
     for (int32_t i = 1; i < gridLayoutInfo_.crossCount_; ++i) {
         res[i] = res[i - 1] + crossLens_[i - 1] + crossGap_;
     }
