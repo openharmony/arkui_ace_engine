@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/mousestyle/mouse_style.h"
+#include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -101,6 +102,7 @@ struct MouseEvent final {
     int32_t touchEventId = 0;
     int32_t originalId = 0;
     bool isInjected = false;
+    std::vector<KeyCode> pressedCodes;
 
     Offset GetOffset() const
     {
