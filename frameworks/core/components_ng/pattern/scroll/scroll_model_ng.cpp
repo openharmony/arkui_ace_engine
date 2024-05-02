@@ -243,9 +243,19 @@ void ScrollModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
     ScrollableModelNG::SetOnReachStart(std::move(onReachStart));
 }
 
+void ScrollModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
+{
+    ScrollableModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
+}
+
 void ScrollModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
     ScrollableModelNG::SetOnReachEnd(std::move(onReachEnd));
+}
+
+void ScrollModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
+{
+    ScrollableModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 
 void ScrollModelNG::SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)

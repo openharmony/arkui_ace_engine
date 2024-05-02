@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/radio_modifier.h"
+#include <string>
 
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
@@ -25,6 +26,9 @@
 
 namespace OHOS::Ace::NG {
 constexpr bool DEFAULT_CHECKED = false;
+const int32_t ERROR_INT_CODE = -1;
+std::string radio_strValue;
+
 void SetRadioChecked(ArkUINodeHandle node, ArkUI_Bool isCheck)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -237,15 +241,91 @@ void ResetRadioResponseRegion(ArkUINodeHandle node)
     RadioModelNG::SetResponseRegion(frameNode, region);
 }
 
+ArkUI_Bool GetRadioChecked(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(RadioModelNG::GetChecked(frameNode));
+}
+
+void GetRadioStyle(ArkUINodeHandle node, ArkUIRadioStyleOption* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    options->checkedBackgroundColor = RadioModelNG::GetCheckedBackgroundColor(frameNode).GetValue();
+    options->uncheckedBorderColor = RadioModelNG::GetUncheckedBorderColor(frameNode).GetValue();
+    options->indicatorColor =  RadioModelNG::GetIndicatorColor(frameNode).GetValue();
+}
+
+void SetRadioValue(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RadioModelNG::SetRadioValue(frameNode, std::string(value));
+}
+
+void ResetRadioValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RadioModelNG::SetRadioValue(frameNode, "");
+}
+
+ArkUI_CharPtr GetSetRadioValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    radio_strValue = RadioModelNG::GetRadioValue(frameNode);
+    return radio_strValue.c_str();
+}
+
+void SetRadioGroup(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RadioModelNG::SetRadioGroup(frameNode, std::string(value));
+}
+
+void ResetRadioGroup(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RadioModelNG::SetRadioGroup(frameNode, "");
+}
+
+ArkUI_CharPtr GetRadioGroup(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    radio_strValue = RadioModelNG::GetRadioGroup(frameNode);
+    return radio_strValue.c_str();
+}
+
 namespace NodeModifier {
 const ArkUIRadioModifier* GetRadioModifier()
 {
-    static const ArkUIRadioModifier modifier = {SetRadioChecked, ResetRadioChecked, SetRadioStyle, ResetRadioStyle,
+    static const ArkUIRadioModifier modifier = { SetRadioChecked, ResetRadioChecked, SetRadioStyle, ResetRadioStyle,
         SetRadioWidth, ResetRadioWidth, SetRadioHeight, ResetRadioHeight, SetRadioSize, ResetRadioSize,
         SetRadioHoverEffect, ResetRadioHoverEffect, SetRadioPadding, ResetRadioPadding, SetRadioResponseRegion,
-        ResetRadioResponseRegion};
+        ResetRadioResponseRegion, GetRadioChecked, GetRadioStyle, SetRadioValue, ResetRadioValue, GetSetRadioValue,
+        SetRadioGroup, ResetRadioGroup, GetRadioGroup };
 
     return &modifier;
 }
+
+void SetOnRadioChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [node, extraParam](const bool value) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_RADIO_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = static_cast<int>(value);
+        SendArkUIAsyncEvent(&event);
+    };
+    RadioModelNG::SetOnChange(frameNode, std::move(onChange));
 }
-}
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG
