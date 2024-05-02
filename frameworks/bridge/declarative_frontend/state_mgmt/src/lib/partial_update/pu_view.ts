@@ -46,10 +46,6 @@ abstract class ViewPU extends PUV2ViewBase
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: Map<string, ObservedPropertyAbstractPU<any>> = new Map<string, ObservedPropertyAbstractPU<any>>();
 
-  // Set of dependent elmtIds that need partial update
-  // during next re-render
-  protected dirtDescendantElementIds_: Set<number> = new Set<number>();
-
   // my LocalStorage instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
   protected localStoragebackStore_: LocalStorage = undefined;
@@ -319,9 +315,9 @@ abstract class ViewPU extends PUV2ViewBase
     // Remove the active component from the Map for Dfx
     ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
     for (const child of this.childrenWeakrefMap_.values()) {
-      const childViewPU: IView | undefined = child.deref();
-      if (childViewPU) {
-        childViewPU.setActiveInternal(this.isActive_);
+      const childView: IView | undefined = child.deref();
+      if (childView) {
+        childView.setActiveInternal(this.isActive_);
       }
     }
   }
@@ -340,9 +336,9 @@ abstract class ViewPU extends PUV2ViewBase
     ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
 
     for (const child of this.childrenWeakrefMap_.values()) {
-      const childViewPU: IView | undefined = child.deref();
-      if (childViewPU) {
-        childViewPU.setActiveInternal(this.isActive_);
+      const childView: IView | undefined = child.deref();
+      if (childView) {
+        childView.setActiveInternal(this.isActive_);
       }
     }
   }
@@ -394,42 +390,6 @@ abstract class ViewPU extends PUV2ViewBase
       this.isRenderInProgress = false;
       stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${entry.getComponentName()} elmtId ${elmtId} - DONE`);
     }
-    stateMgmtProfiler.end();
-  }
-
-  /**
-   * force a complete rerender / update by executing all update functions
-   * exec a regular rerender first
-   *
-   * @param deep recurse all children as well
-   *
-   * framework internal functions, apps must not call
-   */
-  public forceCompleteRerender(deep: boolean = false): void {
-    stateMgmtProfiler.begin('ViewPU.forceCompleteRerender');
-    stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
-
-    // see which elmtIds are managed by this View
-    // and clean up all book keeping for them
-    this.purgeDeletedElmtIds();
-
-    Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
-
-    if (deep) {
-      this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
-        const child = weakRefChild.deref();
-        if (child) {
-          if (child instanceof ViewPU) {
-            if (!child.hasBeenRecycled_) {
-              child.forceCompleteRerender(true);
-            }
-          } else {
-            throw new Error('forceCompleteRerender not implemented for ViewV2, yet');
-          }
-        }
-      });
-    }
-    stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - end`);
     stateMgmtProfiler.end();
   }
 

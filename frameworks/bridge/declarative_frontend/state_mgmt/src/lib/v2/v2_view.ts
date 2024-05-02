@@ -83,11 +83,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             this.setDeleteStatusRecursively();
         }
         // tell UINodeRegisterProxy that all elmtIds under
-        // this ViewPU should be treated as already unregistered
+        // this ViewV2 should be treated as already unregistered
 
         stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
 
-        // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
+        // purge the elmtIds owned by this ViewV2 from the updateFuncByElmtId and also the state variable dependent elmtIds
         Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId: number) => {
             // FIXME split View: enable delete  this purgeDeleteElmtId(elmtId);
         });
@@ -95,7 +95,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         // unregistration of ElementIDs
         stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID`);
 
-        // it will unregister removed elementids from all the viewpu, equals purgeDeletedElmtIdsRecursively
+        // it will unregister removed elementids from all the ViewV2, equals purgeDeletedElmtIdsRecursively
         this.purgeDeletedElmtIds();
 
         // unregisters its own id once its children are unregistered above
@@ -155,7 +155,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         // needs to move set before updateFunc.
         // make sure the key and object value exist since it will add node in attributeModifier during updateFunc.
         this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, classObject: classObject });
-        // add element id -> owning ViewPU
+        // add element id -> owning ViewV2
         UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
         try {
             updateFunc(elmtId, /* is first render */ true);
@@ -234,7 +234,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     public updateDirtyElements(): void {
         stateMgmtProfiler.begin('ViewV2.updateDirtyElements');
         do {
-            stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render): sorted dirty elmtIds: ${Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber)}, starting ....`);
+            stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render): sorted dirty elmtIds: ${Array.from(this.dirtDescendantElementIds_).sort(ViewV2.compareNumber)}, starting ....`);
 
             // see which elmtIds are managed by this View
             // and clean up all book keeping for them
@@ -243,7 +243,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             // process all elmtIds marked as needing update in ascending order.
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
-            const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
+            const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewV2.compareNumber);
             // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added
             // to newly created this.dirtDescendantElementIds_ Set
             dirtElmtIdsFromRootNode.forEach(elmtId => {
@@ -255,16 +255,15 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                 stateMgmtConsole.applicationError(`${this.debugInfo__()}: New UINode objects added to update queue while re-render! - Likely caused by @Component state change during build phase, not allowed. Application error!`);
             }
         } while (this.dirtDescendantElementIds_.size);
-        stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE, dump of ViewPU in next lines`);
+        stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE`);
         stateMgmtProfiler.end();
     }
 
 
     public UpdateElement(elmtId: number): void {
-        stateMgmtProfiler.begin('ViewPU.UpdateElement');
+        stateMgmtProfiler.begin('ViewV2.UpdateElement');
         if (elmtId === this.id__()) {
-            // do not attempt to update itself.
-            // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
+            // do not attempt to update itself
             stateMgmtProfiler.end();
             return;
         }
@@ -343,7 +342,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             stateMgmtProfiler.end();
             return;
         }
-      
+
         stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
         this.isActive_ = newState;
         if (this.isActive_) {
