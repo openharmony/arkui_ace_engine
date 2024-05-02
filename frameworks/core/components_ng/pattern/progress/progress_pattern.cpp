@@ -369,6 +369,7 @@ void ProgressPattern::FireBuilder()
     if (!makeFunc_.has_value()) {
         host->RemoveChildAndReturnIndex(contentModifierNode_);
         contentModifierNode_ = nullptr;
+        host->GetRenderContext()->SetClipToFrame(true);
         host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
@@ -376,6 +377,7 @@ void ProgressPattern::FireBuilder()
     if (contentModifierNode_ == node) {
         return;
     }
+    host->GetRenderContext()->SetClipToFrame(false);
     host->RemoveChildAndReturnIndex(contentModifierNode_);
     contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
