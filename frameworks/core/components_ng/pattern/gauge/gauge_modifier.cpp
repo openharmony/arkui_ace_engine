@@ -61,7 +61,7 @@ void GaugeModifier::UpdateValue()
     CHECK_NULL_VOID(paintProperty);
     UpdateProperty(paintProperty);
     float value = paintProperty->GetValueValue();
-    if (paintProperty->GetIsSensitiveValue()) {
+    if (paintProperty->GetIsSensitiveValue(false)) {
         value = 0.0f;
     }
     float max = paintProperty->GetMaxValue();
@@ -370,7 +370,7 @@ void GaugeModifier::NewPaintCircularAndIndicator(RSCanvas& canvas)
     auto theme = pipelineContext->GetTheme<GaugeTheme>();
     data.thickness = theme->GetTrackThickness().ConvertToPx();
     CalculateStartAndSweepDegree(paintProperty, data);
-    if (paintProperty->GetIsSensitiveValue()) {
+    if (paintProperty->GetIsSensitiveValue(false)) {
         PaintMonochromeCircular(canvas, data, paintProperty);
     } else {
         switch (paintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT)) {
