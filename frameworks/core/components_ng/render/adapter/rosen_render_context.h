@@ -316,6 +316,8 @@ public:
     void MarkDrivenRenderFramePaintState(bool flag) override;
     RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false) override;
     void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
+    bool CreateThumbnailPixelMapAsyncTask(
+        bool needScale, std::function<void(const RefPtr<PixelMap>)> &&callback) override;
     std::vector<double> transInfo_;
     std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
