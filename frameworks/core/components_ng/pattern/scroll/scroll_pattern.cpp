@@ -798,7 +798,7 @@ void ScrollPattern::CaleSnapOffsets()
     auto scrollSnapAlign = GetScrollSnapAlign();
     std::vector<float>().swap(snapOffsets_);
     if (scrollSnapAlign == ScrollSnapAlign::NONE) {
-        CHECK_NULL_VOID(enablePagingStatus_ != ScrollPagingStatus::VALID);
+        CHECK_NULL_VOID(enablePagingStatus_ == ScrollPagingStatus::VALID);
         scrollSnapAlign = ScrollSnapAlign::START;
     }
     if (IsSnapToInterval()) {
