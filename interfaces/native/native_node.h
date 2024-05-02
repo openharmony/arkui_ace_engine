@@ -1917,6 +1917,23 @@ typedef enum {
      */
     NODE_IMAGE_COLOR_FILTER,
     /**
+     * @brief Sets the resizable image options.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: width of the left edge. The unit is vp. \n
+     * .value[1].f32: width of the top edge. The unit is vp. \n
+     * .value[2].f32: width of the right edge. The unit is vp. \n
+     * .value[3].f32: width of the bottom edge. The unit is vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: width of the left edge. The unit is vp. \n
+     * .value[1].f32: width of the top edge. The unit is vp. \n
+     * .value[2].f32: width of the right edge. The unit is vp. \n
+     * .value[3].f32: width of the bottom edge. The unit is vp. \n
+     *
+     */
+    NODE_IMAGE_RESIZABLE,
+    /**
      * @brief Defines the auto resize attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -1939,23 +1956,6 @@ typedef enum {
      *
      */
     NODE_IMAGE_ALT,
-    /**
-     * @brief Sets the resizable image options.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].f32: width of the left edge. The unit is vp. \n
-     * .value[1].f32: width of the top edge. The unit is vp. \n
-     * .value[2].f32: width of the right edge. The unit is vp. \n
-     * .value[3].f32: width of the bottom edge. The unit is vp. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].f32: width of the left edge. The unit is vp. \n
-     * .value[1].f32: width of the top edge. The unit is vp. \n
-     * .value[2].f32: width of the right edge. The unit is vp. \n
-     * .value[3].f32: width of the bottom edge. The unit is vp. \n
-     *
-     */
-    NODE_IMAGE_RESIZABLE,
     /**
      * @brief Defines whether the image is draggable.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -4771,6 +4771,27 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE,
+    /**
+     * @brief 设置NODE_TEXT_AREA_INPUT_FILTER，正则匹配失败时触发。
+     *
+     * 触发该事件的条件：正则匹配失败时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
+     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>：表示正则匹配失败时，被过滤的内容。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_INPUT_FILTER_ERROR,
+    /**
+     * @brief 文本内容滚动时，触发该回调。
+     *
+     * 触发该事件的条件：文本内容滚动时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示文本在内容区的横坐标偏移。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示文本在内容区的纵坐标偏移。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_CONTENT_SCROLL,
 
     /**
      * @brief 输入状态变化时，触发该回调。
@@ -4793,27 +4814,6 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_SUBMIT,
-        /**
-     * @brief 设置NODE_TEXT_AREA_INPUT_FILTER，正则匹配失败时触发。
-     *
-     * 触发该事件的条件：正则匹配失败时。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
-     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
-     * <b>ArkUI_StringAsyncEvent.pStr</b>：表示正则匹配失败时，被过滤的内容。\n
-     *
-     */
-    NODE_TEXT_AREA_ON_INPUT_FILTER_ERROR,
-    /**
-     * @brief 文本内容滚动时，触发该回调。
-     *
-     * 触发该事件的条件：文本内容滚动时。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示文本在内容区的横坐标偏移。\n
-     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示文本在内容区的纵坐标偏移。\n
-     *
-     */
-    NODE_TEXT_AREA_ON_CONTENT_SCROLL,
 
     /**
      * @brief textArea输入内容发生变化时触发该事件。
