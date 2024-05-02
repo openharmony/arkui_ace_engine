@@ -2725,6 +2725,20 @@ typedef enum {
     NODE_BUTTON_LABEL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_BUTTON,
 
     /**
+     * @brief Sets the button type. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
+     * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
+     * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
+     *
+     */
+    NODE_BUTTON_TYPE,
+
+    /**
      * @brief Defines the current value of the progress indicator.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3540,6 +3554,21 @@ typedef enum {
      *
      */
     NODE_SLIDER_STYLE,
+
+    /**
+     * @brief Sets the track thickness of the slider.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: track thickness of the slider, in vp. The default value is 4.0 vp when <b>NODE_SLIDER_STYLE</b>
+     * is set to <b>ARKUI_SLIDER_STYLE_OUT_SET</b> and 20.0 vp when <b>NODE_SLIDER_STYLE</b> is set to
+     * <b>ARKUI_SLIDER_STYLE_IN_SET</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: track thickness of the slider, in vp. \n
+     *
+     */
+    NODE_SLIDER_TRACK_THICKNESS,
 
     /**
      * @brief Set the selection status of an option button. Attribute setting,

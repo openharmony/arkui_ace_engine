@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 
+#include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
@@ -667,4 +669,28 @@ void SliderModelNG::SetChangeValue(FrameNode* frameNode, double value, int32_t m
     pattern->SetSliderValue(value, mode);
 }
 
+Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
+{
+    Dimension defaultTrackThickness = Dimension(0.0f);
+    CHECK_NULL_RETURN(frameNode, defaultTrackThickness);
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultTrackThickness);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, defaultTrackThickness);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, defaultTrackThickness);
+    auto sliderMode = layoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
+    if (sliderMode == SliderModel::SliderMode::OUTSET) {
+        defaultTrackThickness = theme->GetOutsetTrackThickness();
+    } else if (sliderMode == SliderModel::SliderMode::INSET) {
+        defaultTrackThickness = theme->GetInsetTrackThickness();
+    } else {
+        defaultTrackThickness = theme->GetNoneTrackThickness();
+    }
+
+    Dimension trackThickness = Dimension(0.0f);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderLayoutProperty, Thickness, trackThickness, frameNode, defaultTrackThickness);
+    return trackThickness;
+}
 } // namespace OHOS::Ace::NG

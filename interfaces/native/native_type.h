@@ -1662,6 +1662,20 @@ typedef enum {
 } ArkUI_TextDataDetectorType;
 
 /**
+ * @brief Enumerates the button types.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Normal button (without rounded corners by default). */
+    ARKUI_BUTTON_TYPE_NORMAL = 0,
+    /** Capsule-type button (the round corner is half of the height by default). */
+    ARKUI_BUTTON_TYPE_CAPSULE,
+    /** Circle button. */
+    ARKUI_BUTTON_TYPE_CIRCLE,
+} ArkUI_ButtonType;
+
+/**
 * @brief Creates a size constraint.
 *
 * @since 12
