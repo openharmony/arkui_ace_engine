@@ -187,6 +187,7 @@ enum AceLogTag : uint8_t {
     ACE_CANVAS_COMPONENT,     // C0394A
     ACE_SCROLL_BAR,           // C0394B
     ACE_MOVING_PHOTO,         // C0394C
+    ACE_ARK_COMPONENT,        // C0394D
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

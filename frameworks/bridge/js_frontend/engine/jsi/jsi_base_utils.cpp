@@ -679,6 +679,51 @@ std::string GetLogContent(
     return ParseLogContent(params);
 }
 
+// parse log content from startIndex to end
+std::string GetLogContentFromStartIndex(
+    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv,
+    int32_t argc, int32_t startIndex)
+{
+    if (argc < startIndex + 1) {
+        return "";
+    } else if (argc == startIndex + 1) {
+        return argv[startIndex]->ToString(runtime);
+    }
+    std::vector<std::string> params;
+    params.reserve(argc);
+    for (int32_t i = startIndex; i < argc; ++i) {
+        params.emplace_back(argv[i]->ToString(runtime));
+    }
+    return ParseLogContent(params);
+}
+
+// parse log tag when the first arg is tag
+bool GetLogTag(
+    const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, AceLogTag& tag)
+{
+    if (argc < 1) {
+        return false;
+    }
+    // after stateMgmt.js remediation, this will be delete
+    if (!argv[0]->IsNumber(runtime)) {
+        tag = AceLogTag::ACE_STATE_MGMT;
+        return false;
+    }
+    auto tagNum = argv[0]->ToInt32(runtime);
+    switch (tagNum) {
+        case 0:
+            tag = AceLogTag::ACE_STATE_MGMT;
+            break;
+        case 1:
+            tag = AceLogTag::ACE_ARK_COMPONENT;
+            break;
+        default:
+            tag = AceLogTag::ACE_DEFAULT_DOMAIN;
+            break;
+    }
+    return true;
+}
+
 shared_ptr<JsValue> AppLogPrint(
     const shared_ptr<JsRuntime>& runtime, JsLogLevel level, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
@@ -741,19 +786,27 @@ shared_ptr<JsValue> JsLogPrint(
         return runtime->NewUndefined();
     }
 
-    std::string content = GetLogContent(runtime, argv, argc);
+    AceLogTag tag;
+    std::string content;
+    auto getTagSuccess = GetLogTag(runtime, argv, argc, tag);
+    if (getTagSuccess) {
+        content = GetLogContentFromStartIndex(runtime, argv, argc, 1);
+    } else {
+        // after stateMgmt.js remediation, this will be delete
+        content = GetLogContentFromStartIndex(runtime, argv, argc, 0);
+    }
     switch (level) {
         case JsLogLevel::DEBUG:
-            TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
+            TAG_LOGD(tag, "%{public}s", content.c_str());
             break;
         case JsLogLevel::INFO:
-            TAG_LOGI(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
+            TAG_LOGI(tag, "%{public}s", content.c_str());
             break;
         case JsLogLevel::WARNING:
-            TAG_LOGW(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
+            TAG_LOGW(tag, "%{public}s", content.c_str());
             break;
         case JsLogLevel::ERROR:
-            TAG_LOGE(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
+            TAG_LOGE(tag, "%{public}s", content.c_str());
             break;
     }
 
