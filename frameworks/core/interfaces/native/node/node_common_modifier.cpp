@@ -1217,6 +1217,13 @@ void ResetColorBlend(ArkUINodeHandle node)
     ViewAbstract::SetColorBlend(frameNode, colorBlend);
 }
 
+ArkUI_Uint32 GetColorBlend(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ViewAbstract::GetColorBlend(frameNode).GetValue();
+}
+
 void SetGrayscale(ArkUINodeHandle node, ArkUI_Float32 grayScale)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1588,6 +1595,23 @@ void ResetForegroundBlurStyle(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption styleOption;
     ViewAbstract::SetForegroundBlurStyle(frameNode, styleOption);
+}
+
+ArkUIBlurStyleOptionType GetForegroundBlurStyle(ArkUINodeHandle node)
+{
+    ArkUIBlurStyleOptionType styleOptionType = { 0, 0, 0, 1.0f };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, styleOptionType);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, styleOptionType);
+    if (!renderContext->GetFrontBlurStyle().has_value()) {
+        return styleOptionType;
+    }
+    styleOptionType.blurStyle = static_cast<int32_t>(renderContext->GetFrontBlurStyle()->blurStyle);
+    styleOptionType.colorMode = static_cast<int32_t>(renderContext->GetFrontBlurStyle()->colorMode);
+    styleOptionType.adaptiveColor = static_cast<int32_t>(renderContext->GetFrontBlurStyle()->adaptiveColor);
+    styleOptionType.scale = renderContext->GetFrontBlurStyle()->scale;
+    return styleOptionType;
 }
 
 /**
@@ -5198,7 +5222,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetEnabled, GetMargin, GetMarginDimension, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask,
         GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable,
         SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize, GetRenderGroup,
-        SetOnVisibleAreaChange };
+        SetOnVisibleAreaChange, GetColorBlend, GetForegroundBlurStyle };
 
     return &modifier;
 }

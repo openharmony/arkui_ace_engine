@@ -1316,6 +1316,8 @@ struct ArkUICommonModifier {
     ArkUI_Bool (*getRenderGroup)(ArkUINodeHandle node);
     void (*setOnVisibleAreaChange)(
         ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size);
+    ArkUI_Uint32 (*getColorBlend)(ArkUINodeHandle node);
+    ArkUIBlurStyleOptionType (*getForegroundBlurStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {

@@ -3081,6 +3081,30 @@ const ArkUI_AttributeItem* GetRenderGroup(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetColorBlend(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size != NUM_1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setColorBlend(
+        node->uiNodeHandle, item->value[NUM_0].u32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetColorBlend(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetColorBlend(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetColorBlend(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getColorBlend(node->uiNodeHandle);
+    g_numberValues[0].u32 = resultValue;
+    return &g_attributeItem;
+}
+
 // Text
 int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -7282,6 +7306,62 @@ int32_t SetBackgroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetForegroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto isInputValid = CheckBackgroundBlurStyleInput(item, actualSize);
+    if (!isInputValid) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t blurStyle = ARKUI_BLUR_STYLE_THIN;
+    if (BLUR_STYLE_INDEX < actualSize) {
+        blurStyle = ConvertBlurStyle(item->value[BLUR_STYLE_INDEX].i32);
+    }
+    int32_t colorMode = ARKUI_COLOR_MODE_SYSTEM;
+    if (COLOR_MODE_INDEX < actualSize) {
+        colorMode = item->value[COLOR_MODE_INDEX].i32;
+    }
+    int32_t adaptiveColor = ARKUI_ADAPTIVE_COLOR_DEFAULT;
+    if (ADAPTIVE_COLOR_INDEX < actualSize) {
+        adaptiveColor = item->value[ADAPTIVE_COLOR_INDEX].i32;
+    }
+    float scale = 1.0f;
+    if (SCALE_INDEX < actualSize) {
+        scale = item->value[SCALE_INDEX].f32;
+    }
+    BlurOption blurOption;
+    int32_t intArray[NUM_3];
+    intArray[NUM_0] = blurStyle;
+    intArray[NUM_1] = colorMode;
+    intArray[NUM_2] = adaptiveColor;
+    fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundBlurStyle(
+        node->uiNodeHandle, intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetForegroundBlurStyle(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetForegroundBlurStyle(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetForegroundBlurStyle(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto foregroundBlurStyle =
+        fullImpl->getNodeModifiers()->getCommonModifier()->getForegroundBlurStyle(node->uiNodeHandle);
+    g_numberValues[BLUR_STYLE_INDEX].i32 = UnConvertBlurStyle(foregroundBlurStyle.blurStyle);
+    g_numberValues[COLOR_MODE_INDEX].i32 = foregroundBlurStyle.colorMode;
+    g_numberValues[ADAPTIVE_COLOR_INDEX].i32 = foregroundBlurStyle.adaptiveColor;
+    g_numberValues[SCALE_INDEX].f32 = foregroundBlurStyle.scale;
+    g_attributeItem.size = NUM_4;
+    return &g_attributeItem;
+}
+
 bool CheckTransformCenter(const ArkUI_AttributeItem* item, int32_t size)
 {
     CHECK_NULL_RETURN(item, false);
@@ -10207,7 +10287,9 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetRenderFit,
         SetOutlineColor,
         SetSize,
-        SetRenderGroup
+        SetRenderGroup,
+        SetColorBlend,
+        SetForegroundBlurStyle
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -10297,7 +10379,9 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetRenderFit,
         GetOutlineColor,
         GetSize,
-        GetRenderGroup
+        GetRenderGroup,
+        GetColorBlend,
+        GetForegroundBlurStyle
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -10391,7 +10475,9 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetRenderFit,
         ResetOutlineColor,
         ResetSize,
-        ResetRenderGroup
+        ResetRenderGroup,
+        ResetColorBlend,
+        ResetForegroundBlurStyle
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
