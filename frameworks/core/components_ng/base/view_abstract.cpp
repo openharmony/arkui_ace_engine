@@ -4243,4 +4243,13 @@ void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(b
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
 }
+
+Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
+{
+    Color defaultColor = Color::TRANSPARENT;
+    CHECK_NULL_RETURN(frameNode, defaultColor);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, defaultColor);
+    return target->GetFrontColorBlendValue(defaultColor);
+}
 } // namespace OHOS::Ace::NG

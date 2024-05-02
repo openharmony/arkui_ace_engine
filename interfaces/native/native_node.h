@@ -1459,6 +1459,10 @@ typedef enum {
 
     NODE_RENDER_GROUP,
 
+    NODE_COLOR_BLEND,
+
+    NODE_FOREGROUND_BLUR_STYLE,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
