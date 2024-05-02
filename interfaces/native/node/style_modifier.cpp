@@ -44,6 +44,7 @@ const std::regex SIZE_TYPE_MAGIC("([0-9]+)([a-z]+)");
 constexpr char PARAMS_SEPARATOR_LEVEL1 = ';';
 constexpr int UNIT_VP = 1;
 constexpr int UNIT_FP = 2;
+constexpr int UNIT_PERCENT = 3;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -2820,6 +2821,132 @@ const ArkUI_AttributeItem* GetOutlineWidth(ArkUI_NodeHandle node)
     g_numberValues[OUTLINE_RIGHT_WIDTH_INDEX].f32 = outlineWidthArray[OUTLINE_RIGHT_WIDTH_INDEX];
     g_numberValues[OUTLINE_BOTTOM_WIDTH_INDEX].f32 = outlineWidthArray[OUTLINE_BOTTOM_WIDTH_INDEX];
     g_attributeItem.size = REQUIRED_FOUR_PARAM;
+    return &g_attributeItem;
+}
+
+int32_t SetWidthPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || LessNotEqual(item->value[NUM_0].f32, 0.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setWidth(
+        node->uiNodeHandle, item->value[NUM_0].f32, UNIT_PERCENT, nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetWidthPercent(ArkUI_NodeHandle node)
+{
+    ResetWidth(node);
+}
+
+const ArkUI_AttributeItem* GetWidthPercent(ArkUI_NodeHandle node)
+{
+    auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
+    g_numberValues[0].f32 = modifier->getWidth(node->uiNodeHandle, UNIT_PERCENT);
+    if (LessNotEqual(g_numberValues[0].f32, 0.0f)) {
+        return nullptr;
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetHeightPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || LessNotEqual(item->value[NUM_0].f32, 0.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setHeight(
+        node->uiNodeHandle, item->value[NUM_0].f32, UNIT_PERCENT, nullptr);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetHeightPercent(ArkUI_NodeHandle node)
+{
+    ResetHeight(node);
+}
+
+const ArkUI_AttributeItem* GetHeightPercent(ArkUI_NodeHandle node)
+{
+    auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
+    g_numberValues[0].f32 = modifier->getHeight(node->uiNodeHandle, UNIT_PERCENT);
+    if (LessNotEqual(g_numberValues[0].f32, 0.0f)) {
+        return nullptr;
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetPaddingPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size != NUM_1 && item->size != NUM_4) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    int topIndex = NUM_0;
+    int rightIndex = item->size == NUM_1 ? NUM_0 : NUM_1;
+    int bottomIndex = item->size == NUM_1 ? NUM_0 : NUM_2;
+    int leftIndex = item->size == NUM_1 ? NUM_0 : NUM_3;
+    struct ArkUISizeType top = { item->value[topIndex].f32, UNIT_PERCENT };
+    struct ArkUISizeType right = { item->value[rightIndex].f32, UNIT_PERCENT };
+    struct ArkUISizeType bottom = { item->value[bottomIndex].f32, UNIT_PERCENT };
+    struct ArkUISizeType left = { item->value[leftIndex].f32, UNIT_PERCENT };
+    fullImpl->getNodeModifiers()->getCommonModifier()->setPadding(node->uiNodeHandle, &top, &right, &bottom, &left);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetPaddingPercent(ArkUI_NodeHandle node)
+{
+    ResetPadding(node);
+}
+
+const ArkUI_AttributeItem* GetPaddingPercent(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Float32 paddings[NUM_4];
+    ArkUI_Int32 length = 0;
+    fullImpl->getNodeModifiers()->getCommonModifier()->getPadding(node->uiNodeHandle, paddings, length, UNIT_PERCENT);
+    g_numberValues[NUM_0].f32 = paddings[NUM_0];
+    g_numberValues[NUM_1].f32 = paddings[NUM_1];
+    g_numberValues[NUM_2].f32 = paddings[NUM_2];
+    g_numberValues[NUM_3].f32 = paddings[NUM_3];
+    return &g_attributeItem;
+}
+
+int32_t SetMarginPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item || (item->size != NUM_4 && item->size != NUM_1)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    int topIndex = NUM_0;
+    int rightIndex = item->size == NUM_1 ? NUM_0 : NUM_1;
+    int bottomIndex = item->size == NUM_1 ? NUM_0 : NUM_2;
+    int leftIndex = item->size == NUM_1 ? NUM_0 : NUM_3;
+    struct ArkUISizeType top = { item->value[topIndex].f32, UNIT_PERCENT };
+    struct ArkUISizeType right = { item->value[rightIndex].f32, UNIT_PERCENT };
+    struct ArkUISizeType bottom = { item->value[bottomIndex].f32, UNIT_PERCENT };
+    struct ArkUISizeType left = { item->value[leftIndex].f32, UNIT_PERCENT };
+    fullImpl->getNodeModifiers()->getCommonModifier()->setMargin(node->uiNodeHandle, &top, &right, &bottom, &left);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetMarginPercent(ArkUI_NodeHandle node)
+{
+    ResetMargin(node);
+}
+
+const ArkUI_AttributeItem* GetMarginPercent(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Float32 margins[NUM_4];
+    ArkUI_Int32 length = 0;
+    fullImpl->getNodeModifiers()->getCommonModifier()->getMargin(node->uiNodeHandle, margins, length, UNIT_PERCENT);
+    g_numberValues[NUM_0].f32 = margins[NUM_0];
+    g_numberValues[NUM_1].f32 = margins[NUM_1];
+    g_numberValues[NUM_2].f32 = margins[NUM_2];
+    g_numberValues[NUM_3].f32 = margins[NUM_3];
     return &g_attributeItem;
 }
 
@@ -9847,6 +9974,25 @@ const ArkUI_AttributeItem* GetWaterFlowCachedCount(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetWaterFlowFooter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->object) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    auto footerNodeHandle = reinterpret_cast<ArkUI_NodeHandle>(item->object);
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterflowFooter(
+        node->uiNodeHandle, footerNodeHandle->uiNodeHandle);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetWaterFlowFooter(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetWaterflowFooter(node->uiNodeHandle);
+}
+
 int32_t SetWaterFlowSectionOption(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
@@ -10054,6 +10200,10 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetLayoutWeight,
         SetDisplayPriority,
         SetOutlineWidth,
+        SetWidthPercent,
+        SetHeightPercent,
+        SetPaddingPercent,
+        SetMarginPercent,
         SetRenderFit,
         SetOutlineColor,
         SetSize,
@@ -10140,6 +10290,10 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetLayoutWeight,
         GetDisplayPriority,
         GetOutlineWidth,
+        GetWidthPercent,
+        GetHeightPercent,
+        GetPaddingPercent,
+        GetMarginPercent,
         GetRenderFit,
         GetOutlineColor,
         GetSize,
@@ -10230,6 +10384,10 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetLayoutWeight,
         ResetDisplayPriority,
         ResetOutlineWidth,
+        ResetWidthPercent,
+        ResetHeightPercent,
+        ResetPaddingPercent,
+        ResetMarginPercent,
         ResetRenderFit,
         ResetOutlineColor,
         ResetSize,
@@ -11177,7 +11335,7 @@ int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 {
     static Setter* setters[] = { SetLayoutDirection, SetColumnsTemplate, SetRowsTemplate, SetWaterFlowColumnsGap,
         SetWaterFlowRowsGap, SetWaterFlowSectionOption, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount,
-        SetItemConstraintSize, SetWaterFlowScrollToIndex };
+        SetWaterFlowFooter, SetItemConstraintSize, SetWaterFlowScrollToIndex };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -11189,7 +11347,7 @@ void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetLayoutDirection, ResetColumnsTemplate, ResetRowsTemplate,
         ResetWaterFlowColumnsGap, ResetWaterFlowRowsGap, ResetWaterFlowSectionOption, ResetWaterFlowNodeAdapter,
-        ResetWaterFlowCachedCount, ResetItemConstraintSize, nullptr };
+        ResetWaterFlowCachedCount, ResetWaterFlowFooter, ResetItemConstraintSize, nullptr };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -11201,7 +11359,7 @@ const ArkUI_AttributeItem* GetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t 
 {
     static Getter* getters[] = { GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate, GetWaterFlowColumnsGap,
         GetWaterFlowRowsGap, GetWaterFlowSectionOption, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount,
-        GetItemConstraintSize, nullptr };
+        nullptr, GetItemConstraintSize, nullptr };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

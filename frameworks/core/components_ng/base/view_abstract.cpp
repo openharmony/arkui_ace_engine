@@ -4233,4 +4233,14 @@ bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
     CHECK_NULL_RETURN(target, false);
     return target->GetRenderGroupValue(false);
 }
+
+void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
+    const std::vector<double> &ratioList)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback();
+    pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
+}
 } // namespace OHOS::Ace::NG

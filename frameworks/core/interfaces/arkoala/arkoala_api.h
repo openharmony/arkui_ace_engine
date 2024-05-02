@@ -180,6 +180,14 @@ struct ArkUITouchEvent {
     ArkUI_Int32 interceptResult;
 };
 
+struct ArkUIMouseEvent {
+    ArkUI_Int32 action;
+    ArkUI_Int32 button;
+    ArkUI_Int64 timeStamp;
+    ArkUITouchPoint actionTouchPoint;
+    ArkUI_Int32 subKind;
+};
+
 struct ArkUIStringAndFloat {
     ArkUI_Float32 value;
     ArkUI_CharPtr valueStr;
@@ -571,6 +579,7 @@ enum ArkUIEventCategory {
     GESTURE_ASYNC_EVENT = 6,
     TOUCH_EVENT = 7,
     TEXT_ARRAY = 8,
+    MOUSE_INPUT_EVENT = 9,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -842,6 +851,7 @@ struct ArkUINodeEvent {
         ArkUIAPIEventGestureAsyncEvent gestureAsyncEvent;
         ArkUITouchEvent touchEvent;
         ArkUIAPIEventTextArray textArrayEvent;
+        ArkUIMouseEvent mouseEvent;
     };
 };
 
@@ -1304,6 +1314,8 @@ struct ArkUICommonModifier {
     void (*getOutlineColor)(ArkUINodeHandle node, ArkUI_Uint32* values);
     void (*getSize)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 unit);
     ArkUI_Bool (*getRenderGroup)(ArkUINodeHandle node);
+    void (*setOnVisibleAreaChange)(
+        ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size);
 };
 
 struct ArkUICommonShapeModifier {
@@ -2595,6 +2607,8 @@ struct ArkUIWaterFlowModifier {
     ArkUI_Int32 (*getWaterFlowEnableScrollInteraction)(ArkUINodeHandle node);
     ArkUI_Float32 (*getWaterFlowFriction)(ArkUINodeHandle node);
     void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment);
+    void (*setWaterflowFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
+    void (*resetWaterflowFooter)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {

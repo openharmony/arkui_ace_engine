@@ -1388,6 +1388,68 @@ typedef enum {
     NODE_LAYOUT_WEIGHT,
     NODE_DISPLAY_PRIORITY,
     NODE_OUTLINE_WIDTH,
+    /**
+     * @brief 宽度属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：宽度数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：宽度数值，单位为百分比；\n
+     *
+     */
+    NODE_WIDTH_PERCENT,
+    /**
+     * @brief 高度属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：高度数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：高度数值，单位为百分比；\n
+     *
+     */
+    NODE_HEIGHT_PERCENT,
+    /**
+     * @brief 内间距属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式有两种：\n
+     * 1：上下左右四个位置的内间距值相等。\n
+     * .value[0].f32：内间距数值，单位为百分比；\n
+     * 2：分别指定上下左右四个位置的内间距值。\n
+     * .value[0].f32：上内间距数值，单位为百分比；\n
+     * .value[1].f32：右内间距数值，单位为百分比；\n
+     * .value[2].f32：下内间距数值，单位为百分比；\n
+     * .value[3].f32：左内间距数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：上内间距数值，单位为百分比；\n
+     * .value[1].f32：右内间距数值，单位为百分比；\n
+     * .value[2].f32：下内间距数值，单位为百分比；\n
+     * .value[3].f32：左内间距数值，单位为百分比；\n
+     *
+     */
+    NODE_PADDING_PERCENT,
+    /**
+     * @brief 外间距属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式有两种：\n
+     * 1：上下左右四个位置的外间距值相等。\n
+     * .value[0].f32：外间距数值，单位为百分比；\n
+     * 2：分别指定上下左右四个位置的外间距值。\n
+     * .value[0].f32：上外间距数值，单位为百分比；\n
+     * .value[1].f32：右外间距数值，单位为百分比；\n
+     * .value[2].f32：下外间距数值，单位为百分比；\n
+     * .value[3].f32：左外间距数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：上外间距数值，单位为百分比；\n
+     * .value[1].f32：右外间距数值，单位为百分比；\n
+     * .value[2].f32：下外间距数值，单位为百分比；\n
+     * .value[3].f32：左外间距数值，单位为百分比；\n
+     *
+     */
+    NODE_MARGIN_PERCENT,
 
     NODE_RENDER_FIT,
 
@@ -4299,6 +4361,14 @@ typedef enum {
     */
     NODE_WATER_FLOW_CACHED_COUNT,
     /**
+     * @brief 设置瀑布流组件末尾的自定义显示组件。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .object：参数类型{@Link ArkUI_NodeHandle}。
+     *
+     */
+    NODE_WATER_FLOW_FOOTER,
+    /**
     * @brief 设置当前瀑布流子组件的约束尺寸属性，组件布局时，进行尺寸范围限制，支持属性设置，属性重置和属性获取接口。
     *
     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
@@ -4470,6 +4540,34 @@ typedef enum {
      * {@link ArkUI_UIInputEvent}. \n
      */
     NODE_ON_TOUCH_INTERCEPT,
+    /**
+     * @brief 组件可见区域变化事件。
+     *
+     * 触发该事件的条件：组件可见面积与自身面积的比值接近设置的阈值时触发回调。\n
+     * 传入参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0...].f32: 阈值数组，阈值表示组件可见面积与组件自身面积的比值。每个阈值的取值范围均为[0.0, 1.0]\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：组件可见面积与自身面积的比值与上次变化相比的情况，变大为1，变小为0。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：触发回调时组件可见面积与自身面积的比值。\n
+     */
+    NODE_EVENT_ON_VISIBLE_AREA_CHANGE,
+    /**
+     * @brief 鼠标进入或退出组件事件。
+     *
+     * 触发该事件的条件：鼠标进入或退出组件时触发回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：鼠标是否悬浮在组件上，鼠标进入时为1，退出时为0。\n
+     */
+    NODE_ON_HOVER,
+    /**
+     * @brief 组件点击事件。
+     *
+     * 触发该事件的条件：组件被鼠标按键点击或者鼠标在组件上悬浮移动时触发该回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_UIInputEvent}。\n
+     */
+    NODE_ON_MOUSE,
     /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
