@@ -745,8 +745,14 @@ void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     if (pattern) {
-        pattern->SetCustomKeyboard(std::move(buildFunc));
         pattern->SetCustomKeyboardOption(supportAvoidance);
+        // create customKeyboard node
+        if (buildFunc) {
+            NG::ScopedViewStackProcessor builderViewStackProcessor;
+            buildFunc();
+            auto customKeyboard = NG::ViewStackProcessor::GetInstance()->Finish();
+            pattern->SetCustomKeyboard(customKeyboard);
+        }
     }
 }
 
@@ -1619,13 +1625,12 @@ void TextFieldModelNG::SetOnEditChanged(FrameNode* frameNode, std::function<void
 }
 
 
-void TextFieldModelNG::SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc,
-    bool supportAvoidance)
+void TextFieldModelNG::SetCustomKeyboard(FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     if (pattern) {
-        pattern->SetCustomKeyboard(std::move(buildFunc));
+        pattern->SetCustomKeyboard(AceType::Claim<UINode>(customKeyboard));
         pattern->SetCustomKeyboardOption(supportAvoidance);
     }
 }
@@ -1752,5 +1757,21 @@ void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& new
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetPadding(newPadding);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
+}
+
+RefPtr<UINode> TextFieldModelNG::GetCustomKeyboard(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetCustomKeyboard();
+}
+
+bool TextFieldModelNG::GetCustomKeyboardOption(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetCustomKeyboardOption();
 }
 } // namespace OHOS::Ace::NG

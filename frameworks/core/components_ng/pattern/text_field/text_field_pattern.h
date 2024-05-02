@@ -985,34 +985,34 @@ public:
 
     void EditingValueFilterChange();
 
-    void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
+    void SetCustomKeyboard(const RefPtr<UINode>& keyboardBuilder)
     {
-        if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+        if (customKeyboard_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
             // close customKeyboard and request system keyboard
             CloseCustomKeyboard();
-            customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+            customKeyboard_ = keyboardBuilder; // refresh current keyboard
             RequestKeyboard(false, true, true);
             StartTwinkling();
             return;
         }
-        if (!customKeyboardBuilder_ && keyboardBuilder) {
+        if (!customKeyboard_ && keyboardBuilder) {
             // close system keyboard and request custom keyboard
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
             if (imeShown_) {
                 CloseKeyboard(true);
-                customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+                customKeyboard_ = keyboardBuilder; // refresh current keyboard
                 RequestKeyboard(false, true, true);
                 StartTwinkling();
                 return;
             }
 #endif
         }
-        customKeyboardBuilder_ = keyboardBuilder;
+        customKeyboard_ = keyboardBuilder;
     }
 
     bool HasCustomKeyboard()
     {
-        return customKeyboardBuilder_ != nullptr;
+        return customKeyboard_ != nullptr;
     }
 
     void DumpInfo() override;
@@ -1200,6 +1200,16 @@ public:
     }
 
     PreviewTextStyle GetPreviewTextStyle() const;
+
+    RefPtr<UINode> GetCustomKeyboard()
+    {
+        return customKeyboard_;
+    }
+
+    bool GetCustomKeyboardOption()
+    {
+        return keyboardAvoidance_;
+    }
 
 protected:
     virtual void InitDragEvent();
@@ -1527,7 +1537,7 @@ private:
     BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
     bool isFocusedBeforeClick_ = false;
     bool isCustomKeyboardAttached_ = false;
-    std::function<void()> customKeyboardBuilder_;
+    RefPtr<UINode> customKeyboard_;
     RefPtr<OverlayManager> keyboardOverlay_;
     bool isCustomFont_ = false;
     bool hasClicked_ = false;

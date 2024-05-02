@@ -3056,8 +3056,9 @@ HWTEST_F(SearchTestNg, SetProperty001, TestSize.Level1)
     EXPECT_NE(eventHub->onCut_, nullptr);
 
     //test SetCustomKeyboard
-    searchModelInstance.SetCustomKeyboard([]() {});
-    EXPECT_NE(pattern->customKeyboardBuilder_, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
+    pattern->SetCustomKeyboard(frameNode);
+    EXPECT_NE(pattern->customKeyboard_, nullptr);
 
     //test SetType
     searchModelInstance.SetType(TextInputType::BEGIN);

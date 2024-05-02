@@ -2437,6 +2437,10 @@ struct ArkUITextInputModifier {
     ArkUI_Float32 (*getTextInputLineHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputMaxLines)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextInputFontFeature)(ArkUINodeHandle node);
+    void (*setTextInputCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance);
+    ArkUINodeHandle (*getTextInputCustomKeyboard)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputCustomKeyboardOption)(ArkUINodeHandle node);
+    void (*resetTextInputCustomKeyboard)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

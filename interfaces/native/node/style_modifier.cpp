@@ -4069,6 +4069,70 @@ const ArkUI_AttributeItem* GetTextInputContentLineCount(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetInputCustomKeyboard(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->object) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    auto customKeyboard = reinterpret_cast<ArkUI_NodeHandle>(item->object);
+    auto supportAvoidance = false;
+    if (item->size > 0) {
+        supportAvoidance = static_cast<bool>(item->value[0].i32);
+    }
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCustomKeyboard(
+        node->uiNodeHandle, customKeyboard->uiNodeHandle, supportAvoidance);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetInputCustomKeyboard(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    auto* value = fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputCustomKeyboard(
+        node->uiNodeHandle);
+    void* attachNode = fullImpl->getExtendedAPI()->getAttachNodePtr(value);
+    if (attachNode) {
+        g_attributeItem.object = reinterpret_cast<ArkUI_NodeHandle>(attachNode);
+    }
+    g_numberValues[NUM_0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
+        getTextInputCustomKeyboardOption(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetInputCustomKeyboard(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputCustomKeyboard(node->uiNodeHandle);
+}
+
+int32_t SetTextInputWordBreak(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputWordBreak(
+        node->uiNodeHandle, static_cast<uint32_t>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextInputWordBreak(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputWordBreak(
+        node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetTextInputWordBreak(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputWordBreak(node->uiNodeHandle);
+}
+
 int32_t SetBlurOnSubmit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, NUM_1);
@@ -10611,7 +10675,7 @@ int32_t SetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
         StopTextInputEditing, SetTextInputCancelButton, SetTextInputTextSelection, SetTextInputUnderlineColor,
         SetTextInputEnableAutoFill, SetTextInputContentType, SetTextInputPasswordRules, SetTextInputSelectAll,
         SetInputFilter, SetTextInputStyle, SetTextInputCaretOffset, nullptr, nullptr,
-        SetTextInputSelectionMenuHidden, SetBlurOnSubmit };
+        SetTextInputSelectionMenuHidden, SetBlurOnSubmit, SetInputCustomKeyboard, SetTextInputWordBreak };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -10627,7 +10691,7 @@ const ArkUI_AttributeItem* GetTextInputAttribute(ArkUI_NodeHandle node, int32_t 
         GetTextInputCancelButton, GetTextInputTextSelection, GetTextInputUnderlineColor, GetTextInputEnableAutoFill,
         GetTextInputContentType, GetTextInputPasswordRules, GetTextInputSelectAll, GetInputFilter,
         GetTextInputStyle, GetTextInputCaretOffset, GetTextInputContentRect, GetTextInputContentLineCount,
-        GetTextInputSelectionMenuHidden, GetBlurOnSubmit };
+        GetTextInputSelectionMenuHidden, GetBlurOnSubmit, GetInputCustomKeyboard, GetTextInputWordBreak };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -10643,7 +10707,7 @@ void ResetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextInputCancelButton, ResetTextInputTextSelection, ResetTextInputUnderlineColor,
         ResetTextInputEnableAutoFill, ResetTextInputContentType, ResetTextInputPasswordRules, ResetTextInputSelectAll,
         ResetInputFilter, ResetTextInputStyle, ResetTextInputCaretOffset, nullptr, nullptr,
-        ResetTextInputSelectionMenuHidden, ResetBlurOnSubmit };
+        ResetTextInputSelectionMenuHidden, ResetBlurOnSubmit, ResetInputCustomKeyboard, ResetTextInputWordBreak };
     if (subTypeId >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
