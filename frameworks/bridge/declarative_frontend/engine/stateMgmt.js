@@ -7452,29 +7452,39 @@ class ObserveV2 {
         });
         aceTrace.end();
     }
-    constructMonitor(target, name) {
-        let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + name);
-        if (target && (typeof target === 'object') && target[watchProp]) {
-            Object.entries(target[watchProp]).forEach(([funcName, func]) => {
+    constructMonitor(owningObject, owningObjectName) {
+        let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + owningObjectName);
+        if (owningObject && (typeof owningObject === 'object') && owningObject[watchProp]) {
+            Object.entries(owningObject[watchProp]).forEach(([monitorFuncName, monitorFunc]) => {
                 var _a;
                 var _b;
-                if (func && funcName && typeof func === 'function') {
-                    const monitor = new MonitorV2(target, funcName, func);
+                if (monitorFunc && monitorFuncName && typeof monitorFunc === 'function') {
+                    const monitor = new MonitorV2(owningObject, monitorFuncName, monitorFunc);
                     monitor.InitRun();
-                    const refs = (_a = target[_b = ObserveV2.MONITOR_REFS]) !== null && _a !== void 0 ? _a : (target[_b] = {});
-                    refs[name] = monitor;
+                    const refs = (_a = owningObject[_b = ObserveV2.MONITOR_REFS]) !== null && _a !== void 0 ? _a : (owningObject[_b] = {});
+                    // store a reference inside owningObject
+                    // thereby MonitorV2 will share lifespan as owning @ComponentV2 or @ObservedV2
+                    // remember: id2cmp only has a WeakRef to MonitorV2 obj
+                    refs[monitorFuncName] = monitor;
                 }
                 // FIXME Else handle error
             });
         } // if target[watchProp]
     }
-    constructComputed(target, name) {
-        const watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + name);
-        if (target && (typeof target === 'object') && target[watchProp]) {
-            Object.entries(target[watchProp]).forEach(([propertyName, computeFunc]) => {
-                var _a;
+    constructComputed(owningObject, owningObjectName) {
+        const computedProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + owningObjectName);
+        if (owningObject && (typeof owningObject === 'object') && owningObject[computedProp]) {
+            Object.entries(owningObject[computedProp]).forEach(([computedPropertyName, computeFunc]) => {
+                var _a, _b;
+                var _c;
                 
-                new ComputedV2(target, propertyName, computeFunc).InitRun();
+                const computed = new ComputedV2(owningObject, computedPropertyName, computeFunc);
+                computed.InitRun();
+                const refs = (_b = owningObject[_c = ObserveV2.COMPUTED_REFS]) !== null && _b !== void 0 ? _b : (owningObject[_c] = {});
+                // store a reference inside owningObject
+                // thereby ComputedV2 will share lifespan as owning @ComponentV2 or @ObservedV2
+                // remember: id2cmp only has a WeakRef to ComputedV2 obj
+                refs[computedPropertyName] = computed;
             });
         }
     }
@@ -7551,6 +7561,7 @@ ObserveV2.V2_DECO_META = Symbol('__v2_deco_meta__');
 ObserveV2.SYMBOL_REFS = Symbol('__use_refs__');
 ObserveV2.ID_REFS = Symbol('__id_refs__');
 ObserveV2.MONITOR_REFS = Symbol('___monitor_refs_');
+ObserveV2.COMPUTED_REFS = Symbol('___computed_refs_');
 ObserveV2.SYMBOL_PROXY_GET_TARGET = Symbol('__proxy_get_target');
 ObserveV2.OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
 ObserveV2.OB_PREFIX_LEN = 5;
