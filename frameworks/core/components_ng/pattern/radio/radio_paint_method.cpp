@@ -37,8 +37,8 @@ constexpr float DEFAULT_OPACITY_SCALE = 1.0f;
 constexpr float DEFAULT_OPACITY_BORDER_SCALE = 0.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_VELOCITY = 0.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_MASS = 1.0f;
-constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 410.0f;
-constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 25.0f;
+constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 228.0f;
+constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 26.0f;
 constexpr int32_t DEFAULT_INDICATOR_ANIMATION_DURATION = 150;
 } // namespace
 
@@ -180,7 +180,7 @@ void RadioModifier::UpdateIndicatorAnimation(bool isCheck)
     auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(DEFAULT_INTERPOLATINGSPRING_VELOCITY,
         DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
     AnimationOption halfDurationOption;
-    halfDurationOption.SetCurve(springCurve);
+    halfDurationOption.SetCurve(Curves::FRICTION);
     halfDurationOption.SetDuration(DEFAULT_INDICATOR_ANIMATION_DURATION);
     AnimationOption delayOption;
     delayOption.SetCurve(springCurve);
