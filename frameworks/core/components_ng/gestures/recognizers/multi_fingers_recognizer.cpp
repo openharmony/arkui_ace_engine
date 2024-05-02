@@ -40,10 +40,10 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
     size_t maxFingerCount = 0;
     for (const auto& point : touchPoints_) {
         PointF localPoint(point.second.x, point.second.y);
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
-            isPostEventResult_, point.second.postEventNodeId);
+        NGGestureRecognizer::Transform(
+            localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
         FingerInfo fingerInfo = { point.first, point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()),
-            point.second.sourceType, point.second.sourceTool, point.second.originalId };
+            point.second.GetScreenOffset(), point.second.sourceType, point.second.sourceTool, point.second.originalId };
         fingerList_.emplace_back(fingerInfo);
         if (maxTimeStamp <= point.second.GetTimeStamp().time_since_epoch().count()
             && maxFingerCount < point.second.pointers.size()
@@ -103,5 +103,18 @@ void MultiFingersRecognizer::CleanRecognizerState()
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }
+}
+
+void MultiFingersRecognizer::UpdateTouchPointWithAxisEvent(const AxisEvent& event)
+{
+    // Update touchPointInfo with axisEvent.
+    touchPoints_[event.id].id = event.id;
+    touchPoints_[event.id].x = event.x;
+    touchPoints_[event.id].y = event.y;
+    touchPoints_[event.id].screenX = event.screenX;
+    touchPoints_[event.id].screenY = event.screenY;
+    touchPoints_[event.id].sourceType = event.sourceType;
+    touchPoints_[event.id].sourceTool = event.sourceTool;
+    touchPoints_[event.id].originalId = event.originalId;
 }
 } // namespace OHOS::Ace::NG

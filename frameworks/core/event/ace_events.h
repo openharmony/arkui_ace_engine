@@ -47,6 +47,7 @@ enum class SourceTool : int32_t {
     MOUSE = 7,
     LENS = 8,
     TOUCHPAD = 9,
+    JOYSTICK = 10,
 };
 
 struct EventTarget final {
