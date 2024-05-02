@@ -114,6 +114,8 @@ public:
         return realArrowHeight_;
     }
 
+    void UpdateMarginByWidth();
+
 protected:
     OffsetF positionOffset_;
     SizeF wrapperSize_;
