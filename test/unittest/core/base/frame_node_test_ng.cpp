@@ -2727,4 +2727,56 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0050, TestSize.Level1)
     node->DetachContext(true);
     EXPECT_EQ(node->context_, nullptr);
 }
+
+/**
+ * @tc.name: FrameNodeTestNg_GetPositionToScreen001
+ * @tc.desc: Test frame node method GetPositionToScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPositionToScreen001, TestSize.Level1)
+{
+    OffsetF Offset = { 0, 0 };
+    FRAME_NODE2->SetParent(FRAME_NODE3);
+    auto screenOffset = FRAME_NODE2->GetPositionToScreen();
+    EXPECT_EQ(screenOffset, Offset);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetPositionToParentWithTransform001
+ * @tc.desc: Test frame node method GetPositionToParentWithTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPositionToParentWithTransform001, TestSize.Level1)
+{
+    OffsetF Offset = { 0, 0 };
+    FRAME_NODE2->SetParent(FRAME_NODE3);
+    auto parentOffsetWithTransform = FRAME_NODE2->GetPositionToParentWithTransform();
+    EXPECT_EQ(parentOffsetWithTransform, Offset);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetPositionToParentWithTransform001
+ * @tc.desc: Test frame node method GetPositionToParentWithTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPositionToScreenWithTransform001, TestSize.Level1)
+{
+    OffsetF Offset = { 0, 0 };
+    FRAME_NODE2->SetParent(FRAME_NODE3);
+    auto screenOffsetWithTransform = FRAME_NODE2->GetPositionToScreenWithTransform();
+    EXPECT_EQ(screenOffsetWithTransform, Offset);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetPositionToWindowWithTransform001
+ * @tc.desc: Test frame node method GetPositionToWindowWithTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPositionToWindowWithTransform001, TestSize.Level1)
+{
+    OffsetF Offset = { 0, 0 };
+    FRAME_NODE2->SetParent(FRAME_NODE3);
+    auto windowOffsetWithTransform = FRAME_NODE2->GetPositionToWindowWithTransform();
+    EXPECT_EQ(windowOffsetWithTransform, Offset);
+}
 } // namespace OHOS::Ace::NG
