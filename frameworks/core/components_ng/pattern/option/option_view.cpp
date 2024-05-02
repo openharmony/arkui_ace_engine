@@ -121,7 +121,7 @@ RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<F
 }
 
 void OptionView::CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
-    std::function<void()>&& onClickFunc)
+    const std::function<void()>& onClickFunc)
 {
     auto pasteNode =
         PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
@@ -163,7 +163,7 @@ void OptionView::CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr
 }
 
 void OptionView::CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
-    const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, std::function<void()>&& onClickFunc)
+    const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc)
 {
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(pattern);
@@ -179,11 +179,11 @@ void OptionView::CreateOption(bool optionsHasIcon, const std::string& value, con
 
     auto eventHub = option->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetMenuOnClick(std::move(onClickFunc));
+    eventHub->SetMenuOnClick(onClickFunc);
 }
 
 RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::string& value,
-    std::function<void()>&& onClickFunc, int32_t index, const std::string& icon)
+    const std::function<void()>& onClickFunc, int32_t index, const std::string& icon)
 {
     auto option = Create(index);
     CHECK_NULL_RETURN(option, nullptr);
@@ -193,12 +193,12 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::s
 #ifdef OHOS_PLATFORM
     constexpr char BUTTON_PASTE[] = "textoverlay.paste";
     if (value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
-        CreatePasteButton(option, row, std::move(onClickFunc));
+        CreatePasteButton(option, row, onClickFunc);
     } else {
-        CreateOption(optionsHasIcon, value, icon, row, option, std::move(onClickFunc));
+        CreateOption(optionsHasIcon, value, icon, row, option, onClickFunc);
     }
 #else
-    CreateOption(optionsHasIcon, value, icon, row, option, std::move(onClickFunc));
+    CreateOption(optionsHasIcon, value, icon, row, option, onClickFunc);
 #endif
     return option;
 }
