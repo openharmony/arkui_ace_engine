@@ -310,4 +310,15 @@ void SequencedRecognizer::CleanRecognizerState()
     }
     currentIndex_ = 0;
 }
+
+void SequencedRecognizer::ForceCleanRecognizer()
+{
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->ForceCleanRecognizer();
+        }
+    }
+    MultiFingersRecognizer::ForceCleanRecognizer();
+    currentIndex_ = 0;
+}
 } // namespace OHOS::Ace::NG

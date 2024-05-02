@@ -47,7 +47,9 @@ public:
 
     void ForceCleanRecognizer() override
     {
-        touchPoints_.clear();
+        for (const auto& iter : touchPoints_) {
+            touchPoints_[iter.first] = {};
+        }
         fingersId_.clear();
         fingerList_.clear();
         activeFingers_.clear();

@@ -594,21 +594,18 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     if (dispatchSuccess) {
         if (Container::IsCurrentUseNewPipeline()) {
             // Need update here: onTouch/Recognizer need update
-            bool isStopTouchEvent = false;
-            for (const auto& entry : iter->second) {
-                auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
-                if (recognizer) {
-                    entry->HandleMultiContainerEvent(point);
-                    eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point,
-                        NG::TransRefereeState(recognizer->GetRefereeState()),
-                        NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
-                }
-                if (!recognizer && !isStopTouchEvent) {
-                    isStopTouchEvent = !entry->HandleMultiContainerEvent(point);
-                    eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)),
-                        std::string("Handle").append(GestureSnapshot::TransTouchType(point.type)), "", "");
-                }
+            bool hasFailRecognizer = false;
+            bool allDone = false;
+            if (point.type == TouchType::DOWN) {
+                hasFailRecognizer = refereeNG_->HasFailRecognizer(point.id);
+                allDone = refereeNG_->QueryAllDone();
             }
+            DispatchTouchEventToTouchTestResult(point, iter->second, true);
+            if (!allDone && point.type == TouchType::DOWN && !hasFailRecognizer &&
+                refereeNG_->HasFailRecognizer(point.id) && downFingerIds_.size() <= 1) {
+                    refereeNG_->ForceCleanGestureReferee();
+                    DispatchTouchEventToTouchTestResult(point, iter->second, false);
+                }
         } else {
             for (const auto& entry : iter->second) {
                 if (!entry->HandleMultiContainerEvent(point)) {
@@ -633,6 +630,26 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 
     lastEventTime_ = point.time;
     return true;
+}
+
+void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
+    TouchTestResult touchTestResult, bool sendOnTouch)
+{
+    bool isStopTouchEvent = false;
+    for (const auto& entry : touchTestResult) {
+        auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
+        if (recognizer) {
+            entry->HandleMultiContainerEvent(touchEvent);
+            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), touchEvent,
+                NG::TransRefereeState(recognizer->GetRefereeState()),
+                NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
+        }
+        if (!recognizer && !isStopTouchEvent && sendOnTouch) {
+            isStopTouchEvent = !entry->HandleMultiContainerEvent(touchEvent);
+            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)),
+                std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
+        }
+    }
 }
 
 bool EventManager::PostEventDispatchTouchEvent(const TouchEvent& event)
