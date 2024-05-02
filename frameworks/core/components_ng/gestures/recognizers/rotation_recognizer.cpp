@@ -338,7 +338,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
             info.SetTiltY(touchPoint.tiltY.value());
         }
         info.SetSourceTool(touchPoint.sourceTool);
-        info.SetPointerEvent(touchPoint.pointerEvent);
+        info.SetPointerEvent(lastPointEvent_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
