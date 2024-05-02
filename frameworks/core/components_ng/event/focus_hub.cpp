@@ -899,7 +899,7 @@ bool FocusHub::OnClick(const KeyEvent& event)
         auto centerToWindow = Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2);
         auto centerToNode = Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2);
         info.SetGlobalLocation(centerToWindow);
-        info.SetLocalLocation(Offset(centerToNode));
+        info.SetLocalLocation(centerToNode);
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
