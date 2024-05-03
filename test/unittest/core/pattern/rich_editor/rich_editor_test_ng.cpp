@@ -5962,6 +5962,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest006, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 2;
     richEditorPattern->dragRange_.first = 0;
     richEditorPattern->dragRange_.second = 2;
+    richEditorPattern->isDragSponsor_ = true;
     richEditorPattern->HandleOnDragDropTextOperation("he", true);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
