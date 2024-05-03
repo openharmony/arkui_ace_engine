@@ -2496,7 +2496,7 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
     if (windowId) {
         return mouseStyle->ChangePointerStyle(windowId, format);
     }
-    return mouseStyle->ChangePointerStyle(GetWindowId(), format);
+    return mouseStyle->ChangePointerStyle(GetFocusWindowId(), format);
 }
 
 bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
@@ -3385,7 +3385,7 @@ void PipelineContext::SetCursor(int32_t cursorValue)
         auto cursor = static_cast<MouseFormat>(cursorValue);
         window->SetCursor(cursor);
         window->SetUserSetCursor(true);
-        mouseStyle->ChangePointerStyle(GetWindowId(), cursor);
+        mouseStyle->ChangePointerStyle(GetFocusWindowId(), cursor);
     }
 }
 
@@ -3397,7 +3397,7 @@ void PipelineContext::RestoreDefault(int32_t windowId)
     CHECK_NULL_VOID(mouseStyle);
     window->SetCursor(MouseFormat::DEFAULT);
     window->SetUserSetCursor(false);
-    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetWindowId(), MouseFormat::DEFAULT);
+    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetFocusWindowId(), MouseFormat::DEFAULT);
 }
 
 void PipelineContext::OpenFrontendAnimation(
