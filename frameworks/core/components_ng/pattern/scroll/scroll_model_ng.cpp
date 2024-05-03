@@ -549,9 +549,9 @@ NestedScrollOptions ScrollModelNG::GetNestedScroll(FrameNode* frameNode)
 ScrollEdgeType ScrollModelNG::GetOnScrollEdge(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, ScrollEdgeType::SCROLL_TOP);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    Axis axis = Axis::VERTICAL;
-    ACE_GET_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis, frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    Axis axis = pattern->GetAxis();
+
     switch (axis) {
         case Axis::VERTICAL:
             if (pattern->IsAtTop()) {

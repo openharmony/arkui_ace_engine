@@ -74,6 +74,8 @@ public:
 
     DisplayMode GetDisplayMode() const override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
+    static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
     static void SetEditMode(FrameNode* frameNode, bool editMode);
     static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
     static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);

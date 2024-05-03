@@ -77,7 +77,6 @@ constexpr TextDirection DEFAULT_COMMON_DIRECTION = TextDirection::AUTO;
 constexpr int32_t DEFAULT_COMMON_LAYOUTWEIGHT = 0;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
 constexpr int32_t DEFAULT_GRIDSPAN = 0;
-constexpr uint32_t DEFAULT_ALIGN_VALUE = 2;
 constexpr uint32_t DEFAULT_ALIGN_RULES_SIZE = 6;
 constexpr uint8_t DEFAULT_SAFE_AREA_TYPE = 0b111;
 constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
@@ -100,7 +99,6 @@ const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
-constexpr int32_t MAX_ANCHOR_ID_LENGTH = 50;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -2177,6 +2175,16 @@ void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool op
     ViewAbstract::SetGeometryTransition(frameNode, idStr, static_cast<bool>(options));
 }
 
+ArkUI_CharPtr GetGeometryTransition(ArkUINodeHandle node, ArkUI_Bool* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    bool followWithoutTransition = false;
+    g_strValue = ViewAbstract::GetGeometryTransition(frameNode, &followWithoutTransition);
+    *options = followWithoutTransition;
+    return g_strValue.c_str();
+}
+
 void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3138,46 +3146,42 @@ void ResetAlignRules(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    const char* keys[] = { "left", "middle", "right", "top", "center", "bottom" };
-    std::map<AlignDirection, AlignRule> alignRules;
-    for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
-        AlignRule alignRule;
-        alignRule.anchor = "__container__";
-        alignRule.horizontal = static_cast<HorizontalAlign>(DEFAULT_ALIGN_VALUE);
-        alignRule.vertical = static_cast<VerticalAlign>(DEFAULT_ALIGN_VALUE);
-        alignRules[static_cast<AlignDirection>(i)] = alignRule;
-    }
-    ViewAbstract::SetAlignRules(frameNode, alignRules);
+    ViewAbstract::ResetAlignRules(frameNode);
 }
 
-void GetAlignRules(ArkUINodeHandle node, ArkUIAlignRulesType* alignRulesType)
+void GetAlignRules(ArkUINodeHandle node, ArkUI_CharPtr* anchors, ArkUI_Int32* direction, ArkUI_Int32 length)
 {
-    CHECK_NULL_VOID(alignRulesType);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto alignRules = ViewAbstract::GetAlignRules(frameNode);
-    std::string emptyStr;
-    for (int32_t i = 0; i < NUM_6; i++) {
-        auto iterator = alignRules.find(static_cast<AlignDirection>(i));
-        if (iterator == alignRules.end()) {
-            if (strcpy_s(alignRulesType->anchorIds[i], MAX_ANCHOR_ID_LENGTH, emptyStr.c_str()) != 0) {
-                break;
+
+    std::size_t index = 0;
+    for (const AlignDirection alignDirection : { AlignDirection::LEFT, AlignDirection::MIDDLE, AlignDirection::RIGHT,
+             AlignDirection::TOP, AlignDirection::CENTER, AlignDirection::BOTTOM }) {
+        if (index >= length) {
+            return;
+        }
+        auto it = alignRules.find(alignDirection);
+        if (it != alignRules.end()) {
+            anchors[index] = it->second.anchor.c_str();
+            switch (alignDirection) {
+                case AlignDirection::LEFT:
+                case AlignDirection::RIGHT:
+                case AlignDirection::CENTER:
+                    direction[index] = static_cast<ArkUI_Int32>(it->second.horizontal) - 1;
+                    break;
+                case AlignDirection::TOP:
+                case AlignDirection::MIDDLE:
+                case AlignDirection::BOTTOM:
+                    direction[index] = static_cast<ArkUI_Int32>(it->second.vertical) - 1;
+                    break;
             }
-            alignRulesType->alignTypes[i] = 0;
-            continue;
-        }
-        if (strcpy_s(alignRulesType->anchorIds[i], MAX_ANCHOR_ID_LENGTH, iterator->second.anchor.c_str()) != 0) {
-            break;
-        }
-        if (i < NUM_3) {
-            alignRulesType->alignTypes[i] = static_cast<int32_t>(iterator->second.horizontal);
         } else {
-            alignRulesType->alignTypes[i] = static_cast<int32_t>(iterator->second.vertical);
+            anchors[index] = nullptr;
+            direction[index] = -1;
         }
+        ++index;
     }
-    BiasPair biasPair = ViewAbstract::GetBias(frameNode);
-    alignRulesType->biasHorizontalValue = biasPair.first;
-    alignRulesType->biasVerticalValue = biasPair.second;
 }
 
 void SetAccessibilityDescription(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -5136,6 +5140,67 @@ void SetBackgroundImageSizeWithUnit(
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
 
+void SetChainStyle(ArkUINodeHandle node, ArkUI_Int32 direction, ArkUI_Int32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ChainInfo chainInfo;
+    chainInfo.direction = static_cast<LineDirection>(direction);
+    chainInfo.style = static_cast<ChainStyle>(style);
+    ViewAbstract::SetChainStyle(frameNode, chainInfo);
+}
+
+void GetChainStyle(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto chainInfo = ViewAbstract::GetChainStyle(frameNode);
+    // 0 index is direction
+    if (chainInfo.direction.has_value()) {
+        values[0] = static_cast<ArkUI_Int32>(chainInfo.direction.value());
+    } else {
+        values[0] = -1;
+    }
+    // 1 index is style
+    if (chainInfo.style.has_value()) {
+        values[1] = static_cast<ArkUI_Int32>(chainInfo.style.value());
+    } else {
+        values[1] = -1;
+    }
+}
+
+void ResetChainStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetChainStyle(frameNode);
+}
+
+void SetBias(ArkUINodeHandle node, ArkUI_Float32 horizontal, ArkUI_Float32 vertical)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BiasPair pair1(horizontal, vertical);
+    ViewAbstract::SetBias(frameNode, pair1);
+}
+
+void GetBias(ArkUINodeHandle node, ArkUI_Float32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto bias = ViewAbstract::GetBias(frameNode);
+    //horizontal
+    values[0] = bias.first;
+    //vertical
+    values[1] = bias.second;
+}
+
+void ResetBias(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetBias(frameNode);
+}
 void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5234,7 +5299,9 @@ const ArkUICommonModifier* GetCommonModifier()
         GetEnabled, GetMargin, GetMarginDimension, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask,
         GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable,
         SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize, GetRenderGroup,
-        SetOnVisibleAreaChange, GetColorBlend, GetForegroundBlurStyle, ResetVisibleAreaChange, ResetAreaChange };
+        SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
+        SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
+        ResetVisibleAreaChange, ResetAreaChange };
 
     return &modifier;
 }

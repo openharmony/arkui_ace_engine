@@ -63,6 +63,7 @@ public:
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections() override;
     void ResetSections() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);

@@ -561,6 +561,7 @@ enum ArkUINodeType {
     ARKUI_CUSTOM,
     ARKUI_WATER_FLOW,
     ARKUI_FLOW_ITEM,
+    ARKUI_RELATIVE_CONTAINER,
     ARKUI_BLANK,
     ARKUI_DIVIDER,
     ARKUI_ALPHABET_INDEXER,
@@ -938,6 +939,19 @@ struct ArkUIContext {
     ArkUI_Int32 id;
 };
 
+struct ArkUIGuidelineStyle {
+    ArkUI_CharPtr id;
+    ArkUI_Int32 direction;
+    ArkUI_Float32 start;
+    ArkUI_Float32 end;
+};
+
+struct ArkUIBarrierStyle {
+    ArkUI_CharPtr id;
+    ArkUI_Int32 direction;
+    ArkUI_CharPtr* referencedId;
+    ArkUI_Int32 referencedIdSize;
+};
 struct ArkUIRadioStyleOption {
     ArkUI_Uint32 checkedBackgroundColor;
     ArkUI_Uint32 uncheckedBorderColor;
@@ -1303,7 +1317,7 @@ struct ArkUICommonModifier {
     ArkUITranslateTransitionType (*getTranslateTransition)(ArkUINodeHandle node);
     ArkUIOffsetType (*getOffset)(ArkUINodeHandle node);
     ArkUIAnchorType (*getMarkAnchor)(ArkUINodeHandle node);
-    void (*getAlignRules)(ArkUINodeHandle node, ArkUIAlignRulesType* alignRulesType);
+    void (*getAlignRules)(ArkUINodeHandle node, ArkUI_CharPtr* anchors, ArkUI_Int32* direction, ArkUI_Int32 length);
     ArkUIBlurStyleOptionType (*getBackgroundBlurStyle)(ArkUINodeHandle node);
     ArkUIImageSizeType (*getBackgroundImageSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getBackgroundImageSizeWithStyle)(ArkUINodeHandle node);
@@ -1357,6 +1371,13 @@ struct ArkUICommonModifier {
     ArkUI_Bool (*getRenderGroup)(ArkUINodeHandle node);
     void (*setOnVisibleAreaChange)(
         ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size);
+    ArkUI_CharPtr (*getGeometryTransition)(ArkUINodeHandle node, ArkUI_Bool* options);
+    void (*setChainStyle)(ArkUINodeHandle node, ArkUI_Int32 direction, ArkUI_Int32 style);
+    void (*getChainStyle)(ArkUINodeHandle node, ArkUI_Int32* values);
+    void (*resetChainStyle)(ArkUINodeHandle node);
+    void (*setBias)(ArkUINodeHandle node, ArkUI_Float32 horizontal, ArkUI_Float32 vertical);
+    void (*getBias)(ArkUINodeHandle node, ArkUI_Float32* values);
+    void (*resetBias)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getColorBlend)(ArkUINodeHandle node);
     ArkUIBlurStyleOptionType (*getForegroundBlurStyle)(ArkUINodeHandle node);
     void (*resetVisibleAreaChange)(ArkUINodeHandle node);
@@ -3648,6 +3669,14 @@ struct ArkUIGraphicsAPI {
     const ArkUIGraphicsFont* (*getFontAPI)();
 };
 
+struct ArkUIRelativeContainerModifier {
+    void (*setGuideLine)(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32 size);
+    void (*setBarrier)(ArkUINodeHandle node, ArkUIBarrierStyle* values, ArkUI_Int32 size);
+    void (*getGuideLine)(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32* size);
+    void (*getBarrier)(ArkUINodeHandle node, ArkUIBarrierStyle* values, ArkUI_Int32* size);
+    void (*resetGuideline)(ArkUINodeHandle node);
+    void (*resetBarrier)(ArkUINodeHandle node);
+};
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_API_VERSION above for binary
@@ -3750,6 +3779,7 @@ struct ArkUINodeModifiers {
     const ArkUITextClockControllerModifier* (*getTextClockControllerModifier)();
     const ArkUIRichEditorControllerModifier* (*getRichEditorControllerModifier)();
     const ArkUITextAreaControllerModifier* (*getTextAreaControllerModifier)();
+    const ArkUIRelativeContainerModifier* (*getRelativeContainerModifier)();
     const ArkUIParticleModifier* (*getParticleModifier)();
     const ArkUINodeContentModifier* (*getNodeContentModifier)();
     const ArkUISymbolGlyphModifier* (*getSymbolGlyphModifier)();

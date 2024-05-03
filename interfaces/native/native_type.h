@@ -36,6 +36,7 @@
 #ifndef ARKUI_NATIVE_TYPE_H
 #define ARKUI_NATIVE_TYPE_H
 
+#include <cstdint>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -123,6 +124,27 @@ typedef struct {
  * @since 12
  */
 typedef struct ArkUI_WaterFlowSectionOption ArkUI_WaterFlowSectionOption;
+
+/**
+ * @brief 指定设置在相对容器中子组件的对齐规则。
+ *
+ * @since 12
+ */
+typedef struct ArkUI_AlignmentRuleOption ArkUI_AlignmentRuleOption;
+
+/**
+ * @brief guideLine参数，用于定义guideline的id、方向和位置。
+ *
+ * @since 12
+ */
+typedef struct ArkUI_GuidelineOption ArkUI_GuidelineOption;
+
+/**
+ * @brief barrier参数，用于定义barrier的id、方向和生成时所依赖的组件。
+ *
+ * @since 12
+ */
+typedef struct ArkUI_BarrierOption ArkUI_BarrierOption;
 
 /**
  * @brief Defines the navigation indicator style for the swiper.
@@ -1528,19 +1550,53 @@ typedef enum {
     ARKUI_FINISH_CALLBACK_LOGICALLY,
 } ArkUI_FinishCallbackType;
 
+
 /**
- * @brief 交叉轴方向的布局方式。
+ * @brief 定义屏障线的方向。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 屏障在其所有referencedId的最左侧。*/
+    ARKUI_BARRIER_DIRECTION_LEFT = 0,
+    /** 屏障在其所有referencedId的最右侧。*/
+    ARKUI_BARRIER_DIRECTION_RIGHT,
+    /** 屏障在其所有referencedId的最上方。*/
+    ARKUI_BARRIER_DIRECTION_TOP,
+    /** 屏障在其所有referencedId的最下方。*/
+    ARKUI_BARRIER_DIRECTION_BOTTOM
+} ArkUI_BarrierDirection;
+
+
+/**
+  * @brief defines the style of the chain.
+  *
+  * @since 12
+  */
+typedef enum {
+    /** Components are evenly distributed among constraint anchor points. */
+    ARKUI_RELATIVE_LAYOUT_CHAIN_STYLE_SPREAD = 0,
+    /** Except for the first and last two sub-components,
+      * other components are evenly distributed between the constraint anchor points. */
+    ARKUI_RELATIVE_LAYOUT_CHAIN_STYLE_SPREAD_INSIDE,
+    /** No gaps in subcomponents within the chain. */
+    ARKUI_RELATIVE_LAYOUT_CHAIN_STYLE_PACKED,
+} ArkUI_RelativeLayoutChainStyle;
+
+
+/**
+ * @brief Enumerates the alignment modes of items along the cross axis.
   *
  * @since 12
  */
 typedef enum {
-     /** ListItem在List中，交叉轴方向首部对齐。 */
-    ARKUI_LIST_ITEM_ALIGN_START = 0,
-    /** ListItem在List中，交叉轴方向居中对齐。*/
-    ARKUI_LIST_ITEM_ALIGN_CENTER,
-    /** ListItem在List中，交叉轴方向尾部对齐。*/
-    ARKUI_LIST_ITEM_ALIGN_END,
-} ArkUI_ListItemAlign;
+    /** The list items are packed toward the start edge of the list container along the cross axis. */
+    ARKUI_LIST_ITEM_ALIGNMENT_START = 0,
+    /** The list items are centered in the list container along the cross axis. */
+    ARKUI_LIST_ITEM_ALIGNMENT_CENTER,
+    /** The list items are packed toward the end edge of the list container along the cross axis. */
+    ARKUI_LIST_ITEM_ALIGNMENT_END,
+} ArkUI_ListItemAlignment;
 
 /**
  * @brief Enumerates the component units.
@@ -1979,6 +2035,419 @@ void OH_ArkUI_WaterFlowSectionOption_SetMargin(ArkUI_WaterFlowSectionOption* opt
 * @since 12
 */
 ArkUI_Margin OH_ArkUI_WaterFlowSectionOption_GetMargin(ArkUI_WaterFlowSectionOption* option, int32_t index);
+
+/**
+ * @brief Create auxiliary line information in the RelativeContaine container.
+ *
+ * @param size The number of auxiliary lines.
+ * @return auxiliary line information.
+ * @since 12
+ */
+ArkUI_GuidelineOption* OH_ArkUI_GuidelineOption_Create(int32_t size);
+
+/**
+ * @brief Destroy auxiliary line information.
+ *
+ * @param guideline auxiliary line information.
+ * @since 12
+ */
+void OH_ArkUI_GuidelineOption_Dispose(ArkUI_GuidelineOption* guideline);
+
+/**
+ * @brief Set the Id of the auxiliary line.
+ *
+ * @param guideline auxiliary line information.
+ * @param value id, must be unique and cannot have the same name as the component in the container.
+ * @param index auxiliary line index value.
+ * @since 12
+ */
+void OH_ArkUI_GuidelineOption_SetId(ArkUI_GuidelineOption* guideline, const char* value, int32_t index);
+
+/**
+ * @brief Set the direction of the auxiliary line.
+ *
+ * @param guideline auxiliary line information.
+ * @param value direction.
+ * @param index auxiliary line index value.
+ * @since 12
+ */
+void OH_ArkUI_GuidelineOption_SetDirection(ArkUI_GuidelineOption* guideline, ArkUI_Axis value, int32_t index);
+
+/**
+ * @brief Set the distance from the left or top of the container.
+ *
+ * @param guideline auxiliary line information.
+ * @param value The distance from the left or top of the container.
+ * @param index auxiliary line index value.
+ * @since 12
+ */
+void OH_ArkUI_GuidelineOption_SetPositionStart(ArkUI_GuidelineOption* guideline, float value, int32_t index);
+
+/**
+ * @brief Set the distance from the right or bottom of the container.
+ *
+ * @param guideline auxiliary line information.
+ * @param value The distance from the right side or bottom of the container.
+ * @param index auxiliary line index value.
+ * @since 12
+ */
+void OH_ArkUI_GuidelineOption_SetPositionEnd(ArkUI_GuidelineOption* guideline, float value, int32_t index);
+
+/**
+ * @brief Get the Id of the auxiliary line.
+ *
+ * @param guideline auxiliary line information.
+ * @param index auxiliary line index value.
+ * @return Id.
+ * @since 12
+ */
+const char* OH_ArkUI_GuidelineOption_GetId(ArkUI_GuidelineOption* guideline, int32_t index);
+
+/**
+ * @brief Get the direction of the auxiliary line.
+ *
+ * @param guideline auxiliary line information.
+ * @param index auxiliary line index value.
+ * @return direction.
+ * @since 12
+ */
+ArkUI_Axis OH_ArkUI_GuidelineOption_GetDirection(ArkUI_GuidelineOption* guideline, int32_t index);
+
+/**
+ * @brief Get the distance from the left or top of the container.
+ *
+ * @param guideline auxiliary line information.
+ * @param index auxiliary line index value.
+ * @return The distance from the left or top of the container.
+ * @since 12
+ */
+float OH_ArkUI_GuidelineOption_GetPositionStart(ArkUI_GuidelineOption* guideline, int32_t index);
+
+/**
+ * @brief Get the distance from the right side or bottom of the container.
+ *
+ * @param guideline auxiliary line information.
+ * @param index auxiliary line index value.
+ * @return The distance from the right side or bottom of the container.
+ * @since 12
+ */
+float OH_ArkUI_GuidelineOption_GetPositionEnd(ArkUI_GuidelineOption* guideline, int32_t index);
+
+/**
+ * @brief creates barrier information within the RelativeContaine container.
+ *
+ * @param size Number of barriers.
+ * @return barrier information.
+ * @since 12
+ */
+ArkUI_BarrierOption* OH_ArkUI_BarrierOption_Create(int32_t size);
+
+/**
+ * @brief Destroy barrier information.
+ *
+ * @param barrierStyle barrier information.
+ * @since 12
+ */
+void OH_ArkUI_BarrierOption_Dispose(ArkUI_BarrierOption* barrierStyle);
+
+/**
+ * @brief Set the Id of the barrier.
+ *
+ * @param barrierStyle barrier information.
+ * @param value id, must be unique and cannot have the same name as the component in the container.
+ * @param index Barrier index value.
+ * @since 12
+ */
+void OH_ArkUI_BarrierOption_SetId(ArkUI_BarrierOption* barrierStyle, const char* value, int32_t index);
+
+/**
+ * @brief Set the direction of the barrier.
+ *
+ * @param barrierStyle barrier information.
+ * @param value direction.
+ * @param index Barrier index value.
+ * @since 12
+ */
+void OH_ArkUI_BarrierOption_SetDirection(
+    ArkUI_BarrierOption* barrierStyle, ArkUI_BarrierDirection value, int32_t index);
+
+/**
+ * @brief Sets the dependent component of the barrier.
+ *
+ * @param barrierStyle barrier information.
+ * @param value The ID of the dependent component.
+ * @param index Barrier index value.
+ * @since 12
+ */
+void OH_ArkUI_BarrierOption_SetReferencedId(ArkUI_BarrierOption* barrierStyle, const char* value, int32_t index);
+
+/**
+ * @brief Get the Id of the barrier.
+ *
+ * @param barrierStyle auxiliary line information.
+ * @param index auxiliary line index value.
+ * @return The Id of the barrier.
+ * @since 12
+ */
+const char* OH_ArkUI_BarrierOption_GetId(ArkUI_BarrierOption* barrierStyle, int32_t index);
+
+/**
+ * @brief Gets the direction of the barrier.
+ *
+ * @param barrierStyle auxiliary line information.
+ * @param index auxiliary line index value.
+ * @return The direction of the barrier.
+ * @since 12
+ */
+ArkUI_BarrierDirection OH_ArkUI_BarrierOption_GetDirection(ArkUI_BarrierOption* barrierStyle, int32_t index);
+
+/**
+ * @brief Get the dependent components of the barrier.
+ *
+ * @param barrierStyle auxiliary line information.
+ * @param index auxiliary line index value.
+ * @param referencedIndex dependent component Id index value.
+ * @return The barrier's dependent components.
+ * @since 12
+ */
+const char* OH_ArkUI_BarrierOption_GetReferencedId(
+    ArkUI_BarrierOption* barrierStyle, int32_t index, int32_t referencedIndex);
+
+/**
+ * @brief Gets the number of dependent components of the barrier.
+ *
+ * @param barrierStyle auxiliary line information.
+ * @param index auxiliary line index value.
+ * @return The number of dependent components of the barrier.
+ * @since 12
+ */
+int32_t OH_ArkUI_BarrierOption_GetReferencedIdSize(ArkUI_BarrierOption* barrierStyle, int32_t index);
+
+/**
+ * @brief creates alignment rule information for subcomponents in relative containers.
+ *
+ * @return Alignment rule information.
+ * @since 12
+ */
+ArkUI_AlignmentRuleOption* OH_ArkUI_AlignmentRuleOption_Create();
+
+/**
+ * @brief Destroys the alignment rule information of subcomponents in relative containers.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @since 12
+ */
+void OH_ArkUI_AlignmentRuleOption_Dispose(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Set the start alignment parameter.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @param id The id value of the anchor component.
+ * @param value Alignment relative to the anchor component.
+ * @since 12
+ */
+void OH_ArkUI_AlignmentRuleOption_SetStart(
+    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_HorizontalAlignment alignment);
+
+/**
+ * @brief Set the end alignment parameter.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @param id The id value of the anchor component.
+ * @param value Alignment relative to the anchor component.
+ * @since 12
+ */
+void OH_ArkUI_AlignmentRuleOption_SetEnd(
+    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_HorizontalAlignment alignment);
+
+/**
+ * @brief Set the parameters for horizontal center alignment.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @param id The id value of the anchor component.
+ * @param value Alignment relative to anchor component
+ * @since 12
+ */
+void OH_ArkUI_AlignmentRuleOption_SetCenterHorizontal(
+    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_HorizontalAlignment alignment);
+
+/**
+ * @brief Set the parameters for top alignment.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @param id The id value of the anchor component.
+ * @param value Alignment relative to anchor component
+ * @since 12
+ */
+void OH_ArkUI_AlignmentRuleOption_SetTop(
+    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_VerticalAlignment alignment);
+
+/**
+ * @brief Set the bottom alignment parameters.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @param id The id value of the anchor component.
+ * @param value Alignment relative to anchor component
+ * @since 12
+ */
+void OH_ArkUI_AlignmentRuleOption_SetBottom(
+    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_VerticalAlignment alignment);
+
+/**
+ * @brief Set the parameters for vertical center alignment.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @param id The id value of the anchor component.
+ * @param value Alignment relative to the anchor component.
+ * @since 12
+ */
+void OH_ArkUI_AlignmentRuleOption_SetCenterVertical(
+    ArkUI_AlignmentRuleOption* option, const char* id, ArkUI_VerticalAlignment alignment);
+
+/**
+ * @brief Sets the horizontal offset parameter of the component under the anchor point constraint.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @param horizontal bias value in the horizontal direction.
+ * @since 12
+ */
+void OH_ArkUI_AlignmentRuleOption_SetBiasHorizontal(ArkUI_AlignmentRuleOption* option, float horizontal);
+
+/**
+ * @brief Set the vertical offset parameter of the component under the anchor point constraint.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @param horizontal bias value in the vertical direction.
+ * @since 12
+ */
+void OH_ArkUI_AlignmentRuleOption_SetBiasVertical(ArkUI_AlignmentRuleOption* option, float vertical);
+
+/**
+ * @brief Get the Id of the start-aligned parameter.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return The id value of the anchor component.
+ * @since 12
+ */
+const char* OH_ArkUI_AlignmentRuleOption_GetStartId(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Gets the alignment of the start-aligned parameter.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return The alignment of the parameters.
+ * @since 12
+ */
+ArkUI_HorizontalAlignment OH_ArkUI_AlignmentRuleOption_GetStartAlignment(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Get the end alignment parameter.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return End-aligned parameter id.
+ * @since 12
+ */
+const char* OH_ArkUI_AlignmentRuleOption_GetEndId(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Get the end alignment parameter.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return The alignment of the end-aligned parameter.
+ * @since 12
+ */
+ArkUI_HorizontalAlignment OH_ArkUI_AlignmentRuleOption_GetEndAlignment(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Gets the parameters of horizontal center alignment.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return The id of the parameter of horizontal center alignment.
+ * @since 12
+ */
+const char* OH_ArkUI_AlignmentRuleOption_GetCenterIdHorizontal(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Gets the parameters of horizontal center alignment.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return The alignment of the horizontally centered alignment parameter.
+ * @since 12
+ */
+ArkUI_HorizontalAlignment OH_ArkUI_AlignmentRuleOption_GetCenterAlignmentHorizontal(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Get the top-aligned parameters.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return Top aligned parameter id.
+ * @since 12
+ */
+const char* OH_ArkUI_AlignmentRuleOption_GetTopId(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Get the top-aligned parameters.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return The alignment of the top-aligned parameter.
+ * @since 12
+ */
+ArkUI_VerticalAlignment OH_ArkUI_AlignmentRuleOption_GetTopAlignment(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Get the bottom alignment parameters.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return The id of the bottom-aligned parameter.
+ * @since 12
+ */
+const char* OH_ArkUI_AlignmentRuleOption_GetBottomId(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Get the bottom alignment parameters.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return The alignment of the bottom-aligned parameter.
+ * @since 12
+ */
+ArkUI_VerticalAlignment OH_ArkUI_AlignmentRuleOption_GetBottomAlignment(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Gets the parameters of vertical center alignment.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return The id of the vertical center alignment parameter.
+ * @since 12
+ */
+const char* OH_ArkUI_AlignmentRuleOption_GetCenterIdVertical(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Gets the parameters of vertical center alignment.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return The alignment of the vertical center alignment parameter.
+ * @since 12
+ */
+ArkUI_VerticalAlignment OH_ArkUI_AlignmentRuleOption_GetCenterAlignmentVertical(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Get the bias value in the horizontal direction.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return The bias value in the horizontal direction.
+ * @since 12
+ */
+float OH_ArkUI_AlignmentRuleOption_GetBiasHorizontal(ArkUI_AlignmentRuleOption* option);
+
+/**
+ * @brief Get the bias value in the vertical direction.
+ *
+ * @param option Alignment rule information of subcomponents in the relative container.
+ * @return bias value in vertical direction.
+ * @since 12
+*/
+float OH_ArkUI_AlignmentRuleOption_GetBiasVertical(ArkUI_AlignmentRuleOption* option);
 
 /**
  * @brief Creates a navigation indicator.
