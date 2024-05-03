@@ -254,6 +254,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutAlgorithm);
     std::vector<std::vector<float>> arrowOffsetsFromClip_
         = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
+    bool isGreatWrapperWidth_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H
