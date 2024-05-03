@@ -18,6 +18,7 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
   builder: WrappedBuilder<Object[]> | null = null;
   loadingProgressNode: BuilderNode<[LoadingProgressConfiguration]> | null = null;
   modifier: ContentModifier<LoadingProgressConfiguration>;
+  needRebuild: boolean = false;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -36,7 +37,12 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
   }
   setContentModifier(modifier: ContentModifier<LoadingProgressConfiguration>): this {
     if (modifier === undefined || modifier === null) {
-        return;
+      getUINativeModule().loadingProgress.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -44,10 +50,11 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
   }
   makeContentModifierNode(context: UIContext, loadingProgressConfiguration: LoadingProgressConfiguration): FrameNode | null {
     loadingProgressConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.loadingProgressNode)) {
+    if (isUndefined(this.loadingProgressNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.loadingProgressNode = new xNode.BuilderNode(context);
       this.loadingProgressNode.build(this.builder, loadingProgressConfiguration);
+      this.needRebuild = false;
     } else {
       this.loadingProgressNode.update(loadingProgressConfiguration);
     }
