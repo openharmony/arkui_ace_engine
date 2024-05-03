@@ -2489,9 +2489,7 @@ void SetMotionBlur(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 anc
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MotionBlurOption motionBlurOption;
-    CalcDimension radiusDim;
-    radiusDim.SetValue(radius);
-    motionBlurOption.radius = radiusDim;
+    motionBlurOption.radius = radius;
     motionBlurOption.anchor.x = anchorX;
     motionBlurOption.anchor.y = anchorY;
     ViewAbstract::SetMotionBlur(frameNode, motionBlurOption);
@@ -2502,7 +2500,7 @@ void ResetMotionBlur(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MotionBlurOption motionBlurOption;
-    motionBlurOption.radius = CalcDimension(0);
+    motionBlurOption.radius = 0.0;
     motionBlurOption.anchor.x = 0.0;
     motionBlurOption.anchor.y = 0.0;
     ViewAbstract::SetMotionBlur(frameNode, motionBlurOption);

@@ -112,11 +112,11 @@ struct MotionBlurAnchor {
 };
 
 struct MotionBlurOption {
-    Dimension radius;
+    float radius = 0.0f;
     MotionBlurAnchor anchor;
     bool operator==(const MotionBlurOption& other) const
     {
-        return radius == other.radius && anchor == other.anchor;
+        return NearEqual(radius, other.radius) && anchor == other.anchor;
     }
     bool operator!=(const MotionBlurOption& other) const
     {

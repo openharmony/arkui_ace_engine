@@ -3769,7 +3769,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  motionPath(value: MotionBlurOptions): this {
+  motionBlur(value: MotionBlurOptions): this {
     modifierWithKey(this._modifiersWithKeys, MotionBlurModifier.identity, MotionBlurModifier, value);
     return this;
   }
