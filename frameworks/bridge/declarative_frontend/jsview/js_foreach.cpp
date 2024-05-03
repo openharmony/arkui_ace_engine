@@ -111,7 +111,9 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
-
+    if (!info[0]->IsNumber()) {
+        return;
+    }
     const auto elmtId = info[0]->ToNumber<int32_t>();
     std::list<std::string> idList =  ForEachModel::GetInstance()->GetCurrentIdList(elmtId);
 

@@ -30,7 +30,7 @@ public:
     void Call(const TaskExecutor::Task& task) override;
 
 private:
-    uv_loop_t* loop_;
+    uv_loop_t* loop_ = nullptr;
     pthread_t threadId_;
 };
 
