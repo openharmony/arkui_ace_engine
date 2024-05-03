@@ -852,7 +852,7 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
         auto fontSizeValue = fontObj->GetProperty("size");
         CalcDimension fontSize;
         if (JSViewAbstract::ParseJsDimensionFp(fontSizeValue, fontSize)) {
-            if (popupParam) {
+            if (popupParam && fontSize.IsValid()) {
                 popupParam->SetFontSize(fontSize);
             }
         }
