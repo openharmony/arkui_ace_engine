@@ -16,9 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_PAINT_METHOD_H
 
-#include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
-
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
+#include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
 #ifdef USE_FAST_TASKPOOL
@@ -28,13 +29,15 @@
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
 class RosenRenderContext;
-using TaskFunc = std::function<void(CanvasPaintMethod&, PaintWrapper*)>;
+using TaskFunc = std::function<void(CanvasPaintMethod&)>;
 using OnModifierUpdateFunc = std::function<void(void)>;
 class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
     CanvasPaintMethod() = default;
-    explicit CanvasPaintMethod(const WeakPtr<PipelineBase> context, RefPtr<RenderingContext2DModifier> contentModifier)
+    CanvasPaintMethod(const WeakPtr<PipelineBase> context, RefPtr<RenderingContext2DModifier> contentModifier,
+        const WeakPtr<FrameNode>& frameNode)
+        : frameNode_(frameNode)
     {
         matrix_.reset();
         context_ = context;
@@ -49,16 +52,10 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
 #ifndef USE_FAST_TASKPOOL
-    void PushTask(const TaskFunc& task)
-    {
-        tasks_.emplace_back(task);
-    }
-
-    bool HasTask() const
-    {
-        return !tasks_.empty();
-    }
+    void PushTask(const TaskFunc& task);
 #endif
+    bool HasTask() const;
+    void FlushTask();
 
     double GetWidth()
     {
@@ -86,10 +83,8 @@ public:
     bool DrawBitmap(RefPtr<RosenRenderContext> renderContext, RSBitmap& currentBitmap);
     std::string GetJsonData(const std::string& path);
 
-    void FillText(
-        PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth);
-    void StrokeText(
-        PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
+    void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
@@ -99,13 +94,13 @@ public:
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
-    void PaintText(const SizeF& contentSize, double x, double y, std::optional<double> maxWidth,
-        bool isStroke, bool hasShadow = false);
+    void PaintText(const SizeF& contentSize, double x, double y, std::optional<double> maxWidth, bool isStroke,
+        bool hasShadow = false);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
     bool UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow);
-    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-        const RSBrush* brush = nullptr, const RSPen* pen = nullptr) override;
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas, const RSBrush* brush = nullptr,
+        const RSPen* pen = nullptr) override;
     void Path2DRect(const PathArgs& args) override;
     RSCanvas* GetRawPtrOfRSCanvas() override
     {
@@ -113,6 +108,7 @@ private:
     }
 #ifndef USE_FAST_TASKPOOL
     std::list<TaskFunc> tasks_;
+    bool needMarkDirty_ = true;
 #else
     friend class CustomPaintPattern;
     std::unique_ptr<CanvasPaintOp> fastTaskPool_ = std::make_unique<CanvasPaintOp>();
@@ -120,6 +116,7 @@ private:
 
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;
     OnModifierUpdateFunc onModifierUpdate_;
+    WeakPtr<FrameNode> frameNode_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);
 };
