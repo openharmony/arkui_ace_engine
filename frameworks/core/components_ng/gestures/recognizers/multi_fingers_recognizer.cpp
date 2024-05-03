@@ -35,7 +35,9 @@ MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers)
 void MultiFingersRecognizer::UpdateFingerListInfo()
 {
     fingerList_.clear();
-    uint64_t timeStamp = 0;
+    lastPointEvent_.reset();
+    auto maxTimeStamp = TimeStamp::min().time_since_epoch().count();
+    size_t maxFingerCount = 0;
     for (const auto& point : touchPoints_) {
         PointF localPoint(point.second.x, point.second.y);
         NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
@@ -43,10 +45,17 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
         FingerInfo fingerInfo = { point.first, point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()),
             point.second.sourceType, point.second.sourceTool, point.second.originalId };
         fingerList_.emplace_back(fingerInfo);
-        uint64_t currentTimeStamp = point.second.GetTimeStamp().time_since_epoch().count();
-        if (timeStamp < currentTimeStamp) {
+        if (maxTimeStamp <= point.second.GetTimeStamp().time_since_epoch().count()
+            && maxFingerCount < point.second.pointers.size()
+            && maxFingerCount <= fingerList_.size()) {
             lastPointEvent_ = point.second.pointerEvent;
-            timeStamp = currentTimeStamp;
+            maxTimeStamp = point.second.GetTimeStamp().time_since_epoch().count();
+            maxFingerCount = point.second.pointers.size();
+        }
+        if (maxFingerCount < point.second.pointers.size()
+            && maxFingerCount <= fingerList_.size()) {
+            lastPointEvent_ = point.second.pointerEvent;
+            maxFingerCount = point.second.pointers.size();
         }
     }
 }
