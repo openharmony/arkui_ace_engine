@@ -6786,9 +6786,14 @@ void ResetTextPickerSelectedTextStyle(ArkUI_NodeHandle node)
 
 const ArkUI_AttributeItem* GetTextPickerSelectedIndex(ArkUI_NodeHandle node)
 {
-    auto value =
-        GetFullImpl()->getNodeModifiers()->getTextPickerModifier()->getTextPickerSelectedIndex(node->uiNodeHandle);
-    g_numberValues[0].i32 = value;
+    int32_t size = GetFullImpl()->getNodeModifiers()->getTextPickerModifier()->getTextPickerSelectedSize(
+        node->uiNodeHandle);
+    ArkUI_Uint32 values[size];
+    GetFullImpl()->getNodeModifiers()->getTextPickerModifier()->getTextPickerSelectedIndex(
+        node->uiNodeHandle, values, size);
+    for (int i = 0; i < size; ++i) {
+        g_numberValues[i].i32 = static_cast<int32_t>(values[i]);
+    }
     return &g_attributeItem;
 }
 
@@ -6876,6 +6881,35 @@ void ResetTextPickerValue(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
 
     fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerValue(node->uiNodeHandle, "");
+}
+
+const ArkUI_AttributeItem* GetTextPickerSelected(ArkUI_NodeHandle node)
+{
+    int32_t size = GetFullImpl()->getNodeModifiers()->getTextPickerModifier()->getTextPickerSelectedSize(
+        node->uiNodeHandle);
+    ArkUI_Uint32 values[size];
+    GetFullImpl()->getNodeModifiers()->getTextPickerModifier()->getTextPickerSelectedIndex(
+        node->uiNodeHandle, values, size);
+    for (int i = 0; i < size; ++i) {
+        g_numberValues[i].u32 = values[i];
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetTextPickerSelected(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || LessNotEqual(item->value[0].u32, NUM_0)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    ArkUI_Uint32 values[item->size];
+    for (int i = 0; i < item->size; ++i) {
+        values[i] = item->value[i].u32;
+    }
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerSelectedIndex(
+        node->uiNodeHandle, values, item->size);
+    return ERROR_CODE_NO_ERROR;
 }
 
 // Row&Column
@@ -10744,7 +10778,7 @@ void ResetTimePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
-    static Setter* setters[] = { SetTextPickerRange, SetTextPickerSelectedIndex, SetTextPickerValue,
+    static Setter* setters[] = { SetTextPickerRange, SetTextPickerSelected, SetTextPickerValue,
         SetTextPickerDisappearTextStyle, SetTextPickerTextStyle, SetTextPickerSelectedTextStyle,
         SetTextPickerSelectedIndex };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
@@ -10756,7 +10790,7 @@ int32_t SetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
 
 const ArkUI_AttributeItem* GetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetTextPickerRange, GetTextPickerSelectedIndex, GetTextPickerValue,
+    static Getter* getters[] = { GetTextPickerRange, GetTextPickerSelected, GetTextPickerValue,
         GetTextPickerDisappearTextStyle, GetTextPickerTextStyle, GetTextPickerSelectedTextStyle,
         GetTextPickerSelectedIndex };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {

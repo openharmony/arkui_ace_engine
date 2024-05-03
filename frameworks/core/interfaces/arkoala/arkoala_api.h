@@ -2963,7 +2963,7 @@ struct ArkUITextClockControllerModifier {
 struct ArkUITextPickerModifier {
     void (*setTextPickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setTextPickerCanLoop)(ArkUINodeHandle node, ArkUI_Bool value);
-    ArkUI_Int32 (*getTextPickerSelectedIndex)(ArkUINodeHandle node);
+    void (*getTextPickerSelectedIndex)(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size);
     void (*setTextPickerSelectedIndex)(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size);
     ArkUI_CharPtr (*getTextPickerTextStyle)(ArkUINodeHandle node);
     void (*setTextPickerTextStyle)(
@@ -2992,6 +2992,7 @@ struct ArkUITextPickerModifier {
     void (*resetTextPickerDivider)(ArkUINodeHandle node);
     void (*setTextPickerGradientHeight)(ArkUINodeHandle node, ArkUI_Float32 dVal, ArkUI_Int32 dUnit);
     void (*resetTextPickerGradientHeight)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextPickerSelectedSize)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {

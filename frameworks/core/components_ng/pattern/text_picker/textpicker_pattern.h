@@ -248,6 +248,16 @@ public:
         }
     }
 
+    const std::vector<std::string>& GetValues()
+    {
+        return values_;
+    }
+
+    const std::vector<uint32_t>& GetSelecteds()
+    {
+        return selecteds_;
+    }
+
     void SetHasSelectAttr(bool value)
     {
         isHasSelectAttr_ = value;
