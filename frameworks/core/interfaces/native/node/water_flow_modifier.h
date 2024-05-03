@@ -22,12 +22,11 @@ namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier();
 
 void SetOnWillScroll(ArkUINodeHandle node, void* extraParam);
-void SetOnWaterFlowReachEnd(ArkUINodeHandle node, void* extraParam);
+void SetOnReachEnd(ArkUINodeHandle node, void* extraParam);
 void SetOnDidScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowScrollStart(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowScrollStop(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowScrollFrameBegin(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowScrollIndex(ArkUINodeHandle node, void* extraParam);
-void SetOnWaterFlowReachStart(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_WATER_FLOW_MODIFIER_H

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_NG_H
 
 #include "core/components_ng/base/common_configuration.h"
+#include "core/components_ng/pattern/radio/radio_model.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/radio/radio_model.h"
 
@@ -29,7 +30,8 @@ public:
     std::string value_;
     bool checked_;
 };
-using RadioMakeCallback = std::function<RefPtr<FrameNode>(RadioConfiguration& radioConfiguration)>;
+using RadioMakeCallback =
+    std::function<RefPtr<FrameNode>(RadioConfiguration& radioConfiguration)>;
 
 class ACE_EXPORT RadioModelNG : public OHOS::Ace::RadioModel {
 public:
@@ -47,7 +49,6 @@ public:
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
 
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetBuilder(std::function<void()>&& buildFunc) override;
     static void SetRadioIndicator(int32_t indicator);
     static void SetChecked(FrameNode* frameNode, bool isChecked);
@@ -61,15 +62,6 @@ public:
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
-    static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
-    static bool GetChecked(FrameNode* frameNode);
-    static Color GetCheckedBackgroundColor(FrameNode* frameNode);
-    static Color GetUncheckedBorderColor(FrameNode* frameNode);
-    static Color GetIndicatorColor(FrameNode* frameNode);
-    static void SetRadioValue(FrameNode* frameNode, const std::string& value);
-    static std::string GetRadioValue(FrameNode* frameNode);
-    static void SetRadioGroup(FrameNode* frameNode, const std::string& value);
-    static std::string GetRadioGroup(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

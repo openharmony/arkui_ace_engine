@@ -10184,7 +10184,6 @@ void ResetRefreshContent(ArkUI_NodeHandle node)
     GetFullImpl()->getNodeModifiers()->getRefreshModifier()->setRefreshContent(node->uiNodeHandle, nullptr);
 }
 
-// waterFlow attribute
 int32_t SetLayoutDirection(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == 0) {
@@ -10496,268 +10495,6 @@ int32_t SetWaterFlowScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeIt
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->setScrollToIndex(
         node->uiNodeHandle, values[NUM_0], values[NUM_1], values[NUM_2]);
     return ERROR_CODE_NO_ERROR;
-}
-// radio attribute
-int32_t SetRadioChecked(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getRadioModifier()->setRadioChecked(node->uiNodeHandle, item->value[0].i32);
-    return ERROR_CODE_NO_ERROR;
-}
-
-void ResetRadioChecked(ArkUI_NodeHandle node)
-{
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getRadioModifier()->resetRadioChecked(node->uiNodeHandle);
-}
-
-const ArkUI_AttributeItem* GetRadioChecked(ArkUI_NodeHandle node)
-{
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getRadioModifier()->getRadioChecked(node->uiNodeHandle);
-    g_numberValues[0].i32 = resultValue;
-    return &g_attributeItem;
-}
-
-int32_t SetRadioStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    if (item->size == 0) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-
-    auto* fullImpl = GetFullImpl();
-    ArkUI_Uint32 radioStyle[ALLOW_SIZE_3] = { 0xFF007DFF, 0xFF182431, 0xFFFFFFF };
-    // checkedBackgroundColor
-    if (item->size > NUM_0) {
-        radioStyle[NUM_0] = item->value[NUM_0].u32;
-    }
-
-    // uncheckedBorderColor
-    if (item->size > NUM_1) {
-        radioStyle[NUM_1] = item->value[NUM_1].u32;
-    }
-
-    // indicatorColor
-    if (item->size > NUM_2) {
-        radioStyle[NUM_2] = item->value[NUM_2].u32;
-    }
-    fullImpl->getNodeModifiers()->getRadioModifier()->setRadioStyle(
-        node->uiNodeHandle, radioStyle[NUM_0], radioStyle[NUM_1], radioStyle[NUM_2]);
-    return ERROR_CODE_NO_ERROR;
-}
-
-void ResetRadioStyle(ArkUI_NodeHandle node)
-{
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getRadioModifier()->resetRadioStyle(node->uiNodeHandle);
-}
-
-const ArkUI_AttributeItem* GetRadioStyle(ArkUI_NodeHandle node)
-{
-    ArkUIRadioStyleOption options;
-    GetFullImpl()->getNodeModifiers()->getRadioModifier()->getRadioStyle(node->uiNodeHandle, &options);
-    g_numberValues[NUM_0].u32 = options.checkedBackgroundColor;
-    g_numberValues[NUM_1].u32 = options.uncheckedBorderColor;
-    g_numberValues[NUM_2].u32 = options.indicatorColor;
-    return &g_attributeItem;
-}
-
-int32_t SetRadioValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    auto* fullImpl = GetFullImpl();
-    if (!CheckAttributeString(item)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    fullImpl->getNodeModifiers()->getRadioModifier()->setRadioValue(node->uiNodeHandle, item->string);
-    return ERROR_CODE_NO_ERROR;
-}
-
-void ResetRadioValue(ArkUI_NodeHandle node)
-{
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getRadioModifier()->resetRadioValue(node->uiNodeHandle);
-}
-
-const ArkUI_AttributeItem* GetRadioValue(ArkUI_NodeHandle node)
-{
-    auto fullImpl = GetFullImpl();
-    auto value = fullImpl->getNodeModifiers()->getRadioModifier()->getRadioValue(node->uiNodeHandle);
-    g_attributeItem.string = (value != nullptr ? value : EMPTY_STR.c_str());
-    return &g_attributeItem;
-}
-
-int32_t SetRadioGroup(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    auto* fullImpl = GetFullImpl();
-    if (!CheckAttributeString(item)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    fullImpl->getNodeModifiers()->getRadioModifier()->setRadioGroup(node->uiNodeHandle, item->string);
-    return ERROR_CODE_NO_ERROR;
-}
-
-void ResetRadioGroup(ArkUI_NodeHandle node)
-{
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getRadioModifier()->resetRadioGroup(node->uiNodeHandle);
-}
-
-const ArkUI_AttributeItem* GetRadioGroup(ArkUI_NodeHandle node)
-{
-    auto fullImpl = GetFullImpl();
-    auto value = fullImpl->getNodeModifiers()->getRadioModifier()->getRadioGroup(node->uiNodeHandle);
-    g_attributeItem.string = (value != nullptr ? value : EMPTY_STR.c_str());
-    return &g_attributeItem;
-}
-
-// grid attribute
-int32_t SetGridColumnsTemplate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    auto* fullImpl = GetFullImpl();
-    if (!CheckAttributeString(item)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    fullImpl->getNodeModifiers()->getGridModifier()->setGridColumnsTemplate(node->uiNodeHandle, item->string);
-    return ERROR_CODE_NO_ERROR;
-}
-
-void ResetGridColumnsTemplate(ArkUI_NodeHandle node)
-{
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getGridModifier()->resetGridColumnsTemplate(node->uiNodeHandle);
-}
-
-const ArkUI_AttributeItem* GetGridColumnsTemplate(ArkUI_NodeHandle node)
-{
-    auto fullImpl = GetFullImpl();
-    auto columnsTemplate = fullImpl->getNodeModifiers()->getGridModifier()->getGridColumnsTemplate(node->uiNodeHandle);
-    g_attributeItem.string = columnsTemplate;
-    return &g_attributeItem;
-}
-
-int32_t SetGridRowsTemplate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    auto* fullImpl = GetFullImpl();
-    if (!CheckAttributeString(item)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    fullImpl->getNodeModifiers()->getGridModifier()->setGridRowsTemplate(node->uiNodeHandle, item->string);
-    return ERROR_CODE_NO_ERROR;
-}
-
-void ResetGridRowsTemplate(ArkUI_NodeHandle node)
-{
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getGridModifier()->resetGridRowsTemplate(node->uiNodeHandle);
-}
-
-const ArkUI_AttributeItem* GetGridRowsTemplate(ArkUI_NodeHandle node)
-{
-    auto fullImpl = GetFullImpl();
-    auto rowsTemplate = fullImpl->getNodeModifiers()->getGridModifier()->getGridRowsTemplate(node->uiNodeHandle);
-    g_attributeItem.string = rowsTemplate;
-    return &g_attributeItem;
-}
-
-int32_t SetGridColumnsGap(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || LessNotEqual(item->value[NUM_0].f32, 0.0f)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    auto* fullImpl = GetFullImpl();
-    ArkUIResourceLength columnGap = { item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr };
-    fullImpl->getNodeModifiers()->getGridModifier()->setGridColumnsGap(node->uiNodeHandle, &columnGap);
-    return ERROR_CODE_NO_ERROR;
-}
-
-void ResetGridColumnsGap(ArkUI_NodeHandle node)
-{
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getGridModifier()->resetGridColumnsGap(node->uiNodeHandle);
-}
-
-const ArkUI_AttributeItem* GetGridColumnsGap(ArkUI_NodeHandle node)
-{
-    auto modifier = GetFullImpl()->getNodeModifiers()->getGridModifier();
-    g_numberValues[0].f32 = modifier->getGridColumnsGap(node->uiNodeHandle);
-    return &g_attributeItem;
-}
-
-int32_t SetGridRowsGap(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || LessNotEqual(item->value[NUM_0].f32, 0.0f)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    auto* fullImpl = GetFullImpl();
-    ArkUIResourceLength rowGap = { item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr };
-    fullImpl->getNodeModifiers()->getGridModifier()->setGridRowsGap(node->uiNodeHandle, &rowGap);
-    return ERROR_CODE_NO_ERROR;
-}
-
-void ResetGridRowsGap(ArkUI_NodeHandle node)
-{
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getGridModifier()->resetGridRowsGap(node->uiNodeHandle);
-}
-
-const ArkUI_AttributeItem* GetGridRowsGap(ArkUI_NodeHandle node)
-{
-    auto modifier = GetFullImpl()->getNodeModifiers()->getGridModifier();
-    g_numberValues[0].f32 = modifier->getGridRowsGap(node->uiNodeHandle);
-    return &g_attributeItem;
-}
-
-int32_t SetGridNodeAdapter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
-    auto* nodeAdapter = reinterpret_cast<ArkUINodeAdapterHandle>(item->object);
-    return GetFullImpl()->getNodeModifiers()->getGridModifier()->setNodeAdapter(node->uiNodeHandle, nodeAdapter);
-}
-
-void ResetGridNodeAdapter(ArkUI_NodeHandle node)
-{
-    // already check in entry point.
-    auto* fullImpl = GetFullImpl();
-
-    fullImpl->getNodeModifiers()->getGridModifier()->resetNodeAdapter(node->uiNodeHandle);
-}
-
-const ArkUI_AttributeItem* GetGridNodeAdapter(ArkUI_NodeHandle node)
-{
-    ArkUINodeAdapterHandle adapter =
-        GetFullImpl()->getNodeModifiers()->getGridModifier()->getNodeAdapter(node->uiNodeHandle);
-    g_attributeItem.object = reinterpret_cast<void*>(adapter);
-    return &g_attributeItem;
-}
-
-int32_t SetGridCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
-    if (item->size != 1) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    GetFullImpl()->getNodeModifiers()->getGridModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
-    return ERROR_CODE_NO_ERROR;
-}
-
-void ResetGridCachedCount(ArkUI_NodeHandle node)
-{
-    // already check in entry point.
-    auto* fullImpl = GetFullImpl();
-
-    fullImpl->getNodeModifiers()->getGridModifier()->resetCachedCount(node->uiNodeHandle);
-}
-
-const ArkUI_AttributeItem* GetGridCachedCount(ArkUI_NodeHandle node)
-{
-    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getGridModifier()->getCachedCount(node->uiNodeHandle);
-    g_numberValues[0].i32 = value;
-    return &g_attributeItem;
 }
 
 bool CheckIfAttributeLegal(ArkUI_NodeHandle node, int32_t type)
@@ -11209,7 +10946,7 @@ const ArkUI_AttributeItem* GetToggleAttribute(ArkUI_NodeHandle node, int32_t sub
     static Getter* getters[] = { GetToggleSelectedColor, GetToggleSwitchPointColor, GetToggleValue,
         GetToggleUnselectedColor };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "toggle node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
     }
     g_attributeItem.size = RETURN_SIZE_ONE;
@@ -11694,37 +11431,6 @@ void ResetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     return resetters[subTypeId](node);
 }
 
-int32_t SetRadioAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
-{
-    static Setter* setters[] = { SetRadioChecked, SetRadioStyle, SetRadioValue, SetRadioGroup };
-    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "radio node attribute: %{public}d NOT IMPLEMENT", subTypeId);
-        return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
-    }
-    return setters[subTypeId](node, item);
-}
-
-const ArkUI_AttributeItem* GetRadioAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
-{
-    static Getter* getters[] = { GetRadioChecked, GetRadioStyle, GetRadioValue, GetRadioGroup };
-    if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "radio node attribute: %{public}d NOT IMPLEMENT", subTypeId);
-        return nullptr;
-    }
-    g_attributeItem.size = RETURN_SIZE_ONE;
-    return getters[subTypeId](node);
-}
-
-void ResetRadioAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
-{
-    static Resetter* resetters[] = { ResetRadioChecked, ResetRadioStyle, ResetRadioValue, ResetRadioGroup };
-    if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "radio node attribute: %{public}d NOT IMPLEMENT", subTypeId);
-        return;
-    }
-    return resetters[subTypeId](node);
-}
-
 int32_t SetStackAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetAlignContent };
@@ -12026,7 +11732,7 @@ int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 {
     static Setter* setters[] = { SetLayoutDirection, SetColumnsTemplate, SetRowsTemplate, SetWaterFlowColumnsGap,
         SetWaterFlowRowsGap, SetWaterFlowSectionOption, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount,
-        SetWaterFlowFooter, SetWaterFlowScrollToIndex, SetItemConstraintSize };
+        SetWaterFlowFooter, SetItemConstraintSize, SetWaterFlowScrollToIndex };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -12038,7 +11744,7 @@ void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetLayoutDirection, ResetColumnsTemplate, ResetRowsTemplate,
         ResetWaterFlowColumnsGap, ResetWaterFlowRowsGap, ResetWaterFlowSectionOption, ResetWaterFlowNodeAdapter,
-        ResetWaterFlowCachedCount, ResetWaterFlowFooter, nullptr, ResetItemConstraintSize };
+        ResetWaterFlowCachedCount, ResetWaterFlowFooter, ResetItemConstraintSize, nullptr };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -12050,43 +11756,9 @@ const ArkUI_AttributeItem* GetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t 
 {
     static Getter* getters[] = { GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate, GetWaterFlowColumnsGap,
         GetWaterFlowRowsGap, GetWaterFlowSectionOption, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount,
-        nullptr, nullptr, GetItemConstraintSize };
+        nullptr, GetItemConstraintSize, nullptr };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
-        return nullptr;
-    }
-    g_attributeItem.size = RETURN_SIZE_ONE;
-    return getters[subTypeId](node);
-}
-
-int32_t SetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
-{
-    static Setter* setters[] = { SetGridColumnsTemplate, SetGridRowsTemplate, SetGridColumnsGap, SetGridRowsGap,
-        SetGridNodeAdapter, SetGridCachedCount };
-    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
-        return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
-    }
-    return setters[subTypeId](node, item);
-}
-
-void ResetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
-{
-    static Resetter* resetters[] = { ResetGridColumnsTemplate, ResetGridRowsTemplate, ResetGridColumnsGap,
-        ResetGridRowsGap, ResetGridNodeAdapter, ResetGridCachedCount };
-    if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
-        return;
-    }
-    return resetters[subTypeId](node);
-}
-
-const ArkUI_AttributeItem* GetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
-{
-    static Getter* getters[] = { GetGridColumnsTemplate, GetGridRowsTemplate, GetGridColumnsGap, GetGridRowsGap,
-        GetGridNodeAdapter, GetGridCachedCount };
-    if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
     }
     g_attributeItem.size = RETURN_SIZE_ONE;
@@ -12097,13 +11769,37 @@ const ArkUI_AttributeItem* GetGridAttribute(ArkUI_NodeHandle node, int32_t subTy
 int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const ArkUI_AttributeItem* item)
 {
     using AttributeSetterClass = int32_t(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item);
-    static AttributeSetterClass* setterClasses[] = { SetCommonAttribute, SetTextAttribute, SetSpanAttribute,
-        SetImageSpanAttribute, SetImageAttribute, SetToggleAttribute, SetLoadingProgressAttribute,
-        SetTextInputAttribute, SetTextAreaAttribute, SetButtonAttribute, SetProgressAttribute, SetCheckboxAttribute,
-        SetXComponentAttribute, SetDatePickerAttribute, SetTimePickerAttribute, SetTextPickerAttribute,
-        SetCalendarPickerAttribute, SetSliderAttribute, SetRadioAttribute, SetStackAttribute, SetSwiperAttribute,
-        SetScrollAttribute, SetListAttribute, nullptr, SetListItemGroupAttribute, SetColumnAttribute, SetRowAttribute,
-        SetFlexAttribute, SetRefreshAttribute, SetWaterFlowAttribute, nullptr, SetGridAttribute };
+    static AttributeSetterClass* setterClasses[] = {
+        SetCommonAttribute,
+        SetTextAttribute,
+        SetSpanAttribute,
+        SetImageSpanAttribute,
+        SetImageAttribute,
+        SetToggleAttribute,
+        SetLoadingProgressAttribute,
+        SetTextInputAttribute,
+        SetTextAreaAttribute,
+        SetButtonAttribute,
+        SetProgressAttribute,
+        SetCheckboxAttribute,
+        SetXComponentAttribute,
+        SetDatePickerAttribute,
+        SetTimePickerAttribute,
+        SetTextPickerAttribute,
+        SetCalendarPickerAttribute,
+        SetSliderAttribute,
+        SetStackAttribute,
+        SetSwiperAttribute,
+        SetScrollAttribute,
+        SetListAttribute,
+        nullptr,
+        SetListItemGroupAttribute,
+        SetColumnAttribute,
+        SetRowAttribute,
+        SetFlexAttribute,
+        SetRefreshAttribute,
+        SetWaterFlowAttribute
+    };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
@@ -12130,9 +11826,9 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
         GetImageSpanAttribute, GetImageAttribute, GetToggleAttribute, GetLoadingProgressAttribute,
         GetTextInputAttribute, GetTextAreaAttribute, GetButtonAttribute, GetProgressAttribute, GetCheckboxAttribute,
         GetXComponentAttribute, GetDatePickerAttribute, GetTimePickerAttribute, GetTextPickerAttribute,
-        GetCalendarPickerAttribute, GetSliderAttribute, GetRadioAttribute, GetStackAttribute, GetSwiperAttribute,
-        GetScrollAttribute, GetListAttribute, nullptr, nullptr, GetColumnAttribute, GetRowAttribute, GetFlexAttribute,
-        GetRefreshAttribute, GetWaterFlowAttribute, nullptr, GetGridAttribute };
+        GetCalendarPickerAttribute, GetSliderAttribute, GetStackAttribute, GetSwiperAttribute, GetScrollAttribute,
+        GetListAttribute, nullptr, nullptr, GetColumnAttribute, GetRowAttribute, GetFlexAttribute,
+        GetRefreshAttribute, GetWaterFlowAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
@@ -12151,14 +11847,37 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
 int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
 {
     using AttributeResetterClass = void(ArkUI_NodeHandle node, int32_t subTypeId);
-    static AttributeResetterClass* resetterClasses[] = { ResetCommonAttribute, ResetTextAttribute, ResetSpanAttribute,
-        ResetImageSpanAttribute, ResetImageAttribute, ResetToggleAttribute, ResetLoadingProgressAttribute,
-        ResetTextInputAttribute, ResetTextAreaAttribute, ResetButtonAttribute, ResetProgressAttribute,
-        ResetCheckboxAttribute, ResetXComponentAttribute, ResetDatePickerAttribute, ResetTimePickerAttribute,
-        ResetTextPickerAttribute, ResetCalendarPickerAttribute, ResetSliderAttribute, ResetRadioAttribute,
-        ResetStackAttribute, ResetSwiperAttribute, ResetScrollAttribute, ResetListAttribute, nullptr,
-        ResetListItemGroupAttribute, ResetColumnAttribute, ResetRowAttribute, ResetFlexAttribute, ResetRefreshAttribute,
-        ResetWaterFlowAttribute, nullptr, ResetGridAttribute };
+    static AttributeResetterClass* resetterClasses[] = {
+        ResetCommonAttribute,
+        ResetTextAttribute,
+        ResetSpanAttribute,
+        ResetImageSpanAttribute,
+        ResetImageAttribute,
+        ResetToggleAttribute,
+        ResetLoadingProgressAttribute,
+        ResetTextInputAttribute,
+        ResetTextAreaAttribute,
+        ResetButtonAttribute,
+        ResetProgressAttribute,
+        ResetCheckboxAttribute,
+        ResetXComponentAttribute,
+        ResetDatePickerAttribute,
+        ResetTimePickerAttribute,
+        ResetTextPickerAttribute,
+        ResetCalendarPickerAttribute,
+        ResetSliderAttribute,
+        ResetStackAttribute,
+        ResetSwiperAttribute,
+        ResetScrollAttribute,
+        ResetListAttribute,
+        nullptr,
+        ResetListItemGroupAttribute,
+        ResetColumnAttribute,
+        ResetRowAttribute,
+        ResetFlexAttribute,
+        ResetRefreshAttribute,
+        ResetWaterFlowAttribute
+    };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =

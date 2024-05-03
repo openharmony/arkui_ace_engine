@@ -611,8 +611,8 @@ enum ArkUIEventSubKind {
     ON_LIST_SCROLL_FRAME_BEGIN,
     ON_LIST_WILL_SCROLL,
     ON_LIST_DID_SCROLL,
-    ON_LIST_REACH_START,
     ON_LIST_REACH_END,
+    ON_LIST_REACH_START,
 
     ON_TOGGLE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TOGGLE,
 
@@ -650,8 +650,8 @@ enum ArkUIEventSubKind {
     ON_SCROLL_START,
     ON_SCROLL_STOP,
     ON_SCROLL_EDGE,
-    ON_SCROLL_REACH_START,
     ON_SCROLL_REACH_END,
+    ON_SCROLL_REACH_START,
 
     ON_TABS_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TABS,
     ON_NAVIGATOR_CLICK = ARKUI_MAX_EVENT_NUM * ARKUI_NAVIGATOR,
@@ -680,6 +680,7 @@ enum ArkUIEventSubKind {
     ON_WATER_FLOW_WILL_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_WATER_FLOW,
     ON_WATER_FLOW_REACH_END,
     ON_WATER_FLOW_DID_SCROLL,
+    ON_WATER_FLOW_SCROLL,
     ON_WATER_FLOW_SCROLL_START,
     ON_WATER_FLOW_SCROLL_STOP,
     ON_WATER_FLOW_SCROLL_FRAME_BEGIN,
@@ -936,12 +937,6 @@ struct ArkUIAnimateOption {
 
 struct ArkUIContext {
     ArkUI_Int32 id;
-};
-
-struct ArkUIRadioStyleOption {
-    ArkUI_Uint32 checkedBackgroundColor;
-    ArkUI_Uint32 uncheckedBorderColor;
-    ArkUI_Uint32 indicatorColor;
 };
 
 enum ArkUISwiperIndicatorType {
@@ -1941,16 +1936,6 @@ struct ArkUIGridModifier {
     void (*resetEnableScroll)(ArkUINodeHandle node);
     void (*setFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
     void (*resetFriction)(ArkUINodeHandle node);
-    ArkUI_CharPtr (*getGridColumnsTemplate)(ArkUINodeHandle node);
-    ArkUI_CharPtr (*getGridRowsTemplate)(ArkUINodeHandle node);
-    ArkUI_Float32 (*getGridColumnsGap)(ArkUINodeHandle node);
-    ArkUI_Float32 (*getGridRowsGap)(ArkUINodeHandle node);
-    ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
-    void (*resetNodeAdapter)(ArkUINodeHandle node);
-    ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
-    void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
-    void (*resetCachedCount)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
 };
 
 struct ArkUIGridItemModifier {
@@ -3316,14 +3301,6 @@ struct ArkUIRadioModifier {
     void (*setRadioResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
     void (*resetRadioResponseRegion)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getRadioChecked)(ArkUINodeHandle node);
-    void (*getRadioStyle)(ArkUINodeHandle node, ArkUIRadioStyleOption* options);
-    void (*setRadioValue)(ArkUINodeHandle node, ArkUI_CharPtr value);
-    void (*resetRadioValue)(ArkUINodeHandle node);
-    ArkUI_CharPtr (*getRadioValue)(ArkUINodeHandle node);
-    void (*setRadioGroup)(ArkUINodeHandle node, ArkUI_CharPtr value);
-    void (*resetRadioGroup)(ArkUINodeHandle node);
-    ArkUI_CharPtr (*getRadioGroup)(ArkUINodeHandle node);
 };
 
 struct ArkUIPatternLockControllerModifier {

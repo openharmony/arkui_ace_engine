@@ -51,7 +51,6 @@
 #include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
-#include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -274,8 +273,6 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScrollStart,
     NodeModifier::SetOnScrollStop,
     NodeModifier::SetOnScrollEdge,
-    NodeModifier::SetOnScrollReachStart,
-    NodeModifier::SetOnScrollReachEnd,
 };
 
 const ComponentAsyncEventHandler TEXT_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -364,19 +361,16 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListScrollFrameBegin,
     NodeModifier::SetOnListWillScroll,
     NodeModifier::SetOnListDidScroll,
-    NodeModifier::SetOnListReachStart,
-    NodeModifier::SetOnListReachEnd,
 };
 
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
-    NodeModifier::SetOnWaterFlowReachEnd,
+    NodeModifier::SetOnReachEnd,
     NodeModifier::SetOnDidScroll,
     NodeModifier::SetOnWaterFlowScrollStart,
     NodeModifier::SetOnWaterFlowScrollStop,
     NodeModifier::SetOnWaterFlowScrollFrameBegin,
     NodeModifier::SetOnWaterFlowScrollIndex,
-    NodeModifier::SetOnWaterFlowReachStart,
 };
 
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -400,10 +394,6 @@ const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnSearchCopy,
     NodeModifier::SetOnSearchCut,
     NodeModifier::SetOnSearchPaste,
-};
-
-const ComponentAsyncEventHandler RADIO_NODE_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::SetOnRadioChange,
 };
 
 /* clang-format on */
@@ -597,15 +587,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = SEARCH_NODE_ASYNC_EVENT_HANDLERS[subKind];
-            break;
-        }
-        case ARKUI_RADIO: {
-            // search event type.
-            if (subKind >= sizeof(RADIO_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
-            }
-            eventHandle = RADIO_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {

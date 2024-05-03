@@ -140,14 +140,6 @@ void ScrollableModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
     eventHub->SetOnReachStart(std::move(onReachStart));
 }
 
-void ScrollableModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnReachStart(std::move(onReachStart));
-}
-
 void ScrollableModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
