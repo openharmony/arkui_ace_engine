@@ -137,9 +137,9 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     static const ArkUINodeType nodes[] = { ARKUI_CUSTOM, ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE,
         ARKUI_TOGGLE, ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS,
         ARKUI_CHECKBOX, ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER,
-        ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
-        ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM,
-        ARKUI_GRID_ROW, ARKUI_GRID_COL };
+        ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST,
+        ARKUI_LIST_ITEM, ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW,
+        ARKUI_FLOW_ITEM, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_GRID_ROW, ARKUI_GRID_COL };
     // already check in entry point.
     int32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     auto* impl = GetFullImpl();
@@ -485,6 +485,23 @@ int32_t CheckEvent(ArkUI_NodeEvent* event)
 {
     // TODO.
     return 0;
+}
+
+int32_t SetUserData(ArkUI_NodeHandle node, void* userData)
+{
+    if (!node) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!userData) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    node->userData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+void* GetUserData(ArkUI_NodeHandle node)
+{
+    return node->userData;
 }
 
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)

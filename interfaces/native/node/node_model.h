@@ -34,6 +34,7 @@ struct ArkUI_Node {
     void* extraCustomData = nullptr;
     ArkUI_LengthMetricUnit lengthMetricUnit = ARKUI_LENGTH_METRIC_UNIT_DEFAULT;
     void* eventListeners = nullptr;
+    void* userData = nullptr;
     void* swiperIndicator = nullptr;
 };
 
@@ -41,7 +42,7 @@ struct ArkUI_Context {
     int32_t id;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 18;
+constexpr int BASIC_COMPONENT_NUM = 19;
 
 #ifdef __cplusplus
 };
@@ -82,6 +83,8 @@ void HandleNodeEvent(ArkUI_NodeEvent* event);
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr);
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
 
+int32_t SetUserData(ArkUI_NodeHandle node, void* userData);
+void* GetUserData(ArkUI_NodeHandle node);
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit);
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));

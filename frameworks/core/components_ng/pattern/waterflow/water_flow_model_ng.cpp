@@ -182,9 +182,19 @@ void WaterFlowModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
     ScrollableModelNG::SetOnReachStart(std::move(onReachStart));
 }
 
+void WaterFlowModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
+{
+    ScrollableModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
+}
+
 void WaterFlowModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
     ScrollableModelNG::SetOnReachEnd(std::move(onReachEnd));
+}
+
+void WaterFlowModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
+{
+    ScrollableModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 
 void WaterFlowModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin)
