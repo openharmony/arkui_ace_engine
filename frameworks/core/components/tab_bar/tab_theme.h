@@ -74,6 +74,7 @@ public:
                 theme->bottomTabTextSize_ = pattern->GetAttr<Dimension>("bottom_tab_text_size", 0.0_vp);
                 theme->bottomTabHorizontalTextSize_ =
                     pattern->GetAttr<Dimension>("bottom_tab_horizontal_text_size", BOTTOM_BAR_HORIZONTAL_TEXT_SIZE);
+                theme->bottomTabBackgroundBlurStyle_ = pattern->GetAttr<int>("bottom_tab_bar_bg_blur_style", 0);
                 theme->defaultTabBarName_ = pattern->GetAttr<std::string>("default_tab_bar_name", "");
                 theme->bottomTabBarSpace_ = pattern->GetAttr<Dimension>("bottom_tab_bar_space", 0.0_vp);
                 theme->horizontalBottomTabBarSpace_ =
@@ -293,6 +294,11 @@ public:
         return bottomTabHorizontalTextSize_;
     }
 
+    const int& GetBottomTabBackgroundBlurStyle() const
+    {
+        return bottomTabBackgroundBlurStyle_;
+    }
+
     const std::string& GetDefaultTabBarName() const
     {
         return defaultTabBarName_;
@@ -454,6 +460,7 @@ private:
     Dimension dialog_radius_level10_;
     Color dialog_iconColor_;
     Color dialog_fontColor_;
+    int bottomTabBackgroundBlurStyle_;
 };
 
 } // namespace OHOS::Ace
