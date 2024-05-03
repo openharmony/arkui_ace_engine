@@ -769,6 +769,7 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
     float yMax = 0.0f;
     float xMin = 1.0f;
     float yMin = 1.0f;
+    float yTargetOffset = 0.0f;
     switch (placement_) {
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
@@ -798,6 +799,7 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
             xMax = wrapperSize_.Width() - width - marginEnd_;
             yMin = marginTop_;
             yMax = std::min(targetOffset_.GetY() - height - space, wrapperSize_.Height() - marginBottom_ - height);
+            yTargetOffset = targetSecurity_;
             break;
         }
         case Placement::BOTTOM_LEFT:
@@ -810,6 +812,7 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
             xMax = wrapperSize_.Width() - width - marginEnd_;
             yMin = std::max(targetOffset_.GetY() + targetSize_.Height() + space, marginTop_);
             yMax = wrapperSize_.Height() - height - marginBottom_;
+            yTargetOffset = -targetSecurity_;
             break;
         }
         case Placement::NONE: {
@@ -822,8 +825,11 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
         default:
             break;
     }
-    if (xMax < xMin || yMax < yMin) {
+    if ((xMax < xMin && !isGreatWrapperWidth_) || yMax < yMin) {
         return OffsetF(0.0f, 0.0f);
+    } else if (xMax < xMin && isGreatWrapperWidth_) {
+        auto y = std::clamp(position.GetY(), yMin, yMax);
+        return OffsetF(0.0f, y + yTargetOffset);
     }
     auto x = std::clamp(position.GetX(), xMin, xMax);
     auto y = std::clamp(position.GetY(), yMin, yMax);
@@ -2252,9 +2258,9 @@ OffsetF BubbleLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const Siz
 
 void BubbleLayoutAlgorithm::UpdateMarginByWidth()
 {
-    auto isGreatWrapperWidth = GreatOrEqual(childSize_.Width(), wrapperSize_.Width() - MARGIN_SPACE.ConvertToPx());
-    marginStart_ = isGreatWrapperWidth ? 0.0f : marginStart_;
-    marginEnd_ = isGreatWrapperWidth ? 0.0f : marginEnd_;
+    isGreatWrapperWidth_ = GreatOrEqual(childSize_.Width(), wrapperSize_.Width() - MARGIN_SPACE.ConvertToPx());
+    marginStart_ = isGreatWrapperWidth_ ? 0.0f : marginStart_;
+    marginEnd_ = isGreatWrapperWidth_ ? 0.0f : marginEnd_;
 }
 
 } // namespace OHOS::Ace::NG
