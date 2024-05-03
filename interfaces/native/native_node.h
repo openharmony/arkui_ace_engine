@@ -117,6 +117,8 @@ typedef enum {
     ARKUI_NODE_GRID,
     /** Grid item. */
     ARKUI_NODE_GRID_ITEM,
+    /** relative container. */
+    ARKUI_NODE_RELATIVE_CONTAINER,
 } ArkUI_NodeType;
 
 /**
@@ -1466,6 +1468,22 @@ typedef enum {
     NODE_COLOR_BLEND,
 
     NODE_FOREGROUND_BLUR_STYLE,
+
+    NODE_GEOMETRY_TRANSITION,
+
+    /**
+     * @brief 指定以该组件为链头所构成的链的参数，支持属性设置、属性重置和属性获取接口。
+     *
+     * 仅当父容器为RelativeContainer时生效
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：链的方向。枚举{@link ArkUI_Axis}。 \n
+     * .value[1].i32：链的样式。枚举{@link ArkUI_RelativeLayoutChainStyle}。 \n
+     * \n
+     * .value[0].i32：链的方向。枚举{@link ArkUI_Axis}。 \n
+     * .value[1].i32：链的样式。枚举{@link ArkUI_RelativeLayoutChainStyle}。 \n
+     */
+    NODE_RELATIVE_LAYOUT_CHAIN_MODE,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -3952,10 +3970,10 @@ typedef enum {
     * ListItem在List交叉轴方向的布局方式，支持属性设置，属性重置和属性获取接口。
     *
     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlign} \n
+     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment} \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlign}  \n
+     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment}  \n
     */
     NODE_LIST_ALIGN_LIST_ITEM,
 
@@ -4497,6 +4515,7 @@ typedef enum {
      *
      */
     NODE_WATER_FLOW_SCROLL_TO_INDEX,
+
     /**
      * @brief 设置当前瀑布流子组件的约束尺寸属性，组件布局时，进行尺寸范围限制，支持属性设置，属性重置和属性获取接口。
      *
@@ -4593,6 +4612,31 @@ typedef enum {
     * .value[0].i32: number of cached items in the grid adapter. \n
     */
     NODE_GRID_CACHED_COUNT,
+
+    /**
+     * @brief 设置RelativeContaine容器内的辅助线，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的辅助线： \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的辅助线：  \n
+     *
+     */
+    NODE_RELATIVE_CONTAINER_GUIDE_LINE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RELATIVE_CONTAINER,
+
+    /**
+     * @brief 设置RelativeContaine容器内的屏障，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的辅助线： \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的屏障：  \n
+     *
+     */
+    NODE_RELATIVE_CONTAINER_BARRIER,
+
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12

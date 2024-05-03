@@ -42,6 +42,20 @@ RefPtr<FrameNode> WaterFlowModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+RefPtr<ScrollControllerBase> WaterFlowModelNG::GetOrCreateController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    if (!pattern->GetPositionController()) {
+        auto controller = AceType::MakeRefPtr<ScrollableController>();
+        pattern->SetPositionController(controller);
+        controller->SetScrollPattern(pattern);
+        pattern->TriggerModifyDone();
+    }
+    return pattern->GetPositionController();
+}
+
 void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
 {
     RefPtr<NG::UINode> footerNode;

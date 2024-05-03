@@ -49,6 +49,30 @@ RefPtr<FrameNode> ListModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+RefPtr<ScrollControllerBase> ListModelNG::GetOrCreateController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    if (!pattern->GetPositionController()) {
+        auto controller = AceType::MakeRefPtr<NG::ListPositionController>();
+        pattern->SetPositionController(controller);
+        controller->SetScrollPattern(pattern);
+        pattern->TriggerModifyDone();
+    }
+    return pattern->GetPositionController();
+}
+
+void ListModelNG::ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetAxis() != Axis::NONE) {
+        pattern->ScrollToEdge(scrollEdgeType, smooth);
+    }
+}
+
 void ListModelNG::SetSpace(const Dimension& space)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space);

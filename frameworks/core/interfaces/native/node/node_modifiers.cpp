@@ -55,6 +55,7 @@
 #include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
+#include "core/interfaces/native/node/node_relative_container_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_span_modifier.h"
@@ -223,6 +224,7 @@ const ArkUINodeModifiers impl = {
     nullptr, // TextClockControllerModifier
     nullptr, // RichEditorControllerModifier
     nullptr, // TextAreaControllerModifier
+    NodeModifier::GetRelativeContainerModifier, // RelativeContainerModifier
     NodeModifier::GetParticleModifier,
     NodeModifier::GetNodeContentModifier,
     NodeModifier::GetSymbolGlyphModifier,
