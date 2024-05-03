@@ -57,8 +57,8 @@ TextLayoutAlgorithm::TextLayoutAlgorithm(
     }
     ConstructParagraphSpanGroup(spans);
     if (!spans.empty()) {
-        auto maxlines = spans.front()->textLineStyle->GetMaxLines().value_or(INT32_MAX);
-        spanStringHasMaxLines_ |= maxlines != INT32_MAX;
+        auto maxlines = spans.front()->textLineStyle->GetMaxLines().value_or(UINT32_MAX);
+        spanStringHasMaxLines_ |= maxlines != UINT32_MAX;
         spans_.emplace_back(std::move(spans));
     }
 }
@@ -95,7 +95,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
                 std::list<RefPtr<SpanItem>> newGroup;
                 spanItem->SetNeedRemoveNewLine(true);
                 newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
-                spanStringHasMaxLines_ |= pStyle.maxLines != INT32_MAX;
+                spanStringHasMaxLines_ |= pStyle.maxLines != UINT32_MAX;
                 spans_.emplace_back(std::move(newGroup));
                 it = spans.begin();
                 pStyle = nextSpanParagraphStyle;

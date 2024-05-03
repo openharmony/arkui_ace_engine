@@ -305,6 +305,7 @@ void MutableSpanString::ClearAllSpans()
     spansMap_.clear();
     spans_.clear();
     spans_.emplace_back(GetDefaultSpanItem(text_));
+    SplitSpansByNewLine();
 }
 
 void MutableSpanString::KeepSpansOrder()
