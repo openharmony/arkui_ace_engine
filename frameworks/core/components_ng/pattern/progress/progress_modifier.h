@@ -17,15 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_MODIFIER_H
 
 #include "base/geometry/arc.h"
-#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 struct RingProgressData {
@@ -40,7 +36,8 @@ class ProgressModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ProgressModifier, ContentModifier);
 
 public:
-    ProgressModifier();
+    explicit ProgressModifier(
+        const ProgressAnimatableProperty& progressAnimatableProperty = ProgressAnimatableProperty {});
     ~ProgressModifier() override = default;
     void onDraw(DrawingContext& context) override;
 

@@ -35,6 +35,7 @@ struct ArkUI_Node {
     ArkUI_LengthMetricUnit lengthMetricUnit = ARKUI_LENGTH_METRIC_UNIT_DEFAULT;
     void* eventListeners = nullptr;
     void* userData = nullptr;
+    void* swiperIndicator = nullptr;
 };
 
 struct ArkUI_Context {

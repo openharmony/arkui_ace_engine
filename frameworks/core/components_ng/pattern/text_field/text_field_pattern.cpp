@@ -477,9 +477,9 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto isEditorValueChanged = FireOnTextChangeEvent();
     UpdateCancelNode();
     UpdateSelectController();
-    UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     AdjustTextInReasonableArea();
     UpdateCaretRect(isEditorValueChanged);
+    UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     UpdateCaretInfoToController();
     auto hostLayoutProperty =
         dirty->GetHostNode() ? dirty->GetHostNode()->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
@@ -4111,11 +4111,17 @@ void TextFieldPattern::RequestKeyboardOnFocus()
     if (!needToRequestKeyboardOnFocus_ || !needToRequestKeyboardInner_) {
         return;
     }
-    if (!RequestKeyboard(false, true, true)) {
-        return;
-    }
-    NotifyOnEditChanged(true);
-    needToRequestKeyboardInner_ = false;
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto textField = weak.Upgrade();
+        CHECK_NULL_VOID(textField);
+        if (!textField->RequestKeyboard(false, true, true)) {
+            return;
+        }
+        textField->NotifyOnEditChanged(true);
+        textField->needToRequestKeyboardInner_ = false;
+    });
 }
 
 void TextFieldPattern::OnVisibleChange(bool isVisible)

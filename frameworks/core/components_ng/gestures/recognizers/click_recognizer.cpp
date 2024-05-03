@@ -436,7 +436,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDisplayX(touchPoint.screenX);
     info.SetDisplayY(touchPoint.screenY);
 #endif
-    info.SetPointerEvent(touchPoint.pointerEvent);
+    info.SetPointerEvent(lastPointEvent_);
     return info;
 }
 

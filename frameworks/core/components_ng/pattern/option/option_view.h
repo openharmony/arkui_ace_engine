@@ -26,16 +26,16 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT OptionView {
 public:
     static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, const std::string& value,
-        std::function<void()>&& onClickFunc, int32_t index, const std::string& icon = "");
+        const std::function<void()>& onClickFunc, int32_t index, const std::string& icon = "");
 
     static RefPtr<FrameNode> CreateSelectOption(const std::string& value, const std::string& icon, int32_t index);
 
     static RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent);
     static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent);
-    static void CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
-        std::function<void()>&& onClickFunc);
+    static void CreatePasteButton(
+        const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row, const std::function<void()>& onClickFunc);
     static void CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
-        const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, std::function<void()>&& onClickFunc);
+        const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc);
 };
 
 } // namespace OHOS::Ace::NG

@@ -300,8 +300,25 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
         auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
         extraData->eventMap[eventType] = extraParam;
     }
-    impl->getBasicAPI()->registerNodeAsyncEvent(
-        nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType), reinterpret_cast<int64_t>(nodePtr));
+    if (eventType == NODE_EVENT_ON_VISIBLE_AREA_CHANGE) {
+        auto radio = static_cast<ArkUI_AttributeItem*>(userData);
+        ArkUI_Int32 radioLength = radio->size;
+        if (radioLength <= 0) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        ArkUI_Float32 radioList[radioLength];
+        for (int i = 0; i < radioLength; ++i) {
+            if (LessNotEqual(radio->value[i].f32, 0.0f) || GreatNotEqual(radio->value[i].f32, 1.0f)) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            radioList[i] = radio->value[i].f32;
+        }
+        impl->getNodeModifiers()->getCommonModifier()->setOnVisibleAreaChange(
+            nodePtr->uiNodeHandle, reinterpret_cast<int64_t>(nodePtr), radioList, radioLength);
+    } else {
+        impl->getBasicAPI()->registerNodeAsyncEvent(
+            nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType), reinterpret_cast<int64_t>(nodePtr));
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -380,6 +397,11 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
             uiEvent.inputEvent = &(innerEvent->touchEvent);
             event.origin = &uiEvent;
+        } else if (eventType == NODE_ON_MOUSE) {
+            uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
+            uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
+            uiEvent.inputEvent = &(innerEvent->mouseEvent);
+            event.origin = &uiEvent;
         } else {
             event.origin = innerEvent;
         }
@@ -417,6 +439,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
             break;
         case TOUCH_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->touchEvent.subKind);
+            break;
+        case MOUSE_INPUT_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->mouseEvent.subKind);
             break;
         default:
             break; /* Empty */

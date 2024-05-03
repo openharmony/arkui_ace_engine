@@ -149,6 +149,11 @@ struct TouchEvent final : public UIInputEvent {
         return *this;
     }
 
+    TimeStamp GetTimeStamp() const
+    {
+        return this->time;
+    }
+
     TouchEvent& SetType(TouchType type)
     {
         this->type = type;

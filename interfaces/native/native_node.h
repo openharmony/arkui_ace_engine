@@ -1392,6 +1392,68 @@ typedef enum {
     NODE_LAYOUT_WEIGHT,
     NODE_DISPLAY_PRIORITY,
     NODE_OUTLINE_WIDTH,
+    /**
+     * @brief 宽度属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：宽度数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：宽度数值，单位为百分比；\n
+     *
+     */
+    NODE_WIDTH_PERCENT,
+    /**
+     * @brief 高度属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：高度数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：高度数值，单位为百分比；\n
+     *
+     */
+    NODE_HEIGHT_PERCENT,
+    /**
+     * @brief 内间距属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式有两种：\n
+     * 1：上下左右四个位置的内间距值相等。\n
+     * .value[0].f32：内间距数值，单位为百分比；\n
+     * 2：分别指定上下左右四个位置的内间距值。\n
+     * .value[0].f32：上内间距数值，单位为百分比；\n
+     * .value[1].f32：右内间距数值，单位为百分比；\n
+     * .value[2].f32：下内间距数值，单位为百分比；\n
+     * .value[3].f32：左内间距数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：上内间距数值，单位为百分比；\n
+     * .value[1].f32：右内间距数值，单位为百分比；\n
+     * .value[2].f32：下内间距数值，单位为百分比；\n
+     * .value[3].f32：左内间距数值，单位为百分比；\n
+     *
+     */
+    NODE_PADDING_PERCENT,
+    /**
+     * @brief 外间距属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式有两种：\n
+     * 1：上下左右四个位置的外间距值相等。\n
+     * .value[0].f32：外间距数值，单位为百分比；\n
+     * 2：分别指定上下左右四个位置的外间距值。\n
+     * .value[0].f32：上外间距数值，单位为百分比；\n
+     * .value[1].f32：右外间距数值，单位为百分比；\n
+     * .value[2].f32：下外间距数值，单位为百分比；\n
+     * .value[3].f32：左外间距数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：上外间距数值，单位为百分比；\n
+     * .value[1].f32：右外间距数值，单位为百分比；\n
+     * .value[2].f32：下外间距数值，单位为百分比；\n
+     * .value[3].f32：左外间距数值，单位为百分比；\n
+     *
+     */
+    NODE_MARGIN_PERCENT,
 
     NODE_RENDER_FIT,
 
@@ -1400,6 +1462,10 @@ typedef enum {
     NODE_SIZE,
 
     NODE_RENDER_GROUP,
+
+    NODE_COLOR_BLEND,
+
+    NODE_FOREGROUND_BLUR_STYLE,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -1859,6 +1925,23 @@ typedef enum {
      */
     NODE_IMAGE_COLOR_FILTER,
     /**
+     * @brief Sets the resizable image options.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: width of the left edge. The unit is vp. \n
+     * .value[1].f32: width of the top edge. The unit is vp. \n
+     * .value[2].f32: width of the right edge. The unit is vp. \n
+     * .value[3].f32: width of the bottom edge. The unit is vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: width of the left edge. The unit is vp. \n
+     * .value[1].f32: width of the top edge. The unit is vp. \n
+     * .value[2].f32: width of the right edge. The unit is vp. \n
+     * .value[3].f32: width of the bottom edge. The unit is vp. \n
+     *
+     */
+    NODE_IMAGE_RESIZABLE,
+    /**
      * @brief Defines the auto resize attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -1882,23 +1965,6 @@ typedef enum {
      */
     NODE_IMAGE_ALT,
     /**
-     * @brief Sets the resizable image options.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].f32: width of the left edge. The unit is vp. \n
-     * .value[1].f32: width of the top edge. The unit is vp. \n
-     * .value[2].f32: width of the right edge. The unit is vp. \n
-     * .value[3].f32: width of the bottom edge. The unit is vp. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].f32: width of the left edge. The unit is vp. \n
-     * .value[1].f32: width of the top edge. The unit is vp. \n
-     * .value[2].f32: width of the right edge. The unit is vp. \n
-     * .value[3].f32: width of the bottom edge. The unit is vp. \n
-     *
-     */
-    NODE_IMAGE_RESIZABLE,
-    /**
      * @brief Defines whether the image is draggable.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -1921,6 +1987,28 @@ typedef enum {
      *
      */
     NODE_IMAGE_RENDER_MODE,
+    /**
+     * @brief 设置图片的显示尺寸是否跟随图源尺寸，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32，设置图片的显示尺寸是否跟随图源尺寸，1表示跟随，0表示不跟随，默认值为0。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32，1表示图片的显示尺寸跟随图源尺寸，0表示图片的显示尺寸不跟随图源尺寸。\n
+     *
+     */
+    NODE_IMAGE_FIT_ORIGINAL_SIZE,
+    /**
+     * @brief 设置填充颜色，设置后填充颜色会覆盖在图片上，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：填充色数值，0xargb格式，形如 0xFFFF0000 表示红色。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：填充色数值，0xargb格式。\n
+     *
+     */
+    NODE_IMAGE_FILL_COLOR,
     /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -2661,6 +2749,20 @@ typedef enum {
      *
      */
     NODE_BUTTON_LABEL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_BUTTON,
+
+    /**
+     * @brief Sets the button type. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
+     * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
+     * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
+     *
+     */
+    NODE_BUTTON_TYPE,
 
     /**
      * @brief Defines the current value of the progress indicator.
@@ -3480,6 +3582,21 @@ typedef enum {
     NODE_SLIDER_STYLE,
 
     /**
+     * @brief Sets the track thickness of the slider.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: track thickness of the slider, in vp. The default value is 4.0 vp when <b>NODE_SLIDER_STYLE</b>
+     * is set to <b>ARKUI_SLIDER_STYLE_OUT_SET</b> and 20.0 vp when <b>NODE_SLIDER_STYLE</b> is set to
+     * <b>ARKUI_SLIDER_STYLE_IN_SET</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: track thickness of the slider, in vp. \n
+     *
+     */
+    NODE_SLIDER_TRACK_THICKNESS,
+
+    /**
      * @brief Set the selection status of an option button. Attribute setting,
      * attribute resetting, and attribute obtaining are supported.
      * Attribute setting method {@Link ArkUI_AttributeItem} Parameter format:\n
@@ -4046,6 +4163,39 @@ typedef enum {
     NODE_SWIPER_CACHED_COUNT,
 
     /**
+     * @brief 设置 Swiper 组件的前边距，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：前边距数值，单位为vp，默认值为0。 \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：前边距数值，单位为vp。
+     */
+    NODE_SWIPER_PREV_MARGIN,
+
+    /**
+     * @brief 设置 Swiper 组件的后边距，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：后边距数值，单位为vp，默认值为0。 \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：后边距数值，单位为vp。
+     */
+    NODE_SWIPER_NEXT_MARGIN,
+
+    /**
+     * @brief 设置 Swiper 组件的导航指示器类型，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：设置导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
+     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
+     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
+     *
+     */
+    NODE_SWIPER_INDICATOR,
+
+    /**
     * @brief Set the nested scrolling mode for the Swiper component and parent component.
     *
     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -4325,6 +4475,14 @@ typedef enum {
     */
     NODE_WATER_FLOW_CACHED_COUNT,
     /**
+     * @brief 设置瀑布流组件末尾的自定义显示组件。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .object：参数类型{@Link ArkUI_NodeHandle}。
+     *
+     */
+    NODE_WATER_FLOW_FOOTER,
+    /**
      * @brief Scroll to the specified index.
      * 
      * When activating the smooth animation, all items passed through will be loaded and layout calculated, which can
@@ -4575,6 +4733,34 @@ typedef enum {
      */
     NODE_ON_TOUCH_INTERCEPT,
     /**
+     * @brief 组件可见区域变化事件。
+     *
+     * 触发该事件的条件：组件可见面积与自身面积的比值接近设置的阈值时触发回调。\n
+     * 传入参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0...].f32: 阈值数组，阈值表示组件可见面积与组件自身面积的比值。每个阈值的取值范围均为[0.0, 1.0]\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：组件可见面积与自身面积的比值与上次变化相比的情况，变大为1，变小为0。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：触发回调时组件可见面积与自身面积的比值。\n
+     */
+    NODE_EVENT_ON_VISIBLE_AREA_CHANGE,
+    /**
+     * @brief 鼠标进入或退出组件事件。
+     *
+     * 触发该事件的条件：鼠标进入或退出组件时触发回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：鼠标是否悬浮在组件上，鼠标进入时为1，退出时为0。\n
+     */
+    NODE_ON_HOVER,
+    /**
+     * @brief 组件点击事件。
+     *
+     * 触发该事件的条件：组件被鼠标按键点击或者鼠标在组件上悬浮移动时触发该回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_UIInputEvent}。\n
+     */
+    NODE_ON_MOUSE,
+    /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
      * 触发该事件的条件：文本设置TextDataDetectorConfig且识别成功后。\n
@@ -4777,6 +4963,27 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE,
+    /**
+     * @brief 设置NODE_TEXT_AREA_INPUT_FILTER，正则匹配失败时触发。
+     *
+     * 触发该事件的条件：正则匹配失败时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
+     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>：表示正则匹配失败时，被过滤的内容。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_INPUT_FILTER_ERROR,
+    /**
+     * @brief 文本内容滚动时，触发该回调。
+     *
+     * 触发该事件的条件：文本内容滚动时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示文本在内容区的横坐标偏移。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示文本在内容区的纵坐标偏移。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_CONTENT_SCROLL,
 
     /**
      * @brief 输入状态变化时，触发该回调。
@@ -4799,27 +5006,6 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_SUBMIT,
-        /**
-     * @brief 设置NODE_TEXT_AREA_INPUT_FILTER，正则匹配失败时触发。
-     *
-     * 触发该事件的条件：正则匹配失败时。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
-     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
-     * <b>ArkUI_StringAsyncEvent.pStr</b>：表示正则匹配失败时，被过滤的内容。\n
-     *
-     */
-    NODE_TEXT_AREA_ON_INPUT_FILTER_ERROR,
-    /**
-     * @brief 文本内容滚动时，触发该回调。
-     *
-     * 触发该事件的条件：文本内容滚动时。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示文本在内容区的横坐标偏移。\n
-     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示文本在内容区的纵坐标偏移。\n
-     *
-     */
-    NODE_TEXT_AREA_ON_CONTENT_SCROLL,
 
     /**
      * @brief textArea输入内容发生变化时触发该事件。

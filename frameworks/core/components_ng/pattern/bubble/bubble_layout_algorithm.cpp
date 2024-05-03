@@ -402,6 +402,7 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
             }
         }
     } else {
+        UpdateMarginByWidth();
         childOffset_ = GetChildPositionNew(childSize_, bubbleProp); // bubble's offset
         childOffset_ = AddOffset(childOffset_);
     }
@@ -2247,6 +2248,13 @@ OffsetF BubbleLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const Siz
         childPosition.SetX(selfSize_.Width() - childSize.Width() - horizonSpacing);
     }
     return childPosition;
+}
+
+void BubbleLayoutAlgorithm::UpdateMarginByWidth()
+{
+    auto isGreatWrapperWidth = GreatOrEqual(childSize_.Width(), wrapperSize_.Width() - MARGIN_SPACE.ConvertToPx());
+    marginStart_ = isGreatWrapperWidth ? 0.0f : marginStart_;
+    marginEnd_ = isGreatWrapperWidth ? 0.0f : marginEnd_;
 }
 
 } // namespace OHOS::Ace::NG

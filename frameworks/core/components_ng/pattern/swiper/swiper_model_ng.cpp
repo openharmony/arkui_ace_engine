@@ -751,4 +751,35 @@ void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool u
     pattern->ChangeIndex(index, useAnimation);
 }
 
+float SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit)
+{
+    Dimension prevMargin(0.0f, static_cast<DimensionUnit>(unit));
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        SwiperLayoutProperty, PrevMargin, prevMargin, frameNode, prevMargin);
+    return prevMargin.Value();
+}
+
+float SwiperModelNG::GetNextMargin(FrameNode* frameNode, int32_t unit)
+{
+    Dimension nextMargin(0.0f, static_cast<DimensionUnit>(unit));
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        SwiperLayoutProperty, NextMargin, nextMargin, frameNode, nextMargin);
+    return nextMargin.Value();
+}
+
+std::shared_ptr<SwiperParameters> SwiperModelNG::GetDotIndicator(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetSwiperParameters();
+}
+
+int32_t SwiperModelNG::GetIndicatorType(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    SwiperIndicatorType value = SwiperIndicatorType::DOT;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, IndicatorType, value, frameNode, value);
+    return static_cast<int32_t>(value);
+}
 } // namespace OHOS::Ace::NG

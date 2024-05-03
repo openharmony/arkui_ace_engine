@@ -93,6 +93,7 @@ public:
     bool CheckRecognizerState();
 
     bool CheckGestureScopeState();
+    bool HasFailRecognizer();
     void ForceCleanGestureScope();
     void CleanGestureScopeState();
 private:
@@ -135,6 +136,7 @@ public:
     void CleanRedundanceScope();
 
     bool CheckGestureRefereeState();
+    bool HasFailRecognizer(int32_t touchId);
     void ForceCleanGestureReferee();
     void CleanGestureRefereeState(int32_t touchId);
 private:

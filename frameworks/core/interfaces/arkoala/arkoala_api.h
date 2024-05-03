@@ -180,6 +180,14 @@ struct ArkUITouchEvent {
     ArkUI_Int32 interceptResult;
 };
 
+struct ArkUIMouseEvent {
+    ArkUI_Int32 action;
+    ArkUI_Int32 button;
+    ArkUI_Int64 timeStamp;
+    ArkUITouchPoint actionTouchPoint;
+    ArkUI_Int32 subKind;
+};
+
 struct ArkUIStringAndFloat {
     ArkUI_Float32 value;
     ArkUI_CharPtr valueStr;
@@ -571,6 +579,7 @@ enum ArkUIEventCategory {
     GESTURE_ASYNC_EVENT = 6,
     TOUCH_EVENT = 7,
     TEXT_ARRAY = 8,
+    MOUSE_INPUT_EVENT = 9,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -841,6 +850,7 @@ struct ArkUINodeEvent {
         ArkUIAPIEventGestureAsyncEvent gestureAsyncEvent;
         ArkUITouchEvent touchEvent;
         ArkUIAPIEventTextArray textArrayEvent;
+        ArkUIMouseEvent mouseEvent;
     };
 };
 
@@ -932,6 +942,42 @@ struct ArkUIRadioStyleOption {
     ArkUI_Uint32 checkedBackgroundColor;
     ArkUI_Uint32 uncheckedBorderColor;
     ArkUI_Uint32 indicatorColor;
+};
+
+enum ArkUISwiperIndicatorType {
+    DOT,
+    DIGIT,
+};
+
+struct ArkUIOptionalFloat {
+    ArkUI_Int32 isSet;
+    ArkUI_Float32 value;
+};
+
+struct ArkUIOptionalInt {
+    ArkUI_Int32 isSet;
+    ArkUI_Int32 value;
+};
+
+struct ArkUIOptionalUint {
+    ArkUI_Int32 isSet;
+    ArkUI_Uint32 value;
+};
+
+struct ArkUISwiperIndicator {
+    ArkUISwiperIndicatorType type;
+    ArkUI_Int32 dimUnit;
+    ArkUIOptionalFloat dimLeft;
+    ArkUIOptionalFloat dimTop;
+    ArkUIOptionalFloat dimRight;
+    ArkUIOptionalFloat dimBottom;
+    ArkUIOptionalFloat itemWidth;
+    ArkUIOptionalFloat itemHeight;
+    ArkUIOptionalFloat selectedItemWidth;
+    ArkUIOptionalFloat selectedItemHeight;
+    ArkUIOptionalInt maskValue;
+    ArkUIOptionalUint colorValue;
+    ArkUIOptionalUint selectedColorValue;
 };
 
 struct ArkUICommonModifier {
@@ -1309,6 +1355,10 @@ struct ArkUICommonModifier {
     void (*getOutlineColor)(ArkUINodeHandle node, ArkUI_Uint32* values);
     void (*getSize)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 unit);
     ArkUI_Bool (*getRenderGroup)(ArkUINodeHandle node);
+    void (*setOnVisibleAreaChange)(
+        ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size);
+    ArkUI_Uint32 (*getColorBlend)(ArkUINodeHandle node);
+    ArkUIBlurStyleOptionType (*getForegroundBlurStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1515,6 +1565,7 @@ struct ArkUIButtonModifier {
     void (*resetButtonStyle)(ArkUINodeHandle node);
     void (*setButtonControlSize)(ArkUINodeHandle node, ArkUI_Uint32 controlSize);
     void (*resetButtonControlSize)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getButtonType)(ArkUINodeHandle node);
 };
 
 struct ArkUIImageModifier {
@@ -1581,6 +1632,8 @@ struct ArkUIImageModifier {
     void (*setImageResizable)(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
         ArkUI_Float32 right, ArkUI_Float32 bottom);
     void (*getImageResizable)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 size);
+    ArkUI_Int32 (*getFitOriginalSize)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getFillColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {
@@ -1764,6 +1817,10 @@ struct ArkUISwiperModifier {
     void (*resetSwiperNestedScroll)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperNestedScroll)(ArkUINodeHandle node);
     void (*setSwiperToIndex)(ArkUINodeHandle node, ArkUI_Int32* values);
+    ArkUI_Float32 (*getSwiperPrevMargin)(ArkUINodeHandle node, ArkUI_Int32 unit);
+    ArkUI_Float32 (*getSwiperNextMargin)(ArkUINodeHandle node, ArkUI_Int32 unit);
+    void (*setSwiperIndicatorStyle)(ArkUINodeHandle node, ArkUISwiperIndicator* swiperIndicator);
+    void (*getSwiperIndicator)(ArkUINodeHandle node, ArkUISwiperIndicator* swiperIndicator);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -2043,6 +2100,7 @@ struct ArkUIGestureModifier {
     ArkUIGesture* (*createSwipeGestureByModifier)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed);
     ArkUIGesture* (*createGestureGroup)(ArkUI_Int32 mode);
     void (*addGestureToGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
+    void (*removeGestureFromGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
     void (*dispose)(ArkUIGesture* recognizer);
     // gesture event will received in common async event queue.
     void (*registerGestureEvent)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam);
@@ -2116,6 +2174,7 @@ struct ArkUISliderModifier {
     ArkUI_Int32 (*getSliderStyle)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getBlockImageValue)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getSliderBlockShape)(ArkUINodeHandle node, ArkUI_Float32* value);
+    ArkUI_Float32 (*getThickness)(ArkUINodeHandle node, ArkUI_Int32 unit);
 };
 
 struct ArkUIProgressModifier {
@@ -2610,6 +2669,8 @@ struct ArkUIWaterFlowModifier {
     ArkUI_Int32 (*getWaterFlowEnableScrollInteraction)(ArkUINodeHandle node);
     ArkUI_Float32 (*getWaterFlowFriction)(ArkUINodeHandle node);
     void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment);
+    void (*setWaterflowFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
+    void (*resetWaterflowFooter)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {
@@ -2978,7 +3039,7 @@ struct ArkUITextClockControllerModifier {
 struct ArkUITextPickerModifier {
     void (*setTextPickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setTextPickerCanLoop)(ArkUINodeHandle node, ArkUI_Bool value);
-    ArkUI_Int32 (*getTextPickerSelectedIndex)(ArkUINodeHandle node);
+    void (*getTextPickerSelectedIndex)(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size);
     void (*setTextPickerSelectedIndex)(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size);
     ArkUI_CharPtr (*getTextPickerTextStyle)(ArkUINodeHandle node);
     void (*setTextPickerTextStyle)(
@@ -3007,6 +3068,7 @@ struct ArkUITextPickerModifier {
     void (*resetTextPickerDivider)(ArkUINodeHandle node);
     void (*setTextPickerGradientHeight)(ArkUINodeHandle node, ArkUI_Float32 dVal, ArkUI_Int32 dUnit);
     void (*resetTextPickerGradientHeight)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextPickerSelectedSize)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {

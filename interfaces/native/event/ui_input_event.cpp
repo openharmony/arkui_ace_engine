@@ -147,6 +147,13 @@ int64_t OH_ArkUI_UIInputEvent_GetEventTime(const ArkUI_UIInputEvent* event)
             }
             return uiEvent->time.time_since_epoch().count();
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return 0.0f;
+            }
+            return mouseEvent->timeStamp;
+        }
         default:
             break;
     }
@@ -218,6 +225,13 @@ float OH_ArkUI_PointerEvent_GetX(const ArkUI_UIInputEvent* event)
             }
             break;
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return 0.0f;
+            }
+            return mouseEvent->actionTouchPoint.nodeX;
+        }
         default:
             break;
     }
@@ -269,6 +283,13 @@ float OH_ArkUI_PointerEvent_GetY(const ArkUI_UIInputEvent* event)
                 return axisEvent->localY;
             }
             break;
+        }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return 0.0f;
+            }
+            return mouseEvent->actionTouchPoint.nodeY;
         }
         default:
             break;
@@ -323,6 +344,13 @@ float OH_ArkUI_PointerEvent_GetWindowX(const ArkUI_UIInputEvent* event)
             }
             break;
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return 0.0f;
+            }
+            return mouseEvent->actionTouchPoint.windowX;
+        }
         default:
             break;
     }
@@ -375,6 +403,13 @@ float OH_ArkUI_PointerEvent_GetWindowY(const ArkUI_UIInputEvent* event)
                 return axisEvent->y;
             }
             break;
+        }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return 0.0f;
+            }
+            return mouseEvent->actionTouchPoint.windowY;
         }
         default:
             break;
@@ -429,6 +464,13 @@ float OH_ArkUI_PointerEvent_GetDisplayX(const ArkUI_UIInputEvent* event)
             }
             break;
         }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return 0.0f;
+            }
+            return mouseEvent->actionTouchPoint.screenX;
+        }
         default:
             break;
     }
@@ -481,6 +523,13 @@ float OH_ArkUI_PointerEvent_GetDisplayY(const ArkUI_UIInputEvent* event)
                 return axisEvent->screenY;
             }
             break;
+        }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return 0.0f;
+            }
+            return mouseEvent->actionTouchPoint.screenY;
         }
         default:
             break;
@@ -972,6 +1021,44 @@ int32_t OH_ArkUI_PointerEvent_SetInterceptHitTestMode(const ArkUI_UIInputEvent* 
             return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_MouseEvent_GetMouseButton(const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return -1;
+    }
+    switch (event->eventTypeId) {
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return -1;
+            }
+            return OHOS::Ace::NodeModel::ConvertToCMouseEventButtonType(mouseEvent->button);
+        }
+        default:
+            break;
+    }
+    return -1;
+}
+
+int32_t OH_ArkUI_MouseEvent_GetMouseAction(const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return -1;
+    }
+    switch (event->eventTypeId) {
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return -1;
+            }
+            return OHOS::Ace::NodeModel::ConvertToCMouseActionType(mouseEvent->action);
+        }
+        default:
+            break;
+    }
+    return -1;
 }
 
 #ifdef __cplusplus

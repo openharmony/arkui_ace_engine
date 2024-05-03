@@ -36,6 +36,14 @@ constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_FINGER = 1;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_PEN = 2;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_MOUSE = 7;
 constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_TOUCHPAD = 9;
+constexpr int32_t ORIGIN_MOUSE_ACTION_PRESS = 1;
+constexpr int32_t ORIGIN_MOUSE_ACTION_RELEASE = 2;
+constexpr int32_t ORIGIN_MOUSE_ACTION_MOVE = 3;
+constexpr int32_t ORIGIN_MOUSE_BUTTON_LEFT = 1;
+constexpr int32_t ORIGIN_MOUSE_BUTTON_RIGHT = 2;
+constexpr int32_t ORIGIN_MOUSE_BUTTON_MIDDLE = 4;
+constexpr int32_t ORIGIN_MOUSE_BUTTON_BACK = 8;
+constexpr int32_t ORIGIN_MOUSE_BUTTON_FORWARD = 16;
 
 void ConvertToTouchEvent(const ArkUITouchEvent& origin, ArkUI_NodeTouchEvent& event)
 {
@@ -232,6 +240,12 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_WATER_FLOW_WILL_SCROLL;
         case NODE_ON_TOUCH_INTERCEPT:
             return ON_TOUCH_INTERCEPT;
+        case NODE_EVENT_ON_VISIBLE_AREA_CHANGE:
+            return ON_VISIBLE_AREA_CHANGE;
+        case NODE_ON_HOVER:
+            return ON_HOVER;
+        case NODE_ON_MOUSE:
+            return ON_MOUSE;
         case NODE_SCROLL_EVENT_ON_REACH_START:
             if (arkUINodeType == ARKUI_NODE_LIST) {
                 return ON_LIST_REACH_START;
@@ -376,6 +390,12 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_WILL_SCROLL;
         case ON_TOUCH_INTERCEPT:
             return NODE_ON_TOUCH_INTERCEPT;
+        case ON_VISIBLE_AREA_CHANGE:
+            return NODE_EVENT_ON_VISIBLE_AREA_CHANGE;
+        case ON_HOVER:
+            return NODE_ON_HOVER;
+        case ON_MOUSE:
+            return NODE_ON_MOUSE;
         case ON_LIST_REACH_END:
             return NODE_SCROLL_EVENT_ON_REACH_END;
         case ON_WATER_FLOW_REACH_END:
@@ -458,6 +478,12 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
+        case MOUSE_INPUT_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->mouseEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
         default:
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "failed to convert origin event data");
             break;
@@ -512,6 +538,40 @@ int32_t ConvertToCInputEventToolType(int32_t originSourceToolType)
             break;
     }
     return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
+}
+
+int32_t ConvertToCMouseActionType(int32_t originActionType)
+{
+    switch (originActionType) {
+        case ORIGIN_MOUSE_ACTION_PRESS:
+            return static_cast<int32_t>(UI_MOUSE_EVENT_ACTION_PRESS);
+        case ORIGIN_MOUSE_ACTION_RELEASE:
+            return static_cast<int32_t>(UI_MOUSE_EVENT_ACTION_RELEASE);
+        case ORIGIN_MOUSE_ACTION_MOVE:
+            return static_cast<int32_t>(UI_MOUSE_EVENT_ACTION_MOVE);
+        default:
+            break;
+    }
+    return static_cast<int32_t>(UI_MOUSE_EVENT_ACTION_UNKNOWN);
+}
+
+int32_t ConvertToCMouseEventButtonType(int32_t originButtonType)
+{
+    switch (originButtonType) {
+        case ORIGIN_MOUSE_BUTTON_LEFT:
+            return static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_LEFT);
+        case ORIGIN_MOUSE_BUTTON_RIGHT:
+            return static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_RIGHT);
+        case ORIGIN_MOUSE_BUTTON_MIDDLE:
+            return static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_MIDDLE);
+        case ORIGIN_MOUSE_BUTTON_BACK:
+            return static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_BACK);
+        case ORIGIN_MOUSE_BUTTON_FORWARD:
+            return static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_FORWARD);
+        default:
+            break;
+    }
+    return static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_NONE);
 }
 
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_CompatibleNodeEvent* event)

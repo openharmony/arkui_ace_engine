@@ -32,9 +32,9 @@ public:
     OptionEventHub() = default;
     ~OptionEventHub() override = default;
 
-    void SetMenuOnClick(std::function<void()>&& onClickFunc)
+    void SetMenuOnClick(const std::function<void()>& onClickFunc)
     {
-        menuOnClick_ = std::move(onClickFunc);
+        menuOnClick_ = onClickFunc;
     }
 
     MenuJSCallback GetJsCallback()

@@ -907,6 +907,7 @@ void TextPickerModelNG::SetValues(FrameNode* frameNode, const std::vector<std::s
                 selectedValues[i] = options_[i].rangeResult.front();
                 valuesIndex.emplace_back(0);
             } else {
+                selectedValues.emplace_back(values[i]);
                 valuesIndex.emplace_back(std::distance(options_[i].rangeResult.begin(), valueIterator));
             }
         }
@@ -1080,5 +1081,36 @@ void TextPickerModelNG::SetOnCascadeChange(FrameNode* frameNode, TextCascadeChan
     auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+int32_t TextPickerModelNG::GetSelectedSize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, 0);
+    return textPickerPattern->GetSelecteds().size();
+}
+
+std::string TextPickerModelNG::getTextPickerValues(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, "");
+    auto values = textPickerPattern->GetValues();
+    std::string result;
+    for (auto& valueRet : values) {
+        result.append(valueRet + ';');
+    }
+    result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
+    return result;
+}
+
+std::vector<uint32_t> TextPickerModelNG::getTextPickerSelecteds(FrameNode* frameNode)
+{
+    std::vector<uint32_t> defaultValue = { 0 };
+    CHECK_NULL_RETURN(frameNode, defaultValue);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, defaultValue);
+    return textPickerPattern->GetSelecteds();
 }
 } // namespace OHOS::Ace::NG

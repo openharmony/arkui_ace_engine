@@ -654,6 +654,9 @@ public:
     static RenderFit GetRenderFit(FrameNode* frameNode);
     static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
     static bool GetRenderGroup(FrameNode* frameNode);
+    static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
+        const std::vector<double> &ratioList);
+    static Color GetColorBlend(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

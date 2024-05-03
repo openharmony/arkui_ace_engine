@@ -1217,6 +1217,13 @@ void ResetColorBlend(ArkUINodeHandle node)
     ViewAbstract::SetColorBlend(frameNode, colorBlend);
 }
 
+ArkUI_Uint32 GetColorBlend(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return ViewAbstract::GetColorBlend(frameNode).GetValue();
+}
+
 void SetGrayscale(ArkUINodeHandle node, ArkUI_Float32 grayScale)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1588,6 +1595,23 @@ void ResetForegroundBlurStyle(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption styleOption;
     ViewAbstract::SetForegroundBlurStyle(frameNode, styleOption);
+}
+
+ArkUIBlurStyleOptionType GetForegroundBlurStyle(ArkUINodeHandle node)
+{
+    ArkUIBlurStyleOptionType styleOptionType = { 0, 0, 0, 1.0f };
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, styleOptionType);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, styleOptionType);
+    if (!renderContext->GetFrontBlurStyle().has_value()) {
+        return styleOptionType;
+    }
+    styleOptionType.blurStyle = static_cast<int32_t>(renderContext->GetFrontBlurStyle()->blurStyle);
+    styleOptionType.colorMode = static_cast<int32_t>(renderContext->GetFrontBlurStyle()->colorMode);
+    styleOptionType.adaptiveColor = static_cast<int32_t>(renderContext->GetFrontBlurStyle()->adaptiveColor);
+    styleOptionType.scale = renderContext->GetFrontBlurStyle()->scale;
+    return styleOptionType;
 }
 
 /**
@@ -2465,9 +2489,7 @@ void SetMotionBlur(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 anc
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MotionBlurOption motionBlurOption;
-    CalcDimension radiusDim;
-    radiusDim.SetValue(radius);
-    motionBlurOption.radius = radiusDim;
+    motionBlurOption.radius = radius;
     motionBlurOption.anchor.x = anchorX;
     motionBlurOption.anchor.y = anchorY;
     ViewAbstract::SetMotionBlur(frameNode, motionBlurOption);
@@ -2478,7 +2500,7 @@ void ResetMotionBlur(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MotionBlurOption motionBlurOption;
-    motionBlurOption.radius = CalcDimension(0);
+    motionBlurOption.radius = 0.0;
     motionBlurOption.anchor.x = 0.0;
     motionBlurOption.anchor.y = 0.0;
     ViewAbstract::SetMotionBlur(frameNode, motionBlurOption);
@@ -5114,6 +5136,25 @@ void SetBackgroundImageSizeWithUnit(
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
 
+void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    std::vector<double> ratioList(values, values + size);
+    auto onEvent = [nodeId, extraParam](bool visible, double ratio) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = static_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_VISIBLE_AREA_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = visible;
+        event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(ratio);
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnVisibleChange(frameNode, onEvent, ratioList);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -5178,7 +5219,8 @@ const ArkUICommonModifier* GetCommonModifier()
         GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetPaddingDimension, GetConfigSize, GetKey,
         GetEnabled, GetMargin, GetMarginDimension, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask,
         GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable,
-        SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize, GetRenderGroup };
+        SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize, GetRenderGroup,
+        SetOnVisibleAreaChange, GetColorBlend, GetForegroundBlurStyle };
 
     return &modifier;
 }
@@ -5520,6 +5562,52 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam)
         return static_cast<NG::HitTestMode>(touchEvent.touchEvent.interceptResult);
     };
     ViewAbstract::SetOnTouchIntercept(frameNode, std::move(onTouchIntercept));
+}
+
+void SetOnHover(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](bool isHover, HoverInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_HOVER;
+        event.componentAsyncEvent.data[0].i32 = isHover;
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnHover(frameNode, onEvent);
+}
+
+void SetOnMouse(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](MouseInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = MOUSE_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.mouseEvent.subKind = ON_MOUSE;
+        event.mouseEvent.actionTouchPoint.nodeX = PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetX());
+        event.mouseEvent.actionTouchPoint.nodeY = PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetY());
+        event.mouseEvent.button = static_cast<int32_t>(info.GetButton());
+        event.mouseEvent.action = static_cast<int32_t>(info.GetAction());
+        event.mouseEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.mouseEvent.actionTouchPoint.windowX = PipelineBase::Px2VpWithCurrentDensity(
+            info.GetGlobalLocation().GetX());
+        event.mouseEvent.actionTouchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(
+            info.GetGlobalLocation().GetY());
+        event.mouseEvent.actionTouchPoint.screenX = PipelineBase::Px2VpWithCurrentDensity(
+            info.GetScreenLocation().GetX());
+        event.mouseEvent.actionTouchPoint.screenY = PipelineBase::Px2VpWithCurrentDensity(
+            info.GetScreenLocation().GetY());
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnMouse(frameNode, onEvent);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

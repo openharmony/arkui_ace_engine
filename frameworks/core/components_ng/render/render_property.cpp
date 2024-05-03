@@ -198,7 +198,7 @@ void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("foregroundEffect", jsonOption, filter);
     if (propMotionBlur.has_value()) {
         auto motionBlur = JsonUtil::Create(true);
-        motionBlur->Put("radius", propMotionBlur->radius.Value());
+        motionBlur->Put("radius", propMotionBlur->radius);
         auto motionBlurAnchor = JsonUtil::Create(true);
         motionBlurAnchor->Put("x", propMotionBlur->anchor.x);
         motionBlurAnchor->Put("y", propMotionBlur->anchor.y);

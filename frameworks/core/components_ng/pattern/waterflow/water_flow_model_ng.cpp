@@ -613,4 +613,11 @@ void WaterFlowModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int
     pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment));
 }
 
+void WaterFlowModelNG::SetWaterflowFooter(FrameNode* frameNode, FrameNode* footerNode)
+{
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooter(AceType::Claim<UINode>(footerNode));
+}
+
 } // namespace OHOS::Ace::NG

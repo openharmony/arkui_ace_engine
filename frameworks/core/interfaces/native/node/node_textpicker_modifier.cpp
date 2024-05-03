@@ -68,11 +68,23 @@ void ResetTextPickerCanLoop(ArkUINodeHandle node)
     TextPickerModelNG::SetCanLoop(frameNode, true);
 }
 
-ArkUI_Int32 GetTextPickerSelectedIndex(ArkUINodeHandle node)
+void GetTextPickerSelectedIndex(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return TextPickerModelNG::getTextPickerSelectedIndex(frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (TextPickerModelNG::IsSingle(frameNode)) {
+        auto selectedValue = static_cast<ArkUI_Uint32>(
+            TextPickerModelNG::getTextPickerSelectedIndex(frameNode));
+        values[0] = selectedValue;
+    } else {
+        auto selectedValue = TextPickerModelNG::getTextPickerSelecteds(frameNode);
+        if (size != selectedValue.size()) {
+            return;
+        }
+        for (int i = 0; i < size; i++) {
+            values[i] = selectedValue[i];
+        }
+    }
 }
 
 void SetTextPickerSelectedIndex(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size)
@@ -244,7 +256,11 @@ ArkUI_CharPtr GetTextPickerValue(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, "");
-    g_strValue = TextPickerModelNG::getTextPickerValue(frameNode);
+    if (TextPickerModelNG::IsSingle(frameNode)) {
+        g_strValue = TextPickerModelNG::getTextPickerValue(frameNode);
+    } else {
+        g_strValue = TextPickerModelNG::getTextPickerValues(frameNode);
+    }
     return g_strValue.c_str();
 }
 
@@ -404,6 +420,13 @@ void ResetTextPickerGradientHeight(ArkUINodeHandle node)
     TextPickerModelNG::SetGradientHeight(frameNode, height);
 }
 
+ArkUI_Int32 GetTextPickerSelectedSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return TextPickerModelNG::GetSelectedSize(frameNode);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -416,7 +439,8 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         ResetTextPickerSelectedIndex, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
         ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
         GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr, GetTextPickerValue, SetTextPickerValue,
-        SetTextPickerDivider, ResetTextPickerDivider, SetTextPickerGradientHeight, ResetTextPickerGradientHeight};
+        SetTextPickerDivider, ResetTextPickerDivider, SetTextPickerGradientHeight, ResetTextPickerGradientHeight,
+        GetTextPickerSelectedSize };
 
     return &modifier;
 }

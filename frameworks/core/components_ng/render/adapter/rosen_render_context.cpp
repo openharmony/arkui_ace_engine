@@ -3659,16 +3659,8 @@ void RosenRenderContext::UpdateMotionBlur(const MotionBlurOption& motionBlurOpti
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateForeground();
     groupProperty->propMotionBlur = motionBlurOption;
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    float radiusPx = context->NormalizeToPx(motionBlurOption.radius);
-#ifndef USE_ROSEN_DRAWING
-    float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
-#else
-    float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
-#endif
     Rosen::Vector2f anchor(motionBlurOption.anchor.x, motionBlurOption.anchor.y);
-    rsNode_->SetMotionBlurPara(backblurRadius, anchor);
+    rsNode_->SetMotionBlurPara(motionBlurOption.radius, anchor);
 }
 
 void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption)

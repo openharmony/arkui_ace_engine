@@ -370,6 +370,7 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
     pattern->SetIntervalSize(intervalSize);
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
+    CHECK_NULL_VOID(ScrollSnapAlign::NONE != scrollSnapAlign);
     pattern->SetEnablePaging(ScrollPagingStatus::INVALID);
 }
 
@@ -467,6 +468,7 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
     pattern->SetIntervalSize(intervalSize);
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
+    CHECK_NULL_VOID(ScrollSnapAlign::NONE != scrollSnapAlign);
     pattern->SetEnablePaging(ScrollPagingStatus::INVALID);
 }
 

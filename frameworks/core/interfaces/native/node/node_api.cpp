@@ -255,10 +255,10 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnDisappear,
     NodeModifier::SetOnTouch,
     NodeModifier::SetOnClick,
-    nullptr,
+    NodeModifier::SetOnHover,
     NodeModifier::SetOnBlur,
     nullptr,
-    nullptr,
+    NodeModifier::SetOnMouse,
     NodeModifier::SetOnAreaChange,
     nullptr,
     nullptr,
@@ -302,7 +302,6 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaSelectionChange,
     NodeModifier::SetTextInputOnSubmit,
     NodeModifier::SetOnTextAreaContentSizeChange,
-    nullptr,
     NodeModifier::SetOnTextAreaInputFilterError,
     NodeModifier::SetTextAreaOnTextContentScroll,
 };
@@ -608,7 +607,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             }
             eventHandle = RADIO_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
-        }        
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }

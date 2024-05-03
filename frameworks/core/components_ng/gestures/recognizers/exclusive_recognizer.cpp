@@ -309,6 +309,17 @@ void ExclusiveRecognizer::CleanRecognizerState()
     activeRecognizer_ = nullptr;
 }
 
+void ExclusiveRecognizer::ForceCleanRecognizer()
+{
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->ForceCleanRecognizer();
+        }
+    }
+    MultiFingersRecognizer::ForceCleanRecognizer();
+    activeRecognizer_ = nullptr;
+}
+
 void ExclusiveRecognizer::DispatchEventToActiveRecognizers(const TouchEvent& point)
 {
     if (point.type == TouchType::DOWN) {

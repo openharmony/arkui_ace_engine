@@ -526,6 +526,22 @@ void SetScrollToIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 anima
     WaterFlowModelNG::SetScrollToIndex(frameNode, index, animation, alignment);
 }
 
+void SetWaterflowFooter(ArkUINodeHandle node, ArkUINodeHandle footer)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* footerNode = reinterpret_cast<FrameNode*>(footer);
+    CHECK_NULL_VOID(footerNode);
+    WaterFlowModelNG::SetWaterflowFooter(frameNode, footerNode);
+}
+
+void ResetWaterflowFooter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetWaterflowFooter(frameNode, nullptr);
+}
+
 } // namespace
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
@@ -542,7 +558,7 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         GetWaterFlowBarWidth, SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor, GetWaterFlowScrollBarColor,
         GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions,
         GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
-        GetWaterFlowFriction, SetScrollToIndex };
+        GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter, ResetWaterflowFooter, };
     return &modifier;
 }
 

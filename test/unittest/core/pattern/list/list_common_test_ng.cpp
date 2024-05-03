@@ -42,10 +42,12 @@ void ListCommonTestNg::MouseSelect(Offset start, Offset end)
     info.SetInputEventType(InputEventType::MOUSE_BUTTON);
     info.SetLocalLocation(start);
     info.SetGlobalLocation(start);
+    info.SetRawGlobalLocation(start);
     pattern_->HandleDragStart(info);
     if (start != end) {
         info.SetLocalLocation(end);
         info.SetGlobalLocation(end);
+        info.SetRawGlobalLocation(end);
         pattern_->HandleDragUpdate(info);
     }
     pattern_->HandleDragEnd(info);

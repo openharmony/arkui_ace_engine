@@ -95,6 +95,14 @@ struct ProgressStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Type, ProgressType);
 };
 
+struct ProgressAnimatableProperty {
+    Color color;
+    Color bgColor;
+    Color borderColor;
+    float strokeWidth = 0.0f;
+    float strokeRadius = 0.0f;
+};
+
 class ProgressConfiguration : public CommonConfiguration {
     public:
         ProgressConfiguration(float value, float total, bool enabled)
