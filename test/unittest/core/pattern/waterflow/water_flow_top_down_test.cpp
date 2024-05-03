@@ -178,7 +178,7 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset003, TestSize.Level1)
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->UpdateCurrentOffset(10000, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_->firstIdx(), 0);
+    EXPECT_EQ(pattern_->layoutInfo_->FirstIdx(), 0);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 0);
 
     /**
@@ -189,7 +189,7 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset003, TestSize.Level1)
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->UpdateCurrentOffset(-99999, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_->firstIdx(), 19);
+    EXPECT_EQ(pattern_->layoutInfo_->FirstIdx(), 19);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
 }
 
@@ -214,10 +214,13 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll001, TestSize.Level1)
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState = ScrollState::IDLE;
@@ -269,10 +272,13 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll002, TestSize.Level1)
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState = ScrollState::IDLE;
@@ -358,9 +364,9 @@ HWTEST_F(WaterFlowTestNg, OverScroll001, TestSize.Level1)
     for (int i = 0; i < 50; ++i) {
         UpdateCurrentOffset(500.0f);
         EXPECT_EQ(info->startIndex_, 0);
-        EXPECT_GT(info->offset(), 0.0f);
+        EXPECT_GT(info->Offset(), 0.0f);
     }
-    EXPECT_GT(info->offset(), 2500.0f);
+    EXPECT_GT(info->Offset(), 2500.0f);
     UpdateCurrentOffset(-25500.0f);
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 10);
@@ -371,6 +377,6 @@ HWTEST_F(WaterFlowTestNg, OverScroll001, TestSize.Level1)
         EXPECT_EQ(info->endIndex_, std::max(49, info->footerIndex_));
         EXPECT_EQ(info->BottomFinalPos(800.0f), -3050.0f);
     }
-    EXPECT_LT(info->offset(), -4000.0f);
+    EXPECT_LT(info->Offset(), -4000.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -203,14 +203,8 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
         pos = DistanceToTop(idx, mainGap_);
         auto it = std::find_if(
             lane.items_.begin(), lane.items_.end(), [idx](const ItemInfo& item) { return item.idx == idx; });
-        if (it == lane.items_.end()) {
-            std::abort();
-        }
         itemSize = it->mainSize;
     } else {
-        if (lane.items_.back().idx != idx) {
-            std::abort();
-        }
         itemSize = lane.items_.back().mainSize;
         pos = lane.endPos - itemSize;
     }
@@ -351,13 +345,14 @@ void WaterFlowLayoutInfoSW::ClearDataFrom(int32_t idx, float mainGap)
     }
 }
 
+float WaterFlowLayoutInfoSW::TopFinalPos() const
+{
+    return -(StartPos() + delta_);
+};
+
 float WaterFlowLayoutInfoSW::BottomFinalPos(float viewHeight) const
 {
-    if (LessNotEqual(maxHeight_, viewHeight)) {
-        // content < view
-        return -(EndPos() + footerHeight_) + maxHeight_;
-    }
-    return -(EndPos() + footerHeight_) + viewHeight;
+    return -(EndPos() + delta_ + footerHeight_) + std::min(maxHeight_, viewHeight);
 };
 
 bool WaterFlowLayoutInfoSW::IsMisaligned() const
@@ -365,9 +360,12 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
     if (lanes_.empty()) {
         return false;
     }
+    if (!itemStart_ || !NearZero(StartPos())) {
+        return false;
+    }
     bool laneNotAligned = std::any_of(lanes_.begin(), lanes_.end(), [](const auto& lane) {
         return !NearZero(lane.startPos);
     });
-    return itemStart_ && (laneNotAligned || lanes_[0].items_.front().idx != 0);
+    return laneNotAligned || lanes_[0].items_.front().idx != 0;
 }
 } // namespace OHOS::Ace::NG

@@ -83,10 +83,7 @@ public:
     {
         return 0.0f;
     }
-    float TopFinalPos() const override
-    {
-        return -StartPos();
-    };
+    float TopFinalPos() const override;
     float BottomFinalPos(float viewHeight) const override;
 
     void Reset() override;
@@ -129,7 +126,9 @@ public:
     float DistanceToBottom(int32_t item, float mainSize, float mainGap) const;
 
     /**
-     * @brief If we jump to a position and scroll back to top, the staring items might not be aligned with the top boundary.
+     * @brief Check if the layout is misaligned.
+     *
+     * If we jump and scroll back to top, the staring items might not be aligned with the top boundary.
      * @return true if 1. any lane misaligned with top boundary.
      *                 2. the first item is not in the first lane.
      */

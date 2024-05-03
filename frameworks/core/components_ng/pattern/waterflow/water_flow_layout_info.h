@@ -45,15 +45,15 @@ public:
     WaterFlowLayoutInfo() = default;
     ~WaterFlowLayoutInfo() override = default;
 
-    WaterFlowLayoutMode mode() const override
+    WaterFlowLayoutMode Mode() const override
     {
         return WaterFlowLayoutMode::TOP_DOWN;
     }
-    float offset() const override
+    float Offset() const override
     {
         return currentOffset_;
     }
-    int32_t firstIdx() const override
+    int32_t FirstIdx() const override
     {
         return firstIndex_;
     }

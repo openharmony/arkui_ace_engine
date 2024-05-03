@@ -16,7 +16,7 @@
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info->h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 

@@ -23,11 +23,11 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT WaterFlowSWLayout : public WaterFlowLayoutBase {
-    DECLARE_ACE_TYPE(WaterFlowSWLayout, WaterFlowLayoutBase);
+class ACE_EXPORT WaterFlowLayoutSW : public WaterFlowLayoutBase {
+    DECLARE_ACE_TYPE(WaterFlowLayoutSW, WaterFlowLayoutBase);
 
 public:
-    explicit WaterFlowSWLayout(const RefPtr<WaterFlowLayoutInfoSW>& info) : info_(info) {}
+    explicit WaterFlowLayoutSW(const RefPtr<WaterFlowLayoutInfoSW>& info) : info_(info) {}
     void Measure(LayoutWrapper* wrapper) override;
     void Layout(LayoutWrapper* wrapper) override;
 

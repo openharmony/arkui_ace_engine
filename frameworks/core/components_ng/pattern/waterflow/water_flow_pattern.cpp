@@ -19,9 +19,7 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 #include "core/components_ng/pattern/waterflow/water_flow_segmented_layout.h"
 
@@ -68,8 +66,8 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
             delta = std::min(delta, -layoutInfo_->Offset());
         }
     }
-    float userOffset = FireOnWillScroll(-delta);
-    layoutInfo_->UpdateOffset(-userOffset);
+    delta = -FireOnWillScroll(-delta);
+    layoutInfo_->UpdateOffset(delta);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 };
@@ -133,7 +131,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     } else if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        algorithm = MakeRefPtr<WaterFlowSWLayout>(DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
+        algorithm = MakeRefPtr<WaterFlowLayoutSW>(DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
     } else {
         int32_t footerIndex = -1;
         auto footer = footer_.Upgrade();
@@ -182,7 +180,9 @@ void WaterFlowPattern::OnModifyDone()
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW && paintProperty->GetScrollBarProperty()) {
+    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
+        SetScrollBar(DisplayMode::OFF);
+    } else if (paintProperty->GetScrollBarProperty()) {
         SetScrollBar(paintProperty->GetScrollBarProperty());
     }
     SetAccessibilityAction();

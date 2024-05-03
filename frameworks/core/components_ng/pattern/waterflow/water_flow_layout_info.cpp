@@ -18,7 +18,6 @@
 #include <algorithm>
 
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"

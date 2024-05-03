@@ -2489,7 +2489,7 @@ class WaterFlowSections {
 
 var WaterFlowLayoutMode;
 (function (WaterFlowLayoutMode) {
-  WaterFlowLayoutMode[WaterFlowLayoutMode["TOP_DOWN"] = 0] = "TOP_DOWN";
+  WaterFlowLayoutMode[WaterFlowLayoutMode["ALWAYS_TOP_DOWN"] = 0] = "ALWAYS_TOP_DOWN";
   WaterFlowLayoutMode[WaterFlowLayoutMode["SLIDING_WINDOW"] = 1] = "SLIDING_WINDOW";
 })(WaterFlowLayoutMode || (WaterFlowLayoutMode = {}));
 

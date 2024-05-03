@@ -38,9 +38,9 @@ public:
     static RefPtr<WaterFlowLayoutInfoBase> Create(WaterFlowLayoutMode mode);
 
     /* PURE GETTERs */
-    virtual WaterFlowLayoutMode mode() const = 0;
-    virtual float offset() const = 0; // total offset of content
-    virtual int32_t firstIdx() const = 0; // for compatibility
+    virtual WaterFlowLayoutMode Mode() const = 0;
+    virtual float Offset() const = 0; // total offset of content
+    virtual int32_t FirstIdx() const = 0; // for compatibility
 
     virtual void UpdateOffset(float delta) = 0;
 

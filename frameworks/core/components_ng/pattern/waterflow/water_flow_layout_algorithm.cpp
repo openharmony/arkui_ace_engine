@@ -221,7 +221,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             auto currentOffset = childFrameOffset;
             auto crossOffset = itemCrossPosition->second;
-            auto mainOffset = item.second.first + layoutInfo_.currentOffset_;
+            auto mainOffset = item.second.first + layoutInfo_->currentOffset_;
             if (isRtl) {
                 crossOffset = crossSize - crossOffset - itemsCrossSize_.at(mainPositions.first);
             }
