@@ -103,6 +103,8 @@ public:
     static ImageResizableSlice GetResizableSlice(FrameNode *frameNode);
     static void SetDynamicRangeMode(FrameNode *frameNode, DynamicRangeMode dynamicRangeMode);
     static void SetEnhancedImageQuality(FrameNode *frameNode, AIImageQuality imageQuality);
+    static bool GetFitOriginalSize(FrameNode *frameNode);
+    static uint32_t GetFillColor(FrameNode *frameNode);
 private:
     RefPtr<ImagePattern> GetImagePattern();
 };

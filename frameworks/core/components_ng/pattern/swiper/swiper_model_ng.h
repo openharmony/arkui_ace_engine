@@ -129,6 +129,10 @@ public:
 
     static int32_t RealTotalCount(FrameNode* frameNode);
     static void SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool useAnimation);
+    static float GetPreviousMargin(FrameNode* frameNode, int32_t unit);
+    static float GetNextMargin(FrameNode* frameNode, int32_t unit);
+    static std::shared_ptr<SwiperParameters> GetDotIndicator(FrameNode* frameNode);
+    static int32_t GetIndicatorType(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

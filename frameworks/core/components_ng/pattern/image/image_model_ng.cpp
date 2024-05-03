@@ -597,6 +597,25 @@ ImageSourceInfo ImageModelNG::GetAlt(FrameNode* frameNode)
     return layoutProperty->GetAlt().value_or(defaultImageSourceInfo);
 }
 
+bool ImageModelNG::GetFitOriginalSize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetImageSizeStyle()->GetFitOriginalSize().value_or(false);
+}
+
+uint32_t ImageModelNG::GetFillColor(FrameNode *frameNode)
+{
+    uint32_t errorCode = -1;
+    CHECK_NULL_RETURN(frameNode, errorCode);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, errorCode);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), errorCode);
+    Color color = paintProperty->GetImagePaintStyle()->GetSvgFillColor().value_or(Color());
+    return color.GetValue();
+}
+
 bool ImageModelNG::GetDraggable(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, false);

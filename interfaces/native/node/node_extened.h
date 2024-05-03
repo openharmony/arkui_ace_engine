@@ -76,6 +76,36 @@ struct ArkUI_NodeCustomEvent {
     void* userData;
 };
 
+struct ArkUI_OptionalFloat {
+    int32_t isSet;
+    float value;
+};
+
+struct ArkUI_OptionalInt {
+    int32_t isSet;
+    int32_t value;
+};
+
+struct ArkUI_OptionalUint {
+    int32_t isSet;
+    uint32_t value;
+};
+
+struct ArkUI_SwiperIndicator {
+    ArkUI_SwiperIndicatorType type;
+    ArkUI_OptionalFloat dimLeft;
+    ArkUI_OptionalFloat dimTop;
+    ArkUI_OptionalFloat dimRight;
+    ArkUI_OptionalFloat dimBottom;
+    ArkUI_OptionalFloat itemWidth;
+    ArkUI_OptionalFloat itemHeight;
+    ArkUI_OptionalFloat selectedItemWidth;
+    ArkUI_OptionalFloat selectedItemHeight;
+    ArkUI_OptionalInt maskValue;
+    ArkUI_OptionalUint colorValue;
+    ArkUI_OptionalUint selectedColorValue;
+};
+
 #ifdef __cplusplus
 };
 #endif

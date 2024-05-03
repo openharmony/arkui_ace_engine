@@ -125,6 +125,13 @@ typedef struct {
 typedef struct ArkUI_WaterFlowSectionOption ArkUI_WaterFlowSectionOption;
 
 /**
+ * @brief Defines the navigation indicator style for the swiper.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_SwiperIndicator ArkUI_SwiperIndicator;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -1676,6 +1683,18 @@ typedef enum {
 } ArkUI_ButtonType;
 
 /**
+ * @brief Define the navigation indicator type of the swiper.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** dot type. */
+    ARKUI_SWIPER_INDICATOR_TYPE_DOT,
+    /** digit type. */
+    ARKUI_SWIPER_INDICATOR_TYPE_DIGIT,
+} ArkUI_SwiperIndicatorType;
+
+/**
 * @brief Creates a size constraint.
 *
 * @since 12
@@ -1960,6 +1979,221 @@ void OH_ArkUI_WaterFlowSectionOption_SetMargin(ArkUI_WaterFlowSectionOption* opt
 * @since 12
 */
 ArkUI_Margin OH_ArkUI_WaterFlowSectionOption_GetMargin(ArkUI_WaterFlowSectionOption* option, int32_t index);
+
+/**
+ * @brief Creates a navigation indicator.
+ *
+ * @param type Indicates the type of the indicator.
+ * @return Returns the pointer to the new indicator.
+ * @since 12
+*/
+ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType type);
+
+/**
+ * @brief Destroys the pointer to the indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_Dispose(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the distance between the navigation point and the left of the swiper.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param value Indicates the distance between the navigation point and the left of the swiper.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_SetLeftPosition(ArkUI_SwiperIndicator* indicator, float value);
+
+/**
+ * @brief Obtains the distance between the navigation point and the left of the swiper.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the distance between the navigation point and the left of the swiper.
+ * @since 12
+*/
+float OH_ArkUI_SwiperIndicator_GetLeftPosition(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the distance between the navigation point and the top of the swiper.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param value Indicates the distance between the navigation point and the top of the swiper.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_SetTopPosition(ArkUI_SwiperIndicator* indicator, float value);
+
+/**
+ * @brief Obtains the distance between the navigation point and the top of the swiper.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the distance between the navigation point and the top of the swiper.
+ * @since 12
+*/
+float OH_ArkUI_SwiperIndicator_GetTopPosition(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the distance between the navigation point and the right of the swiper.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param value Indicates the distance between the navigation point and the right of the swiper.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_SetRightPosition(ArkUI_SwiperIndicator* indicator, float value);
+
+/**
+ * @brief Obtains the distance between the navigation point and the right of the swiper.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the distance between the navigation point and the right of the swiper.
+ * @since 12
+*/
+float OH_ArkUI_SwiperIndicator_GetRightPosition(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the distance between the navigation point and the bottom of the swiper.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param value Indicates the distance between the navigation point and the bottom of the swiper.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_SetBottomPosition(ArkUI_SwiperIndicator* indicator, float value);
+
+/**
+ * @brief Obtains the distance between the navigation point and the bottom of the swiper.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the distance between the navigation point and the bottom of the swiper.
+ * @since 12
+*/
+float OH_ArkUI_SwiperIndicator_GetBottomPosition(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the width of the dot for the dot indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param value Indicates the width of the dot for the dot indicator.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_SetItemWidth(ArkUI_SwiperIndicator* indicator, float value);
+
+/**
+ * @brief Obtains the width of the dot for the dot indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the width of the dot for the dot indicator.
+ * @since 12
+*/
+float OH_ArkUI_SwiperIndicator_GetItemWidth(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the height of the dot for the dot indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param value Indicates the height of the dot for the dot indicator.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_SetItemHeight(ArkUI_SwiperIndicator* indicator, float value);
+
+/**
+ * @brief  Obtains the height of the dot for the dot indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the height of the dot for the dot indicator.
+ * @since 12
+*/
+float OH_ArkUI_SwiperIndicator_GetItemHeight(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the width of the selected dot for the dot indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param value Indicates the width of the selected dot for the dot indicator.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_SetSelectedItemWidth(ArkUI_SwiperIndicator* indicator, float value);
+
+/**
+ * @brief  Obtains the width of the selected dot for the dot indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the width of the selected dot for the dot indicator.
+ * @since 12
+*/
+float OH_ArkUI_SwiperIndicator_GetSelectedItemWidth(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the height of the selected dot for the dot indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param value Indicates the height of the selected dot for the dot indicator.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_SetSelectedItemHeight(ArkUI_SwiperIndicator* indicator, float value);
+
+/**
+ * @brief  Obtains the height of the selected dot for the dot indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the height of the selected dot for the dot indicator.
+ * @since 12
+*/
+float OH_ArkUI_SwiperIndicator_GetSelectedItemHeight(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets whether to display the mask style of the dot navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param mask Whether to display the mask style. True means to display.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_SetMask(ArkUI_SwiperIndicator* indicator, int32_t mask);
+
+/**
+ * @brief Obtains whether to display the mask style of the dot navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns whether to display the mask style. True means to display.
+ * @since 12
+*/
+int32_t OH_ArkUI_SwiperIndicator_GetMask(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the color of the dot navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param color the color of the dot navigation indicator, in 0xARGB format.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_SetColor(ArkUI_SwiperIndicator* indicator, uint32_t color);
+
+/**
+ * @brief Obtains the color of the dot navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the color of the dot navigation indicator, in 0xARGB format.
+ * @since 12
+*/
+uint32_t OH_ArkUI_SwiperIndicator_GetColor(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Sets the color of the selected dot for the navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param color the color of the selected dot, in 0xARGB format.
+ * @since 12
+*/
+void OH_ArkUI_SwiperIndicator_SetSelectedColor(ArkUI_SwiperIndicator* indicator, uint32_t selectedColor);
+
+/**
+ * @brief Obtains the color of the selected dot for the dot navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the color of the selected dot, in 0xARGB format.
+ * @since 12
+*/
+uint32_t OH_ArkUI_SwiperIndicator_GetSelectedColor(ArkUI_SwiperIndicator* indicator);
 #ifdef __cplusplus
 };
 #endif
