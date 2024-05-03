@@ -32,16 +32,16 @@ class WaterFlowLayoutInfoSW : public WaterFlowLayoutInfoBase {
     DECLARE_ACE_TYPE(WaterFlowLayoutInfoSW, WaterFlowLayoutInfoBase);
 
 public:
-    WaterFlowLayoutMode mode() const override
+    WaterFlowLayoutMode Mode() const override
     {
         return WaterFlowLayoutMode::SLIDING_WINDOW;
     }
 
-    float offset() const override
+    float Offset() const override
     {
         return totalOffset_;
     }
-    int32_t firstIdx() const override
+    int32_t FirstIdx() const override
     {
         return startIndex_;
     }
@@ -127,6 +127,13 @@ public:
      * @return positive result when item's bottom edge is above viewport.
      */
     float DistanceToBottom(int32_t item, float mainSize, float mainGap) const;
+
+    /**
+     * @brief If we jump to a position and scroll back to top, the staring items might not be aligned with the top boundary.
+     * @return true if 1. any lane misaligned with top boundary.
+     *                 2. the first item is not in the first lane.
+     */
+    bool IsMisaligned() const;
 
     int32_t StartIndex() const;
     int32_t EndIndex() const;

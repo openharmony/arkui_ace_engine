@@ -295,7 +295,7 @@ void WaterFlowLayoutInfoSW::ResetBeforeJump(float laneBasePos)
         lane.startPos = laneBasePos;
         lane.endPos = laneBasePos;
     });
-    totalOffset_ = 0;
+    totalOffset_ = 0.0f;
     maxHeight_ = 0.0f;
     idxToLane_.clear();
     synced_ = false;
@@ -359,4 +359,15 @@ float WaterFlowLayoutInfoSW::BottomFinalPos(float viewHeight) const
     }
     return -(EndPos() + footerHeight_) + viewHeight;
 };
+
+bool WaterFlowLayoutInfoSW::IsMisaligned() const
+{
+    if (lanes_.empty()) {
+        return false;
+    }
+    bool laneNotAligned = std::any_of(lanes_.begin(), lanes_.end(), [](const auto& lane) {
+        return !NearZero(lane.startPos);
+    });
+    return itemStart_ && (laneNotAligned || lanes_[0].items_.front().idx != 0);
+}
 } // namespace OHOS::Ace::NG

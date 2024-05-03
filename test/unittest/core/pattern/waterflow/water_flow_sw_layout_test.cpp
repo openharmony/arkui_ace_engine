@@ -300,4 +300,31 @@ HWTEST_F(WaterFlowSWTest, OverScroll002, TestSize.Level1)
     EXPECT_LT(info_->StartPos(), 0.0f);
     EXPECT_GT(info_->EndPos(), 800.0f);
 }
+
+/**
+ * @tc.name: Misaligned001
+ * @tc.desc: Test misalignment and adjustment
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetFooter(GetDefaultHeaderBuilder());
+        CreateItem(50);
+    });
+    EXPECT_FALSE(info_->IsMisaligned());
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+
+    UpdateCurrentOffset(Infinity<float>());
+    EXPECT_TRUE(info_->IsMisaligned());
+    EXPECT_EQ(GetChildY(frameNode_, 1), 100.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+    pattern_->OnScrollEndCallback();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(info_->IsMisaligned());
+    EXPECT_EQ(info_->lanes_[0].startPos, 0.0f);
+    EXPECT_EQ(info_->lanes_[0].items_.front().idx, 0);
+}
 } // namespace OHOS::Ace::NG

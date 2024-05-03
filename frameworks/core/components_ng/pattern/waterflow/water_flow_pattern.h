@@ -46,7 +46,7 @@ public:
     void SetLayoutMode(LayoutMode mode);
     LayoutMode GetLayoutMode() const
     {
-        return layoutMode_;
+        return layoutInfo_->Mode();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
@@ -95,7 +95,7 @@ public:
 
     float GetTotalOffset() const override
     {
-        return -layoutInfo_->offset();
+        return -layoutInfo_->Offset();
     }
 
     int32_t GetRows() const;
@@ -167,8 +167,7 @@ private:
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
     std::optional<int32_t> targetIndex_;
-    LayoutMode layoutMode_ = LayoutMode::TOP_DOWN;
-    RefPtr<WaterFlowLayoutInfoBase> layoutInfo_ = WaterFlowLayoutInfoBase::Create(layoutMode_);
+    RefPtr<WaterFlowLayoutInfoBase> layoutInfo_ = WaterFlowLayoutInfoBase::Create(LayoutMode::TOP_DOWN);
     RefPtr<WaterFlowSections> sections_;
 
     float prevOffset_ = 0.0f;
