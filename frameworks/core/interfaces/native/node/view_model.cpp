@@ -65,6 +65,7 @@
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -379,6 +380,13 @@ void* createGridColNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createRadioNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = RadioModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -408,7 +416,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr, // Web
         createSliderNode,
         createCanvasNode,
-        nullptr, // Radio
+        createRadioNode, // Radio
         createGridNode,
 #ifdef XCOMPONENT_SUPPORTED
         createXComponentNode,
