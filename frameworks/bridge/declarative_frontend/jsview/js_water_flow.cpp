@@ -169,7 +169,7 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
 
     // set layout mode first. SetFooter is dependent to it
     using LayoutMode = NG::WaterFlowLayoutMode;
-    auto mode = LayoutMode::SLIDING_WINDOW;
+    auto mode = LayoutMode::TOP_DOWN;
     auto jsMode = obj->GetProperty("layoutMode");
     if (jsMode->IsNumber()) {
         mode = static_cast<LayoutMode>(jsMode->ToNumber<int32_t>());
