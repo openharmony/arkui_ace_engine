@@ -3075,6 +3075,10 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         ParseJsDimensionVp(object->GetProperty("y"), y);
         double valueX = x.Value();
         double valueY = y.Value();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            valueX = x.ConvertToPx();
+            valueY = y.ConvertToPx();
+        }
         DimensionUnit typeX = DimensionUnit::PX;
         DimensionUnit typeY = DimensionUnit::PX;
         if (x.Unit() == DimensionUnit::PERCENT) {
@@ -3084,10 +3088,6 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         if (y.Unit() == DimensionUnit::PERCENT) {
             valueY = y.Value();
             typeY = DimensionUnit::PERCENT;
-        }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            typeX = x.Unit();
-            typeY = y.Unit();
         }
         SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
     }
