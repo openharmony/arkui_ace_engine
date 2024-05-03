@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_sw_layout.h"
+#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 
 #include <algorithm>
 #include <cfloat>
