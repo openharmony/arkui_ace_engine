@@ -550,6 +550,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
         }
     }
     // Reducing the value of MaxLines to make sure the parapraph could be layout in the constraint of height.
+    paragraph = GetSingleParagraph();
     height = static_cast<float>(paragraph->GetHeight());
     while (GreatNotEqual(height, contentConstraint.maxSize.Height())) {
         auto maxLines = textStyle.GetMaxLines();
@@ -562,6 +563,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
         if (!BuildParagraph(textStyle, layoutProperty, contentConstraint, layoutWrapper)) {
             return false;
         }
+        paragraph = GetSingleParagraph();
         height = static_cast<float>(paragraph->GetHeight());
     }
     return true;
