@@ -43,7 +43,6 @@ void TextSelectController::UpdateCaretIndex(int32_t index)
     caretInfo_.index = newIndex;
     firstHandleInfo_.index = newIndex;
     secondHandleInfo_.index = newIndex;
-    UpdateRecordCaretIndex(caretInfo_.index);
 }
 
 RectF TextSelectController::CalculateEmptyValueCaretRect() const
@@ -146,7 +145,6 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);
-        UpdateRecordCaretIndex(caretInfo_.index);
     } else {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
     }
@@ -441,7 +439,6 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
     MoveHandleToContentRect(caretRect, boundaryAdjustment);
     caretInfo_.rect = caretRect;
     caretRect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
-    UpdateRecordCaretIndex(caretInfo_.index);
 }
 
 void TextSelectController::UpdateFirstHandleOffset()
@@ -539,16 +536,6 @@ void TextSelectController::FireSelectEvent()
         eventHub->FireOnSelectionChange(std::min(firstHandleInfo_.index, secondHandleInfo_.index),
             std::max(firstHandleInfo_.index, secondHandleInfo_.index));
     }
-}
-
-void TextSelectController::UpdateRecordCaretIndex(int32_t index) const
-{
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_VOID(textFiled);
-    textFiled->UpdateRecordCaretIndex(index);
-    textFiled->UpdateCaretInfoToController();
 }
 
 void TextSelectController::ResetHandles()

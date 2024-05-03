@@ -238,7 +238,6 @@ public:
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
     void HandleOnDelete(bool backward) override;
-    void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
 
     int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
@@ -331,7 +330,6 @@ public:
 
     void OnAreaChangedInner() override;
     void OnVisibleChange(bool isVisible) override;
-    void ClearEditingValue();
     void HandleCounterBorder();
     std::wstring GetWideText()
     {
@@ -666,6 +664,7 @@ public:
     }
 
     void UpdateEditingValueToRecord();
+
     void UpdateScrollBarOffset() override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override
@@ -1351,7 +1350,7 @@ private:
     void UnitResponseKeyEvent();
     void ProcNormalInlineStateInBlurEvent();
     bool IsMouseOverScrollBar(const GestureEvent& info);
-    
+
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1558,7 +1557,6 @@ private:
     bool colorModeChange_ = false;
     Offset clickLocation_;
     bool isKeyboardClosedByUser_ = false;
-    bool lockRecord_ = false;
     bool isFillRequestFinish_ = false;
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
