@@ -313,9 +313,25 @@ void ListModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
     eventHub->SetOnReachStart(std::move(onReachStart));
 }
 
+void ListModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachStart(std::move(onReachStart));
+}
+
 void ListModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachEnd(std::move(onReachEnd));
+}
+
+void ListModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
+{
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
