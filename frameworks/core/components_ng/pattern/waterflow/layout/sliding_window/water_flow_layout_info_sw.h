@@ -79,6 +79,16 @@ public:
         return lanes_.size();
     }
 
+    float CurrentPos() const override
+    {
+        return 0.0f;
+    }
+    float TopFinalPos() const override
+    {
+        return -StartPos();
+    };
+    float BottomFinalPos(float viewHeight) const override;
+
     void Reset() override;
 
     /**
@@ -88,6 +98,17 @@ public:
      */
     void ResetBeforeJump(float laneBasePos);
 
+    void BeginUpdate()
+    {
+        synced_ = false;
+    }
+    /**
+     * @brief synchronize data after update is completed.
+     *
+     * @param itemCnt number of FlowItems.
+     * @param mainSize main-axis length of the viewport.
+     * @param mainGap main-axis gap between items.
+     */
     void Sync(int32_t itemCnt, float mainSize, float mainGap);
 
     /**
@@ -138,7 +159,15 @@ public:
     float delta_ = 0.0f;
     float totalOffset_ = 0.0f; // record total offset when continuously scrolling. Reset when jumped
     float mainGap_ = 0.0f;     // update this at the end of a layout
+
+    // maximum content height encountered so far, mainly for comparing content and viewport height
+    float maxHeight_ = 0.0f;
     float footerHeight_ = 0.0f;
+
+private:
+    /* cache */
+    float startPos_ = 0.0f;
+    float endPos_ = 0.0f;
 
     bool synced_ = false;
 

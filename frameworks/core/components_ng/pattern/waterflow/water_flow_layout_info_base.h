@@ -39,7 +39,7 @@ public:
 
     /* PURE GETTERs */
     virtual WaterFlowLayoutMode mode() const = 0;
-    virtual float offset() const = 0;
+    virtual float offset() const = 0; // total offset of content
     virtual int32_t firstIdx() const = 0; // for compatibility
 
     virtual void UpdateOffset(float delta) = 0;
@@ -104,6 +104,19 @@ public:
 
     virtual int32_t GetMainCount() const = 0;
     virtual int32_t GetCrossCount() const = 0;
+
+    /* ======== provide position info for spring effect animation ========= */
+    virtual float CurrentPos() const = 0;
+    /**
+     * @return final position to bounce back to after over-scrolling from top.
+     */
+    virtual float TopFinalPos() const = 0;
+    /**
+     * @param viewHeight height of the viewport.
+     * @return final position to bounce back to after over-scrolling from bottom.
+     */
+    virtual float BottomFinalPos(float viewHeight) const = 0;
+    /* ========================================== */
 
     virtual void Reset() = 0;
 

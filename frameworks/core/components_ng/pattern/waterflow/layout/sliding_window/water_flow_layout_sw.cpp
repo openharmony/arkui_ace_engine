@@ -31,7 +31,7 @@
 namespace OHOS::Ace::NG {
 void WaterFlowSWLayout::Measure(LayoutWrapper* wrapper)
 {
-    info_->synced_ = false;
+    info_->BeginUpdate();
     wrapper_ = wrapper;
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
     info_->axis_ = axis_ = props->GetAxis();

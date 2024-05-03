@@ -30,13 +30,16 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, float mainGap)
     delta_ = 0.0f;
     lastMainSize_ = mainSize;
     mainGap_ = mainGap;
+    startPos_ = StartPos();
+    endPos_ = EndPos();
 
-    itemStart_ = startIndex_ == 0 && NonNegative(DistanceToTop(0, mainGap_));
-    itemEnd_ = endIndex_ == itemCnt - 1;
+    itemStart_ = (startIndex_ == 0 && NonNegative(startPos_)) || GreatOrEqual(startPos_, mainSize);
+    itemEnd_ = endIndex_ == itemCnt - 1 || (itemCnt > 0 && NonPositive(endPos_));
     if (!itemEnd_) {
         footerHeight_ = 0.0f;
     }
-    offsetEnd_ = itemEnd_ && LessOrEqual(EndPos() + footerHeight_, mainSize);
+    offsetEnd_ = itemEnd_ && LessOrEqual(endPos_ + footerHeight_, mainSize);
+    maxHeight_ = std::max(endPos_ - startPos_ + footerHeight_, maxHeight_);
 
     synced_ = true;
 }
@@ -110,7 +113,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
     if (!itemEnd_) {
         return res;
     }
-    float disToBot = EndPos() - lastMainSize_;
+    float disToBot = EndPos() + footerHeight_ - lastMainSize_;
     if (!itemEnd_) {
         res.end = std::min(0.0f, disToBot + delta);
     } else if (Negative(delta)) {
@@ -128,22 +131,28 @@ float WaterFlowLayoutInfoSW::CalcOverScroll(float mainSize, float delta) const
     }
     float res = 0.0f;
     if (itemStart_) {
-        res = lanes_[0].startPos + delta;
+        res = StartPos() + delta;
     }
     if (offsetEnd_) {
-        res = mainSize - (EndPos() + delta);
+        res = mainSize - (EndPos() + footerHeight_ + delta);
     }
     return res;
 }
 
 float WaterFlowLayoutInfoSW::EndPos() const
 {
+    if (synced_) {
+        return endPos_;
+    }
     return std::max_element(lanes_.begin(), lanes_.end(), [](const Lane& left, const Lane& right) {
         return LessNotEqual(left.endPos, right.endPos);
     })->endPos;
 }
 float WaterFlowLayoutInfoSW::StartPos() const
 {
+    if (synced_) {
+        return startPos_;
+    }
     return std::min_element(lanes_.begin(), lanes_.end(), [](const Lane& left, const Lane& right) {
         return LessNotEqual(left.startPos, right.startPos);
     })->startPos;
@@ -168,10 +177,8 @@ bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos) const
 
 float WaterFlowLayoutInfoSW::GetContentHeight() const
 {
-    if (lanes_.empty()) {
-        return 0.0f;
-    }
-    return EndPos() - StartPos();
+    // only height in view are remembered
+    return maxHeight_;
 }
 
 int32_t WaterFlowLayoutInfoSW::GetMainCount() const
@@ -239,6 +246,7 @@ void WaterFlowLayoutInfoSW::Reset()
     delta_ = DistanceToTop(startIndex_, mainGap_);
     lanes_.clear();
     idxToLane_.clear();
+    maxHeight_ = 0.0f;
     synced_ = false;
 }
 
@@ -288,6 +296,7 @@ void WaterFlowLayoutInfoSW::ResetBeforeJump(float laneBasePos)
         lane.endPos = laneBasePos;
     });
     totalOffset_ = 0;
+    maxHeight_ = 0.0f;
     idxToLane_.clear();
     synced_ = false;
 }
@@ -341,4 +350,13 @@ void WaterFlowLayoutInfoSW::ClearDataFrom(int32_t idx, float mainGap)
         }
     }
 }
+
+float WaterFlowLayoutInfoSW::BottomFinalPos(float viewHeight) const
+{
+    if (LessNotEqual(maxHeight_, viewHeight)) {
+        // content < view
+        return -(EndPos() + footerHeight_) + maxHeight_;
+    }
+    return -(EndPos() + footerHeight_) + viewHeight;
+};
 } // namespace OHOS::Ace::NG

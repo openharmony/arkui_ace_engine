@@ -97,6 +97,20 @@ public:
         return prevPos - currentOffset_;
     }
 
+    float CurrentPos() const override
+    {
+        return currentOffset_;
+    }
+    float TopFinalPos() const override
+    {
+        return 0.0f;
+    };
+    float BottomFinalPos(float viewHeight) const override
+    {
+        float endOffset = viewHeight - GetContentHeight();
+        return Negative(endOffset) ? endOffset : 0.0f;
+    };
+
     float JumpToTargetAlign(const std::pair<float, float>& item) const;
     void JumpTo(const std::pair<float, float>& item);
 

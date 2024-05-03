@@ -502,28 +502,28 @@ void WaterFlowPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scr
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
-        return pattern->layoutInfo_->offset();
+        return pattern->layoutInfo_->CurrentPos();
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
-        auto leadOffset = pattern->GetMainContentSize() - pattern->layoutInfo_->GetContentHeight();
-        if (pattern->GetAlwaysEnabled() && Positive(leadOffset)) {
-            return 0.0;
-        }
-        return Negative(leadOffset) ? leadOffset : 0.0;
+        return pattern->layoutInfo_->BottomFinalPos(pattern->GetMainContentSize());
     });
-    scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
+    scrollEffect->SetTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, 0.0);
+        return pattern->layoutInfo_->TopFinalPos();
+    });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
-        auto leadOffset = pattern->GetMainContentSize() - pattern->layoutInfo_->GetContentHeight();
-        if (pattern->GetAlwaysEnabled() && Positive(leadOffset)) {
-            return 0.0;
-        }
-        return Negative(leadOffset) ? leadOffset : 0.0;
+        return pattern->layoutInfo_->BottomFinalPos(pattern->GetMainContentSize());
     });
-    scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
+    scrollEffect->SetInitTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, 0.0);
+        return pattern->layoutInfo_->TopFinalPos();
+    });
 }
 
 void WaterFlowPattern::MarkDirtyNodeSelf()
