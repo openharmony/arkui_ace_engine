@@ -1354,6 +1354,8 @@ struct ArkUICommonModifier {
         ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size);
     ArkUI_Uint32 (*getColorBlend)(ArkUINodeHandle node);
     ArkUIBlurStyleOptionType (*getForegroundBlurStyle)(ArkUINodeHandle node);
+    void (*resetVisibleAreaChange)(ArkUINodeHandle node);
+    void (*resetAreaChange)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {

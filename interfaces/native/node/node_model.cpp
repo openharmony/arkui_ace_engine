@@ -342,6 +342,14 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
         delete extraData;
         nodePtr->extraData = nullptr;
     }
+    if (eventType == NODE_EVENT_ON_VISIBLE_AREA_CHANGE) {
+        auto* impl = GetFullImpl();
+        impl->getNodeModifiers()->getCommonModifier()->resetVisibleAreaChange(nodePtr->uiNodeHandle);
+    }
+    if (eventType == NODE_EVENT_ON_AREA_CHANGE) {
+        auto* impl = GetFullImpl();
+        impl->getNodeModifiers()->getCommonModifier()->resetAreaChange(nodePtr->uiNodeHandle);
+    }
 }
 
 void (*g_compatibleEventReceiver)(ArkUI_CompatibleNodeEvent* event) = nullptr;
