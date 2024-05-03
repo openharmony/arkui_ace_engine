@@ -7760,7 +7760,7 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg001, TestSize.Level1)
 
 /**
  * @tc.name: SubMenuLayoutAlgorithmTestNg002
- * @tc.desc: Test SubMenuLayoutAlgorithm InitializePaddingAPI11 function.
+ * @tc.desc: Test SubMenuLayoutAlgorithm InitializePaddingAPI12 function.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
@@ -7823,13 +7823,13 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
     ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
 
     /**
-     * @tc.steps: step3. call the InitializePaddingAPI11 method.
+     * @tc.steps: step3. call the InitializePaddingAPI12 method.
      * @tc.expected: padding is not zero
      */
     algorithm->hierarchicalParameters_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->menuMediumMargin_ = 10.0_vp;
-    algorithm->InitializePaddingAPI11(wrapper);
+    algorithm->InitializePaddingAPI12(wrapper);
     ASSERT_EQ(algorithm->paddingStart_, 10.0f);
     ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
     ASSERT_EQ(algorithm->paddingTop_, 0.0f);
@@ -7838,7 +7838,7 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
 
 /**
  * @tc.name: SubMenuLayoutAlgorithmTestNg003
- * @tc.desc: Test SubMenuLayoutAlgorithm InitializePaddingAPI11 function.
+ * @tc.desc: Test SubMenuLayoutAlgorithm InitializePaddingAPI12 function.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
@@ -7906,7 +7906,7 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
     algorithm->hierarchicalParameters_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->menuLargeMargin_ = 10.0_vp;
-    algorithm->InitializePaddingAPI11(wrapper);
+    algorithm->InitializePaddingAPI12(wrapper);
     ASSERT_EQ(algorithm->paddingStart_, 10.0f);
     ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
     ASSERT_EQ(algorithm->paddingTop_, 0.0f);
@@ -8156,7 +8156,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNg011, TestSize.Level1)
 }
 /**
  * @tc.name: MenuLayoutAlgorithmAPI11PaddingTest1
- * @tc.desc: Test MenuLayoutAlgorithm InitializePaddingAPI11 function.
+ * @tc.desc: Test MenuLayoutAlgorithm InitializePaddingAPI12 function.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest1, TestSize.Level1)
@@ -8214,13 +8214,13 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest1, TestSize.Level1)
      */
     ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
     /**
-     * @tc.steps: step3. call the InitializePaddingAPI11 method.
+     * @tc.steps: step3. call the InitializePaddingAPI12 method.
      * @tc.expected: padding is not zero
      */
     algorithm->hierarchicalParameters_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->menuMediumMargin_ = 10.0_vp;
-    algorithm->InitializePaddingAPI11(wrapper);
+    algorithm->InitializePaddingAPI12(wrapper);
     ASSERT_EQ(algorithm->paddingStart_, 10.0f);
     ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
     ASSERT_EQ(algorithm->paddingTop_, 0.0f);
@@ -8228,7 +8228,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest1, TestSize.Level1)
 }
 /**
  * @tc.name: MenuLayoutAlgorithmAPI11PaddingTest2
- * @tc.desc: Test MenuLayoutAlgorithm InitializePaddingAPI11 function.
+ * @tc.desc: Test MenuLayoutAlgorithm InitializePaddingAPI12 function.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest2, TestSize.Level1)
@@ -8282,14 +8282,14 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest2, TestSize.Level1)
      */
     ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
     /**
-     * @tc.steps: step3. call the InitializePaddingAPI11 method.
+     * @tc.steps: step3. call the InitializePaddingAPI12 method.
      * @tc.expected: padding is not zero
      */
     algorithm->hierarchicalParameters_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
     selectTheme->menuLargeMargin_ = 10.0_vp;
-    algorithm->InitializePaddingAPI11(wrapper);
+    algorithm->InitializePaddingAPI12(wrapper);
     ASSERT_EQ(algorithm->optionPadding_, 10.0f);
     ASSERT_EQ(algorithm->paddingStart_, 10.0f);
     ASSERT_EQ(algorithm->paddingEnd_, 10.0f);

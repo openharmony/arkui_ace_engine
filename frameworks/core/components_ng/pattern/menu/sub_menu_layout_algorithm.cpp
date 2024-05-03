@@ -40,11 +40,9 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(parentMenuItem);
     InitHierarchicalParameters(props->GetShowInSubWindowValue(false), menuPattern);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        InitializePaddingAPI11(layoutWrapper);
         ModifySubMenuWrapper(layoutWrapper);
-    } else {
-        InitializePadding(layoutWrapper);
     }
+    CheckMenuPadding(layoutWrapper);
     const auto& geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto parentItemProps = parentMenuItem->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -74,7 +72,6 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         parentPattern->AddHoverRegions(position + wrapperOffset, bottomRightPoint + wrapperOffset);
     }
-
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
     child->Layout();
@@ -267,7 +264,7 @@ void SubMenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
     }
 }
 
-void SubMenuLayoutAlgorithm::InitializePaddingAPI11(LayoutWrapper* layoutWrapper)
+void SubMenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper)
 {
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
@@ -289,6 +286,16 @@ void SubMenuLayoutAlgorithm::InitializePaddingAPI11(LayoutWrapper* layoutWrapper
         }
     } else {
         optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    }
+}
+
+void SubMenuLayoutAlgorithm::CheckMenuPadding(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        InitializePaddingAPI12(layoutWrapper);
+    } else {
+        InitializePadding(layoutWrapper);
     }
 }
 
