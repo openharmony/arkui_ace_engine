@@ -16,28 +16,28 @@
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography_style.h"
 #include "include/core/SkImage.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
 #include "include/utils/SkBase64.h"
+#include "rosen_text/typography_create.h"
+#include "rosen_text/typography_style.h"
 
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/image_provider/image_object.h"
+#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/sk_image_cache.h"
-#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -110,7 +110,8 @@ bool CanvasPaintMethod::HasTask() const
 #endif
 }
 
-void CanvasPaintMethod::FlushTask() {
+void CanvasPaintMethod::FlushTask()
+{
 #ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "There are %{public}zu tasks will be run.", tasks_.size());
     for (auto& task : tasks_) {
