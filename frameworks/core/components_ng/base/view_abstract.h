@@ -657,6 +657,8 @@ public:
     static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
         const std::vector<double> &ratioList);
     static Color GetColorBlend(FrameNode* frameNode);
+    static void ResetAreaChanged(FrameNode* frameNode);
+    static void ResetVisibleChange(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

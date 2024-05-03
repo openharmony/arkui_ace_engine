@@ -5155,6 +5155,20 @@ void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_
     ViewAbstract::SetOnVisibleChange(frameNode, onEvent, ratioList);
 }
 
+void ResetVisibleAreaChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetVisibleChange(frameNode);
+}
+
+void ResetAreaChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetAreaChanged(frameNode);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -5220,7 +5234,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetEnabled, GetMargin, GetMarginDimension, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask,
         GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable,
         SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize, GetRenderGroup,
-        SetOnVisibleAreaChange, GetColorBlend, GetForegroundBlurStyle };
+        SetOnVisibleAreaChange, GetColorBlend, GetForegroundBlurStyle, ResetVisibleAreaChange, ResetAreaChange };
 
     return &modifier;
 }
