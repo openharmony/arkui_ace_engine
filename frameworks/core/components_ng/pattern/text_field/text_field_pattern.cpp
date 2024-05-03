@@ -1145,7 +1145,7 @@ void TextFieldPattern::HandleBlurEvent()
     magnifierController_->UpdateShowMagnifier();
     CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
     StopTwinkling();
-    if ((customKeyboardBuilder_ && isCustomKeyboardAttached_)) {
+    if ((customKeyboard_ && isCustomKeyboardAttached_)) {
         CloseKeyboard(true);
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFile on blur, close custom keyboard");
     }
@@ -2508,7 +2508,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
                 return;
             }
             pattern->ScrollToSafeArea();
-            if (pattern->customKeyboardBuilder_) {
+            if (pattern->customKeyboard_) {
                 pattern->StartTwinkling();
             }
         },
@@ -3086,7 +3086,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     CHECK_NULL_RETURN(context, false);
 
     if (needShowSoftKeyboard) {
-        if (customKeyboardBuilder_) {
+        if (customKeyboard_) {
             return RequestCustomKeyboard();
         }
     KeyboardContentTypeToInputType();
@@ -3113,7 +3113,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             textConfig.windowId = systemWindowId;
         }
 #endif
-        if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
+        if (customKeyboard_ && isCustomKeyboardAttached_) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request Softkeyboard, Close CustomKeyboard.");
             CloseCustomKeyboard();
         }
@@ -3225,7 +3225,7 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose, bool isStopTwinkling)
             StopTwinkling();
         }
         CloseSelectOverlay(true);
-        if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
+        if (customKeyboard_ && isCustomKeyboardAttached_) {
             return CloseCustomKeyboard();
         }
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Request close soft keyboard.");
@@ -3269,7 +3269,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     if (isCustomKeyboardAttached_) {
         return true;
     }
-    CHECK_NULL_RETURN(customKeyboardBuilder_, false);
+    CHECK_NULL_RETURN(customKeyboard_, false);
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -3277,7 +3277,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
     overlayManager->SetCustomKeyboardOption(keyboardAvoidance_);
-    overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
+    overlayManager->BindKeyboardWithNode(customKeyboard_, frameNode->GetId());
     isCustomKeyboardAttached_ = true;
     keyboardOverlay_ = overlayManager;
     auto caretHeight = selectController_->GetCaretRect().Height();
@@ -5620,7 +5620,7 @@ void TextFieldPattern::DumpInfo()
                                        .append(std::to_string(textConfig.inputAttribute.enterKeyType)));
 #endif
     DumpLog::GetInstance().AddDesc(textSelector_.ToString());
-    if (customKeyboardBuilder_) {
+    if (customKeyboard_) {
         DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));
@@ -5631,7 +5631,7 @@ void TextFieldPattern::DumpInfo()
 
 void TextFieldPattern::DumpAdvanceInfo()
 {
-    if (customKeyboardBuilder_) {
+    if (customKeyboard_) {
         DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));
