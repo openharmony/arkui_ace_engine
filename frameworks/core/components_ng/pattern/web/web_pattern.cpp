@@ -317,7 +317,11 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragMove(event);
     };
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) { return; };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFlingMove(info);
+    };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
@@ -347,6 +351,18 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             // In other cases, the panEvent is used by default
             return GestureJudgeResult::CONTINUE;
         });
+}
+
+void WebPattern::HandleFlingMove(const GestureEvent& event)
+{
+    if ((event.GetInputEventType() == InputEventType::AXIS) &&
+        (event.GetSourceTool() == SourceTool::TOUCHPAD)) {
+        CHECK_NULL_VOID(delegate_);
+        auto localLocation = event.GetLocalLocation();
+        delegate_->HandleTouchpadFlingEvent(localLocation.GetX(), localLocation.GetY(),
+                                            event.GetVelocity().GetVelocityX(),
+                                            event.GetVelocity().GetVelocityY());
+    }
 }
 
 void WebPattern::HandleDragMove(const GestureEvent& event)
