@@ -163,10 +163,11 @@ void dispose(ArkUIGesture* recognizer)
 void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& touchPointes,
     std::array<ArkUITouchPoint, MAX_POINTS>& points)
 {
-    if (touchPointes.empty()) {
+    if (touchPointes.empty() || touchPointes.size() > info.GetFingerList().size()) {
         return;
     }
     size_t i = 0;
+    auto fingureIterator = std::begin(info.GetFingerList());
     for (auto& touchPoint : touchPointes) {
         if (i >= MAX_POINTS) {
             break;
@@ -174,17 +175,17 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].id = touchPoint.id;
         double density = PipelineBase::GetCurrentDensity();
         points[i].nodeX = NearEqual(density, 0.0) ? 0.0f :
-            info.GetLocalLocation().GetX() / density;
+            fingureIterator->localLocation_.GetX() / density;
         points[i].nodeY = NearEqual(density, 0.0) ? 0.0f :
-            info.GetLocalLocation().GetY() / density;
+            fingureIterator->localLocation_.GetY() / density;
         points[i].windowX = NearEqual(density, 0.0) ? 0.0f :
-            info.GetGlobalLocation().GetX() / density;
+            fingureIterator->globalLocation_.GetX() / density;
         points[i].windowY = NearEqual(density, 0.0) ? 0.0f :
-            info.GetGlobalLocation().GetY() / density;
+            fingureIterator->globalLocation_.GetY() / density;
         points[i].screenX = NearEqual(density, 0.0) ? 0.0f :
-            info.GetScreenLocation().GetX() / density;
+            touchPoint.screenX / density;
         points[i].screenY = NearEqual(density, 0.0) ? 0.0f :
-            info.GetScreenLocation().GetY() / density;
+            touchPoint.screenY / density;
         points[i].contactAreaWidth = touchPoint.size;
         points[i].contactAreaHeight = touchPoint.size;
         points[i].pressure = touchPoint.force;
@@ -193,6 +194,7 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(touchPoint.sourceTool);
         i++;
+        fingureIterator++;
     }
 }
 
