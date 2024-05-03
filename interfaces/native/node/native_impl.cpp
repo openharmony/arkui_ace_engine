@@ -85,8 +85,8 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::RemoveNodeEventReceiver,
     OHOS::Ace::NodeModel::AddNodeCustomEventReceiver,
     OHOS::Ace::NodeModel::RemoveNodeCustomEventReceiver,
-    OHOS::Ace::NodeModel::SetUserData,
-    OHOS::Ace::NodeModel::GetUserData,
+    nullptr,
+    nullptr,
     OHOS::Ace::NodeModel::SetLengthMetricUnit,
     OHOS::Ace::NodeModel::GetParent,
 };

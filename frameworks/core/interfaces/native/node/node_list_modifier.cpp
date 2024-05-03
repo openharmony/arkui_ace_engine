@@ -268,7 +268,7 @@ void ResetListFriction(ArkUINodeHandle node)
     ListModelNG::SetListFriction(frameNode, friction);
 }
 
-void GetListNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
+void GetWaterFlowNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -562,7 +562,7 @@ const ArkUIListModifier* GetListModifier()
         ResetCachedCount, GetEnableScrollInteraction, SetEnableScrollInteraction, ResetEnableScrollInteraction,
         GetSticky, SetSticky, ResetSticky, GetListEdgeEffect, SetListEdgeEffect, ResetListEdgeEffect, GetListDirection,
         SetListDirection, ResetListDirection, GetListFriction, SetListFriction, ResetListFriction,
-        GetListNestedScroll, SetListNestedScroll, ResetListNestedScroll, GetListScrollBar, SetListScrollBar,
+        GetWaterFlowNestedScroll, SetListNestedScroll, ResetListNestedScroll, GetListScrollBar, SetListScrollBar,
         ResetListScrollBar, GetListScrollBarWidth, SetListScrollBarWidth, ResetListScrollBarWidth,
         GetListScrollBarColor, SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem,
         ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset,
@@ -689,34 +689,6 @@ void SetOnListScrollIndex(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     ListModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
-}
-
-void SetOnListReachStart(ArkUINodeHandle node, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto onReachStart = [node, extraParam]() -> void {
-        ArkUINodeEvent event;
-        event.kind = COMPONENT_ASYNC_EVENT;
-        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_LIST_REACH_START;
-        SendArkUIAsyncEvent(&event);
-    };
-    ListModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
-}
-
-void SetOnListReachEnd(ArkUINodeHandle node, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto onReachEnd = [node, extraParam]() -> void {
-        ArkUINodeEvent event;
-        event.kind = COMPONENT_ASYNC_EVENT;
-        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_LIST_REACH_END;
-        SendArkUIAsyncEvent(&event);
-    };
-    ListModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

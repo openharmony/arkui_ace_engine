@@ -508,43 +508,4 @@ DisplayMode GridModelNG::GetDisplayMode() const
     CHECK_NULL_RETURN(pattern, DisplayMode::AUTO);
     return pattern->GetDefaultScrollBarDisplayMode();
 }
-
-std::string GridModelNG::GetColumnsTemplate(FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    std::string value = "1fr";
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, ColumnsTemplate, value, frameNode, value);
-    return value;
-}
-
-std::string GridModelNG::GetRowsTemplate(FrameNode* frameNode)
-{
-    std::string value = "1fr";
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, RowsTemplate, value, frameNode, value);
-    return value;
-}
-
-float GridModelNG::GetColumnsGap(FrameNode* frameNode)
-{
-    Dimension value;
-    CHECK_NULL_RETURN(frameNode, value.Value());
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, ColumnsGap, value, frameNode, value);
-    return value.Value();
-}
-
-float GridModelNG::GetRowsGap(FrameNode* frameNode)
-{
-    Dimension value;
-    CHECK_NULL_RETURN(frameNode, value.Value());
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, RowsGap, value, frameNode, value);
-    return value.Value();
-}
-
-int32_t GridModelNG::GetCachedCount(FrameNode* frameNode)
-{
-    int32_t cachedCount = 1;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, CachedCount, cachedCount, frameNode, 1);
-    return cachedCount;
-}
 } // namespace OHOS::Ace::NG

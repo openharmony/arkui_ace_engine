@@ -236,7 +236,7 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_SWIPER_ANIMATION_END;
         case NODE_SWIPER_EVENT_ON_GESTURE_SWIPE:
             return ON_SWIPER_GESTURE_SWIPE;
-        case NODE_ON_WILL_SCROLL:
+        case NODE_WATER_FLOW_ON_WILL_SCROLL:
             return ON_WATER_FLOW_WILL_SCROLL;
         case NODE_ON_TOUCH_INTERCEPT:
             return ON_TOUCH_INTERCEPT;
@@ -268,12 +268,6 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_WATER_FLOW_SCROLL_INDEX;
         case NODE_TEXT_ON_DETECT_RESULT_UPDATE:
             return ON_DETECT_RESULT_UPDATE;
-        case NODE_RADIO_EVENT_ON_CHANGE:
-            return ON_RADIO_CHANGE;
-        case NODE_LIST_ON_DID_SCROLL:
-            return ON_LIST_DID_SCROLL;
-        case NODE_LIST_ON_WILL_SCROLL:
-            return ON_LIST_WILL_SCROLL;
         default:
             return -1;
     }
@@ -387,7 +381,7 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
         case ON_LIST_SCROLL_STOP:
             return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
         case ON_WATER_FLOW_WILL_SCROLL:
-            return NODE_ON_WILL_SCROLL;
+            return NODE_WATER_FLOW_ON_WILL_SCROLL;
         case ON_TOUCH_INTERCEPT:
             return NODE_ON_TOUCH_INTERCEPT;
         case ON_VISIBLE_AREA_CHANGE:
@@ -404,6 +398,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_REACH_END;
         case ON_WATER_FLOW_DID_SCROLL:
             return NODE_WATER_FLOW_ON_DID_SCROLL;
+        case ON_WATER_FLOW_SCROLL:
+            return NODE_SCROLL_EVENT_ON_SCROLL;
         case ON_WATER_FLOW_SCROLL_FRAME_BEGIN:
             return NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN;
         case ON_WATER_FLOW_SCROLL_START:
@@ -424,8 +420,6 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_REACH_START;
         case ON_DETECT_RESULT_UPDATE:
             return NODE_TEXT_ON_DETECT_RESULT_UPDATE;
-        case ON_RADIO_CHANGE:
-            return NODE_RADIO_EVENT_ON_CHANGE;
         default:
             return -1;
     }

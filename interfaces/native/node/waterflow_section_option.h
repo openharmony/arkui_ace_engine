@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#ifndef ARKUI_NATIVE_NODE_WATERFLOW_SECTION_OPTION_H
-#define ARKUI_NATIVE_NODE_WATERFLOW_SECTION_OPTION_H
+#pragma once
 
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
@@ -36,4 +35,3 @@ struct ArkUI_WaterFlowSectionOption {
 #ifdef __cplusplus
 };
 #endif
-#endif // ARKUI_NATIVE_NODE_WATERFLOW_SECTION_OPTION_H
