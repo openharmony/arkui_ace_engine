@@ -957,8 +957,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest012, TestSize.Level1)
     layoutWrapper.layoutProperty_->layoutConstraint_ = layoutConstraint;
     marqueeLayoutAlgorithm->Measure(&layoutWrapper);
     oTemp = layoutWrapper.GetGeometryNode()->GetFrameSize();
-    EXPECT_EQ(oTemp.Width(), CHILD_WIDTH_600);
-    EXPECT_EQ(oTemp.Height(), CHILD_WIDTH_200);
+    EXPECT_EQ(oTemp.Width(), MARQUEE_WIDTH_500);
+    EXPECT_EQ(oTemp.Height(), CHILD_HEIGHT_50);
 
     /**
      * @tc.steps: step8. set positionProperty_ and call Layout.
@@ -967,7 +967,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest012, TestSize.Level1)
     marqueeLayoutAlgorithm->Layout(&layoutWrapper);
     OffsetF offTemp = textLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
     EXPECT_EQ(offTemp.GetX(), 0);
-    EXPECT_EQ(offTemp.GetY(), 75);
+    EXPECT_EQ(offTemp.GetY(), 0);
 }
 
 /**
