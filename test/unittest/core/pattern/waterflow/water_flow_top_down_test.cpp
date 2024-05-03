@@ -335,4 +335,42 @@ HWTEST_F(WaterFlowTestNg, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
     EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f);
 }
+
+/**
+ * @tc.name: OverScroll001
+ * @tc.desc: Test overScroll past limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OverScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow
+     * @tc.expected: startIndex_ = 0 endIndex_ = 10.
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetFooter(GetDefaultHeaderBuilder());
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        CreateItem(50);
+    });
+    pattern_->SetAnimateCanOverScroll(true);
+    auto info = pattern_->layoutInfo_;
+    for (int i = 0; i < 50; ++i) {
+        UpdateCurrentOffset(500.0f);
+        EXPECT_EQ(info->startIndex_, 0);
+        EXPECT_GT(info->offset(), 0.0f);
+    }
+    EXPECT_GT(info->offset(), 2500.0f);
+    UpdateCurrentOffset(-25500.0f);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    for (int i = 0; i < 50; ++i) {
+        UpdateCurrentOffset(-200.0f);
+        EXPECT_EQ(info->endIndex_, std::max(49, info->footerIndex_));
+        EXPECT_EQ(info->BottomFinalPos(800.0f), -3050.0f);
+    }
+    EXPECT_LT(info->offset(), -4000.0f);
+}
 } // namespace OHOS::Ace::NG

@@ -1041,12 +1041,14 @@ HWTEST_F(WaterFlowTestNg, Callback002, TestSize.Level1)
     EXPECT_EQ(effect->currentPositionCallback_(), 0);
 
     pattern_->SetAlwaysEnabled(true);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(effect->leadingCallback_(), 0);
     EXPECT_EQ(effect->initLeadingCallback_(), 0);
     EXPECT_EQ(effect->currentPositionCallback_(), 0);
 
     pattern_->layoutInfo_->Reset();
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(effect->leadingCallback_(), 0);
     EXPECT_EQ(effect->initLeadingCallback_(), 0);
