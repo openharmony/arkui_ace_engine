@@ -152,6 +152,20 @@ public:
         }
     }
 
+    std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
+    {
+        switch (dynamicMode) {
+            case DynamicRangeMode::HIGH:
+                return "HIGH";
+            case DynamicRangeMode::CONSTRAINT:
+                return "CONSTRAINT";
+            case DynamicRangeMode::STANDARD:
+                return "STANDARD";
+            default:
+                return "STANDARD";
+        }
+    }
+
     std::string GetImageFitStr(ImageFit value);
 
     std::string GetImageRepeatStr(ImageRepeat value);
