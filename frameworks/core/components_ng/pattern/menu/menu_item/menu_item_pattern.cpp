@@ -135,6 +135,14 @@ void MenuItemPattern::OnMountToParentDone()
     UpdateTextNodes();
 }
 
+void MenuItemPattern::OnAttachToFrameNode()
+{
+    RegisterOnKeyEvent();
+    RegisterOnClick();
+    RegisterOnTouch();
+    RegisterOnHover();
+}
+
 void CustomMenuItemPattern::OnAttachToFrameNode()
 {
     RegisterOnKeyEvent();
