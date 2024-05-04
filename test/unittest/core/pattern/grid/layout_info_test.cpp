@@ -521,4 +521,38 @@ HWTEST_F(GridLayoutInfoTest, ClearMatrixToEnd001, TestSize.Level1)
     const decltype(GridLayoutInfo::gridMatrix_) cmp0 = {};
     EXPECT_EQ(info.gridMatrix_, cmp0);
 }
+
+/**
+ * @tc.name: FindStartLineInMatrix001
+ * @tc.desc: Test GridLayoutInfo::FindStartLineInMatrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindStartLineInMatrix001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+
+    info.gridMatrix_ = MATRIX_DEMO_8;
+    auto item = info.FindInMatrix(5);
+    item = info.FindStartLineInMatrix(item, 5);
+    EXPECT_EQ(item->first, 3);
+    item = info.FindInMatrix(2);
+    item = info.FindStartLineInMatrix(item, 2);
+    EXPECT_EQ(item->first, 1);
+
+    info.gridMatrix_ = MATRIX_DEMO_9;
+    item = info.FindInMatrix(0);
+    item = info.FindStartLineInMatrix(item, 0);
+    EXPECT_EQ(item->first, 0);
+    item = info.FindInMatrix(9);
+    item = info.FindStartLineInMatrix(item, 9);
+    EXPECT_EQ(item->first, 6);
+
+    info.gridMatrix_ = MATRIX_DEMO_12;
+    item = info.FindInMatrix(0);
+    item = info.FindStartLineInMatrix(item, 0);
+    EXPECT_EQ(item->first, 0);
+    item = info.FindInMatrix(2);
+    item = info.FindStartLineInMatrix(item, 2);
+    EXPECT_EQ(item->first, 1);
+}
 } // namespace OHOS::Ace::NG

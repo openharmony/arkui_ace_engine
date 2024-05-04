@@ -2144,4 +2144,38 @@ HWTEST_F(GridLayoutTestNg, ScrollLayoutRTL002, TestSize.Level1)
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
 }
+
+/*
+ * @tc.name: GetResetMode001
+ * @tc.desc: Test Reset Function when have bigItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GetResetMode001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateFixedItem(40);
+    });
+
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto layoutAlgorithm =
+        AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(-1), std::make_pair(false, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(1), std::make_pair(true, false));
+
+    pattern_->ScrollToIndex(30, false, ScrollAlign::START);
+    layoutAlgorithm->gridLayoutInfo_.startIndex_ = 30;
+    frameNode_->childrenUpdatedFrom_ = 20;
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(0), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(10), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(25), std::make_pair(true, false));
+
+    layoutAlgorithm->gridLayoutInfo_.hasBigItem_ = true;
+
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(0), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(10), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(25), std::make_pair(false, true));
+}
 } // namespace OHOS::Ace::NG
