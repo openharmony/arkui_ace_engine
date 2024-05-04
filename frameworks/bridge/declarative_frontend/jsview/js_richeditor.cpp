@@ -505,14 +505,25 @@ void JSRichEditor::SetOnDidChange(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    auto JsEventCallback = AceType::MakeRefPtr<JsEventFunction<std::list<NG::RichEditorAbstractSpanResult>, 1>>(
-        JSRef<JSFunc>::Cast(info[0]), CreateJsOnDidChange);
+    auto JsEventCallback =
+        AceType::MakeRefPtr<JsCommonEventFunction<NG::RichEditorChangeValue, 2>>(JSRef<JSFunc>::Cast(info[0]));
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(JsEventCallback)](
-                        const std::list<NG::RichEditorAbstractSpanResult>& textSpanResultList) {
+                        const NG::RichEditorChangeValue& changeValue) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        func->Execute(textSpanResultList);
+        const auto& rangeBefore = changeValue.GetRangeBefore();
+        JSRef<JSObject> rangeBeforeObj = JSRef<JSObject>::New();
+        rangeBeforeObj->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(rangeBefore.start)));
+        rangeBeforeObj->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(rangeBefore.end)));
+
+        const auto& rangeAfter = changeValue.GetRangeAfter();
+        JSRef<JSObject> rangeAfterObj = JSRef<JSObject>::New();
+        rangeAfterObj->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(rangeAfter.start)));
+        rangeAfterObj->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(rangeAfter.end)));
+
+        JSRef<JSVal> param[2] = { JSRef<JSVal>::Cast(rangeBeforeObj), JSRef<JSVal>::Cast(rangeAfterObj) };
+        func->Execute(param);
     };
-    RichEditorModel::GetInstance()->SetOnDidChange(callback);
+    RichEditorModel::GetInstance()->SetOnDidChange(std::move(callback));
 }
 
 void JSRichEditor::SetOnCut(const JSCallbackInfo& info)
@@ -681,14 +692,15 @@ void JSRichEditor::SetChangeTextSpans(
         spanResultObj->SetPropertyObject("spanPosition", spanPositionObj);
         spanResultObj->SetPropertyObject("offsetInSpan", offsetInSpan);
         switch (it.GetType()) {
-            case NG::SpanResultType::TEXT: {
-                JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
-                CreateTextStyleObj(textStyleObj, it);
-                spanResultObj->SetProperty<std::string>("value", it.GetValue());
-                spanResultObj->SetPropertyObject("textStyle", textStyleObj);
-                spanResultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(it.GetTextStyle()));
+            case NG::SpanResultType::TEXT:
+                SetTextChangeSpanResult(spanResultObj, it);
                 break;
-            }
+            case NG::SpanResultType::IMAGE:
+                SetImageChangeSpanResult(spanResultObj, it);
+                break;
+            case NG::SpanResultType::SYMBOL:
+                SetSymbolChangeSpanResult(spanResultObj, it);
+                break;
             default:
                 break;
         }
@@ -696,15 +708,78 @@ void JSRichEditor::SetChangeTextSpans(
     }
 }
 
+void JSRichEditor::SetTextChangeSpanResult(JSRef<JSObject>& resultObj,
+    const NG::RichEditorAbstractSpanResult& spanResult)
+{
+    JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
+    CreateTextStyleObj(textStyleObj, spanResult);
+    resultObj->SetProperty<std::string>("value", spanResult.GetValue());
+    resultObj->SetPropertyObject("textStyle", textStyleObj);
+    resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(spanResult.GetTextStyle()));
+}
+
+void JSRichEditor::SetSymbolChangeSpanResult(JSRef<JSObject>& resultObj,
+    const NG::RichEditorAbstractSpanResult& spanResult)
+{
+    JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
+    CreateTextStyleObj(textStyleObj, spanResult);
+    resultObj->SetProperty<std::string>("value", spanResult.GetValue());
+    resultObj->SetPropertyObject("textStyle", textStyleObj);
+    resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(spanResult.GetTextStyle()));
+}
+
+void JSRichEditor::SetImageChangeSpanResult(JSRef<JSObject>& resultObj,
+    const NG::RichEditorAbstractSpanResult& spanResult)
+{
+    auto valuePixelMap = spanResult.GetValuePixelMap();
+    auto returnWidth = spanResult.GetSizeWidth();
+    auto returnHeight = spanResult.GetSizeHeight();
+    if (valuePixelMap) {
+#ifdef PIXEL_MAP_SUPPORTED
+        if (NearZero(returnWidth) || NearZero(returnHeight)) {
+            returnWidth = valuePixelMap->GetWidth();
+            returnHeight = valuePixelMap->GetHeight();
+        }
+        auto jsPixmap = ConvertPixmap(valuePixelMap);
+        if (!jsPixmap->IsUndefined()) {
+            resultObj->SetPropertyObject("valuePixelMap", jsPixmap);
+        }
+#endif
+    } else {
+        resultObj->SetProperty<std::string>("valueResourceStr", spanResult.GetValueResourceStr());
+    }
+    ImageStyleResult imageStyleResult;
+    imageStyleResult.size[0] = static_cast<double>(returnWidth);
+    imageStyleResult.size[1] = static_cast<double>(returnHeight);
+    imageStyleResult.verticalAlign = static_cast<int32_t>(spanResult.GetVerticalAlign());
+    imageStyleResult.objectFit = static_cast<int32_t>(spanResult.GetObjectFit());
+    imageStyleResult.borderRadius = spanResult.GetBorderRadius();
+    imageStyleResult.margin = spanResult.GetMargin();
+    resultObj->SetPropertyObject("imageStyle", CreateJSImageStyleResult(imageStyleResult));
+}
+
 JSRef<JSVal> JSRichEditor::CreateJsOnWillChange(const NG::RichEditorChangeValue& changeValue)
 {
     JSRef<JSObject> OnWillChangeObj = JSRef<JSObject>::New();
-    JSRef<JSArray> richEditorOriginalSpans = JSRef<JSArray>::New();
-    JSRef<JSArray> richEditorReplacedSpans = JSRef<JSArray>::New();
-    SetChangeTextSpans(richEditorOriginalSpans, changeValue.GetRichEditorOriginalSpans());
-    SetChangeTextSpans(richEditorReplacedSpans, changeValue.GetRichEditorReplacedSpans());
-    OnWillChangeObj->SetPropertyObject("originalSpans", richEditorOriginalSpans);
-    OnWillChangeObj->SetPropertyObject("replacedSpans", richEditorReplacedSpans);
+
+    const auto& rangeBefore = changeValue.GetRangeBefore();
+    JSRef<JSObject> rangeBeforeObj = JSRef<JSObject>::New();
+    rangeBeforeObj->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(rangeBefore.start)));
+    rangeBeforeObj->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(rangeBefore.end)));
+    OnWillChangeObj->SetPropertyObject("rangeBefore", rangeBeforeObj);
+
+    JSRef<JSArray> replacedSpans = JSRef<JSArray>::New();
+    SetChangeTextSpans(replacedSpans, changeValue.GetRichEditorReplacedSpans());
+    OnWillChangeObj->SetPropertyObject("replacedSpans", replacedSpans);
+
+    JSRef<JSArray> replacedImageSpans = JSRef<JSArray>::New();
+    SetChangeTextSpans(replacedImageSpans, changeValue.GetRichEditorReplacedImageSpans());
+    OnWillChangeObj->SetPropertyObject("replacedImageSpans", replacedImageSpans);
+
+    JSRef<JSArray> replacedSymbolSpans = JSRef<JSArray>::New();
+    SetChangeTextSpans(replacedSymbolSpans, changeValue.GetRichEditorReplacedSymbolSpans());
+    OnWillChangeObj->SetPropertyObject("replacedSymbolSpans", replacedSymbolSpans);
+
     return JSRef<JSVal>::Cast(OnWillChangeObj);
 }
 

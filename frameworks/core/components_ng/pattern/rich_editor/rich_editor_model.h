@@ -307,7 +307,7 @@ public:
     virtual void SetEnterKeyType(TextInputAction value) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
     virtual void SetOnWillChange(std::function<bool(const NG::RichEditorChangeValue&)>&& func) = 0;
-    virtual void SetOnDidChange(std::function<void(const std::list<NG::RichEditorAbstractSpanResult>&)>&& func) = 0;
+    virtual void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
 private:
