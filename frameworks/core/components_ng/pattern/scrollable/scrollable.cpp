@@ -919,6 +919,8 @@ void Scrollable::ProcessSpringMotion(double position)
         // trace stop at OnScrollStop
         if (!isFadingAway_) {
             AceAsyncTraceBegin(0, TRAILING_ANIMATION);
+        } else {
+            ACE_SCOPED_TRACE("Spring to same position");
         }
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
