@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 class ImageBridge {
 public:
+    static ArkUINativeModuleValue SetImageShowSrc(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetCopyOption(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetCopyOption(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetAutoResize(ArkUIRuntimeCallInfo *runtimeCallInfo);

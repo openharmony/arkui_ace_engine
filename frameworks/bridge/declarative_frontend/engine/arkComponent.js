@@ -5858,9 +5858,30 @@ class ImageEnhancedImageQualityModifier extends ModifierWithKey {
   }
 }
 ImageObjectFitModifier.identity = Symbol('enhancedImageQuality');
+class ImageSrcModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.setImageShowSrc(node, "");
+    }
+    else {
+      getUINativeModule().image.setImageShowSrc(node, this.value);
+    }
+  }
+}
+ImageSrcModifier.identity = Symbol('imageShowSrc');
+
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    if (value[0] != undefined) {
+      modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
+    }
+    return this;
   }
   draggable(value) {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
@@ -7676,6 +7697,20 @@ class SpanFontWeightModifier extends ModifierWithKey {
   }
 }
 SpanFontWeightModifier.identity = Symbol('spanfontweight');
+class SpanInputModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().span.setSpanSrc(node, "");
+    }
+    else {
+      getUINativeModule().span.setSpanSrc(node, this.value);
+    }
+  }
+}
+SpanInputModifier.identity = Symbol('spanInput');
 class ArkSpanComponent {
   constructor(nativePtr, classType) {
     this._modifiersWithKeys = new Map();
@@ -7686,6 +7721,12 @@ class ArkSpanComponent {
       this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     }
     this._nativePtrChanged = false;
+  }
+  initialize(value) {
+    if (value[0] != undefined) {
+      modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
+    }
+    return this;
   }
   applyModifierPatch() {
     let expiringItemsWithKeys = [];

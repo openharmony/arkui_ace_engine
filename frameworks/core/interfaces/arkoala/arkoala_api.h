@@ -1597,6 +1597,8 @@ struct ArkUIButtonModifier {
 struct ArkUIImageModifier {
     void (*setSrc)(ArkUINodeHandle node, ArkUI_CharPtr value);
     // Do we need resetSrc() ?
+    void (*setImageShowSrc)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
+        ArkUI_Bool isUriPureNumber);
     void (*setCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOption);
     void (*resetCopyOption)(ArkUINodeHandle node);
     void (*setAutoResize)(ArkUINodeHandle node, ArkUI_Bool autoResize);
@@ -3185,6 +3187,7 @@ struct ArkUIDatePickerModifier {
 };
 
 struct ArkUISpanModifier {
+    void (*setSpanSrc)(ArkUINodeHandle node, ArkUI_CharPtr src);
     void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setSpanTextCase)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSpanTextCase)(ArkUINodeHandle node);

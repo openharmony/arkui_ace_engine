@@ -80,6 +80,7 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
+    static void InitTextController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
