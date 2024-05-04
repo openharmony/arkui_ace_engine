@@ -146,6 +146,9 @@ private:
     bool HandleCaretWhenEmpty(CaretMetricsF& result);
     void HandleTextAlign(CaretMetricsF& result, TextAlign align);
     void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
+    void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects);
+    int32_t AdjustIndexForEmoji(int32_t index);
+    bool IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd);
 
     ParagraphStyle paraStyle_;
 #ifndef USE_GRAPHIC_TEXT_GINE
