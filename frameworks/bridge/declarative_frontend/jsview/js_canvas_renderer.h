@@ -82,32 +82,13 @@ public:
     void JsTransform(const JSCallbackInfo& info);
     void JsTranslate(const JSCallbackInfo& info);
     void JsSetLineDash(const JSCallbackInfo& info);
+    void JsGetLineDash(const JSCallbackInfo& info);
     void JsToDataUrl(const JSCallbackInfo& info);
     void JsCreateLinearGradient(const JSCallbackInfo& info);
     void JsCreateRadialGradient(const JSCallbackInfo& info);
     void JsCreateConicGradient(const JSCallbackInfo& info);
     void JsSaveLayer(const JSCallbackInfo& info);
     void JsRestoreLayer(const JSCallbackInfo& info);
-
-    void JsGetFillStyle(const JSCallbackInfo& info);
-    void JsGetStrokeStyle(const JSCallbackInfo& info);
-    void JsGetLineCap(const JSCallbackInfo& info);
-    void JsGetLineDash(const JSCallbackInfo& info);
-    void JsGetLineJoin(const JSCallbackInfo& info);
-    void JsGetMiterLimit(const JSCallbackInfo& info);
-    void JsGetLineWidth(const JSCallbackInfo& info);
-    void JsGetTextAlign(const JSCallbackInfo& info);
-    void JsGetTextBaseline(const JSCallbackInfo& info);
-    void JsGetGlobalAlpha(const JSCallbackInfo& info);
-    void JsGetGlobalCompositeOperation(const JSCallbackInfo& info);
-    void JsGetLineDashOffset(const JSCallbackInfo& info);
-    void JsGetShadowBlur(const JSCallbackInfo& info);
-    void JsGetShadowColor(const JSCallbackInfo& info);
-    void JsGetShadowOffsetX(const JSCallbackInfo& info);
-    void JsGetShadowOffsetY(const JSCallbackInfo& info);
-    void JsGetImageSmoothingEnabled(const JSCallbackInfo& info);
-    void JsGetImageSmoothingQuality(const JSCallbackInfo& info);
-    void JsGetFont(const JSCallbackInfo& info);
     void JsSetFont(const JSCallbackInfo& info);
     void JsSetFillStyle(const JSCallbackInfo& info);
     void JsSetStrokeStyle(const JSCallbackInfo& info);
@@ -135,31 +116,34 @@ public:
     void JsGetPixelMap(const JSCallbackInfo& info);
     void JsSetPixelMap(const JSCallbackInfo& info);
     void JsDrawBitmapMesh(const JSCallbackInfo& info);
-    void JsGetFilter(const JSCallbackInfo& info);
     void JsSetFilter(const JSCallbackInfo& info);
-    void JsGetDirection(const JSCallbackInfo& info);
     void JsSetDirection(const JSCallbackInfo& info);
     void JsReset(const JSCallbackInfo& info);
+
+    void JSGetEmpty(const JSCallbackInfo& info)
+    {
+        return;
+    }
 
     void SetCanvasPattern(const RefPtr<AceType>& canvas)
     {
         canvasPattern_ = canvas;
+        renderingContext2DModel_->SetPattern(canvas);
         if (isInitializeShadow_) {
             return;
         }
         isInitializeShadow_ = true;
-        renderingContext2DModel_->SetPattern(canvas);
         renderingContext2DModel_->SetShadowColor(Color::TRANSPARENT);
     }
 
     void SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas)
     {
         offscreenPattern_ = offscreenCanvas;
+        renderingContext2DModel_->SetPattern(offscreenCanvas);
         if (isOffscreenInitializeShadow_) {
             return;
         }
         isOffscreenInitializeShadow_ = true;
-        renderingContext2DModel_->SetPattern(offscreenCanvas);
         renderingContext2DModel_->SetShadowColor(Color::TRANSPARENT);
     }
 

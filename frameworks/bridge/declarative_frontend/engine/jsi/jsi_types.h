@@ -296,6 +296,7 @@ public:
     T* UnwrapArg(size_t index) const;
     bool GetBooleanArg(size_t index, bool& value) const;
     bool GetInt32Arg(size_t index, int32_t& value) const;
+    bool GetUint32Arg(size_t index, uint32_t& value) const;
     bool GetDoubleArg(size_t index, double& value) const;
     bool GetStringArg(size_t index, std::string& value) const;
 

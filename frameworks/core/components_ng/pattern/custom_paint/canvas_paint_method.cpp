@@ -16,28 +16,28 @@
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography_style.h"
 #include "include/core/SkImage.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
 #include "include/utils/SkBase64.h"
+#include "rosen_text/typography_create.h"
+#include "rosen_text/typography_style.h"
 
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/image_provider/image_object.h"
+#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/sk_image_cache.h"
-#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -88,6 +88,44 @@ double GetQuality(const std::string& args)
 }
 } // namespace
 
+#ifndef USE_FAST_TASKPOOL
+void CanvasPaintMethod::PushTask(const TaskFunc& task)
+{
+    tasks_.emplace_back(task);
+    if (needMarkDirty_) {
+        needMarkDirty_ = false;
+        auto host = frameNode_.Upgrade();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+#endif
+
+bool CanvasPaintMethod::HasTask() const
+{
+#ifndef USE_FAST_TASKPOOL
+    return !tasks_.empty();
+#else
+    return fastTaskPool_ && !fastTaskPool_->Empty();
+#endif
+}
+
+void CanvasPaintMethod::FlushTask()
+{
+#ifndef USE_FAST_TASKPOOL
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "There are %{public}zu tasks will be run.", tasks_.size());
+    for (auto& task : tasks_) {
+        task(*this);
+    }
+    tasks_.clear();
+    needMarkDirty_ = true;
+#else
+    CHECK_NULL_VOID(fastTaskPool_);
+    fastTaskPool_->Draw(this);
+    fastTaskPool_->Reset();
+#endif
+}
+
 void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     ACE_SCOPED_TRACE("CanvasPaintMethod::UpdateContentModifier");
@@ -107,32 +145,15 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         return;
     }
 
-#ifndef USE_FAST_TASKPOOL
-    if (tasks_.empty()) {
+    if (!HasTask()) {
         return;
     }
-#else
-    if (!fastTaskPool_ || fastTaskPool_->Empty()) {
-        return;
-    }
-#endif
 
     if (onModifierUpdate_) {
         onModifierUpdate_();
     }
-
     rsCanvas_->Scale(viewScale, viewScale);
-#ifndef USE_FAST_TASKPOOL
-    TAG_LOGD(AceLogTag::ACE_CANVAS, "There are %{public}zu tasks will be run.", tasks_.size());
-    for (const auto& task : tasks_) {
-        task(*this, paintWrapper);
-    }
-    tasks_.clear();
-#else
-    fastTaskPool_->Draw(this, paintWrapper);
-    fastTaskPool_->Reset();
-#endif
-
+    FlushTask();
     CHECK_NULL_VOID(contentModifier_);
     contentModifier_->MarkModifierDirty();
 }
@@ -146,10 +167,10 @@ void CanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
     skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
     currentSource_ = loadingSource_;
     Ace::CanvasImage canvasImage = canvasImage_;
-    TaskFunc func = [canvasImage](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    TaskFunc func = [canvasImage](CanvasPaintMethod& paintMethod) {
         paintMethod.DrawImage(canvasImage, 0, 0);
     };
-    tasks_.emplace_back(func);
+    PushTask(func);
 }
 
 void CanvasPaintMethod::ImageObjFailed()
@@ -417,32 +438,24 @@ void CanvasPaintMethod::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPatt
 #endif
 }
 
-void CanvasPaintMethod::FillText(
-    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
+void CanvasPaintMethod::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    CHECK_NULL_VOID(paintWrapper);
-    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-
     auto success = UpdateParagraph(text, false, HasShadow());
     CHECK_NULL_VOID(success);
-    PaintText(frameSize, x, y, maxWidth, false, HasShadow());
+    PaintText(lastLayoutSize_, x, y, maxWidth, false, HasShadow());
 }
 
-void CanvasPaintMethod::StrokeText(
-    PaintWrapper* paintWrapper, const std::string& text, double x, double y, std::optional<double> maxWidth)
+void CanvasPaintMethod::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    CHECK_NULL_VOID(paintWrapper);
-    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-
     if (HasShadow()) {
         auto success = UpdateParagraph(text, true, true);
         CHECK_NULL_VOID(success);
-        PaintText(frameSize, x, y, maxWidth, true, true);
+        PaintText(lastLayoutSize_, x, y, maxWidth, true, true);
     }
 
     auto success = UpdateParagraph(text, true);
     CHECK_NULL_VOID(success);
-    PaintText(frameSize, x, y, maxWidth, true);
+    PaintText(lastLayoutSize_, x, y, maxWidth, true);
 }
 
 double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
