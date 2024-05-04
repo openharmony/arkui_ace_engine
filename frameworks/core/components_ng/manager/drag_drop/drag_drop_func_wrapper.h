@@ -33,6 +33,12 @@ public:
         const std::string& extraParams, int32_t currentPointerId, int32_t containerId);
     static void UpdateDragPreviewOptionsFromModifier(
         std::function<void(WeakPtr<FrameNode>)> applyOnNodeSync, DragPreviewOption& options);
+    static void UpdatePreviewOptionDefaultAttr(DragPreviewOption& option);
+    static void UpdateExtraInfo(std::unique_ptr<JsonValue>& arkExtraInfoJson, DragPreviewOption& option);
+    static void PrepareShadowParametersForDragData(std::unique_ptr<JsonValue>& arkExtraInfoJson,
+        DragPreviewOption& option);
+    static void ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonValue>& arkExtraInfoJson);
+    static std::optional<Shadow> GetDefaultShadow();
 };
 } // namespace OHOS::Ace::NG
 

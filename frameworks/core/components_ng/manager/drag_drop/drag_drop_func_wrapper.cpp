@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 
@@ -42,7 +43,6 @@ void DragDropFuncWrapper::DecideWhetherToStopDragging(
     }
 }
 
-
 void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
     std::function<void(WeakPtr<FrameNode>)> applyOnNodeSync, DragPreviewOption& option)
 {
@@ -64,6 +64,72 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
     } else {
         option.options.opacity = DEFAULT_OPACITY;
     }
+
+    auto shadow = imageContext->GetBackShadow();
+    if (shadow.has_value()) {
+        option.options.shadow = shadow.value();
+    }
+}
+
+void DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(DragPreviewOption& option)
+{
+    option.options.opacity = DEFAULT_OPACITY;
+    if (option.isDefaultShadowEnabled) {
+        option.options.shadow = GetDefaultShadow();
+    } else {
+        option.options.shadow = std::nullopt;
+    }
+}
+
+void DragDropFuncWrapper::UpdateExtraInfo(std::unique_ptr<JsonValue>& arkExtraInfoJson,
+    DragPreviewOption& option)
+{
+    CHECK_NULL_VOID(arkExtraInfoJson);
+    double opacity = option.options.opacity;
+    arkExtraInfoJson->Put("dip_opacity", opacity);
+    PrepareShadowParametersForDragData(arkExtraInfoJson, option);
+}
+
+void DragDropFuncWrapper::PrepareShadowParametersForDragData(std::unique_ptr<JsonValue>& arkExtraInfoJson,
+    DragPreviewOption& option)
+{
+    CHECK_NULL_VOID(arkExtraInfoJson);
+    auto shadow = option.options.shadow;
+    if (!shadow.has_value() || !shadow->IsValid()) {
+        arkExtraInfoJson->Put("shadow_enable", false);
+        return;
+    }
+    arkExtraInfoJson->Put("drag_type", "non-text");
+    arkExtraInfoJson->Put("shadow_enable", true);
+    ParseShadowInfo(shadow.value(), arkExtraInfoJson);
+}
+
+void DragDropFuncWrapper::ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonValue>& arkExtraInfoJson)
+{
+    CHECK_NULL_VOID(arkExtraInfoJson);
+    arkExtraInfoJson->Put("shadow_is_filled", shadow.GetIsFilled());
+    arkExtraInfoJson->Put("drag_shadow_OffsetX", shadow.GetOffset().GetX());
+    arkExtraInfoJson->Put("drag_shadow_OffsetY", shadow.GetOffset().GetY());
+    arkExtraInfoJson->Put("shadow_mask", shadow.GetShadowType() == ShadowType::BLUR);
+    int64_t argb = shadow.GetColor().GetValue();
+    arkExtraInfoJson->Put("drag_shadow_argb", argb);
+    int32_t strategy = static_cast<int32_t>(shadow.GetShadowColorStrategy());
+    arkExtraInfoJson->Put("shadow_color_strategy", strategy);
+    arkExtraInfoJson->Put("shadow_corner", shadow.GetBlurRadius());
+    arkExtraInfoJson->Put("shadow_elevation", shadow.GetElevation());
+    arkExtraInfoJson->Put("shadow_is_hardwareacceleration", shadow.GetHardwareAcceleration());
+}
+
+std::optional<Shadow> DragDropFuncWrapper::GetDefaultShadow()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, std::nullopt);
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, std::nullopt);
+    auto colorMode = SystemProperties::GetColorMode();
+    auto shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingSM, colorMode);
+    shadow.SetIsFilled(true);
+    return shadow;
 }
 
 } // namespace OHOS::Ace
