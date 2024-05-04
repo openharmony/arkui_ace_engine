@@ -382,16 +382,12 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        ACE_SCOPED_TRACE("WebPattern::InitPinchEvent actionUpdateTask");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleScaleGestureChange(event);
     };
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->pinchValue_ = pattern->pinchValue_ * event.GetScale();
-        return;
-    };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
 
     pinchGesture_ = MakeRefPtr<PinchGesture>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
@@ -407,7 +403,7 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
 {
     CHECK_NULL_VOID(delegate_);
 
-    double scale =  pinchValue_ * event.GetScale();
+    double scale = event.GetScale();
     double centerX =  event.GetPinchCenter().GetX();
     double centerY =  event.GetPinchCenter().GetY();
     TAG_LOGI(AceLogTag::ACE_WEB,
