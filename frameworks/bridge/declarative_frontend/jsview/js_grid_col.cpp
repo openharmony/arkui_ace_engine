@@ -49,6 +49,12 @@ GridColModel* GridColModel::GetInstance()
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 namespace {
+constexpr size_t XS = 0;
+constexpr size_t SM = 1;
+constexpr size_t MD = 2;
+constexpr size_t LG = 3;
+constexpr size_t XL = 4;
+constexpr size_t XXL = 5;
 constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
 
 void InheritGridContainerSize(const RefPtr<V2::GridContainerSize>& gridContainerSize,
@@ -70,7 +76,49 @@ void InheritGridContainerSize(const RefPtr<V2::GridContainerSize>& gridContainer
     gridContainerSize->xxl = containerSizeArray[5].value();
 }
 
-RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValue, int32_t defaultVal)
+void ParseGridContainerSizeArray(const JSRef<JSVal>& jsValue,
+    std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT], bool isOrder)
+{
+    auto gridParam = JSRef<JSObject>::Cast(jsValue);
+    auto xs = gridParam->GetProperty("xs");
+    if (xs->IsNumber() && xs->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[XS] = xs->ToNumber<int32_t>();
+    } else if (isOrder) {
+        containerSizeArray[XS] = 0;
+    }
+    auto sm = gridParam->GetProperty("sm");
+    if (sm->IsNumber() && sm->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[SM] = sm->ToNumber<int32_t>();
+    } else if (isOrder) {
+        containerSizeArray[SM] = 0;
+    }
+    auto md = gridParam->GetProperty("md");
+    if (md->IsNumber() && md->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[MD] = md->ToNumber<int32_t>();
+    } else if (isOrder) {
+        containerSizeArray[MD] = 0;
+    }
+    auto lg = gridParam->GetProperty("lg");
+    if (lg->IsNumber() && lg->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[LG] = lg->ToNumber<int32_t>();
+    } else if (isOrder) {
+        containerSizeArray[LG] = 0;
+    }
+    auto xl = gridParam->GetProperty("xl");
+    if (xl->IsNumber() && xl->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[XL] = xl->ToNumber<int32_t>();
+    } else if (isOrder) {
+        containerSizeArray[XL] = 0;
+    }
+    auto xxl = gridParam->GetProperty("xxl");
+    if (xxl->IsNumber() && xxl->ToNumber<int32_t>() >= 0) {
+        containerSizeArray[XXL] = xxl->ToNumber<int32_t>();
+    } else if (isOrder) {
+        containerSizeArray[XXL] = 0;
+    }
+}
+
+RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValue, int32_t defaultVal, bool isOrder)
 {
     if (jsValue->IsNumber()) {
         double columnNumber = 0.0;
@@ -80,32 +128,8 @@ RefPtr<V2::GridContainerSize> ParserGridContainerSize(const JSRef<JSVal>& jsValu
         return gridContainerSize;
     } else if (jsValue->IsObject()) {
         auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(defaultVal);
-        auto gridParam = JSRef<JSObject>::Cast(jsValue);
         std::optional<int32_t> containerSizeArray[MAX_NUMBER_BREAKPOINT];
-        auto xs = gridParam->GetProperty("xs");
-        if (xs->IsNumber() && xs->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[0] = xs->ToNumber<int32_t>();
-        }
-        auto sm = gridParam->GetProperty("sm");
-        if (sm->IsNumber() && sm->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[1] = sm->ToNumber<int32_t>();
-        }
-        auto md = gridParam->GetProperty("md");
-        if (md->IsNumber() && md->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[2] = md->ToNumber<int32_t>();
-        }
-        auto lg = gridParam->GetProperty("lg");
-        if (lg->IsNumber() && lg->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[3] = lg->ToNumber<int32_t>();
-        }
-        auto xl = gridParam->GetProperty("xl");
-        if (xl->IsNumber() && xl->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[4] = xl->ToNumber<int32_t>();
-        }
-        auto xxl = gridParam->GetProperty("xxl");
-        if (xxl->IsNumber() && xxl->ToNumber<int32_t>() >= 0) {
-            containerSizeArray[5] = xxl->ToNumber<int32_t>();
-        }
+        ParseGridContainerSizeArray(jsValue, containerSizeArray, isOrder);
         InheritGridContainerSize(gridContainerSize, containerSizeArray, defaultVal);
         return gridContainerSize;
     } else {
@@ -122,9 +146,9 @@ void JSGridCol::Create(const JSCallbackInfo& info)
         auto spanParam = gridParam->GetProperty("span");
         auto offsetParam = gridParam->GetProperty("offset");
         auto orderParam = gridParam->GetProperty("order");
-        auto span = ParserGridContainerSize(spanParam, 1);
-        auto offset = ParserGridContainerSize(offsetParam, 0);
-        auto order = ParserGridContainerSize(orderParam, 0);
+        auto span = ParserGridContainerSize(spanParam, 1, false);
+        auto offset = ParserGridContainerSize(offsetParam, 0, false);
+        auto order = ParserGridContainerSize(orderParam, 0, true);
 
         GridColModel::GetInstance()->Create(span, offset, order);
     } else {
@@ -137,7 +161,7 @@ void JSGridCol::Span(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto span = ParserGridContainerSize(info[0], 1);
+    auto span = ParserGridContainerSize(info[0], 1, false);
     GridColModel::GetInstance()->SetSpan(span);
 }
 
@@ -157,7 +181,7 @@ void JSGridCol::Offset(const JSCallbackInfo& info)
         }
     }
 
-    auto offset = ParserGridContainerSize(info[0], 0);
+    auto offset = ParserGridContainerSize(info[0], 0, false);
     GridColModel::GetInstance()->SetOffset(offset);
 }
 
@@ -166,7 +190,7 @@ void JSGridCol::Order(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto order = ParserGridContainerSize(info[0], 0);
+    auto order = ParserGridContainerSize(info[0], 0, true);
     GridColModel::GetInstance()->SetOrder(order);
 }
 

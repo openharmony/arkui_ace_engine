@@ -54,6 +54,13 @@ public:
         return MakeRefPtr<WaterFlowAccessibilityProperty>();
     }
 
+    RefPtr<ScrollableController> GetPositionController() const
+    {
+        return positionController_;
+    }
+
+    void TriggerModifyDone();
+    
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool UpdateStartIndex(int32_t index);

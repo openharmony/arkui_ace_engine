@@ -191,6 +191,13 @@ var ImageFit;
   ImageFit[ImageFit["ScaleDown"] = 6] = "ScaleDown";
 })(ImageFit || (ImageFit = {}));
 
+var DynamicRangeMode ;
+(function (DynamicRangeMode ) {
+  DynamicRangeMode [DynamicRangeMode ["HIGH"] = 0] = "HIGH";
+  DynamicRangeMode [DynamicRangeMode ["CONSTRAINT"] = 1] = "CONSTRAINT";
+  DynamicRangeMode [DynamicRangeMode ["STANDARD"] = 2] = "STANDARD";
+})(DynamicRangeMode  || (DynamicRangeMode  = {}));
+
 var ImageRepeat;
 (function (ImageRepeat) {
   ImageRepeat[ImageRepeat["NoRepeat"] = 0] = "NoRepeat";
@@ -933,6 +940,11 @@ var NavigationTitleMode;
   NavigationTitleMode[NavigationTitleMode["Mini"] = 2] = "Mini";
 })(NavigationTitleMode || (NavigationTitleMode = {}));
 
+let BarStyle;
+(function (BarStyle) {
+  BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
+  BarStyle[BarStyle.STACK = 1] = "STACK";
+})(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
   NavigationMode[NavigationMode["Stack"] = 0] = "Stack";
@@ -1206,6 +1218,111 @@ var SymbolEffectStrategy;
   SymbolEffectStrategy[SymbolEffectStrategy["SCALE"] = 1] = "SCALE";
   SymbolEffectStrategy[SymbolEffectStrategy["HIERARCHICAL"] = 2] = "HIERARCHICAL";
 })(SymbolEffectStrategy || (SymbolEffectStrategy = {}));
+
+var EffectDirection;
+(function (EffectDirection) {
+  EffectDirection[EffectDirection["DOWN"] = 0] = "DOWN";
+  EffectDirection[EffectDirection["UP"] = 1] = "UP";
+})(EffectDirection || (EffectDirection = {}));
+
+var EffectScope;
+(function (EffectScope) {
+  EffectScope[EffectScope["LAYER"] = 0] = "LAYER";
+  EffectScope[EffectScope["WHOLE"] = 1] = "WHOLE";
+})(EffectScope || (EffectScope = {}));
+
+var EffectFillStyle;
+(function (EffectFillStyle) {
+  EffectFillStyle[EffectFillStyle["CUMULATIVE"] = 0] = "CUMULATIVE";
+  EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
+})(EffectFillStyle || (EffectFillStyle = {}));
+
+class SymbolEffect {
+}
+
+class ScaleSymbolEffect extends SymbolEffect {
+  constructor(scope, direction) {
+    super();
+    this.type = "ScaleSymbolEffect";
+    this.scope = scope;
+    this.direction = direction;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+  direction(value) {
+    this.direction = value;
+    return this;
+  }
+}
+
+class HierarchicalSymbolEffect extends SymbolEffect {
+  constructor(fillStyle) {
+    super();
+    this.type = "HierarchicalSymbolEffect";
+    this.fillStyle = fillStyle;
+  }
+}
+
+class AppearSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "AppearSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+class DisappearSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "DisappearSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class BounceSymbolEffect extends SymbolEffect {
+  constructor(scope, direction) {
+    super();
+    this.type = "BounceSymbolEffect";
+    this.scope = scope;
+    this.direction = direction;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+  direction(value) {
+    this.direction = value;
+    return this;
+  }
+}
+
+class ReplaceSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "ReplaceSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class PulseSymbolEffect extends SymbolEffect {
+  constructor() {
+    super();
+    this.type = "PulseSymbolEffect";
+  }
+}
 
 var RichEditorSpanType;
 (function (RichEditorSpanType) {
@@ -2765,6 +2882,8 @@ var DragPreviewMode;
 (function (DragPreviewMode) {
   DragPreviewMode["AUTO"] = 1;
   DragPreviewMode["DISABLE_SCALE"] = 2;
+  DragPreviewMode["ENABLE_DEFAULT_SHADOW"] = 3;
+  DragPreviewMode["ENABLE_DEFAULT_RADIUS"] = 4;
 })(DragPreviewMode || (DragPreviewMode = {}));
 
 var FoldStatus;
@@ -2902,6 +3021,7 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
   StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
   StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
+  StyledStringKey[StyledStringKey["LINE_HEIGHT"] = 5] = "LINE_HEIGHT";
   StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
@@ -2919,3 +3039,9 @@ let FocusPriority;
   FocusPriority[FocusPriority["PRIOR"] = 2000] = "PRIOR";
   FocusPriority[FocusPriority["PREVIOUS"] = 3000] = "PREVIOUS";
 })(FocusPriority || (FocusPriority = {}));
+var SubMenuExpandingMode;
+(function (SubMenuExpandingMode) {
+  SubMenuExpandingMode[SubMenuExpandingMode["SIDE_EXPAND"] = 0] = "SIDE";
+  SubMenuExpandingMode[SubMenuExpandingMode["EMBEDDED_EXPAND"] = 1] = "EMBEDDED";
+  SubMenuExpandingMode[SubMenuExpandingMode["STACK_EXPAND"] = 2] = "STACK";
+})(SubMenuExpandingMode || (SubMenuExpandingMode = {}));

@@ -507,7 +507,6 @@ HWTEST_F(TextFieldUXTest, InitSurfaceChangedCallback001, TestSize.Level1)
      */
     pattern_->ProcessOverlay();
     pattern_->HandleSurfaceChanged(0, 0, 0, 0);
-    pattern_->processOverlayDelayTask_.operator()();
 }
 
 /**
@@ -754,7 +753,7 @@ HWTEST_F(TextFieldUXTest, SetSelectionFlag001, TestSize.Level1)
     GetFocus();
     pattern_->SetSelectionFlag(start, end);
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
-    
+
     /**
      * @tc.steps: set start != end, Verify the caret position.
      */

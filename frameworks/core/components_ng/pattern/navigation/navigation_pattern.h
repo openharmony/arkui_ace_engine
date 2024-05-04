@@ -411,6 +411,7 @@ private:
     void StartTransition(const RefPtr<NavDestinationGroupNode>& preDestination,
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible = false);
+    void ProcessAutoSave(const RefPtr<FrameNode>& node);
     void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
 
     void FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,

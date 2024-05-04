@@ -44,7 +44,12 @@ void StaticImageObject::MakeCanvasImage(
         ctx->SuccessCallback(cachedImage);
         return;
     }
-    ImageProvider::MakeCanvasImage(Claim(this), ctx, targetSize, forceResize, syncLoad);
+    ImageProvider::MakeCanvasImage(Claim(this), ctx, targetSize, {
+        .forceResize = forceResize,
+        .sync = syncLoad,
+        .dynamicMode = ctx->GetDynamicRangeMode(),
+        .imageQuality = ctx->GetImageQuality()
+    });
 }
 
 RefPtr<ImageObject> StaticImageObject::Clone()

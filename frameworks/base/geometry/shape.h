@@ -156,8 +156,8 @@ protected:
     DimensionOffset offset_;
     DimensionOffset position_;
     Color color_;
-    uint32_t strokeColor_;
-    float strokeWidth_;
+    uint32_t strokeColor_ = 0;
+    float strokeWidth_ = 0.0f;
 };
 
 // inset(<top> <right> <bottom> <left> round <top-radius> <right-radius> <bottom-radius> <left-radius>)

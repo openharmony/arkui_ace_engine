@@ -19,6 +19,7 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   radioNode: BuilderNode<[RadioConfiguration]> | null = null;
   modifier: ContentModifier<RadioConfiguration>;
+  needRebuild: boolean = false;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -60,7 +61,12 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
   }
   setContentModifier(modifier: ContentModifier<RadioConfiguration>): this {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -68,10 +74,11 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
   }
   makeContentModifierNode(context: UIContext, radioConfiguration: RadioConfiguration): FrameNode | null {
     radioConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.radioNode)) {
+    if (isUndefined(this.radioNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.radioNode = new xNode.BuilderNode(context);
       this.radioNode.build(this.builder, radioConfiguration);
+      this.needRebuild = false;
     } else {
       this.radioNode.update(radioConfiguration);
     }

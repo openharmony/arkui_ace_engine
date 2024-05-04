@@ -94,7 +94,7 @@ struct TouchEvent final : public UIInputEvent {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
-    int32_t touchEventId;
+    int32_t touchEventId = 0;
     bool isInterpolated = false;
 
     // all points on the touch screen.
@@ -147,6 +147,11 @@ struct TouchEvent final : public UIInputEvent {
     {
         this->time = time;
         return *this;
+    }
+
+    TimeStamp GetTimeStamp() const
+    {
+        return this->time;
     }
 
     TouchEvent& SetType(TouchType type)

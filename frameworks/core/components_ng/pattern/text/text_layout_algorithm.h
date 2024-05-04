@@ -22,12 +22,13 @@
 #include <unordered_map>
 #include <utility>
 
+#include "base/utils/utils.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
@@ -42,127 +43,81 @@ struct DragSpanPosition {
 };
 
 // TextLayoutAlgorithm acts as the underlying text layout.
-class ACE_EXPORT TextLayoutAlgorithm : public BoxLayoutAlgorithm, public TextAdaptFontSizer {
+class ACE_EXPORT TextLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm, public TextAdaptFontSizer {
     DECLARE_ACE_TYPE(TextLayoutAlgorithm, BoxLayoutAlgorithm, TextAdaptFontSizer);
 
 public:
     TextLayoutAlgorithm();
-
-    explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spanItemChildren)
-        : spanItemChildren_(std::move(spanItemChildren))
-    {}
-
+    explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> paragraphManager_,
+        bool isSpanStringMode, bool isMarquee = false);
     ~TextLayoutAlgorithm() override = default;
 
     void OnReset() override;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
-
-    const RefPtr<Paragraph>& GetParagraph() const override;
     void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override {};
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
 
-    std::list<RefPtr<SpanItem>>&& GetSpanItemChildren();
-
-    float GetBaselineOffset() const;
+    float GetBaselineOffset() const override;
 
     size_t GetLineCount() const;
 
     std::optional<TextStyle> GetTextStyle() const;
 
+    RefPtr<Paragraph> GetParagraph() const override
+    {
+        CHECK_NULL_RETURN(paragraphManager_, nullptr);
+        CHECK_NULL_RETURN(!paragraphManager_->GetParagraphs().empty(), nullptr);
+        return paragraphManager_->GetParagraphs().front().paragraph;
+    }
+
 protected:
-    const std::list<RefPtr<SpanItem>>& GetSpans() const
-    {
-        return spanItemChildren_;
-    }
-    void SetSpans(const std::list<RefPtr<SpanItem>>& spans)
-    {
-        spanItemChildren_ = spans;
-    }
-
-    void SetParagraph(const RefPtr<Paragraph>& paragraph)
-    {
-        paragraph_ = paragraph;
-    }
-
     virtual int32_t GetPreviousLength() const
     {
         return 0;
     }
 
-    virtual void GetPlaceholderRects(std::vector<RectF>& rects);
-
-    virtual ParagraphStyle GetParagraphStyle(
-        const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const;
-
-    virtual void UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper);
-
-    virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper);
-    OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
+    virtual void UpdateParagraphForAISpan(
+        const TextStyle& textStyle, LayoutWrapper* layoutWrapper, const RefPtr<Paragraph>& paragraph);
 
     void GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring textForAI,
-        const TextStyle& textStyle, bool isDragging);
+        const TextStyle& textStyle, bool isDragging, const RefPtr<Paragraph>& paragraph);
 
     std::string StringOutBoundProtection(int32_t position, int32_t length, std::wstring wTextForAI);
 
 private:
-    virtual void ApplyIndent(const TextStyle& textStyle, double width);
-    void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
-    bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
-    void UpdateSymbolSpanEffect(RefPtr<FrameNode>& frameNode);
-    void CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents);
+    OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
+    bool UpdateSingleParagraph(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, const TextStyle& textStyle,
+        const std::string& content, double maxWidth);
+    bool UpdateSymbolTextStyle(const TextStyle& textStyle, const ParagraphStyle& paraStyle,
+        LayoutWrapper* layoutWrapper, RefPtr<FrameNode>& frameNode);
+    void CreateParagraphDrag(
+        const TextStyle& textStyle, const std::vector<std::string>& contents, const RefPtr<Paragraph>& paragraph);
+    void ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spans);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
-        const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper);
-    bool DidExceedMaxLines(const SizeF& maxSize);
+        LayoutWrapper* layoutWrapper);
     bool AddPropertiesAndAnimations(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
-        LayoutWrapper* layoutWrapper);
-    static TextDirection GetTextDirection(const std::string& content, LayoutWrapper* layoutWrapper);
-    float GetTextWidth() const;
-    SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint) const;
-    bool BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
-        LayoutWrapper* layoutWrapper);
-    bool BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
-        LayoutWrapper* layoutWrapper);
-    bool BuildParagraphAdaptUseLayoutConstraint(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
-        LayoutWrapper* layoutWrapper);
-    std::optional<SizeF> BuildTextRaceParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
-        LayoutWrapper* layoutWrapper);
-    void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier);
-    bool AdaptMaxTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
-        const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper);
-    void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
-    void UpdateParagraph(LayoutWrapper* layoutWrapper);
-    bool CreateImageSpanAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    bool IncludeImageSpan(LayoutWrapper* layoutWrapper);
-    void SetImageSpanTextStyle(const TextStyle& textStyle);
-    void GetSpanAndImageSpanList(std::list<RefPtr<SpanItem>>& spanList,
-        std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList);
-    void SplitSpanContentByLines(const TextStyle& textStyle, const std::list<RefPtr<SpanItem>>& spanList,
-        std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
-    void SetImageSpanTextStyleByLines(const TextStyle& textStyle,
-        std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
-        std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
-    void UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper);
-    int32_t GetFirstSpanStartPositon();
+    bool CreateParagraph(
+        const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) override;
+    bool BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    bool BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    bool BuildParagraphAdaptUseLayoutConstraint(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    std::optional<SizeF> BuildTextRaceParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    void UpdateSensitiveContent(std::string& content);
+    bool AdaptMaxTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper);
+    void ResetAiSpanTextStyle(const RefPtr<FrameNode>& frameNode, TextStyle& aiSpanTextStyle);
 
-    std::list<RefPtr<SpanItem>> spanItemChildren_;
-    RefPtr<Paragraph> paragraph_;
-    float baselineOffset_ = 0.0f;
     std::optional<TextStyle> textStyle_;
     RefPtr<PropertyBool> showSelect_;
-    float indent_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

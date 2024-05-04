@@ -419,12 +419,12 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(properties, settingData, buttonInfos, timePickerProperty, dialogEvent,
-                dialogCancelEvent, dialogLifeCycleEvent);
+            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
+                dialogLifeCycleEvent, buttonInfos);
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowTimePicker");
 }

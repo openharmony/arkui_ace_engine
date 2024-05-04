@@ -57,9 +57,12 @@ const double_t WIDTH_D = 80.0;
 const double_t WIDTH_E = 112.0;
 const double_t DIVISOR = 2.0;
 const Dimension DIMENSION_RADIUS(10.0, DimensionUnit::PX);
+const Dimension DIMENSION_WIDTH(2.0, DimensionUnit::PX);
 constexpr int BUTTONINDEX_TEST_1 = 1;
 constexpr int BUTTONINDEX_TEST_2 = -1;
 constexpr int BUTTONINDEX_TEST_3 = -2;
+constexpr float DEFAULT_WIDTH = 600.0f;
+constexpr float DEFAULT_HEIGHT = 1000.0f;
 } // namespace
 
 class MockDialogTheme : public DialogTheme, public ButtonTheme {
@@ -481,6 +484,11 @@ HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty002, TestSize.Level1)
  */
 HWTEST_F(DialogPatternTestNg, DialogPatternTest001, TestSize.Level1)
 {
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
     /**
      * @tc.steps: step1. create params and DialogLayoutAlgorithm object.
      */
@@ -489,6 +497,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest001, TestSize.Level1)
     const DeviceType deviceTypes[] = { DeviceType::WATCH, DeviceType::PHONE, DeviceType::CAR, DeviceType::UNKNOWN };
     auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
     auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+
     /**
      * @tc.steps: step2. call GetMaxWidthBasedOnGridType function.
      * @tc.expected: the result equal to WIDTH_A.
@@ -1726,5 +1735,139 @@ HWTEST_F(DialogPatternTestNg, CustomDialogControllerModelNGTest002, TestSize.Lev
     props.isScenceBoardDialog = false;
     controllerModel.SetOpenDialogWithNode(props, nullptr);
     EXPECT_TRUE(props.isShowInSubWindow);
+}
+
+/**
+ * @tc.name: DialogPatternTest018
+ * @tc.desc: Verify function Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a child node and childLayoutWrapper
+     * @tc.expected: created successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    RefPtr<FrameNode> dialogNode = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dialogNode, dialogNode->GetGeometryNode(), dialogNode->GetLayoutProperty());
+    ASSERT_NE(childLayoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. create dialog with a dialog node and layoutWrapper.
+     * @tc.expected: the dialog node created successfully.
+     */
+    DialogProperties dialogProps { .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .sheetsInfo = sheetItems,
+        .buttons = btnItems,
+        .width = -24,
+        .backgroundColor = Color::TRANSPARENT };
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(DIMENSION_RADIUS);
+    dialogProps.borderRadius = borderRadius;
+    NG::BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(DIMENSION_WIDTH);
+    dialogProps.borderWidth = borderWidth;
+    NG::BorderColorProperty borderColor;
+    borderColor.SetColor(Color::BLACK);
+    dialogProps.borderColor = borderColor;
+    auto dialog = DialogView::CreateDialogNode(dialogProps, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize = { DEFAULT_WIDTH, DEFAULT_HEIGHT };
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dialog, dialog->GetGeometryNode(), dialog->GetLayoutProperty());
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    layoutWrapper->AppendChild(childLayoutWrapper);
+
+    /**
+     * @tc.steps: step3.execute Measure() and Layout()
+     * @tc.expected: prop is set as expected.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
+    dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
+    EXPECT_EQ(layoutWrapper->GetTotalChildCount(), 1);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), DEFAULT_WIDTH);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Height(), DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: DialogPatternTest019
+ * @tc.desc: Verify function Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a child node and childLayoutWrapper
+     * @tc.expected: the child node created successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(childNode, nullptr);
+    auto childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNode, childNode->GetGeometryNode(), childNode->GetLayoutProperty());
+    ASSERT_NE(childLayoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. create dialog with a dialog node and layoutWrapper.
+     * @tc.expected: the dialog node created successfully.
+     */
+    DialogProperties param { .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .width = 320,
+        .height = 320,
+        .backgroundColor = Color::TRANSPARENT };
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(DIMENSION_RADIUS);
+    param.borderRadius = borderRadius;
+    NG::BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(DIMENSION_WIDTH);
+    param.borderWidth = borderWidth;
+    NG::BorderColorProperty borderColor;
+    borderColor.SetColor(Color::BLACK);
+    param.borderColor = borderColor;
+    auto dialog = DialogView::CreateDialogNode(param, nullptr);
+    ASSERT_NE(dialog, nullptr);
+
+    auto dialogLayoutProps = dialog->GetLayoutProperty<DialogLayoutProperty>();
+    ASSERT_NE(dialogLayoutProps, nullptr);
+    dialogLayoutProps->UpdateWidth(param.width.value());
+    dialogLayoutProps->UpdateHeight(param.height.value());
+    SizeF size(param.width.value().ConvertToPx(), param.height.value().ConvertToPx());
+    dialogLayoutProps->UpdateMarginSelfIdealSize(size);
+
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dialog, dialog->GetGeometryNode(), dialog->GetLayoutProperty());
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize = OptionalSizeF(size);
+    layoutConstraint.selfIdealSize = OptionalSizeF(size);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    dialog->AddChild(childNode);
+    layoutWrapper->AppendChild(childLayoutWrapper);
+
+    /**
+     * @tc.steps: step3.execute Measure() and Layout()
+     * @tc.expected: prop is set as expected.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
+    dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
+    EXPECT_EQ(layoutWrapper->GetTotalChildCount(), 1);
+    EXPECT_EQ(dialog->GetGeometryNode()->GetFrameSize().Height(), param.height.value().ConvertToPx());
 }
 } // namespace OHOS::Ace::NG

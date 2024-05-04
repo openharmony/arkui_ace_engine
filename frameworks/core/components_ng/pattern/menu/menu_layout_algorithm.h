@@ -110,7 +110,7 @@ private:
 
     void Initialize(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
-    void InitializePaddingAPI11(LayoutWrapper* layoutWrapper);
+    void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position);
@@ -202,6 +202,9 @@ private:
 
     void ProcessArrowParams(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
     BorderRadiusProperty GetMenuRadius(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
+
+    void CalculateIdealSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
+        PaddingPropertyF padding, SizeF& idealSize, RefPtr<FrameNode> parentItem);
 
     OffsetF targetOffset_;
     SizeF targetSize_;

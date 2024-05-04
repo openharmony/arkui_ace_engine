@@ -31,6 +31,10 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+constexpr int32_t TOUCH_DURATION = 100;
+constexpr int32_t TYPE_TOUCH = 0;
+constexpr int32_t TYPE_HOVER = 1;
+constexpr int32_t TYPE_CANCEL = 2;
 }
 
 void ToggleButtonPattern::OnAttachToFrameNode()
@@ -99,18 +103,15 @@ void ToggleButtonPattern::OnModifyDone()
         CHECK_NULL_VOID(toggleButtonEventHub);
         toggleButtonEventHub->UpdateChangeEvent(isOn_.value());
     }
+    FireBuilder();
     InitButtonAndText();
     HandleEnabled();
     HandleBorderColorAndWidth();
+    InitTouchEvent();
     InitHoverEvent();
     InitOnKeyEvent();
     InitFocusEvent();
     SetAccessibilityAction();
-    FireBuilder();
-    if (UseContentModifier()) {
-        return;
-    }
-    InitTouchEvent();
 }
 
 void ToggleButtonPattern::HandleBorderColorAndWidth()
@@ -348,6 +349,90 @@ void ToggleButtonPattern::HandleEnabled()
         renderContext->OnBackgroundColorUpdate(backgroundColor.BlendOpacity(disabledAlpha_));
     } else {
         renderContext->OnBackgroundColorUpdate(backgroundColor);
+    }
+}
+
+void ToggleButtonPattern::InitTouchEvent()
+{
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto buttonPattern = weak.Upgrade();
+        CHECK_NULL_VOID(buttonPattern);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
+            buttonPattern->OnTouchDown();
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch up");
+            buttonPattern->OnTouchUp();
+        }
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void ToggleButtonPattern::OnTouchDown()
+{
+    isPress_ = true;
+    FireBuilder();
+    if (UseContentModifier()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    if (buttonEventHub->GetStateEffect()) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        backgroundColor_ = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+        if (isSetClickedColor_) {
+            // for user self-defined
+            renderContext->UpdateBackgroundColor(clickedColor_);
+            return;
+        }
+        // for system default
+        auto isNeedToHandleHoverOpacity = false;
+        AnimateTouchAndHover(renderContext, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL, TYPE_TOUCH,
+            TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
+    }
+}
+
+void ToggleButtonPattern::OnTouchUp()
+{
+    isPress_ = false;
+    FireBuilder();
+    if (UseContentModifier()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
+    if (toggleButtonPattern) {
+        toggleButtonPattern->OnClick();
+    }
+    if (buttonEventHub->GetStateEffect()) {
+        auto renderContext = host->GetRenderContext();
+        if (isSetClickedColor_) {
+            renderContext->UpdateBackgroundColor(backgroundColor_);
+            return;
+        }
+        if (buttonEventHub->IsEnabled()) {
+            auto isNeedToHandleHoverOpacity = false;
+            AnimateTouchAndHover(renderContext, TYPE_TOUCH, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL,
+                TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
+        } else {
+            AnimateTouchAndHover(renderContext, TYPE_TOUCH, TYPE_CANCEL, TOUCH_DURATION, Curves::FRICTION);
+        }
     }
 }
 
@@ -667,24 +752,36 @@ void ToggleButtonPattern::FireBuilder()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!toggleMakeFunc_.has_value()) {
+        auto children = host->GetChildren();
+        for (const auto& child : children) {
+            if (child->GetId() == nodeId_) {
+                host->RemoveChildAndReturnIndex(child);
+                host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+                break;
+            }
+        }
         return;
     }
-    host->RemoveChildAtIndex(0);
-    contentModifierNode_ = BuildContentModifierNode();
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
+    nodeId_ = contentModifierNode_->GetId();
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
-    const auto& renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto buttonPaintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
-    CHECK_NULL_VOID(buttonPaintProperty);
-    auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(ITEM_FILL_COLOR);
-    renderContext->UpdateBackgroundColor(bgColor);
 }
 
 RefPtr<FrameNode> ToggleButtonPattern::BuildContentModifierNode()
 {
-    CHECK_NULL_RETURN(toggleMakeFunc_, nullptr);
+    if (!toggleMakeFunc_.has_value()) {
+        return nullptr;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto eventHub = host->GetEventHub<EventHub>();

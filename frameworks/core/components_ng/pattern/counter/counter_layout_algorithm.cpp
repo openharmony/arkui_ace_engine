@@ -107,21 +107,21 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     addButtonWrapper->Measure(layoutConstraint);
 }
 
-void CounterLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+static void LayoutItem(LayoutWrapper* layoutWrapper, int32_t leftButton, int32_t rightButton)
 {
-    // layout sub button
-    auto subButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(SUB_BUTTON);
-    CHECK_NULL_VOID(subButtonWrapper);
-    auto subButtonGeometryNode = subButtonWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(subButtonGeometryNode);
-    auto subButtonSize = subButtonGeometryNode->GetFrameSize();
-    auto subButtonFrameWidth = subButtonSize.Width();
+    // layout left button
+    auto leftButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(leftButton);
+    CHECK_NULL_VOID(leftButtonWrapper);
+    auto leftButtonGeometryNode = leftButtonWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(leftButtonGeometryNode);
+    auto leftButtonSize = leftButtonGeometryNode->GetFrameSize();
+    auto leftButtonFrameWidth = leftButtonSize.Width();
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     const auto& padding = layoutProperty->CreatePaddingWithoutBorder();
-    OffsetF subButtonOffset(padding.left.value_or(0), padding.top.value_or(0));
-    subButtonGeometryNode->SetMarginFrameOffset(subButtonOffset);
-    subButtonWrapper->Layout();
+    OffsetF leftButtonOffset(padding.left.value_or(0), padding.top.value_or(0));
+    leftButtonGeometryNode->SetMarginFrameOffset(leftButtonOffset);
+    leftButtonWrapper->Layout();
 
     // layout content
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(CONTENT);
@@ -130,22 +130,33 @@ void CounterLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(contentGeometryNode);
     auto contentSize = contentGeometryNode->GetFrameSize();
     auto contentFrameWidth = contentSize.Width();
-    auto contentHorizontalOffset = subButtonGeometryNode->GetFrameOffset().GetX() + subButtonFrameWidth;
-    auto contentVerticalOffset = subButtonGeometryNode->GetFrameOffset().GetY();
+    auto contentHorizontalOffset = leftButtonGeometryNode->GetFrameOffset().GetX() + leftButtonFrameWidth;
+    auto contentVerticalOffset = leftButtonGeometryNode->GetFrameOffset().GetY();
     OffsetF contentOffset(contentHorizontalOffset, contentVerticalOffset);
     contentGeometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
 
-    // layout add button
-    auto addButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(ADD_BUTTON);
-    CHECK_NULL_VOID(addButtonWrapper);
-    auto addButtonGeometryNode = addButtonWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(addButtonGeometryNode);
-    auto addButtonHorizontalOffset =
-        subButtonGeometryNode->GetFrameOffset().GetX() + subButtonFrameWidth + contentFrameWidth;
-    auto addButtonVerticalOffset = subButtonGeometryNode->GetFrameOffset().GetY();
-    OffsetF addButtonOffset(addButtonHorizontalOffset, addButtonVerticalOffset);
-    addButtonGeometryNode->SetMarginFrameOffset(addButtonOffset);
-    addButtonWrapper->Layout();
+    // layout right button
+    auto rightButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(rightButton);
+    CHECK_NULL_VOID(rightButtonWrapper);
+    auto rightButtonGeometryNode = rightButtonWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(rightButtonGeometryNode);
+    auto rightButtonHorizontalOffset =
+        leftButtonGeometryNode->GetFrameOffset().GetX() + leftButtonFrameWidth + contentFrameWidth;
+    auto rightButtonVerticalOffset = leftButtonGeometryNode->GetFrameOffset().GetY();
+    OffsetF rightButtonOffset(rightButtonHorizontalOffset, rightButtonVerticalOffset);
+    rightButtonGeometryNode->SetMarginFrameOffset(rightButtonOffset);
+    rightButtonWrapper->Layout();
 }
+
+void CounterLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL) {
+        LayoutItem(layoutWrapper, ADD_BUTTON, SUB_BUTTON);
+    } else {
+        LayoutItem(layoutWrapper, SUB_BUTTON, ADD_BUTTON);
+    }
+}
+
 } // namespace OHOS::Ace::NG

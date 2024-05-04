@@ -143,6 +143,11 @@ public:
         return hoverRadius_;
     }
 
+    const Dimension& GetDefaultPaddingSize() const
+    {
+        return defaultPaddingSize_;
+    }
+
     const Dimension& GetFocusRadius() const
     {
         return focusRadius_;
@@ -216,6 +221,7 @@ protected:
     Dimension borderWidth_;
     Dimension shadowWidth_;
     Dimension hoverRadius_;
+    Dimension defaultPaddingSize_;
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
     Dimension focusBoardSize_;
@@ -264,8 +270,8 @@ public:
             theme->hotZoneHorizontalPadding_ = checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding", 0.0_vp);
             theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size", 0.0_vp);
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                theme->hotZoneHorizontalPadding_ =
-                    checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding_twelve", 2.0_vp);
+                theme->defaultPaddingSize_ =
+                    checkboxPattern->GetAttr<Dimension>("checkbox_default_padding_size", 2.0_vp);
                 theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size_twelve", 24.0_vp);
             }
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
@@ -314,11 +320,6 @@ public:
             theme->hotZoneHorizontalPadding_ =
                 checkboxPattern->GetAttr<Dimension>("hotzone_padding_horizontal", 11.0_vp);
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                theme->hotZoneHorizontalPadding_ =
-                    checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding_twelve", 2.0_vp);
-                theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
-            }
         }
     };
 
@@ -504,10 +505,8 @@ public:
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
                 theme->height_ = theme->width_;
-                theme->hotZoneHorizontalPadding_ =
-                    radioPattern->GetAttr<Dimension>("radio_hotzone_padding_api_twelve", 2.0_vp);
-                theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
-                theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size_api_twelve", 0.0_vp);
+                theme->defaultPaddingSize_ = radioPattern->GetAttr<Dimension>("radio_default_padding_size", 2.0_vp);
+                theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size_api_twelve", 24.0_vp);
                 theme->defaultHeight_ = theme->defaultWidth_;
             }
             theme->radioInnerSizeRatio_ = radioPattern->GetAttr<double>("radio_inner_size_ratio", 0.0);
@@ -544,9 +543,6 @@ public:
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
                 theme->height_ = theme->width_;
-                theme->hotZoneHorizontalPadding_ =
-                    radioPattern->GetAttr<Dimension>("radio_hotzone_padding_api_twelve", 2.0_vp);
-                theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             }
         }
 

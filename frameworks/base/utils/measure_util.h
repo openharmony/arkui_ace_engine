@@ -40,6 +40,7 @@ struct MeasureContext {
     TextOverflow textOverlayFlow = TextOverflow::CLIP;
     TextCase textCase = TextCase::NORMAL;
     WordBreak wordBreak = WordBreak::BREAK_WORD;
+    LineBreakStrategy lineBreakStrategy = LineBreakStrategy::GREEDY;
 };
 
 class MeasureUtil {

@@ -1841,7 +1841,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
         shadows[NUM_1].i32 = type;
         shadows[NUM_5].u32 = color;
     }
-    shadows[NUM_6].i32 = static_cast<uint32_t>((fillArg->IsBoolean()) ? fillArg->BooleaValue() : false);
+    shadows[NUM_6].i32 = fillArg->IsBoolean() ? fillArg->BooleaValue() : false;
     GetArkUINodeModifiers()->getCommonModifier()->setBackShadow(nativeNode, shadows,
         (sizeof(shadows) / sizeof(shadows[NUM_0])));
     return panda::JSValueRef::Undefined(vm);
@@ -3280,9 +3280,9 @@ ArkUINativeModuleValue CommonBridge::SetMotionBlur(ArkUIRuntimeCallInfo *runtime
     Local<JSValueRef> xArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> yArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CalcDimension radius;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) || LessNotEqual(radius.Value(), 0.0f)) {
-        radius.SetValue(0.0f);
+    double radius = 0.0;
+    if (!ArkTSUtils::ParseJsDouble(vm, radiusArg, radius) || LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
     }
     double x = 0.0;
     double y = 0.0;
@@ -3294,8 +3294,7 @@ ArkUINativeModuleValue CommonBridge::SetMotionBlur(ArkUIRuntimeCallInfo *runtime
     }
     x = std::clamp(x, 0.0, 1.0);
     y = std::clamp(y, 0.0, 1.0);
-    GetArkUINodeModifiers()->getCommonModifier()->setMotionBlur(nativeNode,
-        static_cast<ArkUI_Float32>(radius.Value()), x, y);
+    GetArkUINodeModifiers()->getCommonModifier()->setMotionBlur(nativeNode, radius, x, y);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3773,32 +3772,48 @@ ArkUINativeModuleValue CommonBridge::SetConstraintSize(ArkUIRuntimeCallInfo* run
 
     bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, minWidth, false)) {
-        minWidthValue.value = minWidth.Value();
-        minWidthValue.unit = static_cast<int8_t>(minWidth.Unit());
+        if (minWidth.CalcValue() != "") {
+            minWidthValue.string = minWidth.CalcValue().c_str();
+        } else {
+            minWidthValue.value = minWidth.Value();
+            minWidthValue.unit = static_cast<int8_t>(minWidth.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMinWidth(nativeNode, &minWidthValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMinWidth(nativeNode);
     }
 
     if (ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, maxWidth, false)) {
-        maxWidthValue.value = maxWidth.Value();
-        maxWidthValue.unit = static_cast<int8_t>(maxWidth.Unit());
+        if (maxWidth.CalcValue() != "") {
+            maxWidthValue.string = maxWidth.CalcValue().c_str();
+        } else {
+            maxWidthValue.value = maxWidth.Value();
+            maxWidthValue.unit = static_cast<int8_t>(maxWidth.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMaxWidth(nativeNode, &maxWidthValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMaxWidth(nativeNode);
     }
 
     if (ArkTSUtils::ParseJsDimensionVp(vm, forthArg, minHeight, false)) {
-        minHeightValue.value = minHeight.Value();
-        minHeightValue.unit = static_cast<int8_t>(minHeight.Unit());
+        if (minHeight.CalcValue() != "") {
+            minHeightValue.string = minHeight.CalcValue().c_str();
+        } else {
+            minHeightValue.value = minHeight.Value();
+            minHeightValue.unit = static_cast<int8_t>(minHeight.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMinHeight(nativeNode, &minHeightValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMinHeight(nativeNode);
     }
 
     if (ArkTSUtils::ParseJsDimensionVp(vm, fifthArg, maxHeight, false)) {
-        maxHeightValue.value = maxHeight.Value();
-        maxHeightValue.unit = static_cast<int8_t>(maxHeight.Unit());
+        if (maxHeight.CalcValue() != "") {
+            maxHeightValue.string = maxHeight.CalcValue().c_str();
+        } else {
+            maxHeightValue.value = maxHeight.Value();
+            maxHeightValue.unit = static_cast<int8_t>(maxHeight.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMaxHeight(nativeNode, &maxHeightValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMaxHeight(nativeNode);
@@ -4371,6 +4386,30 @@ ArkUINativeModuleValue CommonBridge::ResetObscured(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetForegroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> radiusArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    CalcDimension radius;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) || LessNotEqual(radius.Value(), 0.0f)) {
+        radius.SetValue(0.0f);
+    }
+    ArkUI_Float32 radiusArk = static_cast<ArkUI_Int32>(radius.Value());
+    GetArkUINodeModifiers()->getCommonModifier()->setForegroundEffect(nativeNode, radiusArk);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetForegroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetForegroundEffect(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -4637,10 +4676,10 @@ ArkUINativeModuleValue CommonBridge::ResetSharedTransition(ArkUIRuntimeCallInfo*
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-    auto id = info[1]->ToString();
-    if (id.empty()) {
+    if (!info[1]->IsString() || info[1]->ToString().empty()) {
         return panda::JSValueRef::Undefined(vm);
     }
+    auto id = info[1]->ToString();
     std::shared_ptr<SharedTransitionOption> sharedOption;
     sharedOption = std::make_shared<SharedTransitionOption>();
     sharedOption->duration = DEFAULT_DURATION;
@@ -4661,10 +4700,10 @@ ArkUINativeModuleValue CommonBridge::SetSharedTransition(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-    auto id = info[NUM_1]->ToString();
-    if (id.empty()) {
+    if (!info[NUM_1]->IsString() || info[NUM_1]->ToString().empty()) {
         return panda::JSValueRef::Undefined(vm);
     }
+    auto id = info[NUM_1]->ToString();
     std::shared_ptr<SharedTransitionOption> sharedOption;
     if (info[NUM_2]->IsObject()) {
         Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(info[NUM_2]);

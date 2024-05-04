@@ -110,6 +110,7 @@ public:
     static void SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart);
     static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
+    static void SetNestedScroll(FrameNode* frameNode, const int32_t nestedOpt);
 
     static bool GetLoop(FrameNode* frameNode);
     static bool GetAutoPlay(FrameNode* frameNode);
@@ -124,8 +125,14 @@ public:
     static bool GetShowIndicator(FrameNode* frameNode);
     static int GetShowDisplayArrow(FrameNode* frameNode);
     static EdgeEffect GetEffectMode(FrameNode* frameNode);
+    static int32_t GetNestedScroll(FrameNode* frameNode);
 
     static int32_t RealTotalCount(FrameNode* frameNode);
+    static void SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool useAnimation);
+    static float GetPreviousMargin(FrameNode* frameNode, int32_t unit);
+    static float GetNextMargin(FrameNode* frameNode, int32_t unit);
+    static std::shared_ptr<SwiperParameters> GetDotIndicator(FrameNode* frameNode);
+    static int32_t GetIndicatorType(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

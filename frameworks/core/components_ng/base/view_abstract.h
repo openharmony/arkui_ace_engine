@@ -465,6 +465,7 @@ public:
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
     static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
     static void SetGeometryTransition(FrameNode* frameNode, const std::string& id, bool followWithoutTransition);
+    static const std::string GetGeometryTransition(FrameNode* frameNode, bool* followWithoutTransition);
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
@@ -508,6 +509,8 @@ public:
     static void SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeight);
     static void SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules);
     static void SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo);
+    static ChainInfo GetChainStyle(FrameNode* frameNode);
+    static void ResetChainStyle(FrameNode* frameNode);
     static void SetGrid(FrameNode* frameNode, std::optional<int32_t> span, std::optional<int32_t> offset,
         GridSizeType type = GridSizeType::UNDEFINED);
     static void ResetAspectRatio(FrameNode* frameNode);
@@ -517,6 +520,7 @@ public:
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
     static void SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption);
+    static void SetForegroundEffect(FrameNode* frameNode, float radius);
     static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
@@ -650,6 +654,16 @@ public:
     static NG::BorderWidthProperty GetOuterBorderWidth(FrameNode* frameNode);
     static void SetBias(FrameNode* frameNode, const BiasPair& biasPair);
     static BiasPair GetBias(FrameNode* frameNode);
+    static RenderFit GetRenderFit(FrameNode* frameNode);
+    static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
+    static bool GetRenderGroup(FrameNode* frameNode);
+    static void ResetBias(FrameNode* frameNode);
+    static void ResetAlignRules(FrameNode* frameNode);
+    static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
+        const std::vector<double> &ratioList);
+    static Color GetColorBlend(FrameNode* frameNode);
+    static void ResetAreaChanged(FrameNode* frameNode);
+    static void ResetVisibleChange(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

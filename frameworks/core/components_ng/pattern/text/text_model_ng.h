@@ -105,9 +105,12 @@ public:
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetFont(FrameNode* frameNode, const Font& value);
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
+    static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
+    static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
+    static void SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
     static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);
@@ -137,6 +140,10 @@ public:
     static std::vector<Shadow> GetTextShadow(FrameNode* frameNode);
     static Ace::WordBreak GetWordBreak(FrameNode* frameNode);
     static EllipsisMode GetEllipsisMode(FrameNode* frameNode);
+    static bool GetTextDetectEnable(FrameNode* frameNode);
+    static std::string GetTextDetectConfig(FrameNode* frameNode);
+    static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
+    static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

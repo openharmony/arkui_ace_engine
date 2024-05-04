@@ -225,6 +225,11 @@ public:
     void FireOnSizeChanged(const RectF& oldRect, const RectF& rect);
     bool HasOnSizeChanged() const;
 
+    void AddInnerOnSizeChanged(int32_t id, OnSizeChangedFunc&& onSizeChanged);
+    void FireInnerOnSizeChanged(const RectF& oldRect, const RectF& rect);
+    bool HasInnerOnSizeChanged() const;
+    void ClearInnerOnSizeChanged();
+
     void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged);
     void FireJSFrameNodeOnSizeChanged(const RectF& oldRect, const RectF& rect);
     void ClearJSFrameNodeOnSizeChange();
@@ -590,6 +595,7 @@ private:
     OnAreaChangedFunc onAreaChanged_;
     std::unordered_map<int32_t, OnAreaChangedFunc> onAreaChangedInnerCallbacks_;
     OnSizeChangedFunc onSizeChanged_;
+    std::unordered_map<int32_t, OnSizeChangedFunc> onSizeChangedInnerCallbacks_;
     OnSizeChangedFunc onJsFrameNodeSizeChanged_;
 
     OnPreDragFunc onPreDragFunc_;

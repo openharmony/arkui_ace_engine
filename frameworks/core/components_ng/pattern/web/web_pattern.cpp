@@ -317,7 +317,11 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragMove(event);
     };
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) { return; };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFlingMove(info);
+    };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
@@ -347,6 +351,18 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             // In other cases, the panEvent is used by default
             return GestureJudgeResult::CONTINUE;
         });
+}
+
+void WebPattern::HandleFlingMove(const GestureEvent& event)
+{
+    if ((event.GetInputEventType() == InputEventType::AXIS) &&
+        (event.GetSourceTool() == SourceTool::TOUCHPAD)) {
+        CHECK_NULL_VOID(delegate_);
+        auto localLocation = event.GetLocalLocation();
+        delegate_->HandleTouchpadFlingEvent(localLocation.GetX(), localLocation.GetY(),
+                                            event.GetVelocity().GetVelocityX(),
+                                            event.GetVelocity().GetVelocityY());
+    }
 }
 
 void WebPattern::HandleDragMove(const GestureEvent& event)
@@ -409,6 +425,7 @@ void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->OnTooltip("");
         if (info.GetChangedTouches().empty()) {
             return;
         }
@@ -504,12 +521,18 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
     CHECK_NULL_VOID(delegate_);
+    OnTooltip("");
     if (info.GetAction() == MouseAction::PRESS) {
         delegate_->OnContextMenuHide("");
         WebRequestFocus();
     }
 
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+        if (isReceivedArkDrag_) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop Do not reset drag action when dragging,"
+                "drop/cancel/end event will do this");
+            return;
+        }
         ResetDragAction();
     }
 
@@ -547,7 +570,7 @@ void WebPattern::ResetDragAction()
     }
 
     isDragging_ = false;
-    isDisableSlide_ = false;
+    isReceivedArkDrag_ = false;
     // cancel drag action to avoid web kernel can't process other input event
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -625,7 +648,7 @@ bool WebPattern::GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo)
 NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     isDragging_ = true;
-    isDisableSlide_ = true;
+    isReceivedArkDrag_ = true;
     NG::DragDropInfo dragDropInfo;
     if (GenerateDragDropInfo(dragDropInfo)) {
         auto frameNode = GetHost();
@@ -756,7 +779,7 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
             info->GetX(), info->GetY(), pattern->GetWebId());
         pattern->isW3cDragEvent_ = true;
         pattern->isDragging_ = true;
-        pattern->isDisableSlide_ = true;
+        pattern->isReceivedArkDrag_ = true;
         pattern->dropX_ = 0;
         pattern->dropY_ = 0;
         return pattern->HandleOnDragEnter(info);
@@ -1027,7 +1050,7 @@ void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
 void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     isDragging_ = false;
-    isDisableSlide_ = false;
+    isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
@@ -1076,7 +1099,7 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
 {
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
-    isDisableSlide_ = false;
+    isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1094,7 +1117,7 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
     CHECK_NULL_VOID(delegate_);
 
     isDragging_ = false;
-    isDisableSlide_ = false;
+    isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     ClearDragData();
 
@@ -1121,7 +1144,7 @@ void WebPattern::HandleDragCancel()
     frameNode->SetDraggable(false);
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
-    isDisableSlide_ = false;
+    isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     ClearDragData();
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -1268,6 +1291,9 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
         drawSize.SetWidth(DEFAULT_WEB_WIDTH);
     }
     if (GreatOrEqual(drawSize.Height(), Infinity<double>())) {
+        drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
+    }
+    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
         drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
     }
 
@@ -1851,7 +1877,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateHorizontalScrollBarAccess(GetHorizontalScrollBarAccessEnabledValue(true));
         delegate_->UpdateVerticalScrollBarAccess(GetVerticalScrollBarAccessEnabledValue(true));
         delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
-        delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
+        delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::ALWAYS));
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
         if (GetMetaViewport()) {
@@ -2051,7 +2077,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     CHECK_NULL_VOID(delegate_);
-    if (!isDisableSlide_) {
+    if (!isReceivedArkDrag_) {
         ResetDragAction();
     }
     std::list<TouchInfo> touchInfos;
@@ -2954,13 +2980,11 @@ bool WebPattern::ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChoo
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
-    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
-            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowDateDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowDateDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI, "ArkUIWebShowDateDialog");
     return true;
@@ -3003,14 +3027,12 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
-    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent,
+        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(
-                properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI, "ArkUIWebShowTimeDialog");
     return true;
@@ -3057,13 +3079,12 @@ bool WebPattern::ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDa
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
-    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
+        [properties, settingData, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTextDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI, "ArkUIWebShowTextDialog");
     return true;
@@ -3082,7 +3103,7 @@ void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
     auto menuPattern = menuContainer->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto options = menuPattern->GetOptions();
-    for (auto&& option : options) {
+    for (auto && option : options) {
         auto selectCallback = [callback](int32_t index) {
             std::vector<int32_t> indices { static_cast<int32_t>(index) };
             callback->Continue(indices);
@@ -3986,5 +4007,78 @@ void WebPattern::Backward()
         return;
     }
     delegate_->Backward();
+}
+
+void WebPattern::SuggestionSelected(int32_t index)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::SuggestionSelected index:%{public}d", index);
+    CHECK_NULL_VOID(delegate_);
+    delegate_->SuggestionSelected(index);
+}
+
+void WebPattern::OnShowAutofillPopup(
+    const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnShowAutofillPopup");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    std::vector<SelectParam> selectParam;
+    for (auto& item : menu_items) {
+        selectParam.push_back({ item, "" });
+    }
+    auto menu = MenuView::Create(selectParam, id, host->GetTag());
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+    CHECK_NULL_VOID(menuContainer);
+    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto options = menuPattern->GetOptions();
+    for (auto && option : options) {
+        auto selectCallback = [weak = WeakClaim(this)](int32_t index) {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->SuggestionSelected(index);
+        };
+        auto optionNode = AceType::DynamicCast<FrameNode>(option);
+        if (optionNode) {
+            auto hub = optionNode->GetEventHub<OptionEventHub>();
+            auto optionPattern = optionNode->GetPattern<OptionPattern>();
+            if (!hub || !optionPattern) {
+                continue;
+            }
+            hub->SetOnSelect(std::move(selectCallback));
+            optionNode->MarkModifyDone();
+        }
+    }
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    offset.AddX(offsetX);
+    offset.AddY(offsetY);
+    overlayManager->ShowMenu(id, offset, menu);
+}
+
+void WebPattern::OnHideAutofillPopup()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto destructor = [weak = WeakClaim(this), id]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteMenu(id);
+    };
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDisappear(destructor);
 }
 } // namespace OHOS::Ace::NG

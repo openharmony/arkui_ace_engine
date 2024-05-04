@@ -374,6 +374,22 @@ HWTEST_F(GridLayoutInfoTest, FindItemInRange001, TestSize.Level1)
     EXPECT_EQ(info.FindItemInRange(7).first, -1);
 }
 
+/**
+ * @tc.name: GetTotalHeightOfItemsInView001
+ * @tc.desc: Test GridLayoutInfo::GetTotalHeightOfItemsInView
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetTotalHeightOfItemsInView001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = {{0, 100.0f}, {1, 0.0f}, {2, 100.0f}, {3, 200.0f}};
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 3;
+    info.currentOffset_ = -50.0f;
+    EXPECT_EQ(info.GetTotalHeightOfItemsInView(5.0f, false), 415.0f);
+    EXPECT_EQ(info.GetTotalHeightOfItemsInView(5.0f, true), 415.0f);
+}
+
 namespace {
 void CheckEachIndex(const GridLayoutInfo& info, int32_t maxIdx)
 {

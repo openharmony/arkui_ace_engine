@@ -21,78 +21,55 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr double MULTIPLE = 2.0;
-}
 void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
     auto child = layoutWrapper->GetAllChildrenWithBuild().front();
-    // measure child.
     LayoutConstraintF textLayoutConstraint;
     textLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(Infinity<float>(), maxSize.Height()));
+    // use marquee constrain size as text child max constrain size
+    if (layoutConstraint->selfIdealSize.Height().has_value()) {
+        textLayoutConstraint.selfIdealSize.SetHeight(layoutConstraint->selfIdealSize.Height().value());
+    }
+    // measure text, and add marquee padding to text child
+    PaddingProperty textPadding;
+    textPadding.left = CalcLength(padding.left.value());
+    textPadding.right = CalcLength(padding.right.value());
+    textPadding.top = CalcLength(padding.top.value());
+    textPadding.bottom = CalcLength(padding.bottom.value());
+    child->GetLayoutProperty()->UpdatePadding(textPadding);
     child->Measure(textLayoutConstraint);
-    // measure self.
+    // measure marquee self, and update marquee padding to zero
+    layoutWrapper->GetGeometryNode()->UpdatePaddingWithBorder({ 0.0, 0.0, 0.0, 0.0 });
     OptionalSizeF frameSize;
     do {
-        // Use idea size first if it is valid.
+        // use idea size first if it is valid.
         frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
         if (frameSize.IsValid()) {
             break;
         }
+        // don't set marquee's height, and use text child's height
         frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
         frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->percentReference);
-        if (measureType == MeasureType::MATCH_PARENT) {
-            if (frameSize.IsValid()) {
-                frameSize.Constrain(minSize, maxSize);
-                break;
-            }
-        } else {
-            // use the child size.
-            auto childFrame = child->GetGeometryNode()->GetMarginFrameSize();
-            childFrame.Constrain(SizeF(Infinity<float>(), minSize.Height()), maxSize);
-            AddPaddingToSize(padding, childFrame);
-            frameSize.Constrain(SizeF { 0.0f, 0.0f }, SizeF { Infinity<float>(), childFrame.Height() });
-            break;
-        }
-        frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
+        auto childFrame = child->GetGeometryNode()->GetMarginFrameSize();
+        frameSize.Constrain(SizeF { 0.0f, 0.0f }, SizeF { maxSize.Width(), childFrame.Height() });
+        break;
     } while (false);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 
 void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
-    auto left = padding.left.value_or(0);
-    auto top = padding.top.value_or(0);
-    auto paddingOffset = OffsetF(left, top);
-    auto align = Alignment::CENTER_LEFT;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
-    }
-    // Update child position.
-    auto marqueeNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(marqueeNode);
-    auto textGeoNode = marqueeNode->GetGeometryNode();
-    CHECK_NULL_VOID(textGeoNode);
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        OffsetF translate;
-        translate.SetX((1.0 + align.GetHorizontal()) *
-                       (size.Width() - child->GetGeometryNode()->GetMarginFrameSize().Width()) / MULTIPLE);
-        translate.SetY((1.0 + align.GetVertical()) *
-                       (size.Height() - child->GetGeometryNode()->GetMarginFrameSize().Height()) / MULTIPLE);
-        child->GetGeometryNode()->SetMarginFrameOffset(translate);
-        child->Layout();
-    }
+    auto child = layoutWrapper->GetAllChildrenWithBuild().front();
+    child->GetGeometryNode()->SetMarginFrameOffset({ 0.0f, 0.0f });
+    child->Layout();
 }
 } // namespace OHOS::Ace::NG

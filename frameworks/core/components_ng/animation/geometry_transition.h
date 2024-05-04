@@ -43,6 +43,12 @@ public:
     {
         return id_;
     }
+    
+    bool GetFollowWithoutTransition() const
+    {
+        return followWithoutTransition_;
+    }
+
     void Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn);
     bool Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value);
     void OnReSync(const WeakPtr<FrameNode>& trigger = nullptr, const AnimationOption& option = AnimationOption());

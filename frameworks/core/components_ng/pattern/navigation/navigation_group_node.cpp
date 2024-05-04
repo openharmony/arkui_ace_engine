@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,11 +144,11 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         return;
     }
 
-    for (int32_t i = static_cast<int32_t>(navDestinationNodes.size()) - 1; i >= 0; --i) {
-        const auto& childNode = navDestinationNodes[i];
+    for (uint32_t index = 0; index < navDestinationNodes.size(); index++) {
+        const auto& childNode = navDestinationNodes[index];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
-        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size())
+        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, index, navDestinationNodes.size())
          || hasChanged);
     }
 
@@ -245,7 +245,6 @@ void NavigationGroupNode::RemoveRedundantNavDestination(
                 navDestination->GetContentNode()->Clean();
             }
             navigationContentNode->RemoveChild(navDestination, true);
-            navDestinationPattern->SetCustomNode(nullptr);
             hasChanged = true;
         } else {
             // remain the last child for pop animation
@@ -462,7 +461,6 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto parent = preNavDesNode->GetParent();
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(preNavDesNode);
-            preNavDesPattern->SetCustomNode(nullptr);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
@@ -639,7 +637,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     /* curNode */
     float flag = CheckLanguageDirection();
     curNode->GetRenderContext()->ClipWithRRect(
-        RectF(RectF(0.0f, 0.0f, curFrameSize.Width() * HALF, REMOVE_CLIP_SIZE)),
+        RectF(0.0f, 0.0f, curFrameSize.Width() * HALF, REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     curNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
     curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
@@ -831,7 +829,6 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
     auto parent = AceType::DynamicCast<FrameNode>(preNode->GetParent());
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(preNode);
-    navDestinationPattern->SetCustomNode(nullptr);
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -916,6 +913,12 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
     if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild &&
         !navDestination->IsOnAnimation()) {
+        auto navigationPattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+        if (!pattern->GetIsOnShow() && navigationPattern) {
+            navigationPattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_SHOW, true);
+            navigationPattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_SHOW, true);
+            pattern->SetIsOnShow(true);
+        }
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         navDestination->SetJSViewActive(true);
     }

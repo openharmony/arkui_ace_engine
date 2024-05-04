@@ -1295,8 +1295,8 @@ void ScrollablePattern::InitMouseEvent()
 
 void ScrollablePattern::HandleDragStart(const GestureEvent& info)
 {
-    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
-    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
     if (!IsItemSelected(info)) {
         ClearMultiSelect();
         ClearInvisibleItemsSelectedStatus();
@@ -1312,8 +1312,8 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
 
 void ScrollablePattern::HandleDragUpdate(const GestureEvent& info)
 {
-    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
-    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
     if (!mousePressed_ || !canMultiSelect_) {
         return;
     }
@@ -2406,6 +2406,7 @@ void ScrollablePattern::AddHotZoneSenceInterface(SceneStatus scene)
 
 void ScrollablePattern::InitScrollBarClickEvent()
 {
+    CHECK_NULL_VOID(scrollBar_);
     auto gesture = GetHost()->GetOrCreateGestureEventHub();
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();

@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 
+#include "base/error/error_code.h"
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -222,6 +223,17 @@ void SwiperModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
 
     eventHub->SetGestureSwipeEvent(
         [event = std::move(onGestureSwipe)](int32_t index, const AnimationCallbackInfo& info) { event(index, info); });
+}
+
+void SwiperModelNG::SetNestedScroll(FrameNode* frameNode, const int32_t nestedOpt)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    NestedScrollOptions option;
+    option.forward = static_cast<NestedScrollMode>(nestedOpt);
+    option.backward = static_cast<NestedScrollMode>(nestedOpt);
+    pattern->SetNestedScroll(option);
 }
 
 void SwiperModelNG::SetRemoteMessageEventId(RemoteCallback&& remoteCallback) {}
@@ -715,6 +727,14 @@ EdgeEffect SwiperModelNG::GetEffectMode(FrameNode* frameNode)
     return mode;
 }
 
+int32_t SwiperModelNG::GetNestedScroll(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, ERROR_CODE_PARAM_INVALID);
+    return static_cast<int>(pattern->GetNestedScroll().forward);
+}
+
 int32_t SwiperModelNG::RealTotalCount(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
@@ -723,4 +743,43 @@ int32_t SwiperModelNG::RealTotalCount(FrameNode* frameNode)
     return pattern->RealTotalCount();
 }
 
+void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool useAnimation)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ChangeIndex(index, useAnimation);
+}
+
+float SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit)
+{
+    Dimension prevMargin(0.0f, static_cast<DimensionUnit>(unit));
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        SwiperLayoutProperty, PrevMargin, prevMargin, frameNode, prevMargin);
+    return prevMargin.Value();
+}
+
+float SwiperModelNG::GetNextMargin(FrameNode* frameNode, int32_t unit)
+{
+    Dimension nextMargin(0.0f, static_cast<DimensionUnit>(unit));
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        SwiperLayoutProperty, NextMargin, nextMargin, frameNode, nextMargin);
+    return nextMargin.Value();
+}
+
+std::shared_ptr<SwiperParameters> SwiperModelNG::GetDotIndicator(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetSwiperParameters();
+}
+
+int32_t SwiperModelNG::GetIndicatorType(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    SwiperIndicatorType value = SwiperIndicatorType::DOT;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, IndicatorType, value, frameNode, value);
+    return static_cast<int32_t>(value);
+}
 } // namespace OHOS::Ace::NG

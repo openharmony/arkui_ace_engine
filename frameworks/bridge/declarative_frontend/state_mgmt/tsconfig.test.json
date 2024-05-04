@@ -15,6 +15,7 @@
     // common:
     // delcrations of C++ exposed classes
     "src/lib/common/environment_setting.d.ts",
+    "src/lib/common/ark_tools.d.ts",
     "src/lib/common/storage.d.ts",
     "src/lib/common/ifelse_native.d.ts",
     

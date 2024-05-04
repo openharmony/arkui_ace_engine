@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -329,6 +329,13 @@ public:
         return frameNode_.Upgrade();
     }
 
+    int32_t GetHostInstanceId() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, -1); // -1 means no valid id exists
+        return host->GetInstanceId();
+    }
+
     FrameNode* GetUnsafeHostPtr() const
     {
         return UnsafeRawPtr(frameNode_);
@@ -338,7 +345,7 @@ public:
     virtual void DumpAdvanceInfo() {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
     virtual void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
-    virtual void NotifyFillRequestFailed(int32_t errCode) {}
+    virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "") {}
     virtual bool CheckAutoSave()
     {
         return false;
@@ -525,6 +532,9 @@ public:
         };
         return longPressCallback;
     }
+
+    virtual void OnAttachContext(PipelineContext *context) {}
+    virtual void OnDetachContext(PipelineContext *context) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

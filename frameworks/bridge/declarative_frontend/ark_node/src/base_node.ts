@@ -56,4 +56,7 @@ class BaseNode extends __JSBaseNode__ {
   public getInstanceId() {
     return this.instanceId_;
   }
+  updateInstance(uiContext: UIContext) {
+      this.instanceId_ = uiContext.instanceId_;
+  }
 }

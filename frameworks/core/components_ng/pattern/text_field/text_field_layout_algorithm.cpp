@@ -263,13 +263,13 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
     }
 
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_, imageWidth);
-    auto counterNodeHeight = CounterNodeMeasure(contentWidth, layoutWrapper);
+    CounterNodeMeasure(contentWidth, layoutWrapper);
 
     auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
                       ? paragraph_->GetHeight()
                       : std::max(preferredHeight_, paragraph_->GetHeight());
 
-    auto contentHeight = std::min(contentConstraint.maxSize.Height() - counterNodeHeight, height);
+    auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
 
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
 
@@ -734,7 +734,7 @@ TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& cont
     return textDirection;
 }
 
-const RefPtr<Paragraph>& TextFieldLayoutAlgorithm::GetParagraph() const
+RefPtr<Paragraph> TextFieldLayoutAlgorithm::GetParagraph() const
 {
     return paragraph_;
 }

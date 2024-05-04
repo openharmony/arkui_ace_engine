@@ -20,15 +20,18 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace::NG {
 struct NavigationBackgroundOptions {
     std::optional<Color> color;
     std::optional<BlurStyle> blurStyle;
+    std::optional<BarStyle> barStyle;
 
     bool operator== (const NavigationBackgroundOptions& other) const
     {
-        return color == other.color && blurStyle == other.blurStyle;
+        return color == other.color && blurStyle == other.blurStyle
+            && barStyle == other.barStyle;
     }
 
     bool operator!= (const NavigationBackgroundOptions& other) const

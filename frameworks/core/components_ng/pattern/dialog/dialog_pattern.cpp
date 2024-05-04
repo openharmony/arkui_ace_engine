@@ -978,7 +978,8 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
     // column -> button
     for (size_t i = 0; i < buttons.size(); ++i) {
         RefPtr<FrameNode> button;
-        if (i != (static_cast<int32_t>(buttons.size()) - 1)) {
+        uint32_t val = buttons.size() > 0 ? buttons.size() - 1 : 0;
+        if (i != val) {
             button = CreateButton(buttons[i], i);
         } else {
             button = CreateButton(buttons[i], i, true);

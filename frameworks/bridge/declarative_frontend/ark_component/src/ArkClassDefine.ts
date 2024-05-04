@@ -863,6 +863,16 @@ class ArkKeyBoardShortCut {
   }
 }
 
+class ArkCustomProperty {
+  key: string;
+  value: object;
+
+  constructor() {
+    this.key = undefined;
+    this.value = undefined;
+  }
+}
+
 class ArkBlendMode {
   blendMode: number;
   blendApplyType: number;
@@ -924,16 +934,31 @@ class ArkConstraintSizeOptions {
   }
 }
 
-class ArkTextAreaShowCounter {
+class ArkTextFieldShowCounter {
   value: boolean;
-  options?: any;
+  highlightBorder?: any;
+  thresholdPercentage?: any;
   constructor() {
     this.value = undefined;
-    this.options = undefined;
+    this.highlightBorder = undefined;
+    this.thresholdPercentage = undefined;
   }
-  isEqual(another: ArkTextAreaShowCounter): boolean {
+  isEqual(another: ArkTextFieldShowCounter): boolean {
     return (this.value === another.value) &&
-      (this.options === another.options);
+      (this.highlightBorder === another.highlightBorder) &&
+      (this.thresholdPercentage === another.thresholdPercentage);
+  }
+}
+
+class ArkTextInputFilter {
+  value: ResourceStr | undefined;
+  error?: (value: string) => void;
+  constructor() {
+    this.value = undefined;
+    this.error = undefined;
+  }
+  isEqual(another: ArkSearchInputFilter): boolean {
+    return (this.value === another.value);
   }
 }
 

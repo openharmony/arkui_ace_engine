@@ -37,8 +37,8 @@ constexpr float DEFAULT_OPACITY_SCALE = 1.0f;
 constexpr float DEFAULT_OPACITY_BORDER_SCALE = 0.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_VELOCITY = 0.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_MASS = 1.0f;
-constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 410.0f;
-constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 25.0f;
+constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 228.0f;
+constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 26.0f;
 constexpr int32_t DEFAULT_INDICATOR_ANIMATION_DURATION = 150;
 } // namespace
 
@@ -69,6 +69,7 @@ RadioModifier::RadioModifier()
     pointScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_POINT_SCALE);
     ringPointScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
+    useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
 
     AttachProperty(enabled_);
     AttachProperty(isCheck_);
@@ -179,7 +180,7 @@ void RadioModifier::UpdateIndicatorAnimation(bool isCheck)
     auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(DEFAULT_INTERPOLATINGSPRING_VELOCITY,
         DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
     AnimationOption halfDurationOption;
-    halfDurationOption.SetCurve(springCurve);
+    halfDurationOption.SetCurve(Curves::FRICTION);
     halfDurationOption.SetDuration(DEFAULT_INDICATOR_ANIMATION_DURATION);
     AnimationOption delayOption;
     delayOption.SetCurve(springCurve);
@@ -385,7 +386,11 @@ void RadioModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& conten
     float outCircleRadius = contentSize.Width() / CALC_RADIUS;
     float centerX = outCircleRadius + offset.GetX();
     float centerY = outCircleRadius + offset.GetY();
-    outCircleRadius += hotZoneHorizontalPadding_.ConvertToPx();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        outCircleRadius += defaultPadding_.ConvertToPx();
+    } else {
+        outCircleRadius += hotZoneHorizontalPadding_.ConvertToPx();
+    }
     RSBrush brush;
     brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);

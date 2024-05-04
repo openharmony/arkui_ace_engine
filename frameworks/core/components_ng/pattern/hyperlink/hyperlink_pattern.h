@@ -47,6 +47,7 @@ public:
 private:
     void LinkToAddress();
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* node) override;
     void OnModifyDone() override;
 
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;

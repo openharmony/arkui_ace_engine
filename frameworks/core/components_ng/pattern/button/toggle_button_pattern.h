@@ -61,9 +61,25 @@ public:
         return MakeRefPtr<ToggleButtonAccessibilityProperty>();
     }
 
+    RefPtr<TouchEventImpl>& GetTouchListener()
+    {
+        return touchListener_;
+    }
+
     void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
     {
+        if (toggleMakeFunc == nullptr) {
+            toggleMakeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
         toggleMakeFunc_ = std::move(toggleMakeFunc);
+    }
+
+    int32_t GetBuilderId()
+    {
+        return nodeId_;
     }
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -93,6 +109,9 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
+    void InitTouchEvent();
+    void OnTouchDown();
+    void OnTouchUp();
     void FireBuilder();
     void OpenToCloseFocused();
     void CloseToOpenFocused();
@@ -103,11 +122,14 @@ private:
     std::optional<SwitchMakeCallback> toggleMakeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     void SetIsFocus(bool isFocus);
+    RefPtr<TouchEventImpl> touchListener_;
+    int32_t nodeId_ = -1;
 
     RefPtr<ClickEvent> clickListener_;
     std::optional<bool> isOn_;
     Color checkedColor_;
     Color unCheckedColor_;
+    Color backgroundColor_;
     float disabledAlpha_ { 1.0f };
     Dimension textMargin_;
     Dimension buttonMargin_;
@@ -121,6 +143,10 @@ private:
     bool isCheckedShadow_ = false;
     bool isbgColorFocus_ = false;
     bool isFocus_ = false;
+    bool isPress_ = false;
+    bool isSetClickedColor_ = false;
+    bool IsNeedToHandleHoverOpacity();
+
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPattern);
 };
 } // namespace OHOS::Ace::NG

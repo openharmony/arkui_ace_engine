@@ -98,8 +98,10 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
         json->PutExtAttr("renderingStrategy",
             GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
-        json->PutExtAttr("effectStrategy",
-            GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
+        json->PutExtAttr(
+            "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
+        json->Put("symbolEffect",
+            GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
 
         auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
         // Determines if there are multiple textShadows
@@ -232,6 +234,8 @@ void SpanNode::DumpInfo()
         dumpLog.AddDesc(std::string("SymbolColor:").append(spanItem_->SymbolColorToString()));
         dumpLog.AddDesc(std::string("RenderStrategy: ").append(std::to_string(textStyle->GetRenderStrategy())));
         dumpLog.AddDesc(std::string("EffectStrategy: ").append(std::to_string(textStyle->GetEffectStrategy())));
+        dumpLog.AddDesc(std::string("SymbolEffect:").append(
+            spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString()));
     }
 }
 
@@ -404,6 +408,7 @@ void SpanItem::SetAiSpanTextStyle(std::optional<TextStyle>& aiSpanTextStyle)
         aiSpanTextStyle.value().SetTextColor(hyerlinkColor);
         aiSpanTextStyle.value().SetTextDecoration(TextDecoration::UNDERLINE);
         aiSpanTextStyle.value().SetTextDecorationColor(hyerlinkColor);
+        aiSpanTextStyle.value().SetTextDecorationStyle(TextDecorationStyle::SOLID);
     }
 }
 
@@ -652,6 +657,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(textLineStyle, TextIndent, UpdateTextIndent);
     COPY_TEXT_STYLE(textLineStyle, LeadingMargin, UpdateLeadingMargin);
     COPY_TEXT_STYLE(textLineStyle, WordBreak, UpdateWordBreak);
+    COPY_TEXT_STYLE(textLineStyle, LineBreakStrategy, UpdateLineBreakStrategy);
     COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
 
     if (backgroundStyle.has_value()) {
@@ -855,7 +861,9 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::BASELINE_OFFSET, PropertyInfo::LINEHEIGHT,
         PropertyInfo::TEXT_ALIGN, PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
         PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
-        PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING };
+        PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING,
+        PropertyInfo::SYMBOL_EFFECT_OPTIONS };
+
     set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
     return inheritPropertyInfo;

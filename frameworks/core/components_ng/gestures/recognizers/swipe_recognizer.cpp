@@ -240,8 +240,10 @@ void SwipeRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     PointF curLocalPoint(event.x, event.y);
     PointF lastLocalPoint(touchPoints_[event.id].x, touchPoints_[event.id].y);
-    NGGestureRecognizer::Transform(curLocalPoint, GetAttachedNode(), false, isPostEventResult_);
-    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(curLocalPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
     Offset moveDistance(curLocalPoint.GetX() - lastLocalPoint.GetX(), curLocalPoint.GetY() - lastLocalPoint.GetY());
     touchPoints_[event.id] = event;
     if (NearZero(moveDistance.GetX()) && NearZero(moveDistance.GetY())) {
@@ -371,7 +373,7 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
         info.SetSourceTool(lastTouchEvent_.sourceTool);
-        info.SetPointerEvent(lastTouchEvent_.pointerEvent);
+        info.SetPointerEvent(lastPointEvent_);
         if (prevAngle_) {
             info.SetAngle(prevAngle_.value());
         }

@@ -60,7 +60,9 @@ ohos_shared_library("ace_ndk") {
     "node/node_animate.cpp",
     "node/node_extened.cpp",
     "node/node_model.cpp",
+    "node/node_node_relative_container.cpp",
     "node/style_modifier.cpp",
+    "node/waterflow_section_option.cpp",
   ]
 
   deps = [ "//third_party/bounds_checking_function:libsec_shared" ]

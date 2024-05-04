@@ -89,13 +89,14 @@ void DataPanelPattern::FireBuilder()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChildAtIndex(0);
     if (!makeFunc_.has_value()) {
+        host->RemoveChildAndReturnIndex(contentModifierNode_);
         contentModifierNode_ = nullptr;
         host->AddChild(nullptr, 0);
         host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
+    host->RemoveChildAtIndex(0);
     CHECK_NULL_VOID(makeFunc_);
     contentModifierNode_ = BuildContentModifierNode();
     CHECK_NULL_VOID(contentModifierNode_);
@@ -113,7 +114,7 @@ RefPtr<FrameNode> DataPanelPattern::BuildContentModifierNode()
 
     std::vector<double> tmpArry;
     if (paintProperty->GetValues().value().size() > 0) {
-        for (int i = 0; i < paintProperty->GetValues().value().size(); i++) {
+        for (size_t i = 0; i < paintProperty->GetValues().value().size(); i++) {
             tmpArry.push_back(paintProperty->GetValues().value()[i]);
         }
     } else {

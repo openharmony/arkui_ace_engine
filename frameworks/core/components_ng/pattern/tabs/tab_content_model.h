@@ -114,6 +114,11 @@ struct IconStyle {
     std::optional<Color> selectedColor;
 };
 
+struct TabBarSymbol {
+    std::function<void(WeakPtr<NG::FrameNode>, std::string)> onApply = nullptr;
+    bool selectedFlag = false;
+};
+
 class TabContentModel {
 public:
     static TabContentModel* GetInstance();
@@ -123,7 +128,7 @@ public:
     virtual void Create(std::function<void()>&& deepRenderFunc) = 0;
     virtual void Pop() = 0;
     virtual void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
-        std::function<void()>&& builder, bool useContentOnly) = 0;
+        const std::optional<TabBarSymbol>& tabBarSymbol, std::function<void()>&& builder, bool useContentOnly) = 0;
     virtual void SetTabBarStyle(TabBarStyle tabBarStyle) = 0;
     virtual void SetIndicator(const IndicatorStyle& indicator) = 0;
     virtual void SetBoard(const BoardStyle& board) = 0;

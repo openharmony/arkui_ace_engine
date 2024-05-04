@@ -342,6 +342,8 @@ public:
 
     void JSGetUIContext(const JSCallbackInfo& info);
 
+    void JSSendStateInfo(const std::string& stateInfo);
+
     void JSGetUniqueId(const JSCallbackInfo& info);
 
     // Release the UINode hold on the JS object and trigger the delete phase.

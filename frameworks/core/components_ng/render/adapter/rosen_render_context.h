@@ -231,6 +231,7 @@ public:
 
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
+    void FlushForegroundModifier(const RefPtr<Modifier>& modifier) override;
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
     void RemoveChild(const RefPtr<RenderContext>& renderContext) override;
@@ -264,6 +265,8 @@ public:
     void GetPointWithRevert(PointF& point) override;
 
     void GetPointTransform(PointF& point) override;
+
+    void GetPointTransformRotate(PointF& point) override;
 
     void GetPointWithTransform(PointF& point) override;
 
@@ -305,6 +308,7 @@ public:
 
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnOpacityUpdate(double opacity) override;
+    void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) override;
     void SetAlphaOffscreen(bool isOffScreen) override;
     void MarkContentChanged(bool isChanged) override;
     void MarkDrivenRender(bool flag) override;
@@ -454,6 +458,7 @@ private:
     {
         return transitionEffect_ != nullptr && transitionEffect_->HasDisappearTransition();
     }
+    bool HasValidBgImageResizable();
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
@@ -556,6 +561,7 @@ private:
     void OnePixelRounding(bool isRound, uint8_t flag);
     Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
+    Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.

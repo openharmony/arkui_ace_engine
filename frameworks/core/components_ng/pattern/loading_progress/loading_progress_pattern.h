@@ -35,9 +35,6 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (UseContentModifier()) {
-            return nullptr;
-        }
         if (!loadingProgressModifier_) {
             auto host = GetHost();
             CHECK_NULL_RETURN(host, nullptr);
@@ -46,6 +43,7 @@ public:
             auto loadingOwner =
                 paintProperty->GetLoadingProgressOwner().value_or(LoadingProgressOwner::SELF);
             loadingProgressModifier_ = AceType::MakeRefPtr<LoadingProgressModifier>(loadingOwner);
+            loadingProgressModifier_->SetUseContentModifier(UseContentModifier());
         }
         return MakeRefPtr<LoadingProgressPaintMethod>(loadingProgressModifier_);
     }
@@ -74,7 +72,18 @@ public:
 
     void SetBuilderFunc(LoadingProgressMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
+    }
+
+    const RefPtr<FrameNode>& GetContentModifierNode() const
+    {
+        return contentModifierNode_;
     }
 
     bool UseContentModifier() const

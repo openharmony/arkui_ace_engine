@@ -61,6 +61,7 @@ struct SpanNodeInfo {
     RefPtr<UINode> node;
     RefPtr<UINode> containerSpanNode;
 };
+
 // TextPattern is the base class for text render node to perform paint text.
 class TextPattern : public virtual Pattern, public TextDragBase, public TextBase {
     DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
@@ -69,6 +70,7 @@ public:
     TextPattern()
     {
         selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
+        pManager_ = AceType::MakeRefPtr<ParagraphManager>();
     }
 
     ~TextPattern() override = default;
@@ -87,7 +89,13 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<TextLayoutAlgorithm>(spans_);
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        if (textLayoutProperty &&
+            textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+            return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_, true);
+        } else {
+            return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_);
+        }
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
@@ -167,9 +175,10 @@ public:
         CHECK_NULL_RETURN(host, textRect);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, textRect);
-        if (!renderContext->GetClipEdge().value_or(true) && paragraph_ &&
-            LessNotEqual(textRect.Width(), paragraph_->GetLongestLine())) {
-            textRect.SetWidth(paragraph_->GetLongestLine());
+        CHECK_NULL_RETURN(pManager_, textRect);
+        if (!renderContext->GetClipEdge().value_or(true) &&
+            LessNotEqual(textRect.Width(), pManager_->GetLongestLine())) {
+            textRect.SetWidth(pManager_->GetLongestLine());
         }
         return textRect;
     }
@@ -272,9 +281,9 @@ public:
         return dragNode_;
     }
 
-    ParagraphT GetDragParagraph() const override
+    const RefPtr<Paragraph>& GetDragParagraph() const override
     {
-        return { paragraph_ };
+        return pManager_->GetParagraphs().front().paragraph;
     }
 
     bool CloseKeyboard(bool /* forceClose */) override
@@ -416,9 +425,16 @@ public:
     // It is currently used by RichEditorPattern.
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
 
-    RefPtr<Paragraph> GetParagraph()
+    virtual std::list<ParagraphManager::ParagraphInfo> GetParagraphs() const
     {
-        return paragraph_;
+        std::list<ParagraphManager::ParagraphInfo> res;
+        CHECK_NULL_RETURN(pManager_, res);
+        return pManager_->GetParagraphs();
+    }
+
+    const RefPtr<ParagraphManager>& GetParagraphManager() const
+    {
+        return pManager_;
     }
 
     void MarkContentChange()
@@ -554,29 +570,23 @@ public:
         CopySelectionMenuParams(selectInfo, textResponseType_.value_or(TextResponseType::NONE));
     }
 
-    std::vector<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> GetOnDrawList()
+    void OnSensitiveStyleChange(bool isSensitive) override;
+
+    bool IsSensitiveEnalbe();
+
+    void InitCustomSpanPlaceholderInfo(const std::vector<CustomSpanPlaceholderInfo>& customSpanPlaceholder)
     {
-        return onDraws_;
+        customSpanPlaceholder_ = customSpanPlaceholder;
     }
 
-    void SetOnDrawList(std::vector<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraws)
+    std::vector<CustomSpanPlaceholderInfo> GetCustomSpanPlaceholderInfo()
     {
-        onDraws_ = onDraws;
+        return customSpanPlaceholder_;
     }
 
-    void ClearOnDrawList()
+    void ClearCustomSpanPlaceholderInfo()
     {
-        onDraws_.clear();
-    }
-
-    void InitCustomSpan(std::vector<int32_t> customSpanIndex)
-    {
-        customSpanIndex_ = customSpanIndex;
-    }
-
-    std::vector<int32_t> GetCustomSpanIndex()
-    {
-        return customSpanIndex_;
+        customSpanPlaceholder_.clear();
     }
 
 protected:
@@ -623,6 +633,16 @@ protected:
         return copyOption_ != CopyOptions::None && textDetectEnable_ && enabled_ && dataDetectorAdapter_;
     };
 
+    void OnAttachToMainTree() override
+    {
+        isDetachFromMainTree_ = false;
+    }
+
+    void OnDetachFromMainTree() override
+    {
+        isDetachFromMainTree_ = true;
+    }
+
     Status status_ = Status::NONE;
     bool contChange_ = false;
     int32_t recoverStart_ = 0;
@@ -663,19 +683,17 @@ protected:
     std::optional<TextResponseType> textResponseType_;
 
     friend class TextContentModifier;
+
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleSpanLongPressEvent(GestureEvent& info);
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandlePanStart(const GestureEvent& info);
-    void HandlePanUpdate(const GestureEvent& info);
-    void HandlePanEnd(const GestureEvent& info);
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
+    bool IsShowHandle();
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick);
     void UpdateContainerChildren(const RefPtr<UINode>& parent, const RefPtr<UINode>& child);
@@ -731,16 +749,17 @@ private:
     bool isDoubleClick_ = false;
     bool isSpanStringMode_ = false;
     bool showSelected_ = false;
+    bool isSensitive_ = false;
     int32_t clickedSpanPosition_ = -1;
     TimeStamp lastClickTimeStamp_;
     bool leftFadeout_ = false;
     bool rightFadeout_ = false;
     float gradientPercent_ = 0.0;
     bool isMarqueeRunning_ = false;
-    RefPtr<Paragraph> paragraph_;
+
+    RefPtr<ParagraphManager> pManager_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeholderIndex_;
-    std::vector<int32_t> customSpanIndex_;
     std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;
 
@@ -758,7 +777,8 @@ private:
     bool isShowMenu_ = true;
     RefPtr<TextSelectOverlay> selectOverlay_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
-    std::vector<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraws_;
+    std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder_;
+    bool isDetachFromMainTree_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

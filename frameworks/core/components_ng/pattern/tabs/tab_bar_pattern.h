@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_method.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
+#include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/event/mouse_event.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "frameworks/core/components/focus_animation/focus_animation_theme.h"
@@ -68,6 +69,16 @@ public:
         text_ = text;
     }
 
+    const std::optional<TabBarSymbol>& GetSymbol() const
+    {
+        return symbol_;
+    }
+
+    void SetSymbol(const std::optional<TabBarSymbol>& symbol)
+    {
+        symbol_ = symbol;
+    }
+
     bool HasBuilder() const
     {
         return builder_ != nullptr;
@@ -98,6 +109,7 @@ public:
 private:
     std::string text_;
     std::string icon_;
+    std::optional<TabBarSymbol> symbol_;
     TabBarBuilderFunc builder_;
     TabBarStyle tabBarStyle_;
 };
@@ -186,6 +198,10 @@ public:
     void UpdateTextColorAndFontWeight(int32_t indicator);
 
     void UpdateImageColor(int32_t indicator);
+
+    void UpdateSymbolStats(int32_t index, int32_t preIndex);
+
+    void UpdateSymbolEffect(int32_t index);
 
     void UpdateSubTabBoard();
 
@@ -295,6 +311,20 @@ public:
         return iconStyles_;
     }
 
+    void SetSymbol(const TabBarSymbol& symbol, uint32_t position)
+    {
+        if (symbolArray_.size() == position) {
+            symbolArray_.emplace_back(symbol);
+        } else {
+            symbolArray_[position] = symbol;
+        }
+    }
+
+    std::vector<TabBarSymbol> GetSymbol()
+    {
+        return symbolArray_;
+    }
+
     bool IsMaskAnimationByCreate()
     {
         return isMaskAnimationByCreate_;
@@ -371,6 +401,15 @@ public:
         return bottomTabBarStyles_[position];
     }
 
+    LabelStyle GetBottomTabLabelStyle(uint32_t position) const
+    {
+        if (position < 0 || position >= labelStyles_.size()) {
+            LabelStyle labelStyle{};
+            return labelStyle;
+        }
+        return labelStyles_[position];
+    }
+
     void DumpAdvanceInfo() override;
 
     std::optional<int32_t> GetAnimationDuration();
@@ -395,6 +434,8 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void InitClick(const RefPtr<GestureEventHub>& gestureHub);
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
     void InitHoverEvent();
@@ -408,6 +449,9 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     bool OnKeyEventWithoutClick(const KeyEvent& event);
     bool OnKeyEventWithoutClick(const RefPtr<FrameNode>& host, const KeyEvent& event);
+    void HandleLongPressEvent(const GestureEvent& info);
+    void ShowDialogWithNode(int32_t index);
+    void CloseDialog(int32_t index);
     void HandleClick(const GestureEvent& info);
     void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(const TouchLocationInfo& info);
@@ -453,7 +497,8 @@ private:
     void SetSwiperCurve(const RefPtr<Curve>& curve) const;
     void AdjustOffset(double& offset) const;
     void InitTurnPageRateEvent();
-    void GetIndicatorStyle(IndicatorStyle& indicatorStyle);
+    void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
+    Color GetTabBarBackgroundColor() const;
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
     void TriggerTranslateAnimation(
@@ -462,12 +507,15 @@ private:
     bool IsNeedUpdateFontWeight(int32_t index);
 
     RefPtr<ClickEvent> clickEvent_;
+    RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<SwiperController> swiperController_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
+    RefPtr<FrameNode> dialogNode_;
+    RefPtr<DragEvent> dragEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
@@ -497,6 +545,7 @@ private:
     std::optional<int32_t> imageColorOnIndex_;
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
+    std::optional<int32_t> moveIndex_;
     TabBarStyle tabBarStyle_;
     float currentIndicatorOffset_ = 0.0f;
     std::vector<SelectedMode> selectedModes_;
@@ -504,6 +553,7 @@ private:
     std::vector<TabBarStyle> tabBarStyles_;
     std::vector<LabelStyle> labelStyles_;
     std::vector<IconStyle> iconStyles_;
+    std::vector<TabBarSymbol> symbolArray_;
     bool isFirstFocus_ = true;
     bool isTouchingSwiper_ = false;
     float indicatorStartPos_ = 0.0f;
@@ -523,6 +573,7 @@ private:
     std::optional<int32_t> animationTargetIndex_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;
+    std::pair<double, double> prevRootSize_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -63,6 +63,7 @@ public:
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections() override;
     void ResetSections() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& value);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
@@ -84,6 +85,31 @@ public:
     static void SetCachedCount(FrameNode* frameNode, int32_t value);
     static int32_t GetCachedCount(FrameNode* frameNode);
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
+    static float GetFriction(FrameNode* frameNode);
+    static void SetScrollBarMode(FrameNode* frameNode, DisplayMode value);
+    static int32_t GetScrollBarMode(FrameNode* frameNode);
+    static void SetScrollBarColor(FrameNode* frameNode, const std::string& value);
+    static uint32_t GetScrollBarColor(FrameNode* frameNode);
+    static void SetScrollBarWidth(FrameNode* frameNode, const std::string& value);
+    static float GetScrollBarWidth(FrameNode* frameNode);
+    static int32_t GetEdgeEffect(FrameNode* frameNode);
+    static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
+    static Dimension GetItemMinWidth(FrameNode* frameNode);
+    static Dimension GetItemMaxWidth(FrameNode* frameNode);
+    static Dimension GetItemMinHeight(FrameNode* frameNode);
+    static Dimension GetItemMaxHeight(FrameNode* frameNode);
+    static RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections(FrameNode* frameNode);
+    static void ResetSections(FrameNode* frameNode);
+    static bool GetScrollEnabled(FrameNode* frameNode);
+    static void SetOnScroll(FrameNode* frameNode, std::function<void(Dimension, ScrollState)>&& onScroll);
+    static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
+    static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
+    static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin);
+    static void SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
+    static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
+    static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
+    static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
+    static void SetWaterflowFooter(FrameNode* frameNode, FrameNode* footerNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

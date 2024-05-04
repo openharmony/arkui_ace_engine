@@ -318,11 +318,11 @@ bool RosenRenderSurface::CompareBufferSize(int32_t width, int32_t height,
         || (abs(height - bufferHeight) < PERMITTED_DIFFERENCE && abs(width - bufferWidth) < PERMITTED_DIFFERENCE)) {
         failTimes_ = 0;
     } else {
+        failTimes_++;
         if (failTimes_ <= FAILED_LIMIT) {
             pipeline->SetIsFreezeFlushMessage(true);
             return false;
         }
-        failTimes_++;
     }
     return true;
 }

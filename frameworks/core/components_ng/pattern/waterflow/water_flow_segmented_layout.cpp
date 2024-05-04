@@ -396,7 +396,7 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx)
 {
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     targetIdx = std::min(targetIdx, info_.childrenCount_ - 1);
-    for (int32_t i = info_.itemInfos_.size(); i <= targetIdx; ++i) {
+    for (int32_t i = static_cast<int32_t>(info_.itemInfos_.size()); i <= targetIdx; ++i) {
         int32_t seg = info_.GetSegment(i);
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[seg]);
         float itemHeight = GetUserDefHeight(sections_, seg, i);

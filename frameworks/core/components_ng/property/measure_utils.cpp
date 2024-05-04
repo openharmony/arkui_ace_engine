@@ -130,6 +130,20 @@ PaddingPropertyF ConvertToPaddingPropertyF(
     auto right = ConvertToPx(padding.right, scaleProperty, percentReference);
     auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
     auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (left.has_value()) {
+            left = floor(left.value());
+        }
+        if (right.has_value()) {
+            right = floor(right.value());
+        }
+        if (top.has_value()) {
+            top = floor(top.value());
+        }
+        if (bottom.has_value()) {
+            bottom = floor(bottom.value());
+        }
+    }
     return PaddingPropertyF { left, right, top, bottom };
 }
 

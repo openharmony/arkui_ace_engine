@@ -723,8 +723,14 @@ void SearchModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc, b
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     if (textFieldPattern) {
-        textFieldPattern->SetCustomKeyboard(std::move(buildFunc));
         textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
+        // create customKeyboard node
+        if (buildFunc) {
+            NG::ScopedViewStackProcessor builderViewStackProcessor;
+            buildFunc();
+            auto customKeyboard = NG::ViewStackProcessor::GetInstance()->Finish();
+            textFieldPattern->SetCustomKeyboard(customKeyboard);
+        }
     }
 }
 

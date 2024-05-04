@@ -260,4 +260,20 @@ void VideoModelNG::SetLoop(FrameNode* frameNode, bool loop)
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
     videoPattern->UpdateLoop(loop);
 }
+
+void VideoModelNG::EnableAnalyzer(bool enable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    videoPattern->EnableAnalyzer(enable);
+}
+
+void VideoModelNG::SetImageAnalyzerConfig(void* config)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    videoPattern->SetImageAnalyzerConfig(config);
+}
 } // namespace OHOS::Ace::NG

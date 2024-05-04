@@ -418,6 +418,8 @@ public:
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
+    void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void OnHideAutofillPopup();
     void UpdateTouchHandleForOverlay();
     bool IsSelectOverlayDragging()
     {
@@ -576,6 +578,7 @@ private:
     void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
     void InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleFlingMove(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(int32_t x, int32_t y);
@@ -634,6 +637,8 @@ private:
 
     bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
     bool IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
+
+    void SuggestionSelected(int32_t index);
 #ifdef OHOS_STANDARD_SYSTEM
     WebOverlayType GetTouchHandleOverlayType(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
@@ -726,7 +731,7 @@ private:
     bool isFocus_ = false;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
     bool isDragging_ = false;
-    bool isDisableSlide_ = false;
+    bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;
     bool isWindowShow_ = true;
     bool isActive_ = true;

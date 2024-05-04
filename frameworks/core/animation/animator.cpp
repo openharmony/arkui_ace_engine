@@ -324,7 +324,7 @@ bool Animator::GetInitAnimationDirection()
     // for Alternate and Alternate_Reverse
     bool isOddRound = ((repeatTimes_ - repeatTimesLeft_ + 1) % 2) == 1;
     bool oddRoundDirectionNormal = direction_ == AnimationDirection::ALTERNATE;
-    if (isOddRound ^ oddRoundDirectionNormal) {
+    if (isOddRound != oddRoundDirectionNormal) {
         // if isOddRound is different from oddRoundDirectionNormal, same with AnimationDirection::REVERSE
         return !isReverse_;
     }

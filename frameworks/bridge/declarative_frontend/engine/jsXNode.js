@@ -33,6 +33,9 @@ class BaseNode extends __JSBaseNode__ {
     getInstanceId() {
         return this.instanceId_;
     }
+    updateInstance(uiContext) {
+        this.instanceId_ = uiContext.instanceId_;
+    }
 }
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
@@ -307,19 +310,23 @@ class JSBuilderNode extends BaseNode {
         return this.nodePtr_;
     }
     getValidNodePtr() {
-        var _a;
-        return (_a = this._nativeRef) === null || _a === void 0 ? void 0 : _a.getNativeHandle();
+        return this._nativeRef?.getNativeHandle();
     }
     dispose() {
-        var _a;
-        (_a = this.frameNode_) === null || _a === void 0 ? void 0 : _a.dispose();
+        this.frameNode_?.dispose();
     }
     disposeNode() {
-        var _a;
         super.disposeNode();
         this.nodePtr_ = null;
         this._nativeRef = null;
-        (_a = this.frameNode_) === null || _a === void 0 ? void 0 : _a.resetNodePtr();
+        this.frameNode_?.resetNodePtr();
+    }
+    updateInstance(uiContext) {
+        this.uiContext_ = uiContext;
+        this.instanceId_ = uiContext.instanceId_;
+        if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
+            this.frameNode_.updateInstance(uiContext);
+        }
     }
 }
 /*
@@ -342,7 +349,7 @@ class BuilderNodeFinalizationRegisterProxy {
             if (heldValue.name === 'BuilderRootFrameNode') {
                 const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
                 BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
-                builderNode.disposeNode();
+                builderNode.dispose();
             }
         });
     }
@@ -418,7 +425,6 @@ class NodeController {
  */
 class FrameNode {
     constructor(uiContext, type) {
-        var _a, _b, _c;
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
         }
@@ -449,11 +455,11 @@ class FrameNode {
             result = getUINativeModule().frameNode.createTypedFrameNode(this, type);
         }
         __JSScopeUtil__.restoreInstanceId();
-        this._nativeRef = result === null || result === void 0 ? void 0 : result.nativeStrongRef;
-        this._nodeId = result === null || result === void 0 ? void 0 : result.nodeId;
-        this.nodePtr_ = (_a = this._nativeRef) === null || _a === void 0 ? void 0 : _a.getNativeHandle();
-        (_b = this.renderNode_) === null || _b === void 0 ? void 0 : _b.setNodePtr(result === null || result === void 0 ? void 0 : result.nativeStrongRef);
-        (_c = this.renderNode_) === null || _c === void 0 ? void 0 : _c.setFrameNode(new WeakRef(this));
+        this._nativeRef = result?.nativeStrongRef;
+        this._nodeId = result?.nodeId;
+        this.nodePtr_ = this._nativeRef?.getNativeHandle();
+        this.renderNode_?.setNodePtr(result?.nativeStrongRef);
+        this.renderNode_?.setFrameNode(new WeakRef(this));
         if (result === undefined || this._nodeId === -1) {
             return;
         }
@@ -470,8 +476,7 @@ class FrameNode {
         return 'CustomFrameNode';
     }
     setRenderNode(nativeRef) {
-        var _a;
-        (_a = this.renderNode_) === null || _a === void 0 ? void 0 : _a.setNodePtr(nativeRef);
+        this.renderNode_?.setNodePtr(nativeRef);
     }
     getRenderNode() {
         if (this.renderNode_ !== undefined &&
@@ -496,24 +501,21 @@ class FrameNode {
         FrameNodeFinalizationRegisterProxy.register(this, this._nodeId);
     }
     resetNodePtr() {
-        var _a;
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
         this._nativeRef = null;
         this.nodePtr_ = null;
-        (_a = this.renderNode_) === null || _a === void 0 ? void 0 : _a.resetNodePtr();
+        this.renderNode_?.resetNodePtr();
     }
     setBaseNode(baseNode) {
-        var _a;
         this.baseNode_ = baseNode;
-        (_a = this.renderNode_) === null || _a === void 0 ? void 0 : _a.setBaseNode(baseNode);
+        this.renderNode_?.setBaseNode(baseNode);
     }
     getNodePtr() {
         return this.nodePtr_;
     }
     dispose() {
-        var _a;
-        (_a = this.renderNode_) === null || _a === void 0 ? void 0 : _a.dispose();
+        this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
         this._nativeRef = null;
@@ -606,7 +608,7 @@ class FrameNode {
     }
     getChild(index) {
         const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index);
-        const nodeId = result === null || result === void 0 ? void 0 : result.nodeId;
+        const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
@@ -618,7 +620,7 @@ class FrameNode {
     }
     getFirstChild() {
         const result = getUINativeModule().frameNode.getFirst(this.getNodePtr());
-        const nodeId = result === null || result === void 0 ? void 0 : result.nodeId;
+        const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
@@ -630,7 +632,7 @@ class FrameNode {
     }
     getNextSibling() {
         const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr());
-        const nodeId = result === null || result === void 0 ? void 0 : result.nodeId;
+        const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
@@ -642,7 +644,7 @@ class FrameNode {
     }
     getPreviousSibling() {
         const result = getUINativeModule().frameNode.getPreviousSibling(this.getNodePtr());
-        const nodeId = result === null || result === void 0 ? void 0 : result.nodeId;
+        const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
@@ -654,7 +656,7 @@ class FrameNode {
     }
     getParent() {
         const result = getUINativeModule().frameNode.getParent(this.getNodePtr());
-        const nodeId = result === null || result === void 0 ? void 0 : result.nodeId;
+        const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
@@ -671,8 +673,24 @@ class FrameNode {
         const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
         return { x: position[0], y: position[1] };
     }
+    getPositionToScreen() {
+        const position = getUINativeModule().frameNode.getPositionToScreen(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
     getPositionToWindow() {
         const position = getUINativeModule().frameNode.getPositionToWindow(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
+    getPositionToParentWithTransform() {
+        const position = getUINativeModule().frameNode.getPositionToParentWithTransform(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
+    getPositionToScreenWithTransform() {
+        const position = getUINativeModule().frameNode.getPositionToScreenWithTransform(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
+    getPositionToWindowWithTransform() {
+        const position = getUINativeModule().frameNode.getPositionToWindowWithTransform(this.getNodePtr());
         return { x: position[0], y: position[1] };
     }
     getMeasuredSize() {
@@ -720,6 +738,9 @@ class FrameNode {
     getId() {
         return getUINativeModule().frameNode.getId(this.getNodePtr());
     }
+    getUniqueId() {
+        return getUINativeModule().frameNode.getIdByNodePtr(this.getNodePtr());
+    }
     getNodeType() {
         return getUINativeModule().frameNode.getNodeType(this.getNodePtr());
     }
@@ -740,6 +761,28 @@ class FrameNode {
         const inspectorInfo = JSON.parse(inspectorInfoStr);
         return inspectorInfo;
     }
+    getCustomProperty(key) {
+        return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
+    }
+    setMeasuredSize(size) {
+        getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), size.width, size.height);
+    }
+    setLayoutPosition(position) {
+        getUINativeModule().frameNode.setLayoutPosition(this.getNodePtr(), position.x, position.y);
+    }
+    measure(constraint) {
+        const minSize = constraint.minSize;
+        const maxSize = constraint.maxSize;
+        const percentReference = constraint.percentReference;
+        getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
+            maxSize.height, percentReference.width, percentReference.height);
+    }
+    layout(position) {
+        getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
+    }
+    setNeedsLayout() {
+        getUINativeModule().frameNode.setNeedsLayout(this.getNodePtr());
+    }
     get commonAttribute() {
         if (this._commonAttribute === undefined) {
             this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
@@ -755,6 +798,10 @@ class FrameNode {
         this._commonEvent.setNodePtr(node);
         this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this._commonEvent;
+    }
+    updateInstance(uiContext) {
+        this.uiContext_ = uiContext;
+        this.instanceId_ = uiContext.instanceId_;
     }
 }
 class ImmutableFrameNode extends FrameNode {
@@ -813,8 +860,7 @@ class ProxyFrameNode extends ImmutableFrameNode {
         return this.nodePtr_;
     }
     dispose() {
-        var _a;
-        (_a = this.renderNode_) === null || _a === void 0 ? void 0 : _a.dispose();
+        this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
         this._nativeRef = undefined;
@@ -884,6 +930,16 @@ const __creatorMap__ = new Map([
                 return new ArkStackComponent(node, type);
             });
         }],
+    ["GridRow", (context) => {
+            return new TypedFrameNode(context, "GridRow", (node, type) => {
+                return new ArkGridRowComponent(node, type);
+            });
+        }],
+    ["GridCol", (context) => {
+            return new TypedFrameNode(context, "GridCol", (node, type) => {
+                return new ArkGridColComponent(node, type);
+            });
+        }],
 ]);
 class TypedNode {
     static createNode(context, type) {
@@ -923,6 +979,11 @@ var LengthUnit;
     LengthUnit[LengthUnit["PERCENT"] = 3] = "PERCENT";
     LengthUnit[LengthUnit["LPX"] = 4] = "LPX";
 })(LengthUnit || (LengthUnit = {}));
+var LengthMetricsUnit;
+(function (LengthMetricsUnit) {
+    LengthMetricsUnit[LengthMetricsUnit["DEFAULT"] = 0] = "DEFAULT";
+    LengthMetricsUnit[LengthMetricsUnit["PX"] = 1] = "PX";
+})(LengthMetricsUnit || (LengthMetricsUnit = {}));
 class LengthMetrics {
     constructor(value, unit) {
         if (unit in LengthUnit) {
@@ -999,7 +1060,6 @@ class ShapeMask {
 }
 class RenderNode {
     constructor(type) {
-        var _a;
         this.nodePtr = null;
         this.childrenList = [];
         this.parentRenderNode = null;
@@ -1024,7 +1084,7 @@ class RenderNode {
             return;
         }
         this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
-        this.nodePtr = (_a = this._nativeRef) === null || _a === void 0 ? void 0 : _a.getNativeHandle();
+        this.nodePtr = this._nativeRef?.getNativeHandle();
         this.clipToFrame = true;
     }
     set backgroundColor(color) {
@@ -1310,9 +1370,8 @@ class RenderNode {
         this._frameNode = frameNode;
     }
     setNodePtr(nativeRef) {
-        var _a;
         this._nativeRef = nativeRef;
-        this.nodePtr = (_a = this._nativeRef) === null || _a === void 0 ? void 0 : _a.getNativeHandle();
+        this.nodePtr = this._nativeRef?.getNativeHandle();
     }
     setBaseNode(baseNode) {
         this.baseNode_ = baseNode;
@@ -1322,10 +1381,9 @@ class RenderNode {
         this._nativeRef = null;
     }
     dispose() {
-        var _a, _b, _c, _d;
-        (_a = this._nativeRef) === null || _a === void 0 ? void 0 : _a.dispose();
-        (_b = this.baseNode_) === null || _b === void 0 ? void 0 : _b.disposeNode();
-        (_d = (_c = this._frameNode) === null || _c === void 0 ? void 0 : _c.deref()) === null || _d === void 0 ? void 0 : _d.resetNodePtr();
+        this._nativeRef?.dispose();
+        this.baseNode_?.disposeNode();
+        this._frameNode?.deref()?.resetNodePtr();
         this._nativeRef = null;
         this.nodePtr = null;
     }
@@ -1471,7 +1529,6 @@ class XComponentNode extends FrameNode {
         return false;
     }
 }
-
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1491,7 +1548,6 @@ class Content {
     onAttachToWindow() { }
     onDetachFromWindow() { }
 }
-
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1511,7 +1567,7 @@ class ComponentContent extends Content {
         super();
         let builderNode = new BuilderNode(uiContext, {});
         this.builderNode_ = builderNode;
-        this.builderNode_.build(builder, params !== null && params !== void 0 ? params : undefined, false);
+        this.builderNode_.build(builder, params ?? undefined, false);
     }
     update(params) {
         this.builderNode_.update(params);
@@ -1523,7 +1579,6 @@ class ComponentContent extends Content {
         return this.builderNode_.getNodePtr();
     }
 }
-
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1541,13 +1596,33 @@ class ComponentContent extends Content {
 class NodeContent extends Content {
     constructor() {
         super();
-        this.nativeContent_ = new ArkUINativeNodeContent();
-        this.nativePtr_ = ArkUINativeNodeContent.getNativeContent(this.nativeContent_);
+        this.nativeRef_ = getUINativeModule().frameNode.createNodeContent();
+        this.nativePtr_ = this.nativeRef_.getNativeHandle();
+        this.nodeArray_ = new Array();
+    }
+    addFrameNode(node) {
+        if (this.nodeArray_.includes(node)) {
+            return;
+        }
+        if (getUINativeModule().frameNode.addFrameNodeToNodeContent(node.getNodePtr(), this.nativePtr_)) {
+            this.nodeArray_.push(node);
+        }
+    }
+    removeFrameNode(node) {
+        if (!this.nodeArray_.includes(node)) {
+            return;
+        }
+        if (getUINativeModule().frameNode.removeFrameNodeFromNodeContent(node.getNodePtr(), this.nativePtr_)) {
+            let index = this.nodeArray_.indexOf(node);
+            if (index > -1) {
+                this.nodeArray_.splice(index, 1);
+            }
+        }
     }
 }
 
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
-    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, ShapeMask,
+    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent, TypedNode
 };

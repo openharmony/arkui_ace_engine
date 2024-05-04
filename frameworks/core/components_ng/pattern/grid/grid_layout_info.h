@@ -33,6 +33,7 @@ struct GridPredictLayoutParam {
 };
 
 constexpr int32_t EMPTY_JUMP_INDEX = -2;
+constexpr int32_t JUMP_TO_BOTTOM_EDGE = -3;
 constexpr float HALF = 0.5f;
 
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
@@ -101,6 +102,23 @@ struct GridLayoutInfo {
         return (removeLastGap) ? totalHeight - mainGap : totalHeight;
     }
 
+    /**
+     * @brief set up jumpIndex_ and align_ to jump to the bottom edge of content.
+     */
+    void PrepareJumpToBottom();
+
+    /**
+     * @brief optimized function (early exit) to compare total height to [other].
+     * @param other height to compare to.
+     * @return true if total height is less than [other].
+     */
+    bool HeightSumSmaller(float other, float mainGap) const;
+
+    /**
+     * @return height sum of lines in range [startLine, endLine).
+     */
+    float GetHeightInRange(int32_t startLine, int32_t endLine, float mainGap) const;
+
     struct EndIndexInfo {
         int32_t itemIdx = -1; /**< Index of the last item. */
         int32_t y = -1;       /**< Main-axis position (line index) of the item. */
@@ -154,6 +172,15 @@ struct GridLayoutInfo {
      * @return The line index and column index of the found item.
      */
     std::pair<int32_t, int32_t> FindItemInRange(int32_t target) const;
+
+    /**
+     * @brief Find the offset and line index of an item's center point.
+     *
+     * @param startLine starting line index of this item.
+     * @param lineCnt number of rows the item occupies.
+     * @return [lineIdx, offset relative to this line] of the center point.
+     */
+    std::pair<int32_t, float> FindItemCenter(int32_t startLine, int32_t lineCnt, float mainGap) const;
 
     /**
      * @brief clears lineHeightMap_ and gridMatrix_ starting from line [idx]
@@ -237,13 +264,22 @@ struct GridLayoutInfo {
      * 1. all irregular lines must have the same height.
      * 2. all regular items must have the same height.
      *
-     * @param options contains irregular item info.
+     * @param options contains irregular item.
      * @param endIdx ending item index (exclusive).
      * @param mainGap gap between lines.
      * @return total height of the content.
      */
     float GetContentHeight(const GridLayoutOptions& options, int32_t endIdx, float mainGap) const;
     float GetCurrentLineHeight() const;
+
+    /**
+     * @brief Get Content Offset when using irregular layout.
+     */
+    float GetIrregularOffset(float mainGap) const;
+    /**
+     * @brief Get total content height when using irregular layout.
+     */
+    float GetIrregularHeight(float mainGap) const;
 
     bool GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const;
     float GetTotalHeightFromZeroIndex(int32_t targetLineIndex, float mainGap) const;
@@ -265,6 +301,7 @@ struct GridLayoutInfo {
     using MatIter = std::map<int32_t, std::map<int32_t, int32_t>>::const_iterator;
     MatIter FindStartLineInMatrix(MatIter iter, int32_t index) const;
     void ClearHeightsFromMatrix(int32_t lineIdx);
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
@@ -272,6 +309,7 @@ struct GridLayoutInfo {
     float lastMainSize_ = 0.0f;
     float lastCrossSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
+    float avgLineHeight_ = 0.0f;
 
     // additional padding to accommodate navigation bar when SafeArea is expanded
     float contentEndPadding_ = 0.0f;

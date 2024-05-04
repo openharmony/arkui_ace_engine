@@ -310,7 +310,8 @@ public:
 
     bool IsScrollSnap() override
     {
-        return !snapOffsets_.empty() && GetScrollSnapAlign() != ScrollSnapAlign::NONE;
+        return (!snapOffsets_.empty() && GetScrollSnapAlign() != ScrollSnapAlign::NONE)
+            || enablePagingStatus_ == ScrollPagingStatus::VALID;
     }
 
     void TriggerModifyDone();

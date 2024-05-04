@@ -34,11 +34,17 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_ng/render/paragraph.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
+} //namespace
 
 CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool withoutPercent = true)
 {
@@ -724,12 +730,14 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
         JSRef<JSArray> size = JSRef<JSArray>::Cast(sizeObj);
         JSRef<JSVal> width = size->GetProperty("width");
         CalcDimension imageSpanWidth;
-        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVp(width, imageSpanWidth)) {
+        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVpNG(width, imageSpanWidth, false) &&
+            GreatNotEqual(imageSpanWidth.Value(), 0.0)) {
             imageSize.width = imageSpanWidth;
         }
         JSRef<JSVal> height = size->GetProperty("height");
         CalcDimension imageSpanHeight;
-        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVp(height, imageSpanHeight)) {
+        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVpNG(height, imageSpanHeight, false) &&
+            GreatNotEqual(imageSpanHeight.Value(), 0.0)) {
             imageSize.height = imageSpanHeight;
         }
         imageStyle.size = imageSize;
@@ -963,16 +971,23 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
         if (result->HasProperty("width")) {
             auto widthObj = result->GetProperty("width");
             width = widthObj->ToNumber<float>();
+            if (width < 0) {
+                width = 0;
+            }
         }
-        std::optional<float> height;
+        std::optional<float> heightOpt;
         if (result->HasProperty("height")) {
             auto heightObj = result->GetProperty("height");
-            height = heightObj->ToNumber<float>();
+            auto height = heightObj->ToNumber<float>();
+            if (height >= 0) {
+                heightOpt = height;
+            }
         }
-        return { width, height };
+        return { width, heightOpt };
     };
     return drawCallback;
 }
+
 std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseOnDrawFunc(
     const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
 {
@@ -1023,5 +1038,377 @@ std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseO
         }
     };
     return drawCallback;
+}
+
+void JSLineHeightSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSLineHeightSpan>::Declare("LineHeightStyle");
+    JSClass<JSLineHeightSpan>::CustomProperty(
+        "lineHeight", &JSLineHeightSpan::GetLineHeight, &JSLineHeightSpan::SetLineHeight);
+    JSClass<JSLineHeightSpan>::Bind(globalObj, JSLineHeightSpan::Constructor, JSLineHeightSpan::Destructor);
+}
+
+void JSLineHeightSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto lineHeightSpan = Referenced::MakeRefPtr<JSLineHeightSpan>();
+    lineHeightSpan->IncRefCount();
+
+    RefPtr<LineHeightSpan> span;
+    if (args.Length() <= 0) {
+        span = AceType::MakeRefPtr<LineHeightSpan>();
+    } else {
+        span = JSLineHeightSpan::ParseJSLineHeightSpan(JSRef<JSObject>::Cast(args[0]));
+    }
+    lineHeightSpan->lineHeightSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(lineHeightSpan));
+}
+
+void JSLineHeightSpan::Destructor(JSLineHeightSpan* lineHeightSpan)
+{
+    if (lineHeightSpan != nullptr) {
+        lineHeightSpan->DecRefCount();
+    }
+}
+
+RefPtr<LineHeightSpan> JSLineHeightSpan::ParseJSLineHeightSpan(const JSRef<JSObject>& obj)
+{
+    if (obj->IsUndefined()) {
+        return AceType::MakeRefPtr<LineHeightSpan>(CalcDimension(0, DimensionUnit::VP));
+    }
+    return AceType::MakeRefPtr<LineHeightSpan>(ParseLengthMetrics(obj));
+}
+
+void JSLineHeightSpan::GetLineHeight(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(lineHeightSpan_);
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(lineHeightSpan_->GetLineHeight().ConvertToVp())));
+    info.SetReturnValue(ret);
+}
+
+void JSLineHeightSpan::SetLineHeight(const JSCallbackInfo& info) {}
+
+RefPtr<LineHeightSpan>& JSLineHeightSpan::GetLineHeightSpan()
+{
+    return lineHeightSpan_;
+}
+
+void JSLineHeightSpan::SetLineHeightSpan(const RefPtr<LineHeightSpan>& lineHeightSpan)
+{
+    lineHeightSpan_ = lineHeightSpan;
+}
+
+void JSParagraphStyleSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSParagraphStyleSpan>::Declare("ParagraphStyle");
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "textAlign", &JSParagraphStyleSpan::GetTextAlign, &JSParagraphStyleSpan::SetTextAlign);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "textIndent", &JSParagraphStyleSpan::GetTextIndent, &JSParagraphStyleSpan::SetTextIndent);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "maxLines", &JSParagraphStyleSpan::GetMaxLines, &JSParagraphStyleSpan::SetMaxLines);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "overflow", &JSParagraphStyleSpan::GetOverflow, &JSParagraphStyleSpan::SetOverflow);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "wordBreak", &JSParagraphStyleSpan::GetWordBreak, &JSParagraphStyleSpan::SetWordBreak);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "leadingMargin", &JSParagraphStyleSpan::GetLeadingMargin, &JSParagraphStyleSpan::SetLeadingMargin);
+    JSClass<JSParagraphStyleSpan>::Bind(globalObj, JSParagraphStyleSpan::Constructor, JSParagraphStyleSpan::Destructor);
+}
+
+void JSParagraphStyleSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto paragraphSpan = Referenced::MakeRefPtr<JSParagraphStyleSpan>();
+    paragraphSpan->IncRefCount();
+
+    RefPtr<ParagraphStyleSpan> span;
+    if (args.Length() <= 0) {
+        SpanParagraphStyle paragraphStyle;
+        span = AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle);
+    } else {
+        span = JSParagraphStyleSpan::ParseJsParagraphStyleSpan(JSRef<JSObject>::Cast(args[0]));
+    }
+    paragraphSpan->paragraphStyleSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(paragraphSpan));
+}
+
+void JSParagraphStyleSpan::Destructor(JSParagraphStyleSpan* paragragrahSpan)
+{
+    if (paragragrahSpan != nullptr) {
+        paragragrahSpan->DecRefCount();
+    }
+}
+
+RefPtr<ParagraphStyleSpan> JSParagraphStyleSpan::ParseJsParagraphStyleSpan(const JSRef<JSObject>& obj)
+{
+    SpanParagraphStyle paragraphStyle;
+    ParseJsTextAlign(obj, paragraphStyle);
+    ParseJsTextIndent(obj, paragraphStyle);
+    ParseJsMaxLines(obj, paragraphStyle);
+    ParseJsTextOverflow(obj, paragraphStyle);
+    ParseJsWordBreak(obj, paragraphStyle);
+    ParseJsLeadingMargin(obj, paragraphStyle);
+    return AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle);
+}
+
+void JSParagraphStyleSpan::ParseJsTextAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    if (!obj->HasProperty("textAlign")) {
+        return;
+    }
+    auto textAlignObj = obj->GetProperty("textAlign");
+    int32_t value = 0;
+    if (!textAlignObj->IsNull() && textAlignObj->IsNumber()) {
+        value = textAlignObj->ToNumber<int32_t>();
+    }
+    if (value < 0 || value >= static_cast<int32_t>(TEXT_ALIGNS.size())) {
+        value = 0;
+    }
+    paragraphStyle.align = TEXT_ALIGNS[value];
+}
+
+void JSParagraphStyleSpan::ParseJsTextIndent(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    if (!obj->HasProperty("textIndent")) {
+        return;
+    }
+    auto textIndent = obj->GetProperty("textIndent");
+    CalcDimension size;
+    if (!textIndent->IsNull() && textIndent->IsObject()) {
+        auto textIndentObj = JSRef<JSObject>::Cast(textIndent);
+        auto value = 0.0;
+        auto textIndentVal = textIndentObj->GetProperty("value");
+        if (!textIndentVal->IsNull() && textIndentVal->IsNumber()) {
+            value = textIndentVal->ToNumber<float>();
+        }
+        auto unit = DimensionUnit::VP;
+        auto textIndentUnit = textIndentObj->GetProperty("unit");
+        if (!textIndentUnit->IsNull() && textIndentUnit->IsNumber()) {
+            unit = static_cast<DimensionUnit>(textIndentUnit->ToNumber<int32_t>());
+        }
+        if (value >= 0 && unit != DimensionUnit::PERCENT) {
+            size = CalcDimension(value, unit);
+        }
+    }
+    paragraphStyle.textIndent = size;
+}
+
+void JSParagraphStyleSpan::ParseJsMaxLines(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    if (!obj->HasProperty("maxLines")) {
+        return;
+    }
+    JSRef<JSVal> args = obj->GetProperty("maxLines");
+    int32_t value = Infinity<uint32_t>();
+    if (args->ToString() != "Infinity") {
+        JSContainerBase::ParseJsInt32(args, value);
+    }
+    paragraphStyle.maxLines = value;
+}
+
+void JSParagraphStyleSpan::ParseJsTextOverflow(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    if (!obj->HasProperty("overflow")) {
+        return;
+    }
+    int32_t overflow = 0;
+    JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
+    if (overflowValue->IsNumber()) {
+        overflow = overflowValue->ToNumber<int32_t>();
+    }
+    if (overflowValue->IsUndefined() || overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        overflow = 0;
+    }
+    paragraphStyle.textOverflow = TEXT_OVERFLOWS[overflow];
+}
+void JSParagraphStyleSpan::ParseJsWordBreak(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    if (!obj->HasProperty("wordBreak")) {
+        return;
+    }
+    JSRef<JSVal> args = obj->GetProperty("wordBreak");
+    int32_t index = 0;
+    if (args->IsNumber()) {
+        index = args->ToNumber<int32_t>();
+    }
+    if (index < 0 || index >= WORD_BREAK_TYPES.size()) {
+        index = 0;
+    }
+    paragraphStyle.wordBreak = WORD_BREAK_TYPES[index];
+}
+
+bool JSParagraphStyleSpan::IsPixelMap(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (jsObj->IsUndefined()) {
+        return false;
+    }
+    JSRef<JSVal> func = jsObj->GetProperty("readPixelsToBuffer");
+    return (!func->IsNull() && func->IsFunction());
+}
+
+void JSParagraphStyleSpan::ParseJsLeadingMargin(const JSRef<JSObject>& obj,
+    SpanParagraphStyle& paragraphStyle)
+{
+    if (!obj->HasProperty("leadingMargin")) {
+        return;
+    }
+    auto margin = std::make_optional<NG::LeadingMargin>();
+    auto leadingMargin = obj->GetProperty("leadingMargin");
+    if (!leadingMargin->IsNull() && leadingMargin->IsObject()) {
+        JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(leadingMargin);
+        // LeadingMarginPlaceholder
+        if (leadingMarginObject->HasProperty("pixelMap")) {
+            ParseLeadingMarginPixelMap(leadingMarginObject, margin, leadingMargin);
+        } else { // LengthMetrics
+            CalcDimension width;
+            auto value = 0.0;
+            auto widthVal = leadingMarginObject->GetProperty("value");
+            if (!widthVal->IsNull() && widthVal->IsNumber()) {
+                value = widthVal->ToNumber<float>();
+            }
+            auto unit = DimensionUnit::VP;
+            auto widthUnit = leadingMarginObject->GetProperty("unit");
+            if (!widthUnit->IsNull() && widthUnit->IsNumber()) {
+                unit = static_cast<DimensionUnit>(widthUnit->ToNumber<int32_t>());
+            }
+            if (value >= 0 && unit != DimensionUnit::PERCENT) {
+                width = CalcDimension(value, unit);
+            }
+            margin->size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()));
+        }
+    }
+    paragraphStyle.leadingMargin = margin;
+}
+
+void JSParagraphStyleSpan::ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
+    std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin)
+{
+    JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("pixelMap");
+    if (IsPixelMap(placeholder)) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        auto pixelMap = CreatePixelMapFromNapiValue(placeholder);
+        margin->pixmap = pixelMap;
+#endif
+    }
+    JSRef<JSVal> sizeVal = leadingMarginObject->GetProperty("size");
+    if (!sizeVal->IsUndefined() && sizeVal->IsArray()) {
+        auto rangeArray = JSRef<JSArray>::Cast(sizeVal);
+        JSRef<JSVal> widthVal = rangeArray->GetValueAt(0);
+        JSRef<JSVal> heightVal = rangeArray->GetValueAt(1);
+        CalcDimension width;
+        CalcDimension height;
+        JSContainerBase::ParseJsDimensionVp(widthVal, width);
+        JSContainerBase::ParseJsDimensionVp(heightVal, height);
+        margin->size = NG::LeadingMarginSize(width, height);
+    } else if (sizeVal->IsUndefined()) {
+        std::string resWidthStr;
+        if (JSContainerBase::ParseJsString(leadingMargin, resWidthStr)) {
+            CalcDimension width;
+            JSContainerBase::ParseJsDimensionVp(leadingMargin, width);
+            margin->size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()));
+        }
+    }
+}
+
+void JSParagraphStyleSpan::GetTextAlign(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(paragraphStyleSpan_);
+    if (!paragraphStyleSpan_->GetParagraphStyle().align.has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
+        static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().align.value()))));
+    info.SetReturnValue(ret);
+}
+
+void JSParagraphStyleSpan::SetTextAlign(const JSCallbackInfo& info) {}
+
+void JSParagraphStyleSpan::GetTextIndent(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(paragraphStyleSpan_);
+    if (!paragraphStyleSpan_->GetParagraphStyle().textIndent.has_value()) {
+        return;
+    }
+    auto ret =
+        JSRef<JSVal>::Make(JSVal(ToJSValue(paragraphStyleSpan_->GetParagraphStyle().textIndent.value().ConvertToVp())));
+    info.SetReturnValue(ret);
+}
+
+void JSParagraphStyleSpan::SetTextIndent(const JSCallbackInfo& info) {}
+
+void JSParagraphStyleSpan::GetMaxLines(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(paragraphStyleSpan_);
+    if (!paragraphStyleSpan_->GetParagraphStyle().maxLines.has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(paragraphStyleSpan_->GetParagraphStyle().maxLines.value())));
+    info.SetReturnValue(ret);
+}
+void JSParagraphStyleSpan::SetMaxLines(const JSCallbackInfo& info) {}
+
+void JSParagraphStyleSpan::GetOverflow(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(paragraphStyleSpan_);
+    if (!paragraphStyleSpan_->GetParagraphStyle().textOverflow.has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
+        static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().textOverflow.value()))));
+    info.SetReturnValue(ret);
+}
+void JSParagraphStyleSpan::SetOverflow(const JSCallbackInfo& info) {}
+
+void JSParagraphStyleSpan::GetWordBreak(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(paragraphStyleSpan_);
+    if (!paragraphStyleSpan_->GetParagraphStyle().wordBreak.has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
+        static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().wordBreak.value()))));
+    info.SetReturnValue(ret);
+}
+void JSParagraphStyleSpan::SetWordBreak(const JSCallbackInfo& info) {}
+
+void JSParagraphStyleSpan::GetLeadingMargin(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(paragraphStyleSpan_);
+    if (!paragraphStyleSpan_->GetParagraphStyle().leadingMargin.has_value()) {
+        return;
+    }
+    auto leadingMargin = paragraphStyleSpan_->GetParagraphStyle().leadingMargin.value();
+    JSRef<JSVal> ret;
+#ifdef PIXEL_MAP_SUPPORTED
+    if (leadingMargin.pixmap) {
+        auto lmObj = JSRef<JSObject>::New();
+        auto size = JSRef<JSArray>::New();
+        size->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(Dimension(leadingMargin.size.Width()).ConvertToVp())));
+        size->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(Dimension(leadingMargin.size.Height()).ConvertToVp())));
+        lmObj->SetPropertyObject("pixelMap", ConvertPixmap(leadingMargin.pixmap));
+        lmObj->SetPropertyObject("size", size);
+        ret = JSRef<JSVal>::Cast(lmObj);
+    } else {
+        ret = JSRef<JSVal>::Make(JSVal(ToJSValue(Dimension(leadingMargin.size.Width()).ConvertToVp())));
+    }
+#else
+    ret = JSRef<JSVal>::Make(JSVal(ToJSValue(Dimension(leadingMargin.size.Width()).ConvertToVp())));
+#endif
+    info.SetReturnValue(ret);
+}
+
+void JSParagraphStyleSpan::SetLeadingMargin(const JSCallbackInfo& info) {}
+
+RefPtr<ParagraphStyleSpan>& JSParagraphStyleSpan::GetParagraphStyleSpan()
+{
+    return paragraphStyleSpan_;
+}
+
+void JSParagraphStyleSpan::SetParagraphStyleSpan(const RefPtr<ParagraphStyleSpan>& paragraphStyleSpan)
+{
+    paragraphStyleSpan_ = paragraphStyleSpan;
 }
 } // namespace OHOS::Ace::Framework

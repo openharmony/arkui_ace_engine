@@ -41,6 +41,7 @@ private:
     float defaultHeight_ = 0.0f;
     float horizontalPadding_ = 0.0f;
     float verticalPadding_ = 0.0f;
+    Dimension defaultPaddingSize_;
 
     void InitializeParam();
 

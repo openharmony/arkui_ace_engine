@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,6 +84,8 @@ public:
     }
 
 private:
+    void BackButtonLayout(const RefPtr<FrameNode>& backButtonNode, const RefPtr<LayoutProperty>& buttonLayoutProperty);
+
     void MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
 
@@ -101,8 +103,14 @@ private:
     void MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
 
+    void ShowBackButtonLayout(LayoutWrapper* layoutWrapper,
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty,
+        RefPtr<GeometryNode>& geometryNode, const RefPtr<LayoutWrapper>& backButtonWrapper);
+
     void LayoutBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
+
+    float GetFullModeTitleOffsetY(float titleHeight, float subtitleHeight, RefPtr<GeometryNode> titleBarGeometryNode);
 
     void LayoutTitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
@@ -111,8 +119,8 @@ private:
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float titleHeight);
     void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
-    float ChangeOffsetByDirection(LayoutWrapper* layoutWrapper, RefPtr<NG::GeometryNode>& geometryNode,
-		float offsetX);
+    float ChangeOffsetByDirection(LayoutWrapper* layoutWrapper,
+        const RefPtr<NG::GeometryNode>& childGeometryNode, float offsetX) const;
 
     // set variables from theme
     void InitializeTheme();
@@ -142,6 +150,14 @@ private:
     float minTitleHeight_ = 0.0f;
     float menuWidth_ = 0.0f;
     bool showBackButton_ = false;
+
+    float singleLineTitleHeight_ = 0.0f;
+    float doubleLineTitleBarHeight_ = 0.0f;
+    float navTitleSpaceVertical_ = 0.0f;
+    float navLeftMargin_ = 0.0f;
+    float navBackIconWidth_ = 0.0f;
+    float navButtonPadding_ = 0.0f;
+    float navHorizontalMargin_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TitleBarLayoutAlgorithm);
 };

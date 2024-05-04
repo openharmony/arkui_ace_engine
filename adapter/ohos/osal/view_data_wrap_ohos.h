@@ -217,6 +217,26 @@ public:
         return pageRect_;
     }
 
+    void SetUserSelected(bool isUserSelected) override
+    {
+        viewData_.isUserSelected = isUserSelected;
+    }
+
+    bool GetUserSelected() const override
+    {
+        return viewData_.isUserSelected;
+    }
+
+    void SetOtherAccount(bool isOtherAccount) override
+    {
+        viewData_.isOtherAccount = isOtherAccount;
+    }
+
+    bool GetOtherAccount() const override
+    {
+        return viewData_.isOtherAccount;
+    }
+
 private:
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfoWraps_;
     AbilityBase::ViewData viewData_;

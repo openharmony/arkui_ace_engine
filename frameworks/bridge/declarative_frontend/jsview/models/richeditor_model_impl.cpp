@@ -18,9 +18,9 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 
 namespace OHOS::Ace::Framework {
-void RichEditorModelImpl::Create() {}
+void RichEditorModelImpl::Create(bool isStyledStringMode) {}
 
-RefPtr<RichEditorControllerBase> RichEditorModelImpl::GetRichEditorController()
+RefPtr<RichEditorBaseControllerBase> RichEditorModelImpl::GetRichEditorController()
 {
     return nullptr;
 }

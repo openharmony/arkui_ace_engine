@@ -420,16 +420,16 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
     if (type->IsNull() || !type->IsNumber()) {
         return false;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->Int32Value(vm));
         return Color::ParseColorString(value, result);
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::INTEGER)) {
         auto value = resourceWrapper->GetInt(resId->Int32Value(vm));
         result = Color(ColorAlphaAdapt(value));
         return true;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::COLOR)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber(vm)->Value());
         return true;
     }
@@ -469,12 +469,12 @@ bool ArkTSUtils::ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSVa
     if (type->IsNull() || !type->IsNumber()) {
         return false;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->Int32Value(vm));
         result = StringUtils::StringToCalcDimension(value, false, dimensionUnit);
         return true;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(resourceWrapper->GetInt(resId->Int32Value(vm)));
         result = StringUtils::StringToDimensionWithUnit(value, dimensionUnit);
         return true;
@@ -516,16 +516,16 @@ bool ArkTSUtils::ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JS
     if (type->IsNull() || !type->IsNumber()) {
         return false;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->Int32Value(vm));
         return StringUtils::StringToCalcDimensionNG(value, result, false, dimensionUnit);
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::INTEGER)) {
         auto value = std::to_string(resourceWrapper->GetInt(resId->Int32Value(vm)));
         StringUtils::StringToDimensionWithUnitNG(value, result, dimensionUnit);
         return true;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::FLOAT)) {
         result = resourceWrapper->GetDimension(resId->Int32Value(vm));
         return true;
     }
@@ -677,15 +677,15 @@ bool ArkTSUtils::ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>
         }
         return false;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
         auto numberString = resourceWrapper->GetString(resId);
         return StringUtils::StringToDouble(numberString, result);
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::INTEGER)) {
         result = resourceWrapper->GetInt(resId);
         return true;
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::FLOAT)) {
         result = resourceWrapper->GetDouble(resId);
         return true;
     }
@@ -945,7 +945,7 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
             return false;
         }
 
-        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::RAWFILE)) {
+        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
             auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
             if (!args->IsArray(vm)) {
                 return false;
@@ -969,13 +969,13 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
             }
             Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
             auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
-            if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::MEDIA)) {
+            if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
                 result = resourceWrapper->GetMediaPathByName(param->ToString(vm)->ToString());
                 return true;
             }
             return false;
         }
-        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::MEDIA)) {
+        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
             result = resourceWrapper->GetMediaPath(resId->Uint32Value(vm));
             return true;
         }
@@ -1145,11 +1145,11 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
         }
         return FillResultForResIdNumIsNegative(vm, type, params, result, resourceWrapper);
     }
-    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
         auto originStr = resourceWrapper->GetString(resId->Uint32Value(vm));
         ReplaceHolder(vm, originStr, params, 0);
         result = originStr;
-    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::PLURAL)) {
+    } else if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::PLURAL)) {
         auto countJsVal = panda::ArrayRef::GetValueAt(vm, params, 0);
         int count = 0;
         if (!countJsVal->IsNumber()) {
@@ -1159,9 +1159,9 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
         auto pluralStr = resourceWrapper->GetPluralString(resId->ToNumber(vm)->Value(), count);
         ReplaceHolder(vm, pluralStr, params, 1);
         result = pluralStr;
-    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+    } else if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::FLOAT)) {
         result = std::to_string(resourceWrapper->GetDouble(resId->Uint32Value(vm)));
-    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+    } else if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::INTEGER)) {
         result = std::to_string(resourceWrapper->GetInt(resId->Uint32Value(vm)));
     } else {
         return false;
@@ -1429,5 +1429,32 @@ void ArkTSUtils::PushOuterBorderDimensionVector(
         values.emplace_back(0);
         units.emplace_back(0);
     }
+}
+
+bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId)
+{
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        symbolId = 0;
+        return false;
+    }
+    auto jsObj = jsValue->ToObject(vm);
+    auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    if (resId->IsNull() || !resId->IsNumber()) {
+        return false;
+    }
+    auto resourceObject = GetResourceObject(vm, jsValue);
+    if (!resourceObject) {
+        return false;
+    }
+    auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+    auto symbol = resourceWrapper->GetSymbolById(resId->Uint32Value(vm));
+    if (!symbol) {
+        return false;
+    }
+    symbolId = symbol;
+    return true;
 }
 } // namespace OHOS::Ace::NG

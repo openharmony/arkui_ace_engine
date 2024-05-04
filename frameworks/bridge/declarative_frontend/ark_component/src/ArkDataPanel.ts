@@ -18,6 +18,8 @@ class ArkDataPanelComponent extends ArkComponent implements DataPanelAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   dataPanelNode: BuilderNode<[taPanelTrackShado]> | null = null;
   modifier: ContentModifier<DataPanelConfiguration>;
+  needRebuild: Boolean = false;
+  
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -46,16 +48,21 @@ class ArkDataPanelComponent extends ArkComponent implements DataPanelAttribute {
       getUINativeModule().datapanel.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, this);
   }
   makeContentModifierNode(context: UIContext, datapanelConfig: DataPanelConfiguration): FrameNode | null {
-    datapanelConfig.contentModifier = this.style;
-    if (!isUndefined(this.dataPanelNode)) {
+    datapanelConfig.contentModifier = this.modifier;
+    if (!isUndefined(this.dataPanelNode) || this.needRebuild) {
       let xNode = globalThis.requireNapi('arkui.node');
       this.dataPanelNode = new xNode.BuilderNode(context);
       this.dataPanelNode.build(this.builder, datapanelConfig);
+      this.needRebuild = false;
     } else {
       this.dataPanelNode.update(datapanelConfig);
     }

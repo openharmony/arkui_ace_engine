@@ -252,6 +252,27 @@ ArkUI_GestureRecognizerType GetGestureType(ArkUI_GestureRecognizer* recognizer)
     return static_cast<ArkUI_GestureRecognizerType>(recognizer->type);
 }
 
+ArkUI_GestureRecognizer* CreateGroupGesture(ArkUI_GroupGestureMode gestureMode)
+{
+    auto* gesture =
+        OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createGestureGroup(gestureMode);
+    return new ArkUI_GestureRecognizer { GROUP_GESTURE, gesture, nullptr };
+}
+
+int32_t AddChildGesture(ArkUI_GestureRecognizer* group, ArkUI_GestureRecognizer* child)
+{
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->addGestureToGestureGroup(
+        group->gesture, child->gesture);
+    return 0;
+}
+
+int32_t RemoveChildGesture(ArkUI_GestureRecognizer* group, ArkUI_GestureRecognizer* child)
+{
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->removeGestureFromGestureGroup(
+        group->gesture, child->gesture);
+    return 0;
+}
+
 void HandleGestureEvent(ArkUINodeEvent* event)
 {
     auto* extraData = reinterpret_cast<GestureInnerData*>(event->extraParam);

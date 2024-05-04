@@ -52,6 +52,7 @@ public:
     }
 
     void CleanRecognizerState() override;
+    void ForceCleanRecognizer() override;
 
 private:
     bool CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognizer);

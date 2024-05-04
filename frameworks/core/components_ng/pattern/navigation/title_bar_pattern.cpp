@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -156,13 +157,15 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     auto subTitleSize = theme->GetSubTitleFontSize();
+    auto textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         subTitleSize = theme->GetSubTitleFontSizeS();
+        textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
     }
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
         titleLayoutProperty->UpdateAdaptMaxFontSize(subTitleSize);
-        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
     }
 
     subtitleNode->MarkModifyDone();
@@ -223,17 +226,24 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
     auto titleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
     auto titleFontSize = theme->GetTitleFontSizeBig();
     auto maxFontSize = theme->GetTitleFontSizeBig();
+    auto miniTitleFontSize = theme->GetTitleFontSize();
+    auto miniTitleFontSizeMin = theme->GetTitleFontSizeMin();
+    auto textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         titleFontSize = theme->GetMainTitleFontSizeL();
         maxFontSize = theme->GetMainTitleFontSizeL();
+        miniTitleFontSize = theme->GetMainTitleFontSizeM();
+        miniTitleFontSizeMin = theme->GetMainTitleFontSizeS();
+        textHeightAdaptivePolicy = hostNode->GetSubtitle() ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
+            TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
     }
     if (titleMode == NavigationTitleMode::MINI) {
         if (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue()) {
-            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
-            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
+            titleLayoutProperty->UpdateFontSize(miniTitleFontSize);
+            titleLayoutProperty->UpdateAdaptMaxFontSize(miniTitleFontSize);
         } else {
-            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
-            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
+            titleLayoutProperty->UpdateFontSize(miniTitleFontSizeMin);
+            titleLayoutProperty->UpdateAdaptMaxFontSize(miniTitleFontSizeMin);
         }
         UpdateSubTitleOpacity(1.0);
     } else if (titleMode == NavigationTitleMode::FULL) {
@@ -256,7 +266,7 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
     }
 
     titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
-    titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
     auto maxLines = hostNode->GetSubtitle() ? 1 : TITLEBAR_MAX_LINES;
     titleLayoutProperty->UpdateMaxLines(maxLines);
     if (currentFontSize != titleLayoutProperty->GetFontSizeValue(Dimension(0)) ||
@@ -839,6 +849,10 @@ float TitleBarPattern::OnCoordScrollUpdate(float offset)
     }
     UpdateTitleBarByCoordScroll(titleBarOffset);
     coordScrollFinalOffset_ = titleBarOffset;
+    auto barStyle = options_.bgOptions.barStyle.value_or(BarStyle::STANDARD);
+    if (barStyle == BarStyle::STACK) {
+        offsetHandled = 0.0f;
+    }
 
     return offsetHandled;
 }

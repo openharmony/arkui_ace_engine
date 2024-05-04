@@ -22,11 +22,14 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/event/gesture_info.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/gestures/gesture_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/gestures/gesture_type.h"
 #include "core/gestures/velocity.h"
 #include "core/gestures/velocity_tracker.h"
+#include "core/components/common/properties/common_decoration.h"
+#include "core/components/common/properties/shadow.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,17 +38,46 @@ class NGGestureRecognizer;
 enum class DragPreviewMode : int32_t {
     AUTO = 1,
     DISABLE_SCALE = 2,
+    ENABLE_DEFAULT_SHADOW = 3,
+    ENABLE_DEFAULT_RADIUS = 4,
 };
 
-typedef struct {
+struct BlurBackGroundInfo {
+    EffectOption  backGroundEffect;
+    void ToJsonValue(const std::unique_ptr<JsonValue>& json)
+    {
+        static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
+        json->Put("blur_radius", backGroundEffect.radius.Value());
+        json->Put("blur_staturation", backGroundEffect.saturation);
+        json->Put("blur_brightness", backGroundEffect.brightness);
+        json->Put("blur_color", backGroundEffect.color.ColorToString().c_str());
+        json->Put("blur_adptiva_color", ADAPTIVE_COLOR[static_cast<int32_t>(backGroundEffect.adaptiveColor)]);
+        constexpr int32_t GRAYSCALE_MAX_VALUE = 2;
+        if (backGroundEffect.blurOption.grayscale.size() >= GRAYSCALE_MAX_VALUE) {
+            json->Put("blur_coef1", backGroundEffect.blurOption.grayscale[0]);
+            json->Put("blur_coef2", backGroundEffect.blurOption.grayscale[1]);
+        } else {
+            json->Put("blur_coef1", 0);
+            json->Put("blur_coef2", 0);
+        }
+    }
+};
+
+struct OptionsAfterApplied {
     double opacity;
-} OptionsAfterApplied;
+    std::optional<Shadow> shadow;
+    std::string shadowPath;
+    std::optional<BorderRadiusProperty> borderRadius;
+    BlurBackGroundInfo  blurbgEffect;
+};
 
 struct DragPreviewOption {
-    DragPreviewMode mode = DragPreviewMode::AUTO;
+    bool isScaleEnabled = true;
     bool defaultAnimationBeforeLifting = false;
     bool isMultiSelectionEnabled = false;
     bool isNumber = false;
+    bool isDefaultShadowEnabled = false;
+    bool isDefaultRadiusEnabled = false;
     union {
         int32_t badgeNumber;
         bool isShowBadge;
@@ -61,6 +93,12 @@ struct DragPreviewOption {
     }
     std::function<void(WeakPtr<NG::FrameNode>)> onApply;
     OptionsAfterApplied options; // options from modifier after applied
+    void ResetDragPreviewMode()
+    {
+        isScaleEnabled = true;
+        isDefaultShadowEnabled = false;
+        isDefaultRadiusEnabled = false;
+    }
 };
 
 class ACE_EXPORT Gesture : public virtual AceType {

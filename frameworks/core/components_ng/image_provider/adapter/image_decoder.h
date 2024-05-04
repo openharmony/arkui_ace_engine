@@ -37,7 +37,7 @@ public:
 #endif
 
     // decode image using ImageFramework, return true if process is successful.
-    RefPtr<CanvasImage> MakePixmapImage();
+    RefPtr<CanvasImage> MakePixmapImage(AIImageQuality imageQuality = AIImageQuality::NONE);
 
 private:
 #ifndef USE_ROSEN_DRAWING

@@ -102,7 +102,8 @@ ClickInfo ClickRecognizer::GetClickInfo()
     }
     ClickInfo info(touchPoint.id);
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
@@ -111,6 +112,12 @@ ClickInfo ClickRecognizer::GetClickInfo()
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }
@@ -147,7 +154,8 @@ void ClickRecognizer::OnAccepted()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
         ClickInfo info = GetClickInfo();
@@ -401,7 +409,8 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         }
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
@@ -409,6 +418,13 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
+    
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }
@@ -420,7 +436,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDisplayX(touchPoint.screenX);
     info.SetDisplayY(touchPoint.screenY);
 #endif
-    info.SetPointerEvent(touchPoint.pointerEvent);
+    info.SetPointerEvent(lastPointEvent_);
     return info;
 }
 

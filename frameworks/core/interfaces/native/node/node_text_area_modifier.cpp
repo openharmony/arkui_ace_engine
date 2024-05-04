@@ -46,6 +46,7 @@ constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
+const float ERROR_FLOAT_CODE = -1.0f;
 std::string g_strValue;
 
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
@@ -674,6 +675,7 @@ void ResetTextAreaWordBreak(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[2]); // 2 is the default value of WordBreak::BREAK_WORD
 }
+
 void SetTextAreaAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -757,13 +759,14 @@ void ResetTextAreaSelectedBackgroundColor(ArkUINodeHandle node)
     TextFieldModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
 }
 
-void SetTextAreaCaretStyle(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+void SetTextAreaCaretStyle(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Uint32 caretColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CaretStyle caretStyle;
     caretStyle.caretWidth = CalcDimension(value, (DimensionUnit)unit);
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
+    TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
 }
 
 void ResetTextAreaCaretStyle(ArkUINodeHandle node)
@@ -775,9 +778,10 @@ void ResetTextAreaCaretStyle(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     CaretStyle caretStyle;
     caretStyle.caretWidth = theme->GetCursorWidth();
+    uint32_t caretColor = theme->GetCursorColor().GetValue();
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
+    TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
 }
-
 
 void SetTextAreaTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
 {
@@ -823,6 +827,281 @@ void ResetTextAreaLineSpacing(ArkUINodeHandle node)
     value.Reset();
     TextFieldModelNG::SetLineSpacing(frameNode, value);
 }
+
+ArkUI_CharPtr GetTextAreaFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = UnParseFontFeatureSetting(TextFieldModelNG::GetFontFeature(frameNode));
+    return g_strValue.c_str();
+}
+
+ArkUI_Float32 GetTextAreaAdaptMinFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetAdaptMinFontSize(frameNode).Value();
+}
+
+ArkUI_Float32 GetTextAreaAdaptMaxFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetAdaptMaxFontSize(frameNode).Value();
+}
+
+ArkUI_Float32 GetTextAreaLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetLineHeight(frameNode).Value();
+}
+
+ArkUI_Int32 GetgetTextAreaMaxLines(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetMaxLines(frameNode);
+}
+void SetTextAreaPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
+    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcLength topDimen;
+    CalcLength rightDimen;
+    CalcLength bottomDimen;
+    CalcLength leftDimen;
+    if (top->string != nullptr) {
+        topDimen = CalcLength(top->string);
+    } else {
+        topDimen = CalcLength(top->value, static_cast<DimensionUnit>(top->unit));
+    }
+    if (right->string != nullptr) {
+        rightDimen = CalcLength(right->string);
+    } else {
+        rightDimen = CalcLength(right->value, static_cast<DimensionUnit>(right->unit));
+    }
+    if (bottom->string != nullptr) {
+        bottomDimen = CalcLength(bottom->string);
+    } else {
+        bottomDimen = CalcLength(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+    }
+    if (left->string != nullptr) {
+        leftDimen = CalcLength(left->string);
+    } else {
+        leftDimen = CalcLength(left->value, static_cast<DimensionUnit>(left->unit));
+    }
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(topDimen);
+    paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    paddings.left = std::optional<CalcLength>(leftDimen);
+    paddings.right = std::optional<CalcLength>(rightDimen);
+    TextFieldModelNG::SetPadding(frameNode, paddings);
+}
+
+void ResetTextAreaPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto textFieldPadding = theme->GetPadding();
+    NG::PaddingProperty paddings;
+    paddings.top = NG::CalcLength(textFieldPadding.Top());
+    paddings.bottom = NG::CalcLength(textFieldPadding.Bottom());
+    paddings.left = NG::CalcLength(textFieldPadding.Left());
+    paddings.right = NG::CalcLength(textFieldPadding.Right());
+    TextFieldModelNG::SetPadding(frameNode, paddings);
+}
+
+void SetTextAreaOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        TextFieldModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnChange(frameNode, nullptr);
+}
+
+void SetTextAreaEnterKeyType(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnterKeyType(frameNode, CastToTextInputAction(value));
+}
+
+void ResetTextAreaEnterKeyType(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnterKeyType(frameNode, TextInputAction::NEW_LINE);
+}
+
+void SetTextAreaInputFilter(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string inputFilter(value);
+    if (callback) {
+        auto onError = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetInputFilter(frameNode, inputFilter, *onError);
+    } else {
+        TextFieldModelNG::SetInputFilter(frameNode, inputFilter, nullptr);
+    }
+}
+
+void ResetTextAreaInputFilter(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetInputFilter(frameNode, "", nullptr);
+}
+
+void SetTextAreaOnTextSelectionChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(int32_t, int32_t)>*>(callback);
+        TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(*onChange));
+    } else {
+        TextFieldModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnTextSelectionChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnTextSelectionChange(frameNode, nullptr);
+}
+
+void SetTextAreaOnContentScroll(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onScroll = reinterpret_cast<std::function<void(float, float)>*>(callback);
+        TextFieldModelNG::SetOnContentScroll(frameNode, std::move(*onScroll));
+    } else {
+        TextFieldModelNG::SetOnContentScroll(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnContentScroll(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnContentScroll(frameNode, nullptr);
+}
+
+void SetTextAreaOnEditChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEditChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        TextFieldModelNG::SetOnEditChange(frameNode, std::move(*onEditChange));
+    } else {
+        TextFieldModelNG::SetOnEditChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnEditChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnEditChange(frameNode, nullptr);
+}
+
+void SetTextAreaOnCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCopy = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetOnCopy(frameNode, std::move(*onCopy));
+    } else {
+        TextFieldModelNG::SetOnCopy(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnCopy(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnCopy(frameNode, nullptr);
+}
+
+void SetTextAreaOnCut(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCut = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        TextFieldModelNG::SetOnCut(frameNode, std::move(*onCut));
+    } else {
+        TextFieldModelNG::SetOnCut(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnCut(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnCut(frameNode, nullptr);
+}
+
+void SetTextAreaOnPaste(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onPasteWithEvent = reinterpret_cast<std::function<void(
+                const std::string&, NG::TextCommonEvent&)>*>(callback);
+        TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(*onPasteWithEvent));
+    } else {
+        TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnPaste(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
+}
+
+void SetTextAreaLineBreakStrategy(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (lineBreakStrategy < 0 || lineBreakStrategy >= LINE_BREAK_STRATEGY_TYPES.size()) {
+        lineBreakStrategy = 0; // 0 is the default value of LineBreakStrategy::GREEDY
+    }
+    TextFieldModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[lineBreakStrategy]);
+}
+
+void ResetTextAreaLineBreakStrategy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // 0 is the default value of LineBreakStrategy::GREEDY
+    TextFieldModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[0]);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -850,7 +1129,16 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         ResetTextAreaHeightAdaptivePolicy, SetTextAreaSelectedBackgroundColor, ResetTextAreaSelectedBackgroundColor,
         SetTextAreaCaretStyle, ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow,
         SetTextAreaTextIndent, ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing,
-        GetTextAreaSelectionMenuHidden };
+        GetTextAreaSelectionMenuHidden, GetTextAreaAdaptMinFontSize, GetTextAreaAdaptMaxFontSize,
+        GetTextAreaLineHeight, GetgetTextAreaMaxLines,
+        SetTextAreaPadding, ResetTextAreaPadding, GetTextAreaFontFeature,
+        SetTextAreaOnChange, ResetTextAreaOnChange,
+        SetTextAreaEnterKeyType, ResetTextAreaEnterKeyType, SetTextAreaInputFilter, ResetTextAreaInputFilter,
+        SetTextAreaOnTextSelectionChange, ResetTextAreaOnTextSelectionChange,
+        SetTextAreaOnContentScroll, ResetTextAreaOnContentScroll,
+        SetTextAreaOnEditChange, ResetTextAreaOnEditChange, SetTextAreaOnCopy, ResetTextAreaOnCopy,
+        SetTextAreaOnCut, ResetTextAreaOnCut, SetTextAreaOnPaste, ResetTextAreaOnPaste,
+        SetTextAreaLineBreakStrategy, ResetTextAreaLineBreakStrategy };
     return &modifier;
 }
 
@@ -913,6 +1201,55 @@ void SetOnTextAreaEditChange(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnEditChanged(frameNode, std::move(onChange));
+}
+
+void SetOnTextAreaContentSizeChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [node, extraParam](float width, float height) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXTAREA_CONTENT_SIZE_CHANGE;
+        //0 width
+        event.componentAsyncEvent.data[0].f32 = width;
+        //1 height
+        event.componentAsyncEvent.data[1].f32 = height;
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnContentSizeChange(frameNode, std::move(onChange));
+}
+
+void SetOnTextAreaInputFilterError(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onInputFilterError = [node, extraParam](const std::string& str) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_TEXT_AREA_INPUT_FILTER_ERROR;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetInputFilterError(frameNode, std::move(onInputFilterError));
+}
+
+void SetTextAreaOnTextContentScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScroll = [node, extraParam](float totalOffsetX, float totalOffsetY) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXT_AREA_CONTENT_SCROLL;
+        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetX);
+        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetY);
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onScroll));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

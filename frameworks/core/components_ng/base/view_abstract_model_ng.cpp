@@ -118,13 +118,7 @@ void ViewAbstractModelNG::BindMenuGesture(
             CHECK_NULL_VOID(targetNode);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            // menu already created
-            if (params.empty()) {
-                NG::ViewAbstract::ShowMenu(targetNode->GetId(), menuPosition, menuParam.isShowInSubWindow);
-                return;
-            }
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuPosition, menuParam);
-            params.clear();
         };
     } else if (buildFunc) {
         showMenu = [builderFunc = std::move(buildFunc), weakTarget, menuParam](const GestureEvent& info) mutable {
@@ -187,7 +181,8 @@ void ViewAbstractModelNG::BindMenu(
         expandDisplay = false;
     }
     if (!expandDisplay) {
-        auto destructor = [id = targetNode->GetId()]() {
+        auto destructor = [id = targetNode->GetId(), params]() mutable {
+            params.clear();
             auto pipeline = NG::PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
@@ -196,7 +191,8 @@ void ViewAbstractModelNG::BindMenu(
         };
         targetNode->PushDestroyCallback(destructor);
     } else {
-        auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
+        auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId(), params]() mutable {
+            params.clear();
             auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
             CHECK_NULL_VOID(subwindow);
             auto childContainerId = subwindow->GetChildContainerId();

@@ -28,14 +28,15 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem);
+    OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem, bool stacked);
     float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
     float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
-    OffsetF MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size);
+    OffsetF MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size, bool stacked);
     float VerticalLayoutSubMenuHalfScreen(const SizeF& size, float position, const SizeF& menuItemSize);
     void ModifySubMenuWrapper(LayoutWrapper* layoutWrapper);
+    void CheckMenuPadding(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
-    void InitializePaddingAPI11(LayoutWrapper* layoutWrapper);
+    void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
     float margin_ = 0.0f;
     float paddingStart_ = 0.0f;
     float paddingEnd_ = 0.0f;

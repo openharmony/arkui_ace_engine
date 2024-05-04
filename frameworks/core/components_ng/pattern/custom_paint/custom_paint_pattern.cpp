@@ -22,6 +22,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
+#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 #include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
@@ -130,11 +131,16 @@ void CustomPaintPattern::SetAntiAlias(bool isEnabled)
 
 void CustomPaintPattern::FillRect(const Rect& rect)
 {
+#ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'fillRect(%{public}s)' is being executed.", rect.ToString().c_str());
     auto task = [rect](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.FillRect(rect);
     };
     paintMethod_->PushTask(task);
+#else
+    CHECK_NULL_VOID(paintMethod_->fastTaskPool_);
+    paintMethod_->fastTaskPool_->FillRect(rect);
+#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -330,11 +336,16 @@ void CustomPaintPattern::Ellipse(const EllipseParam& param)
 
 void CustomPaintPattern::BezierCurveTo(const BezierCurveParam& param)
 {
+#ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'bezierCurveTo' is pending execution.");
     auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.BezierCurveTo(param);
     };
     paintMethod_->PushTask(task);
+#else
+    CHECK_NULL_VOID(paintMethod_->fastTaskPool_);
+    paintMethod_->fastTaskPool_->BezierCurveTo(param);
+#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -353,10 +364,15 @@ void CustomPaintPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
 
 void CustomPaintPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
+#ifndef USE_FAST_TASKPOOL
     auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.FillText(paintWrapper, text, x, y, maxWidth);
     };
     paintMethod_->PushTask(task);
+#else
+    CHECK_NULL_VOID(paintMethod_->fastTaskPool_);
+    paintMethod_->fastTaskPool_->FillText(text, x, y, maxWidth);
+#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -801,11 +817,16 @@ void CustomPaintPattern::UpdateLineDash(const std::vector<double>& segments)
 
 void CustomPaintPattern::Save()
 {
+#ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'save' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.Save();
     };
     paintMethod_->PushTask(task);
+#else
+    CHECK_NULL_VOID(paintMethod_->fastTaskPool_);
+    paintMethod_->fastTaskPool_->Save();
+#endif
     paintMethod_->SaveMatrix();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -814,11 +835,17 @@ void CustomPaintPattern::Save()
 
 void CustomPaintPattern::Restore()
 {
+#ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'restore' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.Restore();
     };
     paintMethod_->PushTask(task);
+#else
+    CHECK_NULL_VOID(paintMethod_->fastTaskPool_);
+    paintMethod_->fastTaskPool_->Restore();
+#endif
+
     paintMethod_->RestoreMatrix();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1132,6 +1159,7 @@ void CustomPaintPattern::Reset()
         paintMethod.Reset();
     };
     paintMethod_->PushTask(task);
+    paintMethod_->ResetTransformMatrix();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

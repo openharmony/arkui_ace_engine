@@ -244,6 +244,16 @@ public:
     {
         return pointerEvent_;
     }
+
+    void SetRawGlobalLocation(const Offset& rawGlobalLocation)
+    {
+        rawGlobalLocation_ = rawGlobalLocation;
+    }
+
+    const Offset& GetRawGlobalLocation() const
+    {
+        return rawGlobalLocation_;
+    }
 #ifdef SECURITY_COMPONENT_ENABLE
     void SetDisplayX(double displayX)
     {
@@ -287,6 +297,7 @@ private:
     double speed_ = 0.0;
     double mainSpeed_ = 0.0;
     double mainDelta_ = 0.0;
+    // Will be used in drag.
     int32_t pointerId_ = 0;
 #ifdef SECURITY_COMPONENT_ENABLE
     double displayX_ = 0.0;
@@ -300,7 +311,10 @@ private:
     // Different from global location, The local location refers to the location of the contact point relative to the
     // current node which has the recognizer.
     Offset localLocation_;
+    // Will be used in drag.
     Offset screenLocation_;
+    // Raw last touchPoint global location.
+    Offset rawGlobalLocation_;
     Offset pinchCenter_;
     Offset delta_;
     std::list<FingerInfo> fingerList_;

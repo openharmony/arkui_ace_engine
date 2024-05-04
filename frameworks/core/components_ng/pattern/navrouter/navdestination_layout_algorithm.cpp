@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
@@ -48,9 +49,13 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationG
         titleBarWrapper->Measure(constraint);
         return titleHeight;
     }
-
+    auto singleLineTitleHeight = SINGLE_LINE_TITLEBAR_HEIGHT;
+    auto doubleLineTitleBarHeight = DOUBLE_LINE_TITLEBAR_HEIGHT;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        doubleLineTitleBarHeight = SINGLE_LINE_TITLEBAR_HEIGHT;
+    }
     auto titleHeight = titleBarLayoutProperty->GetTitleHeightValue(
-        titleBarNode->GetSubtitle() ? DOUBLE_LINE_TITLEBAR_HEIGHT : SINGLE_LINE_TITLEBAR_HEIGHT);
+        titleBarNode->GetSubtitle() ? doubleLineTitleBarHeight : singleLineTitleHeight);
     constraint.selfIdealSize = OptionalSizeF(
         size.Width(), static_cast<float>(titleHeight.ConvertToPxWithSize(constraint.percentReference.Height())));
     titleBarWrapper->Measure(constraint);
@@ -65,8 +70,20 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinat
     auto index = hostNode->GetChildIndexById(contentNode->GetId());
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(contentWrapper, 0.0f);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleBarNode, 0.0f);
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, 0.0f);
+    auto options = titlePattern->GetTitleBarOptions();
+    auto barStyle = options.bgOptions.barStyle.value_or(BarStyle::STANDARD);
+    float resetTitleBarHeight = 0.0f;
+    if (barStyle == BarStyle::STACK) {
+        resetTitleBarHeight = 0.0f;
+    } else {
+        resetTitleBarHeight = titleBarHeight;
+    }
     auto constraint = navDestinationLayoutProperty->CreateChildConstraint();
-    float contentHeight = size.Height() - titleBarHeight;
+    float contentHeight = size.Height() - resetTitleBarHeight;
     if (NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty)) {
         constraint.selfIdealSize.SetWidth(size.Width());
     } else {
@@ -116,7 +133,20 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
         return;
     }
 
-    auto contentOffset = OffsetT<float>(0, titlebarHeight);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    auto options = titlePattern->GetTitleBarOptions();
+    auto barStyle = options.bgOptions.barStyle.value_or(BarStyle::STANDARD);
+    float resetTitleBarHeight = 0.0f;
+    if (barStyle == BarStyle::STACK) {
+        resetTitleBarHeight = 0.0f;
+    } else {
+        resetTitleBarHeight = titlebarHeight;
+    }
+
+    auto contentOffset = OffsetT<float>(0, resetTitleBarHeight);
     const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
     contentOffset.AddX(padding.left.value_or(0));
     contentOffset.AddY(padding.top.value_or(0));

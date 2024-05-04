@@ -37,6 +37,8 @@ public:
         Builder() = default;
         ~Builder() = default;
 
+        static constexpr Dimension BOTTOM_BAR_HORIZONTAL_TEXT_SIZE = 12.0_vp;
+
         RefPtr<TabTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<TabTheme> theme = AceType::Claim(new TabTheme());
@@ -70,6 +72,8 @@ public:
                 theme->bottomTabIconOff_ = pattern->GetAttr<Color>("bottom_tab_icon_off", Color::WHITE);
                 theme->bottomTabImageSize_ = pattern->GetAttr<Dimension>("bottom_tab_image_size", 0.0_vp);
                 theme->bottomTabTextSize_ = pattern->GetAttr<Dimension>("bottom_tab_text_size", 0.0_vp);
+                theme->bottomTabHorizontalTextSize_ =
+                    pattern->GetAttr<Dimension>("bottom_tab_horizontal_text_size", BOTTOM_BAR_HORIZONTAL_TEXT_SIZE);
                 theme->defaultTabBarName_ = pattern->GetAttr<std::string>("default_tab_bar_name", "");
                 theme->bottomTabBarSpace_ = pattern->GetAttr<Dimension>("bottom_tab_bar_space", 0.0_vp);
                 theme->horizontalBottomTabBarSpace_ =
@@ -107,6 +111,9 @@ public:
                     pattern->GetAttr<Dimension>("focus_indicator_horizontal_padding", 0.0_vp);
                 theme->focusIndicatorVerticalPadding_ =
                     pattern->GetAttr<Dimension>("focus_indicator_vertical_padding", 0.0_vp);
+                theme->dialog_radius_level10_ = pattern->GetAttr<Dimension>("dialog_radius_level10", 20.0_vp);
+                theme->dialog_iconColor_ = pattern->GetAttr<Color>("dialog_icon_primary", Color(0xff182431));
+                theme->dialog_fontColor_ = pattern->GetAttr<Color>("dialog_font_primary", Color(0xff182431));
             } else {
                 LOGW("find pattern of tab fail");
             }
@@ -281,6 +288,11 @@ public:
         return bottomTabTextSize_;
     }
 
+    const Dimension& GetBottomTabHorizontalTextSize() const
+    {
+        return bottomTabHorizontalTextSize_;
+    }
+
     const std::string& GetDefaultTabBarName() const
     {
         return defaultTabBarName_;
@@ -369,6 +381,18 @@ public:
     {
         return bottomTabBarDefaultHeight_;
     }
+    const Dimension& GetDialogRadiusLevel10() const
+    {
+        return dialog_radius_level10_;
+    }
+    const Color& GetDialogIconColor() const
+    {
+        return dialog_iconColor_;
+    }
+    const Color& GetDialogFontColor() const
+    {
+        return dialog_fontColor_;
+    }
     
 
 protected:
@@ -408,6 +432,7 @@ private:
     Color bottomTabIconOff_;
     Dimension bottomTabImageSize_;
     Dimension bottomTabTextSize_;
+    Dimension bottomTabHorizontalTextSize_;
     std::string defaultTabBarName_;
     Dimension bottomTabBarSpace_;
     Dimension horizontalBottomTabBarSpace_;
@@ -426,6 +451,9 @@ private:
     Dimension tabBarColumnGutter_;
     Dimension tabBarColumnMargin_;
     Dimension horizontalBottomTabMinWidth_;
+    Dimension dialog_radius_level10_;
+    Color dialog_iconColor_;
+    Color dialog_fontColor_;
 };
 
 } // namespace OHOS::Ace

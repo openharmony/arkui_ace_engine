@@ -174,6 +174,32 @@ void ImageModelNG::SetSmoothEdge(FrameNode *frameNode, float value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, value, frameNode);
 }
 
+void ImageModelNG::SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode);
+    ACE_UPDATE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode);
+}
+
+void ImageModelNG::SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dynamicRangeMode)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode, frameNode);
+}
+
+void ImageModelNG::SetEnhancedImageQuality(AIImageQuality imageQuality)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageQuality(imageQuality);
+}
+
+void ImageModelNG::SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageQuality(imageQuality);
+}
+
 void ImageModelNG::SetBorder(const Border &border) {}
 
 void ImageModelNG::SetBackBorder()
@@ -571,6 +597,25 @@ ImageSourceInfo ImageModelNG::GetAlt(FrameNode* frameNode)
     return layoutProperty->GetAlt().value_or(defaultImageSourceInfo);
 }
 
+bool ImageModelNG::GetFitOriginalSize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetImageSizeStyle()->GetFitOriginalSize().value_or(false);
+}
+
+uint32_t ImageModelNG::GetFillColor(FrameNode *frameNode)
+{
+    uint32_t errorCode = -1;
+    CHECK_NULL_RETURN(frameNode, errorCode);
+    auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, errorCode);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), errorCode);
+    Color color = paintProperty->GetImagePaintStyle()->GetSvgFillColor().value_or(Color());
+    return color.GetValue();
+}
+
 bool ImageModelNG::GetDraggable(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, false);
@@ -596,6 +641,15 @@ RefPtr<ImagePattern> ImageModelNG::GetImagePattern()
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
     return AceType::DynamicCast<ImagePattern>(frameNode->GetPattern());
+}
+
+ImageResizableSlice ImageModelNG::GetResizableSlice(FrameNode *frameNode)
+{
+    ImageResizableSlice resizable;
+    CHECK_NULL_RETURN(frameNode, resizable);
+    auto renderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(renderProperty, resizable);
+    return renderProperty->GetImageResizableSlice().value_or(resizable);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

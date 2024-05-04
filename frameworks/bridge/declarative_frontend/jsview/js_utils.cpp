@@ -48,6 +48,7 @@ constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
 #endif
 constexpr char BACKGROUND_COLOR_PROPERTY[] = "backgroundColor";
 constexpr char BACKGROUND_BLUR_STYLE_PROPERTY[] = "backgroundBlurStyle";
+constexpr char BAR_STYLE_PROPERTY[] = "barStyle";
 } // namespace
 
 namespace {
@@ -164,6 +165,75 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
 {
     return DrawingColorFilter::CreateDrawingColorFilter(UnwrapNapiValue(obj));
+}
+
+std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args)
+{
+    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
+    if (!args->IsObject()) {
+        return prop;
+    }
+
+    std::optional<CalcDimension> radiusTopLeft;
+    std::optional<CalcDimension> radiusTopRight;
+    std::optional<CalcDimension> radiusBottomLeft;
+    std::optional<CalcDimension> radiusBottomRight;
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+    CalcDimension topLeft;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
+        radiusTopLeft = topLeft;
+    }
+    CalcDimension topRight;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
+        radiusTopRight = topRight;
+    }
+    CalcDimension bottomLeft;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
+        radiusBottomLeft = bottomLeft;
+    }
+    CalcDimension bottomRight;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
+        radiusBottomRight = bottomRight;
+    }
+    if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
+        !radiusBottomRight.has_value()) {
+        return prop;
+    }
+    NG::BorderRadiusProperty borderRadius;
+    if (radiusTopLeft.has_value()) {
+        borderRadius.radiusTopLeft = radiusTopLeft;
+    }
+    if (radiusTopRight.has_value()) {
+        borderRadius.radiusTopRight = radiusTopRight;
+    }
+    if (radiusBottomLeft.has_value()) {
+        borderRadius.radiusBottomLeft = radiusBottomLeft;
+    }
+    if (radiusBottomRight.has_value()) {
+        borderRadius.radiusBottomRight = radiusBottomRight;
+    }
+    borderRadius.multiValued = true;
+    prop = borderRadius;
+
+    return prop;
+}
+
+std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
+{
+    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
+    CalcDimension radiusDim;
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        return prop;
+    }
+    if (JSViewAbstract::ParseJsDimensionVpNG(args, radiusDim)) {
+        NG::BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(radiusDim);
+        borderRadius.multiValued = false;
+        prop = borderRadius;
+    } else if (args->IsObject()) {
+        prop = HandleDifferentRadius(args);
+    }
+    return prop;
 }
 
 // When the api version >= 11, it is disable event version.
@@ -296,6 +366,17 @@ void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOpt
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             options.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
+    }
+    auto barStyleProperty = optObj->GetProperty(BAR_STYLE_PROPERTY);
+    if (barStyleProperty->IsNumber()) {
+        auto barStyle = barStyleProperty->ToNumber<int32_t>();
+        if (barStyle >= static_cast<int32_t>(NG::BarStyle::STANDARD) &&
+            barStyle <= static_cast<int32_t>(NG::BarStyle::STACK)) {
+            options.barStyle = static_cast<NG::BarStyle>(barStyle);
+            return;
+        }
+        barStyle = static_cast<int32_t>(NG::BarStyle::STANDARD);
+        return;
     }
 }
 } // namespace OHOS::Ace::Framework

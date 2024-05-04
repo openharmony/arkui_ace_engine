@@ -32,6 +32,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/rect.h"
 
+namespace OHOS::Ace {
+class ImageAnalyzerManager;
+}
 namespace OHOS::Ace::NG {
 class VideoPattern : public Pattern {
     DECLARE_ACE_TYPE(VideoPattern, Pattern);
@@ -233,6 +236,8 @@ public:
     }
 
     RefPtr<VideoPattern> GetTargetVideoPattern();
+    void EnableAnalyzer(bool enable);
+    void SetImageAnalyzerConfig(void* config);
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
@@ -321,6 +326,13 @@ private:
     void RegisterRenderContextCallBack();
     void ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status);
 
+    bool IsSupportImageAnalyzer();
+    void StartImageAnalyzer();
+    void CreateAnalyzerOverlay();
+    void DestroyAnalyzerOverlay();
+    void UpdateAnalyzerOverlay();
+    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
 
@@ -343,6 +355,7 @@ private:
     bool pastPlayingStatus_ = false;
 
     bool dragEndAutoPlay_ = false;
+    bool isEnableAnalyzer_ = false;
 
     uint32_t currentPos_ = 0;
     uint32_t duration_ = 0;
@@ -354,6 +367,8 @@ private:
     double progressRate_ = 1.0;
 
     Rect lastBoundsRect_;
+    Rect contentRect_;
+    std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };

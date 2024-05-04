@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/pipeline/base/element_register.h"
+#include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
 
 namespace OHOS::Ace {
 
@@ -978,6 +979,25 @@ void JSViewPartialUpdate::JSGetUniqueId(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(nodeId)));
 }
 
+void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
+{
+#if defined(PREVIEW)
+    return;
+#else
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", stateInfo.c_str());
+    auto pipeline = NG::PipelineContext::GetContextByContainerId(GetInstanceId());
+    CHECK_NULL_VOID(pipeline);
+    if (!pipeline->getProfilerStatus()) {
+        return;
+    }
+    auto info = JsonUtil::ParseJsonString(stateInfo);
+    info->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
+    info->Put("ProcessID", getpid());
+    info->Put("WindowID", (int32_t)pipeline->GetWindowId());
+    OHOS::AbilityRuntime::ConnectServerManager::Get().SendArkUIStateProfilerMessage(info->ToString());
+#endif
+}
+
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     JSClass<JSViewPartialUpdate>::Declare("NativeViewPartialUpdate");
@@ -1007,6 +1027,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "queryRouterPageInfo", &JSViewPartialUpdate::JSGetRouterPageInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
+    JSClass<JSViewPartialUpdate>::Method("sendStateInfo", &JSViewPartialUpdate::JSSendStateInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
@@ -1063,7 +1084,7 @@ bool JSViewPartialUpdate::JsElementIdExists(int32_t elmtId)
 
 void JSViewPartialUpdate::JSGetProxiedItemRenderState(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1) {
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }

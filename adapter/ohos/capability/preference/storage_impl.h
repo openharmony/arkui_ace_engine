@@ -56,7 +56,7 @@ public:
 
 private:
     std::shared_ptr<NativePreferences::Preferences> GetPreference(const std::string& fileName);
-    int errCode_;
+    int errCode_ = 0;
     std::string fileName_;
 };
 

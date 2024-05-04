@@ -145,16 +145,21 @@ public:
     }
 
     void OnModifyDone() override;
+    void OnSensitiveStyleChange(bool isSensitive) override;
 
     void SetBuilderFunc(GaugeMakeCallback&& makeFunc)
     {
         if (makeFunc == nullptr) {
             makeFunc_ = std::nullopt;
-            contentModifierNode_ = nullptr;
             OnModifyDone();
             return;
         }
         makeFunc_ = std::move(makeFunc);
+    }
+
+    const RefPtr<FrameNode>& GetContentModifierNode() const
+    {
+        return contentModifierNode_;
     }
 
     bool UseContentModifier() const
@@ -168,6 +173,8 @@ private:
     void InitDescriptionNode();
     void InitLimitValueText(int32_t valueTextId, bool isMin);
     void HideLimitValueText(int32_t valueTextId, bool isMin);
+    void ObscureText(int32_t valueTextId, bool isSensitive);
+    void ObscureLimitValueText(bool isSensitive);
     void InitIndicatorImage();
     void InitTitleContent();
     void FireBuilder();

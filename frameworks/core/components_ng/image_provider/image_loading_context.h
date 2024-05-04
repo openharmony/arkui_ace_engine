@@ -97,6 +97,33 @@ public:
         return containerId_;
     }
 
+    void SetDynamicRangeMode(DynamicRangeMode dynamicMode)
+    {
+        dynamicMode_ = dynamicMode;
+    }
+
+    DynamicRangeMode GetDynamicRangeMode()
+    {
+        return dynamicMode_;
+    }
+
+    void SetImageQuality(AIImageQuality imageQuality)
+    {
+        imageQuality_ = imageQuality;
+    }
+
+    AIImageQuality GetImageQuality()
+    {
+        return imageQuality_;
+    }
+
+    void FinishMearuse()
+    {
+        measureFinish_ = true;
+    }
+
+    void CallbackAfterMeasureIfNeed();
+
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
     void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResult##NotifyTask) \
@@ -125,7 +152,7 @@ private:
 
     inline bool SizeChanging(const SizeF& dstSize)
     {
-        return dstSize_.IsPositive() && dstSize != dstSize_;
+        return dstSize_.IsNonNegative() && dstSize != dstSize_;
     }
 
     ImageSourceInfo src_;
@@ -143,9 +170,14 @@ private:
     bool autoResize_ = true;
     bool syncLoad_ = false;
 
+    DynamicRangeMode dynamicMode_ = DynamicRangeMode::STANDARD;
+    AIImageQuality imageQuality_ = AIImageQuality::NONE;
+
     RectF srcRect_;
     RectF dstRect_;
     SizeF dstSize_;
+    std::atomic<bool> measureFinish_ = false;
+    std::atomic<bool> needErrorCallBack_ = false;
     // to determine whether the image needs to be reloaded
     int32_t sizeLevel_ = -1;
 

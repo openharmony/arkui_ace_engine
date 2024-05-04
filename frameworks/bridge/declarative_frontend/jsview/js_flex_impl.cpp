@@ -89,6 +89,9 @@ void JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info)
 
 void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> directionVal = obj->GetProperty("direction");
     JSRef<JSVal> justifyVal = obj->GetProperty("justifyContent");

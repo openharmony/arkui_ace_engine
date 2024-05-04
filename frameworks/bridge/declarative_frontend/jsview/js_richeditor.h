@@ -83,7 +83,56 @@ private:
     static void ParseJsFont(const JSRef<JSObject>& fontObject, Font& font);
 };
 
-class JSRichEditorController final : public Referenced {
+class JSRichEditorBaseController : public Referenced {
+public:
+    void SetController(const RefPtr<RichEditorBaseControllerBase>& controller)
+    {
+        controllerWeak_ = controller;
+    }
+
+    void SetCaretOffset(const JSCallbackInfo& args);
+    void GetCaretOffset(const JSCallbackInfo& args);
+    void SetTypingStyle(const JSCallbackInfo& info);
+    void ParseJsTextStyle(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
+        struct UpdateSpanStyle& updateSpanStyle, bool isSupportPercent = true);
+    void ParseJsFontFeatureTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
+        struct UpdateSpanStyle& updateSpanStyle);
+    void GetTypingStyle(const JSCallbackInfo& info);
+    void CloseSelectionMenu();
+    void IsEditing(const JSCallbackInfo& args);
+    void StopEditing();
+
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
+
+    void SetStyledStringMode(bool isStyledStringMode)
+    {
+        isStyledStringMode_ = isStyledStringMode;
+    }
+
+    bool IsStyledStringMode()
+    {
+        return isStyledStringMode_;
+    }
+
+protected:
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
+    WeakPtr<RichEditorBaseControllerBase> controllerWeak_;
+    struct UpdateSpanStyle typingStyle_;
+    bool isStyledStringMode_ = false;
+    static JSRef<JSObject> CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle);
+    void ParseTextDecoration(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseTextShadow(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    JSRef<JSObject> JSObjectCast(JSRef<JSVal> jsValue);
+};
+
+class JSRichEditorController final : public JSRichEditorBaseController {
 public:
     JSRichEditorController() = default;
     ~JSRichEditorController() override = default;
@@ -93,6 +142,7 @@ public:
     static void Constructor(const JSCallbackInfo& args)
     {
         auto controller = Referenced::MakeRefPtr<JSRichEditorController>();
+        controller->SetStyledStringMode(false);
         controller->IncRefCount();
         args.SetReturnValue(Referenced::RawPtr(controller));
     }
@@ -104,10 +154,6 @@ public:
         }
     }
 
-    void SetController(const RefPtr<RichEditorControllerBase>& controller)
-    {
-        controllerWeak_ = controller;
-    }
     void AddImageSpan(const JSCallbackInfo& args);
     void AddTextSpan(const JSCallbackInfo& args);
     void AddSymbolSpan(const JSCallbackInfo& args);
@@ -115,57 +161,62 @@ public:
     void ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan);
     void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
-    void ParseJsTextStyle(
-        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
-    void ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
-        struct UpdateSpanStyle& updateSpanStyle, bool isSupportPercent = true);
-    void ParseJsFontFeatureTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
-        struct UpdateSpanStyle& updateSpanStyle);
     void ParseJsSymbolSpanStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
-    void SetCaretOffset(const JSCallbackInfo& args);
-    void GetCaretOffset(const JSCallbackInfo& args);
     void UpdateSpanStyle(const JSCallbackInfo& info);
     void UpdateParagraphStyle(const JSCallbackInfo& info);
     void GetSpansInfo(const JSCallbackInfo& args);
     void GetParagraphsInfo(const JSCallbackInfo& args);
-    void GetTypingStyle(const JSCallbackInfo& info);
-    void SetTypingStyle(const JSCallbackInfo& info);
-    void CloseSelectionMenu();
     void SetSelection(const JSCallbackInfo& args);
     void GetSelection(const JSCallbackInfo& args);
-    void IsEditing(const JSCallbackInfo& args);
-    void SetInstanceId(int32_t id)
-    {
-        instanceId_ = id;
-    }
-    void StopEditing();
 
 private:
-    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     bool IsPixelMap(const JSRef<JSVal>& jsValue);
     bool IsDrawable(const JSRef<JSVal>& jsValue);
-    void ParseTextDecoration(
-        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
-    void ParseTextShadow(
-        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     void ParseJsSelectionOptions(const JSCallbackInfo& args, std::optional<SelectionOptions>& options);
     static JSRef<JSVal> CreateJSSpansInfo(const SelectionInfo& info);
     static JSRef<JSVal> CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info);
-    static JSRef<JSObject> CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle);
     static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     static void ParseTextAlignParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     bool CheckImageSource(std::string assetSrc);
-    JSRef<JSObject> JSObjectCast(JSRef<JSVal> jsValue);
 
-    WeakPtr<RichEditorControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);
     struct UpdateSpanStyle updateSpanStyle_;
-    struct UpdateSpanStyle typingStyle_;
     static void ParseLineBreakStrategyParagraphStyle(
         const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
+};
+
+class JSRichEditorStyledStringController final : public JSRichEditorBaseController {
+public:
+    JSRichEditorStyledStringController() = default;
+    ~JSRichEditorStyledStringController() override = default;
+
+    static void JSBind(BindingTarget globalObj);
+
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto controller = Referenced::MakeRefPtr<JSRichEditorStyledStringController>();
+        controller->SetStyledStringMode(true);
+        controller->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(controller));
+    }
+
+    static void Destructor(JSRichEditorStyledStringController* controller)
+    {
+        if (controller != nullptr) {
+            controller->DecRefCount();
+        }
+    }
+
+    void GetSelection(const JSCallbackInfo& args);
+    void SetStyledString(const JSCallbackInfo& args);
+    void GetStyledString(const JSCallbackInfo& args);
+    void OnContentChanged(const JSCallbackInfo& args);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorStyledStringController);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H

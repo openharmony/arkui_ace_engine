@@ -85,9 +85,10 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::RemoveNodeEventReceiver,
     OHOS::Ace::NodeModel::AddNodeCustomEventReceiver,
     OHOS::Ace::NodeModel::RemoveNodeCustomEventReceiver,
-    nullptr,
-    nullptr,
+    OHOS::Ace::NodeModel::SetUserData,
+    OHOS::Ace::NodeModel::GetUserData,
     OHOS::Ace::NodeModel::SetLengthMetricUnit,
+    OHOS::Ace::NodeModel::GetParent,
 };
 
 ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
@@ -119,10 +120,10 @@ ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
     OHOS::Ace::GestureModel::CreatePinchGesture,
     OHOS::Ace::GestureModel::CreateRotationGesture,
     OHOS::Ace::GestureModel::CreateSwipeGesture,
-    nullptr,
+    OHOS::Ace::GestureModel::CreateGroupGesture,
     OHOS::Ace::GestureModel::DisposeGesture,
-    nullptr,
-    nullptr,
+    OHOS::Ace::GestureModel::AddChildGesture,
+    OHOS::Ace::GestureModel::RemoveChildGesture,
     OHOS::Ace::GestureModel::SetGestureEventTarget,
     OHOS::Ace::GestureModel::AddGestureToNode,
     OHOS::Ace::GestureModel::RemoveGestureFromNode,

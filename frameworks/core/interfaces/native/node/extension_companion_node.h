@@ -75,7 +75,7 @@ protected:
 private:
     ArkUI_Int32 peerId_ = 0;
     ArkUI_Int32 customCallbackId_ = 0;
-    ArkUI_Int32 flags_ = 0;
+    ArkUI_Uint32 flags_ = 0;
     void* peer_ = nullptr;
     ArkUIVMContext context_ = nullptr;
     ArkUI_Int32 alignment_ = 0;

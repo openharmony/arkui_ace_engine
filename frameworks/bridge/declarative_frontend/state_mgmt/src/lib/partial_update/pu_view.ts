@@ -623,7 +623,6 @@ abstract class ViewPU extends PUV2ViewBase
       }
     } while (this.dirtDescendantElementIds_.size);
     stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE, dump of ViewPU in next lines`);
-    //this dumpStateVars();
     stateMgmtProfiler.end();
   }
 
@@ -683,7 +682,7 @@ abstract class ViewPU extends PUV2ViewBase
       if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
         // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
         // update + initial render calls, like in if and ForEach case, convert to stack as well
-        ObserveV2.getObserve().startBind(this, elmtId);
+        ObserveV2.getObserve().startRecordDependencies(this, elmtId);
       }
 
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
@@ -697,7 +696,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
 
       if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
-        ObserveV2.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
+        ObserveV2.getObserve().stopRecordDependencies();
       }
       if (!this.isViewV3) {
         this.currentlyRenderedElmtIdStack_.pop();
@@ -976,6 +975,7 @@ abstract class ViewPU extends PUV2ViewBase
         case '-profiler':
           view.printDFXHeader('Profiler Info', command);
           view.dumpReport();
+          this.sendStateInfo('{}');
           break;
         default:
           DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);

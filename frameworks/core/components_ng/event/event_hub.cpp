@@ -386,4 +386,29 @@ void EventHub::FireOnDisappear()
         onJSFrameNodeDisappear();
     }
 }
+
+void EventHub::AddInnerOnSizeChanged(int32_t id, OnSizeChangedFunc&& callback)
+{
+    onSizeChangedInnerCallbacks_[id] = std::move(callback);
+}
+
+void EventHub::FireInnerOnSizeChanged(const RectF& oldRect, const RectF& rect)
+{
+    for (auto& innerCallbackInfo : onSizeChangedInnerCallbacks_) {
+        if (innerCallbackInfo.second) {
+            auto innerOnSizeCallback = innerCallbackInfo.second;
+            innerOnSizeCallback(oldRect, rect);
+        }
+    }
+}
+
+bool EventHub::HasInnerOnSizeChanged() const
+{
+    return !onSizeChangedInnerCallbacks_.empty();
+}
+
+void EventHub::ClearInnerOnSizeChanged()
+{
+    onSizeChangedInnerCallbacks_.clear();
+}
 } // namespace OHOS::Ace::NG

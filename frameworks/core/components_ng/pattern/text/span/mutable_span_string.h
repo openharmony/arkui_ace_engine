@@ -43,15 +43,18 @@ public:
     void InsertSpanString(int32_t start, const RefPtr<SpanString>& spanString);
     void AppendSpanString(const RefPtr<SpanString>& spanString);
     bool IsSpeicalNode(int32_t location, SpanType speicalType);
+    void SetSpanWatcher(const WeakPtr<SpanWatcher>& watcher);
+    void NotifySpanWatcher();
 
 private:
+    WeakPtr<SpanWatcher> watcher_;
     void KeepSpansOrder();
     void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
+    void ApplyInsertStringToSpans(int32_t start, const std::string& other);
     void ApplyReplaceStringToSpanBase(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
     void ApplyInsertSpanStringToSpans(int32_t start, const RefPtr<SpanString>& spanString);
     void ApplyInsertSpanStringToSpanBase(int32_t start, const RefPtr<SpanString>& spanString);
-    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
-    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
+    void SplitSpansByNewLine();
     bool InsertUseFrontStyle(int32_t start);
     void UpdateSpanAndSpanMapAfterInsertSpanString(int32_t start, int32_t offset);
     void UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start, int32_t offset, bool useFrontStyle);

@@ -22,6 +22,7 @@
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "core/event/ace_events.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -77,7 +78,8 @@ struct AxisEvent final : public UIInputEvent {
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
-    int32_t touchEventId;
+    int32_t touchEventId = 0;
+    std::vector<KeyCode> pressedCodes;
 
     // Coordinates relative to the upper-left corner of the current component
     float localX = 0.0;

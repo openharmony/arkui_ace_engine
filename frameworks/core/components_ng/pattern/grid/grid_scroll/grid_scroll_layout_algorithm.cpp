@@ -195,12 +195,9 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
-    childFrameOffset_ = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
-    childFrameOffset_ += gridLayoutProperty->IsVertical() ? OffsetF(0.0f, gridLayoutInfo_.currentOffset_)
-                                                          : OffsetF(gridLayoutInfo_.currentOffset_, 0.0f);
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
-    bool isRtl = axis_ == Axis::VERTICAL && layoutDirection == TextDirection::RTL;
-    bool isReverse = gridLayoutProperty->IsReverse();
+    childFrameOffset_ = OffsetF(0.0f, padding.top.value_or(0.0f));
+    childFrameOffset_ += OffsetF(0.0f, gridLayoutInfo_.currentOffset_, axis_);
+    bool isRtl = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
     float prevLineHeight = 0.0f;
     int32_t startIndex = -1;
     int32_t endIndex = -1;
@@ -214,7 +211,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
 
-        auto prevLineOffset = axis_ == Axis::VERTICAL ? OffsetF(0.0, prevLineHeight) : OffsetF(prevLineHeight, 0.0);
+        auto prevLineOffset = OffsetF(0.0f, prevLineHeight, axis_);
         if (line->second.empty()) {
             TAG_LOGW(AceLogTag::ACE_GRID, "line %{public}d should not be empty, please check.", line->first);
             break;
@@ -251,20 +248,15 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             startIndex = startIndex == -1 ? itemIdex : std::min(startIndex, itemIdex);
             endIndex = std::max(itemIdex, endIndex);
             auto frSize = itemsCrossSize_.at(iter->first);
-            SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
+            SizeF blockSize = SizeF(frSize, lineHeight, axis_);
             auto translate = OffsetF(0.0f, 0.0f);
-            translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
+            auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
+            translate = Alignment::GetAlignPosition(blockSize, childSize, align);
 
             if (isRtl) {
-                offset.SetX(size.CrossSize(axis_) - offset.GetX() -
-                            wrapper->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_));
+                offset.SetX(size.Width() - offset.GetX() - childSize.Width());
             }
-
-            if (isReverse) {
-                offset.SetX(size.MainSize(axis_) - offset.GetX() -
-                            wrapper->GetGeometryNode()->GetMarginFrameSize().MainSize(axis_));
-            }
-
+            offset += OffsetF(padding.left.value_or(0.0f), 0.0f);
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
             if (gridLayoutInfo_.hasMultiLineItem_ || expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
                 wrapper->Layout();
@@ -452,7 +444,7 @@ void GridScrollLayoutAlgorithm::InitialItemsCrossSize(
     mainGap_ = axis_ == Axis::HORIZONTAL ? columnsGap : rowsGap;
     crossGap_ = axis_ == Axis::VERTICAL ? columnsGap : rowsGap;
     auto padding = layoutProperty->CreatePaddingAndBorder();
-    crossPaddingOffset_ = axis_ == Axis::HORIZONTAL ? padding.top.value_or(0) : padding.left.value_or(0);
+    crossPaddingOffset_ = axis_ == Axis::HORIZONTAL ? padding.top.value_or(0) : 0.0f;
 
     auto crossSize = frameSize.CrossSize(axis_);
     std::vector<double> crossLens;

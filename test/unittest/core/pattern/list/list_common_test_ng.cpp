@@ -28,6 +28,12 @@ class ListCommonTestNg : public ListTestNg {
 public:
     void MouseSelect(Offset start, Offset end);
     AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex);
+    void CreateForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
+    void CreateLazyForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
+    AssertionResult VerifyForEachItemsOrder(std::list<std::string> expectKeys);
+    AssertionResult VerifyLazyForEachItemsOrder(std::list<std::string> expectKeys);
+    RefPtr<ListItemDragManager> GetForEachItemDragManager(int32_t itemIndex);
+    RefPtr<ListItemDragManager> GetLazyForEachItemDragManager(int32_t itemIndex);
 };
 
 void ListCommonTestNg::MouseSelect(Offset start, Offset end)
@@ -36,10 +42,12 @@ void ListCommonTestNg::MouseSelect(Offset start, Offset end)
     info.SetInputEventType(InputEventType::MOUSE_BUTTON);
     info.SetLocalLocation(start);
     info.SetGlobalLocation(start);
+    info.SetRawGlobalLocation(start);
     pattern_->HandleDragStart(info);
     if (start != end) {
         info.SetLocalLocation(end);
         info.SetGlobalLocation(end);
+        info.SetRawGlobalLocation(end);
         pattern_->HandleDragUpdate(info);
     }
     pattern_->HandleDragEnd(info);
@@ -56,6 +64,115 @@ AssertionResult ListCommonTestNg::IsEqualNextFocusNode(FocusStep step, int32_t c
     }
     int32_t nextIndex = findFocusNodeIndex(nextFocusNode);
     return IsEqual(nextIndex, expectNextIndex);
+}
+
+void ListCommonTestNg::CreateForEachList(
+    int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove)
+{
+    Create([itemNumber, lanes, &onMove](ListModelNG model) {
+        model.SetLanes(lanes);
+        auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
+        ForEachModelNG forEachModelNG;
+        forEachModelNG.Create();
+        auto forEachNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        forEachNode->SetParent(weakList); // for InitAllChildrenDragManager
+        std::list<std::string> newIds;
+        for (int32_t index = 0; index < itemNumber; index++) {
+            newIds.emplace_back(std::to_string(index));
+        }
+        forEachModelNG.SetNewIds(std::move(newIds));
+        forEachModelNG.OnMove(std::move(onMove));
+        for (int32_t index = 0; index < itemNumber; index++) {
+            // key is 0,1,2,3...
+            forEachModelNG.CreateNewChildStart(std::to_string(index));
+            ListItemModelNG itemModel;
+            itemModel.Create();
+            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+            ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
+            ViewStackProcessor::GetInstance()->Pop();
+            forEachModelNG.CreateNewChildFinish(std::to_string(index));
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    });
+}
+
+void ListCommonTestNg::CreateLazyForEachList(
+    int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove)
+{
+    Create([itemNumber, lanes, &onMove](ListModelNG model) {
+        model.SetLanes(lanes);
+        auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
+        const RefPtr<LazyForEachActuator> lazyForEachActuator =
+            AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+        LazyForEachModelNG lazyForEachModelNG;
+        lazyForEachModelNG.Create(lazyForEachActuator);
+        auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        node->SetParent(weakList); // for InitAllChildrenDragManager
+        lazyForEachModelNG.OnMove(std::move(onMove));
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(node);
+        for (int32_t index = 0; index < itemNumber; index++) {
+            ListItemModelNG itemModel;
+            itemModel.Create();
+            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+            ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
+            auto listItemNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+            lazyForEachNode->builder_->cachedItems_.try_emplace(
+                index, LazyForEachChild(std::to_string(index), listItemNode));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    });
+}
+
+AssertionResult ListCommonTestNg::VerifyForEachItemsOrder(std::list<std::string> expectKeys)
+{
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto& children = forEachNode->ModifyChildren();
+    std::string childrenKeysStr;
+    std::string expectKeysStr;
+    auto childIter = children.begin();
+    for (auto keyIter = expectKeys.begin(); keyIter != expectKeys.end(); keyIter++) {
+        expectKeysStr += *keyIter + ", ";
+        auto& child = *childIter;
+        auto syntaxItem = AceType::DynamicCast<SyntaxItem>(child);
+        childrenKeysStr += syntaxItem->GetKey() + ", ";
+        childIter++;
+    }
+    return IsEqual(childrenKeysStr, expectKeysStr);
+}
+
+AssertionResult ListCommonTestNg::VerifyLazyForEachItemsOrder(std::list<std::string> expectKeys)
+{
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto cachedItems = lazyForEachNode->builder_->cachedItems_;
+    std::string childrenKeysStr;
+    std::string expectKeysStr;
+    auto childIter = cachedItems.begin();
+    for (auto keyIter = expectKeys.begin(); keyIter != expectKeys.end(); keyIter++) {
+        expectKeysStr += *keyIter + ", ";
+        childrenKeysStr += childIter->second.first + ", ";
+        childIter++;
+    }
+    return IsEqual(childrenKeysStr, expectKeysStr);
+}
+
+RefPtr<ListItemDragManager> ListCommonTestNg::GetForEachItemDragManager(int32_t itemIndex)
+{
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(itemIndex));
+    auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    return listItemPattern->dragManager_;
+}
+
+RefPtr<ListItemDragManager> ListCommonTestNg::GetLazyForEachItemDragManager(int32_t itemIndex)
+{
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto listItem = AceType::DynamicCast<FrameNode>(lazyForEachNode->GetChildAtIndex(itemIndex));
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    return listItemPattern->dragManager_;
 }
 
 /**
@@ -1303,5 +1420,543 @@ HWTEST_F(ListCommonTestNg, ListPattern_Distributed001, TestSize.Level1)
      */
     pattern_->OnRestoreInfo(ret);
     EXPECT_EQ(pattern_->jumpIndex_, 1);
+}
+
+/**
+ * @tc.name: ForEachDrag001
+ * @tc.desc: Drag small delta to no change order
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag001, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 1, onMoveEvent);
+
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+
+    /**
+     * @tc.steps: step2. Drag dwon, delta <= ITEM_HEIGHT/2
+     * @tc.expected: No change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(50.0);
+    info.SetGlobalPoint(Point(0.f, 50.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyForEachItemsOrder({"0", "1", "2"}));
+
+    /**
+     * @tc.steps: step3. Drag end
+     * @tc.expected: No trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+
+    /**
+     * @tc.steps: step4. Drag item(index:1)
+     */
+    dragManager = GetForEachItemDragManager(1);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 1);
+
+    /**
+     * @tc.steps: step5. Drag up, delta <= ITEM_HEIGHT/2
+     * @tc.expected: No change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-50.0);
+    info.SetGlobalPoint(Point(0.f, 50.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyForEachItemsOrder({"0", "1", "2"}));
+
+    /**
+     * @tc.steps: step6. Drag end
+     * @tc.expected: No trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag002
+ * @tc.desc: Drag to reachEnd, will scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag002, TestSize.Level1)
+{
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    CreateForEachList(10, 1, onMoveEvent);
+
+    /**
+     * @tc.steps: step1. Drag to the end of view
+     * @tc.expected: Will scroll with animation
+     */
+    auto dragManager = GetForEachItemDragManager(7);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0.f, 751.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsRunning());
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_FALSE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsStopped());
+
+    /**
+     * @tc.steps: step2. Drag to the start of view
+     * @tc.expected: Will scroll with animation
+     */
+    pattern_->ScrollTo(200.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 200.f);
+    dragManager = GetForEachItemDragManager(2);
+    dragManager->HandleOnItemDragStart(info);
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-51.0);
+    info.SetGlobalPoint(Point(0.f, 49.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsRunning());
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_FALSE(dragManager->scrolling_);
+    EXPECT_TRUE(pattern_->animator_->IsStopped());
+}
+
+/**
+ * @tc.name: ForEachDrag003
+ * @tc.desc: Drag big delta to change order
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag003, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(3, 1, onMoveEvent);
+
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_HEIGHT/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0.f, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyForEachItemsOrder({"1", "0", "2"}));
+
+    /**
+     * @tc.steps: step3. Drag down delta > ITEM_HEIGHT
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(151.0);
+    info.SetGlobalPoint(Point(0.f, 151.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyForEachItemsOrder({"1", "2", "0"}));
+
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 0);
+    EXPECT_EQ(actualTo, 2);
+
+    /**
+     * @tc.steps: step5. Drag item(index:2)
+     */
+    dragManager = GetForEachItemDragManager(2);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 2);
+
+    /**
+     * @tc.steps: step6. Drag up delta > ITEM_HEIGHT/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-51.0);
+    info.SetGlobalPoint(Point(0.f, 149.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyForEachItemsOrder({"1", "0", "2"}));
+
+    /**
+     * @tc.steps: step7. Drag up delta > ITEM_HEIGHT
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-151.0);
+    info.SetGlobalPoint(Point(0.f, 49.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyForEachItemsOrder({"0", "1", "2"}));
+
+    /**
+     * @tc.steps: step8. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: ForEachDrag004
+ * @tc.desc: Drag with 2 lanes list
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag004, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateForEachList(4, 2, onMoveEvent); // 2 lanes
+
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_HEIGHT/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0.f, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyForEachItemsOrder({"1", "2", "0"}));
+
+    /**
+     * @tc.steps: step3. Drag right-up delta > half size
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(121.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(121.f, 0.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyForEachItemsOrder({"1", "0", "2"}));
+
+    /**
+     * @tc.steps: step4. Drag left delta > itemWidth/2
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(0.f, 0.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyForEachItemsOrder({"0", "1", "2"}));
+
+    /**
+     * @tc.steps: step5. Drag end
+     * @tc.expected: No trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: ForEachDrag005
+ * @tc.desc: Drag with 2 lanes list, but items number is 3, test oblique drag direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag005, TestSize.Level1)
+{
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    CreateForEachList(3, 2, onMoveEvent); // 2 lanes but 3 items
+
+    /**
+     * @tc.steps: step1. Drag item(index:1)
+     */
+    auto dragManager = GetForEachItemDragManager(1);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 1);
+
+    /**
+     * @tc.steps: step2. Drag left-down delta > half size
+     * @tc.expected: Will change left order, than change down order
+     */
+    info.SetOffsetX(-121.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(119.f, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyForEachItemsOrder({"1", "0", "2"}));
+
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyForEachItemsOrder({"0", "2", "1"}));
+}
+
+/**
+ * @tc.name: ForEachDrag006
+ * @tc.desc: Do not set onMoveEvent, could not drag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag006, TestSize.Level1)
+{
+    CreateForEachList(1, 1, nullptr);
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
+    auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
+    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
+    EXPECT_EQ(gestureHub->GetDragEventActuator(), nullptr);
+}
+
+/**
+ * @tc.name: ForEachDrag007
+ * @tc.desc: Remove onMove event, can not drag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
+    ForEachModelNG forEachModelNG;
+    forEachModelNG.Create();
+    auto forEachElement = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    forEachElement->SetParent(weakList); // for InitAllChildrenDragManager
+    std::list<std::string> newIds;
+    for (int32_t index = 0; index < 3; index++) {
+        newIds.emplace_back(std::to_string(index));
+    }
+    forEachModelNG.SetNewIds(std::move(newIds));
+
+    /**
+     * @tc.steps: step1. Set onMoveEvent
+     * @tc.expected: dragEvent init
+     */
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    forEachModelNG.OnMove(std::move(onMoveEvent));
+    for (int32_t index = 0; index < 3; index++) {
+        // key is 0,1,2,3...
+        forEachModelNG.CreateNewChildStart(std::to_string(index));
+        ListItemModelNG itemModel;
+        itemModel.Create();
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
+        ViewStackProcessor::GetInstance()->Pop();
+        forEachModelNG.CreateNewChildFinish(std::to_string(index));
+    }
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(forEachElement);
+    forEachNode->CompareAndUpdateChildren();
+    forEachNode->MountToParent(listNode);
+    auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachElement->GetChildAtIndex(0));
+    auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
+    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set onMoveEvent to null
+     * @tc.expected: dragEvent uninit
+     */
+    forEachModelNG.OnMove(nullptr);
+    EXPECT_EQ(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
+}
+
+/**
+ * @tc.name: LazyForEachDrag001
+ * @tc.desc: Drag big delta to change order
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, LazyForEachDrag001, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateLazyForEachList(3, 1, onMoveEvent);
+
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto dragManager = GetLazyForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_HEIGHT/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0.f, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({"1", "0", "2"}));
+
+    /**
+     * @tc.steps: step3. Drag down delta > ITEM_HEIGHT
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(151.0);
+    info.SetGlobalPoint(Point(0.f, 151.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({"1", "2", "0"}));
+
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 0);
+    EXPECT_EQ(actualTo, 2);
+
+    /**
+     * @tc.steps: step5. Drag item(index:2)
+     */
+    dragManager = GetLazyForEachItemDragManager(2);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 2);
+
+    /**
+     * @tc.steps: step6. Drag up delta > ITEM_HEIGHT/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-51.0);
+    info.SetGlobalPoint(Point(0.f, 149.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({"1", "0", "2"}));
+
+    /**
+     * @tc.steps: step7. Drag up delta > ITEM_HEIGHT
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-151.0);
+    info.SetGlobalPoint(Point(0.f, 49.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({"0", "1", "2"}));
+
+    /**
+     * @tc.steps: step8. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, 2);
+    EXPECT_EQ(actualTo, 0);
+}
+
+/**
+ * @tc.name: LazyForEachDrag002
+ * @tc.desc: Drag with 2 lanes list
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
+{
+    int32_t actualFrom = -1;
+    int32_t actualTo = -1;
+    auto onMoveEvent = [&actualFrom, &actualTo](int32_t from, int32_t to) {
+        actualFrom = from;
+        actualTo = to;
+    };
+    CreateLazyForEachList(4, 2, onMoveEvent); // 2 lanes
+
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto dragManager = GetLazyForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_HEIGHT/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0.f, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({"1", "2", "0"}));
+
+    /**
+     * @tc.steps: step3. Drag right-up delta > half size
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(121.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(121.f, 0.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({"1", "0", "2"}));
+
+    /**
+     * @tc.steps: step4. Drag left delta > itemWidth/2
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(0.0);
+    info.SetGlobalPoint(Point(0.f, 0.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({"0", "1", "2"}));
+
+    /**
+     * @tc.steps: step5. Drag end
+     * @tc.expected: No trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualFrom, -1);
+    EXPECT_EQ(actualTo, -1);
 }
 } // namespace OHOS::Ace::NG

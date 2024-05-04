@@ -56,7 +56,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float DEFAULT_BIAS = 0.5f;
+
 // common function to bind menu
 void BindMenu(const RefPtr<FrameNode> &menuNode, int32_t targetId, const NG::OffsetF &offset)
 {
@@ -1311,6 +1311,20 @@ void ViewAbstract::SetGeometryTransition(FrameNode *frameNode, const std::string
     }
 }
 
+const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode, bool* followWithoutTransition)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        auto geometryTransition = layoutProperty->GetGeometryTransition();
+        if (geometryTransition) {
+            *followWithoutTransition = geometryTransition->GetFollowWithoutTransition();
+            return geometryTransition->GetId();
+        }
+    }
+    return "";
+}
+
 void ViewAbstract::SetOpacity(double opacity)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1499,7 +1513,6 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
-    popupInfo.focusable = param->GetFocusable();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
@@ -1580,6 +1593,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
     }
+    popupInfo.focusable = param->GetFocusable();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
     popupInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
     popupInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
@@ -1694,30 +1708,6 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
         return;
     }
     BindMenu(menuNode, targetNode->GetId(), offset);
-}
-
-void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isShowInSubWindow, bool isContextMenu)
-{
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "show menu enter");
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
-    if (isContextMenu || (expandDisplay && isShowInSubWindow)) {
-        SubwindowManager::GetInstance()->ShowMenuNG(nullptr, targetId, offset);
-        return;
-    }
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-
-    overlayManager->ShowMenu(targetId, offset, nullptr);
 }
 
 void ViewAbstract::SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption)
@@ -2433,6 +2423,7 @@ void ViewAbstract::SetPrivacySensitive(bool flag)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->SetPrivacySensitive(flag);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts &opts)
@@ -3007,10 +2998,42 @@ std::map<AlignDirection, AlignRule> ViewAbstract::GetAlignRules(FrameNode* frame
     return layoutProperty->GetFlexItemProperty()->GetAlignRules().value_or(alignRules);
 }
 
+void ViewAbstract::ResetAlignRules(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(layoutProperty->GetFlexItemProperty());
+    return layoutProperty->GetFlexItemProperty()->ResetAlignRules();
+}
+
 void ViewAbstract::SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, ChainStyle, chainInfo, frameNode);
+}
+
+ChainInfo ViewAbstract::GetChainStyle(FrameNode* frameNode)
+{
+    ChainInfo chainInfo;
+    CHECK_NULL_RETURN(frameNode, chainInfo);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty->GetFlexItemProperty(), chainInfo);
+    layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyle().value_or(chainInfo);
+    if (chainInfo.direction.has_value()) {
+        return chainInfo;
+    }
+    return layoutProperty->GetFlexItemProperty()->GetVerticalChainStyle().value_or(chainInfo);
+}
+
+void ViewAbstract::ResetChainStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ChainInfo nullChainInfo;
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty->GetFlexItemProperty());
+    layoutProperty->GetFlexItemProperty()->UpdateHorizontalChainStyle(nullChainInfo);
+    layoutProperty->GetFlexItemProperty()->UpdateVerticalChainStyle(nullChainInfo);
 }
 
 void ViewAbstract::SetGrid(
@@ -3066,6 +3089,15 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
 void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
+}
+
+void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateForegroundEffect(radius);
+    }
 }
 
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
@@ -4205,19 +4237,89 @@ NG::BorderWidthProperty ViewAbstract::GetOuterBorderWidth(FrameNode* frameNode)
 void ViewAbstract::SetBias(FrameNode* frameNode, const BiasPair& biasPair)
 {
     CHECK_NULL_VOID(frameNode);
-    const auto& layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Bias, biasPair, frameNode);
 }
 
 BiasPair ViewAbstract::GetBias(FrameNode* frameNode)
 {
-    BiasPair biasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+    BiasPair biasPair(-1.0f, -1.0f);
     CHECK_NULL_RETURN(frameNode, biasPair);
-    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, biasPair);
-    const auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
-    CHECK_NULL_RETURN(flexItemProperty, biasPair);
-    return flexItemProperty->GetBias().value_or(biasPair);
+    CHECK_NULL_RETURN(layoutProperty->GetFlexItemProperty(), biasPair);
+    return layoutProperty->GetFlexItemProperty()->GetBias().value_or(biasPair);
+}
+
+void ViewAbstract::ResetBias(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(layoutProperty->GetFlexItemProperty());
+    layoutProperty->GetFlexItemProperty()->ResetBias();
+}
+
+RenderFit ViewAbstract::GetRenderFit(FrameNode* frameNode)
+{
+    RenderFit defalutRenderFit = RenderFit::TOP_LEFT;
+    CHECK_NULL_RETURN(frameNode, defalutRenderFit);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defalutRenderFit);
+    return renderContext->GetRenderFit().value_or(defalutRenderFit);
+}
+
+BorderColorProperty ViewAbstract::GetOuterBorderColor(FrameNode* frameNode)
+{
+    Color defaultColor(0xff000000);
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    CHECK_NULL_RETURN(frameNode, borderColors);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, borderColors);
+    return target->GetOuterBorderColorValue(borderColors);
+}
+
+bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, false);
+    return target->GetRenderGroupValue(false);
+}
+
+void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
+    const std::vector<double> &ratioList)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback();
+    pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
+}
+
+Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
+{
+    Color defaultColor = Color::TRANSPARENT;
+    CHECK_NULL_RETURN(frameNode, defaultColor);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, defaultColor);
+    return target->GetFrontColorBlendValue(defaultColor);
+}
+
+void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->ClearUserOnAreaChange();
+    pipeline->RemoveOnAreaChangeNode(frameNode->GetId());
+}
+
+void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->CleanVisibleAreaUserCallback();
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }
 } // namespace OHOS::Ace::NG

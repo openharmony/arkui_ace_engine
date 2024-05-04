@@ -236,7 +236,9 @@ public:
     bool OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     bool OnOpenAppLink(const std::string& url,
                        std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback) override;
-
+    void OnShowAutofillPopup(
+        const float offsetX, const float offsetY, const std::vector<std::string>& menu_items) override;
+    void OnHideAutofillPopup() override;
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;
@@ -248,6 +250,9 @@ public:
     }
 
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset) override;
+    void OnRenderProcessNotResponding(
+        const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason) override;
+    void OnRenderProcessResponding() override;
 
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
