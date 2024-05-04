@@ -113,12 +113,12 @@ typedef enum {
     ARKUI_NODE_WATER_FLOW,
     /** Water flow item. */
     ARKUI_NODE_FLOW_ITEM,
+    /** relative container. */
+    ARKUI_NODE_RELATIVE_CONTAINER,
     /** Grid. */
     ARKUI_NODE_GRID,
     /** Grid item. */
     ARKUI_NODE_GRID_ITEM,
-    /** relative container. */
-    ARKUI_NODE_RELATIVE_CONTAINER,
 } ArkUI_NodeType;
 
 /**
