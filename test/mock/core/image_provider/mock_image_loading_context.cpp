@@ -79,6 +79,8 @@ RefPtr<CanvasImage> ImageLoadingContext::MoveCanvasImage()
     return MakeRefPtr<MockCanvasImage>();
 }
 
+void ImageLoadingContext::CallbackAfterMeasureIfNeed() {}
+
 void ImageLoadingContext::LoadImageData() {}
 
 bool ImageLoadingContext::MakeCanvasImageIfNeed(const SizeF& dstSize, bool incomingNeedResize,
