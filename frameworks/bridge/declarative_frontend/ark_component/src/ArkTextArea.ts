@@ -131,6 +131,23 @@ class TextAreaWordBreakModifier extends ModifierWithKey<WordBreak> {
   }
 }
 
+class TextAreaLineBreakStrategyModifier extends ModifierWithKey<LineBreakStrategy> {
+  constructor(value: LineBreakStrategy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaLineBreakStrategy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetLineBreakStrategy(node);
+    } else {
+      getUINativeModule().textArea.setLineBreakStrategy(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   constructor(value: CopyOptions) {
     super(value);
@@ -874,6 +891,11 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   wordBreak(value: WordBreak): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
+    return this;
+  }
+  lineBreakStrategy(value: LineBreakStrategy): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaLineBreakStrategyModifier.identity,
+      TextAreaLineBreakStrategyModifier, value);
     return this;
   }
   minFontSize(value: number | string | Resource): TextAreaAttribute {

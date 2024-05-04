@@ -1543,6 +1543,11 @@ void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace:
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, value, frameNode);
 }
 
+void TextFieldModelNG::SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineBreakStrategy, value, frameNode);
+}
+
 void TextFieldModelNG::SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue, frameNode);

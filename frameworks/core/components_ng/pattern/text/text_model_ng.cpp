@@ -503,6 +503,11 @@ void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value, frameNode);
 }
 
+void TextModelNG::SetLineBreakStrategy(FrameNode* frameNode, Ace::LineBreakStrategy value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value, frameNode);
+}
+
 void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value, frameNode);
@@ -901,6 +906,13 @@ FONT_FEATURES_LIST TextModelNG::GetFontFeature(FrameNode* frameNode)
 {
     FONT_FEATURES_LIST value;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontFeature, value, frameNode, value);
+    return value;
+}
+
+LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
+{
+    LineBreakStrategy value = LineBreakStrategy::GREEDY;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, LineBreakStrategy, value, frameNode, value);
     return value;
 }
 } // namespace OHOS::Ace::NG

@@ -216,6 +216,7 @@ public:
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
+    static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void ResetTextInputPadding(FrameNode* frameNode);
     static void SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue);
     static void SetBlurOnSubmit(FrameNode* frameNode, bool blurOnSubmit);

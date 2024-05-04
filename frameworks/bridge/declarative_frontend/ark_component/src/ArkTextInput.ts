@@ -176,6 +176,23 @@ class TextInputWordBreakModifier extends ModifierWithKey<WordBreak> {
   }
 }
 
+class TextInputLineBreakStrategyModifier extends ModifierWithKey<LineBreakStrategy> {
+  constructor(value: LineBreakStrategy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputLineBreakStrategy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetLineBreakStrategy(node);
+    } else {
+      getUINativeModule().textInput.setLineBreakStrategy(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputMinFontSizeModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -1185,6 +1202,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   wordBreak(value: WordBreak): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputWordBreakModifier.identity, TextInputWordBreakModifier, value);
+    return this;
+  }
+  lineBreakStrategy(value: LineBreakStrategy): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputLineBreakStrategyModifier.identity,
+      TextInputLineBreakStrategyModifier, value);
     return this;
   }
   minFontSize(value: number | string | Resource): TextInputAttribute {
