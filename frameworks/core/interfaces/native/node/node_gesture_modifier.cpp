@@ -96,10 +96,10 @@ ArkUIGesture* createRotationGesture(ArkUI_Int32 fingers, ArkUI_Float64 angle)
 ArkUIGesture* createSwipeGesture(ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed)
 {
     SwipeDirection swipeDirection{SwipeDirection::NONE};
-    if (directions & ArkUI_GESTURE_DIRECTION_HORIZONTAL) {
+    if (static_cast<uint32_t>(directions) & ArkUI_GESTURE_DIRECTION_HORIZONTAL) {
         swipeDirection.type = SwipeDirection::HORIZONTAL;
     }
-    if (directions & ArkUI_GESTURE_DIRECTION_VERTICAL) {
+    if (static_cast<uint32_t>(directions) & ArkUI_GESTURE_DIRECTION_VERTICAL) {
         swipeDirection.type += SwipeDirection::VERTICAL;
     }
     auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed);

@@ -2176,10 +2176,6 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("JsPixelRound", info, checkList)) {
-        return;
-    }
     uint8_t value = 0;
     JSRef<JSVal> arg = info[0];
     if (!arg->IsObject()) {
@@ -4071,7 +4067,9 @@ void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<Bord
         borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, sliceDimension);
         return;
     }
-
+    if (!args->IsObject()) {
+        return;
+    }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
     if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
         LocalizedCalcDimension localizedCalcDimension;
@@ -9475,7 +9473,11 @@ bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiu
 
 void JSViewAbstract::SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::DragPreviewOption& option)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(arg);
     auto vm = info.GetVm();
     auto globalObj = JSNApi::GetGlobalObject(vm);
     auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyImageModifierToNode"));
