@@ -523,10 +523,10 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     };
     renderDelegate_->SetErrorEventHandler(std::move(onErrorEventHandler));
 
-    auto&& onSurfaceChangeHandler = [weak = WeakClaim(this)](float width, float height) {
+    auto&& onSurfaceChangeHandler = [weak = WeakClaim(this)](float width, float height, float borderWidth) {
         auto formManagerDelegate = weak.Upgrade();
         CHECK_NULL_VOID(formManagerDelegate);
-        formManagerDelegate->OnFormSurfaceChange(width, height);
+        formManagerDelegate->OnFormSurfaceChange(width, height, borderWidth);
     };
     renderDelegate_->SetSurfaceChangeEventHandler(std::move(onSurfaceChangeHandler));
 
@@ -654,18 +654,18 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
     formRendererDispatcher_->SetAllowUpdate(allowUpdate);
 }
 
-void FormManagerDelegate::NotifySurfaceChange(float width, float height)
+void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
 {
     if (formRendererDispatcher_ == nullptr) {
         return;
     }
-    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height);
+    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
 }
 
-void FormManagerDelegate::OnFormSurfaceChange(float width, float height)
+void FormManagerDelegate::OnFormSurfaceChange(float width, float height, float borderWidth)
 {
     if (onFormSurfaceChangeCallback_) {
-        onFormSurfaceChangeCallback_(width, height);
+        onFormSurfaceChangeCallback_(width, height, borderWidth);
     }
 }
 

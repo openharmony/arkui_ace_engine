@@ -92,7 +92,8 @@ int32_t FormRendererDispatcherStub::HandleDispatchSurfaceChangeEvent(MessageParc
 {
     float width = data.ReadFloat();
     float height = data.ReadFloat();
-    DispatchSurfaceChangeEvent(width, height);
+    float borderWdidth = data.ReadFloat();
+    DispatchSurfaceChangeEvent(width, height, borderWdidth);
     reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }
