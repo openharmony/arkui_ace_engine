@@ -53,6 +53,7 @@ struct OptionParam {
     std::string icon;
     bool enabled = true;
     std::function<void()> action;
+    std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
 
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)

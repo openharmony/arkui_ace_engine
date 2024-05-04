@@ -3122,6 +3122,11 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, si
         if (JSViewAbstract::ParseJsMedia(indexObject->GetProperty("icon"), iconPath)) {
             params[i].icon = iconPath;
         }
+        if (indexObject->GetProperty("symbolIcon")->IsObject()) {
+            std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
+            JSViewAbstract::SetSymbolOptionApply(info, symbolApply, indexObject->GetProperty("symbolIcon"));
+            params[i].symbol = symbolApply;
+        }
         auto enabled = indexObject->GetProperty("enabled");
         if (enabled->IsBoolean()) {
             params[i].enabled = enabled->ToBoolean();
@@ -9745,5 +9750,35 @@ void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)
         focusPriority = info[1]->ToNumber<int32_t>();
     }
     ViewAbstractModel::GetInstance()->SetFocusScopePriority(focusScopeId, focusPriority);
+}
+
+void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSObject> modifierObj)
+{
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (globalFuncRef->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+        if (modifierObj->IsUndefined()) {
+            symbolApply = nullptr;
+        } else {
+            auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                               modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto node = frameNode.Upgrade();
+                CHECK_NULL_VOID(node);
+                JSRef<JSVal> params[2];
+                params[0] = modifierParam;
+                params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+                PipelineContext::SetCallBackNode(node);
+                func->ExecuteJS(2, params);
+            };
+            symbolApply = onApply;
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework

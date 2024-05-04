@@ -222,6 +222,9 @@ private:
     void HandleFocusEvent();
     void HandleBlurEvent();
 
+    void CreateSymbolNode();
+    void CreateImageNode();
+
     std::list<TouchRegion> hoverRegions_;
 
     RefPtr<InputEvent> wrapperMouseEvent_;

@@ -110,17 +110,24 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     if (buildFunc.has_value()) {
         pattern->SetSubBuilder(buildFunc.value_or(nullptr));
     }
-
+    
     AddExpandableAreaView(menuItem);
     AddClickableAreaView(menuItem, border);
+    UpdateMenuProperty(menuItem, menuItemProps);
+}
 
+void MenuItemModelNG::UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps)
+{
     auto menuProperty = menuItem->GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(menuProperty);
+
     menuProperty->UpdateStartIcon(menuItemProps.startIcon.value_or(ImageSourceInfo("")));
     menuProperty->UpdateContent(menuItemProps.content);
     menuProperty->UpdateEndIcon(menuItemProps.endIcon.value_or(ImageSourceInfo("")));
     menuProperty->UpdateLabel(menuItemProps.labelInfo.value_or(""));
     menuProperty->UpdateHasFurtherExpand(true);
+    menuProperty->SetStartSymbol(menuItemProps.startApply);
+    menuProperty->SetEndSymbol(menuItemProps.endApply);
 }
 
 void MenuItemModelNG::AddExpandableAreaView(RefPtr<FrameNode> menuItem)
@@ -169,6 +176,16 @@ void MenuItemModelNG::SetSelectIcon(bool isShow)
 void MenuItemModelNG::SetSelectIconSrc(const std::string& src)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, src);
+}
+
+void MenuItemModelNG::SetSelectIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply)
+{
+    if (symbolApply != nullptr) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+        menuProperty->SetSelectSymbol(symbolApply);
+    }
 }
 
 void MenuItemModelNG::SetOnChange(std::function<void(bool)>&& onChange)
