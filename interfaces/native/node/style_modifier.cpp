@@ -21,6 +21,7 @@
 #include <regex>
 #include <string>
 #include "securec.h"
+#include "drawable_descriptor.h"
 #include "native_node.h"
 #include "native_type.h"
 #include "node_extened.h"
@@ -532,6 +533,15 @@ bool CheckAttributeString(const ArkUI_AttributeItem* item)
     return true;
 }
 
+bool CheckAttributeObject(const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, false);
+    if (!item->object) {
+        return false;
+    }
+    return true;
+}
+
 bool CheckRangFloat(float start, float end, float value)
 {
     return value >= start && value <= end;
@@ -731,7 +741,7 @@ const ArkUI_AttributeItem* GetBackgroundColor(ArkUI_NodeHandle node)
 
 int32_t SetBackgroundImage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!item->string) {
+    if ((!item->string && !item->object) || (item->string && item->object)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (item->size == NUM_1 &&
@@ -743,8 +753,17 @@ int32_t SetBackgroundImage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     std::string bundle;
     std::string module;
     int repeat = item->size == NUM_1 ? item->value[NUM_0].i32 : ARKUI_IMAGE_REPEAT_NONE;
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImage(
-        node->uiNodeHandle, item->string, bundle.c_str(), module.c_str(), repeat);
+    if (item->string) {
+        fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImage(
+            node->uiNodeHandle, item->string, bundle.c_str(), module.c_str(), repeat);
+    } else {
+        auto drawableDescriptor = reinterpret_cast<ArkUI_DrawableDescriptor*>(item->object);
+        if (!drawableDescriptor->drawableDescriptor) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImagePixelMap(
+            node->uiNodeHandle, drawableDescriptor->drawableDescriptor.get(), repeat);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -8511,16 +8530,6 @@ int32_t SetSpanTextBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_AttributeI
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t SetImageSpanSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    auto* fullImpl = GetFullImpl();
-    if (!CheckAttributeString(item)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    fullImpl->getNodeModifiers()->getImageModifier()->setSrc(node->uiNodeHandle, item->string);
-    return ERROR_CODE_NO_ERROR;
-}
-
 int32_t SetVerticalAlign(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -8536,14 +8545,66 @@ int32_t SetVerticalAlign(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t SetImageSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+int32_t SetPixelMapSrc(ArkUI_NodeHandle node, const std::shared_ptr<Napi::DrawableDescriptor>& descriptor)
 {
     auto* fullImpl = GetFullImpl();
-    if (!CheckAttributeString(item)) {
+    fullImpl->getNodeModifiers()->getImageModifier()->setPixelMap(node->uiNodeHandle, descriptor.get());
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetPixelMapArraySrc(ArkUI_NodeHandle node, const std::shared_ptr<Napi::AnimatedDrawableDescriptor>& descriptor)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->setPixelMapArray(node->uiNodeHandle, descriptor.get());
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetResourceSrc(ArkUI_NodeHandle node, const std::shared_ptr<ArkUI_Resource>& resource)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageModifier()->setResourceSrc(node->uiNodeHandle, resource.get());
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetImageSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    bool isString = CheckAttributeString(item);
+    bool isObject = CheckAttributeObject(item);
+    if ((isString && isObject) || (!isString && !isObject)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    fullImpl->getNodeModifiers()->getImageModifier()->setSrc(node->uiNodeHandle, item->string);
-    return ERROR_CODE_NO_ERROR;
+    if (isString) {
+        auto* fullImpl = GetFullImpl();
+        fullImpl->getNodeModifiers()->getImageModifier()->setSrc(node->uiNodeHandle, item->string);
+        return ERROR_CODE_NO_ERROR;
+    }
+
+    auto drawableDescriptor = reinterpret_cast<ArkUI_DrawableDescriptor*>(item->object);
+    if (!drawableDescriptor) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!drawableDescriptor->drawableDescriptor && !drawableDescriptor->resource &&
+        !drawableDescriptor->animatedDrawableDescriptor) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (drawableDescriptor->drawableDescriptor) {
+        return SetPixelMapSrc(node, drawableDescriptor->drawableDescriptor);
+    } else if (drawableDescriptor->animatedDrawableDescriptor) {
+        return SetPixelMapArraySrc(node, drawableDescriptor->animatedDrawableDescriptor);
+    } else {
+        return SetResourceSrc(node, drawableDescriptor->resource);
+    }
+}
+
+int32_t SetImageSpanSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (CheckAttributeString(item)) {
+        fullImpl->getNodeModifiers()->getImageModifier()->setSrc(node->uiNodeHandle, item->string);
+        return ERROR_CODE_NO_ERROR;
+    } else {
+        return SetImageSrc(node, item);
+    }
 }
 
 int32_t SetObjectFit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)

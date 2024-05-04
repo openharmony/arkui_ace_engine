@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "interfaces/native/node/resource.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -389,6 +390,76 @@ void ImageModelNG::InitImage(FrameNode *frameNode, std::string& src)
     RefPtr<OHOS::Ace::PixelMap> pixMapPtr;
     auto srcInfo = CreateSourceInfo(src, pixMapPtr, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber(false);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
+
+
+void ImageModelNG::SetPixelMap(FrameNode* frameNode, void* drawableDescriptor)
+{
+#ifndef ACE_UNITTEST
+    CHECK_NULL_VOID(drawableDescriptor);
+    RefPtr<PixelMap> pixelMapPtr = PixelMap::GetFromDrawable(drawableDescriptor);
+    auto srcInfo = CreateSourceInfo("", pixelMapPtr, "", "");
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+#endif
+}
+
+void ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor)
+{
+#ifndef ACE_UNITTEST
+    CHECK_NULL_VOID(animatedDrawableDescriptor);
+    std::vector<RefPtr<PixelMap>> pixelMaps;
+    int32_t duration = -1;
+    int32_t iterations = 1;
+    if (!PixelMap::GetPxielMapListFromAnimatedDrawable(animatedDrawableDescriptor, pixelMaps, duration, iterations)) {
+        return;
+    }
+    std::vector<ImageProperties> images;
+    for (int32_t i = 0; i < static_cast<int32_t>(pixelMaps.size()); i++) {
+        ImageProperties image;
+        image.pixelMap = pixelMaps[i];
+        images.push_back(image);
+    }
+
+    if (frameNode->GetChildren().empty()) {
+        auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(imageNode);
+        auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        frameNode->AddChild(imageNode);
+    }
+
+    auto pattern = AceType::DynamicCast<ImagePattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetIsAnimation()) {
+        auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
+        CHECK_NULL_VOID(castImageLayoutProperty);
+        castImageLayoutProperty->Reset();
+        auto castImageRenderProperty = frameNode->GetPaintPropertyPtr<ImageRenderProperty>();
+        CHECK_NULL_VOID(castImageRenderProperty);
+        castImageRenderProperty->Reset();
+        pattern->ResetImageAndAlt();
+        pattern->ResetImageProperties();
+    }
+
+    pattern->StopAnimation();
+    pattern->SetIsAnimation(true);
+    pattern->SetImages(std::move(images));
+    pattern->SetDuration(duration);
+    pattern->SetIteration(iterations);
+    pattern->StartAnimation();
+#endif
+}
+
+void ImageModelNG::SetResource(FrameNode* frameNode, void* resource)
+{
+    auto res = reinterpret_cast<ArkUI_Resource*>(resource);
+    CHECK_NULL_VOID(res);
+    RefPtr<PixelMap> pixMapPtr;
+    auto srcInfo = CreateSourceInfo(res->src, pixMapPtr, res->bundleName, res->moduleName);
+    srcInfo.SetIsUriPureNumber(res->resId == -1);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
 

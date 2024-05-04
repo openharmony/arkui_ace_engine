@@ -135,7 +135,7 @@ template("ace_core_interfaces_native_node") {
         config.plugin_components_support) {
       sources += [ "node/plugin_modifier.cpp" ]
     }
-    external_deps = []
+    external_deps = [ "graphic_2d:librender_service_client" ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }

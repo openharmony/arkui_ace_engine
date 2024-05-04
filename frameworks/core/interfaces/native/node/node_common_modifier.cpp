@@ -21,6 +21,7 @@
 #include <vector>
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
+#include "base/image/pixel_map.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
@@ -1939,6 +1940,22 @@ void SetBackgroundImage(
     } else {
         ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
     }
+}
+
+void SetBackgroundImagePixelMap(ArkUINodeHandle node, void* drawableDescriptor, ArkUI_Int32 repeatIndex)
+{
+#ifndef ACE_UNITTEST
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<OHOS::Ace::PixelMap> pixelmap = PixelMap::GetFromDrawable(drawableDescriptor);
+    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { pixelmap });
+    auto repeat = static_cast<ImageRepeat>(repeatIndex);
+    if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, repeat);
+    } else {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
+    }
+#endif
 }
 
 void ResetBackgroundImage(ArkUINodeHandle node)
@@ -5301,7 +5318,7 @@ const ArkUICommonModifier* GetCommonModifier()
         SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize, GetRenderGroup,
         SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
         SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
-        ResetVisibleAreaChange, ResetAreaChange };
+        ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap };
 
     return &modifier;
 }

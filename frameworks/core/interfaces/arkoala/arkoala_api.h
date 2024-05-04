@@ -1382,6 +1382,7 @@ struct ArkUICommonModifier {
     ArkUIBlurStyleOptionType (*getForegroundBlurStyle)(ArkUINodeHandle node);
     void (*resetVisibleAreaChange)(ArkUINodeHandle node);
     void (*resetAreaChange)(ArkUINodeHandle node);
+    void (*setBackgroundImagePixelMap)(ArkUINodeHandle node, void* drawableDescriptor, ArkUI_Int32 repeatIndex);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1662,6 +1663,9 @@ struct ArkUIImageModifier {
     void (*getImageResizable)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 size);
     ArkUI_Int32 (*getFitOriginalSize)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getFillColor)(ArkUINodeHandle node);
+    void (*setPixelMap)(ArkUINodeHandle node, void* drawableDescriptor);
+    void (*setPixelMapArray)(ArkUINodeHandle node, void* animatedDrawableDescriptor);
+    void (*setResourceSrc)(ArkUINodeHandle node, void* resource);
 };
 
 struct ArkUIColumnModifier {

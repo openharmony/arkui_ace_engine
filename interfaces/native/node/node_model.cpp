@@ -588,6 +588,23 @@ int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(
     }
     return ERROR_CODE_NO_ERROR;
 }
+
+void* GetParseJsMedia()
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return nullptr;
+    }
+    void (*parseJsMedia)(void* value, void* resource) = nullptr;
+    parseJsMedia = reinterpret_cast<void (*)(void*, void*)>(
+        FindFunction(module, "OHOS_ACE_ParseJsMedia"));
+    if (!parseJsMedia) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_ParseJsMedia");
+        return nullptr;
+    }
+    return reinterpret_cast<void*>(parseJsMedia);
+}
 } // namespace OHOS::Ace::NodeModel
 
 #ifdef __cplusplus
