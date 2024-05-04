@@ -174,8 +174,8 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
             auto nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
             // let 'node' take the reference, so decrease ref of C node
             node = AceType::Claim(reinterpret_cast<FrameNode*>(nodePtr));
-            node->DecRefCount();
-            if (node) {
+            if (node && node->RefCount() > 1) {
+                node->DecRefCount();
                 node->SetIsArkTsFrameNode(true);
                 AddAttachFuncCallback(vm, node);
             }

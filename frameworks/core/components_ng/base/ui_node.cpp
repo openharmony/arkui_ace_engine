@@ -1105,7 +1105,7 @@ int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node)
         if (childIndex >= 0) {
             return index + childIndex;
         }
-        index += static_cast<uint32_t>(child->FrameCount());
+        index += child->FrameCount();
     }
     return -1;
 }
