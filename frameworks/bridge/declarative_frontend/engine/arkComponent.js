@@ -14,6 +14,28 @@
  */
 
 /// <reference path='./import.ts' />
+let LogTag;
+(function (LogTag) {
+  LogTag[LogTag['STATE_MGMT'] = 0] = 'STATE_MGMT';
+  LogTag[LogTag['ARK_COMPONENT'] = 1] = 'ARK_COMPONENT';
+})(LogTag || (LogTag = {}));
+class ArkLogConsole {
+  static log(...args) {
+      aceConsole.log(LogTag.ARK_COMPONENT,...args);
+  }
+  static debug(...args) {
+      aceConsole.debug(LogTag.ARK_COMPONENT,...args);
+  }
+  static info(...args) {
+      aceConsole.info(LogTag.ARK_COMPONENT,...args);
+  }
+  static warn(...args) {
+      aceConsole.warn(LogTag.ARK_COMPONENT,...args);
+  }
+  static error(...args) {
+      aceConsole.error(LogTag.ARK_COMPONENT,...args);
+  }
+}
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function getUINativeModule() {
   if (arkUINativeModule) {

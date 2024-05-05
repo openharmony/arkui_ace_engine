@@ -357,8 +357,6 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             shared_ptr<JsValue> global = runtime_->GetGlobal();
 
             PreloadConsole(runtime_, global);
-
-            // stateMgmt log method
             PreloadAceConsole(runtime_, global);
             PreloadAceTrace(runtime_, global);
 
