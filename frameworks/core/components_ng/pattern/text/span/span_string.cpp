@@ -292,7 +292,6 @@ void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type)
         specialList.insert(iter, span);
         spansMap_[type] = specialList;
     }
-    text_.insert(span->GetStartIndex(), " ");
 }
 
 RefPtr<NG::ImageSpanItem> SpanString::MakeImageSpanItem(const RefPtr<ImageSpan>& imageSpan)
