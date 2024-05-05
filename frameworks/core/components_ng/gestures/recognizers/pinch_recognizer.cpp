@@ -117,6 +117,9 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (event.isRotationEvent) {
         return;
     }
+    touchPoints_[event.id] = TouchEvent();
+    UpdateTouchPointWithAxisEvent(event);
+    lastAxisEvent_ = event;
     if (IsRefereeFinished()) {
         return;
     }
@@ -169,6 +172,7 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (isPinchEnd_ || event.isRotationEvent) {
         return;
     }
+    lastAxisEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -234,10 +238,7 @@ void PinchRecognizer::OnFlushTouchEventsEnd()
 
 void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
-    if (event.isRotationEvent) {
-        return;
-    }
-    if (isPinchEnd_) {
+    if (event.isRotationEvent || isPinchEnd_) {
         return;
     }
     if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed()) {
@@ -252,12 +253,10 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
             return;
         }
     }
-    touchPoints_[event.id].x = event.x;
-    touchPoints_[event.id].y = event.y;
-    touchPoints_[event.id].sourceType = event.sourceType;
-    touchPoints_[event.id].sourceTool = event.sourceTool;
+    UpdateTouchPointWithAxisEvent(event);
     lastTouchEvent_ = touchPoints_[event.id];
     time_ = event.time;
+    lastAxisEvent_ = event;
     if (refereeState_ == RefereeState::DETECTING || refereeState_ == RefereeState::SUCCEED) {
         if (event.pinchAxisScale != 0.0) {
             scale_ = event.pinchAxisScale;
@@ -385,7 +384,13 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
-        info.SetSourceTool(lastTouchEvent_.sourceTool);
+        if (inputEventType_ == InputEventType::AXIS) {
+            info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
+            info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+            info.SetSourceTool(lastAxisEvent_.sourceTool);
+        } else {
+            info.SetSourceTool(lastTouchEvent_.sourceTool);
+        }
         info.SetPointerEvent(lastPointEvent_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;

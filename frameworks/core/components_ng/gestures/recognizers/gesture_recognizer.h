@@ -353,6 +353,7 @@ protected:
 
     int64_t deviceId_ = 0;
     SourceType deviceType_ = SourceType::NONE;
+    InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     int32_t transId_ = 0;
 
     int32_t currentFingers_ = 0;

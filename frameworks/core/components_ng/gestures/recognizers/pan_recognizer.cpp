@@ -214,11 +214,6 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] = Offset(0.0, 0.0);
-    if (event.sourceType == SourceType::MOUSE) {
-        inputEventType_ = InputEventType::MOUSE_BUTTON;
-    } else {
-        inputEventType_ = InputEventType::TOUCH_SCREEN;
-    }
 
     auto fingerNum = static_cast<int32_t>(touchPoints_.size());
 
@@ -257,14 +252,9 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     }
 
     touchPoints_[event.id] = TouchEvent();
-    touchPoints_[event.id].id = event.id;
-    touchPoints_[event.id].x = event.x;
-    touchPoints_[event.id].y = event.y;
-    touchPoints_[event.id].sourceType = event.sourceType;
-    touchPoints_[event.id].sourceTool = event.sourceTool;
+    UpdateTouchPointWithAxisEvent(event);
     deviceId_ = event.deviceId;
     deviceType_ = event.sourceType;
-    inputEventType_ = InputEventType::AXIS;
     lastAxisEvent_ = event;
 
     panVelocity_.Reset(event.id);
@@ -338,6 +328,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     globalPoint_ = Point(event.x, event.y);
 
     UpdateAxisPointInVelocityTracker(event, true);
+    lastAxisEvent_ = event;
     time_ = event.time;
 
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
@@ -445,6 +436,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     averageDistance_ += delta_;
 
     UpdateAxisPointInVelocityTracker(event);
+    lastAxisEvent_ = event;
     time_ = event.time;
 
     if (refereeState_ == RefereeState::DETECTING) {
@@ -644,6 +636,8 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         info.SetMainVelocity(panVelocity_.GetMainAxisVelocity());
         if (inputEventType_ == InputEventType::AXIS) {
             info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
+            info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
+            info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
             info.SetSourceTool(lastAxisEvent_.sourceTool);
         } else {
             info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
