@@ -3802,10 +3802,10 @@ struct ArkUIRenderNodeModifier {
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*clearChildren)(ArkUINodeHandle node);
     void (*setClipToFrame)(ArkUINodeHandle node, ArkUI_Bool useClip);
-    void (*setRotation)(
-        ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 rotationY, ArkUI_Float32 rotationZ);
+    void (*setRotation)(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 rotationY, ArkUI_Float32 rotationZ,
+        ArkUI_Int32 unitValue);
     void (*setShadowColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*setShadowOffset)(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY);
+    void (*setShadowOffset)(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY, ArkUI_Int32 unitValue);
     void (*setShadowAlpha)(ArkUINodeHandle node, ArkUI_Float32 alpha);
     void (*setShadowElevation)(ArkUINodeHandle node, ArkUI_Float32 elevation);
     void (*setShadowRadius)(ArkUINodeHandle node, ArkUI_Float32 radius);
@@ -3815,18 +3815,18 @@ struct ArkUIRenderNodeModifier {
     void (*setPivot)(ArkUINodeHandle node, ArkUI_Float32 pivotX, ArkUI_Float32 pivotY);
     void (*setFrame)(ArkUINodeHandle node, ArkUI_Float32 positionX, ArkUI_Float32 positionY, ArkUI_Float32 width,
         ArkUI_Float32 height);
-    void (*setSize)(ArkUINodeHandle node, ArkUI_Float32 width, ArkUI_Float32 height);
+    void (*setSize)(ArkUINodeHandle node, ArkUI_Float32 width, ArkUI_Float32 height, ArkUI_Int32 unitValue);
     void (*setOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*setTranslate)(
         ArkUINodeHandle node, ArkUI_Float32 translateX, ArkUI_Float32 translateY, ArkUI_Float32 translateZ);
     void (*setBorderStyle)(
         ArkUINodeHandle node, ArkUI_Int32 left, ArkUI_Int32 top, ArkUI_Int32 right, ArkUI_Int32 bottom);
-    void (*setBorderWidth)(
-        ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right, ArkUI_Float32 bottom);
+    void (*setBorderWidth)(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right,
+        ArkUI_Float32 bottom, ArkUI_Int32 unitValue);
     void (*setBorderColor)(
         ArkUINodeHandle node, ArkUI_Uint32 left, ArkUI_Uint32 top, ArkUI_Uint32 right, ArkUI_Uint32 bottom);
     void (*setBorderRadius)(ArkUINodeHandle node, ArkUI_Float32 topLeft, ArkUI_Float32 topRight,
-        ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight);
+        ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight, ArkUI_Int32 unitValue);
     void (*setRectMask)(ArkUINodeHandle node, ArkUI_Float32 rectX, ArkUI_Float32 rectY, ArkUI_Float32 rectW,
         ArkUI_Float32 rectH, ArkUI_Uint32 fillColor, ArkUI_Uint32 strokeColor, ArkUI_Float32 strokeWidth);
     void (*setCircleMask)(ArkUINodeHandle node, ArkUI_Float32 centerXValue, ArkUI_Float32 centerYValue,
@@ -3837,6 +3837,7 @@ struct ArkUIRenderNodeModifier {
         ArkUI_Float32 rectH, ArkUI_Uint32 fillColor, ArkUI_Uint32 strokeColor, ArkUI_Float32 strokeWidth);
     void (*setCommandPathMask)(ArkUINodeHandle node, ArkUI_CharPtr commands, ArkUI_Uint32 fillColor,
         ArkUI_Uint32 strokeColor, ArkUI_Float32 strokeWidth);
+    void (*setPosition)(ArkUINodeHandle node, ArkUI_Float32 xAxis, ArkUI_Float32 yAxis, ArkUI_Int32 unitValue);
 };
 
 struct ArkUIFrameNodeModifier {

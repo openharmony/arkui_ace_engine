@@ -3039,6 +3039,8 @@ void ArkUINativeModule::RegisterRenderNodeAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetOpacity));
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTranslate"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetTranslate));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetPosition));
     RegisterRenderNodeBorderAndMaskAttributes(renderNode, vm);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "renderNode"), renderNode);
 }
