@@ -97,6 +97,7 @@ constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 constexpr int32_t AUTO_SCROLL_INTERVAL = 15;
+constexpr Dimension CARET_BOTTOM_DISTANCE = 16.0_vp;
 constexpr Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
 constexpr Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 58.0_vp;
 constexpr float MAX_DRAG_SCROLL_SPEED = 2400.0f;
@@ -119,6 +120,9 @@ constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
 constexpr static int32_t NONE_SELECT_TYPE = -1;
 constexpr static int32_t FIRST_LINE = 1;
 constexpr static int32_t SECOND_LINE = 2;
+
+constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
+constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
 } // namespace
 
 RichEditorPattern::RichEditorPattern()
@@ -296,6 +300,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+    auto originHeight = frameRect_.Height();
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -315,7 +320,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         isFirstCallOnReady_ = true;
         isRichEditorInit_ = true;
     }
-    MoveCaretOnLayoutSwap();
+    MoveCaretOnLayoutSwap(LessNotEqual(originHeight, frameRect_.Height()));
     if (textSelector_.IsValid() && SelectOverlayIsOn() && isShowMenu_) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
@@ -341,10 +346,10 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     return ret;
 }
 
-void RichEditorPattern::MoveCaretOnLayoutSwap()
+void RichEditorPattern::MoveCaretOnLayoutSwap(bool isReduceSize)
 {
     MoveCaretAfterTextChange();
-    if (HasFocus()) {
+    if (HasFocus() && !isReduceSize) {
         MoveCaretToContentRect();
     }
 }
@@ -1880,7 +1885,8 @@ void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, bool
     AdjustPlaceholderSelection(currentPosition, nextPosition, textOffset);
     auto textSelectInfo = GetSpansInfo(currentPosition, nextPosition, GetSpansMethod::ONSELECT);
     auto results = textSelectInfo.GetSelection().resultObjects;
-    if (results.size() == 1 && results.front().type == SelectSpanType::TYPEIMAGE && !isOnlyImageDrag_) {
+    if (results.size() == 1 && results.front().type == SelectSpanType::TYPEIMAGE && results.front().valueString != " "
+        && !isOnlyImageDrag_) {
         textSelector_.Update(currentPosition, nextPosition);
         isOnlyImageDrag_ = true;
         showSelect_ = false;
@@ -2263,7 +2269,9 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     InitSelection(textOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
-    
+    if (IsSelected()) {
+        showSelect_ = true;
+    }
     FireOnSelect(selectStart, selectEnd);
     SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
     MoveCaretToContentRect(false);
@@ -5144,6 +5152,14 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
             info.secondHandle = pattern->textSelector_.secondHandle;
         }
         pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
+        auto textDragPattern = pattern->dragNode_->GetPattern<TextDragPattern>();
+        if (textDragPattern) {
+            auto option = host->GetDragPreviewOption();
+            option.options.shadowPath = textDragPattern->GetBackgroundPath()->ConvertToSVGString();
+            option.options.shadow = Shadow(RICH_DEFAULT_ELEVATION, {0.0, 0.0}, Color(RICH_DEFAULT_SHADOW_COLOR),
+                ShadowStyle::OuterFloatingSM);
+            host->SetDragPreviewOptions(option);
+        }
         FrameNode::ProcessOffscreenNode(pattern->dragNode_);
     };
 }
@@ -5837,7 +5853,9 @@ void RichEditorPattern::MoveCaretToContentRect(const OffsetF& caretOffset, float
             OnScrollCallback(contentRect.GetY() - caretOffset.GetY(), SCROLL_FROM_NONE);
         }
     } else if (GreatNotEqual(caretOffset.GetY() + caretHeight, contentRect.Bottom() - keyboardOffset)) {
-        OnScrollCallback(contentRect.Bottom() - keyboardOffset - caretOffset.GetY() - caretHeight, SCROLL_FROM_NONE);
+        auto distance = contentRect.Bottom() - keyboardOffset - caretOffset.GetY() - caretHeight -
+            CARET_BOTTOM_DISTANCE.ConvertToPx();
+        OnScrollCallback(distance, SCROLL_FROM_NONE);
     }
 }
 
