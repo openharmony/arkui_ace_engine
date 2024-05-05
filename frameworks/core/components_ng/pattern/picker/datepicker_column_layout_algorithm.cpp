@@ -26,7 +26,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t DIVIDER_SIZE = 2;
-const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t BUFFER_NODE_NUMBER = 2;
 const int32_t HIDENODE = 3;
@@ -49,10 +48,9 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(dialogTheme);
     SizeF frameSize = { -1.0f, -1.0f };
 
-    uint32_t showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER;
+    uint32_t showCount_ = pickerTheme->GetShowCountPortrait() + BUFFER_NODE_NUMBER;
+    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        showCount_ = pickerTheme->GetShowCountLandscape() + BUFFER_NODE_NUMBER;
     }
 
     auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - HIDENODE) +
