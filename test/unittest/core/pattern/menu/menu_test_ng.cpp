@@ -2971,10 +2971,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestEvent001, TestSize.Level1)
      */
     auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
-    auto clickableNode = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(CLICKABLE_AREA_VIEW_INDEX));
-    ASSERT_NE(clickableNode, nullptr);
-    auto gestureHub = clickableNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
+    auto gestureHub = itemNode->GetOrCreateGestureEventHub();
     auto clickEventActuator = gestureHub->clickEventActuator_;
     ASSERT_NE(clickEventActuator, nullptr);
     auto event = clickEventActuator->GetClickEvent();
@@ -3392,7 +3389,7 @@ HWTEST_F(MenuTestNg, MenuItemViewTestNgCreate001, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 2);
+    ASSERT_EQ(itemNode->GetChildren().size(), 4);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
