@@ -85,6 +85,15 @@ void JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info)
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         FlexModel::GetInstance()->SetCrossAxisAlign(FlexAlign::FLEX_START);
     }
+    if (obj->HasProperty("space")) {
+        CalcDimension value;
+        JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(obj->GetProperty("space"));
+        JSRef<JSVal> mainSpaceVal = spaceObj->GetProperty("main");
+        if (!ParseLengthMetricsToDimension(mainSpaceVal, value) || value.IsNegative()) {
+            value.Reset();
+        }
+        FlexModel::GetInstance()->SetMainSpace(value);
+    }
 }
 
 void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal)
@@ -132,6 +141,21 @@ void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal
         if (alignContent >= 0 && alignContent <= MAIN_ALIGN_MAX_VALUE) {
             FlexModel::GetInstance()->SetWrapAlignment(WRAP_TABLE[alignContent]);
         }
+    }
+    if (obj->HasProperty("space")) {
+        CalcDimension mainValue;
+        CalcDimension crossValue;
+        JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(obj->GetProperty("space"));
+        JSRef<JSVal> mainSpaceVal = spaceObj->GetProperty("main");
+        JSRef<JSVal> crossSpaceVal = spaceObj->GetProperty("cross");
+        if (!ParseLengthMetricsToDimension(mainSpaceVal, mainValue) || mainValue.IsNegative()) {
+            mainValue.Reset();
+        }
+        if (!ParseLengthMetricsToDimension(crossSpaceVal, crossValue) || crossValue.IsNegative()) {
+            crossValue.Reset();
+        }
+        FlexModel::GetInstance()->SetMainSpace(mainValue);
+        FlexModel::GetInstance()->SetCrossSpace(crossValue);
     }
 }
 
