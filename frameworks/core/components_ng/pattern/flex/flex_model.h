@@ -22,6 +22,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "frameworks/base/geometry/dimension.h"
 
 namespace OHOS::Ace {
 
@@ -70,6 +71,8 @@ public:
     virtual void SetJustifyContent(int32_t value) = 0;
 
     virtual void SetAlignContent(int32_t value) = 0;
+    virtual void SetMainSpace(const std::optional<Dimension>& space) = 0;
+    virtual void SetCrossSpace(const std::optional<Dimension>& space) = 0;
 
 private:
     static std::unique_ptr<FlexModel> instance_;
