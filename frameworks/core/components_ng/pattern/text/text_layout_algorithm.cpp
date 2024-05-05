@@ -494,7 +494,7 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, RefP
         symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
     symbolTextStyle.SetFontFamilies({ "HM Symbol" });
     paragraph->PushStyle(symbolTextStyle);
-    if (symbolTextStyle.GetSymbolEffectOptions().has_value()){
+    if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
         auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
         symbolEffectOptions.Reset();
         layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
