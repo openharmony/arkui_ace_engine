@@ -127,6 +127,7 @@ public:
         IC_CANCEL_SVG,
         RADIO_TICK_SVG,
         RADIO_DOT_SVG,
+        IC_TAKEPHOTO_SVG,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.

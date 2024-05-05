@@ -251,6 +251,11 @@ public:
         }
     }
 
+    void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
+    {
+        caretChangeListener_ = listener;
+    }
+
     void SetStyledString(const RefPtr<SpanString>& value);
     void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) override;
     void InsertValueInStyledString(const std::string& insertValue);
@@ -963,6 +968,7 @@ private:
     std::optional<Color> caretColor_;
     std::optional<Color> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
+    std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
     Offset selectionMenuOffset_;
     // add for scroll
