@@ -35,6 +35,7 @@ public:
 #else
     RSRecordingPath AsPath(const Size& viewPort) const override;
 #endif
+private:
     std::string d_;
 };
 
