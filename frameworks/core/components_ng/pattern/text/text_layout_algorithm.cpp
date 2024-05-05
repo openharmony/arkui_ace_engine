@@ -294,6 +294,15 @@ bool TextLayoutAlgorithm::CreateParagraph(
     }
     // default paragraph style
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
+
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        if (paraStyle.align == TextAlign::START) {
+            paraStyle.align = TextAlign::END;
+        } else if (paraStyle.align == TextAlign::END) {
+            paraStyle.align = TextAlign::START;
+        }
+    }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spans_.empty()) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
     }
