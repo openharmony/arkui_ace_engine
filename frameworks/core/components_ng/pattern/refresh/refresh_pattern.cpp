@@ -409,23 +409,20 @@ void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 
 ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 {
-    auto remain = 0.f;
     UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::RUNNING);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         // If dragging does not expand the refresh, there is no need to continue executing the code
         if (NearZero(scrollOffset_) && NonPositive(delta)) {
             return { delta, true };
         }
-        auto lastScrollOffset = scrollOffset_;
         auto pullDownRatio = CalculatePullDownRatio();
         scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, MAX_OFFSET);
-        remain = NearZero(pullDownRatio) ? delta : delta - (scrollOffset_ - lastScrollOffset) / pullDownRatio;
         if (!isSourceFromAnimation_) {
             FireOnOffsetChange(scrollOffset_);
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
                 UpdateFirstChildPlacement();
-                return { remain, true };
+                return { 0.f, true };
             }
             UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
             if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx())) || !pullToRefresh_) {
@@ -438,7 +435,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
     } else {
         HandleDragUpdateLowVersion(delta);
     }
-    return { remain, true };
+    return { 0.f, true };
 }
 
 void RefreshPattern::HandleDragEnd(float speed)
