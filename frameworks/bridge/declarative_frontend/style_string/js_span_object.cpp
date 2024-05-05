@@ -1303,6 +1303,12 @@ void JSParagraphStyleSpan::ParseLeadingMarginPixelMap(const JSRef<JSObject>& lea
         CalcDimension height;
         JSContainerBase::ParseJsDimensionVp(widthVal, width);
         JSContainerBase::ParseJsDimensionVp(heightVal, height);
+        if (LessNotEqual(width.Value(), 0.0)) {
+            width = Dimension(0.0, width.Unit());
+        }
+        if (LessNotEqual(height.Value(), 0.0)) {
+            height = Dimension(0.0, height.Unit());
+        }
         margin->size = NG::LeadingMarginSize(width, height);
     } else if (sizeVal->IsUndefined()) {
         std::string resWidthStr;

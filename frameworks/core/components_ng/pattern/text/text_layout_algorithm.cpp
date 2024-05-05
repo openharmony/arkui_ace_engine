@@ -294,7 +294,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
     }
     // default paragraph style
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spans_.empty()) {
+    if ((Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spans_.empty()) || isSpanStringMode_) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
     }
     paraStyle.leadingMarginAlign = Alignment::CENTER;
