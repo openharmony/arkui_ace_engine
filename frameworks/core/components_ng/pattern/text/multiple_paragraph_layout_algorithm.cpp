@@ -415,6 +415,9 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
             if (group.front()->fontStyle->HasFontSize()) {
                 spanParagraphStyle.fontSize = group.front()->fontStyle->GetFontSizeValue().ConvertToPx();
             }
+            if (group.front()->content.length() == 1 && group.front()->content.front() == '\n' && isSpanStringMode_) {
+                spanParagraphStyle.leadingMargin.reset();
+            }
         }
         if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
             if (!paragraphManager_->GetParagraphs().empty()) {
