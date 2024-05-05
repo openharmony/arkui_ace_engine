@@ -6103,7 +6103,7 @@ ArkUINativeModuleValue CommonBridge::AddTapGesture(ArkUIRuntimeCallInfo* runtime
     int32_t fingers = DEFAULT_TAP_FINGER;
     int32_t count = DEFAULT_TAP_COUNT;
     GetTapGestureValue(runtimeCallInfo, fingers, count, NUM_4);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createTapGesture(count, fingers);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createTapGesture(count, fingers, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_6, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNode(nativeNode, gesture, priority, mask);
@@ -6125,7 +6125,7 @@ ArkUINativeModuleValue CommonBridge::AddLongPressGesture(ArkUIRuntimeCallInfo* r
     bool repeat = false;
     int32_t duration = DEFAULT_LONG_PRESS_DURATION;
     GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, NUM_4);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(fingers, repeat, duration);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(fingers, repeat, duration, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_7, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_8, gesture);
@@ -6149,7 +6149,7 @@ ArkUINativeModuleValue CommonBridge::AddPanGesture(ArkUIRuntimeCallInfo* runtime
     int32_t direction = PanDirection::ALL;
     double distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
     GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, NUM_4);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPanGesture(fingers, direction, distance);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPanGesture(fingers, direction, distance, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_7, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_8, gesture);
@@ -6196,7 +6196,7 @@ ArkUINativeModuleValue CommonBridge::AddPinchGesture(ArkUIRuntimeCallInfo* runti
     int32_t fingers = DEFAULT_PINCH_FINGER;
     double distance = DEFAULT_PINCH_DISTANCE;
     GetPinchGestureValue(runtimeCallInfo, fingers, distance, NUM_4);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPinchGesture(fingers, distance);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPinchGesture(fingers, distance, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_6, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_7, gesture);
@@ -6220,7 +6220,7 @@ ArkUINativeModuleValue CommonBridge::AddRotationGesture(ArkUIRuntimeCallInfo* ru
     int32_t fingers = DEFAULT_ROTATION_FINGER;
     double angle = DEFAULT_ROTATION_ANGLE;
     GetRotationGestureValue(runtimeCallInfo, fingers, angle, NUM_4);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createRotationGesture(fingers, angle);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createRotationGesture(fingers, angle, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_6, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_7, gesture);
@@ -6249,7 +6249,7 @@ ArkUINativeModuleValue CommonBridge::AddTapGestureToGroup(ArkUIRuntimeCallInfo* 
     int32_t fingers = DEFAULT_TAP_FINGER;
     int32_t count = DEFAULT_TAP_COUNT;
     GetTapGestureValue(runtimeCallInfo, fingers, count, NUM_1);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createTapGesture(count, fingers);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createTapGesture(count, fingers, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_0, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_3, gesture);
     auto* group = GetGestureGroup(runtimeCallInfo, NUM_4);
@@ -6265,7 +6265,7 @@ ArkUINativeModuleValue CommonBridge::AddLongPressGestureToGroup(ArkUIRuntimeCall
     bool repeat = false;
     int32_t duration = DEFAULT_LONG_PRESS_DURATION;
     GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, NUM_1);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(fingers, repeat, duration);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(fingers, repeat, duration, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_0, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_4, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_5, gesture);
@@ -6283,7 +6283,7 @@ ArkUINativeModuleValue CommonBridge::AddPanGestureToGroup(ArkUIRuntimeCallInfo* 
     int32_t direction = PanDirection::ALL;
     double distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
     GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, NUM_1);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPanGesture(fingers, direction, distance);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPanGesture(fingers, direction, distance, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_0, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_4, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_5, gesture);
@@ -6318,7 +6318,7 @@ ArkUINativeModuleValue CommonBridge::AddPinchGestureToGroup(ArkUIRuntimeCallInfo
     int32_t fingers = DEFAULT_PINCH_FINGER;
     double distance = DEFAULT_PINCH_DISTANCE;
     GetPinchGestureValue(runtimeCallInfo, fingers, distance, NUM_1);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPinchGesture(fingers, distance);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPinchGesture(fingers, distance, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_0, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_3, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_4, gesture);
@@ -6336,7 +6336,7 @@ ArkUINativeModuleValue CommonBridge::AddRotationGestureToGroup(ArkUIRuntimeCallI
     int32_t fingers = DEFAULT_ROTATION_FINGER;
     double angle = DEFAULT_ROTATION_ANGLE;
     GetRotationGestureValue(runtimeCallInfo, fingers, angle, NUM_1);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createRotationGesture(fingers, angle);
+    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createRotationGesture(fingers, angle, nullptr);
     SetGestureTag(runtimeCallInfo, NUM_0, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_3, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_4, gesture);
