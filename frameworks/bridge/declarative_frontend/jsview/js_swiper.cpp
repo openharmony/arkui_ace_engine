@@ -26,6 +26,8 @@
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_swiper_theme.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/animation/curve.h"
@@ -97,6 +99,8 @@ void JSSwiper::Create(const JSCallbackInfo& info)
             jsController->SetController(controller);
         }
     }
+
+    JSSwiperTheme::ApplyThemeInConstructor();
 }
 
 void JSSwiper::JsRemoteMessage(const JSCallbackInfo& info)
@@ -592,6 +596,7 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
             SwiperModel::GetInstance()->SetDisplayArrow(false);
             return;
         }
+        JSSwiperTheme::ApplyThemeToDisplayArrow(swiperArrowParameters, obj);
         SwiperModel::GetInstance()->SetArrowStyle(swiperArrowParameters);
         SwiperModel::GetInstance()->SetDisplayArrow(true);
     } else if (info[0]->IsBoolean()) {
@@ -607,6 +612,7 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
             swiperArrowParameters.backgroundColor = swiperIndicatorTheme->GetSmallArrowBackgroundColor();
             swiperArrowParameters.arrowSize = swiperIndicatorTheme->GetSmallArrowSize();
             swiperArrowParameters.arrowColor = swiperIndicatorTheme->GetSmallArrowColor();
+            JSSwiperTheme::ApplyThemeToDisplayArrowForce(swiperArrowParameters);
             SwiperModel::GetInstance()->SetArrowStyle(swiperArrowParameters);
             SwiperModel::GetInstance()->SetDisplayArrow(true);
         } else {
@@ -642,20 +648,24 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
             auto type = typeParam->ToString();
             if (type == "DigitIndicator") {
                 SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(obj);
+                JSSwiperTheme::ApplyThemeToDigitIndicator(digitalParameters, obj);
                 SwiperModel::GetInstance()->SetDigitIndicatorStyle(digitalParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DIGIT);
             } else {
                 SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+                JSSwiperTheme::ApplyThemeToDotIndicator(swiperParameters, obj);
                 SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
             }
         } else {
             SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+            JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);
             SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
             SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
         }
     } else {
         SwiperParameters swiperParameters = GetDotIndicatorInfo(JSRef<JSObject>::New());
+        JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);
         SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
         SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
     }

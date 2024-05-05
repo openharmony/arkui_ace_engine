@@ -19,6 +19,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_picker_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -357,6 +358,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         if (param.selectedChangeEventVal->IsFunction()) {
             ParseTextPickerSelectedObject(info, param.selectedChangeEventVal);
         }
+        JSTextPickerTheme::ApplyTheme();
     }
 }
 

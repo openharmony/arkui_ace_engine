@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/patternlock_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_pattern_lock_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
@@ -61,6 +62,7 @@ JSRef<JSArray> JSPatternLock::ChoosePointToJSValue(std::vector<int> input)
 void JSPatternLock::Create(const JSCallbackInfo& info)
 {
     auto controller = PatternLockModel::GetInstance()->Create();
+    JSPatternLockTheme::ApplyTheme();
 
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPatternLockController>();

@@ -90,6 +90,56 @@ class ArkThemeNativeHelper {
         WithTheme.sendThemeToNative(colorsArray, elmtId);
     }
 }
+globalThis.LazyForEach.create = function (paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator, paramUpdateChangedNode) {
+    const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
+    if (themeScope === undefined) {
+        if (paramUpdateChangedNode) {
+            LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator, paramUpdateChangedNode);
+        }
+        else {
+            LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator);
+        }
+        return;
+    }
+    const itemGeneratorWrapper = _item => {
+        const item = _item;
+        {
+            const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
+            paramItemGenerator(item);
+            if (result === true) {
+                ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
+            }
+        }
+    };
+    if (paramUpdateChangedNode) {
+        LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, itemGeneratorWrapper, paramKeyGenerator, paramUpdateChangedNode);
+    }
+    else {
+        LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, itemGeneratorWrapper, paramKeyGenerator);
+    }
+};
+globalThis.ListItem.create = function (deepRenderFunction, isLazy, options) {
+    var _a;
+    if (isLazy === false) {
+        ListItem.createInternal(deepRenderFunction, isLazy, options);
+        return;
+    }
+    const listItemElmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    const themeScope = (_a = globalThis.themeScopeMgr) === null || _a === void 0 ? void 0 : _a.scopeForElmtId(listItemElmtId);
+    if (themeScope === undefined) {
+        ListItem.createInternal(deepRenderFunction, isLazy, options);
+        return;
+    }
+    const deepRenderFunctionWrapper = (elmtId, isInitialRender) => {
+        var _a, _b;
+        const result = (_a = globalThis.themeScopeMgr) === null || _a === void 0 ? void 0 : _a.onDeepRenderScopeEnter(themeScope);
+        deepRenderFunction(elmtId, isInitialRender);
+        if (result === true) {
+            (_b = globalThis.themeScopeMgr) === null || _b === void 0 ? void 0 : _b.onDeepRenderScopeExit();
+        }
+    };
+    ListItem.createInternal(deepRenderFunctionWrapper, isLazy, options);
+};
 class ArkSystemColors {
     constructor() {
         this.brand = ArkResourcesHelper.$r('sys.color.brand');

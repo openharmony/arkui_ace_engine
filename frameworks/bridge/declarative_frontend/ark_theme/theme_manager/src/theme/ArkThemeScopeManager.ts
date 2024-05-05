@@ -365,7 +365,7 @@ class ArkThemeScopeManager {
             if (listenerId === item.owner) {
                 listener.forceRerenderNode(item.elmtId)
             } else if (listenerId === item.elmtId) {
-                listener.willApplyTheme(scope?.getTheme() ?? this.defaultTheme ?? ArkThemeScopeManager.SystemTheme)
+                listener.onWillApplyTheme(scope?.getTheme() ?? this.defaultTheme ?? ArkThemeScopeManager.SystemTheme)
             }
         })
     }

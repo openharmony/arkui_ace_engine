@@ -26,6 +26,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_button_theme.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {
@@ -136,7 +137,10 @@ void JSButton::SetButtonStyle(const JSCallbackInfo& info)
             value = valueT;
         }
     }
-    ButtonModel::GetInstance()->SetButtonStyle(static_cast<ButtonStyleMode>(value));
+    auto buttonStyleMode = static_cast<ButtonStyleMode>(value);
+    if (!JSButtonTheme::ApplyTheme(buttonStyleMode, isLabelButton_)) {
+        ButtonModel::GetInstance()->SetButtonStyle(buttonStyleMode);
+    }
 }
 
 void JSButton::SetControlSize(const JSCallbackInfo& info)
@@ -160,7 +164,10 @@ void JSButton::SetRole(const JSCallbackInfo& info)
             value = valueT;
         }
     }
-    ButtonModel::GetInstance()->SetRole(static_cast<ButtonRole>(value));
+    auto buttonRole = static_cast<ButtonRole>(value);
+    if (!JSButtonTheme::ApplyTheme(buttonRole, isLabelButton_)) {
+        ButtonModel::GetInstance()->SetRole(buttonRole);
+    }
 }
 
 void JSButton::SetStateEffect(const JSCallbackInfo& info)
@@ -358,6 +365,9 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     ButtonModel::GetInstance()->CreateWithLabel(para, buttonChildren);
     ButtonModel::GetInstance()->Create(para, buttonChildren);
     isLabelButton_ = true;
+    auto buttonRole = para.buttonRole.value_or(ButtonRole::NORMAL);
+    auto buttonStyleMode = para.buttonStyleMode.value_or(ButtonStyleMode::EMPHASIZE);
+    JSButtonTheme::ApplyTheme(buttonRole, buttonStyleMode, isLabelButton_);
 }
 
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
@@ -365,6 +375,9 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
     CreateWithPara para = ParseCreatePara(info, false);
     ButtonModel::GetInstance()->CreateWithChild(para);
     isLabelButton_ = false;
+    auto buttonRole = para.buttonRole.value_or(ButtonRole::NORMAL);
+    auto buttonStyleMode = para.buttonStyleMode.value_or(ButtonStyleMode::EMPHASIZE);
+    JSButtonTheme::ApplyTheme(buttonRole, buttonStyleMode, isLabelButton_);
 }
 
 void JSButton::JsPadding(const JSCallbackInfo& info)

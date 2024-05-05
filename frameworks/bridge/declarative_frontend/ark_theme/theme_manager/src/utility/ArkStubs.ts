@@ -37,7 +37,7 @@ interface ViewPuInternal {
     id__(): number
     onGlobalThemeChanged(): void
     forceRerenderNode(elmtId: number): void
-    willApplyTheme(theme: Theme): void
+    onWillApplyTheme(theme: Theme): void
 }
 class UINodeRegisterProxy {
     static ElementIdToOwningViewPU_: Map<any, any>
