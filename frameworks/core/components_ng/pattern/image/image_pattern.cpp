@@ -128,6 +128,40 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     };
 }
 
+OnCompleteInDataReadyNotifyTask ImagePattern::CreateCompleteCallBackInDataReady()
+{
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+        if (currentSourceInfo != sourceInfo) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "sourceInfo does not match, ignore current callback. "
+                "current: %{public}s vs callback's: %{public}s",
+                currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
+            return;
+        }
+        pattern->OnCompleteInDataReady();
+    };
+}
+
+void ImagePattern::OnCompleteInDataReady()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 0,
+        geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height(),
+        geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
+    imageEventHub->FireCompleteEvent(event);
+}
+
 void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
 {
     if (image->IsStatic()) {
@@ -349,13 +383,6 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto imageEventHub = GetEventHub<ImageEventHub>();
-    CHECK_NULL_VOID(imageEventHub);
-    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
-        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 0,
-        geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height(),
-        geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
-    imageEventHub->FireCompleteEvent(event);
 
     if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -532,6 +559,7 @@ void ImagePattern::CreateObscuredImage()
 void ImagePattern::LoadImage(const ImageSourceInfo& src)
 {
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
+    loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
 
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
     if (SystemProperties::GetDebugEnabled()) {

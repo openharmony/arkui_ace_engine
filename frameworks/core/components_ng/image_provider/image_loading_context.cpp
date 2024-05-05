@@ -150,6 +150,13 @@ void ImageLoadingContext::OnDataReady()
     }
 }
 
+void ImageLoadingContext::OnDataReadyOnCompleteCallBack()
+{
+    if (notifiers_.onDataReadyComplete_) {
+        notifiers_.onDataReadyComplete_(src_);
+    }
+}
+
 void ImageLoadingContext::OnDataLoading()
 {
     if (!src_.GetIsConfigurationChange()) {
@@ -337,6 +344,11 @@ void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 {
     CHECK_NULL_VOID(imageObj);
     imageObj_ = imageObj->Clone();
+    if (measureFinish_) {
+        OnDataReadyOnCompleteCallBack();
+    } else {
+        needDataReadyCallBack_ = true;
+    }
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA_SUCCESS);
 }
 
@@ -366,6 +378,10 @@ void ImageLoadingContext::CallbackAfterMeasureIfNeed()
     if (needErrorCallBack_) {
         stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
         needErrorCallBack_ = false;
+    }
+    if (needDataReadyCallBack_) {
+        OnDataReadyOnCompleteCallBack();
+        needDataReadyCallBack_ = false;
     }
 }
 

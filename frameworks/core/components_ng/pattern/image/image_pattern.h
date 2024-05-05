@@ -318,6 +318,7 @@ private:
     void StartDecoding(const SizeF& dstSize);
     bool CheckIfNeedLayout();
     void OnImageDataReady();
+    void OnCompleteInDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
@@ -344,6 +345,7 @@ private:
     DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();
     LoadFailNotifyTask CreateLoadFailCallback();
+    OnCompleteInDataReadyNotifyTask CreateCompleteCallBackInDataReady();
 
     DataReadyNotifyTask CreateDataReadyCallbackForAlt();
     LoadSuccessNotifyTask CreateLoadSuccessCallbackForAlt();
