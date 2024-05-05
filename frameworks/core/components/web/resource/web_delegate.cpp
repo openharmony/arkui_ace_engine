@@ -49,10 +49,12 @@
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
+#include "iservice_registry.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
+#include "system_ability_definition.h"
 #include "third_party/icu/icu4c/source/common/unicode/ucnv.h"
 #include "transaction/rs_interfaces.h"
 #include "web_configuration_observer.h"
@@ -6271,6 +6273,29 @@ OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() cons
     CHECK_NULL_RETURN(setting, OHOS::NWeb::NWebPreference::CopyOptionMode::CROSS_DEVICE);
     auto copyOption = setting->GetCopyOptionMode();
     return copyOption;
+}
+
+bool WebDelegate::OnOpenAppLink(
+    const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
+{
+    if (!callback) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "open app link callback is nullptr");
+        return false;
+    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), url, callback]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto openAppLinkCallback = webPattern->GetOnOpenAppLinkCallback();
+        CHECK_NULL_VOID(openAppLinkCallback);
+        openAppLinkCallback(std::make_shared<WebAppLinkEvent>(url,
+            AceType::MakeRefPtr<WebAppLinkCallbackOhos>(callback)));
+        }, "ArkUIWebOnOpenAppLink");
+    return true;
 }
 
 std::string WebDelegate::GetCanonicalEncodingName(const std::string& alias_name) const

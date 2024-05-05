@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include <numeric>
 
 #include "base/utils/utils.h"
 
@@ -222,7 +223,7 @@ int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
 
     int32_t maxIdx = 0;
     // maxIdx might not be in the last position if hasBigItem_
-    for (auto it : lastLine->second) {
+    for (const auto& it : lastLine->second) {
         maxIdx = std::max(maxIdx, it.second);
     }
     maxIdx = std::max(maxIdx, FindEndIdx(endLine).itemIdx);
@@ -365,7 +366,7 @@ std::pair<int32_t, int32_t> GridLayoutInfo::FindItemInRange(int32_t target) cons
     }
     for (int r = startMainLineIndex_; r <= endMainLineIndex_; ++r) {
         const auto& row = gridMatrix_.at(r);
-        for (auto it : row) {
+        for (const auto& it : row) {
             if (it.second == target) {
                 return { r, it.first };
             }
@@ -658,15 +659,17 @@ void GridLayoutInfo::ClearMatrixToEnd(int32_t idx, int32_t lineIdx)
 float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool regular) const
 {
     float len = 0.0f;
-    float offset = currentOffset_;
-
-    auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
-    for (auto it = lineHeightMap_.find(startMainLineIndex_); it != endIt; ++it) {
+    auto it = lineHeightMap_.find(startMainLineIndex_);
+    if (!regular) {
         // skip adding starting lines that are outside viewport in LayoutIrregular
-        if (!regular && Negative(it->second + offset + mainGap)) {
+        float offset = currentOffset_;
+        while (it != lineHeightMap_.end() && Negative(it->second + offset + mainGap)) {
             offset += it->second + mainGap;
-            continue;
+            ++it;
         }
+    }
+    auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
+    for (; it != endIt; ++it) {
         len += it->second + mainGap;
     }
     return len - mainGap;
@@ -717,5 +720,30 @@ MatIter GridLayoutInfo::FindStartLineInMatrix(MatIter iter, int32_t index) const
         --iter;
     }
     return ++iter;
+}
+
+float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float mainGap) const
+{
+    if (endLine <= startLine) {
+        return 0.0f;
+    }
+    float totalHeight = 0.0f;
+    auto endIt = lineHeightMap_.find(endLine);
+    for (auto it = lineHeightMap_.find(startLine); it != endIt; ++it) {
+        totalHeight += it->second + mainGap;
+    }
+    return totalHeight;
+}
+
+bool GridLayoutInfo::HeightSumSmaller(float other, float mainGap) const
+{
+    other += mainGap;
+    for (const auto& it : lineHeightMap_) {
+        other -= it.second + mainGap;
+        if (NonPositive(other)) {
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

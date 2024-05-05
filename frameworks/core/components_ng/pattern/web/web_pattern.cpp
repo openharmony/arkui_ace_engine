@@ -3978,4 +3978,13 @@ std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t
 {
     return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
+
+void WebPattern::Backward()
+{
+    if (!delegate_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "delegate is null");
+        return;
+    }
+    delegate_->Backward();
+}
 } // namespace OHOS::Ace::NG

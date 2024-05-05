@@ -100,6 +100,7 @@ void SubwindowOhos::InitContainer()
             windowOption->SetExtensionTag(true);
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(hostWindowId);
+            SetUIExtensionHostWindowId(hostWindowId);
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
@@ -1426,6 +1427,15 @@ Rect SubwindowOhos::GetParentWindowRect() const
     return Rect(parentWindowRect.posX_, parentWindowRect.posY_, parentWindowRect.width_, parentWindowRect.height_);
 }
 
+Rect SubwindowOhos::GetUIExtensionHostWindowRect() const
+{
+    Rect rect;
+    CHECK_NULL_RETURN(parentWindow_, rect);
+    auto id = GetUIExtensionHostWindowId();
+    auto hostWindowRect = parentWindow_->GetHostWindowRect(id);
+    return Rect(hostWindowRect.posX_, hostWindowRect.posY_, hostWindowRect.width_, hostWindowRect.height_);
+}
+
 void SubwindowOhos::RequestFocus()
 {
     if (window_->IsFocused()) {
@@ -1559,5 +1569,26 @@ void SubwindowOhos::MarkDirtyDialogSafeArea()
     auto lastChild = rootNode->GetLastChild();
     CHECK_NULL_VOID(lastChild);
     lastChild->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+}
+
+bool SubwindowOhos::CheckHostWindowStatus() const
+{
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_RETURN(parentContainer, false);
+    sptr<OHOS::Rosen::Window> parentWindow = parentContainer->GetUIWindow(parentContainerId_);
+    CHECK_NULL_RETURN(parentWindow, false);
+    if (parentWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_RETURN(parentPipeline, false);
+        auto hostWindowId = parentPipeline->GetFocusWindowId();
+        auto hostWindowRect = parentWindow->GetHostWindowRect(hostWindowId);
+        auto isValid = GreatNotEqual(hostWindowRect.width_, 0) && GreatNotEqual(hostWindowRect.height_, 0);
+        if (!isValid) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
+                "UIExtension Window failed to obtain host window information. Please check if permissions are enabled");
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace

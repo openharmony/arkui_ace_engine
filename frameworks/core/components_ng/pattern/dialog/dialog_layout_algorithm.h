@@ -89,6 +89,8 @@ private:
     void UpdateSafeArea();
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
+    void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
+    
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;
@@ -103,6 +105,8 @@ private:
 
     bool expandDisplay_ = false;
     double expandDisplayValidHeight_ = 0.0;
+    bool isUIExtensionSubWindow_ = false;
+    RectF hostWindowRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };

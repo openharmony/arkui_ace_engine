@@ -74,4 +74,38 @@ void SymbolModelNG::SetSymbolEffectOptions(SymbolEffectOptions& symbolEffectOpti
     symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions);
 }
+
+void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor, frameNode);
+}
+
+void SymbolModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    if (!value.IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, Dimension(), frameNode);
+        return;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value, frameNode);
+}
+
+void SymbolModelNG::SetFontWeight(FrameNode* frameNode, Ace::FontWeight value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value, frameNode);
+}
+
+void SymbolModelNG::SetRenderingStrategy(FrameNode* frameNode, const std::uint32_t renderingStrategy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolRenderingStrategy, renderingStrategy, frameNode);
+}
+
+void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, const std::uint32_t effectStrategy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectStrategy, effectStrategy, frameNode);
+}
+
+void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode}, frameNode);
+}
 } // namespace OHOS::Ace::NG

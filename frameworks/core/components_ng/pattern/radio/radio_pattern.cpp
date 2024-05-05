@@ -898,8 +898,13 @@ void RadioPattern::SetRadioChecked(bool check)
 
 void RadioPattern::FireBuilder()
 {
-    CHECK_NULL_VOID(makeFunc_);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value() && !builderChildNode_) {
+        host->RemoveChildAtIndex(0);
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
     CHECK_NULL_VOID(host);
     host->RemoveChildAtIndex(0);
     customNode_ = BuildContentModifierNode();

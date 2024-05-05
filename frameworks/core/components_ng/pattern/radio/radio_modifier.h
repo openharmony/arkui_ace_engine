@@ -58,6 +58,9 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
+        if (useContentModifier_->Get()) {
+            return;
+        }
         RSCanvas& canvas = context.canvas;
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             PaintIndicator(canvas, isCheck_->Get(), size_->Get(), offset_->Get());
@@ -203,6 +206,13 @@ public:
         }
     }
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
 private:
     float shadowWidth_ = 1.5f;
     float borderWidth_ = 1.5f;
@@ -222,6 +232,7 @@ private:
     RefPtr<PropertyBool> isCheck_;
     RefPtr<PropertyInt> uiStatus_;
     RefPtr<PropertyBool> isFocused_;
+    RefPtr<PropertyBool> useContentModifier_;
 
     RefPtr<AnimatablePropertyColor> pointColor_;
     RefPtr<AnimatablePropertyColor> activeColor_;

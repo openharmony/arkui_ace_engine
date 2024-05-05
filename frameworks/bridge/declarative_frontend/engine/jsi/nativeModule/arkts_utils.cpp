@@ -1430,4 +1430,31 @@ void ArkTSUtils::PushOuterBorderDimensionVector(
         units.emplace_back(0);
     }
 }
+
+bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId)
+{
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        symbolId = 0;
+        return false;
+    }
+    auto jsObj = jsValue->ToObject(vm);
+    auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    if (resId->IsNull() || !resId->IsNumber()) {
+        return false;
+    }
+    auto resourceObject = GetResourceObject(vm, jsValue);
+    if (!resourceObject) {
+        return false;
+    }
+    auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+    auto symbol = resourceWrapper->GetSymbolById(resId->Uint32Value(vm));
+    if (!symbol) {
+        return false;
+    }
+    symbolId = symbol;
+    return true;
+}
 } // namespace OHOS::Ace::NG

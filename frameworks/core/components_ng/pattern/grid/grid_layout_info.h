@@ -101,6 +101,18 @@ struct GridLayoutInfo {
         return (removeLastGap) ? totalHeight - mainGap : totalHeight;
     }
 
+    /**
+     * @brief optimized function (early exit) to compare total height to [other].
+     * @param other height to compare to.
+     * @return true if total height is less than [other].
+     */
+    bool HeightSumSmaller(float other, float mainGap) const;
+
+    /**
+     * @return height sum of lines in range [startLine, endLine).
+     */
+    float GetHeightInRange(int32_t startLine, int32_t endLine, float mainGap) const;
+
     struct EndIndexInfo {
         int32_t itemIdx = -1; /**< Index of the last item. */
         int32_t y = -1;       /**< Main-axis position (line index) of the item. */

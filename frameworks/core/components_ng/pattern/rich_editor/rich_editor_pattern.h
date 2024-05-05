@@ -305,7 +305,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleDraggableFlag(GestureEvent& info, bool& isInterceptEvent);
     bool JudgeContentDraggable();
-    void CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight);
+    std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     OffsetF CalculateEmptyValueCaretRect();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
     RefPtr<GestureEventHub> GetGestureEventHub();
@@ -619,6 +619,7 @@ private:
         GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
     void HandleOnlyImageSelected(const Offset& globalOffset, const bool isFingerSelected);
     void CalcCaretInfoByClick(const Offset& touchOffset);
+    std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
@@ -889,7 +890,7 @@ private:
     TextInputType keyboard_ = TextInputType::UNSPECIFIED;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
     bool keyboardAvoidance_ = false;
-    int32_t richEditorInstanceId_;
+    int32_t richEditorInstanceId_ = -1;
     bool contentChange_ = false;
 };
 } // namespace OHOS::Ace::NG
