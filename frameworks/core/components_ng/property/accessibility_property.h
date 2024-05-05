@@ -53,7 +53,7 @@ public:
 
     virtual std::string GetText() const;
 
-    std::string GetGroupText(bool forceGetChildren = false) const;
+    virtual std::string GetGroupText(bool forceGetChildren = false) const;
 
     virtual void SetText(const std::string& text)
     {
