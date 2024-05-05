@@ -125,9 +125,10 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality)
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE,
-            "decode to pixmap, src=%{public}s, desiredSize = %{public}s, pixmap size = %{public}d x %{public}d",
-            obj_->GetSourceInfo().ToString().c_str(), desiredSize_.ToString().c_str(), image->GetWidth(),
-            image->GetHeight());
+            "decode to pixmap, src=%{public}s, resolutionQuality = %{public}s, desiredSize = %{public}s, pixmap size = "
+            "%{public}d x %{public}d",
+            obj_->GetSourceInfo().ToString().c_str(), GetResolutionQuality(imageQuality).c_str(),
+            desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight());
     }
 
     return image;

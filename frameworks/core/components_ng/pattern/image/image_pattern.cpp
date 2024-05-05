@@ -1203,6 +1203,12 @@ void ImagePattern::DumpRenderInfo()
         DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
     }
 
+    DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
+    if (renderProp->HasDynamicMode()) {
+        dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
+        DumpLog::GetInstance().AddDesc(std::string("dynamicRangeMode: ").append(GetDynamicModeString(dynamicMode)));
+    }
+
     auto matchTextDirection = renderProp->GetMatchTextDirection().value_or(false);
     matchTextDirection ? DumpLog::GetInstance().AddDesc("matchTextDirection:true")
                        : DumpLog::GetInstance().AddDesc("matchTextDirection:false");
