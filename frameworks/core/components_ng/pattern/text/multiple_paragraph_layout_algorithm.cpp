@@ -624,15 +624,13 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
         }
     }
     auto indent = static_cast<float>(value);
+    auto leadingMarginValue = 0.0f;
     std::vector<float> indents;
     if (paragraphStyle.leadingMargin.has_value()) {
-        indent += paragraphStyle.leadingMargin->size.Width().ConvertToPx();
-        indents.emplace_back(indent);
-    } else {
-        // only indent first line
-        indents.emplace_back(indent);
-        indents.emplace_back(0.0);
+        leadingMarginValue = paragraphStyle.leadingMargin->size.Width().ConvertToPx();
     }
+    indents.emplace_back(indent + leadingMarginValue);
+    indents.emplace_back(leadingMarginValue);
     indent_ = std::max(indent_, indent);
     paragraph->SetIndents(indents);
 }
