@@ -104,6 +104,8 @@ inline constexpr int32_t INDEXER_COLLAPSE_WAIT_DURATION = 1;
 enum class AlignStyle {
     LEFT = 0,
     RIGHT,
+    START,
+    END,
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_INDEXER_INDEXER_THEME_H

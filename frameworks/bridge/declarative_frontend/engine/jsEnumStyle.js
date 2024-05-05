@@ -826,6 +826,8 @@ var IndexerAlign;
 (function (IndexerAlign) {
   IndexerAlign[IndexerAlign["Left"] = 0] = "Left";
   IndexerAlign[IndexerAlign["Right"] = 1] = "Right";
+  IndexerAlign[IndexerAlign["START"] = 2] = "START";
+  IndexerAlign[IndexerAlign["END"] = 3] = "END";
 })(IndexerAlign || (IndexerAlign = {}));
 
 var DialogAlignment;
