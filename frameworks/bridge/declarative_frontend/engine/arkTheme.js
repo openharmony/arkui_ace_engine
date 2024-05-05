@@ -789,7 +789,7 @@ class ArkThemeScopeManager {
                 listener.forceRerenderNode(item.elmtId);
             }
             else if (listenerId === item.elmtId) {
-                listener.willApplyTheme((_b = (_a = scope === null || scope === void 0 ? void 0 : scope.getTheme()) !== null && _a !== void 0 ? _a : this.defaultTheme) !== null && _b !== void 0 ? _b : ArkThemeScopeManager.SystemTheme);
+                listener.onWillApplyTheme((_b = (_a = scope === null || scope === void 0 ? void 0 : scope.getTheme()) !== null && _a !== void 0 ? _a : this.defaultTheme) !== null && _b !== void 0 ? _b : ArkThemeScopeManager.SystemTheme);
             }
         });
     }
