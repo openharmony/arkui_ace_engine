@@ -124,6 +124,8 @@ public:
 
     void CallbackAfterMeasureIfNeed();
 
+    void OnDataReadyOnCompleteCallBack();
+
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
     void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResult##NotifyTask) \
@@ -178,6 +180,7 @@ private:
     SizeF dstSize_;
     std::atomic<bool> measureFinish_ = false;
     std::atomic<bool> needErrorCallBack_ = false;
+    std::atomic<bool> needDataReadyCallBack_ = false;
     // to determine whether the image needs to be reloaded
     int32_t sizeLevel_ = -1;
 
