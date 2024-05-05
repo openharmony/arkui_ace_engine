@@ -221,6 +221,8 @@ private:
     bool isMinResponseExceed(const std::optional<Offset>& localLocation);
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
+    float GetValueInValidRange(const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max);
+    void UpdateToValidValue();
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
 
