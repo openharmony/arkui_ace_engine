@@ -2711,6 +2711,7 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
         fontManager->UnRegisterCallbackNG(frameNode);
         fontManager->RemoveVariationNodeNG(frameNode);
     }
+    pipeline->RemoveWindowSizeChangeCallback(node->GetId());
     pipeline->RemoveOnAreaChangeNode(node->GetId());
 }
 
@@ -4125,7 +4126,7 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
     if (SelectOverlayIsOn()) {
         if (selectOverlay_->IsShowMouseMenu()) {
             CloseSelectOverlay();
-        } else {
+        } else if (newWidth != prevWidth || newHeight != prevHeight) {
             DelayProcessOverlay({ .menuIsShow = false });
         }
     }
@@ -6349,7 +6350,28 @@ void TextFieldPattern::OnVirtualKeyboardAreaChanged()
 {
     CHECK_NULL_VOID(SelectOverlayIsOn());
     selectController_->CalculateHandleOffset();
-    selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false });
+}
+
+void TextFieldPattern::RegisterWindowSizeCallback()
+{
+    if (isOritationListenerRegisted_) {
+        return;
+    }
+    isOritationListenerRegisted_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
+}
+
+void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    CHECK_NULL_VOID(SelectOverlayIsOn());
+    if (type == WindowSizeChangeReason::ROTATION) {
+        selectController_->CalculateHandleOffset();
+        selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false});
+    }
 }
 
 void TextFieldPattern::PasswordResponseKeyEvent()

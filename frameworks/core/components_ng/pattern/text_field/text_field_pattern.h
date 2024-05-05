@@ -1139,6 +1139,9 @@ public:
     void ResetContextAttr();
     void RestoreDefaultMouseState();
 
+    void RegisterWindowSizeCallback();
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
     bool IsTransparent()
     {
         return isTransparent_;
@@ -1523,6 +1526,8 @@ private:
     bool inlineFocusState_ = false;
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
+
+    bool isOritationListenerRegisted_ = false;
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
