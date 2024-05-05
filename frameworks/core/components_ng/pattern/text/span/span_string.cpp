@@ -275,6 +275,7 @@ void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type)
         ++(*iter)->interval.second;
     }
 
+    UpdateSpanMapWithOffset(span->GetStartIndex() - 1, 1);
     if (spansMap_.find(type) == spansMap_.end()) {
         spansMap_[type].emplace_back(span);
     } else {
@@ -288,11 +289,7 @@ void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type)
         }
         auto iter = specialList.begin();
         std::advance(iter, step);
-        iter = specialList.insert(iter, span);
-        for (++iter; iter != specialList.end(); ++iter) {
-            (*iter)->UpdateStartIndex((*iter)->GetStartIndex() + 1);
-            (*iter)->UpdateEndIndex((*iter)->GetEndIndex() + 1);
-        }
+        specialList.insert(iter, span);
         spansMap_[type] = specialList;
     }
     text_.insert(span->GetStartIndex(), " ");
