@@ -61,6 +61,7 @@ private:
     AroundSpecialNode IsInsertAroundSpecialNode(int32_t start);
     void InsertStringAroundSpecialNode(int32_t start, const std::string& str, AroundSpecialNode aroundMode);
     void RemoveSpecialpanText();
+    void RemoveSpecialSpans(int32_t start, int32_t length);
 };
 } // namespace OHOS::Ace
 
