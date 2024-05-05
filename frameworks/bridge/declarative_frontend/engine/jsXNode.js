@@ -1127,7 +1127,7 @@ class RenderNode {
             this.frameValue.x = this.checkUndefinedOrNullWithDefaultValue(position.x, 0);
             this.frameValue.y = this.checkUndefinedOrNullWithDefaultValue(position.y, 0);
         }
-        getUINativeModule().common.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y);
+        getUINativeModule().common.setPosition(this.nodePtr, false, this.frameValue.x, this.frameValue.y);
     }
     set rotation(rotation) {
         if (rotation === undefined || rotation === null) {
