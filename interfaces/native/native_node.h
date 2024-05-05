@@ -1457,18 +1457,6 @@ typedef enum {
      */
     NODE_MARGIN_PERCENT,
 
-    NODE_RENDER_FIT,
-
-    NODE_OUTLINE_COLOR,
-
-    NODE_SIZE,
-
-    NODE_RENDER_GROUP,
-
-    NODE_COLOR_BLEND,
-
-    NODE_FOREGROUND_BLUR_STYLE,
-
     NODE_GEOMETRY_TRANSITION,
 
     /**
@@ -1484,6 +1472,18 @@ typedef enum {
      * .value[1].i32：链的样式。枚举{@link ArkUI_RelativeLayoutChainStyle}。 \n
      */
     NODE_RELATIVE_LAYOUT_CHAIN_MODE,
+
+    NODE_RENDER_FIT,
+
+    NODE_OUTLINE_COLOR,
+
+    NODE_SIZE,
+
+    NODE_RENDER_GROUP,
+
+    NODE_COLOR_BLEND,
+
+    NODE_FOREGROUND_BLUR_STYLE,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
