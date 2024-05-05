@@ -1584,6 +1584,8 @@ private:
 
     bool blurOnSubmit_ = true;
     bool isDetachFromMainTree_ = false;
+
+    bool isFocusBGColorSet_ = false;
     bool isFocusTextColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_px;
     bool hasSupportedPreviewText = true;

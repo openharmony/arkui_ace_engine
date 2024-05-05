@@ -836,7 +836,11 @@ void TextFieldPattern::SetFocusStyle()
     CHECK_NULL_VOID(textFieldTheme);
 
     if (!paintProperty->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(textFieldTheme->GetFocusBgColor());
+        auto defaultBGColor = textFieldTheme->GetBgColor();
+        if (renderContext->GetBackgroundColorValue(defaultBGColor) == defaultBGColor) {
+            renderContext->UpdateBackgroundColor(textFieldTheme->GetFocusBgColor());
+            isFocusBGColorSet_ = true;
+        }
     }
 
     auto defaultTextColor = textFieldTheme->GetTextColor();
@@ -859,8 +863,9 @@ void TextFieldPattern::ClearFocusStyle()
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
 
-    if (!paintProperty->HasBackgroundColor()) {
+    if (isFocusBGColorSet_) {
         renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+        isFocusBGColorSet_ = false;
     }
 
     if (isFocusTextColorSet_) {
