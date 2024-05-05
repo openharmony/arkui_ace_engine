@@ -91,6 +91,7 @@ public:
             theme->maskColor_ = sheetPattern->GetAttr<Color>("mask_color", Color(0x33182431));
             theme->closeIconColor_ = sheetPattern->GetAttr<Color>("close_icon_color", Color(0x0c182431));
             theme->closeIconImageColor_ = sheetPattern->GetAttr<Color>("close_icon_image_color", Color(0xff182431));
+            theme->sheetBackgroundBlurStyle_ = sheetPattern->GetAttr<int>("sheet_background_blur_style", 0);
         }
     };
     ~SheetTheme() override = default;
@@ -160,6 +161,11 @@ public:
         return sheetType_;
     }
 
+    const int& GetSheetBackgroundBlurStyle() const
+    {
+        return sheetBackgroundBlurStyle_;
+    }
+
 protected:
     SheetTheme() = default;
 
@@ -177,6 +183,7 @@ private:
     Color closeIconColor_;
     Color closeIconImageColor_;
     std::string sheetType_;
+    int sheetBackgroundBlurStyle_;
 };
 } // namespace OHOS::Ace::NG
 

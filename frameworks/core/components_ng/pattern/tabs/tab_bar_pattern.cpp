@@ -720,6 +720,14 @@ void TabBarPattern::OnModifyDone()
         longPressEvent_ = nullptr;
         dragEvent_ = nullptr;
     }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto tabBarPaintProperty = host->GetPaintProperty<TabBarPaintProperty>();
+        CHECK_NULL_VOID(tabBarPaintProperty);
+        auto theme = pipelineContext->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(theme);
+        auto defaultBlurStyle = static_cast<BlurStyle>(theme->GetBottomTabBackgroundBlurStyle());
+        tabBarPaintProperty->UpdateTabBarBlurStyle(defaultBlurStyle);
+    }
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {

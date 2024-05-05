@@ -363,6 +363,17 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
     }
 
     NG::NavigationTitlebarOptions options;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<NavigationBarTheme>();
+        CHECK_NULL_VOID(theme);
+        auto blurStyle = static_cast<BlurStyle>(theme->GetTitlebarBackgroundBlurStyle());
+        if (blurStyle != BlurStyle::NO_MATERIAL) {
+            options.bgOptions.blurStyle = blurStyle;
+            options.bgOptions.color = Color::TRANSPARENT;
+        }
+    }
     if (info.Length() > 1) {
         ParseBackgroundOptions(info[1], options.bgOptions);
     }
@@ -485,6 +496,17 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
     }
 
     NG::NavigationToolbarOptions options;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<NavigationBarTheme>();
+        CHECK_NULL_VOID(theme);
+        auto blurStyle = static_cast<BlurStyle>(theme->GetToolbarBackgroundBlurStyle());
+        if (blurStyle != BlurStyle::NO_MATERIAL) {
+            options.bgOptions.blurStyle = blurStyle;
+            options.bgOptions.color = Color::TRANSPARENT;
+        }
+    }
     if (info.Length() > 1) {
         ParseBackgroundOptions(info[1], options.bgOptions);
     }
