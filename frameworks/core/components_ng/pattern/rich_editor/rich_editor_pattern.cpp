@@ -401,6 +401,10 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     CHECK_NULL_RETURN(pattern, -1);
     pattern->SetSyncLoad(true);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    int32_t insertIndex = options.offset.value_or(GetTextContentLength());
+    insertIndex = std::min(insertIndex, GetTextContentLength());
+    RichEditorChangeValue changeValue;
+    CHECK_NULL_RETURN(BeforeAddImage(changeValue, options, insertIndex), -1);
 
     // Disable the image itself event
     imageNode->SetDraggable(false);
@@ -417,7 +421,6 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     // Masked the default drag behavior of node image
     gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
 
-    int32_t insertIndex = options.offset.value_or(GetTextContentLength());
     int32_t spanIndex = TextSpanSplit(insertIndex);
     if (spanIndex == -1) {
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
@@ -473,6 +476,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
         CloseSelectOverlay();
         ResetSelection();
     }
+    AfterAddImage(changeValue);
     return spanIndex;
 }
 
@@ -6867,6 +6871,7 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     }
 
     auto wInsertValue = StringUtils::ToWstring(insertValue);
+    changeValue.SetRangeAfter({ innerPosition, innerPosition + wInsertValue.length()});
     std::wstring textTemp = wInsertValue;
     if (!textStyle) {
         if (typingStyle_.has_value() && spanNode && !HasSameTypingStyle(spanNode)) {
@@ -7132,11 +7137,70 @@ bool RichEditorPattern::BeforeChangeText(RichEditorChangeValue& changeValue, con
     } else {
         innerPosition = GetTextContentLength();
     }
+    // only add, do not delete
+    changeValue.SetRangeBefore({ innerPosition, innerPosition });
     GetReplacedSpan(changeValue, innerPosition, options.value, innerPosition, textStyle, options.paraStyle, true);
 
     CHECK_NULL_RETURN(eventHub->HasOnWillChange(), true);
     auto ret = eventHub->FireOnWillChange(changeValue);
     return ret;
+}
+
+bool RichEditorPattern::BeforeAddImage(RichEditorChangeValue& changeValue,
+    const ImageSpanOptions& options, int32_t insertIndex)
+{
+    auto eventHub = GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    if (!eventHub->HasOnWillChange() && !eventHub->HasOnDidChange()) {
+        return true;
+    }
+    changeValue.SetRangeBefore({ insertIndex, insertIndex });
+    changeValue.SetRangeAfter({ insertIndex, insertIndex + 1});
+    RichEditorAbstractSpanResult retInfo;
+    TextInsertValueInfo info;
+    CalcInsertValueObj(info, insertIndex, true);
+    int32_t spanIndex = info.GetSpanIndex();
+    retInfo.SetSpanIndex(spanIndex);
+    if (options.image) {
+        retInfo.SetValueResourceStr(*options.image);
+    }
+    if (options.imagePixelMap) {
+        retInfo.SetValuePixelMap(*options.imagePixelMap);
+    }
+    if (options.imageAttribute.has_value()) {
+        auto imgAttr = options.imageAttribute.value();
+        if (imgAttr.size.has_value()) {
+            retInfo.SetSizeWidth(imgAttr.size->width.value_or(CalcDimension()).ConvertToPx());
+            retInfo.SetSizeHeight(imgAttr.size->height.value_or(CalcDimension()).ConvertToPx());
+        }
+        if (imgAttr.verticalAlign.has_value()) {
+            retInfo.SetVerticalAlign(imgAttr.verticalAlign.value());
+        }
+        if (imgAttr.objectFit.has_value()) {
+            retInfo.SetImageFit(imgAttr.objectFit.value());
+        }
+        if (imgAttr.marginProp.has_value()) {
+            retInfo.SetMargin(imgAttr.marginProp.value().ToString());
+        }
+        if (imgAttr.borderRadius.has_value()) {
+            retInfo.SetBorderRadius(imgAttr.borderRadius.value().ToString());
+        }
+    }
+    retInfo.SetSpanRangeStart(0);
+    retInfo.SetSpanRangeEnd(1);
+    retInfo.SetSpanType(SpanResultType::IMAGE);
+    changeValue.SetRichEditorReplacedImageSpans(retInfo);
+    CHECK_NULL_RETURN(eventHub->HasOnWillChange(), true);
+    auto ret = eventHub->FireOnWillChange(changeValue);
+    return ret;
+}
+
+void RichEditorPattern::AfterAddImage(RichEditorChangeValue& changeValue)
+{
+    auto eventHub = GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_VOID(eventHub->HasOnDidChange());
+    eventHub->FireOnDidChange(changeValue);
 }
 
 void RichEditorPattern::FixMoveDownChange(RichEditorChangeValue& changeValue, int32_t delLength)
@@ -7263,6 +7327,11 @@ bool RichEditorPattern::BeforeChangeText(
         BeforeDrag(changeValue, innerPosition, record);
     }
 
+    if (changeValue.GetRichEditorOriginalSpans().empty()) {
+        // only add, do not delete
+        changeValue.SetRangeBefore({ caretPosition_, caretPosition_ });
+    }
+
     CHECK_NULL_RETURN(eventHub->HasOnWillChange(), true);
     auto ret = eventHub->FireOnWillChange(changeValue);
     return ret;
@@ -7274,7 +7343,7 @@ void RichEditorPattern::AfterChangeText(RichEditorChangeValue& changeValue)
     CHECK_NULL_VOID(eventHub);
     CHECK_NULL_VOID(eventHub->HasOnDidChange());
 
-    eventHub->FireOnDidChange(changeValue.GetRichEditorReplacedSpans());
+    eventHub->FireOnDidChange(changeValue);
 }
 
 OffsetF RichEditorPattern::GetTextPaintOffset() const

@@ -407,6 +407,8 @@ public:
     void RemoveEmptySpanItems();
     RefPtr<GestureEventHub> GetGestureEventHub();
     float GetSelectedMaxWidth();
+    void AfterAddImage(RichEditorChangeValue& changeValue);
+    bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
 
     bool IsUsingMouse() const
     {

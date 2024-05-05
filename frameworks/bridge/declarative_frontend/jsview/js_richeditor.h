@@ -81,6 +81,12 @@ private:
     static void ParseUserGesture(
         const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType);
     static void ParseJsFont(const JSRef<JSObject>& fontObject, Font& font);
+    static void SetTextChangeSpanResult(JSRef<JSObject>& resultObj,
+        const NG::RichEditorAbstractSpanResult& spanResult);
+    static void SetImageChangeSpanResult(JSRef<JSObject>& resultObj,
+        const NG::RichEditorAbstractSpanResult& spanResult);
+    static void SetSymbolChangeSpanResult(JSRef<JSObject>& resultObj,
+        const NG::RichEditorAbstractSpanResult& spanResult);
 };
 
 class JSRichEditorBaseController : public Referenced {
