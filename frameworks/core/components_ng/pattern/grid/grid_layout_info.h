@@ -134,28 +134,23 @@ struct GridLayoutInfo {
     EndIndexInfo FindEndIdx(int32_t endLine) const;
 
     /**
-     * Checks if the item at the specified index is partially or fully above the viewport.
-     *
      * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
      *
-     * @param idx The index of the item.
+     * @param line starting line of the item.
      * @param mainGap The gap between lines.
-     * @return True if the item is at least partially above the viewport, false otherwise.
+     * @return position of the item's top edge relative to the viewport.
      */
-    bool ItemAboveViewport(int32_t idx, float mainGap) const;
+    float GetItemTopPos(int32_t line, float mainGap) const;
 
     /**
-     * Checks if the item at the specified index is partially or fully below the viewport.
-     *
      * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
      *
-     * @param idx The index of the item.
+     * @param line starting line of the item.
      * @param itemHeight The number of rows the item occupies.
-     * @param mainSize The size of the viewport on the main axis.
      * @param mainGap The gap between items in the main axis.
-     * @return True if the item is at least partially below the viewport, false otherwise.
+     * @return position of the item's bottom edge relative to the viewport.
      */
-    bool ItemBelowViewport(int32_t idx, int32_t itemHeight, float mainSize, float mainGap) const;
+    float GetItemBottomPos(int32_t line, int32_t itemHeight, float mainGap) const;
 
     /**
      * @brief Perform a binary search to find item with [index] in the gridMatrix_.

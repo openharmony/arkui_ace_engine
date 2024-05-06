@@ -410,16 +410,19 @@ ScrollAlign GridIrregularLayoutAlgorithm::TransformAutoScrollAlign(float mainSiz
 {
     const auto& info = gridLayoutInfo_;
     if (info.jumpIndex_ >= info.startIndex_ && info.jumpIndex_ <= info.endIndex_) {
-        if (info.startMainLineIndex_ == info.endMainLineIndex_ || info.startIndex_ == info.endIndex_) {
+        auto [line, _] = info.FindItemInRange(info.jumpIndex_);
+        int32_t height = GridLayoutUtils::GetItemSize(&info, wrapper_, info.jumpIndex_).rows;
+        float topPos = info.GetItemTopPos(line, mainGap_);
+        float botPos = info.GetItemBottomPos(line, height, mainGap_);
+        if (NonPositive(topPos) && GreatOrEqual(botPos, mainSize)) {
             // item occupies the whole viewport
             return ScrollAlign::NONE;
         }
         // scrollAlign start / end if the item is not fully in viewport
-        if (info.ItemAboveViewport(info.jumpIndex_, mainGap_)) {
+        if (Negative(topPos)) {
             return ScrollAlign::START;
         }
-        int32_t rows = GridLayoutUtils::GetItemSize(&info, wrapper_, info.jumpIndex_).rows;
-        if (info.ItemBelowViewport(info.jumpIndex_, rows, mainSize, mainGap_)) {
+        if (GreatNotEqual(botPos, mainSize)) {
             return ScrollAlign::END;
         }
         return ScrollAlign::NONE;

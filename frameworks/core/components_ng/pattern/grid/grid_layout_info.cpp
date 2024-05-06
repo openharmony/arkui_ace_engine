@@ -414,26 +414,17 @@ std::pair<int32_t, int32_t> GridLayoutInfo::FindItemInRange(int32_t target) cons
     return { -1, -1 };
 }
 
-bool GridLayoutInfo::ItemAboveViewport(int32_t idx, float mainGap) const
+float GridLayoutInfo::GetItemTopPos(int32_t line, float mainGap) const
 {
-    auto [line, _] = FindItemInRange(idx);
-    float len = currentOffset_;
-    for (int i = startMainLineIndex_; i < line; ++i) {
-        len += lineHeightMap_.at(i) + mainGap;
-    }
-    return len < 0.0f;
+    float len = currentOffset_ + GetHeightInRange(startMainLineIndex_, line, mainGap);
+    return len;
 }
 
-bool GridLayoutInfo::ItemBelowViewport(int32_t idx, int32_t itemHeight, float mainSize, float mainGap) const
+float GridLayoutInfo::GetItemBottomPos(int32_t line, int32_t itemHeight, float mainGap) const
 {
-    auto [line, col] = FindItemInRange(idx);
-
-    float len = currentOffset_;
-    for (int i = startMainLineIndex_; i < line + itemHeight; ++i) {
-        len += lineHeightMap_.at(i) + mainGap;
-    }
+    float len = currentOffset_ + GetHeightInRange(startMainLineIndex_, line + itemHeight, mainGap);
     len -= mainGap;
-    return len > mainSize;
+    return len;
 }
 
 // Use the index to get the line number where the item is located
