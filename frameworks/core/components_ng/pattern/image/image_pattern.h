@@ -120,6 +120,7 @@ public:
 
     void SetImageQuality(AIImageQuality imageQuality)
     {
+        isImageQualityChange_ = (imageQuality_ != imageQuality);
         imageQuality_ = imageQuality;
     }
 
@@ -430,6 +431,7 @@ private:
 
     bool syncLoad_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
+    bool isImageQualityChange_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;
