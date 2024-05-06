@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -1869,9 +1870,10 @@ void GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapp
 // scroll to the item where the index is located
 bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
 {
+    bool irregular = UseIrregularLayout();
     // use as reference
     GridLayoutInfo* infoPtr {};
-    if (UseIrregularLayout()) {
+    if (irregular) {
         infoPtr = &gridLayoutInfo_;
     } else {
         auto gridScrollLayoutAlgorithm =
@@ -1880,15 +1882,36 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
         infoPtr = &scrollGridLayoutInfo_;
     }
 
+    float mainGap = GetMainGap();
     float targetPos = 0.0f;
-    // Based on the index, align gets the position to scroll to
-    bool success =
-        infoPtr->GetGridItemAnimatePos(gridLayoutInfo_, targetIndex_.value(), align, GetMainGap(), targetPos);
-    CHECK_NULL_RETURN(success, false);
+    if (irregular && align == ScrollAlign::CENTER) {
+        targetPos = IrregularAnimateToCenter(mainGap);
+        if (Negative(targetPos)) {
+            return false;
+        }
+    } else {
+        // Based on the index, align gets the position to scroll to
+        bool success = infoPtr->GetGridItemAnimatePos(gridLayoutInfo_, targetIndex_.value(), align, mainGap, targetPos);
+        CHECK_NULL_RETURN(success, false);
+    }
 
     isSmoothScrolling_ = true;
     AnimateTo(targetPos, -1, nullptr, true);
     return true;
+}
+
+float GridPattern::IrregularAnimateToCenter(float mainGap)
+{
+    auto info = gridLayoutInfo_;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1.0f);
+    auto it = info.FindInMatrix(*targetIndex_);
+    if (it == info.gridMatrix_.end()) {
+        return -1.0f;
+    }
+    auto size = GridLayoutUtils::GetItemSize(&info, RawPtr(host), *targetIndex_);
+    auto [center, offset] = info.FindItemCenter(it->first, size.rows, mainGap);
+    return info.GetHeightInRange(0, center, mainGap) + offset - info.lastMainSize_ / 2.0f;
 }
 
 std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()
