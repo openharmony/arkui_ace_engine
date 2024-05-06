@@ -78,6 +78,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("blockStyle", &JSSlider::SetBlockStyle);
     JSClass<JSSlider>::StaticMethod("stepSize", &JSSlider::SetStepSize);
     JSClass<JSSlider>::StaticMethod("sliderInteractionMode", &JSSlider::SetSliderInteractionMode);
+    JSClass<JSSlider>::StaticMethod("slideRange", &JSSlider::SetValidSlideRange);
     JSClass<JSSlider>::StaticMethod("onChange", &JSSlider::OnChange);
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSlider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -316,6 +317,37 @@ void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
         return;
     }
     SliderModel::GetInstance()->SetMaxLabel(info[0]->ToNumber<float>());
+}
+
+void JSSlider::SetValidSlideRange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        SliderModel::GetInstance()->ResetValidSlideRange();
+        return;
+    }
+
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto getValueRangeFrom = paramObject->GetProperty("from");
+    auto getValueRangeTo = paramObject->GetProperty("to");
+    float rangeFromValue = std::numeric_limits<float>::quiet_NaN();
+    float rangeToValue = std::numeric_limits<float>::quiet_NaN();
+    if (getValueRangeFrom->IsEmpty()) {
+        rangeFromValue = std::numeric_limits<float>::infinity();
+    } else if (getValueRangeFrom->IsNumber()) {
+        rangeFromValue = getValueRangeFrom->ToNumber<double>();
+    }
+    if (getValueRangeTo->IsEmpty()) {
+        rangeToValue = std::numeric_limits<float>::infinity();
+    } else if (getValueRangeTo->IsNumber()) {
+        rangeToValue = getValueRangeTo->ToNumber<double>();
+    }
+
+    if (std::isnan(rangeFromValue) || std::isnan(rangeToValue) ||
+        (std::isinf(rangeFromValue) && std::isinf(rangeToValue))) {
+        SliderModel::GetInstance()->ResetValidSlideRange();
+        return;
+    }
+    SliderModel::GetInstance()->SetValidSlideRange(rangeFromValue, rangeToValue);
 }
 
 void JSSlider::SetMinResponsiveDistance(const JSCallbackInfo& info)

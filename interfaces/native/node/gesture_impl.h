@@ -55,5 +55,8 @@ int32_t RemoveChildGesture(ArkUI_GestureRecognizer* group, ArkUI_GestureRecogniz
 
 void HandleGestureEvent(ArkUINodeEvent* event);
 
+int32_t SetGestureInterrupterToNode(
+    ArkUI_NodeHandle node,  ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info));
+
 }; // namespace OHOS::Ace::GestureModel
 #endif

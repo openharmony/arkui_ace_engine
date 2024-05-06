@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod)
 public:
-    ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, bool selected, bool sensitive,
+    ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, bool selected, bool sensitive = false,
         ImageInterpolation interpolation = ImageInterpolation::NONE)
         : canvasImage_(canvasImage), selected_(selected), sensitive_(sensitive), interpolationDefault_(interpolation)
     {}

@@ -570,6 +570,11 @@ public:
 
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
+    bool IsLayoutSeperately() const
+    {
+        return layoutSeperately_;
+    }
+
     virtual void PaintDebugBoundaryTreeAll(bool flag);
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
 
@@ -666,6 +671,8 @@ protected:
     void CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId);
 
     bool needCallChildrenUpdate_ = true;
+
+    bool layoutSeperately_ = false;
 
     virtual void PaintDebugBoundary(bool flag) {}
 

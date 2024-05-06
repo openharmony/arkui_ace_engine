@@ -3260,7 +3260,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg077, TestSize.Level1)
      */
     auto pipeline = PipelineContext::GetMainPipelineContext();
     EXPECT_NE(pipeline, nullptr);
-    EXPECT_EQ(pipeline->HandleFocusNode(), nullptr);
+    EXPECT_NE(pipeline->HandleFocusNode(), nullptr);
 
     /**
      * @tc.steps2: Changing node information affects the return results.

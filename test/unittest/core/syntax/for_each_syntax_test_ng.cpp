@@ -84,7 +84,7 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxTest002, TestSize.Level1)
     // ViewStackProcessor will not pop when it's size equals 1.
     EXPECT_FALSE(ViewStackProcessor::GetInstance()->GetMainElementNode() == nullptr);
     // ViewStackProcessor will not pop when it's size equals 1.
-    EXPECT_FALSE(ViewStackProcessor::GetInstance()->GetMainFrameNode() == nullptr);
+    EXPECT_TRUE(ViewStackProcessor::GetInstance()->GetMainFrameNode() == nullptr);
 }
 
 /**

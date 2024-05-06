@@ -407,7 +407,8 @@ class FrameNode {
   }
 
   setMeasuredSize(size: Size): void {
-    getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), size.width, size.height);
+    getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), Math.max(size.width, 0),
+        Math.max(size.height, 0));
   }
 
   setLayoutPosition(position: Position): void {

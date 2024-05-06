@@ -19,6 +19,7 @@
 
 #include "base/utils/string_utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
+#include "interfaces/native/native_type.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -264,6 +265,27 @@ RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc)
     };
     auto index = BinarySearchFindIndex(aniTimFuncMap, ArraySize(aniTimFuncMap), aniTimFunc.c_str());
     return index < 0 ? nullptr : aniTimFuncMap[index].value;
+}
+
+std::string CurveIntToString(int curve)
+{
+    static const LinearEnumMapNode<ArkUI_AnimationCurve, std::string> curveMap[] = {
+        { ArkUI_AnimationCurve::ARKUI_CURVE_EASE, DOM_ANIMATION_TIMING_FUNCTION_EASE },
+        { ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN, DOM_ANIMATION_TIMING_FUNCTION_EASE_IN },
+        { ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN_OUT, DOM_ANIMATION_TIMING_FUNCTION_EASE_IN_OUT },
+        { ArkUI_AnimationCurve::ARKUI_CURVE_EASE_OUT, DOM_ANIMATION_TIMING_FUNCTION_EASE_OUT},
+        { ArkUI_AnimationCurve::ARKUI_CURVE_EXTREME_DECELERATION, DOM_ANIMATION_TIMING_FUNCTION_EXTREME_DECELERATION },
+        { ArkUI_AnimationCurve::ARKUI_CURVE_FAST_OUT_LINEAR_IN, DOM_ANIMATION_TIMING_FUNCTION_FAST_OUT_LINEAR_IN },
+        { ArkUI_AnimationCurve::ARKUI_CURVE_FAST_OUT_SLOW_IN, DOM_ANIMATION_TIMING_FUNCTION_FAST_OUT_SLOW_IN},
+        { ArkUI_AnimationCurve::ARKUI_CURVE_FRICTION, DOM_ANIMATION_TIMING_FUNCTION_FRICTION },
+        { ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR, DOM_ANIMATION_TIMING_FUNCTION_LINEAR},
+        { ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR_OUT_SLOW_IN, DOM_ANIMATION_TIMING_FUNCTION_LINEAR_OUT_SLOW_IN},
+        { ArkUI_AnimationCurve::ARKUI_CURVE_RHYTHM, DOM_ANIMATION_TIMING_FUNCTION_RHYTHM},
+        { ArkUI_AnimationCurve::ARKUI_CURVE_SHARP, DOM_ANIMATION_TIMING_FUNCTION_SHARP},
+        { ArkUI_AnimationCurve::ARKUI_CURVE_SMOOTH, DOM_ANIMATION_TIMING_FUNCTION_SMOOTH},
+    };
+    auto index = BinarySearchFindIndex(curveMap, ArraySize(curveMap), static_cast<ArkUI_AnimationCurve>(curve));
+    return index < 0 ? DOM_ANIMATION_TIMING_FUNCTION_LINEAR : curveMap[index].value;
 }
 
 bool ParseCurveParam(

@@ -156,6 +156,7 @@ const std::string PREVIEW_STYLE_UNDERLINE = "underline";
 constexpr int32_t PREVIEW_NO_ERROR = 0;
 constexpr int32_t PREVIEW_NULL_POINTER = 1;
 constexpr int32_t PREVIEW_BAD_PARAMETERS = -1;
+constexpr double MINIMAL_OFFSET = 0.01f;
 
 static std::unordered_map<TextContentType, std::pair<AceAutoFillType, std::string>> contentTypeMap_ = {
     {TextContentType::VISIBLE_PASSWORD,
@@ -1502,15 +1503,15 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::UP) {
         RequestKeyboardAfterLongPress();
     }
-    if (SelectOverlayIsOn() && !isTouchCaret_) {
-        return;
-    }
 
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
+        if (SelectOverlayIsOn() && !isTouchCaret_) {
+            return;
+        }
         if (!IsUsingMouse()) {
             HandleTouchMove(info);
         }
@@ -1526,6 +1527,9 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         auto lastCaretIndex = selectController_->GetCaretIndex();
         auto lastCaretRect = selectController_->GetCaretRect();
         isTouchCaret_ = RepeatClickCaret(offset, lastCaretIndex, lastCaretRect);
+        if (isTouchCaret_) {
+            CloseSelectOverlay(true);
+        }
     }
 }
 
@@ -1546,7 +1550,7 @@ void TextFieldPattern::HandleTouchUp()
 
 void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
 {
-    if (isTouchCaret_) {
+    if (isTouchCaret_ || GetIsPreviewText()) {
         UpdateCaretByTouchMove(info);
     }
 }
@@ -1559,13 +1563,23 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     auto touchOffset = info.GetTouches().front().GetLocalLocation();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
+        float offsetY = IsTextArea() ? GetTextRect().GetX() : contentRect_.GetX();
+        std::vector<RectF> previewTextRects = GetPreviewTextRects();
+        if (previewTextRects.empty()) {
+            TAG_LOGI(ACE_TEXT_FIELD, "preview text rect error");
+            return;
+        }
+
+        double limitL;
+        double limitR;
+        double limitT = previewTextRects.front().Top() + offsetY + MINIMAL_OFFSET;
+        double limitB = previewTextRects.back().Bottom() + offsetY - MINIMAL_OFFSET;
+
         Offset previewTextTouchOffset;
-        double offsetLeft = GetPreviewTextRects().front().Left() + GetTextRect().GetX();
-        double offsetRight = GetPreviewTextRects().front().Right() + GetTextRect().GetX();
-        double offsetTop = GetPreviewTextRects().front().Top() + GetTextRect().GetY();
-        double offsetBottom = GetPreviewTextRects().front().Bottom() + GetTextRect().GetY();
-        previewTextTouchOffset.SetX(std::clamp(touchOffset.GetX(), offsetLeft, offsetRight));
-        previewTextTouchOffset.SetY(std::clamp(touchOffset.GetY(), offsetTop, offsetBottom));
+        CalculatePreviewingTextMovingLimit(touchOffset, limitL, limitR);
+
+        previewTextTouchOffset.SetX(std::clamp(touchOffset.GetX(), limitL, limitR));
+        previewTextTouchOffset.SetY(std::clamp(touchOffset.GetY(), limitT, limitB));
         selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset);
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
@@ -2408,6 +2422,7 @@ void TextFieldPattern::OnModifyDone()
     ProcessScroll();
     ProcessCounter();
     Register2DragDropManager();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     isModifyDone_ = true;
 }
 
@@ -2741,6 +2756,9 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     }
     contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetWideText().length());
+    if (GetIsPreviewText() && GetWideText().empty()) {
+        FinishTextPreviewOperation();
+    }
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -4000,8 +4018,13 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         return;
     }
     if (IsTextArea() && action == TextInputAction::NEW_LINE) {
-        if (GetInputFilter() != "\n") {
-            InsertValue("\n");
+        if (!textAreaBlurOnSubmit_) {
+            if (GetInputFilter() != "\n") {
+                InsertValue("\n");
+            }
+        } else {
+            CloseKeyboard(forceCloseKeyboard, false);
+            FocusHub::LostFocusToViewRoot();
         }
         return;
     }
@@ -4012,8 +4035,10 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     }
     // LostFocusToViewRoot may not cause current lost focus, only stop twinkling when it is truly lost focus,
     // which will call StopTwinkling on HandleBlurEvent method.
-    CloseKeyboard(forceCloseKeyboard, false);
-    FocusHub::LostFocusToViewRoot();
+    if (textInputBlurOnSubmit_) {
+        CloseKeyboard(forceCloseKeyboard, false);
+        FocusHub::LostFocusToViewRoot();
+    }
 }
 
 void TextFieldPattern::RecordSubmitEvent() const
@@ -5583,11 +5608,7 @@ void TextFieldPattern::StopEditing()
 #else
     if (isCustomKeyboardAttached_) {
 #endif
-        if (blurOnSubmit_) {
-            FocusHub::LostFocusToViewRoot();
-        } else {
-            NotifyOnEditChanged(false);
-        }
+        FocusHub::LostFocusToViewRoot();
     }
     UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();
@@ -6841,7 +6862,7 @@ bool TextFieldPattern::CheckPreviewTextValidate(PreviewTextInfo info) const
 
 PreviewTextStyle TextFieldPattern::GetPreviewTextStyle() const
 {
-    auto defaultStyle = PreviewTextStyle::UNDERLINE;
+    auto defaultStyle = PreviewTextStyle::NORMAL;
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, defaultStyle);
     if (paintProperty->HasPreviewTextStyle()) {
@@ -6853,5 +6874,37 @@ PreviewTextStyle TextFieldPattern::GetPreviewTextStyle() const
         }
     }
     return defaultStyle;
+}
+
+void TextFieldPattern::ReceivePreviewTextStyle(const std::string& style)
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!style.empty()) {
+        paintProperty->UpdatePreviewTextStyle(style);
+    }
+}
+
+void TextFieldPattern::CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR)
+{
+    float offsetX = IsTextArea() ? contentRect_.GetX() : GetTextRect().GetX();
+    float offsetY = IsTextArea() ? GetTextRect().GetX() : contentRect_.GetX();
+    std::vector<RectF> previewTextRects = GetPreviewTextRects();
+    if (GreatNotEqual(touchOffset.GetY(), previewTextRects.back().Bottom() + offsetY)) {
+        limitL = previewTextRects.back().Left() + offsetX + MINIMAL_OFFSET;
+        limitR = previewTextRects.back().Right() + offsetX - MINIMAL_OFFSET;
+    } else if (GreatNotEqual(touchOffset.GetY(), previewTextRects.front().Top() + offsetY)) {
+        limitL = previewTextRects.front().Left() + offsetX + MINIMAL_OFFSET;
+        limitR = previewTextRects.front().Right() + offsetX - MINIMAL_OFFSET;
+    } else {
+        for (const auto& drawRect : previewTextRects) {
+            if (GreatOrEqual(touchOffset.GetY(), drawRect.Top() + offsetY)
+                && LessOrEqual(touchOffset.GetY(), drawRect.Bottom() + offsetY)) {
+                limitL = drawRect.Left() + offsetX + MINIMAL_OFFSET;
+                limitR = drawRect.Right() + offsetX - MINIMAL_OFFSET;
+                break;
+            }
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

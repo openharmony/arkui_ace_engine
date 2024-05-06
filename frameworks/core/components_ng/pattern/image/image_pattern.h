@@ -120,6 +120,7 @@ public:
 
     void SetImageQuality(AIImageQuality imageQuality)
     {
+        isImageQualityChange_ = (imageQuality_ != imageQuality);
         imageQuality_ = imageQuality;
     }
 
@@ -294,6 +295,7 @@ public:
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
+    void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
 
 private:
@@ -430,6 +432,7 @@ private:
 
     bool syncLoad_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
+    bool isImageQualityChange_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;

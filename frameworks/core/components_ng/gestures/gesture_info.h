@@ -196,6 +196,11 @@ public:
         buff += sizeof(int32_t);
         return buff;
     }
+    
+    void SetUserData(void* userData)
+    {
+        userData_ = userData;
+    }
 
     virtual RefPtr<NGGestureRecognizer> CreateRecognizer() = 0;
 
@@ -209,6 +214,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionEndId_;
     std::unique_ptr<GestureEventNoParameter> onActionCancelId_;
     RefPtr<GestureInfo> gestureInfo_;
+    void* userData_;
 };
 } // namespace OHOS::Ace::NG
 
