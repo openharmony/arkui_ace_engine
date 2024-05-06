@@ -346,6 +346,97 @@ class JSBuilderNode extends BaseNode {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+class NodeAdapter {
+    constructor() {
+        this.count_ = 0;
+        this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
+        this.nativePtr_ = this.nativeRef_.getNativeHandle();
+        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this.onAttachToNode !== undefined ? this.onAttachToNodePtr : undefined, this.onDetachFromNode !== undefined ? this.onDetachFromNode : undefined, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined);
+    }
+    dispose() {
+        this.nativeRef_.dispose();
+        this.nativePtr_ = null;
+    }
+    set totalNodeCount(count) {
+        this.count_ = count;
+        getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, this.count_);
+    }
+    get totalNodeCount() {
+        return this.count_;
+    }
+    notifyItemReloaded() {
+        getUINativeModule().nodeAdapter.notifyItemReloaded(this.nativePtr_);
+    }
+    notifyItemChanged(start, count) {
+        getUINativeModule().nodeAdapter.notifyItemChanged(this.nativePtr_, start, count);
+    }
+    notifyItemRemoved(start, count) {
+        getUINativeModule().nodeAdapter.notifyItemRemoved(this.nativePtr_, start, count);
+    }
+    notifyItemInserted(start, count) {
+        getUINativeModule().nodeAdapter.notifyItemInserted(this.nativePtr_, start, count);
+    }
+    notifyItemMoved(from, to) {
+        getUINativeModule().nodeAdapter.notifyItemMoved(this.nativePtr_, from, to);
+    }
+    getAllItems() {
+        let result = new Array();
+        let nodes = getUINativeModule().nodeAdapter.getAllItems(this.nativePtr_);
+        nodes.forEach(node => {
+            let nodeId = node.nodeId;
+            if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+                let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+                result.push(frameNode);
+            }
+        });
+        return result;
+    }
+    onAttachToNodePtr(target) {
+        let nodeId = target.nodeId;
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            if (this.onAttachToNode !== undefined && frameNode !== undefined) {
+                this.onAttachToNode(frameNode);
+            }
+        }
+    }
+    onCreateNewNodePtr(index) {
+        if (this.onCreateNewChild !== undefined) {
+            let node = this.onCreateNewChild(index);
+            return node.getNodePtr();
+        }
+        return null;
+    }
+    onDisposeNodePtr(id, node) {
+        let nodeId = node.nodeId;
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            if (this.onDisposeChild !== undefined && frameNode !== undefined) {
+                this.onDisposeChild(id, frameNode);
+            }
+        }
+    }
+    static attachNodeAdapter(adapter, node) {
+        getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
+    }
+    static detachNodeAdapter(node) {
+        getUINativeModule().nodeAdapter.detachNodeAdapter(node.getNodePtr());
+    }
+}
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 class BuilderNodeFinalizationRegisterProxy {
     constructor() {
         this.finalizationRegistry_ = new FinalizationRegistry((heldValue) => {
@@ -788,8 +879,7 @@ class FrameNode {
         return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
     }
     setMeasuredSize(size) {
-        getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), Math.max(size.width, 0),
-            Math.max(size.height, 0));
+        getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), Math.max(size.width, 0), Math.max(size.height, 0));
     }
     setLayoutPosition(position) {
         getUINativeModule().frameNode.setLayoutPosition(this.getNodePtr(), position.x, position.y);
@@ -798,8 +888,7 @@ class FrameNode {
         const minSize = constraint.minSize;
         const maxSize = constraint.maxSize;
         const percentReference = constraint.percentReference;
-        getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
-            maxSize.height, percentReference.width, percentReference.height);
+        getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width, maxSize.height, percentReference.width, percentReference.height);
     }
     layout(position) {
         getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
@@ -935,30 +1024,30 @@ class TypedFrameNode extends FrameNode {
 }
 const __creatorMap__ = new Map([
     ["Text", (context) => {
-            return new TypedFrameNode(context, "Text", (node, type) => {
-                return new ArkTextComponent(node, type);
-            });
-        }],
+        return new TypedFrameNode(context, "Text", (node, type) => {
+            return new ArkTextComponent(node, type);
+        });
+    }],
     ["Column", (context) => {
-            return new TypedFrameNode(context, "Column", (node, type) => {
-                return new ArkColumnComponent(node, type);
-            });
-        }],
+        return new TypedFrameNode(context, "Column", (node, type) => {
+            return new ArkColumnComponent(node, type);
+        });
+    }],
     ["Row", (context) => {
-            return new TypedFrameNode(context, "Row", (node, type) => {
-                return new ArkRowComponent(node, type);
-            });
-        }],
+        return new TypedFrameNode(context, "Row", (node, type) => {
+            return new ArkRowComponent(node, type);
+        });
+    }],
     ["Stack", (context) => {
-            return new TypedFrameNode(context, "Stack", (node, type) => {
-                return new ArkStackComponent(node, type);
-            });
-        }],
+        return new TypedFrameNode(context, "Stack", (node, type) => {
+            return new ArkStackComponent(node, type);
+        });
+    }],
     ["GridRow", (context) => {
-            return new TypedFrameNode(context, "GridRow", (node, type) => {
-                return new ArkGridRowComponent(node, type);
-            });
-        }],
+        return new TypedFrameNode(context, "GridRow", (node, type) => {
+            return new ArkGridRowComponent(node, type);
+        });
+    }],
     ["GridCol", (context) => {
             return new TypedFrameNode(context, "GridCol", (node, type) => {
                 return new ArkGridColComponent(node, type);
@@ -975,20 +1064,30 @@ const __creatorMap__ = new Map([
             });
         }],
     ["Flex", (context) => {
-            return new TypedFrameNode(context, "Flex", (node, type) => {
-                return new ArkFlexComponent(node, type);
-            });
-        }],
+        return new TypedFrameNode(context, "Flex", (node, type) => {
+            return new ArkFlexComponent(node, type);
+        });
+    }],
     ["Swiper", (context) => {
-            return new TypedFrameNode(context, "Swiper", (node, type) => {
-                return new ArkSwiperComponent(node, type);
-            });
-        }],
+        return new TypedFrameNode(context, "Swiper", (node, type) => {
+            return new ArkSwiperComponent(node, type);
+        });
+    }],
     ["Progress", (context) => {
-            return new TypedFrameNode(context, "Progress", (node, type) => {
-                return new ArkProgressComponent(node, type);
-            });
-        }],
+        return new TypedFrameNode(context, "Progress", (node, type) => {
+            return new ArkProgressComponent(node, type);
+        });
+    }],
+    ["List", (context) => {
+        return new TypedFrameNode(context, "List", (node, type) => {
+            return new ArkListComponent(node, type);
+        });
+    }],
+    ["ListItem", (context) => {
+        return new TypedFrameNode(context, "ListItem", (node, type) => {
+            return new ArkListItemComponent(node, type);
+        });
+    }],
 ]);
 class TypedNode {
     static createNode(context, type) {
@@ -1084,11 +1183,6 @@ class ColorMetrics {
     }
     static rgba(red, green, blue, alpha = MAX_ALPHA_VALUE) {
         return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
-    }
-    static isRGBOrRGBA(format) {
-        const rgbPattern = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
-        const rgbaPattern = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(\.\d+)?)\s*\)$/i;
-        return rgbPattern.test(format) || rgbaPattern.test(format);
     }
     static rgbOrRGBA(format) {
         const rgbPattern = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
@@ -1807,5 +1901,6 @@ class NodeContent extends Content {
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask,
-    edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent, TypedNode
+    edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
+    TypedNode, NodeAdapter
 };

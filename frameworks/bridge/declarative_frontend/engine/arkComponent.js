@@ -21173,10 +21173,54 @@ class ListFadingEdgeModifier extends ModifierWithKey {
   }
 }
 ListFadingEdgeModifier.identity = Symbol('fadingEdge');
+
+class ListSpaceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetSpace(node);
+    }
+    else {
+      getUINativeModule().list.setSpace(node, this.value);
+    }
+  }
+}
+ListSpaceModifier.identity = Symbol('listSpace');
+
+class ListInitialIndexModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetInitialIndex(node);
+    }
+    else {
+      getUINativeModule().list.setInitialIndex(node, this.value);
+    }
+  }
+}
+ListInitialIndexModifier.identity = Symbol('listInitialIndex');
+
 class ArkListComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+
+  initialize(value) {
+    if (value[0] !== undefined) {
+      if (value[0].initialIndex !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, ListInitialIndexModifier.identity, ListInitialIndexModifier, value[0].initialIndex);
+      }
+      if (value[0].space !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, ListSpaceModifier.identity, ListSpaceModifier, value[0].space);
+      }
+    }
+    return this;
+  }
+
   lanes(value, gutter) {
     let opt = new ArkLanesOpt();
     opt.gutter = gutter;
@@ -21353,6 +21397,9 @@ ListItemSelectableModifier.identity = Symbol('listItemSelectable');
 class ArkListItemComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    return this;
   }
   sticky(value) {
     throw new Error('Method not implemented.');

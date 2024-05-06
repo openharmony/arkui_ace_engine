@@ -138,6 +138,10 @@ declare class ArkSwiperComponent extends ArkComponent {}
 
 declare class ArkProgressComponent extends ArkComponent {}
 
+declare class ArkListComponent extends ArkComponent {}
+
+declare class ArkListItemComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;

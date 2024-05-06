@@ -176,6 +176,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_nav_router_bridge.cpp",
       "nativeModule/arkts_native_navigation_bridge.cpp",
       "nativeModule/arkts_native_navigator_bridge.cpp",
+      "nativeModule/arkts_native_node_adapter_bridge.cpp",
       "nativeModule/arkts_native_node_container_bridge.cpp",
       "nativeModule/arkts_native_panel_bridge.cpp",
       "nativeModule/arkts_native_particle_bridge.cpp",

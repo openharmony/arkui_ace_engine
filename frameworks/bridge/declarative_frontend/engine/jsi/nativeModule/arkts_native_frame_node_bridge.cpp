@@ -166,7 +166,8 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
         { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK },
         { "Blank", ARKUI_BLANK }, { "Image", ARKUI_IMAGE },
         { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }, { "Flex", ARKUI_FLEX },
-        { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }};
+        { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }},
+        { "List", ARKUI_LIST }, { "ListItem", ARKUI_LIST_ITEM } };
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     RefPtr<FrameNode> node;
     auto iter = typeMap.find(type);
@@ -249,8 +250,8 @@ void FrameNodeBridge::SetCustomFunc(const RefPtr<FrameNode>& frameNode, ArkUIRun
     frameNode->SetExtensionHandler(customNode);
 }
 
-std::function<void(LayoutConstraintF& layoutConstraint)> FrameNodeBridge::GetMeasureFunc(EcmaVM* vm,
-    Local<panda::ObjectRef> obj)
+std::function<void(LayoutConstraintF& layoutConstraint)> FrameNodeBridge::GetMeasureFunc(
+    EcmaVM* vm, Local<panda::ObjectRef> obj)
 {
     return [vm, object = JsWeak(panda::CopyableGlobal(vm, obj))](LayoutConstraintF& layoutConstraint) {
         panda::LocalScope pandaScope(vm);
@@ -307,9 +308,9 @@ void FrameNodeBridge::FireMeasureCallback(EcmaVM* vm, JsWeak<panda::CopyableGlob
     };
     auto maxSizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize, valuesOfMaxSize);
     auto minSizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize, valuesOfMinSize);
-    auto percentReferenceObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize,
-        valuesOfPercentReference);
-    
+    auto percentReferenceObj =
+        panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize, valuesOfPercentReference);
+
     Local<JSValueRef> values[] = { maxSizeObj, minSizeObj, percentReferenceObj };
     const char* keys[] = { "maxSize", "minSize", "percentReference" };
     auto constraintObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
@@ -328,11 +329,9 @@ void FrameNodeBridge::FireLayoutCallback(EcmaVM* vm, JsWeak<panda::CopyableGloba
     panda::Local<panda::FunctionRef> func = funcObj;
 
     const char* keys[] = { "x", "y" };
-    Local<JSValueRef> valuesOfPosition[] = {
-        panda::NumberRef::New(vm, static_cast<double>(position.GetX())),
-        panda::NumberRef::New(vm, static_cast<double>(position.GetY()))
-    };
-    
+    Local<JSValueRef> valuesOfPosition[] = { panda::NumberRef::New(vm, static_cast<double>(position.GetX())),
+        panda::NumberRef::New(vm, static_cast<double>(position.GetY())) };
+
     auto positionObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, valuesOfPosition);
     panda::Local<panda::JSValueRef> params[1] = { positionObj };
     func->Call(vm, obj.ToLocal(), params, 1);
@@ -782,7 +781,7 @@ ArkUINativeModuleValue FrameNodeBridge::LayoutNode(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> y = runtimeCallInfo->GetCallArgRef(2);
     CHECK_NULL_RETURN(y->IsNumber(), defaultReturnValue);
     ArkUI_Float32 positionValue[2] = { x->ToNumber(vm)->Value(), y->ToNumber(vm)->Value() };
-    
+
     ArkUIVMContext vmContext = nullptr;
     GetArkUIFullNodeAPI()->getExtendedAPI()->layoutNode(vmContext, nativeNode, positionValue);
     return defaultReturnValue;
