@@ -32,14 +32,50 @@
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetSvgTraceEnabled(), fmt, ##__VA_ARGS__)
 #define ACE_LAYOUT_SCOPED_TRACE(fmt, ...) \
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetLayoutTraceEnabled(), fmt, ##__VA_ARGS__)
-// Enable trace for component creation and attribute settings
-#define ACE_BUILD_SCOPED_TRACE(fmt, ...) \
-    AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetBuildTraceEnabled(), fmt, ##__VA_ARGS__)
 #ifdef ACE_DEBUG
 #define ACE_DEBUG_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
 #else
 #define ACE_DEBUG_SCOPED_TRACE(fmt, ...)
 #endif
+
+#define ACE_LAYOUT_TRACE_BEGIN(fmt, ...) \
+    if (SystemProperties::GetLayoutTraceEnabled() && AceTraceEnabled()) { \
+        AceTraceBeginWithArgs(fmt, ##__VA_ARGS__); \
+    }
+#define ACE_LAYOUT_TRACE_END() \
+    if (SystemProperties::GetLayoutTraceEnabled() && AceTraceEnabled()) { \
+        AceTraceEnd(); \
+    }
+
+// Enable trace for component creation and attribute settings
+#define ACE_BUILD_TRACE_BEGIN(fmt, ...) \
+    if (SystemProperties::GetBuildTraceEnabled() && AceTraceEnabled()) { \
+        AceTraceBeginWithArgs(fmt, ##__VA_ARGS__); \
+    }
+#define ACE_BUILD_TRACE_END() \
+    if (SystemProperties::GetBuildTraceEnabled() && AceTraceEnabled()) { \
+        AceTraceEnd(); \
+    }
+
+#define CHECK_NULL_VOID_LAYOUT_TRACE_END(ptr) \
+    do {                           \
+        if (!(ptr)) {              \
+            if (SystemProperties::GetLayoutTraceEnabled() && AceTraceEnabled()) { \
+                AceTraceEnd();     \
+            }                      \
+            return;                \
+        }                          \
+    } while (0)                    \
+
+#define CHECK_NULL_RETURN_LAYOUT_TRACE_END(ptr, ret) \
+    do {                                  \
+        if (!(ptr)) {                     \
+            if (SystemProperties::GetLayoutTraceEnabled() && AceTraceEnabled()) { \
+                AceTraceEnd();            \
+            }                             \
+            return ret;                   \
+        }                                 \
+    } while (0)                           \
 
 #define ACE_FUNCTION_TRACE() ACE_SCOPED_TRACE(__func__)
 
