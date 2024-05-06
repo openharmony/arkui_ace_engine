@@ -569,9 +569,9 @@ template("declarative_js_engine") {
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
         if (is_arkui_x) {
-          deps += [ "$ace_napi:ace_container_scope_static" ]
+          deps += [ "$ace_root/frameworks/core:ace_container_scope_static" ]
         } else {
-          deps += [ "$ace_napi:ace_container_scope" ]
+          deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
         }
       }
     }
@@ -971,7 +971,7 @@ template("declarative_js_engine_ng") {
       }
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        deps += [ "$ace_napi:ace_container_scope" ]
+        deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
       }
     }
 

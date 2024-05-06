@@ -191,6 +191,15 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/build:libace_compatible"
+                },
+                {
+                    "header": {
+                      "header_base": "//foundation/arkui/ace_engine/frameworks/core/common/",
+                      "header_files": [
+                          "container_scope.h"
+                      ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/frameworks/core:ace_container_scope"
                 }
             ],
             "test": [

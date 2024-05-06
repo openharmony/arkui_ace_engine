@@ -71,7 +71,7 @@ template("napi_dragcontroller_static") {
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:udmf_data_napi" ]
-        external_deps += [ "napi:ace_container_scope" ]
+        deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
       }
       external_deps += [ "kv_store:distributeddata_inner" ]
     }

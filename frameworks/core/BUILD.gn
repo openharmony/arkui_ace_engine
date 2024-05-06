@@ -14,6 +14,31 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
+config("container_scope_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "$ace_root/frameworks" ]
+}
+
+ohos_shared_library("ace_container_scope") {
+  public_configs = [ ":container_scope_config" ]
+
+  configs = [ "$ace_root:ace_config" ]
+
+  sources = [ "$ace_root/frameworks/core/common/container_scope.cpp" ]
+
+  subsystem_name = ace_engine_subsystem
+  innerapi_tags = [ "platformsdk_indirect" ]
+  part_name = ace_engine_part
+}
+
+ohos_source_set("ace_container_scope_static") {
+  public_configs = [ ":container_scope_config" ]
+
+  configs = [ "$ace_root:ace_config" ]
+
+  sources = [ "$ace_root/frameworks/core/common/container_scope.cpp" ]
+}
+
 # build core sources
 template("ace_core_source_set") {
   forward_variables_from(invoker, "*")
@@ -520,9 +545,9 @@ template("ace_core_source_set") {
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
       if (is_arkui_x) {
-        deps += [ "$ace_napi:ace_container_scope_static" ]
+        deps += [ ":ace_container_scope_static" ]
       } else {
-        external_deps += [ "napi:ace_container_scope" ]
+        deps += [ ":ace_container_scope" ]
       }
     }
 
@@ -870,9 +895,9 @@ template("ace_core_ng_source_set") {
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
       if (is_arkui_x) {
-        deps += [ "$ace_napi:ace_container_scope_static" ]
+        deps += [ ":ace_container_scope_static" ]
       } else {
-        external_deps += [ "napi:ace_container_scope" ]
+        deps += [ ":ace_container_scope" ]
       }
     }
     deps += [

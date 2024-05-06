@@ -62,6 +62,7 @@ ohos_shared_library("movingphotoview") {
     ":gen_obj_src_multimedia_movingphotoview_abc",
     ":gen_obj_src_multimedia_movingphotoview_js",
     "$ace_root/build:libace_compatible",
+    "$ace_root/frameworks/core:ace_container_scope",
     "$ace_root/interfaces/inner_api/ace:ace_uicontent",
     "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
   ]
@@ -73,7 +74,6 @@ ohos_shared_library("movingphotoview") {
     "image_framework:image",
     "image_framework:image_native",
     "media_library:media_library_manager",
-    "napi:ace_container_scope",
     "napi:ace_napi",
   ]
 
