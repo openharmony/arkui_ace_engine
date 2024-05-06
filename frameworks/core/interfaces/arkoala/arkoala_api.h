@@ -2128,10 +2128,12 @@ struct ArkUIGestureInterruptInfo {
 struct ArkUIGestureModifier {
     ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers, void* userData);
     ArkUIGesture* (*createLongPressGesture)(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration, void* userData);
-    ArkUIGesture* (*createPanGesture)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, void* userData);
+    ArkUIGesture* (*createPanGesture)(
+        ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, void* userData);
     ArkUIGesture* (*createPinchGesture)(ArkUI_Int32 fingers, ArkUI_Float64 distance, void* userData);
     ArkUIGesture* (*createRotationGesture)(ArkUI_Int32 fingers, ArkUI_Float64 angle, void* userData);
-    ArkUIGesture* (*createSwipeGesture)(ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed, void* userData);
+    ArkUIGesture* (*createSwipeGesture)(
+        ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed, void* userData);
     ArkUIGesture* (*createSwipeGestureByModifier)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed);
     ArkUIGesture* (*createGestureGroup)(ArkUI_Int32 mode);
     void (*addGestureToGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
@@ -2143,7 +2145,8 @@ struct ArkUIGestureModifier {
     void (*removeGestureFromNode)(ArkUINodeHandle node, ArkUIGesture* recognizer);
     void (*removeGestureFromNodeByTag)(ArkUINodeHandle node, ArkUI_CharPtr gestureTag);
     void (*clearGestures)(ArkUINodeHandle node);
-    void (*setGestureInterrupterToNode)(ArkUINodeHandle node, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo));
+    void (*setGestureInterrupterToNode)(
+        ArkUINodeHandle node, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo));
 };
 
 struct ArkUISliderModifier {
