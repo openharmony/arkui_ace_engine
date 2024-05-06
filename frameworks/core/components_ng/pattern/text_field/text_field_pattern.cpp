@@ -1161,6 +1161,9 @@ void TextFieldPattern::HandleBlurEvent()
     }
 #endif
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+    if (GetIsPreviewText()) {
+        FinishTextPreview();
+    }
     NotifyOnEditChanged(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -2515,7 +2518,9 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
-    eventHub->FireOnChange(contentController_->GetTextValue());
+    if (!GetIsPreviewText()) {
+        eventHub->FireOnChange(contentController_->GetTextValue());
+    }
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
@@ -3338,6 +3343,7 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
         };
         SetPreviewTextOperation(info);
         FinishTextPreview();
+        return;
     }
 
     auto start = selectController_->GetStartIndex();
@@ -4507,6 +4513,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
+    UpdateCaretInfoToController();
     if (HasFocus() && !magnifierController_->GetShowMagnifier()) {
         StartTwinkling();
     }
@@ -4519,7 +4526,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 void TextFieldPattern::SetSelectionFlag(
     int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
 {
-    if (!HasFocus()) {
+    if (!HasFocus() || GetIsPreviewText()) {
         return;
     }
     isTouchCaret_ = false;
