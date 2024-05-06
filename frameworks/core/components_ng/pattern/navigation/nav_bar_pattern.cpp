@@ -450,7 +450,9 @@ float NavBarPattern::OnCoordScrollUpdate(float offset)
 
 void NavBarPattern::OnCoordScrollEnd()
 {
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "OnCoordScroll end");
     if (titleMode_ != NavigationTitleMode::FREE) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "titleMode_ is not free");
         return;
     }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());

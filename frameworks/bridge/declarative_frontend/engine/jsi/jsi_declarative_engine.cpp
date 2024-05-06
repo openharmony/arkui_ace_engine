@@ -1305,7 +1305,6 @@ bool JsiDeclarativeEngine::UpdateRootComponent()
         JsiDeclarativeEngine::obj_.Empty();
         return true;
     }
-    LOGE("global object is empty");
     return false;
 }
 
@@ -1607,6 +1606,7 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
             });
     }
     if (iter == namedRouterRegisterMap_.end()) {
+        LOGE("page is not in namedRouterRegisterMap_, please check bundleName、moduleName and url");
         return false;
     }
 
