@@ -19,19 +19,19 @@ enum LogTag {
 }
 
 class ArkLogConsole {
-  public static log(...args: any): void {
+  public static log(...args: Object[]): void {
     aceConsole.log(LogTag.ARK_COMPONENT, ...args);
   }
-  public static debug(...args: any): void {
-    aceConsole.debug(LogTag.ARK_COMPONENT,...args);
+  public static debug(...args: Object[]): void {
+    aceConsole.debug(LogTag.ARK_COMPONENT, ...args);
   }
-  public static info(...args: any): void {
-    aceConsole.info(LogTag.ARK_COMPONENT,...args);
+  public static info(...args: Object[]): void {
+    aceConsole.info(LogTag.ARK_COMPONENT, ...args);
   }
-  public static warn(...args: any): void {
-    aceConsole.warn(LogTag.ARK_COMPONENT,...args);
+  public static warn(...args: Object[]): void {
+    aceConsole.warn(LogTag.ARK_COMPONENT, ...args);
   }
-  public static error(...args: any): void {
-    aceConsole.error(LogTag.ARK_COMPONENT,...args);
+  public static error(...args: Object[]): void {
+    aceConsole.error(LogTag.ARK_COMPONENT, ...args);
   }
 }
