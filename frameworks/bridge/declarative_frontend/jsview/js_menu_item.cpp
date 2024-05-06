@@ -80,8 +80,8 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         auto content = menuItemObj->GetProperty("content");
         auto endIcon = menuItemObj->GetProperty("endIcon");
         auto label = menuItemObj->GetProperty("labelInfo");
-        auto symbolStart = menuItemObj->GetProperty("symbolStart");
-        auto symbolEnd = menuItemObj->GetProperty("symbolEnd");
+        auto symbolStart = menuItemObj->GetProperty("symbolStartIcon");
+        auto symbolEnd = menuItemObj->GetProperty("symbolEndIcon");
 
         if (symbolStart->IsObject()) {
             JSViewAbstract::SetSymbolOptionApply(info, symbolApply, symbolStart);
@@ -99,7 +99,7 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
 
         if (symbolEnd->IsObject()) {
             JSViewAbstract::SetSymbolOptionApply(info, symbolApply, symbolEnd);
-            menuItemProps.startApply = symbolApply;
+            menuItemProps.endApply = symbolApply;
         } else if (ParseJsMedia(endIcon, endIconPath)) {
             std::string bundleName;
             std::string moduleName;
