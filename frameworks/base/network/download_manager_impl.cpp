@@ -171,8 +171,6 @@ public:
             task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
                 const NetStackRequest& request,
                 u_long dlTotal, u_long dlNow, u_long ulTotal, u_long ulNow) {
-                LOGI("Async http task of url [%{private}s] on process, the total download = %ld, the downloaded = %ld",
-                request.GetURL().c_str(), dlTotal, dlNow);
                 onProgressCallback(dlTotal, dlNow, true, instanceId);
             });
         }
@@ -235,8 +233,6 @@ public:
             task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
                 const NetStackRequest& request,
                 u_long dlTotal, u_long dlNow, u_long ulTotal, u_long ulNow) {
-                LOGI("Sync http task of url [%{private}s] on process, the total download = %ld, the downloaded = %ld",
-                request.GetURL().c_str(), dlTotal, dlNow);
                 onProgressCallback(dlTotal, dlNow, false, instanceId);
             });
         }
