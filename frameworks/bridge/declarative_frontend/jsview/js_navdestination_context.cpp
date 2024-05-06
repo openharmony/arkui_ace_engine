@@ -104,11 +104,7 @@ void JSNavDestinationContext::GetRouteInfo(const JSCallbackInfo& info)
     JSRef<JSObject> routeData = JSRef<JSObject>::New();
     routeData->SetProperty<std::string>("name", param->GetName().c_str());
     routeData->SetProperty<std::string>("pageSourceFile", routeInfo.pageSourceFile->c_str());
-    JSRef<JSObject> data = JSRef<JSObject>::New();
-    for (auto iter = routeInfo.data.begin(); iter != routeInfo.data.end(); iter++) {
-        data->SetProperty<std::string>(iter->first.c_str(), iter->second.c_str());
-    }
-    routeData->SetPropertyObject("data", data);
+    routeData->SetPropertyJsonObject("data", routeInfo.data.c_str());
     info.SetReturnValue(routeData);
 }
 
