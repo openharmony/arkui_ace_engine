@@ -555,7 +555,7 @@ void ImageModelNG::SetOnDownloadProgress(FrameNode* frameNode,
 {
     CHECK_NULL_VOID(frameNode);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(imagePattern);
     imagePattern->SetOnProgressCallback(std::move(callback));
 }
 
