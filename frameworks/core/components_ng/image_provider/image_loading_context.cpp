@@ -304,7 +304,7 @@ void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage)
 
 void ImageLoadingContext::DownloadOnProgress(const uint32_t& dlNow, const uint32_t& dlTotal)
 {
-    if(onProgressCallback_){
+    if (onProgressCallback_) {
         onProgressCallback_(dlNow, dlTotal);
     }
 }

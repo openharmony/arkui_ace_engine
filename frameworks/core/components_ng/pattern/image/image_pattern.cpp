@@ -565,7 +565,9 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
-    loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
+    if (onProgressCallback_) {
+        loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
+    }
     loadingCtx_->LoadImageData();
 }
 
