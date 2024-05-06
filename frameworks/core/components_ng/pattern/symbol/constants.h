@@ -27,8 +27,8 @@ enum class SymbolEffectType {
     APPEAR,
     DISAPPEAR,
     BOUNCE,
-    REPLACE,
     PULSE,
+    REPLACE,
 };
 
 enum class CommonSubType {
