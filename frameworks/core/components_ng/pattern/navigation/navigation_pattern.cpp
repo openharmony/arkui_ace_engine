@@ -851,7 +851,9 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 CHECK_NULL_RETURN(newTopNavDestination, false);
                 auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
                 CHECK_NULL_RETURN(navDestinationFocusView, false);
-                navDestinationFocusView->SetIsViewRootScopeFocused(false);
+                if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                    navDestinationFocusView->SetIsViewRootScopeFocused(false);
+                }
                 navDestinationFocusView->FocusViewShow();
             }
         }
