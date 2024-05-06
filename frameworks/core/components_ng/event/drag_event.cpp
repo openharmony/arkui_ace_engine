@@ -1976,7 +1976,7 @@ void DragEventActuator::ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonValu
     arkExtraInfoJson->Put("drag_shadow_OffsetX", shadow.GetOffset().GetX());
     arkExtraInfoJson->Put("drag_shadow_OffsetY", shadow.GetOffset().GetY());
     arkExtraInfoJson->Put("shadow_mask", shadow.GetShadowType() == ShadowType::BLUR);
-    int64_t argb = shadow.GetColor().GetValue();
+    int32_t argb = static_cast<int32_t>(shadow.GetColor().GetValue());
     arkExtraInfoJson->Put("drag_shadow_argb", argb);
     int64_t strategy = static_cast<int64_t>(shadow.GetShadowColorStrategy());
     arkExtraInfoJson->Put("shadow_color_strategy", strategy);
