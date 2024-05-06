@@ -102,9 +102,9 @@ declare class ModifierJS {
 }
 
 declare class aceConsole {
-  static log(...args: any): void;
-  static debug(...args: any): void;
-  static info(...args: any): void;
-  static warn(...args: any): void;
-  static error(...args: any): void;
+  static log(...args: Object[]): void;
+  static debug(...args: Object[]): void;
+  static info(...args: Object[]): void;
+  static warn(...args: Object[]): void;
+  static error(...args: Object[]): void;
 }
