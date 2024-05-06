@@ -4868,6 +4868,17 @@ typedef enum {
      */
     NODE_IMAGE_ON_SVG_PLAY_FINISH,
     /**
+     * @brief Defines image download process event.
+     *
+     * This event is triggered when downloading webpage images from page components.\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].u32</b>: the num of bytes downloaded. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].u32</b>: the total number of bytes to download. \n
+     */
+    NODE_IMAGE_ON_DOWNLOAD_PROGRESS,
+    /**
      * @brief Defines the event triggered when the toggle status changes.
      *
       \n
