@@ -1900,9 +1900,9 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
     return true;
 }
 
-float GridPattern::IrregularAnimateToCenter(float mainGap)
+float GridPattern::IrregularAnimateToCenter(float mainGap) const
 {
-    auto info = gridLayoutInfo_;
+    const auto& info = gridLayoutInfo_;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1.0f);
     auto it = info.FindInMatrix(*targetIndex_);

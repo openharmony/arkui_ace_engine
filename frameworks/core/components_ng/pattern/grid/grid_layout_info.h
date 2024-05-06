@@ -147,7 +147,10 @@ struct GridLayoutInfo {
      * @param mainGap The gap between lines.
      * @return position of the item's top edge relative to the viewport.
      */
-    float GetItemTopPos(int32_t line, float mainGap) const;
+    inline float GetItemTopPos(int32_t line, float mainGap) const
+    {
+        return currentOffset_ + GetHeightInRange(startMainLineIndex_, line, mainGap);
+    }
 
     /**
      * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
@@ -157,7 +160,10 @@ struct GridLayoutInfo {
      * @param mainGap The gap between items in the main axis.
      * @return position of the item's bottom edge relative to the viewport.
      */
-    float GetItemBottomPos(int32_t line, int32_t itemHeight, float mainGap) const;
+    inline float GetItemBottomPos(int32_t line, int32_t itemHeight, float mainGap) const
+    {
+        return currentOffset_ + GetHeightInRange(startMainLineIndex_, line + itemHeight, mainGap) - mainGap;
+    }
 
     /**
      * @brief Perform a binary search to find item with [index] in the gridMatrix_.

@@ -414,19 +414,6 @@ std::pair<int32_t, int32_t> GridLayoutInfo::FindItemInRange(int32_t target) cons
     return { -1, -1 };
 }
 
-float GridLayoutInfo::GetItemTopPos(int32_t line, float mainGap) const
-{
-    float len = currentOffset_ + GetHeightInRange(startMainLineIndex_, line, mainGap);
-    return len;
-}
-
-float GridLayoutInfo::GetItemBottomPos(int32_t line, int32_t itemHeight, float mainGap) const
-{
-    float len = currentOffset_ + GetHeightInRange(startMainLineIndex_, line + itemHeight, mainGap);
-    len -= mainGap;
-    return len;
-}
-
 // Use the index to get the line number where the item is located
 bool GridLayoutInfo::GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const
 {
