@@ -94,6 +94,19 @@ struct LeadingMargin {
                    : "nullptr");
         return jsonValue->ToString();
     }
+
+    bool CheckLeadingMargin(const LeadingMargin& other) const
+    {
+        auto flag = size == other.size;
+        if (pixmap && other.pixmap) {
+            flag &= pixmap->GetRawPixelMapPtr() == other.pixmap->GetRawPixelMapPtr();
+        } else if (!other.pixmap && !pixmap) {
+            flag &= true;
+        } else {
+            flag &= false;
+        }
+        return flag;
+    }
 };
 
 struct ParagraphStyle {
