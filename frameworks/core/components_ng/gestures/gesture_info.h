@@ -46,12 +46,12 @@ struct BlurBackGroundInfo {
     EffectOption  backGroundEffect;
     void ToJsonValue(const std::unique_ptr<JsonValue>& json)
     {
-        static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
         json->Put("blur_radius", backGroundEffect.radius.Value());
         json->Put("blur_staturation", backGroundEffect.saturation);
         json->Put("blur_brightness", backGroundEffect.brightness);
-        json->Put("blur_color", backGroundEffect.color.ColorToString().c_str());
-        json->Put("blur_adptiva_color", ADAPTIVE_COLOR[static_cast<int32_t>(backGroundEffect.adaptiveColor)]);
+        int32_t blurColor = static_cast<int32_t> (backGroundEffect.color.GetValue());
+        json->Put("blur_color", blurColor);
+        json->Put("blur_style", static_cast<int32_t>(backGroundEffect.adaptiveColor));
         constexpr int32_t GRAYSCALE_MAX_VALUE = 2;
         if (backGroundEffect.blurOption.grayscale.size() >= GRAYSCALE_MAX_VALUE) {
             json->Put("blur_coef1", backGroundEffect.blurOption.grayscale[0]);

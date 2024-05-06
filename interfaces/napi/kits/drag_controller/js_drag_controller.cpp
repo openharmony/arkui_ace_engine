@@ -97,6 +97,7 @@ struct DragControllerAsyncCtx {
     uint64_t displayId = 0;
     int32_t sourceType = 0;
     float windowScale = 1.0f;
+    float dipScale = 0.0;
     int parseBuilderCount = 0;
     std::mutex dragStateMutex;
     DragState dragState = DragState::PENDING;
@@ -695,6 +696,7 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
     }
     auto windowId = container->GetWindowId();
     auto arkExtraInfoJson = JsonUtil::Create(true);
+    arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(), asyncCtx->sourceType,
         recordSize, pointerId, asyncCtx->globalX, asyncCtx->globalY,
@@ -841,6 +843,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             }
             auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
             auto arkExtraInfoJson = JsonUtil::Create(true);
+            arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
             NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
             auto windowId = container->GetWindowId();
             Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y };
@@ -1193,8 +1196,6 @@ bool SetDragPreviewOptionMode(DragControllerAsyncCtx* asyncCtx, napi_value& mode
         return true;
     } else if (valueType != napi_number) {
         errMsg = "mode type is wrong";
-        napi_handle_scope scope = nullptr;
-        napi_close_handle_scope(asyncCtx->env, scope);
         return false;
     } else if (isAuto) {
         return true;
@@ -1213,6 +1214,9 @@ bool SetDragPreviewOptionMode(DragControllerAsyncCtx* asyncCtx, napi_value& mode
             break;
         case NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW:
             asyncCtx->dragPreviewOption.isDefaultShadowEnabled = true;
+            break;
+        case NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS:
+            asyncCtx->dragPreviewOption.isDefaultRadiusEnabled = true;
             break;
         default:
             break;
@@ -1242,11 +1246,20 @@ bool ParseDragPreviewMode(DragControllerAsyncCtx* asyncCtx, napi_value& previewO
                 return false;
             }
         }
-    } else if (SetDragPreviewOptionMode(asyncCtx, modeNApi, errMsg, isAuto)) {
+    } else if (!SetDragPreviewOptionMode(asyncCtx, modeNApi, errMsg, isAuto)) {
         return false;
     }
     NG::DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(asyncCtx->dragPreviewOption);
     return true;
+}
+
+void GetCurrentDipScale(DragControllerAsyncCtx* asyncCtx)
+{
+    auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    asyncCtx->dipScale = pipeline->GetDipScale();
 }
 
 bool ParsePreviewOptions(
@@ -1262,6 +1275,7 @@ bool ParsePreviewOptions(
     napi_typeof(asyncCtx->env, previewOptionsNApi, &valueType);
     if (valueType == napi_object) {
         if (!ParseDragPreviewMode(asyncCtx, previewOptionsNApi, errMsg)) {
+            napi_close_handle_scope(asyncCtx->env, scope);
             return false;
         }
 
@@ -1340,6 +1354,7 @@ bool ParseDragInfoParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
         return false;
     }
 
+    GetCurrentDipScale(asyncCtx);
     asyncCtx->hasTouchPoint = ParseTouchPoint(asyncCtx, valueType);
     return true;
 }

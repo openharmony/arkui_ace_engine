@@ -2006,7 +2006,16 @@ void DragEventActuator::PrepareRadiusParametersForDragData(const RefPtr<FrameNod
     auto borderRadius = dragPreviewOption.options.borderRadius;
     if (borderRadius.has_value()) {
         if (borderRadius.value().radiusTopLeft.has_value()) {
-            arkExtraInfoJson->Put("drag_corner_radius", borderRadius.value().radiusTopLeft.value().Value());
+            arkExtraInfoJson->Put("drag_corner_radius1", borderRadius.value().radiusTopLeft.value().Value());
+        }
+        if (borderRadius.value().radiusTopRight.has_value()) {
+            arkExtraInfoJson->Put("drag_corner_radius2", borderRadius.value().radiusTopRight.value().Value());
+        }
+        if (borderRadius.value().radiusBottomRight.has_value()) {
+            arkExtraInfoJson->Put("drag_corner_radius3", borderRadius.value().radiusBottomRight.value().Value());
+        }
+        if (borderRadius.value().radiusBottomLeft.has_value()) {
+            arkExtraInfoJson->Put("drag_corner_radius4", borderRadius.value().radiusBottomLeft.value().Value());
         }
     }
 }
