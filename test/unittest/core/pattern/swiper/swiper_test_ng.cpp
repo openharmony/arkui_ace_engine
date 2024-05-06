@@ -455,23 +455,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetFirstItemInfoInVisibleArea001, TestSize.L
 }
 
 /**
- * @tc.name: SwiperPatternGetTranslateLength001
- * @tc.desc: GetTranslateLength
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternGetTranslateLength001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->itemPosition_.clear();
-
-    /**
-     * @tc.steps: step2. call GetTranslateLength.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->GetTranslateLength();
-}
-
-/**
  * @tc.name: SwiperPatternGetSecondItemInfoInVisibleArea001
  * @tc.desc: GetSecondItemInfoInVisibleArea
  * @tc.type: FUNC
@@ -672,26 +655,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetCustomPropertyOffset001, TestSize.Level1)
             layoutProperty_->UpdatePrevMargin(Dimension(0));
         }
         layoutProperty_->UpdatePrevMargin(Dimension(1));
-    }
-}
-
-/**
- * @tc.name: SwiperPatternGetCurrentFirstIndexStartPos001
- * @tc.desc: GetCurrentFirstIndexStartPos
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternGetCurrentFirstIndexStartPos001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->itemPosition_.clear();
-
-    /**
-     * @tc.steps: step2. call GetCurrentFirstIndexStartPos.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        ASSERT_EQ(pattern_->GetCurrentFirstIndexStartPos(), i == 0 ? 0.0 : 1);
-        pattern_->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 1 }));
     }
 }
 

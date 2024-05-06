@@ -289,8 +289,13 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     navigationPattern->SetNavigationMode(usrNavigationMode);
 
     navigationPattern->SetNavigationModeChange(modeChange);
-    navigationPattern->OnNavBarStateChange(modeChange);
-    navigationPattern->OnNavigationModeChange(modeChange);
+    pipeline->AddAfterLayoutTask([weakNavigationPattern = WeakPtr<NavigationPattern>(navigationPattern),
+        modeChange]() {
+        auto navigationPattern = weakNavigationPattern.Upgrade();
+        CHECK_NULL_VOID(navigationPattern);
+        navigationPattern->OnNavBarStateChange(modeChange);
+        navigationPattern->OnNavigationModeChange(modeChange);
+    });
 }
 
 void NavigationLayoutAlgorithm::SizeCalculation(LayoutWrapper* layoutWrapper,
@@ -469,6 +474,10 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         RangeCalculation(hostNode, navigationLayoutProperty);
     }
     if (size.Width() == 0.0f) {
+        auto layoutAlgorithm = layoutWrapper->GetLayoutAlgorithm();
+        if (layoutAlgorithm) {
+            layoutAlgorithm->SetSkipLayout();
+        }
         return;
     }
     GetRange(hostNode);

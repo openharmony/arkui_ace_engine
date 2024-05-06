@@ -454,8 +454,8 @@ void SetPopupBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption styleOption;
-    if (value >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-        value <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+    if (value >= static_cast<ArkUI_Uint32>(BlurStyle::NO_MATERIAL) &&
+        value <= static_cast<ArkUI_Uint32>(BlurStyle::COMPONENT_ULTRA_THICK)) {
         styleOption.blurStyle = static_cast<BlurStyle>(value);
     }
     IndexerModelNG::SetPopupBackgroundBlurStyle(frameNode, styleOption);

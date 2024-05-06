@@ -29,10 +29,14 @@ public:
     ~SvgFeBlend() override = default;
     static RefPtr<SvgNode> Create();
 
-    RSBlendMode GetBlendMode(FeBlendMode mode) const;
+    RSBlendMode GetBlendMode(SvgFeBlendMode mode) const;
     void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
-        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor,
+        const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
         std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const override;
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+
+private:
+    SvgFeBlendAttribute feBlendAttr_;
 };
 
 } // namespace OHOS::Ace::NG

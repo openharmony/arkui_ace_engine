@@ -122,6 +122,7 @@ private:
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
     void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
+    Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     GestureJudgeResult TriggerGestureJudgeCallback();
@@ -164,7 +165,6 @@ private:
     double newDistance_ = 0.0;
     PanDirection newDirection_;
     bool isFlushTouchEventsEnd_ = false;
-    InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     bool isForDrag_ = false;
     bool isAllowMouse_ = true;
 };

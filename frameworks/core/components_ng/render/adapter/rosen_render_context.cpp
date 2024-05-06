@@ -1454,7 +1454,8 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
     if (needScale) {
         UpdateThumbnailPixelMapScale(scaleX, scaleY);
     }
-    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY);
+    auto ret =
+        RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY, true);
     if (!ret) {
         return nullptr;
     }
@@ -1815,6 +1816,54 @@ Matrix4 RosenRenderContext::GetMatrix()
     return translateMat * rotationMat * skewMat * scaleMat;
 }
 
+// only for GetPositionToXXXWithTransform in FrameNode.
+// contains rotate and perspective matrix set by tranform.
+Matrix4 RosenRenderContext::GetMatrixWithTransformRotate()
+{
+    CHECK_NULL_RETURN(rsNode_, {});
+    auto center = rsNode_->GetStagingProperties().GetPivot();
+
+    Matrix4 rotateMat;
+    if (transformMatrixModifier_ &&
+        !transformMatrixModifier_->quaternionValue->GetStagingValue().IsIdentity()) {
+        auto quaternionValue = transformMatrixModifier_->quaternionValue->GetStagingValue();
+        rotateMat = Matrix4::QuaternionToMatrix(quaternionValue[0], quaternionValue[1],
+            quaternionValue[2], quaternionValue[3]);
+    } else {
+        int32_t degree = rsNode_->GetStagingProperties().GetRotation();
+        if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
+            degree = 0;
+            return Matrix4();
+        }
+        rotateMat = Matrix4::CreateRotate(degree, 0, 0, 1);
+    }
+
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto skew = rsNode_->GetStagingProperties().GetSkew();
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+    auto perspective = rsNode_->GetStagingProperties().GetPersp();
+
+    RectF rect = GetPaintRectWithoutTransform();
+    auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
+    auto centerPos = rect.GetOffset() + centOffset;
+
+    auto perspectiveMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                       Matrix4::CreateFactorPerspective(perspective[0], perspective[1]) *
+                       Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+    auto translateMat = Matrix4::CreateTranslate(translate[0], translate[1], 0);
+    auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                       rotateMat *
+                       Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+    auto skewMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                    Matrix4::CreateFactorSkew(skew[0], skew[1]) *
+                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+    auto scaleMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                    Matrix4::CreateScale(scale[0], scale[1], 1) *
+                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+
+    return perspectiveMat * translateMat * rotationMat * skewMat * scaleMat;
+}
+
 Matrix4 RosenRenderContext::GetLocalTransformMatrix()
 {
     auto invertMat = GetRevertMatrix();
@@ -1835,6 +1884,16 @@ void RosenRenderContext::GetPointWithRevert(PointF& point)
 void RosenRenderContext::GetPointTransform(PointF& point)
 {
     auto transformMat = GetMatrix();
+    Point tmp(point.GetX(), point.GetY());
+    auto transformPoint = transformMat * tmp;
+    point.SetX(transformPoint.GetX());
+    point.SetY(transformPoint.GetY());
+}
+
+// only for GetPositionToXXXWithTransform in FrameNode
+void RosenRenderContext::GetPointTransformRotate(PointF& point)
+{
+    auto transformMat = GetMatrixWithTransformRotate();
     Point tmp(point.GetX(), point.GetY());
     auto transformPoint = transformMat * tmp;
     point.SetX(transformPoint.GetX());
@@ -2850,27 +2909,6 @@ void RosenRenderContext::OnePixelRounding()
         nodeHeightI = nodeHeightTemp;
     }
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
-
-    if (borderWidth_ != Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f)) {
-        // round inner
-        float innerLeft = relativeLeft + borderWidth_[0];
-        float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
-        float innerTop = relativeTop + borderWidth_[1];
-        float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
-        float innerWidthI = RoundValueToPixelGrid(innerRight) - RoundValueToPixelGrid(innerLeft);
-        float innerHeightI = RoundValueToPixelGrid(innerBottom) - RoundValueToPixelGrid(innerTop);
-        // update border
-        float borderLeftI = RoundValueToPixelGrid(borderWidth_[0]);
-        float borderTopI = RoundValueToPixelGrid(borderWidth_[1]);
-        float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
-        float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
-        BorderWidthPropertyF borderWidthPropertyF;
-        borderWidthPropertyF.leftDimen = borderLeftI;
-        borderWidthPropertyF.topDimen = borderTopI;
-        borderWidthPropertyF.rightDimen = borderRightI;
-        borderWidthPropertyF.bottomDimen = borderBottomI;
-        UpdateBorderWidthF(borderWidthPropertyF);
-    }
 }
 
 void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
@@ -2933,29 +2971,6 @@ void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
         nodeHeightI = nodeHeightTemp;
     }
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
-
-    if (borderWidth_ != Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f)) {
-        // round inner
-        float innerLeft = relativeLeft + borderWidth_[0];
-        float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
-        float innerTop = relativeTop + borderWidth_[1];
-        float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
-        float innerWidthI = RoundValueToPixelGrid(innerRight, isRound, ceilRight, floorRight) -
-            RoundValueToPixelGrid(innerLeft, isRound, ceilLeft, floorLeft);
-        float innerHeightI = RoundValueToPixelGrid(innerBottom, isRound, ceilBottom, floorBottom) -
-            RoundValueToPixelGrid(innerTop, isRound, ceilTop, floorTop);
-        // update border
-        float borderLeftI = RoundValueToPixelGrid(borderWidth_[0], isRound, ceilLeft, floorLeft);
-        float borderTopI = RoundValueToPixelGrid(borderWidth_[1], isRound, ceilTop, floorTop);
-        float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
-        float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
-        BorderWidthPropertyF borderWidthPropertyF;
-        borderWidthPropertyF.leftDimen = borderLeftI;
-        borderWidthPropertyF.topDimen = borderTopI;
-        borderWidthPropertyF.rightDimen = borderRightI;
-        borderWidthPropertyF.bottomDimen = borderBottomI;
-        UpdateBorderWidthF(borderWidthPropertyF);
-    }
 }
 
 
@@ -3380,6 +3395,21 @@ void RosenRenderContext::FlushOverlayModifier(const RefPtr<Modifier>& modifier)
     modifierAdapter->AttachProperties();
 }
 
+void RosenRenderContext::FlushForegroundModifier(const RefPtr<Modifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+    auto modifierAdapter = std::static_pointer_cast<ForegroundModifierAdapter>(ConvertForegroundModifier(modifier));
+    auto foregroundModifier = AceType::DynamicCast<ForegroundModifier>(modifier);
+    CHECK_NULL_VOID(foregroundModifier);
+    auto rect = foregroundModifier->GetBoundsRect();
+    std::shared_ptr<Rosen::RectF> foregroundRect =
+        std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    UpdateDrawRegion(DRAW_REGION_OVERLAY_MODIFIER_INDEX, foregroundRect);
+    rsNode_->AddModifier(modifierAdapter);
+    modifierAdapter->AttachProperties();
+}
+
 const std::shared_ptr<Rosen::RSNode>& RosenRenderContext::GetRSNode()
 {
     return rsNode_;
@@ -3585,16 +3615,8 @@ void RosenRenderContext::UpdateMotionBlur(const MotionBlurOption& motionBlurOpti
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateForeground();
     groupProperty->propMotionBlur = motionBlurOption;
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    float radiusPx = context->NormalizeToPx(motionBlurOption.radius);
-#ifndef USE_ROSEN_DRAWING
-    float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
-#else
-    float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
-#endif
     Rosen::Vector2f anchor(motionBlurOption.anchor.x, motionBlurOption.anchor.y);
-    rsNode_->SetMotionBlurPara(backblurRadius, anchor);
+    rsNode_->SetMotionBlurPara(motionBlurOption.radius, anchor);
 }
 
 void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption)

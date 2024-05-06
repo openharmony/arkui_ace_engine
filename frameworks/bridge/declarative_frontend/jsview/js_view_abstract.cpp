@@ -351,6 +351,22 @@ bool ParseMotionPath(const JSRef<JSVal>& jsValue, MotionPathOption& option)
     return true;
 }
 
+void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
+{
+    if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::AUTO)) {
+        previewOption.ResetDragPreviewMode();
+        isAuto = true;
+        return;
+    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
+        previewOption.isScaleEnabled = false;
+    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
+        previewOption.isDefaultShadowEnabled = true;
+    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS)) {
+        previewOption.isDefaultRadiusEnabled = true;
+    }
+    isAuto = false;
+}
+
 void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
     BackgroundImagePosition& bgImgPosition)
 {
@@ -836,7 +852,7 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
         auto fontSizeValue = fontObj->GetProperty("size");
         CalcDimension fontSize;
         if (JSViewAbstract::ParseJsDimensionFp(fontSizeValue, fontSize)) {
-            if (popupParam) {
+            if (popupParam && fontSize.IsValid()) {
                 popupParam->SetFontSize(fontSize);
             }
         }
@@ -2160,10 +2176,6 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("JsPixelRound", info, checkList)) {
-        return;
-    }
     uint8_t value = 0;
     JSRef<JSVal> arg = info[0];
     if (!arg->IsObject()) {
@@ -3110,6 +3122,11 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, si
         if (JSViewAbstract::ParseJsMedia(indexObject->GetProperty("icon"), iconPath)) {
             params[i].icon = iconPath;
         }
+        if (indexObject->GetProperty("symbolIcon")->IsObject()) {
+            std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
+            JSViewAbstract::SetSymbolOptionApply(info, symbolApply, indexObject->GetProperty("symbolIcon"));
+            params[i].symbol = symbolApply;
+        }
         auto enabled = indexObject->GetProperty("enabled");
         if (enabled->IsBoolean()) {
             params[i].enabled = enabled->ToBoolean();
@@ -4055,7 +4072,9 @@ void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<Bord
         borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, sliceDimension);
         return;
     }
-
+    if (!args->IsObject()) {
+        return;
+    }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
     if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
         LocalizedCalcDimension localizedCalcDimension;
@@ -4377,9 +4396,9 @@ void JSViewAbstract::JsMotionBlur(const JSCallbackInfo& info)
         ParseJsDouble(jsAnchorObj->GetProperty("x"), x);
         ParseJsDouble(jsAnchorObj->GetProperty("y"), y);
     }
-    CalcDimension radius;
-    if (!ParseJsDimensionVp(jsObj->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
-        radius.SetValue(0.0f);
+    double radius = 0.0;
+    if (!ParseJsDouble(jsObj->GetProperty("radius"), radius) || LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
     }
     if (LessNotEqual(x, 0.0)) {
         x = 0.0;
@@ -4747,7 +4766,7 @@ bool JSViewAbstract::ParseJsLengthNG(
     } else if (jsValue->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> value = jsObj->GetProperty("value");
-        if (value->IsNull() || (value->IsNumber() && std::isnan(value->ToNumber<double>()))) {
+        if (value->IsNull() || (value->IsNumber() && std::isnan(value->ToNumber<double>())) || value->IsUndefined()) {
             return false;
         }
         DimensionUnit unit = defaultUnit;
@@ -5376,6 +5395,43 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
     return false;
 }
 
+void JSViewAbstract::SetTabBarSymbolOptionApply(const JSCallbackInfo& info, TabBarSymbol& symbolApply,
+    const JSRef<JSVal>& modifierNormalObj, const JSRef<JSVal>& modifierSelectedObj)
+{
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        return;
+    }
+    if (modifierNormalObj->IsUndefined()) {
+        symbolApply.onApply = nullptr;
+    } else {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+        auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            modifierNormal = std::move(modifierNormalObj),
+                            modifierSelected = std::move(modifierSelectedObj)](
+                            WeakPtr<NG::FrameNode> frameNode, std::string type) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto node = frameNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            JSRef<JSVal> params[SECOND_INDEX];
+            if (type == "normal") {
+                params[0] = modifierNormal;
+            } else if (!modifierSelected->IsUndefined()) {
+                params[0] = modifierSelected;
+            }
+            params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(SECOND_INDEX, params);
+        };
+        symbolApply.onApply = onApply;
+    }
+}
+
 bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
 {
     if (!jsValue->IsBoolean() && !jsValue->IsObject()) {
@@ -5746,11 +5802,19 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
     NG::DragPreviewOption previewOption;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
+    bool isAuto = true;
     if (mode->IsNumber()) {
-        int32_t modeValue = mode->ToNumber<int>();
-        if (modeValue >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
-            modeValue <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
-            previewOption.mode = static_cast<NG::DragPreviewMode>(modeValue);
+        ParseDragPreviewMode(previewOption, mode->ToNumber<int>(), isAuto);
+    } else if (mode->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(mode);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            if (value->IsNumber()) {
+                ParseDragPreviewMode(previewOption, value->ToNumber<int>(), isAuto);
+            }
+            if (isAuto) {
+                break;
+            }
         }
     }
 
@@ -5779,7 +5843,7 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
             previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
         }
     }
-    
+
     JSViewAbstract::SetDragPreviewOptionApply(info, previewOption);
 
     return previewOption;
@@ -9414,7 +9478,11 @@ bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiu
 
 void JSViewAbstract::SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::DragPreviewOption& option)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(arg);
     auto vm = info.GetVm();
     auto globalObj = JSNApi::GetGlobalObject(vm);
     auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyImageModifierToNode"));
@@ -9460,7 +9528,8 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
         if (ParseBorderColorProps(colorValue, borderColor)) {
             properties.borderColor = borderColor;
         } else {
-                NG::BorderColorProperty({ Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK });
+            borderColor.SetColor(Color::BLACK);
+            properties.borderColor = borderColor;
         }
         // Parse border style
         auto styleValue = obj->GetProperty("borderStyle");
@@ -9681,5 +9750,35 @@ void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)
         focusPriority = info[1]->ToNumber<int32_t>();
     }
     ViewAbstractModel::GetInstance()->SetFocusScopePriority(focusScopeId, focusPriority);
+}
+
+void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSObject> modifierObj)
+{
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (globalFuncRef->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+        if (modifierObj->IsUndefined()) {
+            symbolApply = nullptr;
+        } else {
+            auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                               modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto node = frameNode.Upgrade();
+                CHECK_NULL_VOID(node);
+                JSRef<JSVal> params[2];
+                params[0] = modifierParam;
+                params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+                PipelineContext::SetCallBackNode(node);
+                func->ExecuteJS(2, params);
+            };
+            symbolApply = onApply;
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework

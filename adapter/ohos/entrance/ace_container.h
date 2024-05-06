@@ -529,9 +529,12 @@ public:
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         StopDragCallback&& stopDragCallback) override;
 
-    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup) override;
+    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node,
+        AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
+    bool ChangeType(AbilityBase::ViewData& viewData);
+    AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
 
     void SearchElementInfoByAccessibilityIdNG(
         int64_t elementId, int32_t mode, int64_t baseParent,

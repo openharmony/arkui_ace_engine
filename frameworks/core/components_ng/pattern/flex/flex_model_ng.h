@@ -38,6 +38,8 @@ public:
 
     void SetAlignItems(int32_t value) override;
     void SetWrapAlignment(WrapAlignment value) override;
+    void SetMainSpace(const std::optional<Dimension>& space) override;
+    void SetCrossSpace(const std::optional<Dimension>& space) override;
 
     void SetHasHeight() override {};
     void SetHasWidth() override {};

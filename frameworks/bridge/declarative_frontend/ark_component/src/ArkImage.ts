@@ -175,6 +175,40 @@ class ImageResizableModifier extends ModifierWithKey<ResizableOptions> {
   }
 }
 
+class ImageDynamicRangeModeModifier extends ModifierWithKey<DynamicRangeMode> {
+  constructor(value: DynamicRangeMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('dynamicRangeMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetDynamicRangeMode(node);
+    } else {
+      getUINativeModule().image.setDynamicRangeMode(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class ImageEnhancedImageQualityModifier extends ModifierWithKey<AIImageQuality> {
+  constructor(value: ResolutionQuality) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enhancedImageQuality');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetEnhancedImageQuality(node);
+    } else {
+      getUINativeModule().image.setEnhancedImageQuality(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
 class ImageInterpolationModifier extends ModifierWithKey<ImageInterpolation> {
   constructor(value: ImageInterpolation) {
     super(value);
@@ -469,9 +503,30 @@ class ImageTransitionModifier extends ModifierWithKey<object> {
   }
 }
 
+class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | DrawableDescriptor> {
+  constructor(value: ResourceStr | PixelMap | DrawableDescriptor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageShowSrc');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.setImageShowSrc(node, "");
+    }
+    else {
+      getUINativeModule().image.setImageShowSrc(node, this.value);
+    }
+  }
+}
+
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]) {
+    if (value[0] != undefined) {
+      modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
+    }
+    return this;
   }
   draggable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
@@ -584,6 +639,16 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   transition(value: TransitionOptions | TransitionEffect): this {
     modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, value);
+    return this;
+  }
+  dynamicRangeMode(value: DynamicRangeMode): this {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
+    return this;
+  }
+  enhancedImageQuality(value: ResolutionQuality): this {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
     return this;
   }
 }

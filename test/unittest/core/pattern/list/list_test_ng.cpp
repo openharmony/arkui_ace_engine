@@ -41,6 +41,7 @@ void ListTestNg::SetUpTestSuite()
     listItemTheme->defaultColor_ = Color::WHITE;
     listItemTheme->defaultLeftMargin_ = GROUP_MARGIN;
     listItemTheme->defaultRightMargin_ = GROUP_MARGIN;
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void ListTestNg::TearDownTestSuite()

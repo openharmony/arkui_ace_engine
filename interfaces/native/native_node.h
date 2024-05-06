@@ -87,6 +87,8 @@ typedef enum {
     ARKUI_NODE_CALENDAR_PICKER = 16,
     /** Slider. */
     ARKUI_NODE_SLIDER = 17,
+    /** Radio */
+    ARKUI_NODE_RADIO = 18,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
     /** Swiper. */
@@ -111,6 +113,12 @@ typedef enum {
     ARKUI_NODE_WATER_FLOW,
     /** Water flow item. */
     ARKUI_NODE_FLOW_ITEM,
+    /** relative container. */
+    ARKUI_NODE_RELATIVE_CONTAINER,
+    /** Grid. */
+    ARKUI_NODE_GRID,
+    /** Grid item. */
+    ARKUI_NODE_GRID_ITEM,
 } ArkUI_NodeType;
 
 /**
@@ -307,7 +315,7 @@ typedef enum {
      * @brief Sets the saturation attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
-     * .value[0].f32: saturation value. The default value is <b>1.0</b>, and the recommended value range is [0, FLT_MAX]. \n
+     * .value[0].f32: saturation value. The default value is <b>1.0</b>, and the recommended value range is [0, 50]. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].f32: saturation value. \n
@@ -1247,12 +1255,14 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].f32: alignment mode of the child components along the cross axis of the parent container.\n
-     * The parameter type is {@link ArkUI_ItemAlign}. The default value is <b>ARKUI_ITEM_ALIGN_AUTO</b>. \n
+     * .value[0].i32: alignment mode of the child components along the cross axis of the parent container.\n
+     * The parameter type is {@link ArkUI_ItemAlignment}.
+     * The default value is <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].f32: alignment mode of the child components along the cross axis of the parent container.\n
-     * The parameter type is {@link ArkUI_ItemAlign}. The default value is <b>ARKUI_ITEM_ALIGN_AUTO</b>. \n
+     * .value[0].i32: alignment mode of the child components along the cross axis of the parent container.\n
+     * The parameter type is {@link ArkUI_ArkUI_ItemAlignment}. The default value is
+     * <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
      *
      */
     NODE_ALIGN_SELF,
@@ -1385,6 +1395,97 @@ typedef enum {
     NODE_DISPLAY_PRIORITY,
     NODE_OUTLINE_WIDTH,
     /**
+     * @brief 宽度属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：宽度数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：宽度数值，单位为百分比；\n
+     *
+     */
+    NODE_WIDTH_PERCENT,
+    /**
+     * @brief 高度属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：高度数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：高度数值，单位为百分比；\n
+     *
+     */
+    NODE_HEIGHT_PERCENT,
+    /**
+     * @brief 内间距属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式有两种：\n
+     * 1：上下左右四个位置的内间距值相等。\n
+     * .value[0].f32：内间距数值，单位为百分比；\n
+     * 2：分别指定上下左右四个位置的内间距值。\n
+     * .value[0].f32：上内间距数值，单位为百分比；\n
+     * .value[1].f32：右内间距数值，单位为百分比；\n
+     * .value[2].f32：下内间距数值，单位为百分比；\n
+     * .value[3].f32：左内间距数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：上内间距数值，单位为百分比；\n
+     * .value[1].f32：右内间距数值，单位为百分比；\n
+     * .value[2].f32：下内间距数值，单位为百分比；\n
+     * .value[3].f32：左内间距数值，单位为百分比；\n
+     *
+     */
+    NODE_PADDING_PERCENT,
+    /**
+     * @brief 外间距属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式有两种：\n
+     * 1：上下左右四个位置的外间距值相等。\n
+     * .value[0].f32：外间距数值，单位为百分比；\n
+     * 2：分别指定上下左右四个位置的外间距值。\n
+     * .value[0].f32：上外间距数值，单位为百分比；\n
+     * .value[1].f32：右外间距数值，单位为百分比；\n
+     * .value[2].f32：下外间距数值，单位为百分比；\n
+     * .value[3].f32：左外间距数值，单位为百分比；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：上外间距数值，单位为百分比；\n
+     * .value[1].f32：右外间距数值，单位为百分比；\n
+     * .value[2].f32：下外间距数值，单位为百分比；\n
+     * .value[3].f32：左外间距数值，单位为百分比；\n
+     *
+     */
+    NODE_MARGIN_PERCENT,
+
+    NODE_GEOMETRY_TRANSITION,
+
+    /**
+     * @brief 指定以该组件为链头所构成的链的参数，支持属性设置、属性重置和属性获取接口。
+     *
+     * 仅当父容器为RelativeContainer时生效
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：链的方向。枚举{@link ArkUI_Axis}。 \n
+     * .value[1].i32：链的样式。枚举{@link ArkUI_RelativeLayoutChainStyle}。 \n
+     * \n
+     * .value[0].i32：链的方向。枚举{@link ArkUI_Axis}。 \n
+     * .value[1].i32：链的样式。枚举{@link ArkUI_RelativeLayoutChainStyle}。 \n
+     */
+    NODE_RELATIVE_LAYOUT_CHAIN_MODE,
+
+    NODE_RENDER_FIT,
+
+    NODE_OUTLINE_COLOR,
+
+    NODE_SIZE,
+
+    NODE_RENDER_GROUP,
+
+    NODE_COLOR_BLEND,
+
+    NODE_FOREGROUND_BLUR_STYLE,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -1454,13 +1555,15 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: text decoration style {@link ArkUI_TextDecorationType}.
+     * .value[0].i32: text decoration type {@link ArkUI_TextDecorationType}.
      * The default value is <b>ARKUI_TEXT_DECORATION_TYPE_NONE</b>.\n
      * .value[1]?.u32: text decoration color, in 0xARGB format. For example, 0xFFFF0000 indicates red. Optional.\n
+     * .value[2]?.i32: text decoration style {@link ArkUI_TextDecorationStyle}. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: text decoration style {@link ArkUI_TextDecorationType}.\n
+     * .value[0].i32: text decoration type {@link ArkUI_TextDecorationType}.\n
      * .value[1].u32: text decoration color, in 0xARGB format. \n
+     * .value[2].i32: text decoration style {@link ArkUI_TextDecorationStyle}. \n
      *
      */
     NODE_TEXT_DECORATION,
@@ -1658,6 +1761,17 @@ typedef enum {
      */
     NODE_TEXT_WORD_BREAK,
     /**
+     * @brief Defines the line break rule. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
+     *
+     */
+    NODE_TEXT_LINE_BREAK_STRATEGY,
+    /**
      * @brief Defines the ellipsis position. This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -1679,6 +1793,45 @@ typedef enum {
      *
      */
     NODE_TEXT_LINE_SPACING,
+    /**
+     * @brief  Set the text feature effect and the NODE_FONT_FEATURE attribute,
+     * NODE_FONT_FEATURE is the advanced typesetting capability of OpenType
+     * Features such as ligatures and equal-width digits are generally used in customized fonts. \n
+     * The capabilities need to be supported by the fonts, \n
+     * Interfaces for setting, resetting, and obtaining attributes are supported. \n
+     * Attribute setting method parameter {@Link ArkUI_AttributeItem} format: \n
+     * .string: complies with the text feature format. The format is normal | \n
+     * is in the format of [ | on | off],\n.
+     * There can be multiple values separated by commas (,). \n
+     * For example, the input format of a number with the same width is ss01 on. \n
+     * \n
+     * Attribute obtaining method return value {@Link ArkUI_AttributeItem} format:\n
+     * .string indicates the content of the text feature. Multiple text features are separated by commas (,). \n
+     */
+    NODE_FONT_FEATURE,
+
+    /**
+     * @brief 设置使能文本识别。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：使能文本识别，默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：使能文本识别。\n
+     *
+     */
+    NODE_TEXT_ENABLE_DATA_DETECTOR,
+    /**
+     * @brief 设置文本识别配置。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0...].i32: 实体类型数组，参数类型{@link ArkUI_TextDataDetectorType}。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0...].i32：实体类型数组，参数类型{@link ArkUI_TextDataDetectorType}。\n
+     *
+     */
+    NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG,
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -1801,6 +1954,23 @@ typedef enum {
      */
     NODE_IMAGE_COLOR_FILTER,
     /**
+     * @brief Sets the resizable image options.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: width of the left edge. The unit is vp. \n
+     * .value[1].f32: width of the top edge. The unit is vp. \n
+     * .value[2].f32: width of the right edge. The unit is vp. \n
+     * .value[3].f32: width of the bottom edge. The unit is vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: width of the left edge. The unit is vp. \n
+     * .value[1].f32: width of the top edge. The unit is vp. \n
+     * .value[2].f32: width of the right edge. The unit is vp. \n
+     * .value[3].f32: width of the bottom edge. The unit is vp. \n
+     *
+     */
+    NODE_IMAGE_RESIZABLE,
+    /**
      * @brief Defines the auto resize attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -1846,6 +2016,28 @@ typedef enum {
      *
      */
     NODE_IMAGE_RENDER_MODE,
+    /**
+     * @brief 设置图片的显示尺寸是否跟随图源尺寸，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32，设置图片的显示尺寸是否跟随图源尺寸，1表示跟随，0表示不跟随，默认值为0。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32，1表示图片的显示尺寸跟随图源尺寸，0表示图片的显示尺寸不跟随图源尺寸。\n
+     *
+     */
+    NODE_IMAGE_FIT_ORIGINAL_SIZE,
+    /**
+     * @brief 设置填充颜色，设置后填充颜色会覆盖在图片上，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：填充色数值，0xargb格式，形如 0xFFFF0000 表示红色。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：填充色数值，0xargb格式。\n
+     *
+     */
+    NODE_IMAGE_FILL_COLOR,
     /**
      * @brief Defines the color of the component when it is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -2138,7 +2330,135 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_TEXT_SELECTION,
-
+    /**
+    * @brief Sets the color of the text underline when it is enabled.
+    *
+    * The default underline color configured for the theme is <b>'0x33182431'</b>.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].u32: color of the underline applied to the text being typed in.
+    * The value is in 0xARGB format. \n
+    * .value[1].u32: color of the underline applied to the text in the normal state.
+    * The value is in 0xARGB format. \n
+    * .value[2].u32: color of the underline applied to the text when an error is detected.
+    * The value is in 0xARGB format. \n
+    * .value[3].u32: color of the underline applied to the text when it is disabled.
+    * The value is in 0xARGB format. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].u32: color of the underline applied to the text being typed in. The value is in 0xARGB format. \n
+    * .value[1].u32: color of the underline applied to the text in the normal state. The value is in 0xARGB format. \n
+    * .value[2].u32: color of the underline applied to the text when an error is detected.
+    * The value is in 0xARGB format. \n
+    * .value[3].u32: color of the underline applied to the text when it is disabled. The value is in 0xARGB format. \n
+    *
+    */
+    NODE_TEXT_INPUT_UNDERLINE_COLOR,
+    /**
+    * @brief Sets whether to enable autofill.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: whether to enable autofill. The default value is <b>true</b>. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: whether to enable autofill. \n
+    *
+    */
+    NODE_TEXT_INPUT_ENABLE_AUTO_FILL,
+    /**
+    * @brief Sets the autofill type.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: autofill type. The parameter type is {@link ArkUI_TextInputContentType}. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: autofill type. The parameter type is {@link ArkUI_TextInputContentType}. \n
+    *
+    */
+    NODE_TEXT_INPUT_CONTENT_TYPE,
+    /**
+    * @brief Defines the rules for generating passwords. When autofill is used, these rules are transparently
+    * transmitted to Password Vault for generating a new password.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .string: rules for generating passwords. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .string: rules for generating passwords. \n
+    *
+    */
+    NODE_TEXT_INPUT_PASSWORD_RULES,
+    /**
+    * @brief Sets whether to select all text in the initial state. The inline mode is not supported.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: whether to select all text in the initial state. The default value is b>false</b>. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: whether to select all text in the initial state. \n
+    *
+    */
+    NODE_TEXT_INPUT_SELECT_ALL,
+    /**
+    * @brief Sets the regular expression for input filtering. Only inputs that comply with the regular expression can be
+    * displayed. Other inputs are filtered out. The specified regular expression can match single characters,
+    * but not strings.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .string: regular expression. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .string: regular expression. \n
+    *
+    */
+    NODE_TEXT_INPUT_INPUT_FILTER,
+    /**
+    * @brief Sets the text box to the default style or inline input style.
+    *
+    * For the inline input style, only <b>InputType.Normal</b> is supported.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: text input style. The parameter type is {@link ArkUI_TextInputStyle}. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: text input style. The parameter type is {@link ArkUI_TextInputStyle}. \n
+    *
+    */
+    NODE_TEXT_INPUT_STYLE,
+    /**
+    * @brief Sets or obtains the caret position.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * In the case of setting the caret position:
+    * .value[0].i32: character count from the beginning of a string to the caret position. \n
+    * 
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * In the case of obtaining the caret position: If this API is called when the caret position is updated in the
+    * current frame, it will not take effect.
+    * .value[0].i32: index of the caret position. \n
+    * .value[1].f32: X coordinate of the caret relative to the text box. \n
+    * .value[2].f32: Y coordinate of the caret relative to the text box. \n
+    */
+    NODE_TEXT_INPUT_CARET_OFFSET,
+    /**
+    * @brief Obtains the position of the edited text area relative to the component and its size.
+    * 
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].f32: horizontal coordinate. \n
+    * .value[1].f32: vertical coordinate. \n
+    * .value[2].f32: content width. \n
+    * .value[3].f32: content height. \n
+    *
+    */
+    NODE_TEXT_INPUT_CONTENT_RECT,
+    /**
+    * @brief Obtains the number of lines of the edited text.
+    * 
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: number of lines of the edited text. \n
+    *
+    */
+    NODE_TEXT_INPUT_CONTENT_LINE_COUNT,
     /**
      * @brief 设置长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单，支持属性设置，属性重置和属性获取接口。
      * 
@@ -2150,7 +2470,41 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_SELECTION_MENU_HIDDEN,
-
+    /**
+     * @brief Sets whether the text box loses focus after the Enter key is pressed to submit information.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     *
+     */
+    NODE_TEXT_INPUT_BLUR_ON_SUBMIT,
+    /**
+     * @brief 设置自定义键盘。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .object：自定义键盘，参数类型{@Link ArkUI_NodeHandle}。\n
+     * .value[0]?.i32：设置自定义键盘是否支持避让功能，默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .object：自定义键盘，参数类型{@Link ArkUI_NodeHandle}。\n
+     * .value[0].i32：设置自定义键盘是否支持避让功能。\n
+     *
+     */
+    NODE_TEXT_INPUT_CUSTOM_KEYBOARD,
+    /**
+     * @brief 文本断行规则属性，支持属性设置，属性重置，属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 参数类型{@link ArkUI_WordBreak}。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 参数类型{@link ArkUI_WordBreak}。\n
+     *
+     */
+    NODE_TEXT_INPUT_WORD_BREAK,
     /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -2290,7 +2644,129 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_SELECTION_MENU_HIDDEN,
-
+    /**
+     * @brief Sets whether the multi-line text box loses focus after the Enter key is pressed to submit information.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the text box loses focus. \n
+     *
+     */
+    NODE_TEXT_AREA_BLUR_ON_SUBMIT,
+    /**
+    * @brief 通过正则表达式设置输入过滤器。匹配表达式的输入允许显示，不匹配的输入将被过滤。仅支持单个字符匹配，不支持字符串匹配。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+    * .string： 正则表达式。\n
+    * \n
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * .string： 正则表达式。\n
+    *
+    */
+    NODE_TEXT_AREA_INPUT_FILTER,
+    /**
+     * @brief 设置文本选中底板颜色，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式。\n
+     *
+     */
+    NODE_TEXT_AREA_SELECTED_BACKGROUND_COLOR,
+    /**
+     * @brief 设置输入法回车键类型，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：回车键类型枚举{@link ArkUI_EnterKeyType}，默认值为ARKUI_ENTER_KEY_TYPE_DONE。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：回车键类型枚举{@link ArkUI_EnterKeyType}。\n
+     *
+     */
+    NODE_TEXT_AREA_ENTER_KEY_TYPE,
+    /**
+     * @brief 设置TextArea通过点击以外的方式获焦时，是否绑定输入法，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：false表示聚焦不拉起输入法，true表示拉起，默认值为true。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：0表示聚焦不拉起输入法，1表示拉起。\n
+     *
+     */
+    NODE_TEXT_AREA_ENABLE_KEYBOARD_ON_FOCUS,
+    /**
+    * @brief 设置或获取光标所在位置信息。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+    * 设置输入光标的位置。
+    * .value[0].i32： 从字符串开始到光标所在位置的字符长度。\n
+    * 
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * 返回当前光标所在位置信息。在当前帧更新光标位置同时调用该接口，该接口不生效
+    * value[0].i32：光标所在位置的索引值。\n
+    * value[1].f32：光标相对输入框的x坐标位值。\n
+    * value[2].f32：光标相对输入框的y坐标位值。\n
+    */
+    NODE_TEXT_AREA_CARET_OFFSET,
+    /**
+    * @brief 获取已编辑文本内容区域相对组件的位置和大小。
+    * 
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * value[0].f32：水平方向横坐标。\n
+    * value[1].f32：竖直方向纵坐标。\n
+    * value[2].f32：内容宽度大小。\n
+    * value[3].f32：内容高度大小。\n
+    *
+    */
+    NODE_TEXT_AREA_CONTENT_RECT,
+    /**
+    * @brief 获取已编辑文本内容的行数。
+    * 
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * value[0].i32：已编辑文本内容行数。\n
+    *
+    */
+    NODE_TEXT_AREA_CONTENT_LINE_COUNT,
+    /**
+     * @brief 组件在获焦状态下，调用该接口设置文本选择区域并高亮显示，且只有在selectionStart小于selectionEnd时，文字才会被选取、高亮显示。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：选中文本的起始位置；\n
+     * .value[1].i32：选中文本的终止位置；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：选中文本的起始位置；\n
+     * .value[1].i32：选中文本的终止位置；\n
+     *
+     */
+    NODE_TEXT_AREA_TEXT_SELECTION,
+    /**
+    * @brief 设置是否启用自动填充。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 是否启用自动填充，默认值true。\n
+    * \n
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 是否启用自动填充。\n
+    *
+    */
+    NODE_TEXT_AREA_ENABLE_AUTO_FILL,
+    /**
+    * @brief 自动填充类型。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 参数类型{@link ArkUI_TextInputContentType}。\n
+    * \n
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 参数类型{@link ArkUI_TextInputContentType}。\n
+    *
+    */
+    NODE_TEXT_AREA_CONTENT_TYPE,
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -2302,6 +2778,20 @@ typedef enum {
      *
      */
     NODE_BUTTON_LABEL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_BUTTON,
+
+    /**
+     * @brief Sets the button type. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
+     * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
+     * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
+     *
+     */
+    NODE_BUTTON_TYPE,
 
     /**
      * @brief Defines the current value of the progress indicator.
@@ -3121,6 +3611,72 @@ typedef enum {
     NODE_SLIDER_STYLE,
 
     /**
+     * @brief Sets the track thickness of the slider.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: track thickness of the slider, in vp. The default value is 4.0 vp when <b>NODE_SLIDER_STYLE</b>
+     * is set to <b>ARKUI_SLIDER_STYLE_OUT_SET</b> and 20.0 vp when <b>NODE_SLIDER_STYLE</b> is set to
+     * <b>ARKUI_SLIDER_STYLE_IN_SET</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: track thickness of the slider, in vp. \n
+     *
+     */
+    NODE_SLIDER_TRACK_THICKNESS,
+
+    /**
+     * @brief Set the selection status of an option button. Attribute setting,
+     * attribute resetting, and attribute obtaining are supported.
+     * Attribute setting method {@Link ArkUI_AttributeItem} Parameter format:\n
+     * .value[0].i32: check status of an option button. The default value is false.
+     * Attribute obtaining method return value {@Link ArkUI_AttributeItem} format:\n
+     * .value[0].i32: selection status of an option button.
+     */
+    NODE_RADIO_CHECKED = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RADIO,
+    /**
+     * @brief Set the styles of the selected and deselected states of the option button.
+     * The attribute setting, attribute resetting, and attribute obtaining are supported.
+     * Attribute setting method {@Link ArkUI_AttributeItem} Parameter format:\n
+     * .value[0]?. u32: color of the mother board in enabled state. \n
+     * The type is 0xARGB, and the default value is 0xFF007DFF. \n
+     * .value[1]?. u32: stroke color in the close state. \n
+     * The type is 0xARGB, and the default value is 0xFF182431. \n
+     * .value[2]?. u32: color of the internal round pie in the enabled state. \n
+     * The type is 0xARGB, and the default value is 0xFFFFFFFF. \n
+     * Attribute obtaining method return value {@Link ArkUI_AttributeItem} format:\n
+     * .value[0]. u32: color of the mother board in enabled state. \n
+     * The type is 0xARGB, and the default value is 0xFF007DFF. \n
+     * .value[1]. u32: stroke color in the close state. \n
+     * The type is 0xARGB, and the default value is 0xFF182431. \n
+     * .value[2]. u32: color of the internal round pie in the enabled state. \n
+     * The type is 0xARGB, and the default value is 0xFFFFFFF. \n
+     */
+    NODE_RADIO_STYLE,
+    /**
+     * @brief 设置当前单选框的值，支持属性设置、重置和获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .string: 单选框的值.\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .string: 单选框的值.\n
+     *
+     */
+    NODE_RADIO_VALUE,
+    /**
+     * @brief 设置当前单选框的所属群组名称，相同group的Radio只能有一个被选中，支持属性设置、重置和获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .string: 当前单选框的所属群组名称.\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .string: 当前单选框的所属群组名称.\n
+     *
+     */
+    NODE_RADIO_GROUP,
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *
@@ -3325,6 +3881,27 @@ typedef enum {
     NODE_SCROLL_ENABLE_PAGING,
 
     /**
+     * @brief Scroll to the next or previous page.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32 Indicates whether to scroll to next page. Value 1 indicates scroll to next page and value 0
+     * indicates scroll to previous page. \n
+     * .value[1]?.i32 Indicates whether to enable animation. Value 1 indicates enable and 0 indicates disable. \n
+     *
+     */
+    NODE_SCROLL_PAGE,
+
+    /**
+     * @brief Scroll a specified distance.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32：Horizontal scrolling distance in vp; \n
+     * .value[1].f32: Vertical scrolling distance in vp; \n
+     *
+     */
+    NODE_SCROLL_BY,
+
+    /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
      * obtained as required through APIs.
      *
@@ -3384,14 +3961,30 @@ typedef enum {
     NODE_LIST_CACHED_COUNT,
 
     /**
+     * @brief Scroll to the specified index.
+     * 
+     * When activating the smooth animation, all items passed through will be loaded and layout calculated, which can
+     * lead to performance issues when loading a large number of items.\n
+     * \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32：The index value of the target element to be slid to in the current container.\n
+     * .value[1]?.i32：Set whether there is an action when sliding to the index value of a list item in the list, where
+     * 1 indicates an action and 0 indicates no action. Default value: 0。\n
+     * .value[2]?.i32：Specify the alignment of the sliding element with the current container,The parameter type is
+     * {@link ArkUI_ScrollAlignment}, default value is ARKUI_SCROLL_ALIGNMENT_START. \n
+     *
+     */
+    NODE_LIST_SCROLL_TO_INDEX,
+
+    /**
     * @brief 设置List交叉轴方向宽度大于ListItem交叉轴宽度 * lanes时，
     * ListItem在List交叉轴方向的布局方式，支持属性设置，属性重置和属性获取接口。
     *
     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlign} \n
+     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment} \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlign}  \n
+     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment}  \n
     */
     NODE_LIST_ALIGN_LIST_ITEM,
 
@@ -3597,6 +4190,63 @@ typedef enum {
     * .value[0].i32: number of cached items in the swiper adapter. \n
     */
     NODE_SWIPER_CACHED_COUNT,
+
+    /**
+     * @brief 设置 Swiper 组件的前边距，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：前边距数值，单位为vp，默认值为0。 \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：前边距数值，单位为vp。
+     */
+    NODE_SWIPER_PREV_MARGIN,
+
+    /**
+     * @brief 设置 Swiper 组件的后边距，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：后边距数值，单位为vp，默认值为0。 \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：后边距数值，单位为vp。
+     */
+    NODE_SWIPER_NEXT_MARGIN,
+
+    /**
+     * @brief 设置 Swiper 组件的导航指示器类型，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32：设置导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
+     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
+     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
+     *
+     */
+    NODE_SWIPER_INDICATOR,
+
+    /**
+    * @brief Set the nested scrolling mode for the Swiper component and parent component.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32：Nested scrolling patterns for Swiper components and parent components. The parameter type is
+    * {@link ArkUI_SwiperNestedScrollMode} \n
+    * The default value is <b>ARKUI_SWIPER_NESTED_SRCOLL_SELF_ONLY<b> \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32：Nested scrolling patterns for Swiper components and parent components. The parameter type is
+    * {@link ArkUI_SwiperNestedScrollMode} \n
+    */
+    NODE_SWIPER_NESTED_SCROLL,
+
+    /**
+    * @brief Set the switcher component to flip to the specified page.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32：Specify the index value of the page in Swiper.\n
+    * .value[1]?.i32：Set whether there is an animation effect when flipping to the specified page. 1 indicates active
+    * effect, 0 indicates no active effect, default value is 0。\n
+    */
+    NODE_SWIPER_SWIPE_TO_INDEX,
 
     /**
      * @brief Defines the header of the list item group.
@@ -3828,6 +4478,7 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: 从0开始计算的索引，会转换为整数，表示要开始改变分组的位置.\n
      * .object: {@ArkUI_WaterFlowSectionOption} object.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
@@ -3852,6 +4503,151 @@ typedef enum {
     * .value[0].i32: number of cached items in the water flowadapter. \n
     */
     NODE_WATER_FLOW_CACHED_COUNT,
+    /**
+     * @brief 设置瀑布流组件末尾的自定义显示组件。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .object：参数类型{@Link ArkUI_NodeHandle}。
+     *
+     */
+    NODE_WATER_FLOW_FOOTER,
+    /**
+     * @brief Scroll to the specified index.
+     * 
+     * When activating the smooth animation, all items passed through will be loaded and layout calculated, which can
+     * lead to performance issues when loading a large number of items.\n
+     * \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32：The index value of the target element to be slid to in the current container.\n
+     * .value[1]?.i32：Set whether there is an action when sliding to the index value of a list item in the list, where
+     * 1 indicates an action and 0 indicates no action. Default value is 0。\n
+     * .value[2]?.i32：Specify the alignment of the sliding element with the current container，The parameter type is
+     * {@link ArkUI_ScrollAlignment}. Default value is </b>ARKUI_SCROLL_ALIGNMENT_START</b>。\n
+     *
+     */
+    NODE_WATER_FLOW_SCROLL_TO_INDEX,
+
+    /**
+     * @brief 设置当前瀑布流子组件的约束尺寸属性，组件布局时，进行尺寸范围限制，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：最小宽度，单位vp； \n
+     * .value[1].f32：最大宽度，单位vp； \n
+     * .value[2].f32：最小高度，单位vp； \n
+     * .value[3].f32：最大高度，单位vp； \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：最小宽度，单位vp； \n
+     * .value[1].f32：最大宽度，单位vp； \n
+     * .value[2].f32：最小高度，单位vp； \n
+     * .value[3].f32：最大高度，单位vp； \n
+     *
+     */
+    NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE,
+
+/**
+     * @brief Sets the number of columns in the grid layout. If this parameter is not set, one column is used
+     * by default. This attribute can be set, reset, and obtained as required through APIs.
+     * For example, <b>'1fr 1fr 2fr'</b> indicates three columns, with the first column taking up 1/4 of the parent
+     * component's full width, the second column 1/4, and the third column 2/4.
+     * You can use <b>columnsTemplate('repeat(auto-fill,track-size)')</b> to automatically calculate the number of
+     * columns based on the specified column width <b>track-size</b>.
+     * <b>repeat</b> and <b>auto-fill</b> are keywords. The units for <b>track-size</b> can be px, vp (default), %,
+     * or a valid number.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: number of columns in the layout.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: number of columns in the layout.\n
+     *
+     */
+    NODE_GRID_COLUMN_TEMPLATE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_GRID,
+
+    /**
+     * @brief Sets the number of rows in the grid layout. If this parameter is not set, one row is used
+     * by default. This attribute can be set, reset, and obtained as required through APIs.
+     * For example, <b>'1fr 1fr 2fr'</b> indicates three rows, with the first row taking up 1/4 of the parent
+     * component's full height, the second row 1/4, and the third row 2/4.
+     * You can use <b>rowsTemplate('repeat(auto-fill,track-size)')</b> to automatically calculate the number of rows
+     * based on the specified row height <b>track-size</b>.
+     * <b>repeat</b> and <b>auto-fill</b> are keywords. The units for <b>track-size</b> can be px, vp (default), %,
+     * or a valid number.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: number of rows in the layout. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: number of rows in the layout. \n
+     *
+     */
+    NODE_GRID_ROW_TEMPLATE,
+
+    /**
+     * @brief Sets the gap between columns. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: gap between columns, in vp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: gap between columns, in vp.\n
+     *
+     */
+    NODE_GRID_COLUMN_GAP,
+
+    /**
+     * @brief Sets the gap between rows. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: gap between lines, in vp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: gap between lines, in vp.\n
+     *
+     */
+    NODE_GRID_ROW_GAP,
+
+    /**
+    * @brief Defines the grid adapter. The attribute can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .object: {@link ArkUI_NodeAdapter} object as the adapter. \n
+    */
+    NODE_GRID_NODE_ADAPTER,
+
+    /**
+    * @brief Sets the number of cached items in the grid adapter.
+    * This attribute can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: number of cached items in the grid adapter. \n
+    */
+    NODE_GRID_CACHED_COUNT,
+
+    /**
+     * @brief 设置RelativeContaine容器内的辅助线，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的辅助线： \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的辅助线：  \n
+     *
+     */
+    NODE_RELATIVE_CONTAINER_GUIDE_LINE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RELATIVE_CONTAINER,
+
+    /**
+     * @brief 设置RelativeContaine容器内的屏障，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的辅助线： \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的屏障：  \n
+     *
+     */
+    NODE_RELATIVE_CONTAINER_BARRIER,
+
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -3992,6 +4788,44 @@ typedef enum {
      */
     NODE_ON_TOUCH_INTERCEPT,
     /**
+     * @brief 组件可见区域变化事件。
+     *
+     * 触发该事件的条件：组件可见面积与自身面积的比值接近设置的阈值时触发回调。\n
+     * 传入参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0...].f32: 阈值数组，阈值表示组件可见面积与组件自身面积的比值。每个阈值的取值范围均为[0.0, 1.0]\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：组件可见面积与自身面积的比值与上次变化相比的情况，变大为1，变小为0。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：触发回调时组件可见面积与自身面积的比值。\n
+     */
+    NODE_EVENT_ON_VISIBLE_AREA_CHANGE,
+    /**
+     * @brief 鼠标进入或退出组件事件。
+     *
+     * 触发该事件的条件：鼠标进入或退出组件时触发回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：鼠标是否悬浮在组件上，鼠标进入时为1，退出时为0。\n
+     */
+    NODE_ON_HOVER,
+    /**
+     * @brief 组件点击事件。
+     *
+     * 触发该事件的条件：组件被鼠标按键点击或者鼠标在组件上悬浮移动时触发该回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_UIInputEvent}。\n
+     */
+    NODE_ON_MOUSE,
+    /**
+     * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
+     *
+     * 触发该事件的条件：文本设置TextDataDetectorConfig且识别成功后。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
+     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>：表示文本识别的结果，Json格式。\n
+     *
+     */
+    NODE_TEXT_ON_DETECT_RESULT_UPDATE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
+    /**
      * @brief Defines the image loading success event.
      *
      * This event is triggered when an image is successfully loaded or decoded. \n
@@ -4113,6 +4947,42 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_ON_EDIT_CHANGE,
+
+    /**
+     * @brief textInput输入内容发生变化时触发该事件。
+     *
+     * 触发该事件的条件：输入内容发生变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>：表示文本的宽度。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：表示文本的高度。\n
+     *
+     */
+    NODE_TEXT_INPUT_ON_CONTENT_SIZE_CHANGE,
+
+    /**
+     * @brief Defines the event triggered when matching with the regular expression specified by
+     * <b>NODE_TEXT_INPUT_INPUT_FILTER</b> fails.
+     *
+      \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * {@link ArkUI_StringAsyncEvent} contains one parameter:\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>: content that is filtered out when regular expression matching fails. \n
+     *
+     */
+    NODE_TEXT_INPUT_ON_INPUT_FILTER_ERROR,
+    /**
+     * @brief 文本内容滚动时，触发该回调。
+     *
+     * 触发该事件的条件：文本内容滚动时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示文本在内容区的横坐标偏移。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示文本在内容区的纵坐标偏移。\n
+     *
+     */
+    NODE_TEXT_INPUT_ON_CONTENT_SCROLL,
     /**
      * @brief Defines the event triggered when the input in the text box changes.
      *
@@ -4148,6 +5018,27 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE,
+    /**
+     * @brief 设置NODE_TEXT_AREA_INPUT_FILTER，正则匹配失败时触发。
+     *
+     * 触发该事件的条件：正则匹配失败时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
+     * {@link ArkUI_StringAsyncEvent}中包含1个参数：\n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>：表示正则匹配失败时，被过滤的内容。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_INPUT_FILTER_ERROR,
+    /**
+     * @brief 文本内容滚动时，触发该回调。
+     *
+     * 触发该事件的条件：文本内容滚动时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示文本在内容区的横坐标偏移。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：表示文本在内容区的纵坐标偏移。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_CONTENT_SCROLL,
 
     /**
      * @brief 输入状态变化时，触发该回调。
@@ -4170,6 +5061,18 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_SUBMIT,
+
+    /**
+     * @brief textArea输入内容发生变化时触发该事件。
+     *
+     * 触发该事件的条件：输入内容发生变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>：表示文本的宽度。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：表示文本的高度。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_CONTENT_SIZE_CHANGE,
 
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
@@ -4237,6 +5140,15 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: state triggered by the event.\n
      */
     NODE_SLIDER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SLIDER,
+
+    /**
+     * @brief Defines the event callback function triggered when an object is dragged or clicked by ARKUI_NODE_RADIO.
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * ArkUI_NodeComponentEvent.data[0].i32: option button status. \n
+     */
+    NODE_RADIO_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RADIO,
 
     /**
      * @brief Defines the event triggered when the index of the currently displayed element of this
@@ -4323,6 +5235,47 @@ typedef enum {
      * needs to scroll based on the real-world situation and return the result in this parameter. \n
      */
     NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN,
+
+
+    /**
+     * @brief Define the enumeration value of the pre sliding trigger event for the scrolling container component.
+     *
+     * The conditions that trigger this event: \n
+     * 1. When the scrolling component triggers scrolling, it supports input settings such as keyboard and mouse
+     * operations that trigger scrolling.\n
+     * 2. Called through the rolling controller API interface.\n
+     * 3. Cross boundary rebound.\n
+     * When an event callback occurs, the union type in the event parameter {@ link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains three parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: The offset for each frame of scrolling is positive when scrolling to
+     * the left and negative when scrolling to the right, measured in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: The offset of each frame scrolling, with a positive offset when
+     * scrolling up and a negative offset when scrolling down, measured in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: Current sliding state, parameter type is
+     * {@link ArkUI_ScrollState}.\n
+     */
+    NODE_SCROLL_EVENT_ON_WILL_SCROLL,
+
+    /**
+     * @brief Define the event enumeration value triggered when sliding a scrolling container component.
+     *
+     * The conditions that trigger this event: \n
+     * 1. When the scrolling component triggers scrolling, it supports input settings such as keyboard and mouse
+     * operations that trigger scrolling.\n
+     * 2. Called through the rolling controller API interface.\n
+     * 3. Cross boundary rebound.\n
+     * When an event callback occurs, the union type in the event parameter {@ link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains three parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: The offset for each frame of scrolling is positive when scrolling to
+     * the left and negative when scrolling to the right, measured in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: The offset of each frame scrolling, with a positive offset when
+     * scrolling up and a negative offset when scrolling down, measured in vp. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: Current sliding state, parameter type is
+     * {@link ArkUI_ScrollState}.\n
+     */
+    NODE_SCROLL_EVENT_ON_DID_SCROLL,
     /**
      * @brief Defines the event triggered when scrolling starts in the <b>ARKUI_NODE_SCROLL</b> component.
      *
@@ -4362,7 +5315,76 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: edge (top, bottom, left, or right) that the scrolling reaches. \n
      */
     NODE_SCROLL_EVENT_ON_SCROLL_EDGE,
+    /**
+     * @brief Define that a callback is triggered
+     * when the scrolling container component reaches the start position.
+     * Condition for triggering the event: \n
+     * Triggered when the component reaches the start position. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is 
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains no parameters. \n
+     */
+    NODE_SCROLL_EVENT_ON_REACH_START,
+    /**
+     * @brief Define that a callback is triggered when the scrolling container component ends. \n
+     * Condition for triggering the event: \n
+     * Triggered when the component reaches the end. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains no parameters. \n
+     */
+    NODE_SCROLL_EVENT_ON_REACH_END,
 
+    /**
+     * @brief Defines the enumerated values of the event triggered, \n
+     * when a subcomponent of ARKUI_NODE_LIST is moved into or out of the list display area. \n
+     * Condition for triggering the event: \n
+     * This method is triggered once during list initialization. \n
+     * It is triggered when the index value of the first or last subcomponent in the list display area changes. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains three parameters: \n
+     * ArkUI_NodeComponentEvent.data[0].i32: List Displays \n
+     * the index value of the first child component in the region. \n
+     * ArkUI_NodeComponentEvent.data[1].i32: List Displays \n
+     * the index value of the last child component in the region. \n
+     * ArkUI_NodeComponentEvent.data[2].i32: List Displays \n
+     * the index value of the subcomponent in the middle of the area. \n
+     */
+    NODE_LIST_ON_SCROLL_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
+    /**
+     * @brief Defines the enumerated values of the event triggered \n
+     * before the sliding of the ARKUI_NODE_LIST component. \n
+     * Condition for triggering the event: \n
+     * This event is triggered when the scrolling component triggers scrolling. \n
+     * Other inputs that trigger scrolling, such as keyboard and mouse operations, can be set. \n
+     * Called through the scroll controller API. \n
+     * Out-of-bounds rebound. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * ArkUI_NodeComponentEvent.data[0].f32: offset of each frame scrolling. \n
+     * The offset is positive when the list content is \n
+     * scrolled up and is negative when the list content is scrolled down. \n
+     * ArkUI_NodeComponentEvent.data[1].i32: Current sliding state. \n
+     */
+    NODE_LIST_ON_WILL_SCROLL,
+    /**
+     * @brief Define the enumerated values of the event triggered when the ARKUI_NODE_LIST component is flicked.
+     * Condition for triggering the event: \n
+     * This event is triggered when the scrolling component triggers scrolling. \n
+     * Other inputs that trigger scrolling, such as keyboard and mouse operations, can be set. \n
+     * Called through the scroll controller API. \n
+     * Out-of-bounds rebound. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * ArkUI_NodeComponentEvent.data[0].f32: offset of each frame scrolling. \n
+     * The offset is positive when the list content is scrolled up and is negative \n
+     * when the list content is scrolled down. \n
+     * ArkUI_NodeComponentEvent.data[1].i32: Current sliding state. \n
+     */
+    NODE_LIST_ON_DID_SCROLL,
     /**
      * @brief Defines the event triggered when the refresh state of the <b>ARKUI_NODE_REFRESH</b> object changes.
      *
@@ -4398,13 +5420,35 @@ typedef enum {
      */
     NODE_ON_WILL_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
     /**
-     * @brief Defines the event triggered when the <b>ARKUI_NODE_WATER_FLOW</b> component reaches the end edge.
-     *
-     * \n
-     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is {@link ArkUI_NodeComponentEvent}. \n
-     * {@link ArkUI_NodeComponentEvent} does not contain parameters. \n
+     * @brief Define the enumerated values of the event triggered when the ARKUI_NODE_WATER_FLOW component slides.
+     * Condition for triggering the event: \n
+     * This event is triggered when the scrolling component triggers scrolling.
+     * Other inputs that trigger scrolling, such as keyboard and mouse operations, can be set. \n
+     * Called through the scroll controller API. \n
+     * Out-of-bounds rebound. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * ArkUI_NodeComponentEvent.data[0].f32: offset of each frame scrolling. 
+     * The offset is positive when the content is scrolled up and is negative when the content is scrolled down. \n
+     * ArkUI_NodeComponentEvent.data[1].i32: Current sliding state. \n
      */
-    NODE_ON_REACH_END,
+    NODE_WATER_FLOW_ON_DID_SCROLL,
+    /**
+     * @brief Defines the enumerated values of the event triggered,
+     * when the subcomponent of the start position or end position displayed in the current waterfall changes.
+     * Condition for triggering the event: \n
+     * This event is triggered when the index value of the first or last subcomponent \n
+     * in the waterfall display area changes. \n
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
+     * {@Link ArkUI_NodeComponentEvent}. \n
+     * {@Link ArkUI_NodeComponentEvent} contains three parameters: \n
+     * ArkUI_NodeComponentEvent.data[0].i32: The index value of \n
+     * the start position of the currently displayed WaterFlow. \n
+     * ArkUI_NodeComponentEvent.data[1].i32: The index value of \n
+     * the end position of the currently displayed waterfall. \n
+     */
+    NODE_WATER_FLOW_ON_SCROLL_INDEX,
 } ArkUI_NodeEventType;
 
 /**
@@ -4605,7 +5649,7 @@ uint32_t OH_ArkUI_NodeAdapter_GetTotalNodeCount(ArkUI_NodeAdapterHandle handle);
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapter_RegisterEventReceiver(
-ArkUI_NodeAdapterHandle handle, void* userData, void (*receiver)(ArkUI_NodeAdapterEvent* event));
+    ArkUI_NodeAdapterHandle handle, void* userData, void (*receiver)(ArkUI_NodeAdapterEvent* event));
 
 /**
 * @brief Deregisters an event callback for the adapter.
@@ -4635,8 +5679,7 @@ int32_t OH_ArkUI_NodeAdapter_ReloadAllItems(ArkUI_NodeAdapterHandle handle);
 * Returns 401 if a parameter exception occurs.
 * @since 12
 */
-int32_t OH_ArkUI_NodeAdapter_ReloadItem(
-ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
+int32_t OH_ArkUI_NodeAdapter_ReloadItem(ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
 
 /**
 * @brief Instructs the specified adapter to remove certain elements.
@@ -4648,8 +5691,7 @@ ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
 * Returns 401 if a parameter exception occurs.
 * @since 12
 */
-int32_t OH_ArkUI_NodeAdapter_RemoveItem(
-ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
+int32_t OH_ArkUI_NodeAdapter_RemoveItem(ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
 
 /**
 * @brief Instructs the specified adapter to insert certain elements.
@@ -4661,8 +5703,7 @@ ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
 * Returns 401 if a parameter exception occurs.
 * @since 12
 */
-int32_t OH_ArkUI_NodeAdapter_InsertItem(
-ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
+int32_t OH_ArkUI_NodeAdapter_InsertItem(ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
 
 /**
 * @brief Instructs the specified adapter to move certain elements.
@@ -5192,6 +6233,14 @@ typedef struct {
      * @return Returns <b>0</b> if the operation is successful; returns <b>401</b> if a parameter error occurs.
      */
     int32_t (*setLengthMetricUnit)(ArkUI_NodeHandle node, ArkUI_LengthMetricUnit unit);
+
+     /**
+     * @brief 获取父节点。
+     *
+     * @param node 目标节点对象。
+     * @return 返回组件的指针，如果没有返回NULL
+     */
+    ArkUI_NodeHandle (*getParent)(ArkUI_NodeHandle node);
 } ArkUI_NativeNodeAPI_1;
 
 /**
@@ -5325,8 +6374,7 @@ typedef void (*ArkUI_NodeContentCallback)(ArkUI_NodeContentEvent* event);
  * @return Returns the status code 
  * @since 12
  */
-int32_t OH_ArkUI_NodeContent_RegisterCallback(
-    ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback);
+int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback);
 
 /**
  * @brief Obtains the type of a node content.

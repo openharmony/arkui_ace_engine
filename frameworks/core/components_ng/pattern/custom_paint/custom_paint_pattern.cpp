@@ -22,6 +22,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
+#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 #include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
@@ -51,10 +52,9 @@ void CustomPaintPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
 
     if (!contentModifier_) {
-        contentModifier_ =
-            AceType::MakeRefPtr<RenderingContext2DModifier>();
+        contentModifier_ = AceType::MakeRefPtr<RenderingContext2DModifier>();
     }
-    paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context, contentModifier_);
+    paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context, contentModifier_, host);
 }
 
 RefPtr<NodePaintMethod> CustomPaintPattern::CreateNodePaintMethod()
@@ -119,258 +119,206 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
 void CustomPaintPattern::SetAntiAlias(bool isEnabled)
 {
-    auto task = [isEnabled](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [isEnabled](CanvasPaintMethod& paintMethod) {
         paintMethod.SetAntiAlias(isEnabled);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::FillRect(const Rect& rect)
 {
+#ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'fillRect(%{public}s)' is being executed.", rect.ToString().c_str());
-    auto task = [rect](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.FillRect(rect);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+#else
+    CHECK_NULL_VOID(paintMethod_->fastTaskPool_);
+    paintMethod_->fastTaskPool_->FillRect(rect);
+#endif
 }
 
 void CustomPaintPattern::StrokeRect(const Rect& rect)
 {
-    auto task = [rect](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.StrokeRect(rect);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::ClearRect(const Rect& rect)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'clearRect(%{public}s)' is being executed.", rect.ToString().c_str());
-    auto task = [rect](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.ClearRect(rect);
     };
     paintMethod_->PushTask(task);
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Fill()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'fill' is pending execution.");
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Fill();
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Fill(const RefPtr<CanvasPath2D>& path)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'fill' whit path is pending execution.");
-    auto task = [path](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Fill(path);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Stroke()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'stroke' is pending execution.");
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Stroke();
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Stroke(const RefPtr<CanvasPath2D>& path)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'stroke' whit path is pending execution.");
-    auto task = [path](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Stroke(path);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Clip()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'clip' is pending execution.");
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Clip();
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Clip(const RefPtr<CanvasPath2D>& path)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'clip' whit path is pending execution.");
-    auto task = [path](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Clip(path);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::BeginPath()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'beginPath' is pending execution.");
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.BeginPath();
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::ClosePath()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'closePath' is pending execution.");
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.ClosePath();
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::MoveTo(double x, double y)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'moveTo(%{public}lf, %{public}lf)' is pending execution.", x, y);
-    auto task = [x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.MoveTo(x, y);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::LineTo(double x, double y)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'lineTo(%{public}lf, %{public}lf)' is pending execution.", x, y);
-    auto task = [x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.LineTo(x, y);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Arc(const ArcParam& param)
 {
-    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.Arc(param);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::ArcTo(const ArcToParam& param)
 {
-    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.ArcTo(param);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::AddRect(const Rect& rect)
 {
-    auto task = [rect](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.AddRect(rect);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Ellipse(const EllipseParam& param)
 {
-    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.Ellipse(param);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::BezierCurveTo(const BezierCurveParam& param)
 {
+#ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'bezierCurveTo' is pending execution.");
-    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.BezierCurveTo(param);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+#else
+    CHECK_NULL_VOID(paintMethod_->fastTaskPool_);
+    paintMethod_->fastTaskPool_->BezierCurveTo(param);
+#endif
 }
 
 void CustomPaintPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
 {
-    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.QuadraticCurveTo(param);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.FillText(paintWrapper, text, x, y, maxWidth);
+#ifndef USE_FAST_TASKPOOL
+    auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod) {
+        paintMethod.FillText(text, x, y, maxWidth);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+#else
+    CHECK_NULL_VOID(paintMethod_->fastTaskPool_);
+    paintMethod_->fastTaskPool_->FillText(text, x, y, maxWidth);
+#endif
 }
 
 void CustomPaintPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.StrokeText(paintWrapper, text, x, y, maxWidth);
+    auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod) {
+        paintMethod.StrokeText(text, x, y, maxWidth);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 double CustomPaintPattern::MeasureText(const std::string& text, const PaintState& state)
@@ -391,36 +339,27 @@ TextMetrics CustomPaintPattern::MeasureTextMetrics(const std::string& text, cons
 void CustomPaintPattern::DrawImage(const Ace::CanvasImage& image, double width, double height)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'drawImage(%{public}f, %{public}f)' is being executed.", width, height);
-    auto task = [image, width, height](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [image, width, height](CanvasPaintMethod& paintMethod) {
         paintMethod.DrawImage(image, width, height);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::DrawSvgImage(
     RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& image, const ImageFit& imageFit)
 {
-    auto task = [svgDom, image, imageFit](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [svgDom, image, imageFit](CanvasPaintMethod& paintMethod) {
         paintMethod.DrawSvgImage(svgDom, image, imageFit);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image)
 {
-    auto task = [pixelMap, image](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [pixelMap, image](CanvasPaintMethod& paintMethod) {
         paintMethod.DrawPixelMap(pixelMap, image);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 std::unique_ptr<Ace::ImageData> CustomPaintPattern::GetImageData(double left, double top, double width, double height)
@@ -460,24 +399,18 @@ void CustomPaintPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& ima
 
 void CustomPaintPattern::PutImageData(const Ace::ImageData& imageData)
 {
-    auto task = [imageData](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [imageData](CanvasPaintMethod& paintMethod) {
         paintMethod.PutImageData(imageData);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern)
 {
-    auto task = [offscreenCanvasPattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [offscreenCanvasPattern](CanvasPaintMethod& paintMethod) {
         paintMethod.TransferFromImageBitmap(offscreenCanvasPattern);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::CloseImageBitmap(const std::string& src)
@@ -487,299 +420,218 @@ void CustomPaintPattern::CloseImageBitmap(const std::string& src)
 
 void CustomPaintPattern::UpdateGlobalAlpha(double alpha)
 {
-    auto task = [alpha](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [alpha](CanvasPaintMethod& paintMethod) {
         paintMethod.SetAlpha(alpha);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateCompositeOperation(CompositeOperation type)
 {
-    auto task = [type](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [type](CanvasPaintMethod& paintMethod) {
         paintMethod.SetCompositeType(type);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateSmoothingEnabled(bool enabled)
 {
-    auto task = [enabled](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [enabled](CanvasPaintMethod& paintMethod) {
         paintMethod.SetSmoothingEnabled(enabled);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateSmoothingQuality(const std::string& quality)
 {
-    auto task = [quality](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [quality](CanvasPaintMethod& paintMethod) {
         paintMethod.SetSmoothingQuality(quality);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateLineCap(LineCapStyle cap)
 {
-    auto task = [cap](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [cap](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineCap(cap);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateLineDashOffset(double dash)
 {
-    auto task = [dash](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [dash](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineDashOffset(dash);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateLineJoin(LineJoinStyle join)
 {
-    auto task = [join](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [join](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineJoin(join);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateLineWidth(double width)
 {
-    auto task = [width](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [width](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineWidth(width);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateMiterLimit(double limit)
 {
-    auto task = [limit](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [limit](CanvasPaintMethod& paintMethod) {
         paintMethod.SetMiterLimit(limit);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateShadowBlur(double blur)
 {
-    auto task = [blur](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [blur](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowBlur(blur);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateShadowColor(const Color& color)
 {
-    auto task = [color](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowColor(color);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateShadowOffsetX(double offsetX)
 {
-    auto task = [offsetX](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [offsetX](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowOffsetX(offsetX);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateShadowOffsetY(double offsetY)
 {
-    auto task = [offsetY](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [offsetY](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowOffsetY(offsetY);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateTextAlign(TextAlign align)
 {
-    auto task = [align](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [align](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextAlign(align);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateTextBaseline(TextBaseline baseline)
 {
-    auto task = [baseline](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [baseline](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextBaseline(baseline);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    auto task = [pattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [pattern](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokePatternNG(pattern);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateStrokeColor(const Color& color)
 {
-    auto task = [color](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokeColor(color);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateStrokeGradient(const Ace::Gradient& grad)
 {
-    auto task = [grad](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [grad](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokeGradient(grad);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateFontWeight(FontWeight weight)
 {
-    auto task = [weight](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [weight](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontWeight(weight);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateFontStyle(FontStyle style)
 {
-    auto task = [style](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [style](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontStyle(style);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateFontFamilies(const std::vector<std::string>& families)
 {
-    auto task = [families](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [families](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontFamilies(families);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateFontSize(const Dimension& size)
 {
-    auto task = [size](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [size](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontSize(size);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateFillColor(const Color& color)
 {
-    auto task = [color](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillColor(color);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateFillGradient(const Ace::Gradient& gradient)
 {
-    auto task = [gradient](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [gradient](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillGradient(gradient);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-    auto task = [pattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [pattern](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillPatternNG(pattern);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateFillRuleForPath(const CanvasFillRule rule)
 {
-    auto task = [rule](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [rule](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillRuleForPath(rule);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
 {
-    auto task = [rule](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [rule](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillRuleForPath2D(rule);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 LineDashParam CustomPaintPattern::GetLineDash() const
@@ -790,113 +642,97 @@ LineDashParam CustomPaintPattern::GetLineDash() const
 void CustomPaintPattern::UpdateLineDash(const std::vector<double>& segments)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'setLineDash' with %{public}zu parameters is executed.", segments.size());
-    auto task = [segments](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [segments](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineDash(segments);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Save()
 {
+#ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'save' is pending execution.");
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Save();
     };
     paintMethod_->PushTask(task);
+#else
+    CHECK_NULL_VOID(paintMethod_->fastTaskPool_);
+    paintMethod_->fastTaskPool_->Save();
+#endif
     paintMethod_->SaveMatrix();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Restore()
 {
+#ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'restore' is pending execution.");
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Restore();
     };
     paintMethod_->PushTask(task);
+#else
+    CHECK_NULL_VOID(paintMethod_->fastTaskPool_);
+    paintMethod_->fastTaskPool_->Restore();
+#endif
+
     paintMethod_->RestoreMatrix();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Scale(double x, double y)
 {
-    auto task = [x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.Scale(x, y);
     };
     paintMethod_->PushTask(task);
     paintMethod_->ScaleMatrix(x, y);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Rotate(double angle)
 {
-    auto task = [angle](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [angle](CanvasPaintMethod& paintMethod) {
         paintMethod.Rotate(angle);
     };
     paintMethod_->PushTask(task);
     paintMethod_->RotateMatrix(angle);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::SetTransform(const TransformParam& param)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'setTransform' is pending execution.");
-    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTransform(param);
     };
     paintMethod_->PushTask(task);
     paintMethod_->SetTransformMatrix(param);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::ResetTransform()
 {
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.ResetTransform();
     };
     paintMethod_->PushTask(task);
     paintMethod_->ResetTransformMatrix();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Transform(const TransformParam& param)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'transform' is pending execution.");
-    auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.Transform(param);
     };
     paintMethod_->PushTask(task);
     paintMethod_->TransformMatrix(param);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::Translate(double x, double y)
 {
-    auto task = [x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.Translate(x, y);
     };
     paintMethod_->PushTask(task);
     paintMethod_->TranslateMatrix(x, y);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 std::string CustomPaintPattern::ToDataURL(const std::string& args)
@@ -937,11 +773,8 @@ void CustomPaintPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, doubl
 
 void CustomPaintPattern::SetInvalidate()
 {
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {};
+    auto task = [](CanvasPaintMethod& paintMethod) {};
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::SetTextDirection(TextDirection direction)
@@ -957,22 +790,18 @@ void CustomPaintPattern::SetTextDirection(TextDirection direction)
     if (direction == TextDirection::INHERIT) {
         direction = directionCommon;
     }
-    auto task = [direction](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [direction](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextDirection(direction);
     };
     paintMethod_->PushTask(task);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::SetFilterParam(const std::string& filterStr)
 {
-    auto task = [filterStr](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [filterStr](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFilterParam(filterStr);
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 TransformParam CustomPaintPattern::GetTransform() const
@@ -983,25 +812,19 @@ TransformParam CustomPaintPattern::GetTransform() const
 void CustomPaintPattern::SaveLayer()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'SaveLayer' is being executed.");
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.SaveLayer();
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::RestoreLayer()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'RestoreLayer' is being executed.");
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.RestoreLayer();
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
@@ -1128,13 +951,11 @@ void CustomPaintPattern::DumpAdvanceInfo()
 
 void CustomPaintPattern::Reset()
 {
-    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+    auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Reset();
     };
     paintMethod_->PushTask(task);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    paintMethod_->ResetTransformMatrix();
 }
 
 void CustomPaintPattern::OnLanguageConfigurationUpdate()

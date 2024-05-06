@@ -1597,7 +1597,7 @@ void WebDelegate::CreatePluginResource(
         webDelegate->BindRouterBackMethod();
         webDelegate->BindPopPageSuccessMethod();
         webDelegate->BindIsPagePathInvalidMethod();
-        }, "ArkUIWebCreatePluginResource");
+    }, "ArkUIWebCreatePluginResource");
 }
 
 void WebDelegate::InitWebEvent()
@@ -2126,7 +2126,7 @@ void WebDelegate::SetWebCallBack()
                 if (delegate) {
                     delegate->Backward();
                 }
-                }, "ArkUIWebBackward");
+            }, "ArkUIWebBackward");
         });
         webController->SetForwardImpl([weak = WeakClaim(this), uiTaskExecutor]() {
             uiTaskExecutor.PostTask([weak]() {
@@ -5350,6 +5350,13 @@ void WebDelegate::HandleTouchCancel()
     }
 }
 
+void WebDelegate::HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy)
+{
+    if (nweb_) {
+        nweb_->SendTouchpadFlingEvent(x, y, vx, vy);
+    }
+}
+
 void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY)
 {
     if (nweb_) {
@@ -6383,7 +6390,7 @@ bool WebDelegate::OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRes
         auto webCom = delegate->webComponent_.Upgrade();
         CHECK_NULL_VOID(webCom);
         result = webCom->OnOverrideUrlLoading(param.get());
-        }, "ArkUIWebHandleOverrideLoading");
+    }, "ArkUIWebHandleOverrideLoading");
     return result;
 }
 

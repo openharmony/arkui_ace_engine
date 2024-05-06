@@ -94,6 +94,8 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
 
     auto target = CreateEventTargetObject(info);
     gestureInfoObj->SetPropertyObject("target", target);
+    gestureInfoObj->SetProperty<float>("axisVertical", info.GetVerticalAxis());
+    gestureInfoObj->SetProperty<float>("axisHorizontal", info.GetHorizontalAxis());
     return gestureInfoObj;
 }
 
@@ -102,11 +104,14 @@ JSRef<JSObject> JsGestureFunction::CreateFingerInfo(const FingerInfo& fingerInfo
     JSRef<JSObject> fingerInfoObj = JSRef<JSObject>::New();
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
+    const OHOS::Ace::Offset& screenLocation  = fingerInfo.screenLocation_;
     fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.originalId_);
     fingerInfoObj->SetProperty<double>("globalX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
     fingerInfoObj->SetProperty<double>("globalY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
     fingerInfoObj->SetProperty<double>("localX", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
     fingerInfoObj->SetProperty<double>("localY", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
+    fingerInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
+    fingerInfoObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
     return fingerInfoObj;
 }
 

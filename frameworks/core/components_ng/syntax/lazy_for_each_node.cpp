@@ -306,7 +306,7 @@ void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
     }
 }
 
-RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
+RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
     if (index >= static_cast<uint32_t>(FrameCount())) {
         return nullptr;
@@ -322,6 +322,9 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     }
     if (isActive_) {
         child.second->SetJSViewActive(true);
+    }
+    if (addToRenderTree) {
+        child.second->SetActive(true);
     }
     if (child.second->GetDepth() != GetDepth() + 1) {
         child.second->SetDepth(GetDepth() + 1);

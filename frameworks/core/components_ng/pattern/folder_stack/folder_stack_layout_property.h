@@ -54,17 +54,19 @@ public:
             align = GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
         }
         json->PutExtAttr("alignContent", align.GetAlignmentStr(TextDirection::LTR).c_str(), filter);
-        auto itemId = GetUpperItemsValue();
-        std::string str;
-        str.assign("[");
-        for (auto& id : itemId) {
-            str.append(id);
-            str.append(", ");
+        if (HasUpperItems()) {
+            auto itemId = GetUpperItemsValue();
+            std::string str;
+            str.assign("[");
+            for (auto& id : itemId) {
+                str.append(id);
+                str.append(", ");
+            }
+            str = (itemId.size() > 1) ? str.substr(0, str.size() - 1).append("]") : str.append("]");
+            json->PutExtAttr("upperItems", str.c_str(), filter);
+            json->PutExtAttr("enableAnimation", propEnableAnimation_.value_or(true) ? "true" : "false", filter);
+            json->PutExtAttr("autoHalfFold", propAutoHalfFold_.value_or(true) ? "true" : "false", filter);
         }
-        str = (itemId.size() > 1) ? str.substr(0, str.size() - 1).append("]") : str.append("]");
-        json->PutExtAttr("upperItems", str.c_str(), filter);
-        json->PutExtAttr("enableAnimation", propEnableAnimation_.value_or(true) ? "true" : "false", filter);
-        json->PutExtAttr("autoHalfFold", propAutoHalfFold_.value_or(true) ? "true" : "false", filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableAnimation, bool, PROPERTY_UPDATE_MEASURE_SELF);

@@ -142,6 +142,9 @@ void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     }
 
     axisEventStart_ = event;
+    lastAxisEvent_ = event;
+    touchPoints_[event.id] = TouchEvent();
+    UpdateTouchPointWithAxisEvent(event);
     axisOffset_.Reset();
     touchDownTime_ = event.time;
     time_ = event.time;
@@ -193,6 +196,7 @@ void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe recognizer receives axis up event");
     globalPoint_ = Point(event.x, event.y);
     time_ = event.time;
+    lastAxisEvent_ = event;
     if ((refereeState_ != RefereeState::DETECTING) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -268,6 +272,8 @@ void SwipeRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     }
     globalPoint_ = Point(event.x, event.y);
     time_ = event.time;
+    lastAxisEvent_ = event;
+    UpdateTouchPointWithAxisEvent(event);
     auto pipeline = PipelineContext::GetCurrentContext();
     bool isShiftKeyPressed = false;
     bool hasDifferentDirectionGesture = false;
@@ -372,8 +378,14 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
-        info.SetSourceTool(lastTouchEvent_.sourceTool);
-        info.SetPointerEvent(lastTouchEvent_.pointerEvent);
+        if (inputEventType_ == InputEventType::AXIS) {
+            info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
+            info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+            info.SetSourceTool(lastAxisEvent_.sourceTool);
+        } else {
+            info.SetSourceTool(lastTouchEvent_.sourceTool);
+        }
+        info.SetPointerEvent(lastPointEvent_);
         if (prevAngle_) {
             info.SetAngle(prevAngle_.value());
         }

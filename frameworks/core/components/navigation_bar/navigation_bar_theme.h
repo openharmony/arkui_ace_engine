@@ -82,6 +82,8 @@ public:
                 auto navBarUnfocusEffectEnable = pattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
                 theme->navBarUnfocusEffectEnable_ = StringUtils::StringToInt(navBarUnfocusEffectEnable);
                 theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("section_unfocus_color", Color::TRANSPARENT);
+                theme->titlebarBackgroundBlurStyle_ = pattern->GetAttr<int>("titlebar_background_blur_style", 0);
+                theme->toolbarBackgroundBlurStyle_ = pattern->GetAttr<int>("toolbar_background_blur_style", 0);
             }
             ParsePattern(themeConstants, theme);
             return theme;
@@ -155,6 +157,8 @@ public:
                 Color(0x0c000000));
             theme->backgroundPressedColor_ = pattern->GetAttr<Color>("icon_background_pressed_color",
                 Color(0x19000000));
+            theme->titlebarBackgroundBlurStyle_ = pattern->GetAttr<int>("titlebar_background_blur_style", 0);
+            theme->toolbarBackgroundBlurStyle_ = pattern->GetAttr<int>("toolbar_background_blur_style", 0);
         }
     };
 
@@ -519,6 +523,14 @@ public:
     {
         return backgroundPressedColor_;
     }
+    const int& GetTitlebarBackgroundBlurStyle() const
+    {
+        return titlebarBackgroundBlurStyle_;
+    }
+    const int& GetToolbarBackgroundBlurStyle() const
+    {
+        return toolbarBackgroundBlurStyle_;
+    }
 protected:
     NavigationBarTheme() = default;
 
@@ -614,6 +626,8 @@ private:
     double backgroundDisableAlpha_ = 0.4;
     Color backgroundHoverColor_;
     Color backgroundPressedColor_;
+    int titlebarBackgroundBlurStyle_;
+    int toolbarBackgroundBlurStyle_;
 };
 
 } // namespace OHOS::Ace

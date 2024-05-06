@@ -46,6 +46,7 @@ template<typename T>
 using RSAnimatableArithmetic = Rosen::RSAnimatableArithmetic<T>;
 using RSContentStyleModifier = Rosen::RSContentStyleModifier;
 using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier;
+using RSForegroundStyleModifier = Rosen::RSForegroundStyleModifier;
 using RSNodeModifier = Rosen::RSNodeModifier;
 using RSDrawingContext = Rosen::RSDrawingContext;
 using RSPropertyBase = Rosen::RSPropertyBase;
@@ -71,6 +72,7 @@ private:
 
 std::shared_ptr<RSModifier> ConvertContentModifier(const RefPtr<Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertOverlayModifier(const RefPtr<Modifier>& modifier);
+std::shared_ptr<RSModifier> ConvertForegroundModifier(const RefPtr<Modifier>& modifier);
 
 class OverlayModifierAdapter : public RSOverlayStyleModifier {
 public:
@@ -89,6 +91,25 @@ private:
     std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayModifierAdapter);
+};
+
+class ForegroundModifierAdapter : public RSForegroundStyleModifier {
+public:
+    ForegroundModifierAdapter() = default;
+    explicit ForegroundModifierAdapter(const RefPtr<Modifier>& modifier)
+        : modifier_(AceType::DynamicCast<ForegroundModifier>(modifier))
+    {}
+    ~ForegroundModifierAdapter() override = default;
+
+    void Draw(RSDrawingContext& context) const override;
+
+    void AttachProperties();
+
+private:
+    WeakPtr<ForegroundModifier> modifier_;
+    std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(ForegroundModifierAdapter);
 };
 
 class RSNodeModifierImpl : public RSNodeModifier, public ModifierImpl {

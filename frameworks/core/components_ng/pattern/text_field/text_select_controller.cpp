@@ -43,7 +43,6 @@ void TextSelectController::UpdateCaretIndex(int32_t index)
     caretInfo_.index = newIndex;
     firstHandleInfo_.index = newIndex;
     secondHandleInfo_.index = newIndex;
-    UpdateRecordCaretIndex(caretInfo_.index);
 }
 
 RectF TextSelectController::CalculateEmptyValueCaretRect() const
@@ -146,7 +145,6 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);
-        UpdateRecordCaretIndex(caretInfo_.index);
     } else {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
     }
@@ -441,7 +439,6 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
     MoveHandleToContentRect(caretRect, boundaryAdjustment);
     caretInfo_.rect = caretRect;
     caretRect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
-    UpdateRecordCaretIndex(caretInfo_.index);
 }
 
 void TextSelectController::UpdateFirstHandleOffset()
@@ -541,16 +538,6 @@ void TextSelectController::FireSelectEvent()
     }
 }
 
-void TextSelectController::UpdateRecordCaretIndex(int32_t index) const
-{
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_VOID(textFiled);
-    textFiled->UpdateRecordCaretIndex(index);
-    textFiled->UpdateCaretInfoToController();
-}
-
 void TextSelectController::ResetHandles()
 {
     firstHandleInfo_.index = caretInfo_.index;
@@ -562,11 +549,26 @@ void TextSelectController::ResetHandles()
 bool TextSelectController::NeedAIAnalysis(int32_t& index, const CaretUpdateType targetType, const Offset& touchOffset,
     std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout)
 {
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textFiled, false);
+
     if (!InputAIChecker::NeedAIAnalysis(contentController_->GetTextValue(), targetType, timeout)) {
         return false;
     }
     if (IsClickAtBoundary(index, touchOffset) && targetType == CaretUpdateType::PRESSED) {
-        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "NeedAIAnalysis IsClickAtBoundary is boundary ,return!");
+        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "NeedAIAnalysis IsClickAtBoundary is boundary, return!");
+        return false;
+    }
+
+    if (textFiled->IsInPasswordMode()) {
+        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "NeedAIAnalysis IsInPasswordMode, return!");
+        return false;
+    }
+
+    if (contentController_->IsIndexBeforeOrInEmoji(index)) {
+        TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "NeedAIAnalysis IsIndexBeforeOrInEmoji, return!");
         return false;
     }
     return true;

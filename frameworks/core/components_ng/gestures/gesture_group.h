@@ -49,6 +49,8 @@ public:
 
     void RemoveChildrenByTag(const std::string& gestureTag, bool& needRecollect);
 
+    void RemoveGesture(RefPtr<Gesture> gesture);
+
 private:
     GestureMode mode_;
     std::vector<RefPtr<Gesture>> gestures_;

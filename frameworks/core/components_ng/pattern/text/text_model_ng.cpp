@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -314,8 +315,7 @@ void TextModelNG::SetTextDetectEnable(bool value)
     textPattern->SetTextDetectEnable(value);
 }
 
-void TextModelNG::SetTextDetectConfig(const std::string& value,
-    std::function<void(const std::string&)>&& onResult)
+void TextModelNG::SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -421,6 +421,18 @@ void TextModelNG::InitText(FrameNode* frameNode, std::string& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
 }
 
+void TextModelNG::InitTextController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>(frameNode);
+    CHECK_NULL_VOID(textPattern);
+    auto spanString = AceType::DynamicCast<SpanString>(spanBase);
+    if (spanString) {
+        auto spans = spanString->GetSpanItems();
+        textPattern->SetSpanItemChildren(spans);
+        textPattern->SetSpanStringMode(true);
+    }
+}
+
 void TextModelNG::SetTextCase(FrameNode* frameNode, Ace::TextCase value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value, frameNode);
@@ -501,6 +513,11 @@ void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
 void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value, frameNode);
+}
+
+void TextModelNG::SetLineBreakStrategy(FrameNode* frameNode, Ace::LineBreakStrategy value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value, frameNode);
 }
 
 void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
@@ -863,6 +880,51 @@ EllipsisMode TextModelNG::GetEllipsisMode(FrameNode* frameNode)
 {
     EllipsisMode value = EllipsisMode::TAIL;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, EllipsisMode, value, frameNode, value);
+    return value;
+}
+
+bool TextModelNG::GetTextDetectEnable(FrameNode* frameNode)
+{
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    return textPattern->GetTextDetectEnable();
+}
+
+void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextDetectTypes(value);
+}
+
+void TextModelNG::SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnResult(std::move(onResult));
+}
+
+std::string TextModelNG::GetTextDetectConfig(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, "");
+    return textPattern->GetTextDetectTypes();
+}
+
+FONT_FEATURES_LIST TextModelNG::GetFontFeature(FrameNode* frameNode)
+{
+    FONT_FEATURES_LIST value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontFeature, value, frameNode, value);
+    return value;
+}
+
+LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
+{
+    LineBreakStrategy value = LineBreakStrategy::GREEDY;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, LineBreakStrategy, value, frameNode, value);
     return value;
 }
 } // namespace OHOS::Ace::NG

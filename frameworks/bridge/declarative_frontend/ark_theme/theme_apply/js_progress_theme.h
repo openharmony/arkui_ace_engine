@@ -1,0 +1,75 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_PROGRESS_THEME_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_PROGRESS_THEME_H
+
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
+#include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/progress/progress_model.h"
+
+namespace OHOS::Ace::Framework {
+class JSProgressTheme {
+public:
+    static void ApplyTheme(const ProgressStyle& style)
+    {
+        auto themeColors = JSThemeUtils::GetThemeColors();
+        if (!themeColors) {
+            // no need to apply custom theme colors
+            return;
+        }
+
+        if (style == ProgressStyle::Ring || style == ProgressStyle::ScaleRing) {
+            ProgressModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary());
+        } else if (style == ProgressStyle::Capsule) {
+            // normal
+            ViewStackModel::GetInstance()->SetVisualState(VisualState::NORMAL);
+            ProgressModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary());
+            auto borderColor = themeColors->BackgroundEmphasize();
+            ViewAbstractModel::GetInstance()->SetBorderColor(borderColor, borderColor, borderColor, borderColor);
+            ViewAbstractModel::GetInstance()->SetColorBlend(Color::BLACK); // default for restore color after pressed
+            ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
+            // focused
+            ViewStackModel::GetInstance()->SetVisualState(VisualState::FOCUSED);
+            ViewAbstractModel::GetInstance()->SetOuterBorderColor(themeColors->InteractiveFocus());
+            CalcDimension outerBorderWidth(JSProgressTheme::outerBorderWidthValue, OHOS::Ace::DimensionUnit::PX);
+            ViewAbstractModel::GetInstance()->SetOuterBorderWidth(outerBorderWidth);
+            // pressed
+            ViewStackModel::GetInstance()->SetVisualState(VisualState::PRESSED);
+            ViewAbstractModel::GetInstance()->SetColorBlend(themeColors->InteractivePressed());
+            // clear state
+            ViewStackModel::GetInstance()->ClearVisualState();
+        } else if (style == ProgressStyle::Linear || style == ProgressStyle::Eclipse) {
+            ProgressModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundSecondary());
+        }
+
+        NG::GradientColor endSideColor;
+        NG::GradientColor beginSideColor;
+        OHOS::Ace::NG::Gradient gradient;
+        endSideColor.SetLinearColor(LinearColor(themeColors->BackgroundEmphasize()));
+        endSideColor.SetDimension(Dimension(0.0f));
+        beginSideColor.SetLinearColor(LinearColor(themeColors->BackgroundEmphasize()));
+        beginSideColor.SetDimension(Dimension(1.0f));
+        gradient.AddColor(endSideColor);
+        gradient.AddColor(beginSideColor);
+        ProgressModel::GetInstance()->SetGradientColor(gradient);
+        ProgressModel::GetInstance()->SetColor(themeColors->BackgroundEmphasize());
+    }
+private:
+    static constexpr double outerBorderWidthValue = 2.0;
+};
+} // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_PROGRESS_THEME_H

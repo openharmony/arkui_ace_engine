@@ -69,7 +69,13 @@ void GridScrollWithOptionsLayoutAlgorithm::LargeItemLineHeight(
     const RefPtr<LayoutWrapper>& itemWrapper, bool& /* hasNormalItem */)
 {
     auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
-    cellAveLength_ = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_), cellAveLength_);
+    auto itemMainSize = GetMainAxisSize(itemSize, gridLayoutInfo_.axis_);
+    if (LessNotEqual(itemMainSize, 0.0f)) {
+        TAG_LOGI(
+            AceLogTag::ACE_GRID, "item height of index %{public}d is less than zero", gridLayoutInfo_.endIndex_ + 1);
+        itemMainSize = 0.0f;
+    }
+    cellAveLength_ = std::max(itemMainSize, cellAveLength_);
 }
 
 void GridScrollWithOptionsLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(

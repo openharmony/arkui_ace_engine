@@ -196,6 +196,8 @@ public:
         return ScrollAlign::AUTO;
     }
 
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
+
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO) override;
     void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
     bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
@@ -304,7 +306,7 @@ private:
     bool isLeftEndStep_ = false;
     bool isRightEndStep_ = false;
     bool isSmoothScrolling_ = false;
-    bool irregular_ = false;
+    bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;

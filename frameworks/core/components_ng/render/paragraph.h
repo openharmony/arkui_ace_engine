@@ -66,14 +66,14 @@ private:
 };
 
 struct LineMetrics {
-    float ascender;
-    float descender;
-    float capHeight;
-    float xHeight;
-    float width;
-    float height;
-    float x;
-    float y;
+    float ascender = 0.0f;
+    float descender = 0.0f;
+    float capHeight = 0.0f;
+    float xHeight = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    float x = 0.0f;
+    float y = 0.0f;
 };
 
 struct LeadingMargin {

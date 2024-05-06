@@ -47,6 +47,10 @@ void JSDrawingRenderingContext::Constructor(const JSCallbackInfo& args)
     auto jsDrawingRenderContext = Referenced::MakeRefPtr<JSDrawingRenderingContext>();
     jsDrawingRenderContext->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsDrawingRenderContext));
+    int32_t unit = 0;
+    if (args.GetInt32Arg(0, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+        jsDrawingRenderContext->SetUnit(CanvasUnit::PX);
+    }
 }
 
 void JSDrawingRenderingContext::Destructor(JSDrawingRenderingContext* controller)
@@ -94,8 +98,12 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(RefPtr<AceType>& canvasPatte
         NativeEngine* nativeEngine = engine->GetNativeEngine();
         napi_env env = reinterpret_cast<napi_env>(nativeEngine);
         ScopeRAII scope(env);
-        context->size_.SetHeight(PipelineBase::Px2VpWithCurrentDensity(height));
-        context->size_.SetWidth(PipelineBase::Px2VpWithCurrentDensity(width));
+        double density = context->GetDensity();
+        density = (density == 0.0 ? 1.0 : density);
+        height /= density;
+        width /= density;
+        context->size_.SetHeight(height);
+        context->size_.SetWidth(width);
         auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, canvas);
         JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
         context->jsCanvasVal_ = JSRef<JSVal>::Cast(jsCanvasVal);

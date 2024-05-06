@@ -231,6 +231,7 @@ public:
 
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
+    void FlushForegroundModifier(const RefPtr<Modifier>& modifier) override;
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
     void RemoveChild(const RefPtr<RenderContext>& renderContext) override;
@@ -264,6 +265,8 @@ public:
     void GetPointWithRevert(PointF& point) override;
 
     void GetPointTransform(PointF& point) override;
+
+    void GetPointTransformRotate(PointF& point) override;
 
     void GetPointWithTransform(PointF& point) override;
 
@@ -558,6 +561,7 @@ private:
     void OnePixelRounding(bool isRound, uint8_t flag);
     Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
+    Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.

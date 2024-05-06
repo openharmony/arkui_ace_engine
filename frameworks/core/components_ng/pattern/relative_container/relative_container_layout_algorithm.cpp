@@ -1049,11 +1049,14 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
             if (it == idNodeMap_.end()) {
                 continue;
             }
-            auto anchorChildWrapper = it->second.layoutWrapper;
-            auto anchorChildLayoutProp = anchorChildWrapper->GetLayoutProperty();
-            auto anchorChildVisibility = anchorChildLayoutProp->GetVisibility();
-            if (anchorChildVisibility == VisibleType::GONE) {
-                childWrapper->SetActive(false);
+
+            if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                auto anchorChildWrapper = it->second.layoutWrapper;
+                auto anchorChildLayoutProp = anchorChildWrapper->GetLayoutProperty();
+                auto anchorChildVisibility = anchorChildLayoutProp->GetVisibility();
+                if (anchorChildVisibility == VisibleType::GONE) {
+                    childWrapper->SetActive(false);
+                }
             }
             // if a is the anchor of b, then reliedOnMap should place <a, [b]> for the first appearance
             // of key a. Otherwise b will be inserted into the existing value list

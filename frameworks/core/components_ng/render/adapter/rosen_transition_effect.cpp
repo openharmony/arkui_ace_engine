@@ -258,6 +258,9 @@ bool RosenTransitionEffect::UpdateRosenTransitionEffect(
                 break;
             }
             case ChainedTransitionEffectType::SLIDE_SWITCH: {
+                if (!AceType::InstanceOf<RosenSlideSwitchTransitionEffect>(nowRSEffect)) {
+                    return false;
+                }
                 break;
             }
             default: {

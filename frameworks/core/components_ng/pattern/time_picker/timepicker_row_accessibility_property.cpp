@@ -86,7 +86,7 @@ void TimePickerRowAccessibilityProperty::GetMinuteText(std::string& result) cons
 
     auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minutePickerColumnPattern);
-    int minute = minutePickerColumnPattern->GetCurrentIndex();
+    int minute = static_cast<int>(minutePickerColumnPattern->GetCurrentIndex());
     std::string textMinute = std::to_string(minute);
     if (minute < DOUBLE_DIGIT) {
         if (timePickerRowPattern->GetPrefixMinute() != ZeroPrefixType::HIDE) {
@@ -106,7 +106,7 @@ void TimePickerRowAccessibilityProperty::GetSecondText(std::string& result) cons
         CHECK_NULL_VOID(secondColumn);
         auto secondPickerColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(secondPickerColumnPattern);
-        int second = secondPickerColumnPattern->GetCurrentIndex();
+        int second = static_cast<int>(secondPickerColumnPattern->GetCurrentIndex());
         std::string textSecond = std::to_string(second);
         if (second < DOUBLE_DIGIT) {
             if (timePickerRowPattern->GetPrefixSecond() != ZeroPrefixType::HIDE) {

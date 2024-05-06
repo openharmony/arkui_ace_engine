@@ -1818,6 +1818,11 @@ float ListPattern::GetTotalHeight() const
     return currentOffset + endMainPos_ + remainOffset + contentEndOffset_;
 }
 
+void ListPattern::TriggerModifyDone()
+{
+    OnModifyDone();
+}
+
 void ListPattern::SetChainAnimation()
 {
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();

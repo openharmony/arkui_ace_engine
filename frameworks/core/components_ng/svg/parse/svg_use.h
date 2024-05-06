@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_USE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_USE_H
 
+#include "core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "core/components_ng/svg/parse/svg_graphic.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +33,7 @@ public:
     void OnInitStyle() override;
     RSRecordingPath AsPath(const Size& viewPort) const override;
     void OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color) override;
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
 
 private:
     // saves the current attributes of the svg node, and restores them when the scope exits.
@@ -44,6 +46,7 @@ private:
         SvgBaseAttribute attributes_;
         WeakPtr<SvgNode> node_;
     };
+    SvgAttributes useAttr_;
 };
 
 } // namespace OHOS::Ace::NG

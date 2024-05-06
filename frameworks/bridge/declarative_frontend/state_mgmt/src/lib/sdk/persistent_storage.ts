@@ -121,9 +121,9 @@ class DateInfo {
 
 /**
  * PersistentStorage
- * 
+ *
  * Keeps current values of select AppStorage property properties persisted to file.
- * 
+ *
  * since 9
  */
 
@@ -138,7 +138,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
    *
    * @param storage method to be used by the framework to set the backend
    * this is to be done during startup
-   * 
+   *
    * internal function, not part of the SDK
    *
    */
@@ -160,7 +160,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   }
 
   /**
-   * 
+   *
    * internal function, not part of the SDK
    */
   public static aboutToBeDeleted(): void {
@@ -174,16 +174,16 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
 
 
   /**
-   * Add property 'key' to AppStorage properties whose current value will be 
+   * Add property 'key' to AppStorage properties whose current value will be
    * persistent.
-   * If AppStorage does not include this property it will be added and initializes 
+   * If AppStorage does not include this property it will be added and initializes
    * with given value
-   * 
+   *
    * @since 10
-   * 
+   *
    * @param key property name
    * @param defaultValue If AppStorage does not include this property it will be initialized with this value
-   * 
+   *
    */
   public static persistProp<T>(key: string, defaultValue: T): void {
     PersistentStorage.getOrCreate().persistProp(key, defaultValue);
@@ -201,7 +201,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   /**
    * Reverse of @see persistProp
    * @param key no longer persist the property named key
-   * 
+   *
    * @since 10
    */
   public static deleteProp(key: string): void {
@@ -220,11 +220,11 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
    * Persist given AppStorage properties with given names.
    * If a property does not exist in AppStorage, add it and initialize it with given value
    * works as @see persistProp for multiple properties.
-   * 
-   * @param properties 
-   * 
+   *
+   * @param properties
+   *
    * @since 10
-   * 
+   *
    */
   public static persistProps(properties: {
     key: string,
@@ -247,7 +247,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   /**
    * Inform persisted AppStorage property names
    * @returns array of AppStorage keys
-   * 
+   *
    * @since 10
    */
   public static keys(): Array<string> {
@@ -278,11 +278,11 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   * and triggers writing to disk by itself. For nested objects (e.g. array of
   * objects) however changes of a property of a property as not observed. This
   * is the case where the application needs to signal to the framework.
-  * 
+  *
   * @param key property that has changed
-  * 
+  *
   * @since 10
-  * 
+  *
   */
   public static notifyHasChanged(propName: string) {
   stateMgmtConsole.debug(`PersistentStorage: force writing '${propName}'-
@@ -353,7 +353,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
         returnValue = this.readFromPersistentStorage(propName);
       }
       link = AppStorage.setAndLink(propName, returnValue, this);
-      if(link === undefined) {
+      if (link === undefined) {
         stateMgmtConsole.debug(`PersistentStorage: failed to set and link app storage property ${propName}`);
         return false;
       }

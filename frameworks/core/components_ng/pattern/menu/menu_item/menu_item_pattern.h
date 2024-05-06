@@ -157,6 +157,7 @@ public:
     RefPtr<MenuPattern> GetMenuPattern(bool needTopMenu = false);
     void UpdateTextNodes();
 
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void OnMountToParentDone() override;
 
@@ -190,6 +191,8 @@ private:
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void AddExpandIcon(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty);
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
+    void UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty);
+    bool IsTextFadeOut();
     void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
     void UpdateExpandableArea();
     void BuildEmbeddedMenuItems(RefPtr<UINode>& node, bool needNextLevel = true);
@@ -219,10 +222,14 @@ private:
     void HandleFocusEvent();
     void HandleBlurEvent();
 
+    void CreateSymbolNode();
+    void CreateImageNode();
+
     std::list<TouchRegion> hoverRegions_;
 
     RefPtr<InputEvent> wrapperMouseEvent_;
 
+    bool isTextFadeOut_ = false;
     bool isSelected_ = false;
     bool isSubMenuShowed_ = false;
     bool isSubMenuHovered_ = false;

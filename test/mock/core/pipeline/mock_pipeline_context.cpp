@@ -158,6 +158,7 @@ void PipelineContext::OnIdle(int64_t deadline) {}
 
 void PipelineContext::Destroy()
 {
+    dragDropManager_.Reset();
     rootNode_.Reset();
 }
 

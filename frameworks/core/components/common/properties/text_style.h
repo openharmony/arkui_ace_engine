@@ -134,6 +134,7 @@ inline std::string ToString(const EllipsisMode& ellipsisMode)
 
 enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD };
 extern const std::vector<WordBreak> WORD_BREAK_TYPES;
+extern const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES;
 namespace StringUtils {
 inline std::string ToString(const WordBreak& wordBreak)
 {

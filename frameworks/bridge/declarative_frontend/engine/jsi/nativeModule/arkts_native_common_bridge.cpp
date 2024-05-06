@@ -3280,9 +3280,9 @@ ArkUINativeModuleValue CommonBridge::SetMotionBlur(ArkUIRuntimeCallInfo *runtime
     Local<JSValueRef> xArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> yArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CalcDimension radius;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) || LessNotEqual(radius.Value(), 0.0f)) {
-        radius.SetValue(0.0f);
+    double radius = 0.0;
+    if (!ArkTSUtils::ParseJsDouble(vm, radiusArg, radius) || LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
     }
     double x = 0.0;
     double y = 0.0;
@@ -3294,8 +3294,7 @@ ArkUINativeModuleValue CommonBridge::SetMotionBlur(ArkUIRuntimeCallInfo *runtime
     }
     x = std::clamp(x, 0.0, 1.0);
     y = std::clamp(y, 0.0, 1.0);
-    GetArkUINodeModifiers()->getCommonModifier()->setMotionBlur(nativeNode,
-        static_cast<ArkUI_Float32>(radius.Value()), x, y);
+    GetArkUINodeModifiers()->getCommonModifier()->setMotionBlur(nativeNode, radius, x, y);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3773,32 +3772,48 @@ ArkUINativeModuleValue CommonBridge::SetConstraintSize(ArkUIRuntimeCallInfo* run
 
     bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, minWidth, false)) {
-        minWidthValue.value = minWidth.Value();
-        minWidthValue.unit = static_cast<int8_t>(minWidth.Unit());
+        if (minWidth.CalcValue() != "") {
+            minWidthValue.string = minWidth.CalcValue().c_str();
+        } else {
+            minWidthValue.value = minWidth.Value();
+            minWidthValue.unit = static_cast<int8_t>(minWidth.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMinWidth(nativeNode, &minWidthValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMinWidth(nativeNode);
     }
 
     if (ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, maxWidth, false)) {
-        maxWidthValue.value = maxWidth.Value();
-        maxWidthValue.unit = static_cast<int8_t>(maxWidth.Unit());
+        if (maxWidth.CalcValue() != "") {
+            maxWidthValue.string = maxWidth.CalcValue().c_str();
+        } else {
+            maxWidthValue.value = maxWidth.Value();
+            maxWidthValue.unit = static_cast<int8_t>(maxWidth.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMaxWidth(nativeNode, &maxWidthValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMaxWidth(nativeNode);
     }
 
     if (ArkTSUtils::ParseJsDimensionVp(vm, forthArg, minHeight, false)) {
-        minHeightValue.value = minHeight.Value();
-        minHeightValue.unit = static_cast<int8_t>(minHeight.Unit());
+        if (minHeight.CalcValue() != "") {
+            minHeightValue.string = minHeight.CalcValue().c_str();
+        } else {
+            minHeightValue.value = minHeight.Value();
+            minHeightValue.unit = static_cast<int8_t>(minHeight.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMinHeight(nativeNode, &minHeightValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMinHeight(nativeNode);
     }
 
     if (ArkTSUtils::ParseJsDimensionVp(vm, fifthArg, maxHeight, false)) {
-        maxHeightValue.value = maxHeight.Value();
-        maxHeightValue.unit = static_cast<int8_t>(maxHeight.Unit());
+        if (maxHeight.CalcValue() != "") {
+            maxHeightValue.string = maxHeight.CalcValue().c_str();
+        } else {
+            maxHeightValue.value = maxHeight.Value();
+            maxHeightValue.unit = static_cast<int8_t>(maxHeight.Unit());
+        }
         GetArkUINodeModifiers()->getCommonModifier()->setMaxHeight(nativeNode, &maxHeightValue);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMaxHeight(nativeNode);
@@ -4368,6 +4383,30 @@ ArkUINativeModuleValue CommonBridge::ResetObscured(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetObscured(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetForegroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> radiusArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    CalcDimension radius;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) || LessNotEqual(radius.Value(), 0.0f)) {
+        radius.SetValue(0.0f);
+    }
+    ArkUI_Float32 radiusArk = static_cast<ArkUI_Int32>(radius.Value());
+    GetArkUINodeModifiers()->getCommonModifier()->setForegroundEffect(nativeNode, radiusArk);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetForegroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetForegroundEffect(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5263,14 +5302,17 @@ Local<panda::ObjectRef> CommonBridge::CreateFingerInfo(EcmaVM* vm, const FingerI
 {
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
+    const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
     double density = PipelineBase::GetCurrentDensity();
-    const char* keys[] = { "id", "globalX", "globalY", "localX", "localY" };
+    const char* keys[] = { "id", "globalX", "globalY", "localX", "localY", "displayX", "displayY" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, fingerInfo.fingerId_),
         panda::NumberRef::New(vm, globalLocation.GetX() / density),
         panda::NumberRef::New(vm, globalLocation.GetY() / density),
         panda::NumberRef::New(vm, localLocation.GetX() / density),
-        panda::NumberRef::New(vm, localLocation.GetY() / density) };
-    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        panda::NumberRef::New(vm, localLocation.GetY() / density),
+        panda::NumberRef::New(vm, screenLocation.GetX() / density),
+        panda::NumberRef::New(vm, screenLocation.GetY() / density) };
+        return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
 Local<panda::ObjectRef> CommonBridge::CreateEventTargetObject(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info)

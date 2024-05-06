@@ -2237,7 +2237,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest042, TestSize.Level1)
     std::vector<ModifierKey> keys;
     keys.push_back(ModifierKey::SHIFT);
     ViewAbstract::SetKeyboardShortcut(VALUE_TAB, std::move(keys), callback);
-    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
     keys.clear();
 
     /**
@@ -3344,8 +3344,7 @@ HWTEST_F(ViewAbstractTestNg, MotionBlur001, TestSize.Level1)
      * @tc.expected: success set render property motionBlur value.
      */
     MotionBlurOption motionBlurOption;
-    CalcDimension radius(5, DimensionUnit::VP);
-    motionBlurOption.radius = radius;
+    motionBlurOption.radius = 5;
     motionBlurOption.anchor.x = 0.5;
     motionBlurOption.anchor.y = 0.5;
     ViewAbstract::SetMotionBlur(motionBlurOption);
@@ -3359,7 +3358,7 @@ HWTEST_F(ViewAbstractTestNg, MotionBlur001, TestSize.Level1)
     EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
                   ->GetOrCreateForeground()->propMotionBlur->anchor.y, 0.5);
     EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
-                  ->GetOrCreateForeground()->propMotionBlur->radius.Value(), 5);
+                  ->GetOrCreateForeground()->propMotionBlur->radius, 5);
 
     /**
      * @tc.steps: step5. finish view stack.

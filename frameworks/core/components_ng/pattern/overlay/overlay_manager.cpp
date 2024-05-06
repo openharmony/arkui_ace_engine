@@ -93,6 +93,7 @@ constexpr int32_t MENU_ANIMATION_DURATION = 150;
 constexpr float TOAST_ANIMATION_POSITION = 15.0f;
 
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
+constexpr float NUM_FLOAT_2 = 2.0f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 250;
 constexpr float PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE = 0.5f;
 
@@ -1195,6 +1196,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         CHECK_NULL_VOID(popupPattern);
         popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
         popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
+        popupNode->GetRenderContext()->UpdateChainedTransition(nullptr);
         rootNode->RemoveChild(popupNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         overlayManager->ErasePopupInfo(targetId);
@@ -1992,9 +1994,8 @@ void RegisterDialogCallback(
 }
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show date dialog enter");
     auto dialogNode = DatePickerDialogView::Show(
@@ -2005,9 +2006,9 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
 }
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
-    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, PickerTime> timePickerProperty,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
+    std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show time dialog enter");
     auto dialogNode = TimePickerDialogView::Show(dialogProps, settingData, buttonInfos, std::move(timePickerProperty),
@@ -2018,9 +2019,9 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const T
 }
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
-    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+    std::map<std::string, NG::DialogTextEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show text dialog enter");
     auto dialogNode = TextPickerDialogView::Show(
@@ -2036,9 +2037,8 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
 }
 
 void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
-    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show calendar dialog enter");
     auto dialogNode = CalendarDialogView::Show(
@@ -3567,7 +3567,7 @@ void OverlayManager::PlaySheetTransition(
             offset = sheetMaxHeight - sheetHeight_;
         }
         if (isFirstTransition) {
-            context->OnTransformTranslateUpdate({ 0.0f, sheetMaxHeight, 0.0f });
+            context->UpdateTransformTranslate({ 0.0f, sheetMaxHeight, 0.0f });
             if (NearZero(sheetHeight_)) {
                 return;
             }
@@ -3602,7 +3602,7 @@ void OverlayManager::PlaySheetTransition(
             option,
             [context, offset]() {
                 if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
+                    context->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
                 }
             },
             option.GetOnFinishEvent());
@@ -3630,7 +3630,7 @@ void OverlayManager::PlaySheetTransition(
             option,
             [context, sheetMaxHeight]() {
                 if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, sheetMaxHeight, 0.0f });
+                    context->UpdateTransformTranslate({ 0.0f, sheetMaxHeight, 0.0f });
                 }
             },
             option.GetOnFinishEvent());
@@ -4034,13 +4034,6 @@ RefPtr<FrameNode> OverlayManager::GetSheetMask(const RefPtr<FrameNode>& sheetNod
     return sheetChildFrameNode;
 }
 
-void OverlayManager::SetCustomKeybroadHeight(float customHeight)
-{
-    if (!keyboardAvoidance_) {
-        return;
-    }
-}
-
 void OverlayManager::SetCustomKeyboardOption(bool supportAvoidance)
 {
     auto pipeline = PipelineContext::GetMainPipelineContext();
@@ -4048,24 +4041,7 @@ void OverlayManager::SetCustomKeyboardOption(bool supportAvoidance)
     keyboardAvoidance_ = supportAvoidance;
 }
 
-void OverlayManager::SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
-    RefPtr<FrameNode> customKeyboard)
-{
-    option.SetOnFinishEvent([weak = WeakClaim(this), customKeyboard] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto customHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
-        pattern->SetCustomKeybroadHeight(customHeight);
-    });
-
-    AnimationUtils::Animate(option, [context]() {
-    if (context) {
-        context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-    }
-    }, option.GetOnFinishEvent());
-}
-
-void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn)
+void OverlayManager::PlayKeyboardTransition(const RefPtr<FrameNode>& customKeyboard, bool isTransitionIn)
 {
     CHECK_NULL_VOID(customKeyboard);
     AnimationOption option;
@@ -4088,9 +4064,18 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     }
     auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
     auto keyboardHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto finalOffset = rootNode->GetTag() == "Stack"
+                           ? (pageHeight - keyboardHeight) - (pageHeight - keyboardHeight) / NUM_FLOAT_2
+                           : 0.0f;
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
-        SupportCustomKeyboardAvoidance(context, option, customKeyboard);
+        AnimationUtils::Animate(option, [context, finalOffset]() {
+            if (context) {
+                context->OnTransformTranslateUpdate({ 0.0f, finalOffset, 0.0f });
+            }
+        });
     } else {
         context->UpdateOpacity(1.0);
         option.SetOnFinishEvent([customKeyboard] {
@@ -4098,13 +4083,13 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(customKeyboard);
         });
-        context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-        AnimationUtils::Animate(option, [context, keyboardHeight]() {
+        AnimationUtils::Animate(
+            option,
+            [context, keyboardHeight, finalOffset]() {
                 if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, keyboardHeight, 0.0f });
+                    context->OnTransformTranslateUpdate({ 0.0f, finalOffset + keyboardHeight, 0.0f });
                 }
-            },
-            option.GetOnFinishEvent());
+            }, option.GetOnFinishEvent());
     }
 }
 
@@ -4116,6 +4101,29 @@ void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, 
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto customKeyboard = KeyboardView::CreateKeyboard(targetId, keyboardBuilder);
+    if (!customKeyboard) {
+        return;
+    }
+    customKeyboard->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    customKeyboardMap_[targetId] = customKeyboard;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this), customKeyboard] {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->PlayKeyboardTransition(customKeyboard, true);
+    });
+}
+
+void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId)
+{
+    if (customKeyboardMap_.find(targetId) != customKeyboardMap_.end()) {
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto customKeyboard = KeyboardView::CreateKeyboardWithNode(targetId, keyboard);
     if (!customKeyboard) {
         return;
     }

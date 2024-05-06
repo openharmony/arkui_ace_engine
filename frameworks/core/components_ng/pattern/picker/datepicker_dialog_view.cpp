@@ -45,7 +45,9 @@ constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
 constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
-constexpr Dimension LUNARSWITCH_MARGIN_TO_BUTTON = 8.0_vp;
+constexpr Dimension TITLE_HEIGHT = 40.0_vp;
+constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
+constexpr Dimension TITLE_PADDING_HORIZONTAL = 16.0_vp;
 constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
@@ -103,6 +105,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(NG::CalcLength(Dimension(1, DimensionUnit::PERCENT)), std::nullopt));
+    UpdateContentPadding(pickerStack);
     pickerStack->MountToParent(contentColumn);
     // build lunarswitch Node
     if (settingData.lunarswitch) {
@@ -114,7 +117,6 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     // build dialog accept and cancel button
     BuildDialogAcceptAndCancelButton(
         buttonInfos, settingData, acceptNode, dateNode, dialogNode, contentColumn, dialogEvent, dialogCancelEvent);
-    UpdateContentPadding(contentColumn);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
 }
@@ -221,11 +223,16 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     CHECK_NULL_RETURN(buttonTitleRenderContext, nullptr);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     MarginProperty margin;
-    margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
-    margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
-    margin.bottom = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
-    buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+        margin.top = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
+        margin.bottom = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
+        buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
+    } else {
+        buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_BUTTON_HEIGHT)));
+    }
     textTitleNode->MountToParent(titleButtonRow);
     titleButtonRow->MountToParent(buttonTitleNode);
     buttonTitleNode->MountToParent(titleRow);
@@ -781,10 +788,8 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
     auto checkboxLayoutProps = checkbox->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(checkboxLayoutProps);
     MarginProperty marginCheckbox;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        marginCheckbox.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
-    }
-    marginCheckbox.right = CalcLength(LUNARSWITCH_MARGIN_TO_BUTTON);
+    marginCheckbox.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    marginCheckbox.right = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
     checkboxLayoutProps->UpdateMargin(marginCheckbox);
     checkboxLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CHECKBOX_SIZE), CalcLength(CHECKBOX_SIZE)));
     checkbox->MarkModifyDone();
@@ -1040,9 +1045,16 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountButtonTitleNode(
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto layoutProps = buttonTitleNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_RETURN(layoutProps, nullptr);
+        PaddingProperty padding;
+        padding.left = CalcLength(TITLE_PADDING_HORIZONTAL);
+        padding.right = CalcLength(TITLE_PADDING_HORIZONTAL);
+        layoutProps->UpdatePadding(padding);
         MarginProperty margin;
+        margin.top = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
         margin.bottom = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
         layoutProps->UpdateMargin(margin);
+        layoutProps->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_HEIGHT)));
     }
 
     buttonTitleNode->MountToParent(contentColumn);

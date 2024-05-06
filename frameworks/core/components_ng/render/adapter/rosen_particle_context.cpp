@@ -41,20 +41,33 @@ void RosenRenderParticle::UpdateDisturbance(
 }
 
 void RosenRenderParticle::updateEmitterPosition(
-    const RefPtr<FrameNode>& frameNode, const std::vector<EmitterProps>& props)
+    const RefPtr<FrameNode>& frameNode, const std::vector<EmitterProperty>& props)
 {
     if (props.size() == 0) {
         return;
     }
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     auto rsNode = AceType::DynamicCast<NG::RosenRenderContext>(renderContext)->GetRSNode();
     CHECK_NULL_VOID(rsNode);
     std::vector<std::shared_ptr<Rosen::EmitterUpdater>> emitUpdater;
     for (const auto& prop : props) {
-        std::shared_ptr<Rosen::EmitterUpdater> updater = std::make_shared<Rosen::EmitterUpdater>(prop.index,
-            prop.position ? std::optional<Rosen::Vector2f>({ prop.position->x, prop.position->y }) : std::nullopt,
-            prop.size ? std::optional<Rosen::Vector2f>({ prop.size->x, prop.size->y }) : std::nullopt,
-            prop.emitRate ? prop.emitRate : std::nullopt);
+        std::optional<Rosen::Vector2f> position = std::nullopt;
+        if (prop.position) {
+            double positionXPx = Dimension(prop.position->x, DimensionUnit::VP).ConvertToPx();
+            double positionYPx = Dimension(prop.position->y, DimensionUnit::VP).ConvertToPx();
+            position = { static_cast<float>(positionXPx), static_cast<float>(positionYPx) };
+        }
+
+        std::optional<Rosen::Vector2f> size = std::nullopt;
+        if (prop.size) {
+            double sizeWidthPx = Dimension(prop.size->x, DimensionUnit::VP).ConvertToPx();
+            double sizeHeightPx = Dimension(prop.size->y, DimensionUnit::VP).ConvertToPx();
+            size = { static_cast<float>(sizeWidthPx), static_cast<float>(sizeHeightPx) };
+        }
+
+        std::shared_ptr<Rosen::EmitterUpdater> updater = std::make_shared<Rosen::EmitterUpdater>(
+            prop.index, position, size, prop.emitRate ? prop.emitRate : std::nullopt);
         emitUpdater.push_back(updater);
     }
     if (!emitUpdater.empty()) {

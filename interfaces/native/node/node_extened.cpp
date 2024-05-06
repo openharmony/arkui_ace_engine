@@ -422,4 +422,17 @@ ArkUI_NodeHandle GetNextSibling(ArkUI_NodeHandle node)
     return nullptr;
 }
 
+ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return nullptr;
+    }
+    auto* impl = GetFullImpl();
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getParent(node->uiNodeHandle);
+    void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
+    if (attachNode) {
+        return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace::NodeModel

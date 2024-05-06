@@ -49,6 +49,30 @@ RefPtr<FrameNode> ListModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+RefPtr<ScrollControllerBase> ListModelNG::GetOrCreateController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    if (!pattern->GetPositionController()) {
+        auto controller = AceType::MakeRefPtr<NG::ListPositionController>();
+        pattern->SetPositionController(controller);
+        controller->SetScrollPattern(pattern);
+        pattern->TriggerModifyDone();
+    }
+    return pattern->GetPositionController();
+}
+
+void ListModelNG::ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetAxis() != Axis::NONE) {
+        pattern->ScrollToEdge(scrollEdgeType, smooth);
+    }
+}
+
 void ListModelNG::SetSpace(const Dimension& space)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space);
@@ -287,6 +311,14 @@ void ListModelNG::SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
 
+void ListModelNG::SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollIndex(std::move(onScrollIndex));
+}
+
 void ListModelNG::SetOnScrollVisibleContentChange(OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -305,9 +337,25 @@ void ListModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
     eventHub->SetOnReachStart(std::move(onReachStart));
 }
 
+void ListModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachStart(std::move(onReachStart));
+}
+
 void ListModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachEnd(std::move(onReachEnd));
+}
+
+void ListModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
+{
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -489,6 +537,15 @@ void ListModelNG::SetListNestedScroll(FrameNode* frameNode, const NestedScrollOp
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNestedScroll(nestedOpt);
+}
+
+NestedScrollOptions ListModelNG::GetListNestedScroll(FrameNode* frameNode)
+{
+    NestedScrollOptions defaultOptions;
+    CHECK_NULL_RETURN(frameNode, defaultOptions);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, defaultOptions);
+    return pattern->GetNestedScroll();
 }
 
 int32_t ListModelNG::GetListScrollBar(FrameNode* frameNode)
@@ -676,6 +733,27 @@ void ListModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onSc
     const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(onScrollStop));
+}
+
+void ListModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment));
+}
+
+void ListModelNG::SetScrollBy(FrameNode* frameNode, double x, double y)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->StopAnimate();
+    auto offset = pattern->GetAxis() == Axis::VERTICAL ? y : x;
+    if (NearZero(offset)) {
+        return;
+    }
+    pattern->UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
 }
 
 RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()

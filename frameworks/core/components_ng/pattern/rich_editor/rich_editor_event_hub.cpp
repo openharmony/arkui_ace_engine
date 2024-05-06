@@ -338,6 +338,46 @@ const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEdi
     return replacedSpans_;
 }
 
+void RichEditorChangeValue::SetRichEditorReplacedImageSpans(const RichEditorAbstractSpanResult& span)
+{
+    replacedImageSpans_.emplace_back(span);
+}
+
+const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedImageSpans() const
+{
+    return replacedImageSpans_;
+}
+
+void RichEditorChangeValue::SetRichEditorReplacedSymbolSpans(const RichEditorAbstractSpanResult& span)
+{
+    replacedSymbolSpans_.emplace_back(span);
+}
+
+const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSymbolSpans() const
+{
+    return replacedSymbolSpans_;
+}
+
+void RichEditorChangeValue::SetRangeBefore(const TextRange& rangeBefore)
+{
+    rangeBefore_ = rangeBefore;
+}
+
+TextRange RichEditorChangeValue::GetRangeBefore() const
+{
+    return rangeBefore_;
+}
+
+void RichEditorChangeValue::SetRangeAfter(const TextRange& rangeAfter)
+{
+    rangeAfter_ = rangeAfter;
+}
+
+TextRange RichEditorChangeValue::GetRangeAfter() const
+{
+    return rangeAfter_;
+}
+
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
 {
     onReady_ = std::move(func);
@@ -441,14 +481,16 @@ bool RichEditorEventHub::HasOnWillChange() const
     return static_cast<bool>(onWillChange_);
 }
 
-void RichEditorEventHub::SetOnDidChange(std::function<void(const std::list<RichEditorAbstractSpanResult>&)>&& func)
+void RichEditorEventHub::SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func)
 {
     onDidChange_ = std::move(func);
 }
 
-void RichEditorEventHub::FireOnDidChange(const std::list<RichEditorAbstractSpanResult>& info)
+void RichEditorEventHub::FireOnDidChange(const RichEditorChangeValue& changeValue)
 {
-    onDidChange_(info);
+    if (onDidChange_) {
+        onDidChange_(changeValue);
+    }
 }
 
 bool RichEditorEventHub::HasOnDidChange() const

@@ -244,6 +244,36 @@ public:
     {
         return pointerEvent_;
     }
+
+    void SetRawGlobalLocation(const Offset& rawGlobalLocation)
+    {
+        rawGlobalLocation_ = rawGlobalLocation;
+    }
+
+    const Offset& GetRawGlobalLocation() const
+    {
+        return rawGlobalLocation_;
+    }
+
+    float GetHorizontalAxis() const
+    {
+        return horizontalAxis_;
+    }
+
+    float GetVerticalAxis() const
+    {
+        return verticalAxis_;
+    }
+
+    void SetHorizontalAxis(float axis)
+    {
+        horizontalAxis_ = axis;
+    }
+
+    void SetVerticalAxis(float axis)
+    {
+        verticalAxis_ = axis;
+    }
 #ifdef SECURITY_COMPONENT_ENABLE
     void SetDisplayX(double displayX)
     {
@@ -303,10 +333,14 @@ private:
     Offset localLocation_;
     // Will be used in drag.
     Offset screenLocation_;
+    // Raw last touchPoint global location.
+    Offset rawGlobalLocation_;
     Offset pinchCenter_;
     Offset delta_;
     std::list<FingerInfo> fingerList_;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
+    float horizontalAxis_ = 0.0;
+    float verticalAxis_ = 0.0;
 };
 
 using GestureEventFunc = std::function<void(GestureEvent& info)>;

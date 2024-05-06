@@ -15,19 +15,18 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_svg.h"
 
+#include "base/geometry/size.h"
 #include "include/pathops/SkPathOps.h"
 
 #include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_declaration.h"
 
 namespace OHOS::Ace::NG {
-
-SvgSvg::SvgSvg() : SvgGroup()
-{
-    declaration_ = AceType::MakeRefPtr<SvgDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
+namespace {
+const char DOM_SVG_SRC_VIEW_BOX[] = "viewBox";
 }
+
+SvgSvg::SvgSvg() : SvgGroup() {}
 
 RefPtr<SvgNode> SvgSvg::Create()
 {
@@ -58,17 +57,66 @@ RSRecordingPath SvgSvg::AsPath(const Size& viewPort) const
 
 Size SvgSvg::GetSize() const
 {
-    auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
-    CHECK_NULL_RETURN(declaration, Size());
-
-    return Size(declaration->GetWidth().Value(), declaration->GetHeight().Value());
+    return Size(svgAttr_.width.Value(), svgAttr_.height.Value());
 }
 
 Rect SvgSvg::GetViewBox() const
 {
-    auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
-    CHECK_NULL_RETURN(declaration, Rect());
-    return declaration->GetViewBox();
+    return svgAttr_.viewBox;
+}
+
+bool SvgSvg::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgAttributes&)> SVG_ATTR_ARRAY[] = {
+        { DOM_SVG_MIRROR,
+            [](const std::string& val, SvgAttributes& attr) {
+                attr.autoMirror = val == "true";
+            } },
+        { DOM_SVG_HEIGHT,
+            [](const std::string& val, SvgAttributes& attr) {
+                attr.height = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_SRC_VIEW_BOX,
+            [](const std::string& val, SvgAttributes& attr) {
+                if (val.empty()) {
+                    return;
+                }
+                std::vector<double> viewBox;
+                StringUtils::StringSplitter(val, ' ', viewBox);
+                if (viewBox.size() == 4) {
+                    attr.viewBox = Rect(viewBox[0], viewBox[1], viewBox[2], viewBox[3]);
+                }
+            } },
+        { DOM_SVG_VIEW_BOX,
+            [](const std::string& val, SvgAttributes& attr) {
+                if (val.empty()) {
+                    return;
+                }
+                std::vector<double> viewBox;
+                StringUtils::StringSplitter(val, ' ', viewBox);
+                if (viewBox.size() == 4) {
+                    attr.viewBox = Rect(viewBox[0], viewBox[1], viewBox[2], viewBox[3]);
+                }
+            } },
+        { DOM_SVG_WIDTH,
+            [](const std::string& val, SvgAttributes& attr) {
+                attr.width = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_X,
+            [](const std::string& val, SvgAttributes& attr) {
+                attr.x = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_Y,
+            [](const std::string& val, SvgAttributes& attr) {
+                attr.y = SvgAttributesParser::ParseDimension(val);
+            } },
+    };
+    auto attrIter = BinarySearchFindIndex(SVG_ATTR_ARRAY, ArraySize(SVG_ATTR_ARRAY), name.c_str());
+    if (attrIter != -1) {
+        SVG_ATTR_ARRAY[attrIter].value(value, svgAttr_);
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

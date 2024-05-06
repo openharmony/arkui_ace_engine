@@ -69,6 +69,9 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode *frameNode, std::string& src);
+    static void SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
+        const std::string& moduleName, bool isUriPureNumber = false);
+    static void SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
     static void SetSmoothEdge(FrameNode *frameNode, float value);
     static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);
@@ -100,8 +103,11 @@ public:
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
     static void SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice);
+    static ImageResizableSlice GetResizableSlice(FrameNode *frameNode);
     static void SetDynamicRangeMode(FrameNode *frameNode, DynamicRangeMode dynamicRangeMode);
     static void SetEnhancedImageQuality(FrameNode *frameNode, AIImageQuality imageQuality);
+    static bool GetFitOriginalSize(FrameNode *frameNode);
+    static uint32_t GetFillColor(FrameNode *frameNode);
 private:
     RefPtr<ImagePattern> GetImagePattern();
 };

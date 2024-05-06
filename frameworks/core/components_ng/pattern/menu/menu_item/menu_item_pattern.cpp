@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <optional>
+#include "menu_item_model.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/log.h"
@@ -36,12 +37,15 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -134,6 +138,14 @@ void MenuItemPattern::OnMountToParentDone()
     UpdateTextNodes();
 }
 
+void MenuItemPattern::OnAttachToFrameNode()
+{
+    RegisterOnKeyEvent();
+    RegisterOnClick();
+    RegisterOnTouch();
+    RegisterOnHover();
+}
+
 void CustomMenuItemPattern::OnAttachToFrameNode()
 {
     RegisterOnKeyEvent();
@@ -145,7 +157,7 @@ void MenuItemPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
+    isTextFadeOut_ = IsTextFadeOut();
     RefPtr<FrameNode> leftRow =
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
@@ -189,6 +201,15 @@ void MenuItemPattern::OnModifyDone()
     }
 }
 
+bool MenuItemPattern::IsTextFadeOut()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, false);
+    return textTheme->GetIsTextFadeout();
+}
+
 void MenuItemPattern::InitFocusEvent()
 {
     auto host = GetHost();
@@ -198,6 +219,11 @@ void MenuItemPattern::InitFocusEvent()
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->content_ && pattern->isTextFadeOut_) {
+            auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
+            textLayoutProperty->UpdateTextMarqueeStart(true);
+            pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
         pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
@@ -205,6 +231,11 @@ void MenuItemPattern::InitFocusEvent()
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->content_ && pattern->isTextFadeOut_) {
+            auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
+            textLayoutProperty->UpdateTextMarqueeStart(false);
+            pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
         pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
@@ -795,6 +826,52 @@ void MenuItemPattern::PlayBgColorAnimation(bool isHoverChange)
     });
 }
 
+void MenuItemPattern::CreateImageNode()
+{
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    selectIcon_ = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto userIcon = itemProperty->GetSelectIconSrc().value_or("");
+    auto iconPath = userIcon.empty() ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetSrc(iconPath);
+    auto props = selectIcon_->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateImageSourceInfo(imageSourceInfo);
+    UpdateIconSrc(selectIcon_, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
+        selectTheme->GetMenuIconColor(), userIcon.empty());
+}
+
+void MenuItemPattern::CreateSymbolNode()
+{
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto symbol = itemProperty->GetSelectSymbol();
+    selectIcon_ = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(selectIcon_);
+    if (symbol != nullptr) {
+        symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(selectIcon_)));
+    } else {
+        auto props = selectIcon_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(props);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto menuTheme = pipeline->GetTheme<MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        uint32_t symbolId = menuTheme->GetSymbolId();
+        props->UpdateSymbolSourceInfo(SymbolSourceInfo(symbolId));
+    }
+}
+
+
 void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
 {
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
@@ -809,29 +886,12 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
         return;
     }
     if (!selectIcon_) {
-        selectIcon_ = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        CHECK_NULL_VOID(selectIcon_);
+        if (!itemProperty->GetSelectIconSrc().value().empty()) {
+            CreateImageNode();
+        } else {
+            CreateSymbolNode();
+        }
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto iconTheme = pipeline->GetTheme<IconTheme>();
-    CHECK_NULL_VOID(iconTheme);
-    auto userIcon = itemProperty->GetSelectIconSrc().value_or("");
-    auto iconPath = userIcon.empty() ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-    ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetSrc(iconPath);
-    if (userIcon.empty()) {
-        imageSourceInfo.SetFillColor(selectTheme->GetMenuIconColor());
-    }
-    auto props = selectIcon_->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    props->UpdateImageSourceInfo(imageSourceInfo);
-    UpdateIconSrc(selectIcon_, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
-        selectTheme->GetMenuIconColor(), userIcon.empty());
-
     auto renderContext = selectIcon_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetVisible(isSelected_);
@@ -1029,32 +1089,37 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
     ImageSourceInfo defaultImageSourceInfo;
     auto iconSrc = isStart ? itemProperty->GetStartIcon().value_or(defaultImageSourceInfo)
                            : itemProperty->GetEndIcon().value_or(defaultImageSourceInfo);
+    auto symbol = isStart ? itemProperty->GetStartSymbol() : itemProperty->GetEndSymbol();
     auto& iconNode = isStart ? startIcon_ : endIcon_;
-    if (iconSrc.GetSrc().empty()) {
+    if (iconSrc.GetSrc().empty() && symbol == nullptr) {
         row->RemoveChild(iconNode); // it's safe even if iconNode is nullptr
         iconNode = nullptr;
         row->MarkModifyDone();
         row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
-
     if (!iconNode) {
-        iconNode = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        CHECK_NULL_VOID(iconNode);
+        if (symbol != nullptr) {
+            iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+            symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
+        } else {
+            iconNode = FrameNode::CreateFrameNode(
+                V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+            CHECK_NULL_VOID(iconNode);
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto selectTheme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID(selectTheme);
+            auto iconWidth = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconWidth();
+            auto iconHeight = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconHeight();
+            ImageSourceInfo imageSourceInfo(iconSrc);
+            auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(props);
+            props->UpdateImageSourceInfo(imageSourceInfo);
+            UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
+        }
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-    auto iconWidth = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconWidth();
-    auto iconHeight = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconHeight();
-    ImageSourceInfo imageSourceInfo(iconSrc);
-    auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    props->UpdateImageSourceInfo(imageSourceInfo);
-    UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
-
     iconNode->MountToParent(row, ((isStart && selectIcon_) || (!isStart && label_)) ? 1 : 0);
     iconNode->MarkModifyDone();
     iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1090,13 +1155,24 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     UpdateFont(menuProperty, theme, isLabel);
 
     textProperty->UpdateContent(content);
-    textProperty->UpdateMaxLines(1);
-    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    UpdateTexOverflow(textProperty);
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
     textProperty->UpdateTextAlign(isLabel ? TextAlign::CENTER : textAlign);
     node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
     node->MarkModifyDone();
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty)
+{
+    textProperty->UpdateMaxLines(1);
+    if (isTextFadeOut_) {
+        textProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textProperty->UpdateTextMarqueeFadeout(true);
+        textProperty->UpdateTextMarqueeStart(false);
+    } else {
+        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    }
 }
 
 void MenuItemPattern::UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel)

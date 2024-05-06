@@ -46,6 +46,11 @@ struct MenuItemSelectIconStyle {
 class ACE_EXPORT MenuItemLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(MenuItemLayoutProperty, LayoutProperty);
 
+private:
+    std::function<void(WeakPtr<NG::FrameNode>)> startSymbol_;
+    std::function<void(WeakPtr<NG::FrameNode>)> endSymbol_;
+    std::function<void(WeakPtr<NG::FrameNode>)> selectSymbol_;
+
 public:
     MenuItemLayoutProperty() = default;
     ~MenuItemLayoutProperty() override = default;
@@ -80,6 +85,36 @@ public:
         ResetMenuWidth();
         ResetExpandingMode();
         ResetHasFurtherExpand();
+    }
+
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetStartSymbol()
+    {
+        return startSymbol_;
+    }
+
+    void SetStartSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol)
+    {
+        startSymbol_ = symbol;
+    }
+
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetEndSymbol()
+    {
+        return endSymbol_;
+    }
+
+    void SetEndSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol)
+    {
+        endSymbol_ = symbol;
+    }
+
+    std::function<void(WeakPtr<NG::FrameNode>)>& GetSelectSymbol()
+    {
+        return selectSymbol_;
+    }
+
+    void SetSelectSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol)
+    {
+        selectSymbol_ = symbol;
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartIcon, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);

@@ -410,6 +410,15 @@ public:
         }
     }
 
+    RefPtr<ScrollableController> GetOrCreatePositionController()
+    {
+        if (!positionController_) {
+            auto controller = AceType::MakeRefPtr<NG::ScrollableController>();
+            SetPositionController(controller);
+        }
+        return positionController_;
+    }
+
     virtual Rect GetItemRect(int32_t index) const
     {
         return Rect();

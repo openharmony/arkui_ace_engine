@@ -87,15 +87,25 @@ void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
-    if (pattern->UseContentModifier()) {
-        BoxLayoutAlgorithm::Measure(layoutWrapper);
-        return;
-    }
-    if (layoutWrapper->GetHostTag() == V2::CHECKBOX_ETS_TAG) {
+    if (layoutWrapper->GetHostTag() == V2::CHECKBOX_ETS_TAG && !pattern->UseContentModifier()) {
         // Checkbox does not have child nodes. If a child is added to a toggle, then hide the child.
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->GetGeometryNode()->SetFrameSize(SizeF());
         }
+        PerformMeasureSelf(layoutWrapper);
+    }  else if (pattern->UseContentModifier()) {
+        const auto& childList = layoutWrapper->GetAllChildrenWithBuild();
+        std::list<RefPtr<LayoutWrapper>> list;
+        for (const auto& child : childList) {
+            if (pattern->GetContentModifierNode()->GetId() != child->GetHostNode()->GetId()) {
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+                child->Measure(layoutConstraint);
+                list.push_back(child);
+            }
+        }
+        BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, list);
     } else {
         auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
@@ -107,8 +117,8 @@ void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         for (auto &&child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Measure(childConstraint);
         }
+        PerformMeasureSelf(layoutWrapper);
     }
-    PerformMeasureSelf(layoutWrapper);
 }
 
 void CheckBoxLayoutAlgorithm::InitializeParam()
@@ -137,7 +147,6 @@ void CheckBoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->UseContentModifier()) {
-        host->GetGeometryNode()->Reset();
         return;
     }
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();

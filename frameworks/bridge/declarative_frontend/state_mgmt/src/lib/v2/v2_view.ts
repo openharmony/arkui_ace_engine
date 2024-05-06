@@ -30,16 +30,16 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
         super(parent, elmtId, extraInfo);
-        stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
+        stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 
     protected finalizeConstruction(): void {
 
-        ProvideConsumeUtilV3.setupConsumeVarsV3(this);
+        ProviderConsumerUtilV2.setupConsumeVarsV2(this);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
 
-        // Always use ID_REFS in ViewPU
+        // Always use ID_REFS in ViewV2
         this[ObserveV2.ID_REFS] = {};
     }
 
@@ -71,10 +71,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId: number) => {
             // FIXME split View: enable delete  this purgeDeleteElmtId(elmtId);
         });
-
-        /*if this hasRecycleManager() {
-           this getRecycleManager() purgeAllCachedRecycleNode();
-        }*/
 
         // unregistration of ElementIDs
         stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID`);
@@ -116,7 +112,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
 
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            ObserveV2.getObserve().startBind(this, elmtId);
+            ObserveV2.getObserve().startRecordDependencies(this, elmtId);
 
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
@@ -128,7 +124,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                 (node as ArkComponent).cleanStageValue();
             }
 
-            ObserveV2.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
+            ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
 
             stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
@@ -198,14 +194,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             this.markNeedUpdate();
             this.restoreInstanceId();
         }
-        /*  if (this hasRecycleManager()) {
-              this dirtDescendantElementIds_ add(this.recycleManager_.proxyNodeId(elmtId));
-            } else {
-        */
         this.dirtDescendantElementIds_.add(elmtId);
-        /*
-            }
-        */
         stateMgmtConsole.debug(`${this.debugInfo__()}: uiNodeNeedUpdate: updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
 
         stateMgmtProfiler.end();
@@ -233,14 +222,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added
             // to newly created this.dirtDescendantElementIds_ Set
             dirtElmtIdsFromRootNode.forEach(elmtId => {
-                /*if (this hasRecycleManager()) {
-                   this UpdateElement (this recycleManager_ proxyNodeId(elmtId));
-                 } else {
-                    */
                 this.UpdateElement(elmtId);
-                /*
-                 }
-                */
                 this.dirtDescendantElementIds_.delete(elmtId);
             });
 

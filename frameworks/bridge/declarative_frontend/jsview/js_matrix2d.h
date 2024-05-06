@@ -93,11 +93,27 @@ public:
         transform_ = param;
     }
 
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
+    double GetDensity()
+    {
+        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+    }
+
     std::string ToString() const;
     ACE_DISALLOW_COPY_AND_MOVE(JSMatrix2d);
 
 private:
     TransformParam transform_;
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 
 } // OHOS::Ace::Framework

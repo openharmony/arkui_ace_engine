@@ -1285,7 +1285,7 @@ HWTEST_F(DragEventTestNg, TestCreateGatherNode001, TestSize.Level1)
     auto itemPattern2 = listItemNode2->GetPattern<ListItemPattern>();
     ASSERT_NE(itemPattern2, nullptr);
     itemPattern2->SetSelected(true);
-    NG::DragPreviewOption option { NG::DragPreviewMode::AUTO, false, true };
+    NG::DragPreviewOption option { true, false, true };
     listItemNode1->SetDragPreviewOptions(option);
     listNode->AddChild(listItemNode1);
     listNode->AddChild(listItemNode2);
@@ -1342,7 +1342,7 @@ HWTEST_F(DragEventTestNg, TestCreateGatherNode002, TestSize.Level1)
     auto itemPattern2 = gridItemNode2->GetPattern<GridItemPattern>();
     ASSERT_NE(itemPattern2, nullptr);
     itemPattern2->SetSelected(true);
-    NG::DragPreviewOption option { NG::DragPreviewMode::AUTO, false, true };
+    NG::DragPreviewOption option { true, false, true };
     gridItemNode1->SetDragPreviewOptions(option);
     gridNode->AddChild(gridItemNode1);
     gridNode->AddChild(gridItemNode2);
@@ -1404,7 +1404,7 @@ HWTEST_F(DragEventTestNg, TestResetNode001, TestSize.Level1)
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    NG::DragPreviewOption option { NG::DragPreviewMode::AUTO, true, false };
+    NG::DragPreviewOption option { true, true, false };
     frameNode->SetDragPreviewOptions(option);
     /**
      * @tc.steps: step2. Set Scale
@@ -1478,7 +1478,7 @@ HWTEST_F(DragEventTestNg, TestIsBelongToMultiItemNode001, TestSize.Level1)
     auto itemPattern = listItemNode->GetPattern<ListItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
     itemPattern->SetSelected(true);
-    NG::DragPreviewOption option { NG::DragPreviewMode::AUTO, false, true };
+    NG::DragPreviewOption option { true, false, true };
     listItemNode->SetDragPreviewOptions(option);
     /**
      * @tc.steps: step2. Create frameNode.
@@ -1527,7 +1527,7 @@ HWTEST_F(DragEventTestNg, TestIsBelongToMultiItemNode002, TestSize.Level1)
     auto itemPattern = gridItemNode->GetPattern<GridItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
     itemPattern->SetSelected(true);
-    NG::DragPreviewOption option { NG::DragPreviewMode::AUTO, false, true };
+    NG::DragPreviewOption option { true, false, true };
     gridItemNode->SetDragPreviewOptions(option);
     /**
      * @tc.steps: step2. Create frameNode.
@@ -1576,7 +1576,7 @@ HWTEST_F(DragEventTestNg, TestIsSelectedItemNode001, TestSize.Level1)
     auto itemPattern = gridItemNode->GetPattern<GridItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
     itemPattern->SetSelected(true);
-    NG::DragPreviewOption option { NG::DragPreviewMode::AUTO, false, true };
+    NG::DragPreviewOption option { true, false, true };
     gridItemNode->SetDragPreviewOptions(option);
     /**
      * @tc.steps: step2. Create GridItemNode's DragEventActuator.
@@ -1619,7 +1619,7 @@ HWTEST_F(DragEventTestNg, TestIsSelectedItemNode002, TestSize.Level1)
     auto itemPattern = listItemNode->GetPattern<ListItemPattern>();
     ASSERT_NE(itemPattern, nullptr);
     itemPattern->SetSelected(true);
-    NG::DragPreviewOption option { NG::DragPreviewMode::AUTO, false, true };
+    NG::DragPreviewOption option { true, false, true };
     listItemNode->SetDragPreviewOptions(option);
     /**
      * @tc.steps: step2. Create ListItemNode's DragEventActuator.
@@ -1675,7 +1675,7 @@ HWTEST_F(DragEventTestNg, TestIsNeedGather001, TestSize.Level1)
     auto itemPattern2 = listItemNode2->GetPattern<ListItemPattern>();
     ASSERT_NE(itemPattern2, nullptr);
     itemPattern2->SetSelected(true);
-    NG::DragPreviewOption option { NG::DragPreviewMode::AUTO, false, true };
+    NG::DragPreviewOption option { true, false, true };
     listItemNode1->SetDragPreviewOptions(option);
     listNode->AddChild(listItemNode1);
     listNode->AddChild(listItemNode2);

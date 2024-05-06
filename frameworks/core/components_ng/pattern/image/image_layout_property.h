@@ -99,6 +99,9 @@ public:
         if (GetHasPlaceHolderStyle().has_value()) {
             TextBackgroundStyle::ToJsonValue(json, GetPlaceHolderStyle(), filter);
         }
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

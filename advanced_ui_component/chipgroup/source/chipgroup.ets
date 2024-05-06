@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { Chip, ChipSize } from '@ohos.arkui.advanced.Chip'
-
+import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
+import { Chip, ChipSize, SymbolOptions } from '@ohos.arkui.advanced.Chip';
 
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
@@ -64,15 +63,16 @@ interface ChipGroupStyleTheme {
   selectedFillColor: ResourceColor;
 }
 
-
 interface LabelOptions {
   text: string;
 }
 
 export interface ChipGroupItemOptions {
   prefixIcon?: IconOptions;
+  prefixSymbol?: SymbolOptions;
   label: LabelOptions;
   suffixIcon?: IconOptions;
+  suffixSymbol?: SymbolOptions;
   allowClose?: boolean;
 }
 
@@ -90,10 +90,9 @@ interface ChipGroupSpaceOptions {
   endSpace?: Length;
 }
 
-
 export interface IconItemOptions {
-  icon: IconOptions,
-  action: Callback<void>
+  icon: IconOptions;
+  action: Callback<void>;
 }
 
 interface IconGroupSuffixTheme {
@@ -120,7 +119,7 @@ function parseDimension<T>(
   const resourceManager = uiContext.getHostContext()?.resourceManager;
   if (typeof value === "object") {
     let temp: Resource = value as Resource;
-    if (temp.type === 10002) {
+    if (temp.type === 10002 || temp.type === 10007) {
       if (resourceManager.getNumber(temp.id) >= 0) {
         return value as T;
       }
@@ -161,7 +160,7 @@ function isValidDimensionNoPercentageString(dimension: string): boolean {
 @Component
 export struct IconGroupSuffix {
   @Consume chipSize: ChipSize | SizeOptions;
-  @Prop items: Array<IconItemOptions> = [];
+  @Prop items: Array<IconItemOptions | SymbolGlyphModifier> = [];
 
   private getBackgroundSize(): number {
     if (this.chipSize === ChipSize.SMALL) {
@@ -171,8 +170,11 @@ export struct IconGroupSuffix {
     }
   }
 
-  private getIconSize(val: Length): Length {
-    let value: Length
+  private getIconSize(val?: Length): Length {
+    if (val === undefined) {
+      return this.chipSize === ChipSize.SMALL ? iconGroupSuffixTheme.smallIconSize : iconGroupSuffixTheme.normalIconSize;
+    }
+    let value: Length;
     if (this.chipSize === ChipSize.SMALL) {
       value = parseDimension(this.getUIContext(), val, isValidDimensionString, iconGroupSuffixTheme.smallIconSize);
     } else {
@@ -183,15 +185,23 @@ export struct IconGroupSuffix {
 
   build() {
     Row() {
-      ForEach(this.items || [], (suffixItem: IconItemOptions) => {
+      ForEach(this.items || [], (suffixItem: IconItemOptions | SymbolGlyphModifier) => {
         Button() {
-          Image(suffixItem.icon.src)
-            .fillColor(iconGroupSuffixTheme.fillColor)
-            .size({
-              width: this.getIconSize(suffixItem.icon?.size?.width),
-              height: this.getIconSize(suffixItem.icon?.size?.height)
-            })
-            .focusable(true)
+          if (suffixItem instanceof SymbolGlyphModifier) {
+            SymbolGlyph()
+              .fontColor([iconGroupSuffixTheme.fillColor])
+              .fontSize(this.getIconSize())
+              .attributeModifier(suffixItem)
+              .focusable(true)
+          } else {
+            Image(suffixItem.icon.src)
+              .fillColor(iconGroupSuffixTheme.fillColor)
+              .size({
+                width: this.getIconSize(suffixItem.icon?.size?.width),
+                height: this.getIconSize(suffixItem.icon?.size?.height)
+              })
+              .focusable(true)
+          }
         }
         .size({
           width: this.getBackgroundSize(),
@@ -200,14 +210,15 @@ export struct IconGroupSuffix {
         .backgroundColor(iconGroupSuffixTheme.backgroundColor)
         .borderRadius(iconGroupSuffixTheme.borderRadius)
         .onClick(() => {
-          suffixItem.action();
+          if (!(suffixItem instanceof SymbolGlyphModifier)) {
+            suffixItem.action();
+          }
         })
         .borderRadius(iconGroupSuffixTheme.borderRadius)
       })
     }
   }
 }
-
 
 @Component
 export struct ChipGroup {
@@ -232,55 +243,51 @@ export struct ChipGroup {
 
   private getChipSize(): ChipSize | SizeOptions {
     if (this.itemStyle && this.itemStyle.size) {
-      return this.itemStyle.size
+      return this.itemStyle.size;
     }
     return defaultTheme.itemStyle.size;
   }
 
   private getFontColor(): ResourceColor {
     if (this.itemStyle && this.itemStyle.fontColor) {
-      return this.itemStyle.fontColor
+      return this.itemStyle.fontColor;
     }
     return defaultTheme.itemStyle.fontColor;
   }
 
   private getSelectedFontColor(): ResourceColor {
     if (this.itemStyle && this.itemStyle.selectedFontColor) {
-      return this.itemStyle.selectedFontColor
+      return this.itemStyle.selectedFontColor;
     }
     return defaultTheme.itemStyle.selectedFontColor;
   }
 
   private getFillColor(): ResourceColor {
     if (this.itemStyle && this.itemStyle.fontColor) {
-      return this.itemStyle.fontColor
+      return this.itemStyle.fontColor;
     }
     return defaultTheme.itemStyle.fillColor;
   }
 
   private getSelectedFillColor(): ResourceColor {
     if (this.itemStyle && this.itemStyle.selectedFontColor) {
-      return this.itemStyle.selectedFontColor
+      return this.itemStyle.selectedFontColor;
     }
     return defaultTheme.itemStyle.selectedFillColor;
   }
 
   private getBackgroundColor(): ResourceColor {
     if (this.itemStyle && this.itemStyle.backgroundColor) {
-      return this.itemStyle.backgroundColor
+      return this.itemStyle.backgroundColor;
     }
     return defaultTheme.itemStyle.backgroundColor;
   }
 
   private getSelectedBackgroundColor(): ResourceColor {
     if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
-      return this.itemStyle.selectedBackgroundColor
+      return this.itemStyle.selectedBackgroundColor;
     }
     return defaultTheme.itemStyle.selectedBackgroundColor;
-  }
-
-  private getItemStyle(): ChipItemStyle {
-    return this.itemStyle ?? defaultTheme.itemStyle;
   }
 
   private getSelectedIndexes(): Array<number> {
@@ -290,9 +297,14 @@ export struct ChipGroup {
         return (
           element >= 0 &&
             element % 1 == 0 &&
+            element != null &&
+            element != undefined &&
             array.indexOf(element) === index &&
             element < (this.items || []).length);
       });
+    if (temp.length == 0) {
+      temp = [0];
+    }
     return temp;
   }
 
@@ -342,7 +354,6 @@ export struct ChipGroup {
   }
 
   build() {
-
     Row() {
       Stack() {
         Scroll(this.scroller) {
@@ -356,6 +367,7 @@ export struct ChipGroup {
                     fillColor: this.getFillColor(),
                     activatedFillColor: this.getSelectedFillColor()
                   },
+                  prefixSymbol: chipItem?.prefixSymbol,
                   label: {
                     text: chipItem?.label?.text ?? " ",
                     fontColor: this.getFontColor(),
@@ -367,6 +379,7 @@ export struct ChipGroup {
                     fillColor: this.getFillColor(),
                     activatedFillColor: this.getSelectedFillColor()
                   },
+                  suffixSymbol: chipItem?.suffixSymbol,
                   allowClose: chipItem.allowClose ?? false,
                   enabled: true,
                   activated: this.isSelected(index),
@@ -404,8 +417,8 @@ export struct ChipGroup {
           Stack()
             .width(iconGroupSuffixTheme.normalBackgroundSize)
             .height(
-              this.getChipSize() === ChipSize.SMALL ? 
-              iconGroupSuffixTheme.smallBackgroundSize : 
+              this.getChipSize() === ChipSize.SMALL ?
+              iconGroupSuffixTheme.smallBackgroundSize :
               iconGroupSuffixTheme.normalBackgroundSize)
             .linearGradient({ angle: 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
@@ -419,7 +432,7 @@ export struct ChipGroup {
       if (this.suffix) {
         Row() {
           this.suffix();
-        }.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight, })
+        }.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight })
       }
     }
     .align(Alignment.End)

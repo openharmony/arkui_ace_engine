@@ -194,6 +194,14 @@ void ScrollModelNG::SetOnDidScroll(NG::ScrollEventWithState&& event)
     eventHub->SetOnDidScrollEvent(std::move(event));
 }
 
+void ScrollModelNG::SetOnDidScroll(FrameNode* frameNode, ScrollEventWithState&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidScrollEvent(std::move(event));
+}
+
 void ScrollModelNG::SetOnScrollEdge(NG::ScrollEdgeEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -235,9 +243,19 @@ void ScrollModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
     ScrollableModelNG::SetOnReachStart(std::move(onReachStart));
 }
 
+void ScrollModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
+{
+    ScrollableModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
+}
+
 void ScrollModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
     ScrollableModelNG::SetOnReachEnd(std::move(onReachEnd));
+}
+
+void ScrollModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
+{
+    ScrollableModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 
 void ScrollModelNG::SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)
@@ -352,6 +370,7 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
     pattern->SetIntervalSize(intervalSize);
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
+    CHECK_NULL_VOID(ScrollSnapAlign::NONE != scrollSnapAlign);
     pattern->SetEnablePaging(ScrollPagingStatus::INVALID);
 }
 
@@ -449,6 +468,7 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
     pattern->SetIntervalSize(intervalSize);
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
+    CHECK_NULL_VOID(ScrollSnapAlign::NONE != scrollSnapAlign);
     pattern->SetEnablePaging(ScrollPagingStatus::INVALID);
 }
 
@@ -529,9 +549,9 @@ NestedScrollOptions ScrollModelNG::GetNestedScroll(FrameNode* frameNode)
 ScrollEdgeType ScrollModelNG::GetOnScrollEdge(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, ScrollEdgeType::SCROLL_TOP);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    Axis axis = Axis::VERTICAL;
-    ACE_GET_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis, frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    Axis axis = pattern->GetAxis();
+
     switch (axis) {
         case Axis::VERTICAL:
             if (pattern->IsAtTop()) {

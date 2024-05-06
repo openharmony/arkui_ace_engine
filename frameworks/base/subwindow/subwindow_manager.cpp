@@ -712,7 +712,7 @@ void SubwindowManager::ShowActionMenu(
     }
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow();
+        auto subwindow = GetOrCreateSubWindow(true);
         CHECK_NULL_VOID(subwindow);
         subwindow->ShowActionMenu(title, button, std::move(callback));
         // for ability
@@ -720,6 +720,8 @@ void SubwindowManager::ShowActionMenu(
         auto subwindow = GetSubwindow(containerId);
         if (!subwindow) {
             subwindow = Subwindow::CreateSubwindow(containerId);
+            CHECK_NULL_VOID(subwindow);
+            CHECK_NULL_VOID(subwindow->CheckHostWindowStatus());
             subwindow->InitContainer();
             AddSubwindow(containerId, subwindow);
         }

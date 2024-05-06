@@ -19,6 +19,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
@@ -56,8 +57,8 @@ TextLayoutAlgorithm::TextLayoutAlgorithm(
     }
     ConstructParagraphSpanGroup(spans);
     if (!spans.empty()) {
-        auto maxlines = spans.front()->textLineStyle->GetMaxLines().value_or(INT32_MAX);
-        spanStringHasMaxLines_ |= maxlines != INT32_MAX;
+        auto maxlines = spans.front()->textLineStyle->GetMaxLines().value_or(UINT32_MAX);
+        spanStringHasMaxLines_ |= maxlines != UINT32_MAX;
         spans_.emplace_back(std::move(spans));
     }
 }
@@ -94,7 +95,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
                 std::list<RefPtr<SpanItem>> newGroup;
                 spanItem->SetNeedRemoveNewLine(true);
                 newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
-                spanStringHasMaxLines_ |= pStyle.maxLines != INT32_MAX;
+                spanStringHasMaxLines_ |= pStyle.maxLines != UINT32_MAX;
                 spans_.emplace_back(std::move(newGroup));
                 it = spans.begin();
                 pStyle = nextSpanParagraphStyle;
@@ -186,8 +187,6 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
     CHECK_NULL_VOID(layoutProperty);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     auto textForAI = pattern->GetTextForAI();
@@ -199,12 +198,7 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
     dragSpanPosition.dragEnd = pattern->GetRecoverEnd();
     bool isDragging = pattern->IsDragging();
     TextStyle aiSpanTextStyle = textStyle;
-    auto hyerlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
-    CHECK_NULL_VOID(hyerlinkTheme);
-    auto hyerlinkColor = hyerlinkTheme->GetTextColor();
-    aiSpanTextStyle.SetTextColor(hyerlinkColor);
-    aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-    aiSpanTextStyle.SetTextDecorationColor(hyerlinkColor);
+    ResetAiSpanTextStyle(frameNode, aiSpanTextStyle);
     for (auto kv : pattern->GetAISpanMap()) {
         if (preEnd >= wTextForAILength) {
             break;
@@ -229,6 +223,19 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
         dragSpanPosition.spanEnd = wTextForAILength;
         GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, isDragging, paragraph);
     }
+}
+
+void TextLayoutAlgorithm::ResetAiSpanTextStyle(const RefPtr<FrameNode>& frameNode, TextStyle& aiSpanTextStyle)
+{
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto hyerlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(hyerlinkTheme);
+    auto hyerlinkColor = hyerlinkTheme->GetTextColor();
+    aiSpanTextStyle.SetTextColor(hyerlinkColor);
+    aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
+    aiSpanTextStyle.SetTextDecorationColor(hyerlinkColor);
+    aiSpanTextStyle.SetTextDecorationStyle(TextDecorationStyle::SOLID);
 }
 
 void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring wTextForAI,
@@ -282,12 +289,13 @@ bool TextLayoutAlgorithm::CreateParagraph(
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    pattern->ClearCustomSpanPlaceholderInfo();
     if (pattern->IsSensitiveEnalbe()) {
         UpdateSensitiveContent(content);
     }
     // default paragraph style
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spans_.empty()) {
+    if ((Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spans_.empty()) || isSpanStringMode_) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
     }
     paraStyle.leadingMarginAlign = Alignment::CENTER;
@@ -321,12 +329,14 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, cons
         symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
     symbolTextStyle.SetFontFamilies({ "HM Symbol" });
     paragraph->PushStyle(symbolTextStyle);
-    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-    symbolEffectOptions.Reset();
-    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
     if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
-        auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
-        symboloptiOns.Reset();
+        auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.Reset();
+        layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+        if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
+            auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
+            symboloptiOns.Reset();
+        }
     }
     paragraph->AddSymbol(symbolSourceInfo->GetUnicode());
     paragraph->PopStyle();
@@ -361,7 +371,7 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
 bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
-    auto maxSize = TextLayoutAlgorithmBase::GetMaxMeasureSize(contentConstraint);
+    auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     if (!CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;
     }
@@ -378,7 +388,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
 OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 {
     SetContentOffset(layoutWrapper);
-    return OffsetF(0.0, 0.0);
+    return OffsetF(0.0f, 0.0f);
 }
 
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
@@ -413,7 +423,7 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
             contentConstraint.maxSize.Height(), stepSize)) {
         return false;
     }
-    auto maxSize = TextLayoutAlgorithmBase::GetMaxMeasureSize(contentConstraint);
+    auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     while (GreatOrEqual(maxFontSize, minFontSize)) {
         textStyle.SetFontSize(Dimension(maxFontSize));
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
@@ -494,7 +504,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle
     // generally not allowed to be modified
     if (!contentConstraint.selfIdealSize.Width()) {
         float paragraphNewWidth = std::min(std::min(paragraph->GetTextWidth(), paragraph->GetMaxWidth()) + indent_,
-            TextLayoutAlgorithmBase::GetMaxMeasureSize(contentConstraint).Width());
+            MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint).Width());
         paragraphNewWidth =
             std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
         if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
@@ -543,6 +553,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
         }
     }
     // Reducing the value of MaxLines to make sure the parapraph could be layout in the constraint of height.
+    paragraph = GetSingleParagraph();
     height = static_cast<float>(paragraph->GetHeight());
     while (GreatNotEqual(height, contentConstraint.maxSize.Height())) {
         auto maxLines = textStyle.GetMaxLines();
@@ -555,6 +566,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
         if (!BuildParagraph(textStyle, layoutProperty, contentConstraint, layoutWrapper)) {
             return false;
         }
+        paragraph = GetSingleParagraph();
         height = static_cast<float>(paragraph->GetHeight());
     }
     return true;
@@ -567,6 +579,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     // create a paragraph with all text in 1 line
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
+    textStyle.SetTextIndent(Dimension(0.0f));
 
     if (!textStyle.GetAdaptTextSize()) {
         if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
@@ -577,7 +590,6 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
             return std::nullopt;
         }
     }
-    textStyle.SetTextIndent(Dimension(0.0));
     textStyle_ = textStyle;
     auto paragraph = GetSingleParagraph();
 

@@ -106,9 +106,10 @@ void GridLayoutProperty::UpdateIrregularFlag(const GridLayoutOptions& layoutOpti
     pattern->SetIrregular(false);
     CHECK_NULL_VOID(layoutOptions.getSizeByIndex);
 
+    bool vertical = IsVertical();
     for (int32_t idx : layoutOptions.irregularIndexes) {
         auto size = layoutOptions.getSizeByIndex(idx);
-        if ((propRowsTemplate_ && size.columns > 1) || (propColumnsTemplate_ && size.rows > 1)) {
+        if ((!vertical && size.columns > 1) || (vertical && size.rows > 1)) {
             pattern->SetIrregular(true);
             return;
         }

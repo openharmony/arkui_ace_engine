@@ -19,6 +19,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/common/ime/text_range.h"
 namespace OHOS::Ace::NG {
 class TextInsertValueInfo {
 public:
@@ -209,14 +210,32 @@ class RichEditorChangeValue : public BaseEventInfo {
 public:
     RichEditorChangeValue() : BaseEventInfo("RichEditorChangeValue") {}
     ~RichEditorChangeValue() = default;
+
     void SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span);
     const std::list<RichEditorAbstractSpanResult>& GetRichEditorOriginalSpans() const;
+
     void SetRichEditorReplacedSpans(const RichEditorAbstractSpanResult& span);
     const std::list<RichEditorAbstractSpanResult>& GetRichEditorReplacedSpans() const;
+
+    void SetRichEditorReplacedImageSpans(const RichEditorAbstractSpanResult& span);
+    const std::list<RichEditorAbstractSpanResult>& GetRichEditorReplacedImageSpans() const;
+
+    void SetRichEditorReplacedSymbolSpans(const RichEditorAbstractSpanResult& span);
+    const std::list<RichEditorAbstractSpanResult>& GetRichEditorReplacedSymbolSpans() const;
+
+    void SetRangeBefore(const TextRange& rangeBefore);
+    TextRange GetRangeBefore() const;
+
+    void SetRangeAfter(const TextRange& rangeAfter);
+    TextRange GetRangeAfter() const;
 
 private:
     std::list<RichEditorAbstractSpanResult> originalSpans_;
     std::list<RichEditorAbstractSpanResult> replacedSpans_;
+    std::list<RichEditorAbstractSpanResult> replacedImageSpans_;
+    std::list<RichEditorAbstractSpanResult> replacedSymbolSpans_;
+    TextRange rangeBefore_;
+    TextRange rangeAfter_;
 };
 
 class RichEditorEventHub : public EventHub {
@@ -294,8 +313,8 @@ public:
     void SetOnWillChange(std::function<bool(const RichEditorChangeValue&)> && func);
     bool FireOnWillChange(const RichEditorChangeValue& info);
     bool HasOnWillChange() const;
-    void SetOnDidChange(std::function<void(const std::list<RichEditorAbstractSpanResult>&)> && func);
-    void FireOnDidChange(const std::list<RichEditorAbstractSpanResult>& info);
+    void SetOnDidChange(std::function<void(const RichEditorChangeValue&)> && func);
+    void FireOnDidChange(const RichEditorChangeValue& info);
     bool HasOnDidChange() const;
     void SetOnCut(std::function<void(NG::TextCommonEvent&)> && func);
     void FireOnCut(NG::TextCommonEvent& value);
@@ -315,7 +334,7 @@ private:
     std::function<void(const bool&)> onEditingChange_;
     std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
     std::function<bool(const RichEditorChangeValue&)> onWillChange_;
-    std::function<void(const std::list<RichEditorAbstractSpanResult>&)> onDidChange_;
+    std::function<void(const RichEditorChangeValue&)> onDidChange_;
     std::function<void(NG::TextCommonEvent&)> onCut_;
     std::function<void(NG::TextCommonEvent&)> onCopy_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorEventHub);

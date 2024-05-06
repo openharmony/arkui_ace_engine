@@ -2238,6 +2238,24 @@ class ObscuredModifier extends ModifierWithKey<Array<ObscuredReasons>> {
   }
 }
 
+class ForegroundEffectModifier extends ModifierWithKey<ForegroundEffectOptions> {
+  constructor(value: ForegroundEffectOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('foregroundEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetForegroundEffect(node);
+    } else {
+      getUINativeModule().common.setForegroundEffect(node, this.value.radius);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.radius === this.stageValue.radius);
+  }
+}
+
 class BackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOptions> {
   constructor(options: BackgroundEffectOptions) {
     super(options);
@@ -3751,7 +3769,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  motionPath(value: MotionBlurOptions): this {
+  motionBlur(value: MotionBlurOptions): this {
     modifierWithKey(this._modifiersWithKeys, MotionBlurModifier.identity, MotionBlurModifier, value);
     return this;
   }

@@ -30,6 +30,7 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
@@ -238,38 +239,53 @@ struct PlaceholderOptions {
     }
 };
 
-class ACE_EXPORT RichEditorControllerBase : public AceType {
-    DECLARE_ACE_TYPE(RichEditorControllerBase, AceType);
+class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
+    DECLARE_ACE_TYPE(RichEditorBaseControllerBase, AceType);
+
+public:
+    virtual int32_t GetCaretOffset() = 0;
+    virtual bool SetCaretOffset(int32_t caretPosition) = 0;
+    virtual void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) = 0;
+    virtual void CloseSelectionMenu() = 0;
+    virtual bool IsEditing() = 0;
+    virtual void StopEditing() = 0;
+};
+
+class ACE_EXPORT RichEditorControllerBase : virtual public RichEditorBaseControllerBase {
+    DECLARE_ACE_TYPE(RichEditorControllerBase, RichEditorBaseControllerBase);
 
 public:
     virtual int32_t AddImageSpan(const ImageSpanOptions& options) = 0;
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
     virtual int32_t AddSymbolSpan(const SymbolSpanOptions& options) = 0;
     virtual int32_t AddPlaceholderSpan(const RefPtr<NG::UINode>& customNode, const SpanOptionBase& options) = 0;
-    virtual int32_t GetCaretOffset() = 0;
-    virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void UpdateParagraphStyle(int32_t start, int32_t end, const UpdateParagraphStyle& style) = 0;
     virtual void UpdateSpanStyle(
         int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;
-    virtual void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) = 0;
     virtual void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) = 0;
     virtual SelectionInfo GetSpansInfo(int32_t start, int32_t end) = 0;
     virtual std::vector<ParagraphInfo> GetParagraphsInfo(int32_t start, int32_t end) = 0;
     virtual void DeleteSpans(const RangeOptions& options) = 0;
-    virtual void CloseSelectionMenu() = 0;
     virtual SelectionInfo GetSelectionSpansInfo() = 0;
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
-    virtual bool IsEditing() = 0;
-    virtual void StopEditing() = 0;
+};
+
+class ACE_EXPORT RichEditorStyledStringControllerBase : virtual public RichEditorBaseControllerBase {
+    DECLARE_ACE_TYPE(RichEditorStyledStringControllerBase, RichEditorBaseControllerBase);
+
+public:
+    virtual void SetStyledString(const RefPtr<SpanStringBase>& value) = 0;
+    virtual RefPtr<SpanStringBase> GetStyledString() = 0;
+    virtual SelectionRangeInfo GetSelection() = 0;
 };
 
 class ACE_EXPORT RichEditorModel {
 public:
     static RichEditorModel* GetInstance();
     virtual ~RichEditorModel() = default;
-    virtual void Create() = 0;
-    virtual RefPtr<RichEditorControllerBase> GetRichEditorController() = 0;
+    virtual void Create(bool isStyledStringMode = false) = 0;
+    virtual RefPtr<RichEditorBaseControllerBase> GetRichEditorController() = 0;
     virtual void SetOnReady(std::function<void()>&& func) = 0;
     virtual void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) = 0;
     virtual void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) = 0;
@@ -291,7 +307,7 @@ public:
     virtual void SetEnterKeyType(TextInputAction value) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
     virtual void SetOnWillChange(std::function<bool(const NG::RichEditorChangeValue&)>&& func) = 0;
-    virtual void SetOnDidChange(std::function<void(const std::list<NG::RichEditorAbstractSpanResult>&)>&& func) = 0;
+    virtual void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
 private:

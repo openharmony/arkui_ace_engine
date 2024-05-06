@@ -83,6 +83,11 @@ enum LengthUnit {
   LPX = 4,
 }
 
+enum LengthMetricsUnit {
+  DEFAULT = 0,
+  PX = 1,
+}
+
 type EdgeWidths = EdgesT<Number>;
 
 type EdgeColors = EdgesT<Number>;
@@ -293,7 +298,7 @@ class RenderNode {
       this.frameValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(position.x, 0);
       this.frameValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(position.y, 0);
     }
-    getUINativeModule().common.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y);
+    getUINativeModule().common.setPosition(this.nodePtr, false, this.frameValue.x, this.frameValue.y);
   }
   set rotation(rotation: Vector3) {
     if (rotation === undefined || rotation === null) {

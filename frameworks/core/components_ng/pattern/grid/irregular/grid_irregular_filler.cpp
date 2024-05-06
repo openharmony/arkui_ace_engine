@@ -240,7 +240,7 @@ int32_t GridIrregularFiller::FillMatrixOnly(int32_t targetIdx)
     if (targetIdx >= info_->childrenCount_) {
         targetIdx = info_->childrenCount_ - 1;
     }
-    int32_t idx = InitPosToLastItem(info_->gridMatrix_.size() - 1);
+    int32_t idx = InitPosToLastItem(static_cast<int32_t>(info_->gridMatrix_.size()) - 1);
     while (idx < targetIdx) {
         if (!FindNextItem(++idx)) {
             FillOne(idx);

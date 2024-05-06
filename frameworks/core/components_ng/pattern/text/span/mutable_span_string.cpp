@@ -41,11 +41,44 @@ void MutableSpanString::RemoveSpans(int32_t start, int32_t length)
     if (!CheckRange(start, length)) {
         return;
     }
-    for (auto it = spansMap_.begin(); it != spansMap_.end();) {
-        auto spanKey = (*it).first;
-        auto nextIt = std::next(it);
-        RemoveSpan(start, length, spanKey);
-        it = nextIt;
+    std::list<SpanType> typeList;
+    auto iter = typeList.begin();
+    for (auto& it : spansMap_) {
+        auto spanKey = it.first;
+        if (spanKey != SpanType::CustomSpan && spanKey != SpanType::Image) {
+            iter = typeList.insert(iter, spanKey);
+        }
+    }
+    for (const auto& spanKey : typeList) {
+        if (spanKey != SpanType::CustomSpan && spanKey != SpanType::Image) {
+            RemoveSpan(start, length, spanKey);
+        }
+    }
+    RemoveSpecialSpans(start, length);
+}
+
+void MutableSpanString::RemoveSpecialSpans(int32_t start, int32_t length)
+{
+    if (!CheckRange(start, length)) {
+        return;
+    }
+    int32_t end = start + length;
+    std::list<RefPtr<SpanBase>> spanBaseList;
+    auto iter = spanBaseList.begin();
+    for (const auto& type : specailTypes) {
+        auto spans = spansMap_[type];
+        for (const auto& span : spans) {
+            auto spanIndex = span->GetStartIndex();
+            if (start <= spanIndex && spanIndex < end) {
+                iter = spanBaseList.insert(iter, span);
+            }
+        }
+    }
+    spanBaseList.sort(
+        [](const RefPtr<SpanBase>& a, const RefPtr<SpanBase>& b) { return a->GetStartIndex() < b->GetStartIndex(); });
+    for (const auto& span : spanBaseList) {
+        auto index = span->GetStartIndex();
+        RemoveSpan(index, index + 1, span->GetSpanType());
     }
 }
 
@@ -270,24 +303,32 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
     UpdateSpansAndSpanMapWithOffsetAfterInsert(start, otherLength, useFrontStyle);
     SplitSpansByNewLine();
     KeepSpansOrder();
+    NotifySpanWatcher();
 }
 
 void MutableSpanString::RemoveString(int32_t start, int32_t length)
 {
     ReplaceString(start, length, "");
+    NotifySpanWatcher();
 }
 
 void MutableSpanString::RemoveSpecialpanText()
 {
+    std::list<int32_t> indexList;
+    auto iter = indexList.begin();
     for (const auto& type : specailTypes) {
         auto spans = spansMap_[type];
-        int32_t count = 0;
         for (const auto& span : spans) {
-            auto wStr = GetWideString();
-            wStr.erase(span->GetStartIndex() - count, 1);
-            text_ = StringUtils::ToString(wStr);
-            ++count;
+            iter = indexList.insert(iter, span->GetStartIndex());
         }
+    }
+    indexList.sort([](const int32_t& a, const int32_t& b) { return a < b; });
+    int32_t count = 0;
+    for (const auto& index : indexList) {
+        auto wStr = GetWideString();
+        wStr.erase(index - count, 1);
+        text_ = StringUtils::ToString(wStr);
+        ++count;
     }
 }
 
@@ -297,6 +338,7 @@ void MutableSpanString::ClearAllSpans()
     spansMap_.clear();
     spans_.clear();
     spans_.emplace_back(GetDefaultSpanItem(text_));
+    SplitSpansByNewLine();
 }
 
 void MutableSpanString::KeepSpansOrder()
@@ -529,5 +571,21 @@ bool MutableSpanString::IsSpeicalNode(int32_t location, SpanType speicalType)
         }
     }
     return false;
+}
+
+void MutableSpanString::SetSpanWatcher(const WeakPtr<SpanWatcher>& watcher)
+{
+    watcher_ = watcher;
+}
+
+void MutableSpanString::NotifySpanWatcher()
+{
+    if (spans_.empty()) {
+        spans_.emplace_back(GetDefaultSpanItem(""));
+    }
+    auto watcher = watcher_.Upgrade();
+    if (watcher) {
+        watcher->UpdateSpanItems(spans_);
+    }
 }
 } // namespace OHOS::Ace

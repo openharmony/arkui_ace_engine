@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,12 +200,12 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     CHECK_NULL_VOID(dirtyNode);
     auto customNode = DynamicCast<CustomNode>(dirtyNode);
     if (customNode && !dirtyNode->GetInspectorIdValue("").empty()) {
-        ACE_LAYOUT_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d][key:%s]",
+        ACE_BUILD_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d][key:%s]",
             customNode->GetJSViewName().c_str(),
             dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0,
             dirtyNode->GetInspectorIdValue("").c_str());
     } else if (customNode) {
-        ACE_LAYOUT_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d]",
+        ACE_BUILD_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d]",
             customNode->GetJSViewName().c_str(),
             dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0);
     }
@@ -219,12 +219,12 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     if (!dirty->GetInspectorIdValue("").empty()) {
-        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]",
+        ACE_BUILD_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]",
             dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
             dirty->GetInspectorIdValue("").c_str());
     } else {
-        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
+        ACE_BUILD_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
     }
     taskScheduler_->AddDirtyLayoutNode(dirty);
@@ -247,11 +247,11 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     if (!dirty->GetInspectorIdValue("").empty()) {
-        ACE_LAYOUT_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
+        ACE_BUILD_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
             dirty->GetInspectorIdValue("").c_str());
     } else {
-        ACE_LAYOUT_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
+        ACE_BUILD_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
     }
     taskScheduler_->AddDirtyRenderNode(dirty);
@@ -478,31 +478,11 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
     CHECK_NULL_RETURN(curRootNode, nullptr);
     auto rootFocusHub = curRootNode->GetFocusHub();
     CHECK_NULL_RETURN(rootFocusHub, nullptr);
-    RefPtr<FocusHub> lastFocusNode;
-    std::list<RefPtr<FocusHub>> focusNodes = rootFocusHub->GetChildren();
-    for (const auto& item : focusNodes) {
-        if (item->IsCurrentFocus()) {
-            lastFocusNode = item;
-        }
-    }
-    while (lastFocusNode) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curLastFocusNodeTAG:(%{public}s).", lastFocusNode->GetFrameName().c_str());
-        if (!lastFocusNode->IsCurrentFocus() || !lastFocusNode->IsFocusableNode()) {
-            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Is not CurrentFocus Or not FocusableNode.");
-            break;
-        }
-        std::list<RefPtr<FocusHub>> focusNodesInner = lastFocusNode->GetChildren();
-        auto openBreak = false;
-        for (const auto& item : focusNodesInner) {
-            if (item->IsCurrentFocus()) {
-                lastFocusNode = item;
-                openBreak = true;
-            }
-        }
-        if (!openBreak) {
-            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Is LastFocusNode, break.");
-            break;
-        }
+    auto tmpFocusNode = rootFocusHub->GetLastWeakFocusNode().Upgrade();
+    auto lastFocusNode = rootFocusHub;
+    while (tmpFocusNode && tmpFocusNode->IsCurrentFocus()) {
+        lastFocusNode = tmpFocusNode;
+        tmpFocusNode = tmpFocusNode->GetLastWeakFocusNode().Upgrade();
     }
     if (lastFocusNode == nullptr) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "lastFocusNode is null.");
@@ -518,7 +498,7 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
-void PipelineContext::IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
+void PipelineContext::IsSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode)
 {
     // Frame other window to SCB window Or inSCB window changes,hide keyboard.
     if ((windowFocus_.has_value() && windowFocus_.value()) ||
@@ -530,14 +510,14 @@ void PipelineContext::IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
         return;
     }
     // In windowscene, focus change, need close keyboard.
-    if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB WindowscenePage ready to close keyboard.");
+    auto pattern = curFrameNode->GetPattern();
+    if (pattern && !pattern->NeedSoftKeyboard()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB WindowPage ready to close keyboard.");
         WindowSceneHelper::IsCloseKeyboard(curFrameNode);
-        needSoftKeyboard_ = std::nullopt;
     }
 }
 
-void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
+void PipelineContext::IsNotSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode)
 {
     if ((windowFocus_.has_value() && windowFocus_.value()) ||
         (windowShow_.has_value() && windowShow_.value())) {
@@ -550,16 +530,10 @@ void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
         return;
     }
 
-    if (preNodeId_ != -1 && preNodeId_ == curFrameNode->GetId()) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FocusNode not change.");
-        return;
-    }
-    preNodeId_ = -1;
-
-    if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
+    auto pattern = curFrameNode->GetPattern();
+    if (pattern && !pattern->NeedSoftKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal WindowPage ready to close keyboard.");
         FocusHub::IsCloseKeyboard(curFrameNode);
-        needSoftKeyboard_ = std::nullopt;
     }
 }
 #endif
@@ -2160,19 +2134,24 @@ void PipelineContext::RegisterDumpInfoListener(const std::function<void(const st
     dumpListeners_.push_back(callback);
 }
 
-bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap)
+bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
+    bool skipSubAutoFillContainer)
 {
     CHECK_NULL_RETURN(viewDataWrap, false);
     RefPtr<FrameNode> pageNode = nullptr;
+    RefPtr<FrameNode> dumpNode = nullptr;
     if (node == nullptr) {
         if (stageManager_) {
             pageNode = stageManager_->GetLastPage();
+            dumpNode = pageNode;
         }
     } else {
         pageNode = node->GetPageNode();
+        dumpNode = node;
     }
     CHECK_NULL_RETURN(pageNode, false);
-    pageNode->DumpViewDataPageNodes(viewDataWrap);
+    CHECK_NULL_RETURN(dumpNode, false);
+    dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     auto pageInfo = pagePattern->GetPageInfo();
@@ -2222,10 +2201,10 @@ void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, Ref
     }
 }
 
-void PipelineContext::NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode)
+void PipelineContext::NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode, const std::string& fillContent)
 {
     CHECK_NULL_VOID(node);
-    node->NotifyFillRequestFailed(errCode);
+    node->NotifyFillRequestFailed(errCode, fillContent);
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
@@ -2517,7 +2496,7 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
     if (windowId) {
         return mouseStyle->ChangePointerStyle(windowId, format);
     }
-    return mouseStyle->ChangePointerStyle(GetWindowId(), format);
+    return mouseStyle->ChangePointerStyle(GetFocusWindowId(), format);
 }
 
 bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
@@ -2651,6 +2630,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.time = event.time;
     result.deviceId = event.deviceId;
     result.sourceType = event.sourceType;
+    result.sourceTool = event.sourceTool;
     result.pointerEvent = event.pointerEvent;
     return result;
 }
@@ -3406,7 +3386,7 @@ void PipelineContext::SetCursor(int32_t cursorValue)
         auto cursor = static_cast<MouseFormat>(cursorValue);
         window->SetCursor(cursor);
         window->SetUserSetCursor(true);
-        mouseStyle->ChangePointerStyle(GetWindowId(), cursor);
+        mouseStyle->ChangePointerStyle(GetFocusWindowId(), cursor);
     }
 }
 
@@ -3418,7 +3398,7 @@ void PipelineContext::RestoreDefault(int32_t windowId)
     CHECK_NULL_VOID(mouseStyle);
     window->SetCursor(MouseFormat::DEFAULT);
     window->SetUserSetCursor(false);
-    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetWindowId(), MouseFormat::DEFAULT);
+    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetFocusWindowId(), MouseFormat::DEFAULT);
 }
 
 void PipelineContext::OpenFrontendAnimation(
@@ -3652,17 +3632,21 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
 
 void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
 {
-    if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0) {
+    auto windowManager = GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto mode = windowManager->GetWindowMode();
+    if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
+        mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
         auto percent = SystemProperties::GetDarkModeBrightnessPercent();
         auto stage = stageManager_->GetStageNode();
         CHECK_NULL_VOID(stage);
         auto renderContext = stage->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         CalcDimension dimension;
-        if (isFocus) {
-            dimension.SetValue(1 + percent.front());
+        if (!isFocus && mode == WindowMode::WINDOW_MODE_FLOATING) {
+            dimension.SetValue(1 + percent.second);
         } else {
-            dimension.SetValue(1 + percent.back());
+            dimension.SetValue(1 + percent.first);
         }
         renderContext->UpdateFrontBrightness(dimension);
     }

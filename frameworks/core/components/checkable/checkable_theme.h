@@ -505,10 +505,8 @@ public:
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
                 theme->height_ = theme->width_;
-                theme->hotZoneHorizontalPadding_ =
-                    radioPattern->GetAttr<Dimension>("radio_hotzone_padding_api_twelve", 2.0_vp);
-                theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
-                theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size_api_twelve", 0.0_vp);
+                theme->defaultPaddingSize_ = radioPattern->GetAttr<Dimension>("radio_default_padding_size", 2.0_vp);
+                theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size_api_twelve", 24.0_vp);
                 theme->defaultHeight_ = theme->defaultWidth_;
             }
             theme->radioInnerSizeRatio_ = radioPattern->GetAttr<double>("radio_inner_size_ratio", 0.0);
@@ -545,9 +543,6 @@ public:
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
                 theme->height_ = theme->width_;
-                theme->hotZoneHorizontalPadding_ =
-                    radioPattern->GetAttr<Dimension>("radio_hotzone_padding_api_twelve", 2.0_vp);
-                theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             }
         }
 
