@@ -11051,14 +11051,14 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetHeightPercent,
         SetPaddingPercent,
         SetMarginPercent,
+        SetGeometryTransition,
+        SetChainMode,
         SetRenderFit,
         SetOutlineColor,
         SetSize,
         SetRenderGroup,
         SetColorBlend,
         SetForegroundBlurStyle,
-        SetGeometryTransition,
-        SetChainMode,
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -11145,14 +11145,14 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetHeightPercent,
         GetPaddingPercent,
         GetMarginPercent,
+        GetGeometryTransition,
+        GetChainMode,
         GetRenderFit,
         GetOutlineColor,
         GetSize,
         GetRenderGroup,
         GetColorBlend,
         GetForegroundBlurStyle,
-        GetGeometryTransition,
-        GetChainMode,
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -11243,14 +11243,14 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetHeightPercent,
         ResetPaddingPercent,
         ResetMarginPercent,
+        ResetGeometryTransition,
+        ResetChainMode,
         ResetRenderFit,
         ResetOutlineColor,
         ResetSize,
         ResetRenderGroup,
         ResetColorBlend,
         ResetForegroundBlurStyle,
-        ResetGeometryTransition,
-        ResetChainMode,
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

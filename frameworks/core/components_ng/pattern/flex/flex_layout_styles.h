@@ -32,6 +32,7 @@ struct WrapLayoutAttribute {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Alignment, WrapAlignment);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MainAlignment, WrapAlignment);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CrossAlignment, WrapAlignment);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(CrossSpace, Dimension);
 };
 } // namespace OHOS::Ace::NG
 

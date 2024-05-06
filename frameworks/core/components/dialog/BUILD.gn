@@ -20,6 +20,7 @@ build_component("dialog") {
     "alert_dialog_component.cpp",
     "dialog_component.cpp",
     "dialog_element.cpp",
+    "dialog_theme.cpp",
     "render_dialog.cpp",
     "render_dialog_creator.cpp",
   ]

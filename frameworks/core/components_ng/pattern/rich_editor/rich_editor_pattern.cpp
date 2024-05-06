@@ -1173,6 +1173,9 @@ bool RichEditorPattern::SetCaretPosition(int32_t pos)
         FireOnSelectionChange(correctPos);
         if (caretPosition_ != correctPos) {
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "caret:%{public}d->%{public}d", caretPosition_, correctPos);
+            if (caretChangeListener_) {
+                caretChangeListener_(correctPos);
+            }
         }
         caretPosition_ = correctPos;
         UpdateCaretInfoToController();

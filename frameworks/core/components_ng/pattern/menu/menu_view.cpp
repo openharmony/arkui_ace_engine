@@ -442,6 +442,7 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
             columnNode->MountToParent(parent);
             columnNode->OnMountToParentDone();
             manager->SetHasFilter(true);
+            manager->SetFilterActive(true);
             manager->SetFilterColumnNode(columnNode);
             parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
             manager->ShowFilterAnimation(columnNode);

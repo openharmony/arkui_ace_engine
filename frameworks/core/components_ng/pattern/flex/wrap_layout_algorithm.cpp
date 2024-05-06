@@ -71,6 +71,8 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         HandleDialogStretch();
         return;
     }
+    spacing_ = flexProp->GetSpaceValue({});
+    contentSpace_ = flexProp->GetCrossSpaceValue({});
     auto spacing = static_cast<float>(spacing_.ConvertToPx());
     auto contentSpace = static_cast<float>(contentSpace_.ConvertToPx());
     float currentMainLength = 0.0f;

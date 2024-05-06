@@ -341,9 +341,15 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
 {
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
+    
     auto direction = textLayoutProperty->GetLayoutDirection();
     if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
         return direction;
+    }
+
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        return TextDirection::RTL;
     }
 
     TextDirection textDirection = TextDirection::LTR;
@@ -414,6 +420,9 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
             GetSpanParagraphStyle(group.front()->textLineStyle, spanParagraphStyle);
             if (group.front()->fontStyle->HasFontSize()) {
                 spanParagraphStyle.fontSize = group.front()->fontStyle->GetFontSizeValue().ConvertToPx();
+            }
+            if (group.front()->content.length() == 1 && group.front()->content.front() == '\n' && isSpanStringMode_) {
+                spanParagraphStyle.leadingMargin.reset();
             }
         }
         if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {

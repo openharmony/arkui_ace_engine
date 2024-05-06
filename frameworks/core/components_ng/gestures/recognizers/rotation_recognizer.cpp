@@ -106,6 +106,9 @@ void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (!event.isRotationEvent) {
         return;
     }
+    lastAxisEvent_ = event;
+    touchPoints_[event.id] = TouchEvent();
+    UpdateTouchPointWithAxisEvent(event);
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives axis start event, begin to detect rotation event");
     if (refereeState_ == RefereeState::READY) {
         initialAngle_ = event.rotateAxisAngle;
@@ -153,6 +156,7 @@ void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (!event.isRotationEvent) {
         return;
     }
+    lastAxisEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -226,11 +230,9 @@ void RotationRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     if (!event.isRotationEvent) {
         return;
     }
-    touchPoints_[event.id].x = event.x;
-    touchPoints_[event.id].y = event.y;
-    touchPoints_[event.id].sourceType = event.sourceType;
-    touchPoints_[event.id].sourceTool = event.sourceTool;
+    UpdateTouchPointWithAxisEvent(event);
     currentAngle_ = event.rotateAxisAngle;
+    lastAxisEvent_ = event;
     time_ = event.time;
     if (refereeState_ == RefereeState::DETECTING) {
         double diffAngle = fabs((currentAngle_ - initialAngle_));
@@ -337,7 +339,13 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         if (touchPoint.tiltY.has_value()) {
             info.SetTiltY(touchPoint.tiltY.value());
         }
-        info.SetSourceTool(touchPoint.sourceTool);
+        if (inputEventType_ == InputEventType::AXIS) {
+            info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
+            info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+            info.SetSourceTool(lastAxisEvent_.sourceTool);
+        } else {
+            info.SetSourceTool(touchPoint.sourceTool);
+        }
         info.SetPointerEvent(lastPointEvent_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;

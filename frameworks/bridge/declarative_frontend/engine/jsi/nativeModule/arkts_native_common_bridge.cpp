@@ -5302,14 +5302,17 @@ Local<panda::ObjectRef> CommonBridge::CreateFingerInfo(EcmaVM* vm, const FingerI
 {
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
+    const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
     double density = PipelineBase::GetCurrentDensity();
-    const char* keys[] = { "id", "globalX", "globalY", "localX", "localY" };
+    const char* keys[] = { "id", "globalX", "globalY", "localX", "localY", "displayX", "displayY" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, fingerInfo.fingerId_),
         panda::NumberRef::New(vm, globalLocation.GetX() / density),
         panda::NumberRef::New(vm, globalLocation.GetY() / density),
         panda::NumberRef::New(vm, localLocation.GetX() / density),
-        panda::NumberRef::New(vm, localLocation.GetY() / density) };
-    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        panda::NumberRef::New(vm, localLocation.GetY() / density),
+        panda::NumberRef::New(vm, screenLocation.GetX() / density),
+        panda::NumberRef::New(vm, screenLocation.GetY() / density) };
+        return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
 Local<panda::ObjectRef> CommonBridge::CreateEventTargetObject(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info)

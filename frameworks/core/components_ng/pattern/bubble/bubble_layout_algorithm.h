@@ -185,7 +185,7 @@ private:
     void BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
         RefPtr<FrameNode> bubbleNode, bool showInSubWindow);
     void SetArrowOffsetsFromClip(const int16_t index, const float offsetX, const float offsetY);
-    void SetHotAreas(bool showInSubWindow, bool isBlock, int32_t nodeId, int32_t containerId);
+    void SetHotAreas(bool showInSubWindow, bool isBlock, RefPtr<FrameNode> frameNode, int32_t containerId);
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);

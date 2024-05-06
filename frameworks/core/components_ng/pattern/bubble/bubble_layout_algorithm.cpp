@@ -453,10 +453,11 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     arrowPositionForPaint_ = arrowPosition_;
     UpdateClipOffset(frameNode);
     auto isBlock = bubbleProp->GetBlockEventValue(true);
-    SetHotAreas(showInSubWindow, isBlock, frameNode->GetId(), bubblePattern->GetContainerId());
+    SetHotAreas(showInSubWindow, isBlock, frameNode, bubblePattern->GetContainerId());
 }
 
-void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock, int32_t nodeId, int32_t containerId)
+void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
+    RefPtr<FrameNode> frameNode, int32_t containerId)
 {
     if (showInSubWindow) {
         std::vector<Rect> rects;
@@ -471,8 +472,18 @@ void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock, int3
             rects.emplace_back(parentWindowRect);
             rects.emplace_back(rect);
         }
-        auto subWindowMgr = SubwindowManager::GetInstance();
-        subWindowMgr->SetHotAreas(rects, nodeId, containerId);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [rects, containerId, frameNodeWK = WeakClaim(RawPtr(frameNode))]() {
+                auto frameNode = frameNodeWK.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                auto subWindowMgr = SubwindowManager::GetInstance();
+                subWindowMgr->SetHotAreas(rects, frameNode->GetId(), containerId);
+            },
+            TaskExecutor::TaskType::UI, "PopupSetHotAreas");
     }
 }
 
