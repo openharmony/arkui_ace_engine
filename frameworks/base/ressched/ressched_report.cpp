@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,8 +30,9 @@ constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
 #endif
-constexpr int32_t TOUCH_EVENT               = 1;
+constexpr int32_t TOUCH_DOWN_EVENT          = 1;
 constexpr int32_t CLICK_EVENT               = 2;
+constexpr int32_t TOUCH_UP_EVENT            = 3;
 constexpr int32_t SLIDE_OFF_EVENT = 0;
 constexpr int32_t SLIDE_ON_EVENT = 1;
 constexpr int32_t PUSH_PAGE_START_EVENT = 0;
@@ -148,10 +149,13 @@ void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
 
 void ResSchedReport::OnTouchEvent(const TouchType& touchType)
 {
-    if (touchType == TouchType::DOWN || touchType == TouchType::UP) {
-        std::unordered_map<std::string, std::string> payload;
+    std::unordered_map<std::string, std::string> payload;
+    if (touchType == TouchType::DOWN) {
         payload[NAME] = TOUCH;
-        ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_EVENT, payload);
+        ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
+    } else if (touchType == TouchType::UP) {
+        payload[NAME] = TOUCH;
+        ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_UP_EVENT, payload);
     }
 }
 
