@@ -4263,7 +4263,16 @@ int32_t SetBlurOnSubmit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 void ResetBlurOnSubmit(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextInputModifier()->setBlurOnSubmit(node->uiNodeHandle, true);
+    switch (node->type) {
+        case ARKUI_NODE_TEXT_INPUT:
+            fullImpl->getNodeModifiers()->getTextInputModifier()->setBlurOnSubmit(node->uiNodeHandle, true);
+            break;
+        case ARKUI_NODE_TEXT_AREA:
+            fullImpl->getNodeModifiers()->getTextInputModifier()->setBlurOnSubmit(node->uiNodeHandle, false);
+            break;
+        default:
+            break;
+    }
 }
 
 const ArkUI_AttributeItem* GetBlurOnSubmit(ArkUI_NodeHandle node)
