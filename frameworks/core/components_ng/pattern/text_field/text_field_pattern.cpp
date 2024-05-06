@@ -1503,15 +1503,15 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::UP) {
         RequestKeyboardAfterLongPress();
     }
-    if (SelectOverlayIsOn() && !isTouchCaret_) {
-        return;
-    }
 
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
+        if (SelectOverlayIsOn() && !isTouchCaret_) {
+            return;
+        }
         if (!IsUsingMouse()) {
             HandleTouchMove(info);
         }
@@ -1527,6 +1527,9 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         auto lastCaretIndex = selectController_->GetCaretIndex();
         auto lastCaretRect = selectController_->GetCaretRect();
         isTouchCaret_ = RepeatClickCaret(offset, lastCaretIndex, lastCaretRect);
+        if (isTouchCaret_) {
+            CloseSelectOverlay(true);
+        }
     }
 }
 

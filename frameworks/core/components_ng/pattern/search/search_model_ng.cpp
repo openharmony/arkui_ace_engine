@@ -788,7 +788,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     padding.bottom = CalcLength(0.0);
     padding.top = CalcLength(0.0);
     textFieldLayoutProperty->UpdatePadding(padding);
-    pattern->SetEnableTouchAndHoverEffect(false);
+    pattern->SetEnableTouchAndHoverEffect(true);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     if (!hasTextFieldNode) {
         auto pattern = parentNode->GetPattern<SearchPattern>();
