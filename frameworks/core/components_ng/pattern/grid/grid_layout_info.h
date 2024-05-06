@@ -46,6 +46,13 @@ struct GridLayoutInfo {
      * @return height of all lines in viewport.
      */
     float GetTotalHeightOfItemsInView(float mainGap, bool regular = true) const;
+    /**
+     * @brief skip starting lines that are outside viewport in LayoutIrregular
+     *
+     * @return [iterator to the first line in view, offset of that first line]
+     */
+    using HeightMapIt = std::map<int32_t, float>::const_iterator;
+    std::pair<HeightMapIt, float> SkipLinesAboveView(float mainGap) const;
 
     void UpdateStartIndexByStartLine()
     {

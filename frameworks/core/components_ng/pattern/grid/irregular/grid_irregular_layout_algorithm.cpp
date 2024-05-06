@@ -116,9 +116,8 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
         crossGap_ = 0.0f;
     }
 
-    int32_t lastCrossCount = info.crossCount_;
     info.crossCount_ = static_cast<int32_t>(crossLens_.size());
-    CheckForReset(lastCrossCount);
+    CheckForReset();
 }
 
 namespace {
@@ -143,7 +142,7 @@ inline void ResetLayoutRange(GridLayoutInfo& info)
 }
 } // namespace
 
-void GridIrregularLayoutAlgorithm::CheckForReset(int32_t lastCrossCount)
+void GridIrregularLayoutAlgorithm::CheckForReset()
 {
     auto& info = gridLayoutInfo_;
 
@@ -175,6 +174,13 @@ void GridIrregularLayoutAlgorithm::CheckForReset(int32_t lastCrossCount)
         info.lineHeightMap_.clear();
         PrepareJumpOnReset(info);
         ResetLayoutRange(info);
+        return;
+    }
+
+    if (!wrapper_->IsContraintNoChanged()) {
+        // need to remeasure all items in current view
+        postJumpOffset_ = info.currentOffset_;
+        PrepareJumpOnReset(info);
     }
 }
 
@@ -184,7 +190,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnOffset(float mainSize)
         return;
     }
 
-    if (Positive(gridLayoutInfo_.currentOffset_)) {
+    if (GreatNotEqual(gridLayoutInfo_.currentOffset_, gridLayoutInfo_.prevOffset_)) {
         MeasureBackward(mainSize);
     } else {
         MeasureForward(mainSize);
@@ -239,9 +245,10 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize)
 {
     auto& info = gridLayoutInfo_;
+    // skip adding starting lines that are outside viewport in LayoutIrregular
+    auto [it, offset] = info.SkipLinesAboveView(mainGap_);
     GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
-    filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ },
-        info.currentOffset_ + info.lineHeightMap_.at(info.startMainLineIndex_) + mainGap_, info.startMainLineIndex_);
+    filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ }, offset + it->second + mainGap_, it->first);
 
     GridLayoutRangeSolver solver(&info, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
