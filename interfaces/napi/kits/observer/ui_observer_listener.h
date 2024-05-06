@@ -45,18 +45,13 @@ public:
     void OnDidClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,
         const RefPtr<NG::FrameNode> frameNode);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
+    bool NapiEqual(napi_value cb);
     void OnDrawOrLayout();
-
-    bool NapiEqual(napi_value cb) const;
-    napi_value GetNapiCallback() const;
-    bool operator==(const UIObserverListener& listener) const
-    {
-        return NapiEqual(listener.GetNapiCallback());
-    }
 
 private:
     napi_value CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo);
     napi_value CreateNavDestinationInfoObj(const NG::NavDestinationInfo& info);
+    napi_value GetNapiCallback();
     static napi_valuetype GetValueType(napi_env env, napi_value value);
     static napi_value GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName);
     void AddBaseEventInfo(napi_value objValueClickEvent, const ClickInfo& clickInfo);
