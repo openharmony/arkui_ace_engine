@@ -208,6 +208,78 @@ void JSMenu::SetExpandingMode(const JSCallbackInfo& info)
     MenuModel::GetInstance()->SetExpandingMode(expandingMode);
 }
 
+void JSMenu::SetItemGroupDivider(const JSCallbackInfo& args)
+{
+    V2::ItemDivider divider;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        CalcDimension value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.strokeWidth = value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("startMargin"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.startMargin = value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("endMargin"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.endMargin = value;
+
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            divider.color = Color::TRANSPARENT;
+        }
+    }
+    MenuModel::GetInstance()->SetItemGroupDivider(divider);
+    args.ReturnSelf();
+}
+
+void JSMenu::SetItemDivider(const JSCallbackInfo& args)
+{
+    V2::ItemDivider divider;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        CalcDimension value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.strokeWidth = value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("startMargin"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.startMargin = value;
+        if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("endMargin"), value)) {
+            value.Reset();
+        }
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        divider.endMargin = value;
+
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            divider.color = Color::TRANSPARENT;
+        }
+    }
+    MenuModel::GetInstance()->SetItemDivider(divider);
+    args.ReturnSelf();
+}
+
 void JSMenu::JSBind(BindingTarget globalObj)
 {
     JSClass<JSMenu>::Declare("Menu");
@@ -220,6 +292,8 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::StaticMethod("radius", &JSMenu::SetRadius, opt);
     JSClass<JSMenu>::StaticMethod("subMenuExpandingMode", &JSMenu::SetExpandingMode);
     JSClass<JSMenu>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
+    JSClass<JSMenu>::StaticMethod("menuItemDivider", &JSMenu::SetItemDivider);
+    JSClass<JSMenu>::StaticMethod("menuItemGroupDivider", &JSMenu::SetItemGroupDivider);
     JSClass<JSMenu>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSMenu>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSMenu>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);

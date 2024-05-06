@@ -31,6 +31,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
@@ -477,6 +478,8 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
     auto layoutProperty = GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     const auto& children = host->GetChildren();
+    bool needDivider = false;
+    int32_t index = 0;
     for (auto child : children) {
         if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
             auto itemNode = AceType::DynamicCast<FrameNode>(child);
@@ -496,13 +499,18 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
             }
 
             UpdateMenuItemTextNode(layoutProperty, itemProperty, itemPattern);
+            itemPattern->UpdateNeedDivider(needDivider);
+            needDivider = true;
+            itemPattern->SetIndex(index);
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
             auto itemGroupNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(itemGroupNode);
             UpdateMenuItemChildren(itemGroupNode);
+            needDivider = false;
         } else {
             // do nothing
         }
+        index++;
     }
 }
 
@@ -1559,4 +1567,49 @@ float MenuPattern::GetSelectMenuWidth()
     
     return finalWidth;
 }
+
+void MenuPattern::OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, bool press)
+{
+    CHECK_NULL_VOID(parent);
+    if (parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+        auto pattern = DynamicCast<FrameNode>(parent)->GetPattern<MenuItemGroupPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnIntItemPressed(index, press);
+    }
+    const auto& children = parent->GetChildren();
+    if (index >= children.size() - 1) {
+        return;
+    }
+    auto nextNode = parent->GetChildAtIndex(index + 1);
+    CHECK_NULL_VOID(nextNode);
+    if (!InstanceOf<FrameNode>(nextNode)) {
+        LOGW("next menuNode is not a frameNode! type = %{public}s", nextNode->GetTag().c_str());
+        return;
+    }
+    if (nextNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+        auto pattern = DynamicCast<FrameNode>(nextNode)->GetPattern<MenuItemGroupPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnExtItemPressed(press, true);
+    } else {
+        auto props = DynamicCast<FrameNode>(nextNode)->GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(props);
+        // need save needDivider property due to some items shoud not have divide in not pressed state
+        props->UpdatePress(press);
+        nextNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    if (index > 0) {
+        auto prevNode = parent->GetChildAtIndex(index - 1);
+        CHECK_NULL_VOID(prevNode);
+        if (!InstanceOf<FrameNode>(prevNode)) {
+            LOGW("prev menuNode is not a frameNode! type = %{public}s", prevNode->GetTag().c_str());
+            return;
+        }
+        if (prevNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+            auto pattern = DynamicCast<FrameNode>(prevNode)->GetPattern<MenuItemGroupPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnExtItemPressed(press, false);
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

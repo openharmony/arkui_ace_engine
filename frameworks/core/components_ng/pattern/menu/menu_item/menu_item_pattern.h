@@ -25,6 +25,8 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_paint_method.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -64,6 +66,16 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<MenuItemLayoutAlgorithm>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<MenuItemPaintMethod>();
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<MenuItemPaintProperty>();
     }
 
     void MarkIsSelected(bool isSelected);
@@ -184,6 +196,12 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
     void InitLongPressEvent();
+    void UpdateNeedDivider(bool need);
+    void SetIndex(int32_t index)
+    {
+        index_ = index;
+    }
+    float GetDividerStroke();
 
 protected:
     void RegisterOnKeyEvent();
@@ -230,6 +248,7 @@ private:
     bool IsSubMenu();
     void RecordChangeEvent() const;
     void ParseMenuRadius(MenuParam& param);
+    void ModifyDivider();
 
     void InitFocusEvent();
     void HandleFocusEvent();
@@ -254,6 +273,7 @@ private:
     bool isFocusBGColorSet_ = false;
     bool isExpanded_ = false;
     int32_t clickMenuItemId_ = -1;
+    int32_t index_ = 0;
 
     std::function<void()> subBuilderFunc_ = nullptr;
 

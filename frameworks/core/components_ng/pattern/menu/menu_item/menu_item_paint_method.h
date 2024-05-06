@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_GROUP_MENU_ITEM_GROUP_PAINT_METHOD_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_GROUP_MENU_ITEM_GROUP_PAINT_METHOD_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MENU_ITEM_PAINT_METHOD_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MENU_ITEM_PAINT_METHOD_H
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -27,7 +27,7 @@
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
-struct GroupDividerInfo {
+struct ItemDividerInfo {
     float strokeWidth = 0.0f;
     float startMargin = 0.0f;
     float endMargin = 0.0f;
@@ -35,18 +35,16 @@ struct GroupDividerInfo {
     float width = 0.0f;
     float topMargin = 0.0f;
 };
-class ACE_EXPORT MenuItemGroupPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(MenuItemGroupPaintMethod, NodePaintMethod)
+class ACE_EXPORT MenuItemPaintMethod : public NodePaintMethod {
+    DECLARE_ACE_TYPE(MenuItemPaintMethod, NodePaintMethod)
 public:
-    MenuItemGroupPaintMethod() = default;
-    ~MenuItemGroupPaintMethod() override = default;
-
+    MenuItemPaintMethod() = default;
+    ~MenuItemPaintMethod() override = default;
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
-
 private:
-    void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, GroupDividerInfo info);
+    void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, ItemDividerInfo info);
 
-    ACE_DISALLOW_COPY_AND_MOVE(MenuItemGroupPaintMethod);
+    ACE_DISALLOW_COPY_AND_MOVE(MenuItemPaintMethod);
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_GROUP_MENU_ITEM_GROUP_PAINT_METHOD_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MENU_ITEM_PAINT_METHOD_H

@@ -777,9 +777,15 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-
+    auto props = GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_VOID(props);
+    auto menu = GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto parent = AceType::DynamicCast<FrameNode>(host->GetParent());
     if (touchType == TouchType::DOWN) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
@@ -788,8 +794,12 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
         auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
         menuWrapperPattern->SetLastTouchItem(host);
+        props->UpdatePress(true);
+        menuPattern->OnItemPressed(parent, index_, true);
     } else if (touchType == TouchType::UP) {
         SetBgBlendColor(isHovered_ ? theme->GetHoverColor() : Color::TRANSPARENT);
+        props->UpdatePress(false);
+        menuPattern->OnItemPressed(parent, index_, false);
     } else {
         return;
     }
@@ -829,17 +839,28 @@ void MenuItemPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
+    auto props = GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_VOID(props);
+    auto menu = GetMenu(false);
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = AceType::DynamicCast<FrameNode>(host->GetParent());
 
     if (isHover || isSubMenuShowed_) {
         // keep hover color when subMenu showed
         SetBgBlendColor(theme->GetHoverColor());
         ShowSubMenu();
+        props->UpdateHover(true);
+        menuPattern->OnItemPressed(parent, index_, true);
     } else {
         SetBgBlendColor(Color::TRANSPARENT);
+        props->UpdateHover(false);
+        menuPattern->OnItemPressed(parent, index_, false);
     }
     PlayBgColorAnimation();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1425,6 +1446,8 @@ void MenuItemPattern::UpdateTextNodes()
     if (IsDisabled()) {
         UpdateDisabledStyle();
     }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool MenuItemPattern::IsDisabled()
@@ -1563,5 +1586,45 @@ bool MenuItemPattern::IsSubMenu()
         return false;
     }
     return topLevelMenuPattern->IsSubMenu();
+}
+
+void MenuItemPattern::ModifyDivider()
+{
+    auto menu = GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    auto divider = menuProperty->GetItemDivider();
+    if (divider.has_value()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateStrokeWidth(divider->strokeWidth);
+        paintProperty->UpdateStartMargin(divider->startMargin);
+        paintProperty->UpdateEndMargin(divider->endMargin);
+        paintProperty->UpdateDividerColor(divider->color);
+    }
+}
+
+void MenuItemPattern::UpdateNeedDivider(bool need)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateNeedDivider(need);
+    if (need) {
+        ModifyDivider();
+    }
+}
+
+float MenuItemPattern::GetDividerStroke()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto props = host->GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_RETURN(props, 0.0f);
+    return props->GetStrokeWidth().value_or(Dimension(0.0f, DimensionUnit::PX)).ConvertToPx();
 }
 } // namespace OHOS::Ace::NG
