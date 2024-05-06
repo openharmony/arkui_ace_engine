@@ -294,6 +294,7 @@ public:
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
+    void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
 
 private:
