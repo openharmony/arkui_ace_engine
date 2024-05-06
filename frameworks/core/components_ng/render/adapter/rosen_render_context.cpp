@@ -1667,6 +1667,40 @@ void SkewRect(float sx, float sy, RectF& rect)
     rect.SetHeight(bottomAfterSkew - topAfterSkew);
 }
 
+void PerspectiveRect(float px, float py, RectF& rect)
+{
+    auto left = rect.Left();
+    auto right = rect.Right();
+    auto top = rect.Top();
+    auto bottom = rect.Bottom();
+
+    auto leftAfterSkew = Infinity<double>();
+    auto rightAfterSkew = -Infinity<double>();
+    auto topAfterSkew = Infinity<double>();
+    auto bottomAfterSkew = -Infinity<double>();
+
+    double xValues[] = { left, right };
+    double yValues[] = { top, bottom };
+
+    for (uint32_t i = 0; i < 2; i++) {
+        for (uint32_t j = 0; j < 2; j++) {
+            double perspectiveValue = px * xValues[i] + py * yValues[j] + 1;
+            if (NearZero(perspectiveValue)) {
+                return;
+            }
+            leftAfterSkew = std::min(leftAfterSkew, xValues[i] / perspectiveValue);
+            rightAfterSkew = std::max(rightAfterSkew, xValues[i] / perspectiveValue);
+            topAfterSkew = std::min(topAfterSkew, yValues[i] / perspectiveValue);
+            bottomAfterSkew = std::max(bottomAfterSkew, yValues[i] / perspectiveValue);
+        }
+    }
+
+    rect.SetLeft(leftAfterSkew);
+    rect.SetWidth(rightAfterSkew - leftAfterSkew);
+    rect.SetTop(topAfterSkew);
+    rect.SetHeight(bottomAfterSkew - topAfterSkew);
+}
+
 void SkewPoint(float sx, float sy, PointF& point)
 {
     auto x = point.GetX();
@@ -1684,6 +1718,7 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto skew = rsNode_->GetStagingProperties().GetSkew();
+    auto perspective = rsNode_->GetStagingProperties().GetPersp();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     auto center = rsNode_->GetStagingProperties().GetPivot();
     auto degree = rsNode_->GetStagingProperties().GetRotation();
@@ -1727,6 +1762,9 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
             newSize = SizeF(oldSize.Height() * scale[1], oldSize.Width() * scale[0]);
         }
         rect.SetSize(newSize);
+
+        // calculate perspective
+        PerspectiveRect(perspective[0], perspective[1], rect);
     }
     gRect = rect;
     return rect;
@@ -1848,6 +1886,7 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto scale = rsNode_->GetStagingProperties().GetScale();
+    auto perspective = rsNode_->GetStagingProperties().GetPersp();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
     SkewPoint(skew[0], skew[1], point);
     RectF rect = GetPaintRectWithoutTransform();
@@ -1868,10 +1907,18 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
 
         double currentPointX = (point.GetX() - centerX) * cos(radian) + (point.GetY() - centerY) * sin(radian);
         double currentPointY = -1 * (point.GetX() - centerX) * sin(radian) + (point.GetY() - centerY) * cos(radian);
-        currentPointX = currentPointX + centerX;
-        currentPointY = currentPointY + centerY;
-        point.SetX(currentPointX - rect.Left());
-        point.SetY(currentPointY - rect.Top());
+        currentPointX = currentPointX + centerX - rect.Left();
+        currentPointY = currentPointY + centerY - rect.Top();
+
+        double perspectiveValue = perspective[0] * currentPointX + perspective[1] * currentPointY + 1;
+        if (NearZero(perspectiveValue)) {
+            point.SetX(currentPointX);
+            point.SetY(currentPointY);
+            return;
+        }
+
+        point.SetX(currentPointX / perspectiveValue);
+        point.SetY(currentPointY / perspectiveValue);
     }
 }
 
