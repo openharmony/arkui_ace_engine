@@ -182,7 +182,7 @@ constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
 const std::vector<std::string> SYNC_RENDER_SLIDE {V2::LIST_ETS_TAG, V2::SCROLL_ETS_TAG};
 
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
-constexpr double DEFAULT_PINCH_DISTANCE = 4.0;
+constexpr double DEFAULT_PINCH_DISTANCE = 1.0;
 
 WebPattern::WebPattern() = default;
 
@@ -267,7 +267,9 @@ void WebPattern::InitEvent()
     InitTouchEvent(gestureHub);
     InitDragEvent(gestureHub);
     InitPanEvent(gestureHub);
-    InitPinchEvent(gestureHub);
+    if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+        InitPinchEvent(gestureHub);
+    }
 
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
