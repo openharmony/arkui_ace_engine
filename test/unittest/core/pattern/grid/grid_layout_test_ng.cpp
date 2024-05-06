@@ -18,7 +18,6 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -954,21 +953,21 @@ HWTEST_F(GridLayoutTestNg, ItemAboveViewport001, TestSize.Level1)
     info.endIndex_ = 5;
 
     info.currentOffset_ = 0.0f;
-    EXPECT_FALSE(info.ItemAboveViewport(1, 5.0f));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(0, 5.0f)));
 
     info.currentOffset_ = -50.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
 
     info.currentOffset_ = -200.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
-    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
 
     // adding gap length
     info.currentOffset_ = -205.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
-    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
 
-    EXPECT_TRUE(info.ItemAboveViewport(2, 0.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(1, 0.0f)));
 
     info.startMainLineIndex_ = 1;
     info.endMainLineIndex_ = 1;
@@ -976,10 +975,10 @@ HWTEST_F(GridLayoutTestNg, ItemAboveViewport001, TestSize.Level1)
     info.endIndex_ = 3;
 
     info.currentOffset_ = 0.0f;
-    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
 
     info.currentOffset_ = -1.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(3, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(1, 5.0f)));
 }
 
 /**
@@ -1004,22 +1003,22 @@ HWTEST_F(GridLayoutTestNg, ItemBelowViewport001, TestSize.Level1)
     info.endIndex_ = 4;
 
     info.currentOffset_ = 0.0f;
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 100.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 700.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 705.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 710.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 1005.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1010.0f, 5.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 100.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 700.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 705.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 710.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1005.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1010.0f));
 
     info.currentOffset_ = -50.0f;
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 100.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 700.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 705.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 710.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 955.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 960.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1005.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1010.0f, 5.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 100.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 700.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 705.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 710.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 955.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 960.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1005.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1010.0f));
 }
 
 /**
@@ -2123,7 +2122,7 @@ HWTEST_F(GridLayoutTestNg, ScrollLayoutRTL001, TestSize.Level1)
 
 /**
  * @tc.name: ScrollLayoutRTL002
- * @tc.desc: Test Horizental Grid with Direction RTL
+ * @tc.desc: Test Horizontal Grid with Direction RTL
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, ScrollLayoutRTL002, TestSize.Level1)
@@ -2143,6 +2142,36 @@ HWTEST_F(GridLayoutTestNg, ScrollLayoutRTL002, TestSize.Level1)
         RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
+}
+
+/**
+ * @tc.name: AdaptToChildMainSize003
+ * @tc.desc: Test Horizontal Grid with Infinity mainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptToChildMainSize003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+        CreateFixedItem(8);
+    });
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_WIDTH * 2);
+}
+
+/**
+ * @tc.name: AdaptToChildMainSize004
+ * @tc.desc: Test Vertical Grid with Infinity mainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptToChildMainSize004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        ViewAbstract::SetHeight(CalcLength(Infinity<int32_t>()));
+        CreateFixedItem(8);
+    });
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_HEIGHT * 2);
 }
 
 /*

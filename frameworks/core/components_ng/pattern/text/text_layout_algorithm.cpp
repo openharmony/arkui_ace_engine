@@ -329,12 +329,14 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, cons
         symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
     symbolTextStyle.SetFontFamilies({ "HM Symbol" });
     paragraph->PushStyle(symbolTextStyle);
-    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-    symbolEffectOptions.Reset();
-    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
     if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
-        auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
-        symboloptiOns.Reset();
+        auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.Reset();
+        layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+        if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
+            auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
+            symboloptiOns.Reset();
+        }
     }
     paragraph->AddSymbol(symbolSourceInfo->GetUnicode());
     paragraph->PopStyle();
@@ -637,11 +639,13 @@ std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
 
 void TextLayoutAlgorithm::UpdateSensitiveContent(std::string& content)
 {
+    auto wContent = StringUtils::ToWstring(content);
     std::replace_if(
-        content.begin(), content.end(),
-        [](char c) {
-            return c != '\n';
-        }, '-');
+        wContent.begin(), wContent.end(),
+        [](wchar_t ch) {
+            return ch != L'\n';
+        }, L'-');
+    content = StringUtils::ToString(wContent);
 }
 
 size_t TextLayoutAlgorithm::GetLineCount() const

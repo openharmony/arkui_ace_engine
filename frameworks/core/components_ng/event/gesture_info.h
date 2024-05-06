@@ -78,11 +78,22 @@ public:
         isSystemGesture_ = isSystemGesture;
     }
 
+    void SetUserData(void* userData)
+    {
+        userData_ = userData;
+    }
+
+    void* GetUserData()
+    {
+        return userData_;
+    }
+
 private:
     std::optional<std::string> tag_;
     GestureTypeName type_ = GestureTypeName::UNKNOWN;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     bool isSystemGesture_ = false;
+    void* userData_;
 };
 } // namespace OHOS::Ace::NG
 

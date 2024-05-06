@@ -105,7 +105,9 @@ void GridTestNg::CreateItem(int32_t itemNumber, float width, float height, GridI
         } else if (width != NULL_VALUE) {
             ViewAbstract::SetWidth(CalcLength(width));
         }
-        if (height != NULL_VALUE) {
+        if (height == -2) {
+            ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+        } else if (height != NULL_VALUE) {
             ViewAbstract::SetHeight(CalcLength(height));
         }
         {
@@ -125,6 +127,11 @@ void GridTestNg::CreateFixedItem(int32_t itemNumber, GridItemStyle gridItemStyle
 void GridTestNg::CreateFixedHeightItems(int32_t itemNumber, float height, GridItemStyle gridItemStyle)
 {
     CreateItem(itemNumber, -2, height, gridItemStyle);
+}
+
+void GridTestNg::CreateFixedWidthItems(int32_t itemNumber, float width, GridItemStyle gridItemStyle)
+{
+    CreateItem(itemNumber, width, -2, gridItemStyle);
 }
 
 void GridTestNg::CreateBigItem(

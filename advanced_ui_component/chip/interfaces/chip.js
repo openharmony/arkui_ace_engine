@@ -19,6 +19,7 @@ const mediaquery = requireNapi('mediaquery');
 const resourceManager = requireNapi('resourceManager');
 const componentUtils = requireNapi('arkui.componentUtils');
 const hilog = requireNapi('hilog');
+const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
 
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {

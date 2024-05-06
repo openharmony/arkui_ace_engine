@@ -629,14 +629,14 @@ napi_value UIObserverListener::CreateNavDestinationInfoObj(const NG::NavDestinat
     return objValue;
 }
 
-napi_value UIObserverListener::GetNapiCallback() const
+napi_value UIObserverListener::GetNapiCallback()
 {
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     return callback;
 }
 
-bool UIObserverListener::NapiEqual(napi_value cb) const
+bool UIObserverListener::NapiEqual(napi_value cb)
 {
     bool isEquals = false;
     napi_strict_equals(env_, cb, GetNapiCallback(), &isEquals);

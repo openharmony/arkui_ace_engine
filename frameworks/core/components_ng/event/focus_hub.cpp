@@ -2187,7 +2187,11 @@ bool FocusHub::UpdateFocusView()
     }
     auto curFocusView = FocusView::GetCurrentFocusView();
     if (focusView && focusView->IsFocusViewLegal() && focusView != curFocusView) {
-        focusView->SetIsViewRootScopeFocused(false);
+        auto focusViewRootScope = focusView->GetViewRootScope();
+        auto focusViewRootScopeChild = focusViewRootScope ? focusViewRootScope->lastWeakFocusNode_.Upgrade() : nullptr;
+        if (focusViewRootScopeChild && focusViewRootScopeChild->IsCurrentFocus()) {
+            focusView->SetIsViewRootScopeFocused(false);
+        }
         focusView->FocusViewShow();
     }
     return true;

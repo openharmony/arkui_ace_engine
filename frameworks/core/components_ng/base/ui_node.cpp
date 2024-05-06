@@ -217,7 +217,7 @@ void UINode::RemoveChildAtIndex(int32_t index)
 
 RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 {
-    auto children = GetChildren();
+    auto& children = GetChildren();
     if ((index < 0) || (index >= static_cast<int32_t>(children.size()))) {
         return nullptr;
     }

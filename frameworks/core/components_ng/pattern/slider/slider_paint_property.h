@@ -130,6 +130,13 @@ public:
                 .c_str(), filter);
         json->PutExtAttr("minResponsiveDistance",
             std::to_string(GetMinResponsiveDistance().value_or(0.0f)).c_str(), filter);
+        auto slideRangeValues = GetValidSlideRange();
+        if (slideRangeValues.has_value() && slideRangeValues.value()->HasValidValues()) {
+            auto slideRange = JsonUtil::Create(true);
+            slideRange->Put("from", std::to_string(slideRangeValues.value()->GetFromValue()).c_str());
+            slideRange->Put("to", std::to_string(slideRangeValues.value()->GetToValue()).c_str());
+            json->PutExtAttr("slideRange", slideRange, filter);
+        }
     }
 
     SizeF GetBlockSizeValue(const SizeF& defaultValue)
@@ -172,6 +179,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockShape, RefPtr<BasicShape>, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, StepSize, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SliderMode, SliderModel::SliderMode, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        SliderPaintStyle, ValidSlideRange, RefPtr<SliderModel::SliderValidRange>, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_GROUP(SliderTipStyle, SliderTipStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, ShowTips, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, Padding, Dimension, PROPERTY_UPDATE_RENDER)
