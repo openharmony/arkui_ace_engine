@@ -154,7 +154,7 @@ private:
 
     inline bool SizeChanging(const SizeF& dstSize)
     {
-        return dstSize_.IsNonNegative() && dstSize != dstSize_;
+        return dstSize_.IsPositive() && dstSize != dstSize_;
     }
 
     ImageSourceInfo src_;
