@@ -355,6 +355,7 @@ void LongPressRecognizer::SendCallbackMsg(
             info.SetTiltY(trackPoint.tiltY.value());
         }
         info.SetSourceTool(trackPoint.sourceTool);
+        info.SetPointerEvent(trackPoint.pointerEvent);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
