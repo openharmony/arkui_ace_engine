@@ -61,7 +61,7 @@ void UIObserverListener::OnScrollEventStateChange(
     napi_create_int32(env_, static_cast<int32_t>(eventType), &scrollEventType);
     napi_create_double(env_, offset, &scrollOffset);
     napi_set_named_property(env_, objValue, "id", scrollId);
-    napi_set_named_property(env_, objValue, "eventType", scrollEventType);
+    napi_set_named_property(env_, objValue, "scrollEvent", scrollEventType);
     napi_set_named_property(env_, objValue, "offset", scrollOffset);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
