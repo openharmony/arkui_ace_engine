@@ -346,10 +346,10 @@ int32_t ConvertBlurStyle(int32_t originBlurStyle)
 
 int32_t UnConvertBlurStyle(int32_t blurStyle)
 {
-    if (blurStyle <= static_cast<int32_t>(ARKUI_BLUR_STYLE_NONE)) {
-        return blurStyle - 1;
-    } else if (blurStyle == 0) {
+    if (blurStyle == 0) {
         return static_cast<int32_t>(ARKUI_BLUR_STYLE_NONE);
+    } else if (blurStyle <= static_cast<int32_t>(ARKUI_BLUR_STYLE_NONE)) {
+        return blurStyle - 1;
     }
     return blurStyle;
 }
