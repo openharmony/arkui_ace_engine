@@ -23,6 +23,8 @@
  * 
  */
 
+/// <reference path="../../../../ark_theme/export/ark_theme_scope_manager.d.ts" />
+
 type ExtraInfo = { page: string, line: number };
 type ProfileRecursionCounter = { total: number };
 
@@ -335,6 +337,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       stateMgmtConsole.debug(`${this.debugInfo__()}: ifElseBranchUpdateFunction: IfElse branch unchanged, no work to do.`);
       return;
     }
+    ArkThemeScopeManager.getInstance().onIfElseBranchUpdateEnter()
 
     // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
     // ifElseNode stores the most recent branch, so we can compare
@@ -350,6 +353,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     this.purgeDeletedElmtIds();
 
     branchfunc();
+    ArkThemeScopeManager.getInstance().onIfElseBranchUpdateExit(removedChildElmtIds)
   }
 
   /**
@@ -548,4 +552,8 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
    * @returns
    */
   abstract __mkRepeatAPI<I>(arr: Array<I>): RepeatAPI<I>;
+
+  onGlobalThemeChanged(): void {
+  }
+
 } // class PUV2ViewBase

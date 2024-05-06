@@ -17,6 +17,7 @@
 * all definitions in this file are framework internal
 */
 
+/// <reference path="../../../../ark_theme/export/ark_theme_scope_manager.d.ts" />
 type DFXCommand = { what: string, viewId: number, isRecursive: boolean };
 type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
@@ -152,6 +153,7 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = undefined;
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
+    ArkThemeScopeManager.getInstance().onViewPUCreate(this);
     if (localStorage) {
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry or view instance creation.`);
@@ -161,6 +163,16 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
+  onGlobalThemeChanged(): void {
+    this.onWillApplyThemeInternally();
+    this.forceCompleteRerender(false)
+    this.childrenWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild.deref();
+      if (child) {
+        child.onGlobalThemeChanged();
+      }
+    });
+  }
 
   // inform the subscribed property
   // that the View and thereby all properties
@@ -171,6 +183,14 @@ abstract class ViewPU extends PUV2ViewBase
 
   aboutToRecycle(): void { }
 
+  private onWillApplyThemeInternally(): void {
+    const theme = ArkThemeScopeManager.getInstance().getFinalTheme(this.id__())
+    if (theme) {
+        this.onWillApplyTheme(theme)
+    }
+  }
+
+  onWillApplyTheme(theme: Theme): void {}
   // super class will call this function from
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
@@ -222,6 +242,7 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.getParent()) {
       this.getParent().removeChild(this);
     }
+    ArkThemeScopeManager.getInstance().onViewPUDelete(this);
     this.localStoragebackStore_ = undefined;
   }
 
@@ -313,6 +334,7 @@ abstract class ViewPU extends PUV2ViewBase
 
   public initialRenderView(): void {
     stateMgmtProfiler.begin('ViewPU.initialRenderView');
+    this.onWillApplyThemeInternally();
     this.obtainOwnObservedProperties();
     this.isRenderInProgress = true;
     this.initialRender();
@@ -669,6 +691,8 @@ abstract class ViewPU extends PUV2ViewBase
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV3 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
+      ArkThemeScopeManager.getInstance().onComponentCreateEnter(_componentName, elmtId, isFirstRender, this.id__())
+
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
 
       if (!this.isViewV3) {
@@ -702,6 +726,8 @@ abstract class ViewPU extends PUV2ViewBase
         this.currentlyRenderedElmtIdStack_.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
+
+      ArkThemeScopeManager.getInstance().onComponentCreateExit(elmtId)
 
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
       this.restoreInstanceId();

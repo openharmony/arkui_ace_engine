@@ -4055,6 +4055,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             
             return;
         }
+        ArkThemeScopeManager.getInstance().onIfElseBranchUpdateEnter();
         // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
         // ifElseNode stores the most recent branch, so we can compare
         // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
@@ -4066,6 +4067,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         
         this.purgeDeletedElmtIds();
         branchfunc();
+        ArkThemeScopeManager.getInstance().onIfElseBranchUpdateExit(removedChildElmtIds);
     }
     /**
      Partial updates for ForEach.
@@ -4231,6 +4233,8 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     debugInfoInactiveComponents() {
         return Array.from(PUV2ViewBase.inactiveComponents_)
             .map((component) => `- ${component}`).join('\n');
+    }
+    onGlobalThemeChanged() {
     }
 } // class PUV2ViewBase
 // List of inactive components used for Dfx
@@ -5904,6 +5908,7 @@ class ViewPU extends PUV2ViewBase {
         //this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
         this.localStoragebackStore_ = undefined;
         
+        ArkThemeScopeManager.getInstance().onViewPUCreate(this);
         if (localStorage) {
             this.localStorage_ = localStorage;
             
@@ -5981,8 +5986,25 @@ class ViewPU extends PUV2ViewBase {
     get isViewV3() {
         return false;
     }
+    onGlobalThemeChanged() {
+        this.onWillApplyThemeInternally();
+        this.forceCompleteRerender(false);
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                child.onGlobalThemeChanged();
+            }
+        });
+    }
     aboutToReuse(params) { }
     aboutToRecycle() { }
+    onWillApplyThemeInternally() {
+        const theme = ArkThemeScopeManager.getInstance().getFinalTheme(this.id__());
+        if (theme) {
+            this.onWillApplyTheme(theme);
+        }
+    }
+    onWillApplyTheme(theme) { }
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
@@ -6024,6 +6046,7 @@ class ViewPU extends PUV2ViewBase {
         if (this.getParent()) {
             this.getParent().removeChild(this);
         }
+        ArkThemeScopeManager.getInstance().onViewPUDelete(this);
         this.localStoragebackStore_ = undefined;
     }
     debugInfoStateVars() {
@@ -6098,6 +6121,7 @@ class ViewPU extends PUV2ViewBase {
     }
     initialRenderView() {
         
+        this.onWillApplyThemeInternally();
         this.obtainOwnObservedProperties();
         this.isRenderInProgress = true;
         this.initialRender();
@@ -6421,6 +6445,7 @@ class ViewPU extends PUV2ViewBase {
         const updateFunc = (elmtId, isFirstRender) => {
             this.syncInstanceId();
             
+            ArkThemeScopeManager.getInstance().onComponentCreateEnter(_componentName, elmtId, isFirstRender, this.id__());
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             if (!this.isViewV3) {
                 // Enable PU state tracking only in PU @Components
@@ -6449,6 +6474,7 @@ class ViewPU extends PUV2ViewBase {
                 this.currentlyRenderedElmtIdStack_.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
+            ArkThemeScopeManager.getInstance().onComponentCreateExit(elmtId);
             
             this.restoreInstanceId();
         };

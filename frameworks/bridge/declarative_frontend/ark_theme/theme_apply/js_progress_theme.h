@@ -55,6 +55,9 @@ public:
         } else if (style == ProgressStyle::Linear || style == ProgressStyle::Eclipse) {
             ProgressModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundSecondary());
         }
+        if (style != ProgressStyle::Ring && style != ProgressStyle::ScaleRing) {
+            ProgressModel::GetInstance()->SetColor(themeColors->BackgroundEmphasize());
+        }
 
         NG::GradientColor endSideColor;
         NG::GradientColor beginSideColor;
@@ -66,7 +69,6 @@ public:
         gradient.AddColor(endSideColor);
         gradient.AddColor(beginSideColor);
         ProgressModel::GetInstance()->SetGradientColor(gradient);
-        ProgressModel::GetInstance()->SetColor(themeColors->BackgroundEmphasize());
     }
 private:
     static constexpr double outerBorderWidthValue = 2.0;
