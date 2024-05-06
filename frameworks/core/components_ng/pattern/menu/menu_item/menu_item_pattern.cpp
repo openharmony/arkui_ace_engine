@@ -886,7 +886,7 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
         return;
     }
     if (!selectIcon_) {
-        if (!itemProperty->GetSelectIconSrc().value().empty()) {
+        if (!itemProperty->GetSelectIconSrc().value_or("").empty()) {
             CreateImageNode();
         } else {
             CreateSymbolNode();
