@@ -565,6 +565,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
+    loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     loadingCtx_->LoadImageData();
 }
 
@@ -1857,6 +1858,12 @@ void ImagePattern::SetDuration(int32_t duration)
         CHECK_NULL_VOID(imageAnimator);
         imageAnimator->animator_->SetDuration(finalDuration);
     });
+}
+
+void ImagePattern::SetOnProgressCallback(
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress)
+{
+    onProgressCallback_ = onProgress;
 }
 
 void ImagePattern::OnSensitiveStyleChange(bool isSensitive)

@@ -23,5 +23,6 @@ const ArkUIImageModifier* GetImageModifier();
 void SetImageOnComplete(ArkUINodeHandle node, void* extraParam);
 void SetImageOnError(ArkUINodeHandle node, void* extraParam);
 void SetImageOnSvgPlayFinish(ArkUINodeHandle node, void* extraParam);
+void SetImageOnDownloadProgress(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif

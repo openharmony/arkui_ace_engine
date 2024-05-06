@@ -319,6 +319,7 @@ const ComponentAsyncEventHandler imageNodeAsyncEventHandlers[] = {
     NodeModifier::SetImageOnComplete,
     NodeModifier::SetImageOnError,
     NodeModifier::SetImageOnSvgPlayFinish,
+    NodeModifier::SetImageOnDownloadProgress,
 };
 
 const ComponentAsyncEventHandler DATE_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
