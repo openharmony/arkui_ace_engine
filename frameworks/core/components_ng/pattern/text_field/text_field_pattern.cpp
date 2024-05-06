@@ -4001,8 +4001,13 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         return;
     }
     if (IsTextArea() && action == TextInputAction::NEW_LINE) {
-        if (GetInputFilter() != "\n") {
-            InsertValue("\n");
+        if (!textAreaBlurOnSubmit_) {
+            if (GetInputFilter() != "\n") {
+                InsertValue("\n");
+            }
+        } else {
+            CloseKeyboard(forceCloseKeyboard, false);
+            FocusHub::LostFocusToViewRoot();
         }
         return;
     }
@@ -4013,8 +4018,10 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     }
     // LostFocusToViewRoot may not cause current lost focus, only stop twinkling when it is truly lost focus,
     // which will call StopTwinkling on HandleBlurEvent method.
-    CloseKeyboard(forceCloseKeyboard, false);
-    FocusHub::LostFocusToViewRoot();
+    if (textInputBlurOnSubmit_) {
+        CloseKeyboard(forceCloseKeyboard, false);
+        FocusHub::LostFocusToViewRoot();
+    }
 }
 
 void TextFieldPattern::RecordSubmitEvent() const
@@ -5584,11 +5591,7 @@ void TextFieldPattern::StopEditing()
 #else
     if (isCustomKeyboardAttached_) {
 #endif
-        if (blurOnSubmit_) {
-            FocusHub::LostFocusToViewRoot();
-        } else {
-            NotifyOnEditChanged(false);
-        }
+        FocusHub::LostFocusToViewRoot();
     }
     UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();

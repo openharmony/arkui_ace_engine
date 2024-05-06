@@ -172,11 +172,12 @@ public:
     }
     void SetBlurOnSubmit(bool blurOnSubmit)
     {
-        blurOnSubmit_ = blurOnSubmit;
+        textInputBlurOnSubmit_ = blurOnSubmit;
+        textAreaBlurOnSubmit_ = blurOnSubmit;
     }
     bool GetBlurOnSubmit()
     {
-        return blurOnSubmit_;
+        return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
     }
     bool GetNeedToRequestKeyboardOnFocus() const
     {
@@ -1582,7 +1583,8 @@ private:
     std::string autoFillNewPassword_;
     bool autoFillOtherAccount_ = false;
 
-    bool blurOnSubmit_ = true;
+    bool textInputBlurOnSubmit_ = true;
+    bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
 
     bool isFocusBGColorSet_ = false;
