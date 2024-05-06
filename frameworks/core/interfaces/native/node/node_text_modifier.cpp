@@ -861,6 +861,27 @@ ArkUI_Int32 GetTextLineBreakStrategy(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(TextModelNG::GetLineBreakStrategy(frameNode));
 }
+
+void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
+}
+
+ArkUI_Uint32 GetTextSelectedBackgroundColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
+    return TextModelNG::GetSelectedBackgroundColor(frameNode).GetValue();
+}
+
+void ResetTextSelectedBackgroundColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetSelectedBackgroundColor(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -955,7 +976,10 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextDataDetectorConfig,
         SetLineBreakStrategy,
         ResetLineBreakStrategy,
-        GetTextLineBreakStrategy
+        GetTextLineBreakStrategy,
+        SetTextSelectedBackgroundColor,
+        GetTextSelectedBackgroundColor,
+        ResetTextSelectedBackgroundColor,
     };
 
     return &modifier;

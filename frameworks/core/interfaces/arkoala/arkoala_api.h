@@ -1551,6 +1551,9 @@ struct ArkUITextModifier {
     void (*setLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
     void (*resetLineBreakStrategy)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextLineBreakStrategy)(ArkUINodeHandle node);
+    void (*setTextSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    ArkUI_Uint32 (*getTextSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*resetTextSelectedBackgroundColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {

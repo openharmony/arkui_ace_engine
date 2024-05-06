@@ -8262,6 +8262,31 @@ void ResetTextLineBreakStrategy(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextModifier()->resetLineBreakStrategy(node->uiNodeHandle);
 }
 
+int32_t SetTextSelectedBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextSelectedBackgroundColor(
+        node->uiNodeHandle, item->value[0].u32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextSelectedBackgroundColor(ArkUI_NodeHandle node)
+{
+    g_numberValues[0].u32 = GetFullImpl()->getNodeModifiers()->getTextModifier()->getTextSelectedBackgroundColor(
+        node->uiNodeHandle);
+    return &g_attributeItem;
+}
+
+void ResetTextSelectedBackgroundColor(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextModifier()->resetTextSelectedBackgroundColor(node->uiNodeHandle);
+}
+
 int32_t SetTextEllipsisMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -11267,7 +11292,8 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetDecoration, SetTextCase, SetLetterSpacing, SetMaxLines, SetTextAlign, SetTextOverflow, SetTextFontFamily,
         SetTextCopyOption, SetTextBaseLineOffset, SetTextShadow, SetTextMinFontSize, SetTextMaxFontSize, SetTextFont,
         SetTextHeightAdaptivePolicy, SetTextIndent, SetTextWordBreak, SetTextEllipsisMode, SetLineSpacing,
-        SetFontFeature, SetTextEnableDateDetector, SetTextDataDetectorConfig, SetTextLineBreakStrategy };
+        SetFontFeature, SetTextEnableDateDetector, SetTextDataDetectorConfig, SetTextLineBreakStrategy,
+        SetTextSelectedBackgroundColor };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -11281,7 +11307,8 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetDecoration, GetTextCase, GetLetterSpacing, GetMaxLines, GetTextAlign, GetTextOverflow, GetTextFontFamily,
         GetTextCopyOption, GetTextBaseLineOffset, GetTextShadow, GetTextMinFontSize, GetTextMaxFontSize, GetTextFont,
         GetTextHeightAdaptivePolicy, GetTextIndent, GetTextWordBreak, GetTextEllipsisMode, GetLineSpacing,
-        GetFontFeature, GetTextEnableDateDetector, GetTextDataDetectorConfig, GetTextLineBreakStrategy };
+        GetFontFeature, GetTextEnableDateDetector, GetTextDataDetectorConfig, GetTextLineBreakStrategy,
+        GetTextSelectedBackgroundColor };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -11297,7 +11324,7 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextOverflow, ResetTextFontFamily, ResetTextCopyOption, ResetTextBaselineOffset, ResetTextShadow,
         ResetTextMinFontSize, ResetTextMaxFontSize, ResetTextFont, ResetTextHeightAdaptivePolicy, ResetTextIndent,
         ResetTextWordBreak, ResetTextEllipsisMode, ResetLineSpacing, ResetFontFeature, ResetTextEnableDateDetector,
-        ResetTextDataDetectorConfig, ResetTextLineBreakStrategy };
+        ResetTextDataDetectorConfig, ResetTextLineBreakStrategy, ResetTextSelectedBackgroundColor };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
