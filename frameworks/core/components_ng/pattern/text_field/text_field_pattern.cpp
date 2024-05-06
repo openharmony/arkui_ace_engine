@@ -2408,6 +2408,7 @@ void TextFieldPattern::OnModifyDone()
     ProcessScroll();
     ProcessCounter();
     Register2DragDropManager();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     isModifyDone_ = true;
 }
 
