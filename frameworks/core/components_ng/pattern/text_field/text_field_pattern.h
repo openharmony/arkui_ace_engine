@@ -1211,6 +1211,12 @@ public:
         return keyboardAvoidance_;
     }
 
+    void SetShowKeyBoardOnFocus(bool value);
+    bool GetShowKeyBoardOnFocus()
+    {
+        return showKeyBoardOnFocus_;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1594,6 +1600,7 @@ private:
     std::queue<PreviewTextInfo> previewTextOperation;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
+    bool showKeyBoardOnFocus_ = true;
 };
 } // namespace OHOS::Ace::NG
 

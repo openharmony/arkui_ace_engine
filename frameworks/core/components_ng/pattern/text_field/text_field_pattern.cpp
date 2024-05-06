@@ -3101,6 +3101,10 @@ void TextFieldPattern::KeyboardContentTypeToInputType()
 
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
+    if (!showKeyBoardOnFocus_) {
+        return false;
+    }
+
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
     auto context = tmpHost->GetContextRefPtr();
@@ -6902,6 +6906,24 @@ void TextFieldPattern::CalculatePreviewingTextMovingLimit(const Offset& touchOff
                 break;
             }
         }
+    }
+}
+
+void TextFieldPattern::SetShowKeyBoardOnFocus(bool value)
+{
+    if (showKeyBoardOnFocus_ == value) {
+        return;
+    }
+    showKeyBoardOnFocus_ = value;
+
+    if (!HasFocus()) {
+        return;
+    }
+
+    if (value) {
+        RequestKeyboard(false, true, true);
+    } else {
+        CloseKeyboard(true, false);
     }
 }
 } // namespace OHOS::Ace::NG

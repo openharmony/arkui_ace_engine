@@ -2535,6 +2535,9 @@ struct ArkUITextInputModifier {
     void (*resetTextInputCustomKeyboard)(ArkUINodeHandle node);
     void (*setTextInputLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
     void (*resetTextInputLineBreakStrategy)(ArkUINodeHandle node);
+    void (*setTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Bool (*getTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node);
+    void (*resetTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
