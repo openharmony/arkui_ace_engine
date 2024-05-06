@@ -2406,7 +2406,7 @@ bool FocusHub::AcceptFocusOfPriorityChild()
         return true;
     } else {
         if (GetIsFocusGroup() && !IsNestingFocusGroup()) {
-            SetLastWeakFocusNodeToPreviousNode()
+            SetLastWeakFocusNodeToPreviousNode();
             return true;
         }
     }
