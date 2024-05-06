@@ -18,7 +18,6 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -2123,7 +2122,7 @@ HWTEST_F(GridLayoutTestNg, ScrollLayoutRTL001, TestSize.Level1)
 
 /**
  * @tc.name: ScrollLayoutRTL002
- * @tc.desc: Test Horizental Grid with Direction RTL
+ * @tc.desc: Test Horizontal Grid with Direction RTL
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, ScrollLayoutRTL002, TestSize.Level1)
@@ -2143,6 +2142,36 @@ HWTEST_F(GridLayoutTestNg, ScrollLayoutRTL002, TestSize.Level1)
         RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
+}
+
+/**
+ * @tc.name: AdaptToChildMainSize003
+ * @tc.desc: Test Horizontal Grid with Infinity mainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptToChildMainSize003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+        CreateFixedItem(8);
+    });
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_WIDTH * 2);
+}
+
+/**
+ * @tc.name: AdaptToChildMainSize004
+ * @tc.desc: Test Vertical Grid with Infinity mainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptToChildMainSize004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        ViewAbstract::SetHeight(CalcLength(Infinity<int32_t>()));
+        CreateFixedItem(8);
+    });
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_HEIGHT * 2);
 }
 
 /*
