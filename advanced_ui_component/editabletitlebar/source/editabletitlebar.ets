@@ -17,6 +17,7 @@ import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import resourceManager from '@ohos.resourceManager';
+import { Theme } from '@ohos.arkui.theme';
 
 export enum EditableLeftIconType {
   Back,
@@ -50,6 +51,16 @@ const PUBLIC_OK = $r('sys.media.ohos_ic_public_ok');
 
 const PUBLIC_BACK = $r('sys.media.ohos_ic_compnent_titlebar_back');
 
+class EditableTitleBarTheme {
+  iconColor: ResourceColor = $r('sys.color.titlebar_icon_color');
+  iconBackgroundColor: ResourceColor = $r('sys.color.titlebar_icon_background_color');
+  iconBackgroundPressedColor: ResourceColor = $r('sys.color.titlebar_icon_background_pressed_color');
+  iconBackgroundHoverColor: ResourceColor = $r('sys.color.titlebar_icon_background_hover_color');
+  iconBackgroundFocusOutlineColor: ResourceColor = $r('sys.color.titlebar_icon_background_focus_outline_color');
+  titleColor: ResourceColor = $r('sys.color.titlebar_title_tertiary_color');
+  subTitleColor: ResourceColor = $r('sys.color.titlebar_subheader_color');
+}
+
 @Component
 export struct EditableTitleBar {
   leftIconStyle: EditableLeftIconType = EditableLeftIconType.Back;
@@ -77,6 +88,17 @@ export struct EditableTitleBar {
   private static readonly leftMargin = getNumberByResource('titlebar_title_margin_left');
   private static readonly rightMargin = getNumberByResource('titlebar_title_margin_right');
   private static readonly titlePadding = getNumberByResource('titlebar_icon_background_space_horizontal');
+  @Provide editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
+
+  onWillApplyTheme(theme: Theme): void {
+    this.editableTitleBarTheme.iconColor = theme.colors.iconPrimary;
+    this.editableTitleBarTheme.titleColor = theme.colors.fontPrimary;
+    this.editableTitleBarTheme.subTitleColor = theme.colors.fontSecondary;
+    this.editableTitleBarTheme.iconBackgroundColor = theme.colors.compBackgroundTertiary;
+    this.editableTitleBarTheme.iconBackgroundPressedColor = theme.colors.interactivePressed;
+    this.editableTitleBarTheme.iconBackgroundHoverColor = theme.colors.interactiveHover;
+    this.editableTitleBarTheme.iconBackgroundFocusOutlineColor = theme.colors.interactiveFocus;
+  }
 
   build() {
     Flex({
@@ -117,7 +139,7 @@ export struct EditableTitleBar {
           Row() {
             Text(this.title)
               .fontSize($r('sys.float.titlebar_title_tertiary_size'))
-              .fontColor($r('sys.color.titlebar_title_tertiary_color'))
+              .fontColor(this.editableTitleBarTheme.titleColor)
               .maxLines(1)
               .fontWeight(FontWeight.Bold)
               .textAlign(TextAlign.Start)
@@ -130,7 +152,7 @@ export struct EditableTitleBar {
             Row() {
               Text(this.subtitle)
                 .fontSize($r('sys.float.titlebar_subheader_size'))
-                .fontColor($r('sys.color.titlebar_subheader_color'))
+                .fontColor(this.editableTitleBarTheme.subTitleColor)
                 .maxLines(1)
                 .fontWeight(FontWeight.Regular)
                 .textAlign(TextAlign.Start)
@@ -273,12 +295,12 @@ struct ImageMenuItem {
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
-
+  @Consume editableTitleBarTheme: EditableTitleBarTheme;
   @Styles focusedStyle() {
     .border({
       radius: $r('sys.float.titlebar_icon_background_shape'),
       width: $r('sys.float.titlebar_icon_background_focus_outline_weight'),
-      color: $r('sys.color.titlebar_icon_background_focus_outline_color'),
+      color: this.editableTitleBarTheme.iconBackgroundFocusOutlineColor,
       style: BorderStyle.Solid,
     })
   }
@@ -357,13 +379,23 @@ struct ImageMenuItem {
     }
   }
 
+  getBgColor(): ResourceColor {
+    if (this.isOnClick) {
+      return this.editableTitleBarTheme.iconBackgroundPressedColor;
+    } else if (this.isOnHover) {
+      return this.editableTitleBarTheme.iconBackgroundHoverColor;
+    } else {
+      return this.editableTitleBarTheme.iconBackgroundColor;
+    }
+  }
+
   @Builder
   IconBuilder(): void {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
       Image(this.item.value)
         .width($r('sys.float.titlebar_icon_width'))
         .height($r('sys.float.titlebar_icon_height'))
-        .fillColor($r('sys.color.titlebar_icon_color'))
+        .fillColor(this.editableTitleBarTheme.iconColor)
         .focusable(this.item.isEnabled)
         .enabled(this.item.isEnabled)
     }
@@ -374,7 +406,7 @@ struct ImageMenuItem {
       ImageMenuItem.iconBackgroundSpaceHorizontal,
     })
     .foregroundColor(this.getFgColor())
-    .backgroundColor($r('sys.color.titlebar_icon_background_color'))
+    .backgroundColor(this.getBgColor())
     .buttonStateStyles()
     .buttonEventStyle()
   }
