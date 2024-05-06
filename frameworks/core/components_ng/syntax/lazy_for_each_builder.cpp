@@ -223,7 +223,7 @@ namespace OHOS::Ace::NG {
         if (from < to) {
             for (const auto& [itemIndex, child] : temp) {
                 auto position = static_cast<size_t>(itemIndex);
-                if (position > from && position <= to && position >=1) {
+                if (position > from && position <= to && position >= 1) {
                     cachedItems_.emplace(position - 1, child);
                 } else if (position == from) {
                     cachedItems_.emplace(to, child);
