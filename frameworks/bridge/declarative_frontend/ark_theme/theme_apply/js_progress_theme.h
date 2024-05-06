@@ -56,19 +56,18 @@ public:
             ProgressModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundSecondary());
         }
         if (style != ProgressStyle::Ring && style != ProgressStyle::ScaleRing) {
+            NG::GradientColor endSideColor;
+            NG::GradientColor beginSideColor;
+            OHOS::Ace::NG::Gradient gradient;
+            endSideColor.SetLinearColor(LinearColor(themeColors->BackgroundEmphasize()));
+            endSideColor.SetDimension(Dimension(0.0f));
+            beginSideColor.SetLinearColor(LinearColor(themeColors->BackgroundEmphasize()));
+            beginSideColor.SetDimension(Dimension(1.0f));
+            gradient.AddColor(endSideColor);
+            gradient.AddColor(beginSideColor);
+            ProgressModel::GetInstance()->SetGradientColor(gradient);
             ProgressModel::GetInstance()->SetColor(themeColors->BackgroundEmphasize());
         }
-
-        NG::GradientColor endSideColor;
-        NG::GradientColor beginSideColor;
-        OHOS::Ace::NG::Gradient gradient;
-        endSideColor.SetLinearColor(LinearColor(themeColors->BackgroundEmphasize()));
-        endSideColor.SetDimension(Dimension(0.0f));
-        beginSideColor.SetLinearColor(LinearColor(themeColors->BackgroundEmphasize()));
-        beginSideColor.SetDimension(Dimension(1.0f));
-        gradient.AddColor(endSideColor);
-        gradient.AddColor(beginSideColor);
-        ProgressModel::GetInstance()->SetGradientColor(gradient);
     }
 private:
     static constexpr double outerBorderWidthValue = 2.0;
