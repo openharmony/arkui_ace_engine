@@ -238,7 +238,6 @@ public:
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
     void HandleOnDelete(bool backward) override;
-    void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
 
     int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
@@ -331,7 +330,6 @@ public:
 
     void OnAreaChangedInner() override;
     void OnVisibleChange(bool isVisible) override;
-    void ClearEditingValue();
     void HandleCounterBorder();
     std::wstring GetWideText()
     {
@@ -666,6 +664,7 @@ public:
     }
 
     void UpdateEditingValueToRecord();
+
     void UpdateScrollBarOffset() override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override
@@ -985,34 +984,34 @@ public:
 
     void EditingValueFilterChange();
 
-    void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
+    void SetCustomKeyboard(const RefPtr<UINode>& keyboardBuilder)
     {
-        if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+        if (customKeyboard_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
             // close customKeyboard and request system keyboard
             CloseCustomKeyboard();
-            customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+            customKeyboard_ = keyboardBuilder; // refresh current keyboard
             RequestKeyboard(false, true, true);
             StartTwinkling();
             return;
         }
-        if (!customKeyboardBuilder_ && keyboardBuilder) {
+        if (!customKeyboard_ && keyboardBuilder) {
             // close system keyboard and request custom keyboard
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
             if (imeShown_) {
                 CloseKeyboard(true);
-                customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
+                customKeyboard_ = keyboardBuilder; // refresh current keyboard
                 RequestKeyboard(false, true, true);
                 StartTwinkling();
                 return;
             }
 #endif
         }
-        customKeyboardBuilder_ = keyboardBuilder;
+        customKeyboard_ = keyboardBuilder;
     }
 
     bool HasCustomKeyboard()
     {
-        return customKeyboardBuilder_ != nullptr;
+        return customKeyboard_ != nullptr;
     }
 
     void DumpInfo() override;
@@ -1140,6 +1139,9 @@ public:
     void ResetContextAttr();
     void RestoreDefaultMouseState();
 
+    void RegisterWindowSizeCallback();
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
     bool IsTransparent()
     {
         return isTransparent_;
@@ -1200,6 +1202,16 @@ public:
     }
 
     PreviewTextStyle GetPreviewTextStyle() const;
+
+    RefPtr<UINode> GetCustomKeyboard()
+    {
+        return customKeyboard_;
+    }
+
+    bool GetCustomKeyboardOption()
+    {
+        return keyboardAvoidance_;
+    }
 
 protected:
     virtual void InitDragEvent();
@@ -1351,7 +1363,7 @@ private:
     void UnitResponseKeyEvent();
     void ProcNormalInlineStateInBlurEvent();
     bool IsMouseOverScrollBar(const GestureEvent& info);
-    
+
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
@@ -1515,6 +1527,8 @@ private:
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
 
+    bool isOritationListenerRegisted_ = false;
+
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
 #else
@@ -1527,7 +1541,7 @@ private:
     BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
     bool isFocusedBeforeClick_ = false;
     bool isCustomKeyboardAttached_ = false;
-    std::function<void()> customKeyboardBuilder_;
+    RefPtr<UINode> customKeyboard_;
     RefPtr<OverlayManager> keyboardOverlay_;
     bool isCustomFont_ = false;
     bool hasClicked_ = false;
@@ -1558,7 +1572,6 @@ private:
     bool colorModeChange_ = false;
     Offset clickLocation_;
     bool isKeyboardClosedByUser_ = false;
-    bool lockRecord_ = false;
     bool isFillRequestFinish_ = false;
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
@@ -1571,6 +1584,8 @@ private:
 
     bool blurOnSubmit_ = true;
     bool isDetachFromMainTree_ = false;
+
+    bool isFocusBGColorSet_ = false;
     bool isFocusTextColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_px;
     bool hasSupportedPreviewText = true;

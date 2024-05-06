@@ -83,6 +83,7 @@ ohos_unittest("parse_test_ng") {
     "$ace_root/frameworks/core/components/declaration/svg/svg_text_path_declaration.cpp",
     "$ace_root/frameworks/core/components/svg/svg_transform.cpp",
     "$ace_root/frameworks/core/components_ng/svg/parse/svg_animation.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_attributes_parser.cpp",
     "$ace_root/frameworks/core/components_ng/svg/parse/svg_circle.cpp",
     "$ace_root/frameworks/core/components_ng/svg/parse/svg_clip_path.cpp",
     "$ace_root/frameworks/core/components_ng/svg/parse/svg_ellipse.cpp",
@@ -200,6 +201,7 @@ ohos_unittest("svg_dom_test_ng") {
     "$ace_root/frameworks/core/components/declaration/svg/svg_text_path_declaration.cpp",
     "$ace_root/frameworks/core/components/svg/svg_transform.cpp",
     "$ace_root/frameworks/core/components_ng/svg/parse/svg_animation.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_attributes_parser.cpp",
     "$ace_root/frameworks/core/components_ng/svg/parse/svg_circle.cpp",
     "$ace_root/frameworks/core/components_ng/svg/parse/svg_clip_path.cpp",
     "$ace_root/frameworks/core/components_ng/svg/parse/svg_ellipse.cpp",
@@ -266,7 +268,7 @@ ohos_unittest("svg_dom_test_ng") {
 group("core_svg_unittest") {
   testonly = true
   deps = [
-    # ":parse_test_ng",
+    ":parse_test_ng",
     ":svg_dom_test_ng",
   ]
 }

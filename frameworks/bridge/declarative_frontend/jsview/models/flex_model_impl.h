@@ -46,6 +46,8 @@ public:
 
     void SetJustifyContent(int32_t value) override;
     void SetAlignContent(int32_t value) override;
+    void SetMainSpace(const std::optional<Dimension>& space) override {};
+    void SetCrossSpace(const std::optional<Dimension>& space) override {};
 };
 
 } // namespace OHOS::Ace::Framework

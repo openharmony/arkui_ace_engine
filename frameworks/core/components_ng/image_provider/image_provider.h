@@ -31,6 +31,7 @@ namespace OHOS::Ace::NG {
 using DataReadyNotifyTask = std::function<void(const ImageSourceInfo& src)>;
 using LoadSuccessNotifyTask = std::function<void(const ImageSourceInfo& src)>;
 using LoadFailNotifyTask = std::function<void(const ImageSourceInfo& src, const std::string& errorMsg)>;
+using OnCompleteInDataReadyNotifyTask = std::function<void(const ImageSourceInfo& src)>;
 
 struct LoadNotifier {
     LoadNotifier(DataReadyNotifyTask&& dataReadyNotifyTask, LoadSuccessNotifyTask&& loadSuccessNotifyTask,
@@ -42,6 +43,7 @@ struct LoadNotifier {
     DataReadyNotifyTask onDataReady_;
     LoadSuccessNotifyTask onLoadSuccess_;
     LoadFailNotifyTask onLoadFail_;
+    OnCompleteInDataReadyNotifyTask onDataReadyComplete_;
 };
 
 struct ImageDecoderOptions {

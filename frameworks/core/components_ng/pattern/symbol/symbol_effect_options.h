@@ -87,12 +87,13 @@ public:
     void UpdateFlags(const SymbolEffectOptions& lastOptions)
     {
         bool isCurTriggerSetted = triggerNum_.has_value();
+        bool isTriggerHasSetted = lastOptions.GetTriggerNum().has_value();
         bool isCurActiveSetted = isActive_.has_value();
 
         if (isCurTriggerSetted) {
             // 本次设置了triggerValue, 比较两次的TriggerNum值
             isTxtActiveSource_ = 1;
-            if (!lastOptions.GetTriggerNum().has_value()) {
+            if (!isTriggerHasSetted) {
                 // 上次无值
                 if (triggerNum_ == -1) {
                     isTxtActive_ = false;
@@ -105,6 +106,11 @@ public:
                 int32_t curTriggerNum = triggerNum_.value();
                 isTxtActive_ = curTriggerNum != lastTriggerNum;
             }
+        } else if (isTriggerHasSetted) {
+            // 历史设置过triggerValue,本次没设置triggerValue（两个接口混用,isActive写在下面场景）
+            isTxtActiveSource_ = 1;
+            isTxtActive_ = lastOptions.GetIsTxtActive();
+            triggerNum_ = lastOptions.GetTriggerNum().value();
         } else if (isCurActiveSetted) {
             // 只设isActive => isActive
             isTxtActiveSource_ = 0;

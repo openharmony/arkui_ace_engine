@@ -1541,6 +1541,55 @@ ArkUI_Bool GetBlurOnSubmit(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, true);
     return TextFieldModelNG::GetBlurOnSubmit(frameNode);
 }
+void SetTextInputCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto *customKeyboardNode = reinterpret_cast<FrameNode*>(customKeyboard);
+    CHECK_NULL_VOID(customKeyboardNode);
+    TextFieldModelNG::SetCustomKeyboard(frameNode, customKeyboardNode, supportAvoidance);
+}
+
+ArkUINodeHandle GetTextInputCustomKeyboard(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto customKeyboard = TextFieldModelNG::GetCustomKeyboard(frameNode);
+    CHECK_NULL_RETURN(customKeyboard, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(customKeyboard));
+}
+
+ArkUI_Int32 GetTextInputCustomKeyboardOption(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetCustomKeyboardOption(frameNode));
+}
+
+void ResetTextInputCustomKeyboard(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCustomKeyboard(frameNode, nullptr, false);
+}
+
+void SetTextInputLineBreakStrategy(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (lineBreakStrategy < 0 || lineBreakStrategy >= LINE_BREAK_STRATEGY_TYPES.size()) {
+        lineBreakStrategy = 0; // 0 is the default value of lineBreakStrategy::GREEDY
+    }
+    TextFieldModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[lineBreakStrategy]);
+}
+
+void ResetTextInputLineBreakStrategy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+     // 0 is the default value of lineBreakStrategy::GREEDY
+    TextFieldModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[0]);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -1590,7 +1639,9 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputCaretIndex, GetTextInputCaretOffset, GetTextInputStyle, GetTextInputContentRect,
         GetTextInputContentLinesNum, SetBlurOnSubmit, GetBlurOnSubmit,
         GetTextInputAdaptMinFontSize, GetTextInputAdaptMaxFontSize, GetTextInputLineHeight, GetTextInputMaxLines,
-        GetTextInputFontFeature};
+        GetTextInputFontFeature, SetTextInputCustomKeyboard, GetTextInputCustomKeyboard,
+        GetTextInputCustomKeyboardOption, ResetTextInputCustomKeyboard, SetTextInputLineBreakStrategy,
+        ResetTextInputLineBreakStrategy };
     return &modifier;
 }
 

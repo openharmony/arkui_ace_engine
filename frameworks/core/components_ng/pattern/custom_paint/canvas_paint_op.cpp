@@ -33,19 +33,19 @@ static_assert(sizeof(Op) == 4, "size of canvas op shoule be 4");
 
 struct SaveOp final : Op {
     static constexpr auto kType = Type::SaveOp;
-    void Draw(CanvasPaintMethod* method, PaintWrapper*) const { method->Save(); }
+    void Draw(CanvasPaintMethod* method) const { method->Save(); }
 };
 
 struct RestoreOp final : Op {
     static constexpr auto kType = Type::RestoreOp;
-    void Draw(CanvasPaintMethod* method, PaintWrapper*) const { method->Restore(); }
+    void Draw(CanvasPaintMethod* method) const { method->Restore(); }
 };
 
 struct FillRectOp final : Op {
     static constexpr auto kType = Type::FillRectOp;
     explicit FillRectOp(const Rect& rect): rect(std::move(rect)) {}
     Rect rect;
-    void Draw(CanvasPaintMethod* method, PaintWrapper*) const { method->Restore(); }
+    void Draw(CanvasPaintMethod* method) const { method->Restore(); }
 };
 
 struct FillTextOp final : Op {
@@ -55,9 +55,9 @@ struct FillTextOp final : Op {
     std::string text;
     double x, y;
     std::optional<double> maxWidth;
-    void Draw(CanvasPaintMethod* method, PaintWrapper* paintWrapper) const
+    void Draw(CanvasPaintMethod* method) const
     {
-        method->FillText(paintWrapper, text, x, y, maxWidth);
+        method->FillText(text, x, y, maxWidth);
     }
 };
 
@@ -65,15 +65,15 @@ struct BezierCurveToOp final : Op {
     static constexpr auto kType = Type::BezierCurveToOp;
     explicit BezierCurveToOp(const BezierCurveParam& param): param(param) {}
     BezierCurveParam param;
-    void Draw(CanvasPaintMethod* method, PaintWrapper*) const { method->BezierCurveTo(param); }
+    void Draw(CanvasPaintMethod* method) const { method->BezierCurveTo(param); }
 };
 
-typedef void (*DrawFn)(const void*, CanvasPaintMethod* method, PaintWrapper* paintWrapper);
+typedef void (*DrawFn)(const void*, CanvasPaintMethod* method);
 typedef void (*VoidFn)(const void*);
 
 #define X(T)                                                                                   \
-    [](const void* op, CanvasPaintMethod* method, PaintWrapper* paintWrapper) {                \
-        ((const T*)op)->Draw(method, paintWrapper);                                            \
+    [](const void* op, CanvasPaintMethod* method) {                                            \
+        ((const T*)op)->Draw(method);                                                          \
     },
 static const DrawFn DRAW_FNS[] = {
     #include "./canvas_paint_ops.in"
@@ -88,9 +88,9 @@ static const VoidFn DTOR_FBS[] = {
 };
 #undef X
 
-void CanvasPaintOp::Draw(CanvasPaintMethod* method, PaintWrapper* paintWrapper) const
+void CanvasPaintOp::Draw(CanvasPaintMethod* method) const
 {
-    Map(DRAW_FNS, method, paintWrapper);
+    Map(DRAW_FNS, method);
 }
 
 void CanvasPaintOp::Reset()

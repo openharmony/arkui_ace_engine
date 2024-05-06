@@ -175,6 +175,11 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Invalid arguments for LazyForEach");
         return;
     }
+    if (!params[PARAM_VIEW_ID]->IsString() || !params[PARAM_PARENT_VIEW]->IsObject()
+        || !params[PARAM_DATA_SOURCE]->IsObject() || !params[PARAM_ITEM_GENERATOR]->IsFunction()
+        || !params[PARAM_KEY_GENERATOR]->IsFunction()) {
+            return;
+    }
     std::string viewId = ViewStackModel::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
 
     JSRef<JSObject> parentViewObj = JSRef<JSObject>::Cast(params[PARAM_PARENT_VIEW]);

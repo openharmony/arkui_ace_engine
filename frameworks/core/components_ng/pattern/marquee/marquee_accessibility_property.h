@@ -30,6 +30,8 @@ public:
 
     std::string GetText() const override;
 
+    std::string GetGroupText(bool forceGetChildren = false) const override;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(MarqueeAccessibilityProperty);
 };

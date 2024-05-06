@@ -44,6 +44,7 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
+const int32_t WORD_BREAK_TYPES_DEFAULT = 2;
 } //namespace
 
 CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool withoutPercent = true)
@@ -1226,7 +1227,7 @@ void JSParagraphStyleSpan::ParseJsWordBreak(const JSRef<JSObject>& obj, SpanPara
         return;
     }
     JSRef<JSVal> args = obj->GetProperty("wordBreak");
-    int32_t index = 0;
+    int32_t index = WORD_BREAK_TYPES_DEFAULT;
     if (args->IsNumber()) {
         index = args->ToNumber<int32_t>();
     }
@@ -1302,6 +1303,12 @@ void JSParagraphStyleSpan::ParseLeadingMarginPixelMap(const JSRef<JSObject>& lea
         CalcDimension height;
         JSContainerBase::ParseJsDimensionVp(widthVal, width);
         JSContainerBase::ParseJsDimensionVp(heightVal, height);
+        if (LessNotEqual(width.Value(), 0.0)) {
+            width = Dimension(0.0, width.Unit());
+        }
+        if (LessNotEqual(height.Value(), 0.0)) {
+            height = Dimension(0.0, height.Unit());
+        }
         margin->size = NG::LeadingMarginSize(width, height);
     } else if (sizeVal->IsUndefined()) {
         std::string resWidthStr;

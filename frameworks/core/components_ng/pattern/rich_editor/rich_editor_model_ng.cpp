@@ -280,7 +280,7 @@ void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChang
     eventHub->SetOnWillChange(std::move(func));
 }
 
-void RichEditorModelNG::SetOnDidChange(std::function<void(const std::list<RichEditorAbstractSpanResult>&)>&& func)
+void RichEditorModelNG::SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);

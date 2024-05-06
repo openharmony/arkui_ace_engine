@@ -2185,7 +2185,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent006, TestSize.Level1)
     event.code = KeyCode::KEY_Z;
     ret = pattern_->OnKeyEvent(event);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue(), "");
+    EXPECT_EQ(pattern_->GetTextValue(), "abcdefghijklmnopqrstuvwxyz");
     EXPECT_TRUE(ret);
 
     event.pressedCodes.clear();
@@ -2194,7 +2194,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent006, TestSize.Level1)
     event.code = KeyCode::KEY_Y;
     ret = pattern_->OnKeyEvent(event);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
+    EXPECT_EQ(pattern_->GetTextValue(), "abcdefghijklmnopqrstuvwxyz");
     EXPECT_TRUE(ret);
 }
 
@@ -4265,7 +4265,7 @@ HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
     pattern_->SetCaretPosition(5);
     pattern_->UpdateEditingValueToRecord();
     pattern_->HandleOnUndoAction();
-    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
 }
 
 /**
@@ -4617,7 +4617,7 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     std::string result = "😄😌😎😭😄😌😎😭😄😌";
     EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " << pattern_->GetTextValue();
-    
+
     pattern_->SetCaretPosition(10);
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
@@ -4658,7 +4658,7 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction002, TestSize.Level1)
     /**
      * @tc.step: step2. Set caretPosition and call Delete
      */
-    
+
     pattern_->SetCaretPosition(132);
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
@@ -4666,7 +4666,7 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction002, TestSize.Level1)
     std::string result = std::string("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦")
         .append("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦");
     EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
-    
+
     pattern_->SetCaretPosition(88);
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
@@ -4716,7 +4716,7 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     result = "👁️👁️👁️👁️👁️👁️👁️👁️";
     EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
-    
+
     pattern_->SetCaretPosition(0);
     pattern_->DeleteForward(2);
     FlushLayoutTask(frameNode_);
@@ -4766,7 +4766,7 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction004, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     result = "🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳";
     EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
-    
+
     pattern_->SetCaretPosition(12);
     pattern_->DeleteForward(1);
     FlushLayoutTask(frameNode_);
@@ -4853,12 +4853,6 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction006, TestSize.Level1)
     pattern_->DeleteForward(2);
     FlushLayoutTask(frameNode_);
     result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
-  
-    pattern_->SetCaretPosition(21);
-    pattern_->DeleteForward(2);
-    FlushLayoutTask(frameNode_);
-    result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
     EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
 }
 

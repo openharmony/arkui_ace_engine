@@ -702,6 +702,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextAttribute;
     textIndent(value: Length): TextAttribute;
     wordBreak(value: WordBreak): TextAttribute;
+    lineBreakStrategy(value: LineBreakStrategy): TextAttribute;
     onCopy(callback: (value: string) => void): TextAttribute;
     selection(selectionStart: number, selectionEnd: number): TextAttribute;
     ellipsisMode(value: EllipsisMode): TextAttribute;

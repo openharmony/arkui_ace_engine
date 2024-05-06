@@ -245,10 +245,10 @@ HWTEST_F(AppBarTestNg, TestUpdateIconColor008, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = pipeline->GetTheme<AppBarTheme>();
     auto icon = pattern->GetMenuIcon();
-    auto layoutProperty = icon->GetLayoutProperty<ImageLayoutProperty>();
+    auto renderContext = icon->GetRenderContext();
 
     pattern->UpdateIconColor(theme, icon);
-    EXPECT_EQ(layoutProperty->GetImageSourceInfo()->GetFillColor().value_or(Color::RED), theme->GetIconColor());
+    EXPECT_EQ(renderContext->GetForegroundColorValue(Color::RED), theme->GetIconColor());
 }
 
 /**

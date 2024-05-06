@@ -86,6 +86,21 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
 }
 
+void ImageModelNG::SetInitialSrc(FrameNode *frameNode, const std::string &src, const std::string &bundleName,
+    const std::string &moduleName, bool isUriPureNumber)
+{
+    auto srcInfo = ImageSourceInfo{ src, bundleName, moduleName };
+    srcInfo.SetIsUriPureNumber(isUriPureNumber);
+
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
+
+void ImageModelNG::SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
+{
+    auto srcInfo = CreateSourceInfo("", pixMap, "", "");
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
+
 void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration)
 {
     auto* stack = ViewStackProcessor::GetInstance();

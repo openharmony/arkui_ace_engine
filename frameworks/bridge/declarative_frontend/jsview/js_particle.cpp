@@ -847,9 +847,11 @@ void JSParticle::ParseEmitterProperty(
     auto positionProperty = paramObj->GetProperty("position");
     if (positionProperty->IsObject()) {
         auto positionValue = Framework::JSRef<Framework::JSObject>::Cast(positionProperty);
-        auto positionXValue = positionValue->GetProperty("x")->ToNumber<float>();
-        auto positonYValue = positionValue->GetProperty("y")->ToNumber<float>();
-        emitterProperty.position = { positionXValue, positonYValue };
+        if (positionValue->GetProperty("x")->IsNumber() && positionValue->GetProperty("y")->IsNumber()) {
+            auto positionXValue = positionValue->GetProperty("x")->ToNumber<float>();
+            auto positonYValue = positionValue->GetProperty("y")->ToNumber<float>();
+            emitterProperty.position = { positionXValue, positonYValue };
+        }
     }
     auto sizeProperty = paramObj->GetProperty("size");
     if (sizeProperty->IsObject()) {

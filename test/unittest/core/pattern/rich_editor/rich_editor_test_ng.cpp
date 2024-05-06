@@ -5641,9 +5641,9 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest001, TestSize.Level1)
     richEditorModel.SetOnWillChange(std::move(onWillChange));
     bool isDidCalled = false;
     int32_t afterCount = 0;
-    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+    auto onDidChange = [&isDidCalled, &afterCount](const RichEditorChangeValue& afterResult) {
         isDidCalled = true;
-        afterCount = afterResult.size();
+        afterCount = afterResult.GetRichEditorReplacedSpans().size();
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
 
@@ -5689,9 +5689,9 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest002, TestSize.Level1)
     richEditorModel.SetOnWillChange(std::move(onWillChange));
     bool isDidCalled = false;
     int32_t afterCount = 0;
-    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+    auto onDidChange = [&isDidCalled, &afterCount](const RichEditorChangeValue& afterResult) {
         isDidCalled = true;
-        afterCount = afterResult.size();
+        afterCount = afterResult.GetRichEditorReplacedSpans().size();
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
 
@@ -5759,9 +5759,9 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest003, TestSize.Level1)
     richEditorModel.SetOnWillChange(std::move(onWillChange));
     bool isDidCalled = false;
     int32_t afterCount = 0;
-    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+    auto onDidChange = [&isDidCalled, &afterCount](const RichEditorChangeValue& afterResult) {
         isDidCalled = true;
-        afterCount = afterResult.size();
+        afterCount = afterResult.GetRichEditorReplacedSpans().size();
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
 
@@ -5828,9 +5828,9 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest004, TestSize.Level1)
     richEditorModel.SetOnWillChange(std::move(onWillChange));
     bool isDidCalled = false;
     int32_t afterCount = 0;
-    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+    auto onDidChange = [&isDidCalled, &afterCount](const RichEditorChangeValue& afterResult) {
         isDidCalled = true;
-        afterCount = afterResult.size();
+        afterCount = afterResult.GetRichEditorReplacedSpans().size();
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
 
@@ -5892,9 +5892,9 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest005, TestSize.Level1)
     richEditorModel.SetOnWillChange(std::move(onWillChange));
     bool isDidCalled = false;
     int32_t afterCount = 0;
-    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+    auto onDidChange = [&isDidCalled, &afterCount](const RichEditorChangeValue& afterResult) {
         isDidCalled = true;
-        afterCount = afterResult.size();
+        afterCount = afterResult.GetRichEditorReplacedSpans().size();
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
 
@@ -5941,9 +5941,9 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest006, TestSize.Level1)
     richEditorModel.SetOnWillChange(std::move(onWillChange));
     bool isDidCalled = false;
     int32_t afterCount = 0;
-    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+    auto onDidChange = [&isDidCalled, &afterCount](const RichEditorChangeValue& afterResult) {
         isDidCalled = true;
-        afterCount = afterResult.size();
+        afterCount = afterResult.GetRichEditorReplacedSpans().size();
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
 
@@ -5962,6 +5962,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest006, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 2;
     richEditorPattern->dragRange_.first = 0;
     richEditorPattern->dragRange_.second = 2;
+    richEditorPattern->isDragSponsor_ = true;
     richEditorPattern->HandleOnDragDropTextOperation("he", true);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
@@ -6000,9 +6001,9 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest007, TestSize.Level1)
     richEditorModel.SetOnWillChange(std::move(onWillChange));
     bool isDidCalled = false;
     int32_t afterCount = 0;
-    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+    auto onDidChange = [&isDidCalled, &afterCount](const RichEditorChangeValue& afterResult) {
         isDidCalled = true;
-        afterCount = afterResult.size();
+        afterCount = afterResult.GetRichEditorReplacedSpans().size();
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
 
@@ -6064,9 +6065,9 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest008, TestSize.Level1)
     richEditorModel.SetOnWillChange(std::move(onWillChange));
     bool isDidCalled = false;
     int32_t afterCount = 0;
-    auto onDidChange = [&isDidCalled, &afterCount](const std::list<RichEditorAbstractSpanResult>& afterResult) {
+    auto onDidChange = [&isDidCalled, &afterCount](const RichEditorChangeValue& afterResult) {
         isDidCalled = true;
-        afterCount = afterResult.size();
+        afterCount = afterResult.GetRichEditorReplacedSpans().size();
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
 

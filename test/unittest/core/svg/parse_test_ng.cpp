@@ -240,7 +240,6 @@ const std::string FEGAUSS_SVG_LABEL =
 const std::string FEGAUSS_SVG_LABEL2 =
     "<svg width=\"-230\" height=\"-120\"><filter id=\"blurMe\"><feGaussianBlur in=\"Graphic\" stdDeviation=\"5\" "
     "/></filter><circle cx=\"170\" cy=\"60\" r=\"50\" fill=\"green\" filter=\"url(#blurMe)\" /></svg>";
-constexpr float STD_DEVIATION = 5.0f;
 const std::string COMPOSITE_SVG_LABEL =
     "<svg height=\"900\" width=\"900\"><filter id=\"composite\" y=\"0\" x=\"0\" width=\"100%\" "
     "height=\"100%\"><feComposite in2=\"B\" "
@@ -264,8 +263,8 @@ const std::string ELLIPSE_SVG_LABEL3 =
 const std::string ELLIPSE_SVG_LABEL4 =
     "<svg fill=\"white\" width=\"10\" height=\"10\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse "
     "cx=\"0.0\" cy=\"0.0\" rx=\"1\" ry=\"-1\" stroke-width=\"4\" fill=\"red\" stroke=\"blue\"></ellipse></svg>";
-constexpr float ELLIPSE_Cx = 60.0f;
-constexpr float ELLIPSE_Cy = 200.0f;
+constexpr float ELLIPSE_CX = 60.0f;
+constexpr float ELLIPSE_CY = 200.0f;
 constexpr float ELLIPSE_RX = 50.0f;
 constexpr float ELLIPSE_RY = 100.0f;
 const std::string SVG_ANIMATE_TRANSFORM(
@@ -360,14 +359,13 @@ RefPtr<SvgDom> ParseTestNg::ParseRect(const std::string& svgLabel)
     EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
     auto svgRect = AceType::DynamicCast<SvgRect>(svg->children_.at(0));
     EXPECT_NE(svgRect, nullptr);
-    auto rectDeclaration = AceType::DynamicCast<SvgRectDeclaration>(svgRect->declaration_);
-    EXPECT_NE(rectDeclaration, nullptr);
-    EXPECT_FLOAT_EQ(rectDeclaration->GetX().ConvertToPx(), X);
-    EXPECT_FLOAT_EQ(rectDeclaration->GetY().ConvertToPx(), Y);
-    EXPECT_FLOAT_EQ(rectDeclaration->GetRx().ConvertToPx(), RX);
-    EXPECT_FLOAT_EQ(rectDeclaration->GetRy().ConvertToPx(), RY);
-    EXPECT_FLOAT_EQ(rectDeclaration->GetWidth().ConvertToPx(), RECT_WIDTH);
-    EXPECT_FLOAT_EQ(rectDeclaration->GetHeight().ConvertToPx(), RECT_HEIGHT);
+    auto rectDeclaration = svgRect->rectAttr_;
+    EXPECT_FLOAT_EQ(rectDeclaration.x.ConvertToPx(), X);
+    EXPECT_FLOAT_EQ(rectDeclaration.y.ConvertToPx(), Y);
+    EXPECT_FLOAT_EQ(rectDeclaration.rx.ConvertToPx(), RX);
+    EXPECT_FLOAT_EQ(rectDeclaration.ry.ConvertToPx(), RY);
+    EXPECT_FLOAT_EQ(rectDeclaration.width.ConvertToPx(), RECT_WIDTH);
+    EXPECT_FLOAT_EQ(rectDeclaration.height.ConvertToPx(), RECT_HEIGHT);
     return svgDom;
 }
 
@@ -386,12 +384,10 @@ RefPtr<SvgDom> ParseTestNg::parsePolygon(const std::string& svgLable)
     EXPECT_NE(svgPolygon, nullptr);
     auto svgPolyline = AceType::DynamicCast<SvgPolygon>(svg->children_.at(1));
     EXPECT_NE(svgPolyline, nullptr);
-    auto polygonDeclaration = AceType::DynamicCast<SvgPolygonDeclaration>(svgPolygon->declaration_);
-    EXPECT_NE(polygonDeclaration, nullptr);
-    EXPECT_STREQ(polygonDeclaration->GetPoints().c_str(), POLYGON_POINT.c_str());
-    auto polylineDeclaration = AceType::DynamicCast<SvgPolygonDeclaration>(svgPolyline->declaration_);
-    EXPECT_NE(polylineDeclaration, nullptr);
-    EXPECT_STREQ(polylineDeclaration->GetPoints().c_str(), POLYLINE_POINT.c_str());
+    auto polygonDeclaration = svgPolygon->polyAttr_;
+    EXPECT_STREQ(polygonDeclaration.points.c_str(), POLYGON_POINT.c_str());
+    auto polylineDeclaration = svgPolyline->polyAttr_;
+    EXPECT_STREQ(polylineDeclaration.points.c_str(), POLYLINE_POINT.c_str());
     return svgDom;
 }
 
@@ -406,8 +402,8 @@ RefPtr<SvgDom> ParseTestNg::ParsePath(const std::string& svgLabel)
     EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
     auto svgPath = AceType::DynamicCast<SvgPath>(svg->children_.at(0));
     EXPECT_NE(svgPath, nullptr);
-    auto pathDeclaration = AceType::DynamicCast<SvgPathDeclaration>(svgPath->declaration_);
-    EXPECT_STREQ(pathDeclaration->GetD().c_str(), PATH_CMD.c_str());
+    auto pathDeclaration = svgPath->d_;
+    EXPECT_STREQ(pathDeclaration.c_str(), PATH_CMD.c_str());
     return svgDom;
 }
 
@@ -424,10 +420,8 @@ RefPtr<SvgDom> ParseTestNg::ParseFeGaussianblur(const std::string& svgLabel)
     EXPECT_NE(svgFilter, nullptr);
     auto svgFeGaussiaBlur = AceType::DynamicCast<SvgFeGaussianBlur>(svgFilter->children_.at(0));
     EXPECT_NE(svgFeGaussiaBlur, nullptr);
-    auto feDeclaration = AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(svgFeGaussiaBlur->declaration_);
-    EXPECT_NE(feDeclaration, nullptr);
-    EXPECT_FLOAT_EQ(feDeclaration->GetStdDeviationX(), STD_DEVIATION);
-    EXPECT_EQ(feDeclaration->GetEdgeMode(), FeEdgeMode::EDGE_DUPLICATE);
+    auto feDeclaration = svgFeGaussiaBlur->gaussianBlurAttr_;
+    EXPECT_EQ(feDeclaration.edgeMode, SvgFeEdgeMode::EDGE_DUPLICATE);
     return svgDom;
 }
 
@@ -442,11 +436,11 @@ RefPtr<SvgDom> ParseTestNg::ParseEllipse(const std::string& svgLabel)
     EXPECT_GT(svg->children_.size(), 0);
     auto svgEllipse = AceType::DynamicCast<SvgEllipse>(svg->children_.at(0));
     EXPECT_NE(svgEllipse, nullptr);
-    auto ellipseDeclaration = AceType::DynamicCast<SvgEllipseDeclaration>(svgEllipse->declaration_);
-    EXPECT_FLOAT_EQ(ellipseDeclaration->GetCx().ConvertToPx(), ELLIPSE_Cx);
-    EXPECT_FLOAT_EQ(ellipseDeclaration->GetCy().ConvertToPx(), ELLIPSE_Cy);
-    EXPECT_FLOAT_EQ(ellipseDeclaration->GetRx().ConvertToPx(), ELLIPSE_RX);
-    EXPECT_FLOAT_EQ(ellipseDeclaration->GetRy().ConvertToPx(), ELLIPSE_RY);
+    auto ellipseDeclaration = svgEllipse->ellipseAttr_;
+    EXPECT_FLOAT_EQ(ellipseDeclaration.cx.ConvertToPx(), ELLIPSE_CX);
+    EXPECT_FLOAT_EQ(ellipseDeclaration.cy.ConvertToPx(), ELLIPSE_CY);
+    EXPECT_FLOAT_EQ(ellipseDeclaration.rx.ConvertToPx(), ELLIPSE_RX);
+    EXPECT_FLOAT_EQ(ellipseDeclaration.ry.ConvertToPx(), ELLIPSE_RY);
     return svgDom;
 }
 
@@ -475,10 +469,10 @@ HWTEST_F(ParseTestNg, ParseCircleTest001, TestSize.Level1)
     EXPECT_GT(svg->children_.size(), 0);
     auto svgLine = AceType::DynamicCast<SvgCircle>(svg->children_.at(0));
     EXPECT_NE(svgLine, nullptr);
-    auto circleDeclaration = AceType::DynamicCast<SvgCircleDeclaration>(svgLine->declaration_);
-    EXPECT_FLOAT_EQ(circleDeclaration->GetCx().ConvertToPx(), Cx);
-    EXPECT_FLOAT_EQ(circleDeclaration->GetCy().ConvertToPx(), Cy);
-    EXPECT_FLOAT_EQ(circleDeclaration->GetR().ConvertToPx(), R);
+    auto circleDeclaration = svgLine->circleAttr_;
+    EXPECT_FLOAT_EQ(circleDeclaration.cx.ConvertToPx(), Cx);
+    EXPECT_FLOAT_EQ(circleDeclaration.cy.ConvertToPx(), Cy);
+    EXPECT_FLOAT_EQ(circleDeclaration.r.ConvertToPx(), R);
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
@@ -571,16 +565,15 @@ HWTEST_F(ParseTestNg, ParseUseTest001, TestSize.Level1)
     EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
     auto svgUse = AceType::DynamicCast<SvgUse>(svg->children_.at(INDEX_ONE));
     EXPECT_NE(svgUse, nullptr);
-    auto svgUseDeclaration = AceType::DynamicCast<SvgDeclaration>(svgUse->declaration_);
-    EXPECT_NE(svgUseDeclaration, nullptr);
-    auto fillState = svgUseDeclaration->GetFillState();
+    auto svgUseDeclaration = svgUse->attributes_;
+    auto fillState = svgUseDeclaration.fillState;
     EXPECT_STREQ(fillState.GetFillRule().c_str(), FILL_RULE.c_str());
-    EXPECT_STREQ(svgUseDeclaration->GetTransform().c_str(), TRANSFORM.c_str());
-    auto stroke = svgUseDeclaration->GetStrokeState();
+    EXPECT_STREQ(svgUseDeclaration.transform.c_str(), TRANSFORM.c_str());
+    auto stroke = svgUseDeclaration.strokeState;
     EXPECT_FLOAT_EQ(STROKE_WIDTH, stroke.GetLineWidth().ConvertToPx());
     EXPECT_EQ(stroke.HasStroke(), true);
     EXPECT_STREQ(stroke.GetColor().ColorToString().c_str(), Color(STROKE).ColorToString().c_str());
-    EXPECT_STREQ(svgUseDeclaration->GetHref().c_str(), HREF.c_str());
+    EXPECT_STREQ(svgUseDeclaration.href.c_str(), HREF.c_str());
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
@@ -590,11 +583,11 @@ HWTEST_F(ParseTestNg, ParseUseTest001, TestSize.Level1)
 
     // <Use> shouldn't overwrite attributes of the referenced <Path>
     auto svgPath = svgDom->svgContext_->GetSvgNodeById(HREF);
-    auto pathDeclaration = svgPath->declaration_;
-    EXPECT_NE(pathDeclaration->GetFillState().GetFillRule().c_str(), FILL_RULE.c_str());
-    EXPECT_NE(pathDeclaration->GetFillState().GetColor(), Color::RED);
-    EXPECT_NE(pathDeclaration->GetTransform().c_str(), TRANSFORM.c_str());
-    EXPECT_NE(pathDeclaration->GetStrokeState().GetColor(), Color(STROKE));
+    auto pathDeclaration = svgPath->attributes_;
+    EXPECT_NE(pathDeclaration.fillState.GetFillRule().c_str(), FILL_RULE.c_str());
+    EXPECT_NE(pathDeclaration.fillState.GetColor(), Color::RED);
+    EXPECT_NE(pathDeclaration.transform.c_str(), TRANSFORM.c_str());
+    EXPECT_NE(pathDeclaration.strokeState.GetColor(), Color(STROKE));
 }
 
 /**
@@ -644,9 +637,8 @@ HWTEST_F(ParseTestNg, ParseStopTest001, TestSize.Level1)
     EXPECT_NE(svgGradient, nullptr);
     auto svgStop = AceType::DynamicCast<SvgStop>(svgGradient->children_.at(INDEX_ZEARO));
     EXPECT_NE(svgStop, nullptr);
-    auto svgStopDeclaration = AceType::DynamicCast<SvgStopDeclaration>(svgStop->declaration_);
-    EXPECT_NE(svgStopDeclaration, nullptr);
-    auto gradientColor = svgStopDeclaration->GetGradientColor();
+    auto svgStopDeclaration = svgStop->stopAttr_;
+    auto gradientColor = svgStopDeclaration.gradientColor;
     EXPECT_FLOAT_EQ(gradientColor.GetOpacity(), STOP_OPACITY);
     EXPECT_STREQ(gradientColor.GetColor().ColorToString().c_str(), Color::FromRGB(255, 255, 0).ColorToString().c_str());
     Testing::MockCanvas rSCanvas;
@@ -755,14 +747,13 @@ HWTEST_F(ParseTestNg, ParsePatternTest001, TestSize.Level1)
     EXPECT_NE(svgDefs, nullptr);
     auto svgPattern = AceType::DynamicCast<SvgPattern>(svgDefs->children_.at(0));
     EXPECT_NE(svgPattern, nullptr);
-    auto patternDeclaration = AceType::DynamicCast<SvgPatternDeclaration>(svgPattern->declaration_);
-    EXPECT_NE(patternDeclaration, nullptr);
-    EXPECT_FLOAT_EQ(patternDeclaration->GetWidth().ConvertToPx(), PATTERN_WIDTH);
-    EXPECT_FLOAT_EQ(patternDeclaration->GetHeight().ConvertToPx(), PATTERN_HEIGHT);
-    EXPECT_FLOAT_EQ(patternDeclaration->GetViewBox().GetOffset().GetX(), PATTERN_VIEWBOX_X);
-    EXPECT_FLOAT_EQ(patternDeclaration->GetViewBox().GetOffset().GetY(), PATTERN_VIEWBOX_Y);
-    EXPECT_FLOAT_EQ(patternDeclaration->GetViewBox().GetSize().Width(), PATTERN_VIEWBOX_WIDTH);
-    EXPECT_FLOAT_EQ(patternDeclaration->GetViewBox().GetSize().Height(), PATTERN_VIEWBOX_HEIGHT);
+    auto patternDeclaration = svgPattern->patternAttr_;
+    EXPECT_FLOAT_EQ(patternDeclaration.width.ConvertToPx(), PATTERN_WIDTH);
+    EXPECT_FLOAT_EQ(patternDeclaration.height.ConvertToPx(), PATTERN_HEIGHT);
+    EXPECT_FLOAT_EQ(patternDeclaration.viewBox.GetOffset().GetX(), PATTERN_VIEWBOX_X);
+    EXPECT_FLOAT_EQ(patternDeclaration.viewBox.GetOffset().GetY(), PATTERN_VIEWBOX_Y);
+    EXPECT_FLOAT_EQ(patternDeclaration.viewBox.GetSize().Width(), PATTERN_VIEWBOX_WIDTH);
+    EXPECT_FLOAT_EQ(patternDeclaration.viewBox.GetSize().Height(), PATTERN_VIEWBOX_HEIGHT);
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
@@ -915,11 +906,11 @@ HWTEST_F(ParseTestNg, ParseLineTest001, TestSize.Level1)
     EXPECT_GT(svg->children_.size(), 0);
     auto svgLine = AceType::DynamicCast<SvgLine>(svg->children_.at(0));
     EXPECT_NE(svgLine, nullptr);
-    auto lineDeclaration = AceType::DynamicCast<SvgLineDeclaration>(svgLine->declaration_);
-    EXPECT_FLOAT_EQ(lineDeclaration->GetX1().ConvertToPx(), X1);
-    EXPECT_FLOAT_EQ(lineDeclaration->GetY1().ConvertToPx(), Y1);
-    EXPECT_FLOAT_EQ(lineDeclaration->GetX2().ConvertToPx(), X2);
-    EXPECT_FLOAT_EQ(lineDeclaration->GetY2().ConvertToPx(), Y2);
+    auto lineDeclaration = svgLine->lineAttr_;
+    EXPECT_FLOAT_EQ(lineDeclaration.x1.ConvertToPx(), X1);
+    EXPECT_FLOAT_EQ(lineDeclaration.y1.ConvertToPx(), Y1);
+    EXPECT_FLOAT_EQ(lineDeclaration.x2.ConvertToPx(), X2);
+    EXPECT_FLOAT_EQ(lineDeclaration.y2.ConvertToPx(), Y2);
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
@@ -947,9 +938,8 @@ HWTEST_F(ParseTestNg, ParseLinearGradientTest001, TestSize.Level1)
     EXPECT_NE(defers->children_.at(INDEX_ZEARO), nullptr);
     auto svgGradient = AceType::DynamicCast<SvgGradient>(defers->children_.at(INDEX_ZEARO));
     EXPECT_NE(svgGradient, nullptr);
-    auto svgGradientDeclaration = AceType::DynamicCast<SvgGradientDeclaration>(svgGradient->gradientDeclaration_);
-    EXPECT_NE(svgGradientDeclaration, nullptr);
-    auto gradient = svgGradientDeclaration->GetGradient();
+    auto svgGradientDeclaration = svgGradient->gradientAttr_;
+    auto gradient = svgGradientDeclaration.gradient;
     EXPECT_EQ(gradient.GetLinearGradient().x1.has_value(), true);
     EXPECT_FLOAT_EQ(gradient.GetLinearGradient().x1->ConvertToPx(), ZERO);
     EXPECT_EQ(gradient.GetLinearGradient().x2.has_value(), true);
@@ -985,9 +975,8 @@ HWTEST_F(ParseTestNg, ParseRadialGradientTest001, TestSize.Level1)
     EXPECT_NE(defers->children_.at(INDEX_ZEARO), nullptr);
     auto svgGradient = AceType::DynamicCast<SvgGradient>(defers->children_.at(INDEX_ZEARO));
     EXPECT_NE(svgGradient, nullptr);
-    auto svgGradientDeclaration = AceType::DynamicCast<SvgGradientDeclaration>(svgGradient->gradientDeclaration_);
-    EXPECT_NE(svgGradientDeclaration, nullptr);
-    auto gradient = svgGradientDeclaration->GetGradient();
+    auto svgGradientDeclaration = svgGradient->gradientAttr_;
+    auto gradient = svgGradientDeclaration.gradient;
     auto radialGradient = gradient.GetRadialGradient();
     EXPECT_EQ(radialGradient.fRadialCenterX.has_value(), true);
     EXPECT_FLOAT_EQ(radialGradient.fRadialCenterX->ConvertToPx(), ZERO);
@@ -1054,12 +1043,11 @@ HWTEST_F(ParseTestNg, ParseFilterTest001, TestSize.Level1)
     EXPECT_GT(svg->children_.size(), 0);
     auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
     EXPECT_STREQ(svgFilter->nodeId_.c_str(), FILTER_ID.c_str());
-    auto filterDeclaration = AceType::DynamicCast<SvgFilterDeclaration>(svgFilter->declaration_);
-    EXPECT_NE(filterDeclaration, nullptr);
-    EXPECT_FLOAT_EQ(filterDeclaration->GetHeight().ConvertToPx(), FILTER_HEIGHT);
-    EXPECT_FLOAT_EQ(filterDeclaration->GetWidth().ConvertToPx(), FILTER_WIDTH);
-    EXPECT_FLOAT_EQ(filterDeclaration->GetX().ConvertToPx(), ZERO);
-    EXPECT_FLOAT_EQ(filterDeclaration->GetY().ConvertToPx(), ZERO);
+    auto filterDeclaration = svgFilter->filterAttr_;
+    EXPECT_FLOAT_EQ(filterDeclaration.height.ConvertToPx(), FILTER_HEIGHT);
+    EXPECT_FLOAT_EQ(filterDeclaration.width.ConvertToPx(), FILTER_WIDTH);
+    EXPECT_FLOAT_EQ(filterDeclaration.x.ConvertToPx(), ZERO);
+    EXPECT_FLOAT_EQ(filterDeclaration.y.ConvertToPx(), ZERO);
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
@@ -1118,8 +1106,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest001, TestSize.Level1)
     EXPECT_NE(svgFilter, nullptr);
     auto svgFeComposite = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(0));
     EXPECT_NE(svgFeComposite, nullptr);
-    auto feCompositsDeclaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(svgFeComposite->declaration_);
-    EXPECT_NE(feCompositsDeclaration, nullptr);
+    auto feCompositsDeclaration = svgFeComposite->feCompositeAttr_;
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
@@ -1142,13 +1129,13 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest002, TestSize.Level1)
 #else
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
 #endif
-    ColorInterpolationType colorInterpolationType = ColorInterpolationType::LINEAR_RGB;
-    ColorInterpolationType srcColor = ColorInterpolationType::SRGB;
+    SvgColorInterpolationType colorInterpolationType = SvgColorInterpolationType::LINEAR_RGB;
+    SvgColorInterpolationType srcColor = SvgColorInterpolationType::SRGB;
     svgFe->GetImageFilter(imageFilter, colorInterpolationType, resultHash);
-    EXPECT_EQ(colorInterpolationType, ColorInterpolationType::LINEAR_RGB);
+    EXPECT_EQ(colorInterpolationType, SvgColorInterpolationType::LINEAR_RGB);
     svgFe->ConverImageFilterColor(imageFilter, srcColor, colorInterpolationType);
     EXPECT_NE(imageFilter, nullptr);
-    EXPECT_EQ(colorInterpolationType, ColorInterpolationType::LINEAR_RGB);
+    EXPECT_EQ(colorInterpolationType, SvgColorInterpolationType::LINEAR_RGB);
     delete svgFe;
 }
 
@@ -1167,12 +1154,12 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest003, TestSize.Level1)
 #else
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
 #endif
-    ColorInterpolationType srcColor = ColorInterpolationType::SRGB;
-    ColorInterpolationType colorInterPolationType = ColorInterpolationType::LINEAR_RGB;
+    SvgColorInterpolationType srcColor = SvgColorInterpolationType::SRGB;
+    SvgColorInterpolationType colorInterPolationType = SvgColorInterpolationType::LINEAR_RGB;
     colorMatrix->OnAsImageFilter(imageFilter, srcColor, colorInterPolationType, resultHash);
     EXPECT_NE(imageFilter, nullptr);
-    EXPECT_EQ(colorInterPolationType, ColorInterpolationType::LINEAR_RGB);
-    EXPECT_EQ(srcColor, ColorInterpolationType::SRGB);
+    EXPECT_EQ(colorInterPolationType, SvgColorInterpolationType::LINEAR_RGB);
+    EXPECT_EQ(srcColor, SvgColorInterpolationType::SRGB);
     delete colorMatrix;
 }
 
@@ -1194,10 +1181,9 @@ HWTEST_F(ParseTestNg, ParseFeColorMatrixTest001, TestSize.Level1)
     EXPECT_NE(svgFilter, nullptr);
     auto svgFeColorMatrix = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(0));
     EXPECT_NE(svgFeColorMatrix, nullptr);
-    auto feColorDeclaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(svgFeColorMatrix->declaration_);
-    EXPECT_NE(feColorDeclaration, nullptr);
-    EXPECT_EQ(feColorDeclaration->GetType(), SvgFeColorMatrixType::Matrix);
-    EXPECT_STREQ(feColorDeclaration->GetValues().c_str(), VALUE.c_str());
+    auto feColorDeclaration = svgFeColorMatrix->matrixAttr_;
+    EXPECT_EQ(feColorDeclaration.type, SvgFeColorMatrixType::MATRIX);
+    EXPECT_STREQ(feColorDeclaration.values.c_str(), VALUE.c_str());
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
@@ -1226,30 +1212,26 @@ HWTEST_F(ParseTestNg, ParseFeColorMatrixTest002, TestSize.Level1)
     // the first child in filter
     auto svgFeColorMatrix1 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(0));
     EXPECT_NE(svgFeColorMatrix1, nullptr);
-    auto feColorDeclaration1 = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(svgFeColorMatrix1->declaration_);
-    EXPECT_NE(feColorDeclaration1, nullptr);
-    EXPECT_EQ(feColorDeclaration1->GetType(), SvgFeColorMatrixType::Matrix);
-    EXPECT_STREQ(feColorDeclaration1->GetValues().c_str(), VALUE.c_str());
+    auto feColorDeclaration1 = svgFeColorMatrix1->matrixAttr_;
+    EXPECT_EQ(feColorDeclaration1.type, SvgFeColorMatrixType::MATRIX);
+    EXPECT_STREQ(feColorDeclaration1.values.c_str(), VALUE.c_str());
     // the second child in filter
     auto svgFeColorMatrix2 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(1));
     EXPECT_NE(svgFeColorMatrix2, nullptr);
-    auto feColorDeclaration2 = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(svgFeColorMatrix2->declaration_);
-    EXPECT_NE(feColorDeclaration2, nullptr);
-    EXPECT_EQ(feColorDeclaration2->GetType(), SvgFeColorMatrixType::Saturate);
-    EXPECT_STREQ(feColorDeclaration2->GetValues().c_str(), SATURATE_VALUE.c_str());
+    auto feColorDeclaration2 = svgFeColorMatrix2->matrixAttr_;
+    EXPECT_EQ(feColorDeclaration2.type, SvgFeColorMatrixType::SATURATE);
+    EXPECT_STREQ(feColorDeclaration2.values.c_str(), SATURATE_VALUE.c_str());
     // the third child in filter
     auto svgFeColorMatrix3 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(2));
     EXPECT_NE(svgFeColorMatrix3, nullptr);
-    auto feColorDeclaration3 = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(svgFeColorMatrix3->declaration_);
-    EXPECT_NE(feColorDeclaration3, nullptr);
-    EXPECT_EQ(feColorDeclaration3->GetType(), SvgFeColorMatrixType::HueRotate);
-    EXPECT_STREQ(feColorDeclaration3->GetValues().c_str(), HUE_ROTATE.c_str());
+    auto feColorDeclaration3 = svgFeColorMatrix3->matrixAttr_;
+    EXPECT_EQ(feColorDeclaration3.type, SvgFeColorMatrixType::HUE_ROTATE);
+    EXPECT_STREQ(feColorDeclaration3.values.c_str(), HUE_ROTATE.c_str());
     // the fourth child in filter
     auto svgFeColorMatrix4 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(3));
     EXPECT_NE(svgFeColorMatrix4, nullptr);
-    auto feColorDeclaration4 = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(svgFeColorMatrix4->declaration_);
-    EXPECT_NE(feColorDeclaration4, nullptr);
-    EXPECT_EQ(feColorDeclaration4->GetType(), SvgFeColorMatrixType::LuminanceToAlpha);
+    auto feColorDeclaration4 = svgFeColorMatrix4->matrixAttr_;
+    EXPECT_EQ(feColorDeclaration4.type, SvgFeColorMatrixType::LUMINACE_TO_ALPHA);
 }
 
 /**
@@ -1272,30 +1254,24 @@ HWTEST_F(ParseTestNg, ParseFeGaussianBlurTest001, TestSize.Level1)
     // the first child in filter
     auto svgFeGaussianBlur1 = AceType::DynamicCast<SvgFeGaussianBlur>(svgFilter->children_.at(0));
     EXPECT_NE(svgFeGaussianBlur1, nullptr);
-    auto svgFeGaussianBlurDeclaration1 =
-        AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(svgFeGaussianBlur1->declaration_);
-    EXPECT_NE(svgFeGaussianBlurDeclaration1, nullptr);
+    auto svgFeGaussianBlurDeclaration1 = svgFeGaussianBlur1->gaussianBlurAttr_;
     // 10 50 = 10 50
-    EXPECT_EQ(svgFeGaussianBlurDeclaration1->GetStdDeviationX(), X1);
-    EXPECT_EQ(svgFeGaussianBlurDeclaration1->GetStdDeviationY(), Y1);
+    EXPECT_EQ(svgFeGaussianBlurDeclaration1.stdDeviationX, X1);
+    EXPECT_EQ(svgFeGaussianBlurDeclaration1.stdDeviationY, Y1);
     // the second child in filter
     auto svgFeGaussianBlur2 = AceType::DynamicCast<SvgFeGaussianBlur>(svgFilter->children_.at(1));
     EXPECT_NE(svgFeGaussianBlur2, nullptr);
-    auto svgFeGaussianBlurDeclaration2 =
-        AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(svgFeGaussianBlur2->declaration_);
-    EXPECT_NE(svgFeGaussianBlurDeclaration2, nullptr);
+    auto svgFeGaussianBlurDeclaration2 = svgFeGaussianBlur2->gaussianBlurAttr_;
     // 10 = 10 10
-    EXPECT_EQ(svgFeGaussianBlurDeclaration2->GetStdDeviationX(), X1);
-    EXPECT_EQ(svgFeGaussianBlurDeclaration2->GetStdDeviationY(), X1);
+    EXPECT_EQ(svgFeGaussianBlurDeclaration2.stdDeviationX, X1);
+    EXPECT_EQ(svgFeGaussianBlurDeclaration2.stdDeviationY, X1);
     // the third child in filter
     auto svgFeGaussianBlur3 = AceType::DynamicCast<SvgFeGaussianBlur>(svgFilter->children_.at(2));
     EXPECT_NE(svgFeGaussianBlur3, nullptr);
-    auto svgFeGaussianBlurDeclaration3 =
-        AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(svgFeGaussianBlur3->declaration_);
-    EXPECT_NE(svgFeGaussianBlurDeclaration3, nullptr);
+    auto svgFeGaussianBlurDeclaration3 = svgFeGaussianBlur3->gaussianBlurAttr_;
     // abc abc = 0 0
-    EXPECT_EQ(svgFeGaussianBlurDeclaration3->GetStdDeviationX(), ZERO);
-    EXPECT_EQ(svgFeGaussianBlurDeclaration3->GetStdDeviationY(), ZERO);
+    EXPECT_EQ(svgFeGaussianBlurDeclaration3.stdDeviationX, ZERO);
+    EXPECT_EQ(svgFeGaussianBlurDeclaration3.stdDeviationY, ZERO);
 }
 
 /**
@@ -1319,26 +1295,24 @@ HWTEST_F(ParseTestNg, ParseFeFloodAndCompositeTest001, TestSize.Level1)
     // the first child in filter
     auto svgFeFlood1 = AceType::DynamicCast<SvgFeFlood>(svgFilter->children_.at(0));
     EXPECT_NE(svgFeFlood1, nullptr);
-    auto svgFeFloodDeclaration1 = AceType::DynamicCast<SvgFeFloodDeclaration>(svgFeFlood1->declaration_);
-    EXPECT_NE(svgFeFloodDeclaration1, nullptr);
-    EXPECT_EQ(svgFeFloodDeclaration1->GetFloodColor().GetValue(), RED_COLOR);
-    EXPECT_EQ(svgFeFloodDeclaration1->GetFloodOpacity(), ZERO);
+    auto svgFeFloodDeclaration1 = svgFeFlood1->feFloodAttr_;
+    EXPECT_EQ(svgFeFloodDeclaration1.floodColor.GetValue(), RED_COLOR);
+    EXPECT_EQ(svgFeFloodDeclaration1.floodOpacity, ZERO);
     // the second child in filter
     auto svgFeFlood2 = AceType::DynamicCast<SvgFeFlood>(svgFilter->children_.at(1));
     EXPECT_NE(svgFeFlood2, nullptr);
-    auto svgFeFloodDeclaration2 = AceType::DynamicCast<SvgFeFloodDeclaration>(svgFeFlood2->declaration_);
-    EXPECT_NE(svgFeFloodDeclaration2, nullptr);
-    EXPECT_EQ(svgFeFloodDeclaration2->GetFloodColor().GetValue(), GREEN_COLOR);
-    EXPECT_EQ(svgFeFloodDeclaration2->GetFloodOpacity(), ONE);
+    auto svgFeFloodDeclaration2 = svgFeFlood2->feFloodAttr_;
+    EXPECT_EQ(svgFeFloodDeclaration2.floodColor.GetValue(), GREEN_COLOR);
+    EXPECT_EQ(svgFeFloodDeclaration2.floodOpacity, ONE);
     // the third child in filter
     auto svgFeComposite = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(2));
     EXPECT_NE(svgFeComposite, nullptr);
-    auto svgFeCompositeDeclaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(svgFeComposite->declaration_);
-    EXPECT_NE(svgFeCompositeDeclaration, nullptr);
-    EXPECT_EQ(svgFeCompositeDeclaration->GetIn().in, FeInType::SOURCE_ALPHA);
-    EXPECT_EQ(svgFeCompositeDeclaration->GetIn2().in, FeInType::SOURCE_GRAPHIC);
-    EXPECT_EQ(svgFeCompositeDeclaration->GetK1(), ONE);
-    EXPECT_EQ(svgFeCompositeDeclaration->GetK2(), ZERO);
+    auto svgFeCommonDeclaration = svgFeComposite->feAttr_;
+    auto svgFeCompositeDeclaration = svgFeComposite->feCompositeAttr_;
+    EXPECT_EQ(svgFeCommonDeclaration.in.in, SvgFeInType::SOURCE_ALPHA);
+    EXPECT_EQ(svgFeCompositeDeclaration.in2.in, SvgFeInType::SOURCE_GRAPHIC);
+    EXPECT_EQ(svgFeCompositeDeclaration.k1, ONE);
+    EXPECT_EQ(svgFeCompositeDeclaration.k2, ZERO);
 }
 
 /**
@@ -1361,11 +1335,11 @@ HWTEST_F(ParseTestNg, ParseFeBlendTest001, TestSize.Level1)
     // the first child in filter
     auto svgFeBlend = AceType::DynamicCast<SvgFeBlend>(svgFilter->children_.at(0));
     EXPECT_NE(svgFeBlend, nullptr);
-    auto svgFeBlendDeclaration = AceType::DynamicCast<SvgFeBlendDeclaration>(svgFeBlend->declaration_);
-    EXPECT_NE(svgFeBlendDeclaration, nullptr);
-    EXPECT_EQ(svgFeBlendDeclaration->GetIn().in, FeInType::SOURCE_GRAPHIC);
-    EXPECT_EQ(svgFeBlendDeclaration->GetIn2().in, FeInType::SOURCE_ALPHA);
-    EXPECT_EQ(svgFeBlendDeclaration->GetBlendMode(), FeBlendMode::LIGHTEN);
+    auto svgFeCommonDeclaration = svgFeBlend->feAttr_;
+    auto svgFeBlendDeclaration = svgFeBlend->feBlendAttr_;
+    EXPECT_EQ(svgFeCommonDeclaration.in.in, SvgFeInType::SOURCE_GRAPHIC);
+    EXPECT_EQ(svgFeBlendDeclaration.in2.in, SvgFeInType::SOURCE_ALPHA);
+    EXPECT_EQ(svgFeBlendDeclaration.blendMode, SvgFeBlendMode::LIGHTEN);
 }
 
 /**
@@ -1548,10 +1522,10 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest004, TestSize.Level1)
      */
     auto svgFe = AccessibilityManager::MakeRefPtr<SvgFe>();
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
-    ColorInterpolationType colorInterpolationType = ColorInterpolationType::SRGB;
-    ColorInterpolationType srcColor = ColorInterpolationType::LINEAR_RGB;
+    SvgColorInterpolationType colorInterpolationType = SvgColorInterpolationType::SRGB;
+    SvgColorInterpolationType srcColor = SvgColorInterpolationType::LINEAR_RGB;
     svgFe->GetImageFilter(imageFilter, colorInterpolationType, resultHash);
-    EXPECT_EQ(colorInterpolationType, ColorInterpolationType::SRGB);
+    EXPECT_EQ(colorInterpolationType, SvgColorInterpolationType::SRGB);
 
     /* *
      * @tc.steps: step3. call GetImageFilter
@@ -1559,7 +1533,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest004, TestSize.Level1)
      */
     svgFe->ConverImageFilterColor(imageFilter, srcColor, colorInterpolationType);
     EXPECT_NE(imageFilter, nullptr);
-    EXPECT_EQ(colorInterpolationType, ColorInterpolationType::SRGB);
+    EXPECT_EQ(colorInterpolationType, SvgColorInterpolationType::SRGB);
 }
 
 /**
@@ -1581,41 +1555,41 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest005, TestSize.Level1)
      * @tc.expected: Execute function return value not is nullptr
      */
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
-    FeIn in = {
-        .in = FeInType::SOURCE_GRAPHIC,
+    SvgFeIn in = {
+        .in = SvgFeInType::SOURCE_GRAPHIC,
         .id = ""
     };
-    in.in = FeInType::SOURCE_GRAPHIC;
+    in.in = SvgFeInType::SOURCE_GRAPHIC;
     auto value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    in.in = FeInType::SOURCE_ALPHA;
+    in.in = SvgFeInType::SOURCE_ALPHA;
     value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_NE(value, nullptr);
 
-    in.in = FeInType::BACKGROUND_IMAGE;
+    in.in = SvgFeInType::BACKGROUND_IMAGE;
     value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    in.in = FeInType::BACKGROUND_ALPHA;
+    in.in = SvgFeInType::BACKGROUND_ALPHA;
     value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    in.in = FeInType::FILL_PAINT;
+    in.in = SvgFeInType::FILL_PAINT;
     value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    in.in = FeInType::STROKE_PAINT;
+    in.in = SvgFeInType::STROKE_PAINT;
     value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    in.in = FeInType::PRIMITIVE;
+    in.in = SvgFeInType::PRIMITIVE;
     value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
     // 20 = Values not in definition
     int cnt = 20;
-    in.in = static_cast<FeInType>(cnt);
+    in.in = static_cast<SvgFeInType>(cnt);
     value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 }
@@ -1669,10 +1643,10 @@ HWTEST_F(ParseTestNg, ParseNodeTest002, TestSize.Level1)
      * @tc.steps: step1. call SetHref InitStyle
      * @tc.expected: Execute function return value is 1.
      */
-    svgDom->root_->declaration_->SetHref("href");
+    svgDom->root_->attributes_.href = "href";
     svgDom->root_->svgContext_.Upgrade()->Push("href", SvgGradient::CreateLinearGradient());
-    svgDom->root_->InitStyle(nullptr);
-    EXPECT_EQ(svgDom->root_->declaration_->GetHref(), "href");
+    svgDom->root_->InitStyle(SvgBaseAttribute());
+    EXPECT_EQ(svgDom->root_->attributes_.href, "href");
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
     svgDom->root_->hrefRender_ = false;
@@ -1721,7 +1695,6 @@ HWTEST_F(ParseTestNg, ParseNodeTest003, TestSize.Level1)
     svg->UpdateAttr("height", 120.5);
     svg->passStyle_ = false;
     svg->UpdateAttrHelper("fill", "black");
-    EXPECT_FALSE(svg->declaration_->attributes_.empty());
 
     /* *
      * @tc.steps: step2. call ConvertDimensionToPx
@@ -2041,7 +2014,7 @@ HWTEST_F(ParseTestNg, ParsePolygonTest003, TestSize.Level1)
     auto svgPolygon = AceType::DynamicCast<SvgPolygon>(svg->children_.at(0));
     Gradient temp;
     temp.SetType(GradientType::CONIC);
-    svgPolygon->declaration_->SetGradient(temp);
+    svgPolygon->attributes_.fillState.SetGradient(temp);
     svgPolygon->UpdateGradient(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_NE(svgPolygon->fillState_.GetGradient()->GetType(), GradientType::LINEAR);
 }
@@ -2069,18 +2042,18 @@ HWTEST_F(ParseTestNg, ParsePolygonTest004, TestSize.Level1)
      * @tc.expected: Execute SvgPolygon Points is empty
      */
     auto svgPolygon = AceType::DynamicCast<SvgPolygon>(svg->children_.at(0));
-    auto declaration = AceType::DynamicCast<SvgPolygonDeclaration>(svgPolygon->declaration_);
-    declaration->SetPoints("");
+    auto declaration = svgPolygon->polyAttr_;
+    declaration.points = "";
     svgPolygon->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
-    EXPECT_TRUE(declaration->GetPoints().empty());
+    EXPECT_TRUE(declaration.points.empty());
 
     /* *
      * @tc.steps: step3. call AsPath
      * @tc.expected: Execute SvgPolygon Points parse error
      */
-    declaration->SetPoints("ccc");
+    declaration.points = "ccc";
     svgPolygon->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
-    EXPECT_FALSE(declaration->GetPoints().empty());
+    EXPECT_FALSE(declaration.points.empty());
 }
 
 /**
@@ -2124,8 +2097,8 @@ HWTEST_F(ParseTestNg, ParseRectTest004, TestSize.Level1)
      */
     auto svgRect = AceType::DynamicCast<SvgRect>(svg->children_.at(0));
     svgRect->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
-    auto rectDeclaration = AceType::DynamicCast<SvgRectDeclaration>(svgRect->declaration_);
-    EXPECT_NE(rectDeclaration->GetRx().Value(), 0);
+    auto rectDeclaration = svgRect->rectAttr_;
+    EXPECT_NE(rectDeclaration.rx.Value(), 0);
 }
 
 /**
@@ -2147,9 +2120,9 @@ HWTEST_F(ParseTestNg, ParseUseTest002, TestSize.Level1)
      * @tc.expected: Execute function return value is true
      */
     auto svgUse = AceType::DynamicCast<SvgUse>(svg->children_.at(INDEX_ONE));
-    svgUse->declaration_->SetHref("");
+    svgUse->attributes_.href = "";
     svgUse->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
-    EXPECT_TRUE(svgUse->declaration_->GetHref().empty());
+    EXPECT_TRUE(svgUse->attributes_.href.empty());
 }
 
 /**
@@ -2171,12 +2144,11 @@ HWTEST_F(ParseTestNg, ParseImageTest001, TestSize.Level1)
      * @tc.expected: Execute function return value is true
      */
     auto svgImage = AceType::DynamicCast<SvgImage>(svg->children_.at(0));
-    auto imageDeclaration = AceType::DynamicCast<SvgImageDeclaration>(svgImage->declaration_);
-    EXPECT_NE(imageDeclaration, nullptr);
-    EXPECT_FLOAT_EQ(imageDeclaration->GetX().ConvertToPx(), X);
-    EXPECT_FLOAT_EQ(imageDeclaration->GetY().ConvertToPx(), Y);
-    EXPECT_FLOAT_EQ(imageDeclaration->GetWidth().ConvertToPx(), RECT_WIDTH);
-    EXPECT_FLOAT_EQ(imageDeclaration->GetHeight().ConvertToPx(), RECT_HEIGHT);
-    EXPECT_STREQ(imageDeclaration->GetHref().c_str(), IMAGE_HREF.c_str());
+    auto imageDeclaration = svgImage->imageAttr_;
+    EXPECT_FLOAT_EQ(imageDeclaration.x.ConvertToPx(), X);
+    EXPECT_FLOAT_EQ(imageDeclaration.y.ConvertToPx(), Y);
+    EXPECT_FLOAT_EQ(imageDeclaration.width.ConvertToPx(), RECT_WIDTH);
+    EXPECT_FLOAT_EQ(imageDeclaration.height.ConvertToPx(), RECT_HEIGHT);
+    EXPECT_STREQ(imageDeclaration.href.c_str(), IMAGE_HREF.c_str());
 }
 } // namespace OHOS::Ace::NG

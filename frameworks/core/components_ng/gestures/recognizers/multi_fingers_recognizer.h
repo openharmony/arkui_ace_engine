@@ -73,6 +73,8 @@ protected:
         touchPoints_[touchId] = {};
     }
 
+    void UpdateTouchPointWithAxisEvent(const AxisEvent& event);
+
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked) override;
 
     void OnResetStatus() override

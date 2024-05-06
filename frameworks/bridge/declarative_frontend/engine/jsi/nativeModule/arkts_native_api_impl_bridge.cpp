@@ -938,6 +938,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetWordBreak));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWordBreak"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetWordBreak));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLineBreakStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetLineBreakStrategy));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineBreakStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetLineBreakStrategy));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEllipsisMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetEllipsisMode));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEllipsisMode"),
@@ -1093,6 +1097,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "blank"), blank);
 
     auto span = panda::ObjectRef::New(vm);
+    span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSpanSrc"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SpanBridge::SetSpanSrc));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextCase"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::SetTextCase));
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextCase"),
@@ -1313,6 +1319,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetWordBreak));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWordBreak"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetWordBreak));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLineBreakStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetLineBreakStrategy));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineBreakStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetLineBreakStrategy));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinFontSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMinFontSize));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinFontSize"),
@@ -1655,6 +1665,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetWordBreak));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWordBreak"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetWordBreak));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLineBreakStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetLineBreakStrategy));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineBreakStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetLineBreakStrategy));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCancelButton"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetCancelButton));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCancelButton"),
@@ -2480,6 +2494,8 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
 void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto image = panda::ObjectRef::New(vm);
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageShowSrc"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetImageShowSrc));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOption"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetCopyOption));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),

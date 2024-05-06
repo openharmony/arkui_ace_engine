@@ -578,6 +578,7 @@ private:
     void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
     void InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleFlingMove(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(int32_t x, int32_t y);
@@ -784,7 +785,6 @@ private:
     bool isParentReachEdge_ = false;
     ReachEdge isFlingReachEdge_ = { false, false };
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
-    double pinchValue_ = 1.0;
     std::queue<TouchEventInfo> touchEventQueue_;
     std::unordered_map<int32_t, bool> naitve_map_;
 };

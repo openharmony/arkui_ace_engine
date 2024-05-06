@@ -115,4 +115,13 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     return contentConstraint.Constrain(size);
 }
 
+void ImageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    BoxLayoutAlgorithm::Measure(layoutWrapper);
+    auto ctx = loadingCtx_.Upgrade();
+    CHECK_NULL_VOID(ctx);
+    ctx->FinishMearuse();
+    ctx->CallbackAfterMeasureIfNeed();
+}
+
 } // namespace OHOS::Ace::NG

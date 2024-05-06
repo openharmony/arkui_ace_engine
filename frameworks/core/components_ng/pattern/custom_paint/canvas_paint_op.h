@@ -27,14 +27,13 @@ class Rect;
 
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
-class PaintWrapper;
 
 class CanvasPaintOp final {
 public:
     CanvasPaintOp() : mHasText(false) {}
     ~CanvasPaintOp() { Reset(); }
 
-    void Draw(CanvasPaintMethod* method, PaintWrapper* paintWrapper) const;
+    void Draw(CanvasPaintMethod* method) const;
     void Reset();
     bool Empty() const {return fUsed == 0; }
 

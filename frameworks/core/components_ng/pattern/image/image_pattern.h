@@ -152,6 +152,20 @@ public:
         }
     }
 
+    std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
+    {
+        switch (dynamicMode) {
+            case DynamicRangeMode::HIGH:
+                return "HIGH";
+            case DynamicRangeMode::CONSTRAINT:
+                return "CONSTRAINT";
+            case DynamicRangeMode::STANDARD:
+                return "STANDARD";
+            default:
+                return "STANDARD";
+        }
+    }
+
     std::string GetImageFitStr(ImageFit value);
 
     std::string GetImageRepeatStr(ImageRepeat value);
@@ -318,6 +332,7 @@ private:
     void StartDecoding(const SizeF& dstSize);
     bool CheckIfNeedLayout();
     void OnImageDataReady();
+    void OnCompleteInDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
@@ -344,6 +359,7 @@ private:
     DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();
     LoadFailNotifyTask CreateLoadFailCallback();
+    OnCompleteInDataReadyNotifyTask CreateCompleteCallBackInDataReady();
 
     DataReadyNotifyTask CreateDataReadyCallbackForAlt();
     LoadSuccessNotifyTask CreateLoadSuccessCallbackForAlt();
@@ -385,6 +401,7 @@ private:
     void OnImageModifyDone();
     void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
+    void ChangeRenderContextProperties();
     void ControlAnimation(int32_t index);
     void SetObscured();
 

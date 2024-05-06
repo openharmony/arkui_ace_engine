@@ -216,6 +216,7 @@ public:
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
+    static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void ResetTextInputPadding(FrameNode* frameNode);
     static void SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue);
     static void SetBlurOnSubmit(FrameNode* frameNode, bool blurOnSubmit);
@@ -226,8 +227,7 @@ public:
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func);
-    static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc,
-        bool supportAvoidance = false);
+    static void SetCustomKeyboard(FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance = false);
     static void SetInputFilter(FrameNode* frameNode, const std::string& value);
     static void SetInputFilterError(FrameNode* frameNode, const std::function<void(const std::string&)>& onError);
     static Ace::WordBreak GetWordBreak(FrameNode* frameNode);
@@ -245,6 +245,8 @@ public:
     static Dimension GetLineHeight(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);
     static void SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding);
+    static RefPtr<UINode> GetCustomKeyboard(FrameNode* frameNode);
+    static bool GetCustomKeyboardOption(FrameNode* frameNode);
  
 private:
     void AddDragFrameNodeToManager() const;

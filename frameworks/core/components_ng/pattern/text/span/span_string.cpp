@@ -275,6 +275,7 @@ void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type)
         ++(*iter)->interval.second;
     }
 
+    UpdateSpanMapWithOffset(span->GetStartIndex() - 1, 1);
     if (spansMap_.find(type) == spansMap_.end()) {
         spansMap_[type].emplace_back(span);
     } else {
@@ -288,14 +289,9 @@ void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type)
         }
         auto iter = specialList.begin();
         std::advance(iter, step);
-        iter = specialList.insert(iter, span);
-        for (++iter; iter != specialList.end(); ++iter) {
-            (*iter)->UpdateStartIndex((*iter)->GetStartIndex() + 1);
-            (*iter)->UpdateEndIndex((*iter)->GetEndIndex() + 1);
-        }
+        specialList.insert(iter, span);
         spansMap_[type] = specialList;
     }
-    text_.insert(span->GetStartIndex(), " ");
 }
 
 RefPtr<NG::ImageSpanItem> SpanString::MakeImageSpanItem(const RefPtr<ImageSpan>& imageSpan)
@@ -498,18 +494,17 @@ RefPtr<SpanString> SpanString::GetSubSpanString(int32_t start, int32_t length) c
 
     std::list<RefPtr<NG::SpanItem>> subSpans_;
     for (const auto& spanItem : spans_) {
-        int32_t spanStart = spanItem->interval.first;
-        int32_t spanEnd = spanItem->interval.second;
-        if ((start <= spanStart && spanStart < end) || (start <= spanEnd && spanEnd < end)) {
-            auto oldStart = spanStart;
-            auto oldEnd = spanEnd;
-            spanStart = spanStart <= start ? 0 : spanStart - start;
-            spanEnd = spanEnd < end ? spanEnd - start : end - start;
+        auto intersection = spanItem->GetIntersectionInterval({start, start+length});
+        if (intersection) {
+            int32_t oldStart = spanItem->interval.first;
+            int32_t oldEnd = spanItem->interval.second;
+            auto spanStart = oldStart <= start ? 0 : oldStart - start;
+            auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
             auto newSpanItem = spanItem->GetSameStyleSpanItem();
             newSpanItem->interval = { spanStart, spanEnd };
             newSpanItem->content = StringUtils::ToString(
                 StringUtils::ToWstring(spanItem->content)
-                    .substr(std::max(start - oldStart, 0), std::min(spanEnd, oldEnd) - std::max(start, oldStart)));
+                    .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart)));
             subSpans_.emplace_back(newSpanItem);
         }
     }

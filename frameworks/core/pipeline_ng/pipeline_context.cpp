@@ -2496,7 +2496,7 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
     if (windowId) {
         return mouseStyle->ChangePointerStyle(windowId, format);
     }
-    return mouseStyle->ChangePointerStyle(GetWindowId(), format);
+    return mouseStyle->ChangePointerStyle(GetFocusWindowId(), format);
 }
 
 bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
@@ -2630,6 +2630,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.time = event.time;
     result.deviceId = event.deviceId;
     result.sourceType = event.sourceType;
+    result.sourceTool = event.sourceTool;
     result.pointerEvent = event.pointerEvent;
     return result;
 }
@@ -3385,7 +3386,7 @@ void PipelineContext::SetCursor(int32_t cursorValue)
         auto cursor = static_cast<MouseFormat>(cursorValue);
         window->SetCursor(cursor);
         window->SetUserSetCursor(true);
-        mouseStyle->ChangePointerStyle(GetWindowId(), cursor);
+        mouseStyle->ChangePointerStyle(GetFocusWindowId(), cursor);
     }
 }
 
@@ -3397,7 +3398,7 @@ void PipelineContext::RestoreDefault(int32_t windowId)
     CHECK_NULL_VOID(mouseStyle);
     window->SetCursor(MouseFormat::DEFAULT);
     window->SetUserSetCursor(false);
-    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetWindowId(), MouseFormat::DEFAULT);
+    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetFocusWindowId(), MouseFormat::DEFAULT);
 }
 
 void PipelineContext::OpenFrontendAnimation(
@@ -3643,9 +3644,9 @@ void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
         CHECK_NULL_VOID(renderContext);
         CalcDimension dimension;
         if (!isFocus && mode == WindowMode::WINDOW_MODE_FLOATING) {
-            dimension.SetValue(1 + percent.back());
+            dimension.SetValue(1 + percent.second);
         } else {
-            dimension.SetValue(1 + percent.front());
+            dimension.SetValue(1 + percent.first);
         }
         renderContext->UpdateFrontBrightness(dimension);
     }

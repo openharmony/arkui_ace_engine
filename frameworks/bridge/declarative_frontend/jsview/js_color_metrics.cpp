@@ -187,8 +187,12 @@ void JSColorMetrics::JsRGBAColor(const JSCallbackInfo& info)
 
 void JSColorMetrics::JsBlendColor(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
     JSColorMetrics* overlayColor = JSRef<JSObject>::Cast(info[0])->Unwrap<JSColorMetrics>();
-    if (info.Length() < 1 || !info[0]->IsObject() || !overlayColor) {
+    if (!overlayColor) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }

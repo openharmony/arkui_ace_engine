@@ -135,6 +135,12 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
 RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent)
 {
     const char* element = dom.getName(xmlNode);
+    if (dom.getType(xmlNode) == SkDOM::kText_Type) {
+        CHECK_NULL_RETURN(parent, nullptr);
+        if (AceType::InstanceOf<SvgStyle>(parent)) {
+            SvgStyle::ParseCssStyle(element, attrCallback_);
+        }
+    }
 
     auto elementIter = BinarySearchFindIndex(TAG_FACTORIES, ArraySize(TAG_FACTORIES), element);
     if (elementIter == -1) {

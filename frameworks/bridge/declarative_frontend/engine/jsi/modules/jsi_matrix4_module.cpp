@@ -292,7 +292,7 @@ shared_ptr<JsValue> SetPolyToPoly(const shared_ptr<JsRuntime>& runtime, const sh
             srcIndex, pointCount, static_cast<int>(srcPoint.size()));
         return thisObj;
     }
-    if (dstIndex < 0 || (pointCount + dstIndex) > dstPoint.size()) {
+    if (dstIndex < 0 || (pointCount + dstIndex) > static_cast<int32_t>(dstPoint.size())) {
         LOGE("setpPolyToPoly dstIndex out of range dstIndex:%{public}d, pointCount:%{public}d, dst size%{public}d",
             dstIndex, pointCount, static_cast<int>(dstPoint.size()));
         return thisObj;

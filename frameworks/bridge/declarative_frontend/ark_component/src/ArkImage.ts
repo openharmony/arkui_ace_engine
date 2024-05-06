@@ -503,9 +503,30 @@ class ImageTransitionModifier extends ModifierWithKey<object> {
   }
 }
 
+class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | DrawableDescriptor> {
+  constructor(value: ResourceStr | PixelMap | DrawableDescriptor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageShowSrc');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.setImageShowSrc(node, "");
+    }
+    else {
+      getUINativeModule().image.setImageShowSrc(node, this.value);
+    }
+  }
+}
+
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]) {
+    if (value[0] != undefined) {
+      modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
+    }
+    return this;
   }
   draggable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);

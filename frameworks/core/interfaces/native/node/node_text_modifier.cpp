@@ -836,6 +836,31 @@ ArkUI_CharPtr GetTextFontFeature(ArkUINodeHandle node)
     g_strValue = UnParseFontFeatureSetting(TextModelNG::GetFontFeature(frameNode));
     return g_strValue.c_str();
 }
+
+void SetLineBreakStrategy(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (lineBreakStrategy < 0 || lineBreakStrategy >= LINE_BREAK_STRATEGY_TYPES.size()) {
+        lineBreakStrategy = 0; // 0 is the default value of LineBreakStrategy::GREEDY
+    }
+    TextModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[lineBreakStrategy]);
+}
+
+void ResetLineBreakStrategy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // 0 is the default value of LineBreakStrategy::GREEDY
+    TextModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[0]);
+}
+
+ArkUI_Int32 GetTextLineBreakStrategy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetLineBreakStrategy(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -928,6 +953,9 @@ const ArkUITextModifier* GetTextModifier()
         SetTextDataDetectorConfig,
         GetTextDataDetectorConfig,
         ResetTextDataDetectorConfig,
+        SetLineBreakStrategy,
+        ResetLineBreakStrategy,
+        GetTextLineBreakStrategy
     };
 
     return &modifier;

@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 class SpanBridge {
 public:
+    static ArkUINativeModuleValue SetSpanSrc(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetTextCase(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetTextCase(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetFontWeight(ArkUIRuntimeCallInfo *runtimeCallInfo);

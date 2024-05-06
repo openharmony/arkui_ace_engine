@@ -4116,6 +4116,23 @@ void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, 
     });
 }
 
+void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId)
+{
+    if (customKeyboardMap_.find(targetId) != customKeyboardMap_.end()) {
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto customKeyboard = KeyboardView::CreateKeyboardWithNode(targetId, keyboard);
+    if (!customKeyboard) {
+        return;
+    }
+    customKeyboard->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    customKeyboardMap_[targetId] = customKeyboard;
+    PlayKeyboardTransition(customKeyboard, true);
+}
+
 void OverlayManager::CloseKeyboard(int32_t targetId)
 {
     auto it = customKeyboardMap_.find(targetId);

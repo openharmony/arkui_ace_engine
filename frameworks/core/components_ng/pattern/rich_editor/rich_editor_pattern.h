@@ -251,6 +251,11 @@ public:
         }
     }
 
+    void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
+    {
+        caretChangeListener_ = listener;
+    }
+
     void SetStyledString(const RefPtr<SpanString>& value);
     void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) override;
     void InsertValueInStyledString(const std::string& insertValue);
@@ -264,7 +269,7 @@ public:
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void MoveCaretOnLayoutSwap();
+    void MoveCaretOnLayoutSwap(bool isReduceSize);
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
@@ -407,6 +412,8 @@ public:
     void RemoveEmptySpanItems();
     RefPtr<GestureEventHub> GetGestureEventHub();
     float GetSelectedMaxWidth();
+    void AfterAddImage(RichEditorChangeValue& changeValue);
+    bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
 
     bool IsUsingMouse() const
     {
@@ -821,13 +828,16 @@ private:
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
 
     void GetChangeSpanStyle(RichEditorChangeValue& changeValue, std::optional<TextStyle>& spanTextStyle,
-        const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
+        std::optional<struct UpdateParagraphStyle>& spanParaStyle, const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
     void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::string& insertValue,
-        int32_t textIndex, std::optional<TextStyle> style, bool isCreate = false, bool fixDel = true);
+        int32_t textIndex, std::optional<TextStyle> textStyle, std::optional<struct UpdateParagraphStyle> paraStyle,
+        bool isCreate = false, bool fixDel = true);
     void GetReplacedSpanFission(RichEditorChangeValue& changeValue, int32_t& innerPosition, std::string& content,
-        int32_t startSpanIndex, int32_t offsetInSpan, std::optional<TextStyle> style);
+        int32_t startSpanIndex, int32_t offsetInSpan, std::optional<TextStyle> textStyle,
+        std::optional<struct UpdateParagraphStyle> paraStyle);
     void CreateSpanResult(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t spanIndex,
-        int32_t offsetInSpan, int32_t endInSpan, std::string content, std::optional<TextStyle> style);
+        int32_t offsetInSpan, int32_t endInSpan, std::string content, std::optional<TextStyle> textStyle,
+        std::optional<struct UpdateParagraphStyle> paraStyle);
     void SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle);
     void CalcInsertValueObj(TextInsertValueInfo& info, int textIndex, bool isCreate = false);
     void GetDeletedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t length,
@@ -958,6 +968,7 @@ private:
     std::optional<Color> caretColor_;
     std::optional<Color> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
+    std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
     Offset selectionMenuOffset_;
     // add for scroll

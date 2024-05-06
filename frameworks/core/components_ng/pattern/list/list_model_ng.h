@@ -74,6 +74,8 @@ public:
 
     DisplayMode GetDisplayMode() const override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
+    static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
     static void SetEditMode(FrameNode* frameNode, bool editMode);
     static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
     static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);
@@ -120,7 +122,8 @@ public:
     static NestedScrollOptions GetListNestedScroll(FrameNode* frameNode);
     static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
     static void SetScrollBy(FrameNode* frameNode, double x, double y);
-
+    static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
+    static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
 private:
     void AddDragFrameNodeToManager() const;
 };

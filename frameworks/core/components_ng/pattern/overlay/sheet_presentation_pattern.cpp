@@ -70,7 +70,17 @@ void SheetPresentationPattern::OnModifyDone()
         CHECK_NULL_VOID(pipeline);
         auto sheetTheme = pipeline->GetTheme<SheetTheme>();
         CHECK_NULL_VOID(sheetTheme);
-        renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            BlurStyle blurStyle = static_cast<BlurStyle>(sheetTheme->GetSheetBackgroundBlurStyle());
+            if (blurStyle != BlurStyle::NO_MATERIAL) {
+                BlurStyleOption options;
+                options.blurStyle = blurStyle;
+                renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+                renderContext->UpdateBackBlurStyle(options);
+            }
+        } else {
+            renderContext->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
+        }
     }
     InitPanEvent();
     InitPageHeight();

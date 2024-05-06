@@ -113,6 +113,12 @@ typedef enum {
     ARKUI_NODE_WATER_FLOW,
     /** Water flow item. */
     ARKUI_NODE_FLOW_ITEM,
+    /** relative container. */
+    ARKUI_NODE_RELATIVE_CONTAINER,
+    /** Grid. */
+    ARKUI_NODE_GRID,
+    /** Grid item. */
+    ARKUI_NODE_GRID_ITEM,
 } ArkUI_NodeType;
 
 /**
@@ -1451,6 +1457,22 @@ typedef enum {
      */
     NODE_MARGIN_PERCENT,
 
+    NODE_GEOMETRY_TRANSITION,
+
+    /**
+     * @brief 指定以该组件为链头所构成的链的参数，支持属性设置、属性重置和属性获取接口。
+     *
+     * 仅当父容器为RelativeContainer时生效
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：链的方向。枚举{@link ArkUI_Axis}。 \n
+     * .value[1].i32：链的样式。枚举{@link ArkUI_RelativeLayoutChainStyle}。 \n
+     * \n
+     * .value[0].i32：链的方向。枚举{@link ArkUI_Axis}。 \n
+     * .value[1].i32：链的样式。枚举{@link ArkUI_RelativeLayoutChainStyle}。 \n
+     */
+    NODE_RELATIVE_LAYOUT_CHAIN_MODE,
+
     NODE_RENDER_FIT,
 
     NODE_OUTLINE_COLOR,
@@ -1738,6 +1760,17 @@ typedef enum {
      *
      */
     NODE_TEXT_WORD_BREAK,
+    /**
+     * @brief Defines the line break rule. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_LineBreakStrategy}. \n
+     *
+     */
+    NODE_TEXT_LINE_BREAK_STRATEGY,
     /**
      * @brief Defines the ellipsis position. This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3612,14 +3645,36 @@ typedef enum {
      * .value[2]?. u32: color of the internal round pie in the enabled state. \n
      * The type is 0xARGB, and the default value is 0xFFFFFFFF. \n
      * Attribute obtaining method return value {@Link ArkUI_AttributeItem} format:\n
-     * .value[0]?. u32: color of the mother board in enabled state. \n
+     * .value[0]. u32: color of the mother board in enabled state. \n
      * The type is 0xARGB, and the default value is 0xFF007DFF. \n
-     * .value[1]?. u32: stroke color in the close state. \n
+     * .value[1]. u32: stroke color in the close state. \n
      * The type is 0xARGB, and the default value is 0xFF182431. \n
-     * .value[2]?. u32: color of the internal round pie in the enabled state. \n
+     * .value[2]. u32: color of the internal round pie in the enabled state. \n
      * The type is 0xARGB, and the default value is 0xFFFFFFF. \n
      */
     NODE_RADIO_STYLE,
+    /**
+     * @brief 设置当前单选框的值，支持属性设置、重置和获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .string: 单选框的值.\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .string: 单选框的值.\n
+     *
+     */
+    NODE_RADIO_VALUE,
+    /**
+     * @brief 设置当前单选框的所属群组名称，相同group的Radio只能有一个被选中，支持属性设置、重置和获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .string: 当前单选框的所属群组名称.\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .string: 当前单选框的所属群组名称.\n
+     *
+     */
+    NODE_RADIO_GROUP,
 
     /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
@@ -3926,10 +3981,10 @@ typedef enum {
     * ListItem在List交叉轴方向的布局方式，支持属性设置，属性重置和属性获取接口。
     *
     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlign} \n
+     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment} \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlign}  \n
+     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment}  \n
     */
     NODE_LIST_ALIGN_LIST_ITEM,
 
@@ -4457,24 +4512,6 @@ typedef enum {
      */
     NODE_WATER_FLOW_FOOTER,
     /**
-    * @brief 设置当前瀑布流子组件的约束尺寸属性，组件布局时，进行尺寸范围限制，支持属性设置，属性重置和属性获取接口。
-    *
-    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-    * .value[0].f32：最小宽度，单位vp； \n
-    * .value[1].f32：最大宽度，单位vp； \n
-    * .value[2].f32：最小高度，单位vp； \n
-    * .value[3].f32：最大高度，单位vp； \n
-    * \n
-    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-    * .value[0].f32：最小宽度，单位vp； \n
-    * .value[1].f32：最大宽度，单位vp； \n
-    * .value[2].f32：最小高度，单位vp； \n
-    * .value[3].f32：最大高度，单位vp； \n
-    *
-    */
-    NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE,
-
-    /**
      * @brief Scroll to the specified index.
      * 
      * When activating the smooth animation, all items passed through will be loaded and layout calculated, which can
@@ -4489,6 +4526,128 @@ typedef enum {
      *
      */
     NODE_WATER_FLOW_SCROLL_TO_INDEX,
+
+    /**
+     * @brief 设置当前瀑布流子组件的约束尺寸属性，组件布局时，进行尺寸范围限制，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32：最小宽度，单位vp； \n
+     * .value[1].f32：最大宽度，单位vp； \n
+     * .value[2].f32：最小高度，单位vp； \n
+     * .value[3].f32：最大高度，单位vp； \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：最小宽度，单位vp； \n
+     * .value[1].f32：最大宽度，单位vp； \n
+     * .value[2].f32：最小高度，单位vp； \n
+     * .value[3].f32：最大高度，单位vp； \n
+     *
+     */
+    NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE,
+
+/**
+     * @brief Sets the number of columns in the grid layout. If this parameter is not set, one column is used
+     * by default. This attribute can be set, reset, and obtained as required through APIs.
+     * For example, <b>'1fr 1fr 2fr'</b> indicates three columns, with the first column taking up 1/4 of the parent
+     * component's full width, the second column 1/4, and the third column 2/4.
+     * You can use <b>columnsTemplate('repeat(auto-fill,track-size)')</b> to automatically calculate the number of
+     * columns based on the specified column width <b>track-size</b>.
+     * <b>repeat</b> and <b>auto-fill</b> are keywords. The units for <b>track-size</b> can be px, vp (default), %,
+     * or a valid number.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: number of columns in the layout.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: number of columns in the layout.\n
+     *
+     */
+    NODE_GRID_COLUMN_TEMPLATE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_GRID,
+
+    /**
+     * @brief Sets the number of rows in the grid layout. If this parameter is not set, one row is used
+     * by default. This attribute can be set, reset, and obtained as required through APIs.
+     * For example, <b>'1fr 1fr 2fr'</b> indicates three rows, with the first row taking up 1/4 of the parent
+     * component's full height, the second row 1/4, and the third row 2/4.
+     * You can use <b>rowsTemplate('repeat(auto-fill,track-size)')</b> to automatically calculate the number of rows
+     * based on the specified row height <b>track-size</b>.
+     * <b>repeat</b> and <b>auto-fill</b> are keywords. The units for <b>track-size</b> can be px, vp (default), %,
+     * or a valid number.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: number of rows in the layout. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: number of rows in the layout. \n
+     *
+     */
+    NODE_GRID_ROW_TEMPLATE,
+
+    /**
+     * @brief Sets the gap between columns. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: gap between columns, in vp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: gap between columns, in vp.\n
+     *
+     */
+    NODE_GRID_COLUMN_GAP,
+
+    /**
+     * @brief Sets the gap between rows. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: gap between lines, in vp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: gap between lines, in vp.\n
+     *
+     */
+    NODE_GRID_ROW_GAP,
+
+    /**
+    * @brief Defines the grid adapter. The attribute can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .object: {@link ArkUI_NodeAdapter} object as the adapter. \n
+    */
+    NODE_GRID_NODE_ADAPTER,
+
+    /**
+    * @brief Sets the number of cached items in the grid adapter.
+    * This attribute can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: number of cached items in the grid adapter. \n
+    */
+    NODE_GRID_CACHED_COUNT,
+
+    /**
+     * @brief 设置RelativeContaine容器内的辅助线，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的辅助线： \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的辅助线：  \n
+     *
+     */
+    NODE_RELATIVE_CONTAINER_GUIDE_LINE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RELATIVE_CONTAINER,
+
+    /**
+     * @brief 设置RelativeContaine容器内的屏障，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的辅助线： \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .object: RelativeContaine容器内的屏障：  \n
+     *
+     */
+    NODE_RELATIVE_CONTAINER_BARRIER,
+
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -5259,7 +5418,7 @@ typedef enum {
      * component is scrolled up and negative when the component is scrolled down. \n
      * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. \n
      */
-    NODE_WATER_FLOW_ON_WILL_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
+    NODE_ON_WILL_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
     /**
      * @brief Define the enumerated values of the event triggered when the ARKUI_NODE_WATER_FLOW component slides.
      * Condition for triggering the event: \n

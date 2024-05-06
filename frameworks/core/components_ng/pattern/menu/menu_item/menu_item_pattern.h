@@ -157,6 +157,7 @@ public:
     RefPtr<MenuPattern> GetMenuPattern(bool needTopMenu = false);
     void UpdateTextNodes();
 
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void OnMountToParentDone() override;
 
@@ -220,6 +221,9 @@ private:
     void InitFocusEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();
+
+    void CreateSymbolNode();
+    void CreateImageNode();
 
     std::list<TouchRegion> hoverRegions_;
 

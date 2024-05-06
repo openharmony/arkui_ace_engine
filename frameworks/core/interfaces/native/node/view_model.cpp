@@ -57,6 +57,7 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
+#include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
@@ -65,6 +66,7 @@
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -323,6 +325,12 @@ void* createCircleNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createRelativeContainerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = RelativeContainerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
 void* createGridNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = GridModelNG::CreateFrameNode(nodeId);
@@ -379,6 +387,13 @@ void* createGridColNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createRadioNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = RadioModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -408,7 +423,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr, // Web
         createSliderNode,
         createCanvasNode,
-        nullptr, // Radio
+        createRadioNode, // Radio
         createGridNode,
 #ifdef XCOMPONENT_SUPPORTED
         createXComponentNode,
@@ -428,6 +443,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createCustomNode,
         createWaterFlowNode,
         createFlowItemNode,
+        createRelativeContainerNode,
         createBlankNode,
         createDividerNode,
         createAlphabetIndexerNode,

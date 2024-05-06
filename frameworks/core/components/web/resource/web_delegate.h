@@ -666,6 +666,7 @@ public:
     void HandleTouchMove(const std::vector<std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo>> &touch_point_infos,
                          bool fromOverlay = false);
     void HandleTouchCancel();
+    void HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy);
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);

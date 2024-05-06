@@ -14,6 +14,28 @@
  */
 
 /// <reference path='./import.ts' />
+let LogTag;
+(function (LogTag) {
+  LogTag[LogTag['STATE_MGMT'] = 0] = 'STATE_MGMT';
+  LogTag[LogTag['ARK_COMPONENT'] = 1] = 'ARK_COMPONENT';
+})(LogTag || (LogTag = {}));
+class ArkLogConsole {
+  static log(...args) {
+      aceConsole.log(LogTag.ARK_COMPONENT,...args);
+  }
+  static debug(...args) {
+      aceConsole.debug(LogTag.ARK_COMPONENT,...args);
+  }
+  static info(...args) {
+      aceConsole.info(LogTag.ARK_COMPONENT,...args);
+  }
+  static warn(...args) {
+      aceConsole.warn(LogTag.ARK_COMPONENT,...args);
+  }
+  static error(...args) {
+      aceConsole.error(LogTag.ARK_COMPONENT,...args);
+  }
+}
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function getUINativeModule() {
   if (arkUINativeModule) {
@@ -5858,9 +5880,30 @@ class ImageEnhancedImageQualityModifier extends ModifierWithKey {
   }
 }
 ImageObjectFitModifier.identity = Symbol('enhancedImageQuality');
+class ImageSrcModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.setImageShowSrc(node, "");
+    }
+    else {
+      getUINativeModule().image.setImageShowSrc(node, this.value);
+    }
+  }
+}
+ImageSrcModifier.identity = Symbol('imageShowSrc');
+
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    if (value[0] != undefined) {
+      modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
+    }
+    return this;
   }
   draggable(value) {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
@@ -7676,6 +7719,20 @@ class SpanFontWeightModifier extends ModifierWithKey {
   }
 }
 SpanFontWeightModifier.identity = Symbol('spanfontweight');
+class SpanInputModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().span.setSpanSrc(node, "");
+    }
+    else {
+      getUINativeModule().span.setSpanSrc(node, this.value);
+    }
+  }
+}
+SpanInputModifier.identity = Symbol('spanInput');
 class ArkSpanComponent {
   constructor(nativePtr, classType) {
     this._modifiersWithKeys = new Map();
@@ -7686,6 +7743,12 @@ class ArkSpanComponent {
       this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     }
     this._nativePtrChanged = false;
+  }
+  initialize(value) {
+    if (value[0] != undefined) {
+      modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
+    }
+    return this;
   }
   applyModifierPatch() {
     let expiringItemsWithKeys = [];
@@ -8649,6 +8712,24 @@ class TextWordBreakModifier extends ModifierWithKey {
 }
 TextWordBreakModifier.identity = Symbol('textWordBreak');
 
+class TextLineBreakStrategyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetLineBreakStrategy(node);
+    }
+    else {
+      getUINativeModule().text.setLineBreakStrategy(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextLineBreakStrategyModifier.identity = Symbol('textLineBreakStrategy');
+
 class TextFontFeatureModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9165,6 +9246,11 @@ class ArkTextComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextWordBreakModifier.identity, TextWordBreakModifier, value);
     return this;
   }
+  lineBreakStrategy(value) {
+    modifierWithKey(this._modifiersWithKeys, TextLineBreakStrategyModifier.identity,
+      TextLineBreakStrategyModifier, value);
+    return this;
+  }
   fontFeature(value) {
     modifierWithKey(this._modifiersWithKeys, TextFontFeatureModifier.identity, TextFontFeatureModifier, value);
     return this;
@@ -9317,6 +9403,24 @@ class TextAreaWordBreakModifier extends ModifierWithKey {
     }
 }
 TextAreaWordBreakModifier.identity = Symbol('textAreaWordBreak');
+
+class TextAreaLineBreakStrategyModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textArea.resetLineBreakStrategy(node);
+      }
+      else {
+          getUINativeModule().textArea.setLineBreakStrategy(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaLineBreakStrategyModifier.identity = Symbol('textAreaLineBreakStrategy');
 class TextAreaSelectedBackgroundColorModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -10035,6 +10139,11 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
     return this;
   }
+  lineBreakStrategy(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaLineBreakStrategyModifier.identity,
+      TextAreaLineBreakStrategyModifier, value);
+    return this;
+  }
   minFontSize(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaMinFontSizeModifier.identity, TextAreaMinFontSizeModifier, value);
     return this;
@@ -10266,6 +10375,25 @@ class TextInputWordBreakModifier extends ModifierWithKey {
     }
 }
 TextInputWordBreakModifier.identity = Symbol('textInputWordBreak');
+
+class TextInputLineBreakStrategyModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textInput.resetLineBreakStrategy(node);
+      }
+      else {
+          getUINativeModule().textInput.setLineBreakStrategy(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputLineBreakStrategyModifier.identity = Symbol('textInputLineBreakStrategy');
+
 class TextInputMinFontSizeModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -11219,6 +11347,11 @@ class ArkTextInputComponent extends ArkComponent {
   }
   wordBreak(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputWordBreakModifier.identity, TextInputWordBreakModifier, value);
+    return this;
+  }
+  lineBreakStrategy(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputLineBreakStrategyModifier.identity,
+      TextInputLineBreakStrategyModifier, value);
     return this;
   }
   minFontSize(value) {
@@ -12897,16 +13030,25 @@ class ArkLoadingProgressComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().loadingProgress.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().loadingProgress.setContentModifierBuilder(this.nativePtr, this);
   }
   makeContentModifierNode(context, loadingProgressConfiguration) {
     loadingProgressConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.loadingProgressNode)) {
+    if (isUndefined(this.loadingProgressNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.loadingProgressNode = new xNode.BuilderNode(context);
       this.loadingProgressNode.build(this.builder, loadingProgressConfiguration);
+      this.needRebuild = false;
     } else {
       this.loadingProgressNode.update(loadingProgressConfiguration);
     }

@@ -80,6 +80,7 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
+    static void InitTextController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
@@ -105,6 +106,7 @@ public:
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetFont(FrameNode* frameNode, const Font& value);
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
+    static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
@@ -142,6 +144,7 @@ public:
     static bool GetTextDetectEnable(FrameNode* frameNode);
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
+    static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

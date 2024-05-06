@@ -150,6 +150,13 @@ public:
         return currentOffset_;
     }
 
+    RefPtr<ScrollControllerBase> GetPositionController() const
+    {
+        return positionController_;
+    }
+    
+    void TriggerModifyDone();
+
     float GetTotalHeight() const override;
 
     // scroller

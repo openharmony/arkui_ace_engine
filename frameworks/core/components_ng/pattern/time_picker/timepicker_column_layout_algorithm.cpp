@@ -24,7 +24,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DIVIDER_SIZE = 2;
-constexpr int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 constexpr float ITEM_HEIGHT_HALF = 2.0f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr int32_t HIDENODE = 3;
@@ -49,10 +48,9 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(blendNode);
     SizeF frameSize = { -1.0f, -1.0f };
 
-    uint32_t showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER;
+    uint32_t showCount_ = pickerTheme->GetShowCountPortrait() + BUFFER_NODE_NUMBER;
+    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        showCount_ = pickerTheme->GetShowCountLandscape() + BUFFER_NODE_NUMBER;
     }
     auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - HIDENODE) +
                                      pickerTheme->GetDividerSpacing().ConvertToPx());

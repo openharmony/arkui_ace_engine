@@ -49,7 +49,6 @@ public:
     }
 
     void FireSelectEvent();
-    void UpdateRecordCaretIndex(int32_t index) const;
 
     void UpdateHandleIndex(int32_t handleIndex)
     {

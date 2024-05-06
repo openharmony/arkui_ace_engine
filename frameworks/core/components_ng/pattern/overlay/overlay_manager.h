@@ -271,7 +271,6 @@ public:
     void SetHasFilter(bool hasFilter)
     {
         hasFilter_ = hasFilter;
-        hasFilterActived = true;
     }
 
     bool GetHasEvent()
@@ -404,6 +403,7 @@ public:
     void RemoveSheetMask(RefPtr<FrameNode>& sheetNode, RefPtr<UINode>& rootNode);
 
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
+    void BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
 
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);

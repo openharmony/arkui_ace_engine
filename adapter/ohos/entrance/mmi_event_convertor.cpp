@@ -317,9 +317,9 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     TimeStamp time(microseconds);
     events.time = time;
     events.pointerEvent = pointerEvent;
-    auto sourceTool = GetSourceTool(item.GetToolType());
-    if (events.sourceType == SourceType::TOUCH && sourceTool == SourceTool::PEN) {
-        events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+    events.sourceTool = GetSourceTool(item.GetToolType());
+    if (events.sourceType == SourceType::TOUCH && events.sourceTool == SourceTool::PEN) {
+        events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(events.sourceTool);
         // Pen use type double XY position.
         events.x = item.GetWindowXPos();
         events.y = item.GetWindowYPos();

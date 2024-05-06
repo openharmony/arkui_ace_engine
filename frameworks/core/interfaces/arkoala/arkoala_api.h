@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 95
+#define ARKUI_FULL_API_VERSION 96
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 95
+#define ARKUI_NODE_API_VERSION 96
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -561,6 +561,7 @@ enum ArkUINodeType {
     ARKUI_CUSTOM,
     ARKUI_WATER_FLOW,
     ARKUI_FLOW_ITEM,
+    ARKUI_RELATIVE_CONTAINER,
     ARKUI_BLANK,
     ARKUI_DIVIDER,
     ARKUI_ALPHABET_INDEXER,
@@ -611,8 +612,8 @@ enum ArkUIEventSubKind {
     ON_LIST_SCROLL_FRAME_BEGIN,
     ON_LIST_WILL_SCROLL,
     ON_LIST_DID_SCROLL,
-    ON_LIST_REACH_END,
     ON_LIST_REACH_START,
+    ON_LIST_REACH_END,
 
     ON_TOGGLE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TOGGLE,
 
@@ -650,8 +651,8 @@ enum ArkUIEventSubKind {
     ON_SCROLL_START,
     ON_SCROLL_STOP,
     ON_SCROLL_EDGE,
-    ON_SCROLL_REACH_END,
     ON_SCROLL_REACH_START,
+    ON_SCROLL_REACH_END,
 
     ON_TABS_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TABS,
     ON_NAVIGATOR_CLICK = ARKUI_MAX_EVENT_NUM * ARKUI_NAVIGATOR,
@@ -680,7 +681,6 @@ enum ArkUIEventSubKind {
     ON_WATER_FLOW_WILL_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_WATER_FLOW,
     ON_WATER_FLOW_REACH_END,
     ON_WATER_FLOW_DID_SCROLL,
-    ON_WATER_FLOW_SCROLL,
     ON_WATER_FLOW_SCROLL_START,
     ON_WATER_FLOW_SCROLL_STOP,
     ON_WATER_FLOW_SCROLL_FRAME_BEGIN,
@@ -937,6 +937,25 @@ struct ArkUIAnimateOption {
 
 struct ArkUIContext {
     ArkUI_Int32 id;
+};
+
+struct ArkUIGuidelineStyle {
+    ArkUI_CharPtr id;
+    ArkUI_Int32 direction;
+    ArkUI_Float32 start;
+    ArkUI_Float32 end;
+};
+
+struct ArkUIBarrierStyle {
+    ArkUI_CharPtr id;
+    ArkUI_Int32 direction;
+    ArkUI_CharPtr* referencedId;
+    ArkUI_Int32 referencedIdSize;
+};
+struct ArkUIRadioStyleOption {
+    ArkUI_Uint32 checkedBackgroundColor;
+    ArkUI_Uint32 uncheckedBorderColor;
+    ArkUI_Uint32 indicatorColor;
 };
 
 enum ArkUISwiperIndicatorType {
@@ -1298,7 +1317,7 @@ struct ArkUICommonModifier {
     ArkUITranslateTransitionType (*getTranslateTransition)(ArkUINodeHandle node);
     ArkUIOffsetType (*getOffset)(ArkUINodeHandle node);
     ArkUIAnchorType (*getMarkAnchor)(ArkUINodeHandle node);
-    void (*getAlignRules)(ArkUINodeHandle node, ArkUIAlignRulesType* alignRulesType);
+    void (*getAlignRules)(ArkUINodeHandle node, ArkUI_CharPtr* anchors, ArkUI_Int32* direction, ArkUI_Int32 length);
     ArkUIBlurStyleOptionType (*getBackgroundBlurStyle)(ArkUINodeHandle node);
     ArkUIImageSizeType (*getBackgroundImageSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getBackgroundImageSizeWithStyle)(ArkUINodeHandle node);
@@ -1352,8 +1371,17 @@ struct ArkUICommonModifier {
     ArkUI_Bool (*getRenderGroup)(ArkUINodeHandle node);
     void (*setOnVisibleAreaChange)(
         ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size);
+    ArkUI_CharPtr (*getGeometryTransition)(ArkUINodeHandle node, ArkUI_Bool* options);
+    void (*setChainStyle)(ArkUINodeHandle node, ArkUI_Int32 direction, ArkUI_Int32 style);
+    void (*getChainStyle)(ArkUINodeHandle node, ArkUI_Int32* values);
+    void (*resetChainStyle)(ArkUINodeHandle node);
+    void (*setBias)(ArkUINodeHandle node, ArkUI_Float32 horizontal, ArkUI_Float32 vertical);
+    void (*getBias)(ArkUINodeHandle node, ArkUI_Float32* values);
+    void (*resetBias)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getColorBlend)(ArkUINodeHandle node);
     ArkUIBlurStyleOptionType (*getForegroundBlurStyle)(ArkUINodeHandle node);
+    void (*resetVisibleAreaChange)(ArkUINodeHandle node);
+    void (*resetAreaChange)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1520,6 +1548,9 @@ struct ArkUITextModifier {
     void (*setTextDataDetectorConfig)(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size);
     ArkUI_Int32 (*getTextDataDetectorConfig)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*resetTextDataDetectorConfig)(ArkUINodeHandle node);
+    void (*setLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
+    void (*resetLineBreakStrategy)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextLineBreakStrategy)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -1566,6 +1597,8 @@ struct ArkUIButtonModifier {
 struct ArkUIImageModifier {
     void (*setSrc)(ArkUINodeHandle node, ArkUI_CharPtr value);
     // Do we need resetSrc() ?
+    void (*setImageShowSrc)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
+        ArkUI_Bool isUriPureNumber);
     void (*setCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOption);
     void (*resetCopyOption)(ArkUINodeHandle node);
     void (*setAutoResize)(ArkUINodeHandle node, ArkUI_Bool autoResize);
@@ -1934,6 +1967,16 @@ struct ArkUIGridModifier {
     void (*resetEnableScroll)(ArkUINodeHandle node);
     void (*setFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
     void (*resetFriction)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getGridColumnsTemplate)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getGridRowsTemplate)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getGridColumnsGap)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getGridRowsGap)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
+    void (*resetNodeAdapter)(ArkUINodeHandle node);
+    ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
+    void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
+    void (*resetCachedCount)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
 };
 
 struct ArkUIGridItemModifier {
@@ -2312,6 +2355,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaOnCut)(ArkUINodeHandle node);
     void (*setTextAreaOnPaste)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnPaste)(ArkUINodeHandle node);
+    void (*setTextAreaLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
+    void (*resetTextAreaLineBreakStrategy)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2484,6 +2529,12 @@ struct ArkUITextInputModifier {
     ArkUI_Float32 (*getTextInputLineHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputMaxLines)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextInputFontFeature)(ArkUINodeHandle node);
+    void (*setTextInputCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance);
+    ArkUINodeHandle (*getTextInputCustomKeyboard)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputCustomKeyboardOption)(ArkUINodeHandle node);
+    void (*resetTextInputCustomKeyboard)(ArkUINodeHandle node);
+    void (*setTextInputLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
+    void (*resetTextInputLineBreakStrategy)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -3136,6 +3187,7 @@ struct ArkUIDatePickerModifier {
 };
 
 struct ArkUISpanModifier {
+    void (*setSpanSrc)(ArkUINodeHandle node, ArkUI_CharPtr src);
     void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setSpanTextCase)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSpanTextCase)(ArkUINodeHandle node);
@@ -3299,6 +3351,14 @@ struct ArkUIRadioModifier {
     void (*setRadioResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
     void (*resetRadioResponseRegion)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRadioChecked)(ArkUINodeHandle node);
+    void (*getRadioStyle)(ArkUINodeHandle node, ArkUIRadioStyleOption* options);
+    void (*setRadioValue)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetRadioValue)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getRadioValue)(ArkUINodeHandle node);
+    void (*setRadioGroup)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetRadioGroup)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getRadioGroup)(ArkUINodeHandle node);
 };
 
 struct ArkUIPatternLockControllerModifier {
@@ -3623,6 +3683,14 @@ struct ArkUIGraphicsAPI {
     const ArkUIGraphicsFont* (*getFontAPI)();
 };
 
+struct ArkUIRelativeContainerModifier {
+    void (*setGuideLine)(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32 size);
+    void (*setBarrier)(ArkUINodeHandle node, ArkUIBarrierStyle* values, ArkUI_Int32 size);
+    void (*getGuideLine)(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32* size);
+    void (*getBarrier)(ArkUINodeHandle node, ArkUIBarrierStyle* values, ArkUI_Int32* size);
+    void (*resetGuideline)(ArkUINodeHandle node);
+    void (*resetBarrier)(ArkUINodeHandle node);
+};
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_API_VERSION above for binary
@@ -3725,6 +3793,7 @@ struct ArkUINodeModifiers {
     const ArkUITextClockControllerModifier* (*getTextClockControllerModifier)();
     const ArkUIRichEditorControllerModifier* (*getRichEditorControllerModifier)();
     const ArkUITextAreaControllerModifier* (*getTextAreaControllerModifier)();
+    const ArkUIRelativeContainerModifier* (*getRelativeContainerModifier)();
     const ArkUIParticleModifier* (*getParticleModifier)();
     const ArkUINodeContentModifier* (*getNodeContentModifier)();
     const ArkUISymbolGlyphModifier* (*getSymbolGlyphModifier)();

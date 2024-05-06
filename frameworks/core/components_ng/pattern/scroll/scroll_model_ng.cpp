@@ -243,9 +243,19 @@ void ScrollModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
     ScrollableModelNG::SetOnReachStart(std::move(onReachStart));
 }
 
+void ScrollModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
+{
+    ScrollableModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
+}
+
 void ScrollModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
     ScrollableModelNG::SetOnReachEnd(std::move(onReachEnd));
+}
+
+void ScrollModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
+{
+    ScrollableModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 
 void ScrollModelNG::SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)
@@ -539,9 +549,9 @@ NestedScrollOptions ScrollModelNG::GetNestedScroll(FrameNode* frameNode)
 ScrollEdgeType ScrollModelNG::GetOnScrollEdge(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, ScrollEdgeType::SCROLL_TOP);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    Axis axis = Axis::VERTICAL;
-    ACE_GET_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis, frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    Axis axis = pattern->GetAxis();
+
     switch (axis) {
         case Axis::VERTICAL:
             if (pattern->IsAtTop()) {

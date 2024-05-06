@@ -16,6 +16,8 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
+#include <string>
 
 #include "native_compatible.h"
 #include "native_node.h"
@@ -34,6 +36,10 @@ struct ArkUI_Node {
     void* extraCustomData = nullptr;
     ArkUI_LengthMetricUnit lengthMetricUnit = ARKUI_LENGTH_METRIC_UNIT_DEFAULT;
     void* eventListeners = nullptr;
+    void* barrierOption = nullptr;
+    void* guidelineOption = nullptr;
+    void* alignRuleOption = nullptr;  
+    void* userData = nullptr;
     void* swiperIndicator = nullptr;
 };
 
@@ -41,7 +47,51 @@ struct ArkUI_Context {
     int32_t id;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 18;
+struct ArkUI_GuidelineStyle {
+    std::string id;
+    ArkUI_Axis direction;
+    float start;
+    float end;
+};
+
+struct ArkUI_GuidelineOption {
+    std::vector<ArkUI_GuidelineStyle> styles;
+};
+
+struct ArkUI_BarrierStyle {
+    std::string id;
+    ArkUI_BarrierDirection direction;
+    std::vector<std::string> referencedId;
+};
+
+struct ArkUI_BarrierOption {
+    std::vector<ArkUI_BarrierStyle> styles;
+};
+
+struct ArkUI_HorizontalAlignRule {
+    bool hasValue;
+    std::string anchor;
+    ArkUI_HorizontalAlignment align;
+};
+
+struct ArkUI_VerticalAlignRule {
+    bool hasValue;
+    std::string anchor;
+    ArkUI_VerticalAlignment align;
+};
+
+struct ArkUI_AlignmentRuleOption {
+    ArkUI_HorizontalAlignRule left;
+    ArkUI_HorizontalAlignRule middle;
+    ArkUI_HorizontalAlignRule right;
+    ArkUI_VerticalAlignRule top;
+    ArkUI_VerticalAlignRule center;
+    ArkUI_VerticalAlignRule bottom;
+    float biasHorizontal;
+    float biasVertical;
+};
+
+constexpr int BASIC_COMPONENT_NUM = 19;
 
 #ifdef __cplusplus
 };
@@ -82,6 +132,8 @@ void HandleNodeEvent(ArkUI_NodeEvent* event);
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr);
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
 
+int32_t SetUserData(ArkUI_NodeHandle node, void* userData);
+void* GetUserData(ArkUI_NodeHandle node);
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit);
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));

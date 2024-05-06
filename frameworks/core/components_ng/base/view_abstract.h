@@ -53,6 +53,7 @@ struct OptionParam {
     std::string icon;
     bool enabled = true;
     std::function<void()> action;
+    std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
 
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
@@ -465,6 +466,7 @@ public:
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
     static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
     static void SetGeometryTransition(FrameNode* frameNode, const std::string& id, bool followWithoutTransition);
+    static const std::string GetGeometryTransition(FrameNode* frameNode, bool* followWithoutTransition);
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
@@ -508,6 +510,8 @@ public:
     static void SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeight);
     static void SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules);
     static void SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo);
+    static ChainInfo GetChainStyle(FrameNode* frameNode);
+    static void ResetChainStyle(FrameNode* frameNode);
     static void SetGrid(FrameNode* frameNode, std::optional<int32_t> span, std::optional<int32_t> offset,
         GridSizeType type = GridSizeType::UNDEFINED);
     static void ResetAspectRatio(FrameNode* frameNode);
@@ -654,9 +658,13 @@ public:
     static RenderFit GetRenderFit(FrameNode* frameNode);
     static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
     static bool GetRenderGroup(FrameNode* frameNode);
+    static void ResetBias(FrameNode* frameNode);
+    static void ResetAlignRules(FrameNode* frameNode);
     static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
         const std::vector<double> &ratioList);
     static Color GetColorBlend(FrameNode* frameNode);
+    static void ResetAreaChanged(FrameNode* frameNode);
+    static void ResetVisibleChange(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

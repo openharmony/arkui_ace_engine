@@ -579,11 +579,7 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     dialogLifeCycleEvent["willDisappearId"] = pickerDialogEvent.onWillDisappear;
     DialogProperties properties;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-            properties.alignment = DialogAlignment::BOTTOM;
-        } else {
-            properties.alignment = DialogAlignment::CENTER;
-        }
+        properties.alignment = theme->GetAlignment();
     }
     if (pickerDialog.alignment.has_value()) {
         properties.alignment = pickerDialog.alignment.value();

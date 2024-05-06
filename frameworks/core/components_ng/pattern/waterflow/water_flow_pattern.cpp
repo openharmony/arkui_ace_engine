@@ -219,6 +219,11 @@ void WaterFlowPattern::OnModifyDone()
     Register2DragDropManager();
 }
 
+void WaterFlowPattern::TriggerModifyDone()
+{
+    OnModifyDone();
+}
+
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {

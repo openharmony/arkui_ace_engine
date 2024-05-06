@@ -65,9 +65,7 @@ void RichEditorModelImpl::SetOnSubmit(std::function<void(int32_t, NG::TextFieldC
 void RichEditorModelImpl::SetEnterKeyType(TextInputAction value) {}
 
 void RichEditorModelImpl::SetOnWillChange(std::function<bool(const NG::RichEditorChangeValue&)>&& func) {}
-void RichEditorModelImpl::SetOnDidChange(
-    std::function<void(const std::list<NG::RichEditorAbstractSpanResult>&)>&& func)
-{}
+void RichEditorModelImpl::SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) {}
 void RichEditorModelImpl::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) {}
 void RichEditorModelImpl::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) {}
 

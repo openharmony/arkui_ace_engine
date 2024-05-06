@@ -729,6 +729,178 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_GuidelineOption_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GuidelineOption_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GuidelineOption_SetId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GuidelineOption_SetDirection"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GuidelineOption_SetPositionStart"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GuidelineOption_SetPositionEnd"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GuidelineOption_GetId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GuidelineOption_GetDirection"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GuidelineOption_GetPositionStart"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GuidelineOption_GetPositionEnd"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_BarrierOption_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_BarrierOption_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_BarrierOption_SetId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_BarrierOption_SetDirection"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_BarrierOption_SetReferencedId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_BarrierOption_GetId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_BarrierOption_GetDirection"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_BarrierOption_GetReferencedId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_BarrierOption_GetReferencedIdSize"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_SetStart"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_SetEnd"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_SetCenterHorizontal"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_SetTop"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_SetBottom"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_SetCenterVertical"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_SetBiasHorizontal"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_SetBiasVertical"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetStartId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetStartAlignment"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetEndId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetEndAlignment"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetCenterIdHorizontal"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetCenterAlignmentHorizontal"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetTopId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetTopAlignment"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetBottomId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetBottomAlignment"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetCenterIdVertical"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetCenterAlignmentVertical"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetBiasHorizontal"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AlignmentRuleOption_GetBiasVertical"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_SwiperIndicator_Create"
     },
     {

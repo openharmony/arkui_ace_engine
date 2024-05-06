@@ -57,8 +57,8 @@ TextLayoutAlgorithm::TextLayoutAlgorithm(
     }
     ConstructParagraphSpanGroup(spans);
     if (!spans.empty()) {
-        auto maxlines = spans.front()->textLineStyle->GetMaxLines().value_or(INT32_MAX);
-        spanStringHasMaxLines_ |= maxlines != INT32_MAX;
+        auto maxlines = spans.front()->textLineStyle->GetMaxLines().value_or(UINT32_MAX);
+        spanStringHasMaxLines_ |= maxlines != UINT32_MAX;
         spans_.emplace_back(std::move(spans));
     }
 }
@@ -95,7 +95,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
                 std::list<RefPtr<SpanItem>> newGroup;
                 spanItem->SetNeedRemoveNewLine(true);
                 newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
-                spanStringHasMaxLines_ |= pStyle.maxLines != INT32_MAX;
+                spanStringHasMaxLines_ |= pStyle.maxLines != UINT32_MAX;
                 spans_.emplace_back(std::move(newGroup));
                 it = spans.begin();
                 pStyle = nextSpanParagraphStyle;
@@ -289,12 +289,13 @@ bool TextLayoutAlgorithm::CreateParagraph(
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    pattern->ClearCustomSpanPlaceholderInfo();
     if (pattern->IsSensitiveEnalbe()) {
         UpdateSensitiveContent(content);
     }
     // default paragraph style
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spans_.empty()) {
+    if ((Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spans_.empty()) || isSpanStringMode_) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
     }
     paraStyle.leadingMarginAlign = Alignment::CENTER;
@@ -328,12 +329,14 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, cons
         symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
     symbolTextStyle.SetFontFamilies({ "HM Symbol" });
     paragraph->PushStyle(symbolTextStyle);
-    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-    symbolEffectOptions.Reset();
-    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
     if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
-        auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
-        symboloptiOns.Reset();
+        auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.Reset();
+        layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+        if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
+            auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
+            symboloptiOns.Reset();
+        }
     }
     paragraph->AddSymbol(symbolSourceInfo->GetUnicode());
     paragraph->PopStyle();

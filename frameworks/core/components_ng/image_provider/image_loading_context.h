@@ -117,6 +117,15 @@ public:
         return imageQuality_;
     }
 
+    void FinishMearuse()
+    {
+        measureFinish_ = true;
+    }
+
+    void CallbackAfterMeasureIfNeed();
+
+    void OnDataReadyOnCompleteCallBack();
+
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
     void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResult##NotifyTask) \
@@ -145,7 +154,7 @@ private:
 
     inline bool SizeChanging(const SizeF& dstSize)
     {
-        return dstSize_.IsPositive() && dstSize != dstSize_;
+        return dstSize_.IsNonNegative() && dstSize != dstSize_;
     }
 
     ImageSourceInfo src_;
@@ -169,6 +178,9 @@ private:
     RectF srcRect_;
     RectF dstRect_;
     SizeF dstSize_;
+    std::atomic<bool> measureFinish_ = false;
+    std::atomic<bool> needErrorCallBack_ = false;
+    std::atomic<bool> needDataReadyCallBack_ = false;
     // to determine whether the image needs to be reloaded
     int32_t sizeLevel_ = -1;
 
