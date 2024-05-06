@@ -768,6 +768,68 @@ HWTEST_F(GridIrregularLayoutTest, JumpCenter001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridIrregularLayout::TargetPosCenter001
+ * @tc.desc: Test calculate target position with align center
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, TargetPosCenter001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo12());
+        model.SetRowsGap(Dimension { 5.0f });
+        model.SetEdgeEffect(EdgeEffect::NONE, true);
+        CreateFixedHeightItems(1, 605.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 1825.0f);
+        CreateFixedHeightItems(4, 300.0f);
+    });
+
+    pattern_->ScrollToIndex(2, true, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 817.5f);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::JumpAuto001
+ * @tc.desc: Test jumping to irregular item with align center
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, JumpAuto001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo12());
+        model.SetRowsGap(Dimension { 5.0f });
+        model.SetEdgeEffect(EdgeEffect::NONE, true);
+        CreateFixedHeightItems(1, 605.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 1825.0f);
+        CreateFixedHeightItems(4, 300.0f);
+    });
+
+    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startMainLineIndex_, 1);
+    EXPECT_EQ(info.endMainLineIndex_, 6);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -1025.0f);
+
+    // shouldn't move
+    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -1025.0f);
+
+    pattern_->ScrollToIndex(2, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0.0f);
+
+    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0.0f);
+}
+
+/**
  * @tc.name: GridIrregularLayout::ToEdge001
  * @tc.desc: Test jumping to bottom edge
  * @tc.type: FUNC

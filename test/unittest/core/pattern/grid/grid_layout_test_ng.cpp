@@ -954,21 +954,21 @@ HWTEST_F(GridLayoutTestNg, ItemAboveViewport001, TestSize.Level1)
     info.endIndex_ = 5;
 
     info.currentOffset_ = 0.0f;
-    EXPECT_FALSE(info.ItemAboveViewport(1, 5.0f));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(0, 5.0f)));
 
     info.currentOffset_ = -50.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
 
     info.currentOffset_ = -200.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
-    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
 
     // adding gap length
     info.currentOffset_ = -205.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
-    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
 
-    EXPECT_TRUE(info.ItemAboveViewport(2, 0.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(1, 0.0f)));
 
     info.startMainLineIndex_ = 1;
     info.endMainLineIndex_ = 1;
@@ -976,10 +976,10 @@ HWTEST_F(GridLayoutTestNg, ItemAboveViewport001, TestSize.Level1)
     info.endIndex_ = 3;
 
     info.currentOffset_ = 0.0f;
-    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
 
     info.currentOffset_ = -1.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(3, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(1, 5.0f)));
 }
 
 /**
@@ -1004,22 +1004,22 @@ HWTEST_F(GridLayoutTestNg, ItemBelowViewport001, TestSize.Level1)
     info.endIndex_ = 4;
 
     info.currentOffset_ = 0.0f;
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 100.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 700.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 705.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 710.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 1005.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1010.0f, 5.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 100.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 700.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 705.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 710.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1005.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1010.0f));
 
     info.currentOffset_ = -50.0f;
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 100.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 700.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 705.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 710.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 955.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 960.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1005.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1010.0f, 5.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 100.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 700.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 705.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 710.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 955.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 960.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1005.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1010.0f));
 }
 
 /**
