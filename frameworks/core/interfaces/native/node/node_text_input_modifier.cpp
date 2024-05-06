@@ -1590,6 +1590,27 @@ void ResetTextInputLineBreakStrategy(ArkUINodeHandle node)
      // 0 is the default value of lineBreakStrategy::GREEDY
     TextFieldModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[0]);
 }
+
+void SetTextInputShowKeyBoardOnFocus(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowKeyBoardOnFocus(frameNode, value);
+}
+
+ArkUI_Bool GetTextInputShowKeyBoardOnFocus(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return static_cast<ArkUI_Bool>(TextFieldModelNG::GetShowKeyBoardOnFocus(frameNode));
+}
+
+void ResetTextInputShowKeyBoardOnFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowKeyBoardOnFocus(frameNode, true);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -1641,7 +1662,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputAdaptMinFontSize, GetTextInputAdaptMaxFontSize, GetTextInputLineHeight, GetTextInputMaxLines,
         GetTextInputFontFeature, SetTextInputCustomKeyboard, GetTextInputCustomKeyboard,
         GetTextInputCustomKeyboardOption, ResetTextInputCustomKeyboard, SetTextInputLineBreakStrategy,
-        ResetTextInputLineBreakStrategy };
+        ResetTextInputLineBreakStrategy, SetTextInputShowKeyBoardOnFocus, GetTextInputShowKeyBoardOnFocus,
+        ResetTextInputShowKeyBoardOnFocus };
     return &modifier;
 }
 

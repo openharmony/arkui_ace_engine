@@ -247,7 +247,9 @@ public:
     static void SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding);
     static RefPtr<UINode> GetCustomKeyboard(FrameNode* frameNode);
     static bool GetCustomKeyboardOption(FrameNode* frameNode);
- 
+    static void SetShowKeyBoardOnFocus(FrameNode* frameNode, bool value);
+    static bool GetShowKeyBoardOnFocus(FrameNode* frameNode);
+
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);
