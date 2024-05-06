@@ -162,6 +162,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 
 #ifdef USE_COMPONENTS_LIB
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -455,6 +456,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSCounter::JSBind(globalObj);
     JSCalendarPicker::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
+    JSWithTheme::JSBind(globalObj);
     JSRichEditor::JSBind(globalObj);
     JSRichEditorController::JSBind(globalObj);
     JSRichEditorStyledStringController::JSBind(globalObj);
