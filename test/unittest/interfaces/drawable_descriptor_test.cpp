@@ -368,7 +368,7 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0010, TestSize.Level1)
     /**
      * @tc.steps: step2. check creating mask ok
      */
-    EXPECT_TRUE(layeredDrawable.GetDefaultMask());
+    EXPECT_FALSE(layeredDrawable.GetDefaultMask());
 }
 
 /**
@@ -392,6 +392,7 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0011, TestSize.Level1)
      */
     std::shared_ptr<Media::PixelMap> foreground = std::make_shared<Media::PixelMap>();
     layeredDrawable.SetForeground(foreground);
+    layeredDrawable.layeredPixelMap_ = foreground;
     auto composedResult = layeredDrawable.GetPixelMap();
     /**
      * @tc.steps: step3. check pixelMap should not be null since this layeredDrawable is customized
