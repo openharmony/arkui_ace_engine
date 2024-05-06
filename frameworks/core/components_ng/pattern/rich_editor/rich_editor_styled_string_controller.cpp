@@ -30,8 +30,15 @@ void RichEditorStyledStringController::SetStyledString(const RefPtr<SpanStringBa
 
 RefPtr<SpanStringBase> RichEditorStyledStringController::GetStyledString()
 {
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>("");
-    return spanString;
+    auto richEditorPattern = pattern_.Upgrade();
+    auto mutableSpanString = AceType::MakeRefPtr<MutableSpanString>("");
+    CHECK_NULL_RETURN(richEditorPattern, mutableSpanString);
+    auto styledString = richEditorPattern->GetStyledString();
+    CHECK_NULL_RETURN(styledString, mutableSpanString);
+    auto length = styledString->GetLength();
+    auto spanString = styledString->GetSubSpanString(0, length);
+    mutableSpanString->AppendSpanString(spanString);
+    return mutableSpanString;
 }
 
 SelectionRangeInfo RichEditorStyledStringController::GetSelection()
@@ -48,5 +55,23 @@ SelectionRangeInfo RichEditorStyledStringController::GetSelection()
         value = SelectionRangeInfo(start, end);
     }
     return value;
+}
+
+void RichEditorStyledStringController::SetOnWillChange(std::function<bool(const StyledStringChangeValue&)> && func)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(richEditorPattern);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStyledStringWillChange(std::move(func));
+}
+
+void RichEditorStyledStringController::SetOnDidChange(std::function<void(const StyledStringChangeValue&)> && func)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(richEditorPattern);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStyledStringDidChange(std::move(func));
 }
 }
