@@ -278,6 +278,8 @@ public:
     virtual void SetStyledString(const RefPtr<SpanStringBase>& value) = 0;
     virtual RefPtr<SpanStringBase> GetStyledString() = 0;
     virtual SelectionRangeInfo GetSelection() = 0;
+    virtual void SetOnWillChange(std::function<bool(const NG::StyledStringChangeValue&)> && func) = 0;
+    virtual void SetOnDidChange(std::function<void(const NG::StyledStringChangeValue&)> && func) = 0;
 };
 
 class ACE_EXPORT RichEditorModel {

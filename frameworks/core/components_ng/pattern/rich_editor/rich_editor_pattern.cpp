@@ -161,14 +161,20 @@ void RichEditorPattern::UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& s
 void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue)
 {
     CHECK_NULL_VOID(styledString_);
+    int32_t changeStart = caretPosition_;
+    int32_t changeLength = 0;
     if (textSelector_.IsValid()) {
         auto start = textSelector_.GetTextStart();
         auto end = textSelector_.GetTextEnd();
         SetCaretPosition(start);
-        DeleteForwardInStyledString(end - start);
+        changeStart = caretPosition_;
+        changeLength = end - start;
+        DeleteForwardInStyledString(changeLength, false);
         CloseSelectOverlay();
         ResetSelection();
     }
+    bool isPreventChange = !BeforeStyledStringChange(changeStart, changeLength, insertValue);
+    CHECK_NULL_VOID(!isPreventChange);
     styledString_->InsertString(caretPosition_, insertValue);
     if (!caretVisible_) {
         StartTwinkling();
@@ -180,6 +186,7 @@ void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
+    AfterStyledStringChange(changeStart, changeLength, insertValue);
 }
 void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
 {
@@ -192,7 +199,11 @@ void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
         CloseSelectOverlay();
         ResetSelection();
     }
-    styledString_->RemoveString(caretPosition_ - length, length);
+    CHECK_NULL_VOID(caretPosition_ != 0);
+    int32_t changeStart = caretPosition_ - length;
+    bool isPreventChange = !BeforeStyledStringChange(changeStart, length, "");
+    CHECK_NULL_VOID(!isPreventChange);
+    styledString_->RemoveString(changeStart, length);
     if (!caretVisible_) {
         StartTwinkling();
     }
@@ -203,12 +214,25 @@ void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
+    AfterStyledStringChange(changeStart, length, "");
 }
 
-void RichEditorPattern::DeleteForwardInStyledString(int32_t length)
+void RichEditorPattern::DeleteForwardInStyledString(int32_t length, bool isIME)
 {
     CHECK_NULL_VOID(styledString_);
-    styledString_->RemoveString(caretPosition_, length);
+    if (textSelector_.IsValid()) {
+        if (!textSelector_.StartEqualToDest()) {
+            length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+        }
+        SetCaretPosition(textSelector_.GetTextStart());
+        CloseSelectOverlay();
+        ResetSelection();
+    }
+    CHECK_NULL_VOID(GetTextContentLength() != 0);
+    int32_t changeStart = caretPosition_;
+    bool isPreventChange = isIME && !BeforeStyledStringChange(changeStart, length, "");
+    CHECK_NULL_VOID(!isPreventChange);
+    styledString_->RemoveString(changeStart, length);
     if (!caretVisible_) {
         StartTwinkling();
     }
@@ -216,6 +240,50 @@ void RichEditorPattern::DeleteForwardInStyledString(int32_t length)
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
+    if (isIME) {
+        AfterStyledStringChange(changeStart, length, "");
+    }
+}
+
+bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, const std::string& string)
+{
+    auto eventHub = GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_RETURN(eventHub, true);
+    CHECK_NULL_RETURN(eventHub->HasOnStyledStringWillChange(), true);
+    auto styledString = AceType::MakeRefPtr<MutableSpanString>(string);
+    auto stringLength = styledString->GetLength();
+    StyledStringChangeValue changeValue;
+    auto changeStart = std::clamp(start, 0, GetTextContentLength());
+    if (stringLength != 0) {
+        auto lastStyles = styledString_->GetSpans(changeStart - 1, 1);
+        for (auto && style : lastStyles) {
+            if (!style) {
+                continue;
+            }
+            style->UpdateStartIndex(0);
+            style->UpdateEndIndex(stringLength);
+            styledString->AddSpan(style);
+        }
+    }
+    auto changeEnd = std::clamp(changeStart + length, 0, GetTextContentLength());
+    changeValue.SetRangeBefore({ changeStart, changeEnd });
+    changeValue.SetReplacementString(styledString);
+    return eventHub->FireOnStyledStringWillChange(changeValue);
+}
+
+void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, const std::string& string)
+{
+    auto eventHub = GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_VOID(eventHub->HasOnStyledStringDidChange());
+    StyledStringChangeValue changeValue;
+    auto changeStart = std::clamp(start, 0, GetTextContentLength());
+    auto changeEnd = std::clamp(changeStart + length, 0, GetTextContentLength());
+    auto stringLength = static_cast<int32_t>(StringUtils::ToWstring(string).length());
+    auto stringEnd = changeStart + stringLength;
+    changeValue.SetRangeBefore({ changeStart, changeEnd });
+    changeValue.SetRangeAfter({ changeStart, stringEnd });
+    eventHub->FireOnStyledStringDidChange(changeValue);
 }
 
 void RichEditorPattern::OnModifyDone()

@@ -30,6 +30,8 @@ public:
     void SetStyledString(const RefPtr<SpanStringBase>& value) override;
     RefPtr<SpanStringBase> GetStyledString() override;
     SelectionRangeInfo GetSelection() override;
+    void SetOnWillChange(std::function<bool(const StyledStringChangeValue&)> && func) override;
+    void SetOnDidChange(std::function<void(const StyledStringChangeValue&)> && func) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_STYLED_STRING_CONTROLLER_H
