@@ -271,7 +271,6 @@ public:
     void SetHasFilter(bool hasFilter)
     {
         hasFilter_ = hasFilter;
-        hasFilterActived = true;
     }
 
     bool GetHasEvent()
