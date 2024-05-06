@@ -55,7 +55,7 @@ public:
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
     using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, bool, bool)>;
-    using OnFormSurfaceChangeCallback = std::function<void(float width, float height)>;
+    using OnFormSurfaceChangeCallback = std::function<void(float width, float height, float borderWidth)>;
     using OnFormSurfaceDetachCallback = std::function<void()>;
     using ActionEventHandle = std::function<void(const std::string&)>;
     using UnTrustFormCallback = std::function<void()>;
@@ -118,11 +118,11 @@ public:
     void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
     void OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
         const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode, const AAFwk::Want& want);
-    void OnFormSurfaceChange(float width, float height);
+    void OnFormSurfaceChange(float width, float height, float borderWidth = 0.0);
     void OnFormSurfaceDetach();
     void ResetForm();
     void ReleaseForm();
-    void NotifySurfaceChange(float width, float height);
+    void NotifySurfaceChange(float width, float height, float borderWidth = 0.0);
     static bool GetFormInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& cardName, AppExecFwk::FormInfo& formInfo);
     void ProcessRecycleForm();

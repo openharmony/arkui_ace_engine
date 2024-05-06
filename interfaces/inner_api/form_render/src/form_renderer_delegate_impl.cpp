@@ -65,14 +65,14 @@ int32_t FormRendererDelegateImpl::OnError(const std::string& code, const std::st
     return ERR_OK;
 }
 
-int32_t FormRendererDelegateImpl::OnSurfaceChange(float width, float height)
+int32_t FormRendererDelegateImpl::OnSurfaceChange(float width, float height, float borderWidth)
 {
     HILOG_DEBUG("%{public}s called.", __func__);
     if (!surfaceChangeEventHandler_) {
         HILOG_ERROR("surfaceChangeEventHandler_ is null");
         return ERR_INVALID_DATA;
     }
-    surfaceChangeEventHandler_(width, height);
+    surfaceChangeEventHandler_(width, height, borderWidth);
     return ERR_OK;
 }
 
@@ -116,7 +116,8 @@ void FormRendererDelegateImpl::SetErrorEventHandler(
     errorEventHandler_ = std::move(listener);
 }
 
-void FormRendererDelegateImpl::SetSurfaceChangeEventHandler(std::function<void(float width, float height)>&& listener)
+void FormRendererDelegateImpl::SetSurfaceChangeEventHandler(
+    std::function<void(float width, float height, float borderWidth)>&& listener)
 {
     surfaceChangeEventHandler_ = std::move(listener);
 }
