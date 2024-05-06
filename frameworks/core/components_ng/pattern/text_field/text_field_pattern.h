@@ -836,7 +836,7 @@ public:
     }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
-    void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false);
+    void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false, bool showMenu = false);
     void HandleOnSelectAll() override
     {
         HandleOnSelectAll(true);

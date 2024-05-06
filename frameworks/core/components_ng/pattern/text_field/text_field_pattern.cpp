@@ -1232,7 +1232,7 @@ void TextFieldPattern::HandleOnRedoAction()
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
+void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool showMenu)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
@@ -1264,7 +1264,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
         }
         return;
     }
-    selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = false, .animation = true });
+    selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
 }
 
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
