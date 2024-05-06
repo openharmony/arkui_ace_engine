@@ -473,6 +473,16 @@ void RosenRenderContext::SetFrameWithoutAnimation(const RectF& paintRect)
         [&]() { rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height()); });
 }
 
+void RosenRenderContext::SyncGeometryPropertiesWithoutAnimation(
+    GeometryNode* /*geometryNode*/, bool /* isRound */, uint8_t /* flag */)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    SyncGeometryProperties(paintRect_, true);
+    host->OnPixelRoundFinish(paintRect_.GetSize());
+}
+
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool /* isRound */, uint8_t /* flag */)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -482,7 +492,22 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     host->OnPixelRoundFinish(paintRect_.GetSize());
 }
 
-void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
+void RosenRenderContext::SyncGeometryFrame(const RectF& paintRect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    if (useContentRectForRSFrame_) {
+        SetContentRectToFrame(paintRect);
+    } else {
+        rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    }
+    if (frameOffset_.has_value()) {
+        rsNode_->SetFrame(paintRect.GetX() + frameOffset_->GetX(), paintRect.GetY() + frameOffset_->GetY(),
+            paintRect.Width(), paintRect.Height());
+    }
+}
+
+void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect, bool isSkipFrameTransition)
 {
     CHECK_NULL_VOID(rsNode_);
     if (isDisappearing_ && !paintRect.IsValid()) {
@@ -493,15 +518,10 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s",
             host->GetTag().c_str(), host->GetId(), paintRect.ToString().c_str());
     }
-    rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
-    if (useContentRectForRSFrame_) {
-        SetContentRectToFrame(paintRect);
+    if (isSkipFrameTransition) {
+        RSNode::ExecuteWithoutAnimation([&]() { SyncGeometryFrame(paintRect); });
     } else {
-        rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
-    }
-    if (frameOffset_.has_value()) {
-        rsNode_->SetFrame(paintRect.GetX() + frameOffset_->GetX(), paintRect.GetY() + frameOffset_->GetY(),
-            paintRect.Width(), paintRect.Height());
+        SyncGeometryFrame(paintRect);
     }
     if (!isSynced_) {
         isSynced_ = true;

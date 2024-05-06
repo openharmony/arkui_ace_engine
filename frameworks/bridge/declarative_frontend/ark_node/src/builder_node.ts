@@ -88,6 +88,7 @@ class JSBuilderNode extends BaseNode {
       return;
     }
     child.updateStateVars(params);
+    child.updateDirtyElements();
   }
   public createOrGetNode(elmtId: number, builder: () => object): object {
     const entry = this.updateFuncByElmtId.get(elmtId);

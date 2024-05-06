@@ -114,6 +114,7 @@ class JSBuilderNode extends BaseNode {
             return;
         }
         child.updateStateVars(params);
+        child.updateDirtyElements();
     }
     createOrGetNode(elmtId, builder) {
         const entry = this.updateFuncByElmtId.get(elmtId);

@@ -621,6 +621,24 @@ public:
         return instanceId_;
     }
 
+    bool GetIsGeometryTransitionIn() const
+    {
+        return isGeometryTransitionIn_;
+    }
+
+    void SetIsGeometryTransitionIn(bool isGeometryTransitionIn)
+    {
+        isGeometryTransitionIn_ = isGeometryTransitionIn;
+    }
+
+    virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
+    {
+        SetIsGeometryTransitionIn(isGeometryTransitionIn);
+        for (const auto& child : GetChildren()) {
+            child->SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+        }
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -704,6 +722,7 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
+    bool isGeometryTransitionIn_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
