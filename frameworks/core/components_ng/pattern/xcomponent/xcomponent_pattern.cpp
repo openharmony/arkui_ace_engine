@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#include <cmath>
+#include <cstdlib>
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
 
+#include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
 #include "base/log/frame_report.h"
@@ -41,6 +44,7 @@
 #include "ui/rs_ext_node_operation.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
+#include "display_manager.h"
 
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
@@ -53,7 +57,18 @@
 namespace OHOS::Ace::NG {
 namespace {
 #ifdef OHOS_PLATFORM
-constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
+constexpr double INFLEXION = 0.35;
+constexpr double FLING_FRICTION = 0.002;
+constexpr double GRAVITY = 9.8;
+const double DECELERATION  = log(0.78) / log(0.9);
+const double DECEL_MINUS_ONE = DECELERATION - 1.0;
+constexpr int32_t MAX_SLIE_TIME = 5000;
+constexpr int32_t SECOND_UNIT = 1000;
+constexpr int32_t SQUARE = 2;
+constexpr int32_t DISTANCE_UNIT = 1000 * 1000;
+constexpr int32_t DELAY_TIME = 1;
+constexpr double INCH_UNIT = 39.37;
+constexpr double TUNNING_FACTOR = 0.84;
 #endif
 std::string XComponentTypeToString(XComponentType type)
 {
@@ -280,6 +295,8 @@ void XComponentPattern::RequestFocus()
 void XComponentPattern::OnAttachToFrameNode()
 {
     Initialize();
+    dpi_ = OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay()->GetDpi();
+    physicalCoeff_ = GRAVITY * INCH_UNIT * dpi_ * TUNNING_FACTOR;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -842,15 +859,9 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 #ifdef OHOS_PLATFORM
     // increase cpu frequency
     if (touchType == TouchType::MOVE) {
-        auto currentTime = GetSysTimestamp();
-        auto increaseCpuTime = currentTime - startIncreaseTime_;
-        if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
-            startIncreaseTime_ = currentTime;
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-        }
+        lastTouchInfo_ = touchEventPoint_;
     } else if (touchType == TouchType::UP) {
-        startIncreaseTime_ = 0;
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        ReportSlideToRss();
     }
 #endif
     SetTouchPoint(info.GetTouches(), timeStamp, touchType);
@@ -868,6 +879,45 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 #endif
 }
+
+void XComponentPattern::ReportSlideToRss()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostDelayedTask([this] {
+        slideCount_ ++;
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        }, DELAY_TIME);
+    uiTaskExecutor.PostDelayedTask([this] {
+        slideCount_ --;
+        if (slideCount_.load() == 0) {
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        }
+        }, GetFlingDuration(GetUpVelocity(lastTouchInfo_, touchEventPoint_)) + DELAY_TIME);
+}
+
+#ifdef OHOS_PLATFORM
+float XComponentPattern::GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo,
+    OH_NativeXComponent_TouchEvent upEventInfo)
+{
+    float distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
+    int64_t time = abs(lastMoveInfo.timeStamp - upEventInfo.timeStamp);
+    if (time == 0) {
+        return 0.0f;
+    }
+    return distance * DISTANCE_UNIT / (time / SECOND_UNIT); // unit: pixel/ms
+}
+
+
+int XComponentPattern::GetFlingDuration(float velocity)
+{
+    double l = log(INFLEXION * velocity / (FLING_FRICTION * physicalCoeff_));
+    return std::min((int)(SECOND_UNIT * exp(l / DECEL_MINUS_ONE)), MAX_SLIE_TIME);
+}
+#endif
 
 void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
 {
