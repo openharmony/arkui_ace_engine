@@ -689,7 +689,6 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             overlayManager->DestroySheet(host, pattern->GetTargetId());
-            pattern->FireCallback("false");
         }
     });
     StartSheetTransitionAnimation(option, isTransitionIn, offset);
@@ -1249,6 +1248,10 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     isAnimationProcess_ = true;
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto sheetParent = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(sheetParent);
     if (isTransitionIn) {
         animation_ = AnimationUtils::StartAnimation(
             option,
@@ -1259,6 +1262,11 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             },
             option.GetOnFinishEvent());
     } else {
+        sheetPattern->FireCallback("false");
+        if (sheetPattern->HasCallback()) {
+            sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+                HitTestMode::HTMTRANSPARENT);
+        }
         animation_ = AnimationUtils::StartAnimation(
             option,
             [context, this]() {
