@@ -1344,7 +1344,6 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
         return;
     }
     auto isHandlesShow = pattern->IsHandlesShow();
-    pattern->CloseHandleAndSelect();
     auto dragNode = pattern->MoveDragNode();
     CHECK_NULL_VOID(dragNode);
     dragNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
@@ -1366,6 +1365,7 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
         renderContext->UpdateOpacity(dragPreviewOption.options.opacity);
     }
     modifier->StartFloatingAnimate();
+    pattern->CloseHandleAndSelect();
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set text animation success.");
 }
 
@@ -1433,7 +1433,6 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateTransformScale(VectorF(1.0f, 1.0f));
-    modifier->StartFloatingCancelAnimate();
     AnimationUtils::Animate(
         option,
         [context, startDrag, globalX, globalY, frameWidth, frameHeight, scale]() {

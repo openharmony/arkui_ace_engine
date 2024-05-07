@@ -5197,7 +5197,11 @@ void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
 
 void RichEditorPattern::ShowHandles()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (!selectOverlay_->IsHandlesShow() && !selectOverlay_->SelectOverlayIsCreating()) {
+        showSelect_ = true;
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         selectOverlay_->ProcessOverlay({.animation = false});
     }
 }
