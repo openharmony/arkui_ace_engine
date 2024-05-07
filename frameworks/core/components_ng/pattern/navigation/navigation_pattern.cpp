@@ -220,6 +220,7 @@ void NavigationPattern::OnLanguageConfigurationUpdate()
 void NavigationPattern::SyncWithJsStackIfNeeded()
 {
     if (!needSyncWithJsStack_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "not need SyncWithJsStack");
         return;
     }
     CHECK_NULL_VOID(navigationStack_);
