@@ -239,7 +239,8 @@ public:
     void EnableAnalyzer(bool enable);
     void SetImageAnalyzerConfig(void* config);
     bool GetAnalyzerState();
-    void UpdateAnalyzerState(bool isCreated) {
+    void UpdateAnalyzerState(bool isCreated)
+    {
         isAnalyzerCreated_ = isCreated;
     }
 
