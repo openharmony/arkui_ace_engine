@@ -66,6 +66,7 @@ constexpr int32_t SECOND_UNIT = 1000;
 constexpr int32_t SQUARE = 2;
 constexpr int32_t DISTANCE_UNIT = 1000 * 1000;
 constexpr int32_t DELAY_TIME = 1;
+constexpr int32_t DPI_DENISTY_RATE = 160;
 constexpr double INCH_UNIT = 39.37;
 constexpr double TUNNING_FACTOR = 0.84;
 #endif
@@ -295,7 +296,7 @@ void XComponentPattern::OnAttachToFrameNode()
 {
     Initialize();
 #ifdef OHOS_PLATFORM
-    dpi_ = PipelineBase::GetCurrentDensity() * 160;
+    dpi_ = PipelineBase::GetCurrentDensity() * DPI_DENISTY_RATE;
     physicalCoeff_ = GRAVITY * INCH_UNIT * dpi_ * TUNNING_FACTOR;
 #endif
     auto host = GetHost();
