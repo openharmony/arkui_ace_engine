@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+
 const REFLECT_MAX_COUNT = 3;
 const IMAGE_SIZE_WIDTH_HEIGHT = 24;
 const TEXT_MIN_SIZE = 9;
@@ -262,7 +264,7 @@ export class ToolBar extends ViewPU {
       Column.create();
       Column.width('100%');
       Column.height('100%');
-      Column.padding({ left: 4, right: 4 });
+      Column.padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) });
       Column.borderRadius({ id: -1, type: 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
         bundleName: '', moduleName: '' });
     }, Column);
@@ -293,7 +295,7 @@ export class ToolBar extends ViewPU {
       Column.height('100%');
       Column.focusable(!(this.toolBarList[r1]?.state === 2));
       Column.focusOnTouch(!(this.toolBarList[r1]?.state === 2));
-      Column.padding({ left: 4, right: 4 });
+      Column.padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) });
       Column.borderRadius({
         id: -1, type: 10002,
         params: ['sys.float.ohos_id_corner_radius_clicked'],
@@ -407,7 +409,10 @@ export class ToolBar extends ViewPU {
       Tabs.onChange((j1) => {
       });
       Tabs.width('100%');
-      Tabs.padding({ left: this.toolBarList.length < 5 ? 24 : 0, right: this.toolBarList.length < 5 ? 24 : 0 });
+      Tabs.padding({
+        start: LengthMetrics.vp(this.toolBarList.length < 5 ? 24 : 0),
+        end: LengthMetrics.vp(this.toolBarList.length < 5 ? 24 : 0)
+      });
       Tabs.backgroundColor({
         id: -1, type: 10001,
         params: ['sys.color.ohos_id_color_toolbar_bg'],
