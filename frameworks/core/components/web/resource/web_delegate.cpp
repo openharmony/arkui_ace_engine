@@ -2991,7 +2991,7 @@ void WebDelegate::UpdateLoadsImagesAutomatically(const bool& isImageAccessEnable
                 setting->PutImageLoadingAllowed(isImageAccessEnabled);
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateLoadsImagesAutomatically");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateLoadImageAccessEnabled");
 }
 
 void WebDelegate::UpdateMixedContentMode(const MixedModeContent& mixedMode)
@@ -5059,7 +5059,7 @@ void WebDelegate::OnScroll(double xOffset, double yOffset)
                 onScrollV2(std::make_shared<WebOnScrollEvent>(xOffset, yOffset));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIWebScrollV2");
+        TaskExecutor::TaskType::JS, "ArkUIWebScroll");
 }
 
 void WebDelegate::OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting)
@@ -5189,7 +5189,7 @@ void WebDelegate::OnWindowExit()
                 onWindowExitV2(std::make_shared<WebWindowExitEvent>());
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIWebWindowExitV2");
+        TaskExecutor::TaskType::JS, "ArkUIWebWindowExit");
 }
 
 void WebDelegate::OnPageVisible(const std::string& url)
@@ -5989,7 +5989,7 @@ void WebDelegate::OnOverScroll(float xOffset, float yOffset)
                 onOverScrollV2(std::make_shared<WebOnOverScrollEvent>(xOffset, yOffset));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIWebOverScrollV2");
+        TaskExecutor::TaskType::JS, "ArkUIWebOverScroll");
 }
 
 void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
