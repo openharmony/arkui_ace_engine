@@ -3910,7 +3910,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(touchEvent.time);
     event.SetPointerEvent(touchEvent.pointerEvent);
-    TouchLocationInfo changedInfo("onTouch", touchEvent.id);
+    TouchLocationInfo changedInfo("onTouch", touchEvent.originalId);
     PointF lastLocalPoint(touchEvent.x, touchEvent.y);
     NGGestureRecognizer::Transform(lastLocalPoint, Claim(this), false, false);
     auto localX = static_cast<float>(lastLocalPoint.GetX());
@@ -3956,7 +3956,7 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
         NGGestureRecognizer::Transform(localPoint, Claim(this), false, false);
         auto localX = static_cast<float>(localPoint.GetX());
         auto localY = static_cast<float>(localPoint.GetY());
-        TouchLocationInfo info("onTouch", item.id);
+        TouchLocationInfo info("onTouch", item.originalId);
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
         info.SetScreenLocation(Offset(screenX, screenY));

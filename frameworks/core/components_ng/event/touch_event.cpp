@@ -79,7 +79,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(lastPoint.time);
     event.SetPointerEvent(lastPoint.pointerEvent);
-    TouchLocationInfo changedInfo("onTouch", lastPoint.id);
+    TouchLocationInfo changedInfo("onTouch", lastPoint.originalId);
     PointF lastLocalPoint(lastPoint.x, lastPoint.y);
     NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
         isPostEventResult_, point.postEventNodeId);
@@ -90,7 +90,6 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     changedInfo.SetScreenLocation(Offset(lastPoint.screenX, lastPoint.screenY));
     changedInfo.SetTouchType(lastPoint.type);
     changedInfo.SetForce(lastPoint.force);
-    changedInfo.SetOriginalId(lastPoint.originalId);
     if (lastPoint.tiltX.has_value()) {
         changedInfo.SetTiltX(lastPoint.tiltX.value());
     }
@@ -118,7 +117,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             false, isPostEventResult_, point.postEventNodeId);
         auto localX = static_cast<float>(localPoint.GetX());
         auto localY = static_cast<float>(localPoint.GetY());
-        TouchLocationInfo info("onTouch", item.id);
+        TouchLocationInfo info("onTouch", item.originalId);
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
         info.SetScreenLocation(Offset(screenX, screenY));
@@ -131,7 +130,6 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             info.SetTiltY(item.tiltY.value());
         }
         info.SetSourceTool(item.sourceTool);
-        info.SetOriginalId(item.originalId);
         event.AddTouchLocationInfo(std::move(info));
     }
     event.SetSourceDevice(lastPoint.sourceType);
@@ -146,7 +144,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             isPostEventResult_, point.postEventNodeId);
         auto localX = static_cast<float>(localPoint.GetX());
         auto localY = static_cast<float>(localPoint.GetY());
-        TouchLocationInfo historyInfo("onTouch", item.id);
+        TouchLocationInfo historyInfo("onTouch", item.originalId);
         historyInfo.SetTimeStamp(item.time);
         historyInfo.SetGlobalLocation(Offset(globalX, globalY));
         historyInfo.SetLocalLocation(Offset(localX, localY));
@@ -160,7 +158,6 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             historyInfo.SetTiltY(item.tiltY.value());
         }
         historyInfo.SetSourceTool(item.sourceTool);
-        historyInfo.SetOriginalId(item.originalId);
         event.AddHistoryLocationInfo(std::move(historyInfo));
         event.AddHistoryPointerEvent(item.pointerEvent);
     }
