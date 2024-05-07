@@ -1097,6 +1097,9 @@ void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, TextInputAction val
 {
     auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
+    if (value == TextInputAction::UNSPECIFIED) {
+        value = pattern->IsTextArea() ? TextInputAction::NEW_LINE : TextInputAction::DONE;
+    }
     pattern->UpdateTextInputAction(value);
 }
 

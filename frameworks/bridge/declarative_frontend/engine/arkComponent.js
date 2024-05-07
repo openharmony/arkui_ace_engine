@@ -11144,6 +11144,23 @@ class TextInputPaddingModifier extends ModifierWithKey {
   }
 }
 TextInputPaddingModifier.identity = Symbol('textInputPadding');
+class TextInputContentTypeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetContentType(node);
+    }
+    else {
+      getUINativeModule().textInput.setContentType(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputContentTypeModifier.identity = Symbol('textInputContentType');
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -11394,6 +11411,10 @@ class ArkTextInputComponent extends ArkComponent {
     else {
       modifierWithKey(this._modifiersWithKeys, TextInputPaddingModifier.identity, TextInputPaddingModifier, undefined);
     }
+    return this;
+  }
+  contentType(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputContentTypeModifier.identity, TextInputContentTypeModifier, value);
     return this;
   }
 }
@@ -18218,13 +18239,16 @@ class ArkMarqueeComponent extends ArkComponent {
     return this;
   }
   onStart(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, MarqueeOnStartModifier.identity, MarqueeOnStartModifier, event);
+    return this;
   }
   onBounce(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, MarqueeOnBounceModifier.identity, MarqueeOnBounceModifier, event);
+    return this;
   }
   onFinish(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, MarqueeOnFinishModifier.identity, MarqueeOnFinishModifier, event);
+    return this;
   }
   marqueeUpdateStrategy(value) {
     modifierWithKey(this._modifiersWithKeys, MarqueeUpdateStrategyModifier.identity, MarqueeUpdateStrategyModifier, value);
@@ -18324,6 +18348,45 @@ class MarqueeUpdateStrategyModifier extends ModifierWithKey {
     }
 }
 MarqueeUpdateStrategyModifier.identity = Symbol('marqueeUpdateStrategy');
+class MarqueeOnStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().marquee.resetMarqueeOnStart(node);
+    } else {
+      getUINativeModule().marquee.setMarqueeOnStart(node, this.value);
+    }
+  }
+}
+MarqueeOnStartModifier.identity = Symbol('marqueeOnStart');
+class MarqueeOnBounceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().marquee.resetMarqueeOnBounce(node);
+    } else {
+      getUINativeModule().marquee.setMarqueeOnBounce(node, this.value);
+    }
+  }
+}
+MarqueeOnBounceModifier.identity = Symbol('marqueeOnBounce');
+class MarqueeOnFinishModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().marquee.resetMarqueeOnFinish(node);
+    } else {
+      getUINativeModule().marquee.setMarqueeOnFinish(node, this.value);
+    }
+  }
+}
+MarqueeOnFinishModifier.identity = Symbol('marqueeOnFinish');
 // @ts-ignore
 if (globalThis.Marquee !== undefined) {
   globalThis.Marquee.attributeModifier = function (modifier) {
