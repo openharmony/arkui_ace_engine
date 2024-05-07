@@ -18,6 +18,7 @@
 
 #include "pixel_map.h"
 
+#include "base/geometry/rect.h"
 #include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
