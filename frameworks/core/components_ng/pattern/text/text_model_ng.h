@@ -112,6 +112,7 @@ public:
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
     static void SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
     static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);
@@ -145,6 +146,8 @@ public:
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
     static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
+    static Color GetSelectedBackgroundColor(FrameNode* frameNode);
+    static void ResetSelectedBackgroundColor(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

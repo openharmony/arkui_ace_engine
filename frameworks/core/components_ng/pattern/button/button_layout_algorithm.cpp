@@ -176,12 +176,12 @@ void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
         }
         renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(minSize / 2)));
         MeasureCircleButton(layoutWrapper);
-    } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE) {
-        renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(frameSize.Height() / 2)));
-    } else {
+    } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::NORMAL) {
         auto normalRadius =
             buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty({ 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp }));
         renderContext->UpdateBorderRadius(normalRadius);
+    } else {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(frameSize.Height() / 2)));
     }
 }
 

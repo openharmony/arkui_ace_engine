@@ -1232,7 +1232,7 @@ void TextFieldPattern::HandleOnRedoAction()
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
+void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool showMenu)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
@@ -1264,7 +1264,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
         }
         return;
     }
-    selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = false, .animation = true });
+    selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
 }
 
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
@@ -3104,6 +3104,10 @@ void TextFieldPattern::KeyboardContentTypeToInputType()
 
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
+    if (!showKeyBoardOnFocus_) {
+        return false;
+    }
+
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
     auto context = tmpHost->GetContextRefPtr();
@@ -6905,6 +6909,24 @@ void TextFieldPattern::CalculatePreviewingTextMovingLimit(const Offset& touchOff
                 break;
             }
         }
+    }
+}
+
+void TextFieldPattern::SetShowKeyBoardOnFocus(bool value)
+{
+    if (showKeyBoardOnFocus_ == value) {
+        return;
+    }
+    showKeyBoardOnFocus_ = value;
+
+    if (!HasFocus()) {
+        return;
+    }
+
+    if (value) {
+        RequestKeyboard(false, true, true);
+    } else {
+        CloseKeyboard(true, false);
     }
 }
 } // namespace OHOS::Ace::NG

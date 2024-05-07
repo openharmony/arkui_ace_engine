@@ -1043,9 +1043,11 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
                 StartRestore(RouterPageInfo());
                 return;
             }
+            LOGI("Router back start ExitToDesktop");
             ExitToDesktop();
             return;
         }
+        LOGI("Router back start PopPage");
         PopPage(target.params, true, true);
         return;
     }

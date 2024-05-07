@@ -80,7 +80,6 @@ constexpr double BIG_DIALOG_WIDTH = 216.0f;
 constexpr double MAX_DIALOG_WIDTH = 256.0f;
 constexpr int8_t GRIDCOUNT = 2;
 constexpr int8_t MAXLINES = 6;
-constexpr uint16_t DIALOG_DEFAULT_FONT_SIZE = 32;
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 } // namespace
 
@@ -139,12 +138,6 @@ void CreateDialogTextNode(const RefPtr<FrameNode>& columnNode, const RefPtr<Pipe
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(dialogTextNode->GetLayoutProperty());
     CHECK_NULL_VOID(titleProp);
     titleProp->UpdateContent(textValue.value_or(""));
-    float scale = pipelineContext->GetFontScale();
-    if (scale == BIG_FONT_SIZE_SCALE) {
-        titleProp->UpdateFontSize(Dimension(DIALOG_DEFAULT_FONT_SIZE, DimensionUnit::FP));
-    } else if (scale == LARGE_FONT_SIZE_SCALE || scale == MAX_FONT_SIZE_SCALE) {
-        titleProp->UpdateFontSize(Dimension(DIALOG_DEFAULT_FONT_SIZE / BIG_FONT_SIZE_SCALE * scale, DimensionUnit::FP));
-    }
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     titleProp->UpdateMaxLines(MAXLINES);
     MarginProperty margin = {
@@ -925,23 +918,21 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     dialogProperties.alignment = DialogAlignment::CENTER;
     dialogProperties.gridCount = GRIDCOUNT;
     dialogProperties.isModal = false;
+    dialogProperties.backgroundColor = Color::TRANSPARENT;
+    dialogProperties.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultLG);
     BlurStyleOption styleOption;
     styleOption.blurStyle = static_cast<BlurStyle>(
         dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
     auto renderContext = dialogColumnNode->GetRenderContext();
     renderContext->UpdateBackBlurStyle(styleOption);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    BorderRadiusProperty radius;
-    radius.SetRadius(tabTheme->GetDialogRadiusLevel10());
-    renderContext->UpdateBorderRadius(radius);
-    renderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::OuterDefaultLG));
     float scale = pipelineContext->GetFontScale();
     if (scale == BIG_FONT_SIZE_SCALE || scale == LARGE_FONT_SIZE_SCALE) {
         dialogProperties.width = CalcDimension(BIG_DIALOG_WIDTH, DimensionUnit::VP);
-    } else if (scale == MAX_FONT_SIZE_SCALE) {
+    } else if (scale >= MAX_FONT_SIZE_SCALE) {
         dialogProperties.width = CalcDimension(MAX_DIALOG_WIDTH, DimensionUnit::VP);
     }
+    auto layoutProperty = dialogColumnNode->GetLayoutProperty();
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     dialogNode_ = overlayManager->ShowDialogWithNode(dialogProperties, dialogColumnNode, false);
 }
 

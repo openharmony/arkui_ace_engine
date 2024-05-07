@@ -836,7 +836,7 @@ public:
     }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
-    void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false);
+    void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false, bool showMenu = false);
     void HandleOnSelectAll() override
     {
         HandleOnSelectAll(true);
@@ -1209,6 +1209,12 @@ public:
     bool GetCustomKeyboardOption()
     {
         return keyboardAvoidance_;
+    }
+
+    void SetShowKeyBoardOnFocus(bool value);
+    bool GetShowKeyBoardOnFocus()
+    {
+        return showKeyBoardOnFocus_;
     }
 
 protected:
@@ -1594,6 +1600,7 @@ private:
     std::queue<PreviewTextInfo> previewTextOperation;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
+    bool showKeyBoardOnFocus_ = true;
 };
 } // namespace OHOS::Ace::NG
 

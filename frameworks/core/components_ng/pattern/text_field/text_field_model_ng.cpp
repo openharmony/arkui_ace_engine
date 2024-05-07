@@ -1780,4 +1780,19 @@ bool TextFieldModelNG::GetCustomKeyboardOption(FrameNode* frameNode)
     CHECK_NULL_RETURN(pattern, false);
     return pattern->GetCustomKeyboardOption();
 }
+
+void TextFieldModelNG::SetShowKeyBoardOnFocus(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetShowKeyBoardOnFocus(value);
+}
+bool TextFieldModelNG::GetShowKeyBoardOnFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->GetShowKeyBoardOnFocus();
+}
 } // namespace OHOS::Ace::NG

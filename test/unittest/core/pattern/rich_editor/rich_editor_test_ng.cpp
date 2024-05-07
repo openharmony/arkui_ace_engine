@@ -166,6 +166,7 @@ class RichEditorTestNg : public TestNG {
 public:
     void SetUp() override;
     void TearDown() override;
+    static void TearDownTestSuite();
     void AddSpan(const std::string& content);
     void AddImageSpan();
     void AddParagraph(TestParagraphItem testParagraphItem);
@@ -208,8 +209,12 @@ void RichEditorTestNg::TearDown()
     testOnIMEInputComplete = 0;
     testAboutToDelete = 0;
     testOnDeleteComplete = 0;
-    MockPipelineContext::TearDown();
     MockParagraph::TearDown();
+}
+
+void RichEditorTestNg::TearDownTestSuite()
+{
+    TestNG::TearDownTestSuite();
 }
 
 void RichEditorTestNg::AddSpan(const std::string& content)
@@ -772,8 +777,7 @@ HWTEST_F(RichEditorTestNg, RichEditorModel011, TestSize.Level1)
     // test placeholder appear when there is nothing in richEditor
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
     auto spanItemChildren = layoutAlgorithm->GetSpans();
-    EXPECT_EQ(spanItemChildren.size(), 1);
-    EXPECT_EQ(spanItemChildren.back()->GetSpanContent(), INIT_VALUE_1);
+    EXPECT_EQ(spanItemChildren.size(), 0);
 
     // test add Text then placeholder disappear
     TextSpanOptions textOptions;
@@ -794,8 +798,7 @@ HWTEST_F(RichEditorTestNg, RichEditorModel011, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
     spanItemChildren = layoutAlgorithm->GetSpans();
-    EXPECT_EQ(spanItemChildren.size(), 1);
-    EXPECT_EQ(spanItemChildren.back()->GetSpanContent(), INIT_VALUE_1);
+    EXPECT_EQ(spanItemChildren.size(), 0);
 
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -839,14 +842,7 @@ HWTEST_F(RichEditorTestNg, RichEditorModel012, TestSize.Level1)
     // test placeholder value and style is correct
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
     auto spanItemChildren = layoutAlgorithm->GetSpans();
-    auto spanItem = spanItemChildren.back();
-    EXPECT_EQ(spanItemChildren.size(), 1);
-    EXPECT_EQ(spanItem->GetSpanContent(), INIT_VALUE_1);
-    EXPECT_EQ(spanItem->fontStyle->propTextColor, TEXT_COLOR_VALUE);
-    EXPECT_EQ(spanItem->fontStyle->propFontSize, FONT_SIZE_VALUE);
-    EXPECT_EQ(spanItem->fontStyle->propItalicFontStyle, ITALIC_FONT_STYLE_VALUE);
-    EXPECT_EQ(spanItem->fontStyle->propFontWeight, FONT_WEIGHT_VALUE);
-    EXPECT_EQ(spanItem->fontStyle->propFontFamily, FONT_FAMILY_VALUE);
+    EXPECT_EQ(spanItemChildren.size(), 0);
 
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -885,15 +881,7 @@ HWTEST_F(RichEditorTestNg, RichEditorModel013, TestSize.Level1)
     // test placeholder value and style is correct
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
     auto spanItemChildren = layoutAlgorithm->GetSpans();
-    auto spanItem = spanItemChildren.back();
-    EXPECT_EQ(spanItemChildren.size(), 1);
-    EXPECT_EQ(spanItem->GetSpanContent(), INIT_VALUE_1);
-    EXPECT_FALSE(spanItem->fontStyle->propTextColor.has_value());
-    EXPECT_FALSE(spanItem->fontStyle->propFontSize.has_value());
-    EXPECT_FALSE(spanItem->fontStyle->propItalicFontStyle.has_value());
-    EXPECT_FALSE(spanItem->fontStyle->propFontWeight.has_value());
-    ASSERT_TRUE(spanItem->fontStyle->propFontFamily.has_value());
-    EXPECT_TRUE(spanItem->fontStyle->propFontFamily.value().empty());
+    EXPECT_EQ(spanItemChildren.size(), 0);
 
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -2051,11 +2039,11 @@ HWTEST_F(RichEditorTestNg, OnHandleMove001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = -1;
-    richEditorPattern->OnHandleMove(RectF(0.0f, 0.0f, 10.0f, 10.0f), true);
+    richEditorPattern->selectOverlay_->OnHandleMove(RectF(0.0f, 0.0f, 10.0f, 10.0f), true);
     EXPECT_EQ(richEditorPattern->caretPosition_, -1);
 
     richEditorPattern->caretPosition_ = -1;
-    richEditorPattern->OnHandleMove(RectF(0.0f, 0.0f, 10.0f, 10.0f), false);
+    richEditorPattern->selectOverlay_->OnHandleMove(RectF(0.0f, 0.0f, 10.0f, 10.0f), false);
     EXPECT_EQ(richEditorPattern->caretPosition_, -1);
 }
 
@@ -2527,110 +2515,6 @@ HWTEST_F(RichEditorTestNg, HandleOnCopy001, TestSize.Level1)
     richEditorPattern->HandleOnCopy();
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
-}
-
-/**
- * @tc.name: InsertValueByPaste001
- * @tc.desc: test InsertValueByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, InsertValueByPaste001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("test");
-
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
-    richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 4);
-
-    richEditorPattern->typingStyle_ = UpdateSpanStyle();
-    richEditorPattern->typingTextStyle_ = std::nullopt;
-    richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 9);
-
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = TextStyle();
-    richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 14);
-
-    richEditorPattern->typingStyle_ = UpdateSpanStyle();
-    richEditorPattern->typingTextStyle_ = TextStyle();
-    richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 19);
-
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 24);
-
-    richEditorPattern->caretSpanIndex_ = 0;
-    richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 29);
-
-    richEditorPattern->caretSpanIndex_ = 1;
-    AddImageSpan();
-    richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 34);
-}
-
-/**
- * @tc.name: InsertValueByPaste002
- * @tc.desc: test InsertValueByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, InsertValueByPaste002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 4);
-}
-
-/**
- * @tc.name: InsertValueByPaste003
- * @tc.desc: test InsertValueByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, InsertValueByPaste003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddImageSpan();
-    richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 4);
-}
-
-/**
- * @tc.name: InsertValueByPaste004
- * @tc.desc: test InsertValueByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, InsertValueByPaste004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->caretSpanIndex_ = 0;
-    richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 4);
-
-    AddSpan("test");
-    richEditorPattern->caretSpanIndex_ = 0;
-    richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 8);
-
-    AddSpan("test");
-    richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 12);
-
-    ClearSpan();
-    AddImageSpan();
-    richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 16);
 }
 
 /**

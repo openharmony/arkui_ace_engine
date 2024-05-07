@@ -523,7 +523,6 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     layoutWrapper->Measure(layoutConstrain);
     PlaceholderStyle placeholderStyle;
     auto baselineOffset = Dimension(0.0f);
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
     if (imageLayoutProperty) {
         placeholderStyle.verticalAlign = imageLayoutProperty->GetVerticalAlign().value_or(VerticalAlign::BOTTOM);
@@ -537,9 +536,6 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
         imageSpanItem->placeholderIndex = imageSpanItem->UpdateParagraph(frameNode, paragraph, placeholderStyle);
     } else {
         placeholderStyle.baselineOffset = (baselineOffset - Dimension(IMAGE_SPAN_BASELINE_OFFSET)).ConvertToPx();
-        if (isRtl) {
-            placeholderStyle.baselineOffset = -placeholderStyle.baselineOffset;
-        }
         imageSpanItem->placeholderIndex = imageSpanItem->UpdateParagraph(frameNode, paragraph, placeholderStyle);
     }
     currentParagraphPlaceholderCount_++;

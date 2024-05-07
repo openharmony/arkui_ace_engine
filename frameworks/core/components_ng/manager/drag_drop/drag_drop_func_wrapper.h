@@ -35,10 +35,15 @@ public:
         std::function<void(WeakPtr<FrameNode>)> applyOnNodeSync, DragPreviewOption& options);
     static void UpdatePreviewOptionDefaultAttr(DragPreviewOption& option);
     static void UpdateExtraInfo(std::unique_ptr<JsonValue>& arkExtraInfoJson, DragPreviewOption& option);
+    static void PrepareRadiusParametersForDragData(std::unique_ptr<JsonValue>& arkExtraInfoJson,
+        DragPreviewOption& option);
     static void PrepareShadowParametersForDragData(std::unique_ptr<JsonValue>& arkExtraInfoJson,
         DragPreviewOption& option);
     static void ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonValue>& arkExtraInfoJson);
     static std::optional<Shadow> GetDefaultShadow();
+    static std::optional<BorderRadiusProperty> GetDefaultBorderRadius();
+    static float RadiusToSigma(float radius);
+    static std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
 };
 } // namespace OHOS::Ace::NG
 

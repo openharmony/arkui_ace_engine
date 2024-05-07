@@ -1563,6 +1563,9 @@ struct ArkUITextModifier {
     void (*setLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
     void (*resetLineBreakStrategy)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextLineBreakStrategy)(ArkUINodeHandle node);
+    void (*setTextSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    ArkUI_Uint32 (*getTextSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*resetTextSelectedBackgroundColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2558,6 +2561,9 @@ struct ArkUITextInputModifier {
     void (*resetTextInputCustomKeyboard)(ArkUINodeHandle node);
     void (*setTextInputLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
     void (*resetTextInputLineBreakStrategy)(ArkUINodeHandle node);
+    void (*setTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Bool (*getTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node);
+    void (*resetTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

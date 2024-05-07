@@ -13,13 +13,19 @@
  * limitations under the License.
  */
 
+#include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
 constexpr float DEFAULT_OPACITY = 0.95f;
+constexpr Dimension PREVIEW_BORDER_RADIUS = 12.0_vp;
+constexpr float BLUR_SIGMA_SCALE = 0.57735f;
+constexpr float SCALE_HALF = 0.5f;
+}
+
 
 void DragDropFuncWrapper::SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId)
 {
@@ -69,6 +75,24 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
     if (shadow.has_value()) {
         option.options.shadow = shadow.value();
     }
+
+    auto borderRadius = imageContext->GetBorderRadius();
+    if (borderRadius.has_value()) {
+        option.options.borderRadius = borderRadius;
+    }
+
+    auto bgEffect = imageContext->GetBackgroundEffect();
+    if (bgEffect.has_value()) {
+        option.options.blurbgEffect.backGroundEffect = bgEffect.value();
+    } else {
+        auto blurstyletmp = imageContext->GetBackBlurStyle();
+        if (blurstyletmp.has_value()) {
+            bgEffect = BrulStyleToEffection(blurstyletmp);
+            if (bgEffect.has_value()) {
+                option.options.blurbgEffect.backGroundEffect = bgEffect.value();
+            }
+        }
+    }
 }
 
 void DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(DragPreviewOption& option)
@@ -79,6 +103,11 @@ void DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(DragPreviewOption& opti
     } else {
         option.options.shadow = std::nullopt;
     }
+    if (option.isDefaultRadiusEnabled) {
+        option.options.borderRadius = GetDefaultBorderRadius();
+    } else {
+        option.options.borderRadius = std::nullopt;
+    }
 }
 
 void DragDropFuncWrapper::UpdateExtraInfo(std::unique_ptr<JsonValue>& arkExtraInfoJson,
@@ -87,7 +116,32 @@ void DragDropFuncWrapper::UpdateExtraInfo(std::unique_ptr<JsonValue>& arkExtraIn
     CHECK_NULL_VOID(arkExtraInfoJson);
     double opacity = option.options.opacity;
     arkExtraInfoJson->Put("dip_opacity", opacity);
+    if (option.options.blurbgEffect.backGroundEffect.radius.IsValid()) {
+        option.options.blurbgEffect.ToJsonValue(arkExtraInfoJson);
+    }
     PrepareShadowParametersForDragData(arkExtraInfoJson, option);
+    PrepareRadiusParametersForDragData(arkExtraInfoJson, option);
+}
+
+void DragDropFuncWrapper::PrepareRadiusParametersForDragData(std::unique_ptr<JsonValue>& arkExtraInfoJson,
+    DragPreviewOption& option)
+{
+    CHECK_NULL_VOID(arkExtraInfoJson);
+    auto borderRadius = option.options.borderRadius;
+    if (borderRadius.has_value()) {
+        if (borderRadius.value().radiusTopLeft.has_value()) {
+            arkExtraInfoJson->Put("drag_corner_radius1", borderRadius.value().radiusTopLeft.value().Value());
+        }
+        if (borderRadius.value().radiusTopRight.has_value()) {
+            arkExtraInfoJson->Put("drag_corner_radius2", borderRadius.value().radiusTopRight.value().Value());
+        }
+        if (borderRadius.value().radiusBottomRight.has_value()) {
+            arkExtraInfoJson->Put("drag_corner_radius3", borderRadius.value().radiusBottomRight.value().Value());
+        }
+        if (borderRadius.value().radiusBottomLeft.has_value()) {
+            arkExtraInfoJson->Put("drag_corner_radius4", borderRadius.value().radiusBottomLeft.value().Value());
+        }
+    }
 }
 
 void DragDropFuncWrapper::PrepareShadowParametersForDragData(std::unique_ptr<JsonValue>& arkExtraInfoJson,
@@ -130,6 +184,46 @@ std::optional<Shadow> DragDropFuncWrapper::GetDefaultShadow()
     auto shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingSM, colorMode);
     shadow.SetIsFilled(true);
     return shadow;
+}
+
+std::optional<BorderRadiusProperty> DragDropFuncWrapper::GetDefaultBorderRadius()
+{
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(PREVIEW_BORDER_RADIUS);
+    return borderRadius;
+}
+
+float DragDropFuncWrapper::RadiusToSigma(float radius)
+{
+    return GreatNotEqual(radius, 0.0f) ? BLUR_SIGMA_SCALE * radius + SCALE_HALF : 0.0f;
+}
+
+std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
+    const std::optional<BlurStyleOption>& blurStyleOp)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
+    if (!blurStyleTheme) {
+        LOGW("cannot find theme of blurStyle, create blurStyle failed");
+        return std::nullopt;
+    }
+    ThemeColorMode colorMode = blurStyleOp->colorMode;
+    if (blurStyleOp->colorMode == ThemeColorMode::SYSTEM) {
+        colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
+    }
+    auto blurParam = blurStyleTheme->GetBlurParameter(blurStyleOp->blurStyle, colorMode);
+    CHECK_NULL_RETURN(blurParam, std::nullopt);
+    auto ratio = blurStyleOp->scale;
+    auto maskColor = blurParam->maskColor.BlendOpacity(ratio);
+    auto radiusPx = blurParam->radius * pipeline->GetDipScale();
+    auto radiusBlur = RadiusToSigma(radiusPx) * ratio;
+    auto saturation = (blurParam->saturation - 1) * ratio + 1.0;
+    auto brightness = (blurParam->brightness - 1) * ratio + 1.0;
+    Dimension dimen(radiusBlur);
+    EffectOption bgEffection = {dimen, saturation, brightness, maskColor,
+        blurStyleOp->adaptiveColor, blurStyleOp->blurOption};
+    return std::optional<EffectOption>(bgEffection);
 }
 
 } // namespace OHOS::Ace
