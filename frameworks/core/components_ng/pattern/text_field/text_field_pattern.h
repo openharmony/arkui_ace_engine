@@ -639,6 +639,7 @@ public:
     }
 
     void ProcessInnerPadding();
+    void ProcessNumberOfLines();
     void OnCursorMoveDone(
         TextAffinity textAffinity = TextAffinity::UPSTREAM, std::optional<Offset> offset = std::nullopt);
     bool IsDisabled();

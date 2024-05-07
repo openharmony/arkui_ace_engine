@@ -1795,4 +1795,27 @@ bool TextFieldModelNG::GetShowKeyBoardOnFocus(FrameNode* frameNode)
     CHECK_NULL_RETURN(pattern, true);
     return pattern->GetShowKeyBoardOnFocus();
 }
+
+void TextFieldModelNG::SetNumberOfLines(FrameNode* frameNode, int32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NumberOfLines, value, frameNode);
+}
+
+int32_t TextFieldModelNG::GetNumberOfLines(FrameNode* frameNode)
+{
+    uint32_t value = -1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, NumberOfLines, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::ResetNumberOfLines(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    if (textFieldLayoutProperty) {
+        textFieldLayoutProperty->ResetNumberOfLines();
+    }
+}
+
 } // namespace OHOS::Ace::NG

@@ -2519,6 +2519,17 @@ typedef enum {
     NODE_TEXT_INPUT_SHOW_KEYBOARD_ON_FOCUS,
     
     /**
+     * @brief 设置该属性后，通过该属性计算textInput组件的高度。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置numberOfLines的值。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置numberOfLines的值。\n
+     *
+     */
+    NODE_TEXT_INPUT_NUMBER_OF_LINES,
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -2793,6 +2804,17 @@ typedef enum {
     */
     NODE_TEXT_AREA_SHOW_KEYBOARD_ON_FOCUS,
 
+    /**
+     * @brief 设置该属性后，通过该属性计算textArea组件的高度。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置numberOfLines的值。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置numberOfLines的值。\n
+     *
+     */
+    NODE_TEXT_AREA_NUMBER_OF_LINES,
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *
