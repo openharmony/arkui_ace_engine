@@ -628,9 +628,9 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
     --currentIndex;
     {
         if (wrapper->GetHostNode()) {
-            ACE_SCOPED_TRACE("[MeasureSwiperBackwardItem:%d][self:%d][parent:%d][startPos:%f]", currentIndex,
+            ACE_SCOPED_TRACE("[MeasureSwiperBackwardItem:%d][self:%d][parent:%d][endPos:%f]", currentIndex,
                 wrapper->GetHostNode()->GetId(),
-                wrapper->GetHostNode()->GetParent() ? wrapper->GetHostNode()->GetParent()->GetId() : 0, startPos);
+                wrapper->GetHostNode()->GetParent() ? wrapper->GetHostNode()->GetParent()->GetId() : 0, endPos);
         }
         wrapper->Measure(layoutConstraint);
     }
