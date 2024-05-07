@@ -550,6 +550,15 @@ void ImageModelNG::SetOnSvgPlayFinish(FrameNode* frameNode, std::function<void()
     eventHub->SetOnFinish(std::move(callback));
 }
 
+void ImageModelNG::SetOnDownloadProgress(FrameNode* frameNode,
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetOnProgressCallback(std::move(callback));
+}
+
 ImageSourceInfo ImageModelNG::GetSrc(FrameNode* frameNode)
 {
     ImageSourceInfo defaultImageSourceInfo;

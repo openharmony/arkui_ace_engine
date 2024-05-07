@@ -700,5 +700,21 @@ void SetImageOnSvgPlayFinish(ArkUINodeHandle node, void* extraParam)
     };
     ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onSvgPlayFinishEvent));
 }
+
+void SetImageOnDownloadProgress(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDownloadProgress = [node, extraParam](const uint32_t& dlNow, const uint32_t& dlTotal) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_DOWNLOAD_PROGRESS;
+        event.componentAsyncEvent.data[0].u32 = dlNow;
+        event.componentAsyncEvent.data[1].u32 = dlTotal;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageModelNG::SetOnDownloadProgress(frameNode, std::move(onDownloadProgress));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

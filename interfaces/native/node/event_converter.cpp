@@ -184,6 +184,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_IMAGE_ERROR;
         case NODE_IMAGE_ON_SVG_PLAY_FINISH:
             return ON_IMAGE_SVG_PLAY_FINISH;
+        case NODE_IMAGE_ON_DOWNLOAD_PROGRESS:
+            return ON_IMAGE_DOWNLOAD_PROGRESS;
         case NODE_TEXT_PICKER_EVENT_ON_CHANGE:
             return ON_TEXT_PICKER_CHANGE;
         case NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE:
@@ -324,6 +326,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_IMAGE_ON_ERROR;
         case ON_IMAGE_SVG_PLAY_FINISH:
             return NODE_IMAGE_ON_SVG_PLAY_FINISH;
+        case ON_IMAGE_DOWNLOAD_PROGRESS:
+            return NODE_IMAGE_ON_DOWNLOAD_PROGRESS;
         case ON_TEXT_PICKER_CHANGE:
             return NODE_TEXT_PICKER_EVENT_ON_CHANGE;
         case ON_DATE_PICKER_DATE_CHANGE:

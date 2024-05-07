@@ -292,6 +292,8 @@ public:
         isImageAnimator_ = isImageAnimator;
     }
 
+    void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -459,6 +461,8 @@ private:
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
     bool hasSizeChanged = false;
+
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG
