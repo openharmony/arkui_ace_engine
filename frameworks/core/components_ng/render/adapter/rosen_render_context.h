@@ -580,6 +580,7 @@ private:
     RefPtr<CanvasImage> bdImage_;
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
+    bool isHdr_ = false;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool firstTransitionIn_ = false;
