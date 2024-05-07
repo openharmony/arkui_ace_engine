@@ -2514,4 +2514,54 @@ HWTEST_F(ImageTestNg, ImagePixelMapListTest0001, TestSize.Level1)
     EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
     EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
 }
+
+/**
+ * @tc.name: ImageSensitiveTest0001
+ * @tc.desc: Test image privacySensitive.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSensitiveTest0001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_FALSE(frameNode->IsPrivacySensitive());
+    frameNode->SetPrivacySensitive(true);
+    EXPECT_TRUE(frameNode->IsPrivacySensitive());
+    frameNode->SetPrivacySensitive(false);
+    EXPECT_FALSE(frameNode->isPrivacySensitive_);
+}
+
+/**
+ * @tc.name: ImageSensitiveTest0002
+ * @tc.desc: Test image OnSensitiveStyleChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSensitiveTest0002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get ImagePattern and call OnSensitiveStyleChange.
+     * @tc.expected: isSensitive_ is true when setting privacy sensitive and card notification.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    frameNode->SetPrivacySensitive(true);
+    imagePattern->OnSensitiveStyleChange(false);
+    EXPECT_FALSE(imagePattern->isSensitive_);
+    imagePattern->OnSensitiveStyleChange(true);
+    EXPECT_TRUE(imagePattern->isSensitive_);
+    frameNode->SetPrivacySensitive(false);
+    imagePattern->OnSensitiveStyleChange(true);
+    EXPECT_FALSE(imagePattern->isSensitive_);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true, true);
+    EXPECT_TRUE(imagePaintMethod.sensitive_);
+}
 } // namespace OHOS::Ace::NG
