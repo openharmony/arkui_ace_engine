@@ -44,8 +44,7 @@
 #include "ui/rs_ext_node_operation.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
-#include "dm/display_manager.h"
-#include <pixel_map.h>
+#include "display_manager.h"
 
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
