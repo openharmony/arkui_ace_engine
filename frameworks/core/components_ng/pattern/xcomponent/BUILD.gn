@@ -16,7 +16,7 @@ import("$ace_root/frameworks/core/components_ng/components.gni")
 
 if (is_ohos_standard_system) {
   config("ohos_xcomponent_config") {
-    include_dirs = 
+    include_dirs =
         [ "//foundation/window/window_manager/interfaces/innerkits/dm" ]
   }
 }
