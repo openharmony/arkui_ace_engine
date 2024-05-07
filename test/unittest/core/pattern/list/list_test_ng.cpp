@@ -42,6 +42,7 @@ void ListTestNg::SetUpTestSuite()
     listItemTheme->defaultLeftMargin_ = GROUP_MARGIN;
     listItemTheme->defaultRightMargin_ = GROUP_MARGIN;
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 }
 
 void ListTestNg::TearDownTestSuite()
@@ -59,11 +60,17 @@ void ListTestNg::TearDown()
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
+    ClearOldList();  // Each testcase will create new list at begin
 }
 
-void ListTestNg::GetInstance()
+void ListTestNg::ClearOldList()
 {
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ElementRegister::GetInstance()->Clear(); // Will create new list after clear
+}
+
+void ListTestNg::GetList()
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ListPattern>();
     eventHub_ = frameNode_->GetEventHub<ListEventHub>();
@@ -72,8 +79,10 @@ void ListTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ListAccessibilityProperty>();
 }
 
-void ListTestNg::Create(const std::function<void(ListModelNG)>& callback)
+ListModelNG ListTestNg::CreateList()
 {
+    ResetElmtId();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     ListModelNG model;
     model.Create();
     ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
@@ -81,101 +90,73 @@ void ListTestNg::Create(const std::function<void(ListModelNG)>& callback)
     RefPtr<ScrollControllerBase> scrollController = model.CreateScrollController();
     RefPtr<ScrollProxy> proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
     model.SetScroller(scrollController, proxy);
-    if (callback) {
-        callback(model);
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    GetList();
+    return model;
 }
 
-void ListTestNg::CreateWithItem(const std::function<void(ListModelNG)>& callback)
-{
-    Create([callback](ListModelNG model) {
-        if (callback) {
-            callback(model);
-        }
-        CreateItem(TOTAL_LINE_NUMBER);
-    });
-}
-
-void ListTestNg::CreateWithSwipe(bool isStartNode, V2::SwipeEdgeEffect swipeEdgeEffect, int32_t itemNumber)
-{
-    Create([isStartNode, swipeEdgeEffect, itemNumber](ListModelNG model) {
-        auto startFunc = GetDefaultSwiperBuilder(START_NODE_LEN);
-        auto endFunc = GetDefaultSwiperBuilder(END_NODE_LEN);
-        for (int32_t index = 0; index < itemNumber; index++) {
-            if (isStartNode) {
-                CreateItemWithSwipe(startFunc, nullptr, swipeEdgeEffect);
-            } else {
-                CreateItemWithSwipe(nullptr, endFunc, swipeEdgeEffect);
-            }
-        }
-    });
-}
-
-void ListTestNg::CreateWithSwipeAction(
-    SwipeActionItem& item, bool isStartArea, OnOffsetChangeFunc onOffsetChange, V2::SwipeEdgeEffect effect)
-{
-    ListModelNG model;
-    model.Create();
-    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
-    {
-        ListItemModelNG itemModel;
-        itemModel.Create();
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
-        itemModel.SetSwiperAction(nullptr, nullptr, std::move(onOffsetChange), effect);
-        itemModel.SetDeleteArea(std::move(item.builderAction), std::move(item.onDelete),
-            std::move(item.onEnterDeleteArea), std::move(item.onExitDeleteArea), std::move(item.onStateChange),
-            item.actionAreaDistance, isStartArea);
-        {
-            RowModelNG rowModel;
-            rowModel.Create(std::nullopt, nullptr, "");
-            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-            ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
-            ViewStackProcessor::GetInstance()->Pop();
-        }
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
-}
-
-void ListTestNg::CreateItem(int32_t itemNumber, Axis axis, V2::ListItemStyle listItemStyle)
+void ListTestNg::CreateListItems(int32_t itemNumber, V2::ListItemStyle listItemStyle)
 {
     for (int32_t index = 0; index < itemNumber; index++) {
-        ListItemModelNG itemModel;
-        itemModel.Create([](int32_t) {}, listItemStyle);
-        if (axis == Axis::VERTICAL) {
-            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-            ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
-        } else {
-            ViewAbstract::SetWidth(CalcLength(ITEM_WIDTH));
-            ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
-        }
-        {
-            ButtonModelNG buttonModelNG;
-            buttonModelNG.CreateWithLabel("label");
-            ViewStackProcessor::GetInstance()->Pop();
-        }
+        CreateListItem(listItemStyle);
         ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
 
-void ListTestNg::CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize, V2::ListItemStyle listItemStyle)
+ListItemModelNG ListTestNg::CreateListItem(V2::ListItemStyle listItemStyle)
+{
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, listItemStyle);
+    if (layoutProperty_->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL) {
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
+    } else {
+        ViewAbstract::SetWidth(CalcLength(ITEM_WIDTH));
+        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+    }
+    return itemModel;
+}
+
+void ListTestNg::CreateListItemGroups(int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        CreateListItemGroup(listItemGroupStyle);
+        CreateListItems(GROUP_LINE_NUMBER);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+ListItemGroupModelNG ListTestNg::CreateListItemGroup(V2::ListItemGroupStyle listItemGroupStyle)
+{
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    ListItemGroupModelNG groupModel;
+    groupModel.Create(listItemGroupStyle);
+    return groupModel;
+}
+
+void ListTestNg::CreateDone()
+{
+    auto& elementsStack = ViewStackProcessor::GetInstance()->elementsStack_;
+    while (elementsStack.size() > 1) {
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+}
+
+void ListTestNg::CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize)
 {
     for (int32_t index = 0; index < itemNumber; ++index) {
-        ListItemModelNG itemModel;
-        itemModel.Create([](int32_t) {}, listItemStyle);
+        ListItemModelNG itemModel = CreateListItem();
         ViewAbstract::SetWidth(CalcLength(itemSize.Width()));
         ViewAbstract::SetHeight(CalcLength(itemSize.Height()));
-        {
-            ButtonModelNG buttonModelNG;
-            buttonModelNG.CreateWithLabel("label");
-            ViewStackProcessor::GetInstance()->Pop();
-        }
         ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
 
@@ -185,14 +166,14 @@ void ListTestNg::CreateGroupWithSetting(
     for (int32_t index = 0; index < groupNumber; index++) {
         auto header = GetDefaultHeaderBuilder();
         auto footer = GetDefaultHeaderBuilder();
-        ListItemGroupModelNG groupModel;
-        groupModel.Create(listItemGroupStyle);
+        ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
         groupModel.SetSpace(Dimension(SPACE));
         groupModel.SetDivider(ITEM_DIVIDER);
         groupModel.SetHeader(std::move(header));
         groupModel.SetFooter(std::move(footer));
-        CreateItem(itemNumber, axis, static_cast<V2::ListItemStyle>(listItemGroupStyle));
+        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
         ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
 
@@ -201,8 +182,7 @@ void ListTestNg::CreateGroupWithSettingChildrenMainSize(int32_t groupNumber)
     for (int32_t index = 0; index < groupNumber; ++index) {
         auto header = GetDefaultHeaderBuilder();
         auto footer = GetDefaultHeaderBuilder();
-        ListItemGroupModelNG groupModel;
-        groupModel.Create(V2::ListItemGroupStyle::NONE);
+        ListItemGroupModelNG groupModel = CreateListItemGroup();
         groupModel.SetSpace(Dimension(SPACE));
         groupModel.SetDivider(ITEM_DIVIDER);
         groupModel.SetHeader(std::move(header));
@@ -212,39 +192,29 @@ void ListTestNg::CreateGroupWithSettingChildrenMainSize(int32_t groupNumber)
         childrenSize->UpdateDefaultSize(ITEM_HEIGHT);
         const int32_t itemNumber = 2;
         childrenSize->ChangeData(1, itemNumber, { 50.f, 200.f });
-        CreateItem(1, Axis::VERTICAL, V2::ListItemStyle::NONE);
+        CreateListItems(1);
         CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
         CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
-        CreateItem(1, Axis::VERTICAL, V2::ListItemStyle::NONE);
+        CreateListItems(1);
         ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
-
-void ListTestNg::CreateGroup(int32_t groupNumber, Axis axis)
-{
-    for (int32_t index = 0; index < groupNumber; index++) {
-        ListItemGroupModelNG groupModel;
-        groupModel.Create(V2::ListItemGroupStyle::NONE);
-        CreateItem(GROUP_LINE_NUMBER, axis, V2::ListItemStyle::NONE);
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-}
-
 
 void ListTestNg::CreateGroupChildrenMainSize(int32_t groupNumber)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
-        ListItemGroupModelNG groupModel;
-        groupModel.Create(V2::ListItemGroupStyle::NONE);
+        ListItemGroupModelNG groupModel = CreateListItemGroup();
         auto childrenSize = groupModel.GetOrCreateListChildrenMainSize();
         childrenSize->UpdateDefaultSize(ITEM_HEIGHT);
         const int32_t itemNumber = 2;
         childrenSize->ChangeData(1, itemNumber, { 50.f, 200.f });
-        CreateItem(1, Axis::VERTICAL, V2::ListItemStyle::NONE);
+        CreateListItems(1);
         CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
         CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
-        CreateItem(1, Axis::VERTICAL, V2::ListItemStyle::NONE);
+        CreateListItems(1);
         ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
 
@@ -252,9 +222,9 @@ void ListTestNg::CreateGroupWithItem(int32_t groupNumber, Axis axis)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
         if (index & 1) {
-            CreateItem(1, axis);
+            CreateListItems(1);
         } else {
-            CreateGroup(1, axis);
+            CreateListItemGroups(1);
         }
     }
 }
@@ -262,10 +232,7 @@ void ListTestNg::CreateGroupWithItem(int32_t groupNumber, Axis axis)
 void ListTestNg::CreateItemWithSwipe(
     std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect)
 {
-    ListItemModelNG itemModel;
-    itemModel.Create();
-    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-    ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
+    ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(std::move(startAction), std::move(endAction), nullptr, effect);
     if (startAction) {
         itemModel.SetDeleteArea(
@@ -283,6 +250,7 @@ void ListTestNg::CreateItemWithSwipe(
         ViewStackProcessor::GetInstance()->Pop();
     }
     ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 }
 
 std::function<void()> ListTestNg::GetDefaultSwiperBuilder(float crossSize)

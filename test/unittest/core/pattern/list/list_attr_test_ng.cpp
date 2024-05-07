@@ -32,22 +32,22 @@ public:
  */
 HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        model.SetSpace(Dimension(10));
-        model.SetInitialIndex(1);
-        model.SetListDirection(Axis::VERTICAL);
-        model.SetScrollBar(DisplayMode::ON);
-        model.SetEditMode(true);
-        model.SetChainAnimation(true);
-        model.SetEdgeEffect(EdgeEffect::NONE, false);
-        model.SetLanes(3);
-        model.SetLaneMinLength(Dimension(40));
-        model.SetLaneMaxLength(Dimension(60));
-        model.SetListItemAlign(V2::ListItemAlign::CENTER);
-        model.SetCachedCount(10);
-        model.SetSticky(V2::StickyStyle::HEADER);
-        model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
-    });
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(10));
+    model.SetInitialIndex(1);
+    model.SetListDirection(Axis::VERTICAL);
+    model.SetScrollBar(DisplayMode::ON);
+    model.SetEditMode(true);
+    model.SetChainAnimation(true);
+    model.SetEdgeEffect(EdgeEffect::NONE, false);
+    model.SetLanes(3);
+    model.SetLaneMinLength(Dimension(40));
+    model.SetLaneMaxLength(Dimension(60));
+    model.SetListItemAlign(V2::ListItemAlign::CENTER);
+    model.SetCachedCount(10);
+    model.SetSticky(V2::StickyStyle::HEADER);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Call ToJsonValue()
@@ -73,11 +73,13 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
      * @tc.steps: step2. Change some property, Call ToJsonValue()
      * @tc.expected: The json value is correct
      */
-    layoutProperty_->UpdateListDirection(Axis::HORIZONTAL);
-    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
-    layoutProperty_->UpdateStickyStyle(V2::StickyStyle::FOOTER);
-    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-    layoutProperty_->UpdateDivider(ITEM_DIVIDER);
+    model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    model.SetListItemAlign(V2::ListItemAlign::END);
+    model.SetSticky(V2::StickyStyle::FOOTER);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetDivider(ITEM_DIVIDER);
+    CreateDone();
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("listDirection"), "Axis.Horizontal");
@@ -94,9 +96,11 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
      * @tc.steps: step3. Change some property, Call ToJsonValue()
      * @tc.expected: The json value is changed
      */
-    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::START);
-    layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
-    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::END);
+    model = CreateList();
+    model.SetListItemAlign(V2::ListItemAlign::START);
+    model.SetSticky(V2::StickyStyle::BOTH);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    CreateDone();
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("alignListItem"), "ListItemAlign.Start");
@@ -107,8 +111,10 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
      * @tc.steps: step3. Change some property, Call ToJsonValue()
      * @tc.expected: The json value is changed
      */
-    layoutProperty_->UpdateStickyStyle(V2::StickyStyle::NONE);
-    layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::NONE);
+    model = CreateList();
+    model.SetSticky(V2::StickyStyle::NONE);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::NONE);
+    CreateDone();
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("sticky"), "StickyStyle.None");
@@ -139,22 +145,11 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, ListLayoutProperty002, TestSize.Level1)
 {
-    /**
-     * @tc.step1: create list
-     */
-    ListModelNG model;
-    model.Create();
-    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
-    RefPtr<ScrollControllerBase> scrollController = model.CreateScrollController();
-    RefPtr<ScrollProxy> proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
-    model.SetScroller(scrollController, proxy);
-    CreateItem(19);
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    ListModelNG model = CreateList();
+    CreateDone();
 
     /**
-     * @tc.step2: set invalid values for LaneMinLength and LaneMaxLength
+     * @tc.step1: set invalid values for LaneMinLength and LaneMaxLength
      * @tc.expected: default value
      */
     model.SetListFriction(AceType::RawPtr(frameNode_), 0);
@@ -166,7 +161,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty002, TestSize.Level1)
     EXPECT_FALSE(layoutProperty_->HasLaneMaxLength());
 
     /**
-     * @tc.step3: set valid values for LaneMinLength and LaneMaxLength
+     * @tc.step2: set valid values for LaneMinLength and LaneMaxLength
      * @tc.expected: the set value
      */
     model.SetListFriction(AceType::RawPtr(frameNode_), NEW_FRICTION);
@@ -187,7 +182,9 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty002, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
 {
-    CreateWithItem([](ListModelNG model) {});
+    CreateList();
+    ListItemModelNG itemModel = CreateListItem();
+    CreateDone();
     auto layoutProperty = GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, 0);
 
     /**
@@ -205,9 +202,12 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
      * @tc.steps: step2. Change some property, Call ToJsonValue()
      * @tc.expected: The json value is correct
      */
-    layoutProperty->UpdateStickyMode(V2::StickyMode::NORMAL);
-    layoutProperty->UpdateEditMode(V2::EditMode::NONE);
-    layoutProperty->UpdateEdgeEffect(V2::SwipeEdgeEffect::Spring);
+    CreateList();
+    itemModel = CreateListItem();
+    itemModel.SetSticky(V2::StickyMode::NORMAL);
+    itemModel.SetEditMode(V2::EditMode::NONE);
+    itemModel.SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::Spring);
+    CreateDone();
     json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("sticky"), "Sticky.Normal");
@@ -219,9 +219,12 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
      * @tc.steps: step3. Change some property, Call ToJsonValue()
      * @tc.expected: The json value is correct
      */
-    layoutProperty->UpdateStickyMode(V2::StickyMode::OPACITY);
-    layoutProperty->UpdateEditMode(V2::EditMode::MOVABLE);
-    layoutProperty->UpdateEdgeEffect(V2::SwipeEdgeEffect::None);
+    CreateList();
+    itemModel = CreateListItem();
+    itemModel.SetSticky(V2::StickyMode::OPACITY);
+    itemModel.SetEditMode(V2::EditMode::MOVABLE);
+    itemModel.SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::None);
+    CreateDone();
     json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("sticky"), "Sticky.Opacity");
@@ -233,7 +236,10 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
      * @tc.steps: step4. Change some property, Call ToJsonValue()
      * @tc.expected: The json value is correct
      */
-    layoutProperty->UpdateEditMode(V2::EditMode::DELETABLE);
+    CreateList();
+    itemModel = CreateListItem();
+    itemModel.SetEditMode(V2::EditMode::DELETABLE);
+    CreateDone();
     json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("editable"), "EditMode.Deletable");
@@ -242,7 +248,10 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
      * @tc.steps: step5. Change some property, Call ToJsonValue()
      * @tc.expected: The json value is correct
      */
-    layoutProperty->UpdateEditMode(V2::EditMode::DELETABLE | V2::EditMode::MOVABLE);
+    CreateList();
+    itemModel = CreateListItem();
+    itemModel.SetEditMode(V2::EditMode::DELETABLE | V2::EditMode::MOVABLE);
+    CreateDone();
     json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->GetBool("editable"));
@@ -259,7 +268,10 @@ HWTEST_F(ListAttrTestNg, AttrSpace001, TestSize.Level1)
      * @tc.cases: Set space
      * @tc.expected: Has space
      */
-    CreateWithItem([](ListModelNG model) { model.SetSpace(Dimension(SPACE)); });
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    CreateListItems(2);
+    CreateDone();
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0) + SPACE);
 }
 
@@ -271,14 +283,14 @@ HWTEST_F(ListAttrTestNg, AttrSpace001, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrSpace002, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set invalid space:SPACE, set Horizontal layout
+     * @tc.cases: Set space:SPACE, set Horizontal layout
      * @tc.expected: Has space
      */
-    Create([](ListModelNG model) {
-        model.SetListDirection(Axis::HORIZONTAL);
-        model.SetSpace(Dimension(SPACE));
-        CreateGroup(2, Axis::HORIZONTAL); // 2 itemGroup
-    });
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    model.SetSpace(Dimension(SPACE));
+    CreateListItemGroups(2);
+    CreateDone();
     EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
     EXPECT_EQ(GetChildX(frameNode_, 1), GetChildWidth(frameNode_, 0) + SPACE);
 }
@@ -294,14 +306,20 @@ HWTEST_F(ListAttrTestNg, AttrSpace003, TestSize.Level1)
      * @tc.cases: Set invalid space:LIST_HEIGHT
      * @tc.expected: Space was going to be zero
      */
-    CreateWithItem([](ListModelNG model) { model.SetSpace(Dimension(LIST_HEIGHT)); });
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(LIST_HEIGHT));
+    CreateListItems(2);
+    CreateDone();
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0));
 
     /**
      * @tc.cases: Set invalid space: -1
      * @tc.expected: Space was going to be zero
      */
-    CreateWithItem([](ListModelNG model) { model.SetSpace(Dimension(-1)); });
+    model = CreateList();
+    model.SetSpace(Dimension(-1));
+    CreateListItems(2);
+    CreateDone();
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0));
 }
 
@@ -316,7 +334,10 @@ HWTEST_F(ListAttrTestNg, AttrDivider001, TestSize.Level1)
      * @tc.cases: Set divider
      * @tc.expected: Has divider, the divider width is STROKE_WIDTH
      */
-    CreateWithItem([](ListModelNG model) { model.SetDivider(ITEM_DIVIDER); });
+    ListModelNG model = CreateList();
+    model.SetDivider(ITEM_DIVIDER);
+    CreateListItems(2);
+    CreateDone();
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0) + STROKE_WIDTH);
 }
 
@@ -331,12 +352,12 @@ HWTEST_F(ListAttrTestNg, AttrDivider002, TestSize.Level1)
      * @tc.cases: Set space less than divider's STROKE_WIDTH
      * @tc.expected: Space was going to be STROKE_WIDTH
      */
-    Create([](ListModelNG model) {
-        model.SetListDirection(Axis::HORIZONTAL);
-        model.SetSpace(Dimension(STROKE_WIDTH - 1.f));
-        model.SetDivider(ITEM_DIVIDER);
-        CreateItem(TOTAL_LINE_NUMBER, Axis::HORIZONTAL); // 10 items
-    });
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    model.SetSpace(Dimension(STROKE_WIDTH - 1.f));
+    model.SetDivider(ITEM_DIVIDER);
+    CreateListItems(2);
+    CreateDone();
     EXPECT_EQ(GetChildX(frameNode_, 1), GetChildWidth(frameNode_, 0) + STROKE_WIDTH);
 }
 
@@ -353,7 +374,10 @@ HWTEST_F(ListAttrTestNg, AttrDivider003, TestSize.Level1)
      */
     auto divider = ITEM_DIVIDER;
     divider.strokeWidth = Dimension(LIST_HEIGHT);
-    CreateWithItem([divider](ListModelNG model) { model.SetDivider(divider); });
+    ListModelNG model = CreateList();
+    model.SetDivider(divider);
+    CreateListItems(2);
+    CreateDone();
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0));
 }
 
@@ -368,7 +392,9 @@ HWTEST_F(ListAttrTestNg, AttrInitIndex001, TestSize.Level1)
      * @tc.cases: Not set initialIndex
      * @tc.expected: List default at top
      */
-    CreateWithItem([](ListModelNG model) {});
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 }
@@ -383,7 +409,10 @@ HWTEST_F(ListAttrTestNg, AttrInitIndex002, TestSize.Level1)
      * @tc.cases: Set initialIndex:1
      * @tc.expected: The item(index:1) is at top
      */
-    CreateWithItem([](ListModelNG model) { model.SetInitialIndex(1); });
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_EQ(GetChildY(frameNode_, 1), 0.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
@@ -400,10 +429,10 @@ HWTEST_F(ListAttrTestNg, AttrInitIndex003, TestSize.Level1)
      * @tc.cases: Set initialIndex:1, total ListItem size less than viewport
      * @tc.expected: List is unscrollable, list is at top
      */
-    Create([](ListModelNG model) {
-        model.SetInitialIndex(1);
-        CreateItem(5);
-    });
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
     EXPECT_FALSE(pattern_->IsScrollable());
     EXPECT_TRUE(pattern_->IsAtTop());
 }
@@ -419,11 +448,11 @@ HWTEST_F(ListAttrTestNg, AttrInitIndex004, TestSize.Level1)
      * @tc.cases: Set Horizontal layout, set initialIndex:5, the initialIndex greater than scrollable distance
      * @tc.expected: List is at bottom, the item(index:2) is at top
      */
-    Create([](ListModelNG model) {
-        model.SetListDirection(Axis::HORIZONTAL);
-        model.SetInitialIndex(5);
-        CreateItem(TOTAL_LINE_NUMBER, Axis::HORIZONTAL); // 10 items
-    });
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    model.SetInitialIndex(5);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     EXPECT_TRUE(pattern_->IsAtBottom());
     EXPECT_EQ(GetChildX(frameNode_, 2), 0.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_WIDTH * 2);
@@ -440,7 +469,10 @@ HWTEST_F(ListAttrTestNg, AttrInitIndex005, TestSize.Level1)
      * @tc.cases: Set initialIndex:100, the initialIndex greater than max Index(itemSize-1)
      * @tc.expected: List is at top, ignore initialIndex
      */
-    CreateWithItem([](ListModelNG model) { model.SetInitialIndex(100); });
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(100);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     EXPECT_TRUE(pattern_->IsAtTop());
 }
 
@@ -455,12 +487,14 @@ HWTEST_F(ListAttrTestNg, AttrInitIndex006, TestSize.Level1)
      * @tc.cases: Set initialIndex:3, the initialIndex is not an integer multiple of the lanes
      * @tc.expected: The item(index:2,3) is at top
      */
-    Create([](ListModelNG model) {
-        model.SetInitialIndex(3);
-        model.SetLanes(2);
-        CreateItem(20); // 20 items, scrollable list
-    });
-    EXPECT_EQ(GetChildY(frameNode_, 1), 0.f);
+    const int32_t lanes = 2;
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(3);
+    model.SetLanes(lanes);
+    CreateListItems(TOTAL_ITEM_NUMBER * lanes);
+    CreateDone();
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0.f);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 0.f);
 }
 
 /**
@@ -474,10 +508,10 @@ HWTEST_F(ListAttrTestNg, AttrInitIndex007, TestSize.Level1)
      * @tc.cases: Set initialIndex:1, create itemGroup
      * @tc.expected: The itemGroup(index:1) is at top
      */
-    Create([](ListModelNG model) {
-        model.SetInitialIndex(1);
-        CreateGroup(4); // 4 itemGroup
-    });
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    CreateListItemGroups(GROUP_NUMBER);
+    CreateDone();
     EXPECT_EQ(GetChildY(frameNode_, 1), 0.f);
 }
 
@@ -492,7 +526,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollBar001, TestSize.Level1)
      * @tc.cases: Set scrollBar
      * @tc.expected: The itemGroup(index:1) is at top
      */
-    CreateWithItem([](ListModelNG model) { model.SetScrollBar(DisplayMode::ON); });
+    ListModelNG model = CreateList();
+    model.SetScrollBar(DisplayMode::ON);
+    CreateListItems(1);
+    CreateDone();
     EXPECT_EQ(pattern_->GetScrollBar()->GetDisplayMode(), DisplayMode::ON);
 }
 
@@ -508,7 +545,9 @@ HWTEST_F(ListAttrTestNg, AttrScrollBar002, TestSize.Level1)
      * @tc.expected: the default value is auto
      */
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
-    CreateWithItem([](ListModelNG model) {});
+    ListModelNG model = CreateList();
+    CreateListItems(1);
+    CreateDone();
     EXPECT_EQ(pattern_->GetScrollBar()->GetDisplayMode(), DisplayMode::AUTO);
 }
 
@@ -523,10 +562,10 @@ HWTEST_F(ListAttrTestNg, AttrLanes001, TestSize.Level1)
      * @tc.cases: Set lanes:2
      * @tc.expected: Has two lanes
      */
-    Create([](ListModelNG model) {
-        model.SetLanes(2);
-        CreateItem(19); // 19 items, 10 rows
-    });
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
     EXPECT_LT(GetChildX(frameNode_, 0), GetChildX(frameNode_, 1));
     EXPECT_EQ(GetChildX(frameNode_, 0), GetChildX(frameNode_, 2));
 }
@@ -542,11 +581,11 @@ HWTEST_F(ListAttrTestNg, AttrLanes002, TestSize.Level1)
      * @tc.cases: Set LaneMinLength half of LIST_WIDTH
      * @tc.expected: Has two lanes
      */
-    Create([](ListModelNG model) {
-        model.SetLaneMinLength(Dimension(LIST_WIDTH / 2 - 1));
-        model.SetLaneMaxLength(Dimension(LIST_WIDTH));
-        CreateItem(19);
-    });
+    ListModelNG model = CreateList();
+    model.SetLaneMinLength(Dimension(LIST_WIDTH / 2 - 1));
+    model.SetLaneMaxLength(Dimension(LIST_WIDTH));
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
     EXPECT_LT(GetChildX(frameNode_, 0), GetChildX(frameNode_, 1));
     EXPECT_EQ(GetChildX(frameNode_, 0), GetChildX(frameNode_, 2));
 }
@@ -564,11 +603,11 @@ HWTEST_F(ListAttrTestNg, AttrLanes003, TestSize.Level1)
      * @tc.expected: Has two lanes, ignore LaneMaxLength
      */
     const float minLaneLength = LIST_WIDTH / 2 - 1;
-    Create([minLaneLength](ListModelNG model) {
-        model.SetLaneMinLength(Dimension(minLaneLength));
-        model.SetLaneMaxLength(Dimension(minLaneLength - 1));
-        CreateItem(19);
-    });
+    ListModelNG model = CreateList();
+    model.SetLaneMinLength(Dimension(minLaneLength));
+    model.SetLaneMaxLength(Dimension(minLaneLength - 1));
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
     EXPECT_LT(GetChildX(frameNode_, 0), GetChildX(frameNode_, 1));
     EXPECT_EQ(GetChildX(frameNode_, 0), GetChildX(frameNode_, 2));
     EXPECT_EQ(GetChildWidth(frameNode_, 0), minLaneLength);
@@ -586,10 +625,11 @@ HWTEST_F(ListAttrTestNg, AttrLanes004, TestSize.Level1)
      * @tc.expected: Has laneGutter
      */
     const float laneGutter = 16.f;
-    CreateWithItem([laneGutter](ListModelNG model) {
-        model.SetLanes(2);
-        model.SetLaneGutter(Dimension(laneGutter));
-    });
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetLaneGutter(Dimension(laneGutter));
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
     EXPECT_EQ(GetChildX(frameNode_, 1), GetChildWidth(frameNode_, 0) + laneGutter);
 }
 
@@ -605,12 +645,12 @@ HWTEST_F(ListAttrTestNg, AttrLanes005, TestSize.Level1)
      * @tc.expected: Has laneGutter
      */
     Dimension laneGutter = Dimension::FromString("10%");
-    Create([laneGutter](ListModelNG model) {
-        CreateItem(20);
-        model.SetScrollBar(DisplayMode::OFF);
-        model.SetLanes(5);
-        model.SetLaneGutter(laneGutter);
-    });
+    ListModelNG model = CreateList();
+    model.SetScrollBar(DisplayMode::OFF);
+    model.SetLanes(5);
+    model.SetLaneGutter(laneGutter);
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
     double gutter = laneGutter.ConvertToPxWithSize(LIST_WIDTH);
     EXPECT_EQ(GetChildX(frameNode_, 1), GetChildWidth(frameNode_, 0) + gutter);
 }
@@ -626,12 +666,11 @@ HWTEST_F(ListAttrTestNg, AttrLanes006, TestSize.Level1)
      * @tc.cases: set invalid values for LaneMinLength and LaneMaxLength
      * @tc.expected: default value
      */
-    Create([](ListModelNG model) {
-        model.SetLaneMinLength(Dimension(0.f));
-        model.SetLaneMaxLength(Dimension(0.f));
-        CreateItem(19);
-    });
-
+    ListModelNG model = CreateList();
+    model.SetLaneMinLength(Dimension(0.f));
+    model.SetLaneMaxLength(Dimension(0.f));
+    CreateListItems(1);
+    CreateDone();
     EXPECT_FALSE(layoutProperty_->HasLaneMinLength());
     EXPECT_FALSE(layoutProperty_->HasLaneMinLength());
 }
@@ -647,32 +686,34 @@ HWTEST_F(ListAttrTestNg, AttrAlignListItem001, TestSize.Level1)
      * @tc.cases: case1. Set item width smaller than LIST_WIDTH
      * @tc.expected: the item default is align to start
      */
-    constexpr float itemWidth = 400.f;
-    Create([itemWidth](ListModelNG model) {
-        for (int32_t index = 0; index < TOTAL_LINE_NUMBER; index++) {
-            ListItemModelNG itemModel;
-            itemModel.Create();
-            ViewAbstract::SetWidth(CalcLength(itemWidth));
-            ViewStackProcessor::GetInstance()->Pop();
-        }
-    });
-    EXPECT_EQ(GetChildRect(frameNode_, 0).GetX(), 0);
+    const float itemWidth = LIST_WIDTH / 2;
+    ListModelNG model = CreateList();
+    CreateListItem();
+    ViewAbstract::SetWidth(CalcLength(itemWidth));
+    CreateDone();
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0);
 
     /**
      * @tc.cases: case2. Set ListItemAlign::CENTER
      * @tc.expected: the item is align to center
      */
-    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildRect(frameNode_, 0).GetX(), (LIST_WIDTH - itemWidth) / 2);
+    model = CreateList();
+    model.SetListItemAlign(V2::ListItemAlign::CENTER);
+    CreateListItem();
+    ViewAbstract::SetWidth(CalcLength(itemWidth));
+    CreateDone();
+    EXPECT_EQ(GetChildX(frameNode_, 0), (LIST_WIDTH - itemWidth) / 2);
 
     /**
      * @tc.cases: case3. Set ListItemAlign::END
      * @tc.expected: the item is align to end
      */
-    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildRect(frameNode_, 0).GetX(), LIST_WIDTH - itemWidth);
+    model = CreateList();
+    model.SetListItemAlign(V2::ListItemAlign::END);
+    CreateListItem();
+    ViewAbstract::SetWidth(CalcLength(itemWidth));
+    CreateDone();
+    EXPECT_EQ(GetChildX(frameNode_, 0), LIST_WIDTH - itemWidth);
 }
 
 /**
@@ -683,13 +724,13 @@ HWTEST_F(ListAttrTestNg, AttrAlignListItem001, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign001, TestSize.Level1)
 {
     /**
-     * @tc.steps: stpe1. Set list height:780.f for not align the last item, Set ScrollSnapAlign::START
+     * @tc.steps: stpe1. Set list height:380.f for not align the last item, Set ScrollSnapAlign::START
      */
-    CreateWithItem([](ListModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
-        ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - 20.f)); // 780.f
-        model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
-    });
+    ListModelNG model = CreateList();
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - 20.f)); // 380.f
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     float scrollableDistance = pattern_->GetScrollableDistance();
     EXPECT_EQ(scrollableDistance, 220.f);
 
@@ -723,14 +764,14 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign001, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign002, TestSize.Level1)
 {
     /**
-     * @tc.steps: stpe1. Set list height:780.f for not align the last item, Set ScrollSnapAlign::END
+     * @tc.steps: stpe1. Set list height:380.f for not align the last item, Set ScrollSnapAlign::END
      * @tc.expected: The last item in the view will be align to end
      */
-    CreateWithItem([](ListModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
-        ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - 20.f)); // 780.f
-        model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
-    });
+    ListModelNG model = CreateList();
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - 20.f)); // 380.f
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     // The first item(index:0) will be align to start in init
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 
@@ -760,8 +801,12 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign003, TestSize.Level1)
      * @tc.steps: stpe1. Set ScrollSnapAlign::CENTER
      * @tc.expected: The middle item in the view will be align to center
      */
-    CreateWithItem([](ListModelNG model) { model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER); });
-    EXPECT_EQ(pattern_->GetTotalOffset(), -(LIST_HEIGHT - ITEM_HEIGHT) / 2); // 350.f
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    const float defaultOffset = -(LIST_HEIGHT - ITEM_HEIGHT) / 2; // -150.f
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
     float scrollableDistance = pattern_->GetScrollableDistance();
     EXPECT_EQ(scrollableDistance, 200.f); // still is 200.f
 
@@ -770,21 +815,21 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign003, TestSize.Level1)
      * @tc.expected: The fitst item(index:0) align to center
      */
     ScrollSnapForEqualHeightItem(-49.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -350.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset); // -150.f
 
     /**
      * @tc.steps: stpe3. Scroll delta greater than half of ITEM_HEIGHT
      * @tc.expected: The fitst item(index:1) align to center
      */
     ScrollSnapForEqualHeightItem(-51.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -250.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset + ITEM_HEIGHT); // -50.f
 
     /**
      * @tc.steps: stpe4. Scroll to over bottom
      * @tc.expected: The last item(index:9) align to center
      */
     ScrollSnapForEqualHeightItem(-1000.f, -1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 550.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance - defaultOffset); // 350.f
 }
 
 /**
@@ -797,7 +842,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign004, TestSize.Level1)
     /**
      * @tc.steps: stpe1. Set ScrollSnapAlign::START, set item(index:1) height:150.f
      */
-    CreateWithItem([](ListModelNG model) { model.SetScrollSnapAlign(V2::ScrollSnapAlign::START); });
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, 1)
         ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(ITEM_HEIGHT * 1.5)));
     /**
@@ -823,10 +871,13 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign004, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign005, TestSize.Level1)
 {
     /**
-     * @tc.steps: stpe1. Set ScrollSnapAlign::END, set item(index:9) height:150.f
+     * @tc.steps: stpe1. Set ScrollSnapAlign::END, set item(index:5) height:150.f
      */
-    CreateWithItem([](ListModelNG model) { model.SetScrollSnapAlign(V2::ScrollSnapAlign::END); });
-    GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, 9)
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, TOTAL_ITEM_NUMBER - 1)
         ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(ITEM_HEIGHT * 1.5)));
 
     /**
@@ -854,10 +905,13 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign006, TestSize.Level1)
     /**
      * @tc.steps: stpe1. Set ScrollSnapAlign::CENTER, set item(index:1) height:150.f
      */
-    CreateWithItem([](ListModelNG model) { model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER); });
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     GetChildLayoutProperty<ListItemLayoutProperty>(frameNode_, 1)
         ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(ITEM_HEIGHT * 1.5)));
-    EXPECT_EQ(pattern_->GetTotalOffset(), -(LIST_HEIGHT - ITEM_HEIGHT) / 2); // 350.f
+    EXPECT_EQ(pattern_->GetTotalOffset(), -(LIST_HEIGHT - ITEM_HEIGHT) / 2); // -150.f
 
     /**
      * @tc.steps: stpe2. Scroll delta greater than half of item(index:0) height
@@ -881,11 +935,12 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign006, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, AttrSLECM001, TestSize.Level1)
 {
-    CreateWithItem([](ListModelNG model) {
-        model.SetEdgeEffect(EdgeEffect::SPRING, false);
-        model.SetChainAnimation(true);
-        model.SetMultiSelectable(true);
-    });
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    model.SetChainAnimation(true);
+    model.SetMultiSelectable(true);
+    CreateListItems(1);
+    CreateDone();
     EXPECT_NE(pattern_->GetScrollEdgeEffect(), nullptr);
     EXPECT_NE(pattern_->chainAnimation_, nullptr);
     EXPECT_TRUE(pattern_->multiSelectable_);
@@ -902,7 +957,10 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
      * @tc.cases: Scrollable list, Not set ScrollEnabled
      * @tc.expected: Default by list isScrollable_
      */
-    CreateWithItem([](ListModelNG model) { model.SetScrollEnabled(true); });
+    ListModelNG model = CreateList();
+    model.SetScrollEnabled(true);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     EXPECT_TRUE(pattern_->scrollableEvent_->GetEnable());
 }
 
@@ -917,10 +975,10 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction002, TestSize.Level1)
      * @tc.cases: UnScrollable list, Not set ScrollEnabled
      * @tc.expected: Default by list isScrollable_
      */
-    Create([](ListModelNG model) {
-        model.SetScrollEnabled(true);
-        model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-    });
+    ListModelNG model = CreateList();
+    model.SetScrollEnabled(true);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    CreateDone();
     EXPECT_FALSE(pattern_->scrollableEvent_->GetEnable());
     EXPECT_TRUE(pattern_->IsScrollSnapAlignCenter());
     EXPECT_FALSE(pattern_->IsAtTop());
@@ -938,7 +996,10 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction003, TestSize.Level1)
      * @tc.cases: Scrollable list, set ScrollEnabled:false
      * @tc.expected: Default by list isScrollable_
      */
-    CreateWithItem([](ListModelNG model) { model.SetScrollEnabled(false); });
+    ListModelNG model = CreateList();
+    model.SetScrollEnabled(false);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     EXPECT_FALSE(pattern_->scrollableEvent_->GetEnable());
 }
 
@@ -953,7 +1014,10 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction004, TestSize.Level1)
      * @tc.cases: UnScrollable list, Set ScrollEnabled:true
      * @tc.expected: Decided by list isScrollable_
      */
-    Create([](ListModelNG model) { model.SetScrollEnabled(true); });
+    ListModelNG model = CreateList();
+    model.SetScrollEnabled(true);
+    CreateListItems(1);
+    CreateDone();
     EXPECT_FALSE(pattern_->scrollableEvent_->GetEnable());
 }
 
@@ -968,7 +1032,10 @@ HWTEST_F(ListAttrTestNg, AttrFriction001, TestSize.Level1)
      * @tc.cases: Set invalid friction:0
      * @tc.expected: Friction is default
      */
-    CreateWithItem([](ListModelNG model) { model.SetFriction(0); });
+    ListModelNG model = CreateList();
+    model.SetFriction(0);
+    CreateListItems(1);
+    CreateDone();
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), FRICTION);
 }
 
@@ -983,7 +1050,10 @@ HWTEST_F(ListAttrTestNg, AttrFriction002, TestSize.Level1)
      * @tc.cases: Set invalid friction:-1
      * @tc.expected: Friction is default
      */
-    CreateWithItem([](ListModelNG model) { model.SetFriction(-1); });
+    ListModelNG model = CreateList();
+    model.SetFriction(-1);
+    CreateListItems(1);
+    CreateDone();
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), FRICTION);
 }
 
@@ -998,7 +1068,10 @@ HWTEST_F(ListAttrTestNg, AttrFriction003, TestSize.Level1)
      * @tc.cases: Set friction:1
      * @tc.expected: Friction is 1
      */
-    CreateWithItem([](ListModelNG model) { model.SetFriction(1); });
+    ListModelNG model = CreateList();
+    model.SetFriction(1);
+    CreateListItems(1);
+    CreateDone();
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 1);
 }
 
@@ -1009,10 +1082,10 @@ HWTEST_F(ListAttrTestNg, AttrFriction003, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, EdgeEffectOption001, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        CreateItem(TOTAL_LINE_NUMBER);
-        model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    });
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->isScrollable_);
 }
@@ -1024,10 +1097,10 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption001, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, EdgeEffectOption002, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        CreateItem(TOTAL_LINE_NUMBER);
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    });
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->isScrollable_);
 }
@@ -1039,10 +1112,10 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption002, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, EdgeEffectOption003, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        CreateItem(1); // 1 is item count.
-        model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    });
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateListItems(1);
+    CreateDone();
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
     EXPECT_FALSE(pattern_->isScrollable_);
 }
@@ -1054,10 +1127,10 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption003, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, EdgeEffectOption004, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        CreateItem(1); // 1 is item count.
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    });
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateListItems(1);
+    CreateDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->isScrollable_);
 }
@@ -1069,7 +1142,10 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption004, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback001, TestSize.Level1)
 {
-    CreateWithItem([](ListModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, false); });
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateListItems(1);
+    CreateDone();
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 0);
     EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), 0);
@@ -1085,10 +1161,11 @@ HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback001, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback002, TestSize.Level1)
 {
-    CreateWithItem([](ListModelNG model) {
-        model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-        model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    });
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 350.0);
     EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), -50.0);
@@ -1104,10 +1181,10 @@ HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback002, TestSize.Level1)
  */
 HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback003, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
-        model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    });
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateDone();
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 0);
     EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), 800);
@@ -1136,11 +1213,12 @@ HWTEST_F(ListAttrTestNg, ChainAnimation001, TestSize.Level1)
         .stiffness = DEFAULT_STIFFNESS,
         .damping = DEFAULT_DAMPING,
     };
-    CreateWithItem([options](ListModelNG model) {
-        model.SetSpace(Dimension(SPACE));
-        model.SetChainAnimation(true);
-        model.SetChainAnimationOptions(options);
-    });
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetChainAnimation(true);
+    model.SetChainAnimationOptions(options);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
 
     /**
      * @tc.steps: step1. When minSpace > maxSpace.
@@ -1188,11 +1266,12 @@ HWTEST_F(ListAttrTestNg, ChainAnimation002, TestSize.Level1)
         .stiffness = DEFAULT_STIFFNESS,
         .damping = DEFAULT_DAMPING,
     };
-    CreateWithItem([options](ListModelNG model) {
-        model.SetSpace(Dimension(SPACE));
-        model.SetChainAnimation(true);
-        model.SetChainAnimationOptions(options);
-    });
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetChainAnimation(true);
+    model.SetChainAnimationOptions(options);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
 
     /**
      * @tc.steps: step1. When minSpace < maxSpace.
@@ -1240,11 +1319,12 @@ HWTEST_F(ListAttrTestNg, ChainAnimation003, TestSize.Level1)
         .stiffness = DEFAULT_STIFFNESS,
         .damping = DEFAULT_DAMPING,
     };
-    CreateWithItem([options](ListModelNG model) {
-        model.SetSpace(Dimension(SPACE));
-        model.SetChainAnimation(true);
-        model.SetChainAnimationOptions(options);
-    });
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetChainAnimation(true);
+    model.SetChainAnimationOptions(options);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
 
     /**
      * @tc.steps: step1. When conductivity == 0, intensity == 0
@@ -1274,20 +1354,20 @@ HWTEST_F(ListAttrTestNg, FadingEdge001, TestSize.Level1)
      * @tc.cases: SetFadingEdge false
      * @tc.expected: FadingEdge false
      */
-    Create([](ListModelNG model) {
-        model.SetFadingEdge(false);
-        CreateItem(TOTAL_LINE_NUMBER);
-    });
+    ListModelNG model = CreateList();
+    model.SetFadingEdge(false);
+    CreateListItems(1);
+    CreateDone();
     EXPECT_FALSE(layoutProperty_->GetFadingEdgeValue(true));
 
     /**
      * @tc.cases: SetFadingEdge true
      * @tc.expected: FadingEdge true
      */
-    Create([](ListModelNG model) {
-        model.SetFadingEdge(true);
-        CreateItem(TOTAL_LINE_NUMBER);
-    });
+    model = CreateList();
+    model.SetFadingEdge(true);
+    CreateListItems(1);
+    CreateDone();
     EXPECT_TRUE(layoutProperty_->GetFadingEdgeValue(false));
     frameNode_->SetOverlayNode(nullptr);
     FlushLayoutTask(frameNode_);
@@ -1304,13 +1384,13 @@ HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
      * @tc.cases: ContentStartOffset 50.f and Space 10.f
      * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
      */
-    Create([](ListModelNG model) {
-        model.SetFadingEdge(true);
-        model.SetContentStartOffset(50.f);
-        model.SetContentEndOffset(50.f);
-        model.SetSpace(Dimension(10.f));
-        CreateItem(TOTAL_LINE_NUMBER);
-    });
+    ListModelNG model = CreateList();
+    model.SetFadingEdge(true);
+    model.SetContentStartOffset(50.f);
+    model.SetContentEndOffset(50.f);
+    model.SetSpace(Dimension(10.f));
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     EXPECT_EQ(pattern_->GetTotalOffset(), -50);
     EXPECT_EQ(pattern_->startMainPos_, 50.f);
     EXPECT_EQ(pattern_->endMainPos_, 820.f);
