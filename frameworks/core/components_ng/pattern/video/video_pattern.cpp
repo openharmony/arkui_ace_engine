@@ -1011,8 +1011,8 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto padding  = layoutProperty->CreatePaddingAndBorder();
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     if (imageFit == ImageFit::COVER) {
-        contentRect_ = Rect(padding.left.value_or(0), padding.top.value_or(0), videoNodeSize.Width(),
-            videoNodeSize.Height());
+        contentRect_ = Rect(padding.left.value_or(0), padding.top.value_or(0),
+                            videoNodeSize.Width(), videoNodeSize.Height());
     } else {
         contentRect_ = Rect((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE + padding.left.value_or(0),
                             (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE + padding.top.value_or(0),
