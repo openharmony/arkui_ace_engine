@@ -265,6 +265,7 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
     auto isAround = IsInsertAroundSpecialNode(start);
     if (isAround != AroundSpecialNode::NONE) {
         InsertStringAroundSpecialNode(start, other, isAround);
+        NotifySpanWatcher();
         return;
     }
     bool useFrontStyle = InsertUseFrontStyle(start);
@@ -279,6 +280,7 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
         spanItem->content = other;
         spanItem->interval = { 0, otherLength };
         spans_.emplace_back(spanItem);
+        NotifySpanWatcher();
         return;
     }
     for (auto& span : spans_) {
