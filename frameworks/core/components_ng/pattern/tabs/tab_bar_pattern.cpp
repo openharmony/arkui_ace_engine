@@ -256,7 +256,7 @@ void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
         }
     };
     dragEvent_ = MakeRefPtr<DragEvent>(nullptr, std::move(actionUpdateTask), nullptr, nullptr);
-    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
+    PanDirection panDirection = { .type = PanDirection::ALL };
     gestureHub->SetDragEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
@@ -704,14 +704,16 @@ void TabBarPattern::OnModifyDone()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     float scale = pipelineContext->GetFontScale();
-    if (scale >= BIG_FONT_SIZE_SCALE) {
-        InitLongPressEvent(gestureHub);
-        InitDragEvent(gestureHub);
-    } else {
-        gestureHub->RemoveDragEvent();
-        gestureHub->SetLongPressEvent(nullptr);
-        longPressEvent_ = nullptr;
-        dragEvent_ = nullptr;
+    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE) {
+        if (scale >= BIG_FONT_SIZE_SCALE) {
+            InitLongPressEvent(gestureHub);
+            InitDragEvent(gestureHub);
+        } else {
+            gestureHub->RemoveDragEvent();
+            gestureHub->SetLongPressEvent(nullptr);
+            longPressEvent_ = nullptr;
+            dragEvent_ = nullptr;
+        }
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto tabBarPaintProperty = host->GetPaintProperty<TabBarPaintProperty>();
