@@ -389,6 +389,26 @@ TextFieldPattern::~TextFieldPattern()
     }
 }
 
+void TextFieldPattern::ProcessDeleteBackward()
+{
+    DeleteBackwardOperation(deleteBackwardOperations_.front());
+    deleteBackwardOperations_.pop();
+    HandleDeleteOnCounterScene();
+    if (selectController_->GetCaretIndex() <= 0) {
+        ClearQueue(deleteBackwardOperations_);
+    }
+}
+
+void TextFieldPattern::ProcessDeleteForward()
+{
+    DeleteForwardOperation(deleteForwardOperations_.front());
+    deleteForwardOperations_.pop();
+    HandleDeleteOnCounterScene();
+    if (selectController_->GetCaretIndex() == static_cast<int32_t>(contentController_->GetWideText().length())) {
+        ClearQueue(deleteForwardOperations_);
+    }
+}
+
 void TextFieldPattern::BeforeCreateLayoutWrapper()
 {
     while (!inputOperations_.empty()) {
@@ -401,15 +421,11 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
                 break;
             }
             case InputOperation::DELETE_BACKWARD: {
-                DeleteBackwardOperation(deleteBackwardOperations_.front());
-                deleteBackwardOperations_.pop();
-                HandleDeleteOnCounterScene();
+                ProcessDeleteBackward();
                 break;
             }
             case InputOperation::DELETE_FORWARD: {
-                DeleteForwardOperation(deleteForwardOperations_.front());
-                deleteForwardOperations_.pop();
-                HandleDeleteOnCounterScene();
+                ProcessDeleteForward();
                 break;
             }
             case InputOperation::CURSOR_UP: {
@@ -6412,6 +6428,7 @@ void TextFieldPattern::UnitResponseKeyEvent()
     auto unitArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
     CHECK_NULL_VOID(unitArea);
     auto frameNode = unitArea->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
         auto selectPattern = frameNode->GetPattern<SelectPattern>();
         CHECK_NULL_VOID(selectPattern);

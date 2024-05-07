@@ -1420,6 +1420,15 @@ private:
     bool CheckPreviewTextValidate(PreviewTextInfo info) const;
 
     void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);
+    void ProcessDeleteBackward();
+    void ProcessDeleteForward();
+    template<class T>
+    void ClearQueue(const std::queue<T>& queue)
+    {
+        while (!queue.empty()) {
+            queue.pop();
+        }
+    }
 
     RectF frameRect_;
     RectF textRect_;
