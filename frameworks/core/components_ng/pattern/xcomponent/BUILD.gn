@@ -23,7 +23,6 @@ build_component_ng("xcomponent_pattern_ng") {
     "xcomponent_pattern.cpp",
   ]
 
-
   if (is_ohos_standard_system) {
     deps = [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
     external_deps = [
