@@ -953,6 +953,8 @@ public:
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     void RemoveFocusScopeIdAndPriority();
     bool AcceptFocusOfPriorityChild();
+    bool SetLastWeakFocusNodeToPreviousNode();
+    void SetLastWeakFocusToPreviousInFocusView();
     bool GetIsFocusGroup() const
     {
         return isGroup_;
@@ -966,6 +968,11 @@ public:
     std::string GetFocusScopeId() const
     {
         return focusScopeId_;
+    }
+
+    FocusPriority GetFocusPriority() const
+    {
+        return focusPriority_;
     }
 
 protected:

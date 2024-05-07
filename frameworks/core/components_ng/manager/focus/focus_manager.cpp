@@ -49,6 +49,15 @@ void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView)
     }
     focusViewStack_.emplace_back(focusViewWeak);
     lastFocusView_ = focusViewWeak;
+
+    lastFocusView = lastFocusView_.Upgrade();
+    if (!lastFocusView) {
+        return;
+    }
+    auto lastFocusViewHub = lastFocusView->GetFocusHub();
+    if (lastFocusViewHub) {
+        lastFocusViewHub->SetLastWeakFocusToPreviousInFocusView();
+    }
 }
 
 void FocusManager::FocusViewHide(const RefPtr<FocusView>& focusView)
@@ -191,11 +200,16 @@ void FocusManager::RemoveFocusScope(const std::string& focusScopeId)
     }
 }
 
-void FocusManager::AddScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub)
+void FocusManager::AddScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub,
+    bool pushFront)
 {
     auto iter = focusHubScopeMap_.find(focusScopeId);
     if (iter != focusHubScopeMap_.end()) {
-        iter->second.second.emplace_back(priorFocusHub);
+        if (pushFront) {
+            iter->second.second.emplace_front(priorFocusHub);
+        } else {
+            iter->second.second.emplace_back(priorFocusHub);
+        }
     } else {
         focusHubScopeMap_[focusScopeId] = { nullptr, { priorFocusHub } };
     }
