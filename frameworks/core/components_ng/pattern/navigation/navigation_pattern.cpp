@@ -845,18 +845,8 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(hostNode, false);
     if (navigationModeChange_) {
         if (NavigationMode::STACK == navigationMode_) {
-            auto newTopNavPath = navigationStack_->GetTopNavPath();
-            if (newTopNavPath.has_value()) {
-                auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-                    NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
-                CHECK_NULL_RETURN(newTopNavDestination, false);
-                auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
-                CHECK_NULL_RETURN(navDestinationFocusView, false);
-                if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                    navDestinationFocusView->SetIsViewRootScopeFocused(false);
-                }
-                navDestinationFocusView->FocusViewShow();
-            }
+            // Set focus on navDestination when mode changes to STACK
+            RefreshFocusToDestination();
         }
         AbortAnimation(hostNode);
     }
@@ -1895,6 +1885,21 @@ void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*heigh
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         AbortAnimation(hostNode);
+    }
+}
+void NavigationPattern::RefreshFocusToDestination()
+{
+    auto newTopNavPath = navigationStack_->GetTopNavPath();
+    if (newTopNavPath.has_value()) {
+        auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
+        CHECK_NULL_VOID(newTopNavDestination);
+        auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
+        CHECK_NULL_VOID(navDestinationFocusView);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            navDestinationFocusView->SetIsViewRootScopeFocused(false);
+        }
+        navDestinationFocusView->FocusViewShow();
     }
 }
 } // namespace OHOS::Ace::NG
