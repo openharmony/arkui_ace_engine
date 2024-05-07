@@ -120,7 +120,7 @@ public:
 
     virtual void DrawBufferForXComponent(RSCanvas& canvas, float width, float height, float offsetX, float offsetY) {};
 
-    virtual void releaseSurfaceBuffers() {}
+    virtual void ReleaseSurfaceBuffers() {}
 
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);

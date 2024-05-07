@@ -1781,7 +1781,7 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTest, TestSize.Level1)
         [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { g_surfaceShowNum += 1; });
     nativeXComponent->RegisterSurfaceHideCallback(
         [](OH_NativeXComponent* /* nativeXComponent */, void* /* window */) { g_surfaceShowNum -= 1; });
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), releaseSurfaceBuffers())
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), ReleaseSurfaceBuffers())
         .WillOnce(Return());
     pattern->OnWindowHide();
     pattern->OnWindowHide(); // test when hasReleasedSurface_ is not satisfied
@@ -1796,7 +1796,7 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTest, TestSize.Level1)
      */
     bool initConditions[2] = { true, false };
     bool typeConditions[2] = { true, false };
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), releaseSurfaceBuffers())
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), ReleaseSurfaceBuffers())
         .WillOnce(Return());
     for (bool initCondition : initConditions) {
         for (bool typeCondition : typeConditions) {

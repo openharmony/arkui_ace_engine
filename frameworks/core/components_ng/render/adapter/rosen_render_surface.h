@@ -119,7 +119,7 @@ public:
     bool CompareBufferSize(int32_t width, int32_t height, std::shared_ptr<SurfaceBufferNode> surfaceNode);
 #endif
 
-    void releaseSurfaceBuffers() override;
+    void ReleaseSurfaceBuffers() override;
 
     void UpdateSurfaceSizeInUserData(uint32_t width, uint32_t height) override;
 

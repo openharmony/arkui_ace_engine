@@ -1345,7 +1345,7 @@ void XComponentPattern::NativeSurfaceHide()
     CHECK_NULL_VOID(surfaceHideCallback);
     surfaceHideCallback(nativeXComponent_.get(), surface);
     CHECK_NULL_VOID(renderSurface_);
-    renderSurface_->releaseSurfaceBuffers();
+    renderSurface_->ReleaseSurfaceBuffers();
 }
 
 void XComponentPattern::NativeSurfaceShow()
