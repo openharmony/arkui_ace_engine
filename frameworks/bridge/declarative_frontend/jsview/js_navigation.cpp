@@ -133,6 +133,12 @@ void JSNavigation::ParseBarItems(
             toolBarItem.text = itemValueObject->ToString();
         }
 
+        auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
+        if (!itemSymbolIconObject->IsUndefined()) {
+            std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
+            SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
+            toolBarItem.iconSymbol = iconSymbol;
+        }
         auto itemIconObject = itemObject->GetProperty("icon");
         if (itemIconObject->IsString()) {
             toolBarItem.icon = itemIconObject->ToString();
@@ -161,6 +167,34 @@ void JSNavigation::ParseBarItems(
     }
 }
 
+void JSNavigation::ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
+    const JSRef<JSObject>& itemObject)
+{
+    std::string icon;
+    std::string activeIcon;
+    auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
+    if (!itemSymbolIconObject->IsUndefined()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
+        SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
+        toolBarItem.iconSymbol = iconSymbol;
+    }
+    auto itemIconObject = itemObject->GetProperty("icon");
+    if (ParseJsMedia(itemIconObject, icon)) {
+        toolBarItem.icon = icon;
+    }
+
+    auto itemActiveSymbolIconObject = itemObject->GetProperty("activeSymbolIcon");
+    if (!itemActiveSymbolIconObject->IsUndefined()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> activeSymbol;
+        SetSymbolOptionApply(info, activeSymbol, itemActiveSymbolIconObject);
+        toolBarItem.activeIconSymbol = activeSymbol;
+    }
+    auto itemActiveIconObject = itemObject->GetProperty("activeIcon");
+    if (ParseJsMedia(itemActiveIconObject, activeIcon)) {
+        toolBarItem.activeIcon = activeIcon;
+    }
+}
+
 void JSNavigation::ParseToolbarItemsConfiguration(
     const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items)
 {
@@ -172,18 +206,11 @@ void JSNavigation::ParseToolbarItemsConfiguration(
         }
         NG::BarItem toolBarItem;
         std::string text;
-        std::string icon;
-        std::string activeIcon;
 
         auto itemObject = JSRef<JSObject>::Cast(item);
         auto itemValueObject = itemObject->GetProperty("value");
         if (ParseJsString(itemValueObject, text)) {
             toolBarItem.text = text;
-        }
-
-        auto itemIconObject = itemObject->GetProperty("icon");
-        if (ParseJsMedia(itemIconObject, icon)) {
-            toolBarItem.icon = icon;
         }
 
         auto itemActionValue = itemObject->GetProperty("action");
@@ -205,12 +232,7 @@ void JSNavigation::ParseToolbarItemsConfiguration(
         if (itemStatusValue->IsNumber()) {
             toolBarItem.status = static_cast<NG::NavToolbarItemStatus>(itemStatusValue->ToNumber<int32_t>());
         }
-
-        auto itemActiveIconObject = itemObject->GetProperty("activeIcon");
-        if (ParseJsMedia(itemActiveIconObject, activeIcon)) {
-            toolBarItem.activeIcon = activeIcon;
-        }
-
+        ParseSymbolAndIcon(info, toolBarItem, itemObject);
         items.push_back(toolBarItem);
     }
 }
@@ -416,10 +438,19 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
+    std::vector<std::string> nameList;
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
-    NavigationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap, bundleName, moduleName);
+    nameList.emplace_back(bundleName);
+    nameList.emplace_back(moduleName);
+
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
+    if (src.empty() && pixMap == nullptr) {
+        SetSymbolOptionApply(info, iconSymbol, info[0]);
+    }
+
+    NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, noPixMap, pixMap, nameList);
 }
 
 void JSNavigation::SetHideBackButton(bool hide)
