@@ -337,7 +337,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
             movingPhoto->OnResolutionChange();
-        }, "ArkUIMovingResolutionChanged");
+        }, "ArkUIMovingPhotoResolutionChanged");
     };
 
     auto&& startRenderFrameEvent = [movingPhotoPattern, uiTaskExecutor]() {
@@ -346,7 +346,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
             movingPhoto->OnStartRenderFrame();
-        }, "ArkUIMovingStartRender");
+        }, "ArkUIMovingPhotoStartRender");
     };
 
     mediaPlayer_->RegisterMediaPlayerEvent(
@@ -743,7 +743,7 @@ void MovingPhotoPattern::Start()
         auto mediaPlayer = weak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->Play();
-    }, "ArkUIMovingStartPlay");
+    }, "ArkUIMovingPhotoStartPlay");
 }
 
 void MovingPhotoPattern::Stop()
@@ -761,7 +761,7 @@ void MovingPhotoPattern::Stop()
         auto mediaPlayer = weak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->Stop();
-    }, "ArkUIMovingStopPlay");
+    }, "ArkUIMovingPhotoStopPlay");
 }
 
 void MovingPhotoPattern::UpdateMediaPlayerSpeed()
@@ -778,7 +778,7 @@ void MovingPhotoPattern::UpdateMediaPlayerSpeed()
         auto mediaPlayer = weak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->SetPlaybackSpeed(static_cast<float>(NORMAL_PLAY_SPEED));
-    }, "ArkUIMovingUpdateSpeed");
+    }, "ArkUIMovingPhotoUpdateSpeed");
 }
 
 void MovingPhotoPattern::UpdateMediaPlayerMuted()
@@ -796,7 +796,7 @@ void MovingPhotoPattern::UpdateMediaPlayerMuted()
         auto mediaPlayer = weak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->SetVolume(videoVolume, videoVolume);
-    }, "ArkUIMovingUpdateMuted");
+    }, "ArkUIMovingPhotoUpdateMuted");
 }
 
 void MovingPhotoPattern::OnAreaChangedInner()
