@@ -2374,6 +2374,7 @@ void TextFieldPattern::OnModifyDone()
     ApplyUnderlineTheme();
     ApplyInlineTheme();
     ProcessInnerPadding();
+    ProcessNumberOfLines();
 
     InitClickEvent();
     InitLongPressEvent();
@@ -2597,6 +2598,28 @@ void TextFieldPattern::ProcessInnerPadding()
     paddings.left = NG::CalcLength(left);
     paddings.right = NG::CalcLength(right);
     layoutProperty->UpdatePadding(paddings);
+}
+
+void TextFieldPattern::ProcessNumberOfLines()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty && layoutProperty->HasNumberOfLines());
+    auto numberOfLines = layoutProperty->GetNumberOfLines().value();
+    CHECK_NULL_VOID(numberOfLines > 0);
+    auto lineHeight = PreferredLineHeight(false);
+    auto lineSpacing = layoutProperty->HasLineSpacing() ? layoutProperty->GetLineSpacing().value().ConvertToPx() : 0.f;
+    auto contentHeight = numberOfLines * lineHeight + (numberOfLines - 1) * lineSpacing;
+    auto height = contentHeight + GetVerticalPaddingAndBorderSum();
+
+    // get previously user defined ideal width
+    std::optional<CalcLength> width = std::nullopt;
+    auto &&layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        width = layoutConstraint->selfIdealSize->Width();
+    }
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, CalcLength(height)));
 }
 
 void TextFieldPattern::InitLongPressEvent()

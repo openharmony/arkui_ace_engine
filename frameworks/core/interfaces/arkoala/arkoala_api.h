@@ -2565,6 +2565,9 @@ struct ArkUITextInputModifier {
     void (*setTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node, ArkUI_Bool value);
     ArkUI_Bool (*getTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node);
     void (*resetTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node);
+    void (*setTextInputNumberOfLines)(ArkUINodeHandle node, ArkUI_Int32 value);
+    ArkUI_Int32 (*getTextInputNumberOfLines)(ArkUINodeHandle node);
+    void (*resetTextInputNumberOfLines)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
