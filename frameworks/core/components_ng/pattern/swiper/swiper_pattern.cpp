@@ -161,6 +161,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     swiperLayoutAlgorithm->SetSwipeByGroup(IsSwipeByGroup());
     swiperLayoutAlgorithm->SetRealTotalCount(RealTotalCount());
     swiperLayoutAlgorithm->SetPlaceItemWidth(placeItemWidth_);
+    swiperLayoutAlgorithm->SetIsFrameAnimation(translateAnimationIsRunning_);
 
     auto swiperPaintProperty = host->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(host, nullptr);
