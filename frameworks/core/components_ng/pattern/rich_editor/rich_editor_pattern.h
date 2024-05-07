@@ -264,6 +264,9 @@ public:
     }
 
     void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) override;
+    void ProcessStyledString();
+    void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
+    void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
     void InsertValueInStyledString(const std::string& insertValue);
     void DeleteBackwardInStyledString(int32_t length);
     void DeleteForwardInStyledString(int32_t length, bool isIME = true);
