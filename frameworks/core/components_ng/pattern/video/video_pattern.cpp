@@ -1016,7 +1016,7 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     } else {
         contentRect_ = Rect((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE + padding.left.value_or(0),
                             (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE + padding.top.value_or(0),
-                        videoFrameSize.Width(), videoFrameSize.Height());
+                            videoFrameSize.Width(), videoFrameSize.Height());
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1718,7 +1718,7 @@ void VideoPattern::StartImageAnalyzer()
         return;
     }
 
-    if (GetAnalyzerState()) {
+    if (imageAnalyzerManager_->IsOverlayCreated()) {
         DestroyAnalyzerOverlay();
     }
 
