@@ -43,8 +43,8 @@
 #include "transaction/rs_transaction_proxy.h"
 #include "ui/rs_ext_node_operation.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#endif
 #include "display_manager.h"
+#endif
 
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
@@ -295,8 +295,10 @@ void XComponentPattern::RequestFocus()
 void XComponentPattern::OnAttachToFrameNode()
 {
     Initialize();
+#ifdef ENABLE_ROSEN_BACKEND
     dpi_ = OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay()->GetDpi();
     physicalCoeff_ = GRAVITY * INCH_UNIT * dpi_ * TUNNING_FACTOR;
+#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -915,8 +917,11 @@ float XComponentPattern::GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveIn
 
 int XComponentPattern::GetFlingDuration(float velocity)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     double l = log(INFLEXION * velocity / (FLING_FRICTION * physicalCoeff_));
     return std::min((int)(SECOND_UNIT * exp(l / DECEL_MINUS_ONE)), MAX_SLIE_TIME);
+#endif
+    return 0;
 }
 #endif
 

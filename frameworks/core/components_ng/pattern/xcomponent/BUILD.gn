@@ -23,16 +23,13 @@ build_component_ng("xcomponent_pattern_ng") {
     "xcomponent_pattern.cpp",
   ]
 
-  external_deps = [
-    "window_manager:libdm",
-  ]
-
   if (is_ohos_standard_system) {
     deps = [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
     external_deps += [
       "c_utils:utils",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
+      "window_manager:libdm",
     ]
   } else if (is_arkui_x) {
     deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
