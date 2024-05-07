@@ -1060,6 +1060,7 @@ void TextFieldPattern::ProcNormalInlineStateInBlurEvent()
             layoutProperty->UpdateMaxLines(1);
             layoutProperty->UpdatePlaceholderMaxLines(1);
         }
+        layoutProperty->ResetTextOverflowMaxLines();
         inlineSelectAllFlag_ = false;
         inlineFocusState_ = false;
         RestorePreInlineStates();
@@ -5150,6 +5151,9 @@ void TextFieldPattern::ProcessInlinePaddingAndMargin()
     if (!IsTextArea()) {
         layoutProperty->UpdatePlaceholderMaxLines(layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
         layoutProperty->ResetMaxLines();
+    }
+    if (layoutProperty->HasTextOverflow()) {
+        layoutProperty->UpdateTextOverflowMaxLines(layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
     }
 }
 
