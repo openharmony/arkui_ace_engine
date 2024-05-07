@@ -295,10 +295,8 @@ void XComponentPattern::RequestFocus()
 void XComponentPattern::OnAttachToFrameNode()
 {
     Initialize();
-#ifdef ENABLE_ROSEN_BACKEND
-    dpi_ = OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay()->GetDpi();
+    dpi_ = PipelineBase::GetCurrentDensity();
     physicalCoeff_ = GRAVITY * INCH_UNIT * dpi_ * TUNNING_FACTOR;
-#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -863,6 +861,7 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::MOVE) {
         lastTouchInfo_ = touchEventPoint_;
     } else if (touchType == TouchType::UP) {
+        LOGE("flutter test: PipelineBase::GetCurrentDensity() is %{public}lf, OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay()->GetDpi() is %{public}d", PipelineBase::GetCurrentDensity(), OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay()->GetDpi());
         ReportSlideToRss();
     }
 #endif
