@@ -265,7 +265,6 @@ void GaugeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(gaugePattern);
     if (gaugePattern->UseContentModifier()) {
         BoxLayoutAlgorithm::Layout(layoutWrapper);
-        hostNode->GetGeometryNode()->Reset();
         return;
     }
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
