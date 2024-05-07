@@ -489,7 +489,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!isLayouted_ && isAnimation_) {
+    if (!isLayouted_ && GetIsAnimation()) {
         isLayouted_ = true;
         if (images_.size()) {
             int32_t nextIndex = GetNextIndex(nowImageIndex_);
@@ -642,10 +642,15 @@ void ImagePattern::UpdateGestureAndDragWhenModify()
 
 void ImagePattern::OnModifyDone()
 {
-    if (isAnimation_) {
-        OnAnimatedModifyDone();
-    } else {
-        OnImageModifyDone();
+    switch (imageType_) {
+        case ImageType::BASE:
+            OnImageModifyDone();
+            break;
+        case ImageType::ANIMATION:
+            OnAnimatedModifyDone();
+            break;
+        default:
+            break;
     }
 }
 
@@ -678,6 +683,9 @@ void ImagePattern::OnAnimatedModifyDone()
     }
     UpdateFormDurationByRemainder();
     SetObscured();
+    if (isSrcUndefined_) {
+        return;
+    }
     ControlAnimation(index);
 }
 
@@ -932,7 +940,7 @@ void ImagePattern::OnVisibleAreaChange(bool visible)
         CloseSelectOverlay();
     }
     // control pixelMap List
-    if (isAnimation_ && !animator_->IsStopped()) {
+    if (GetIsAnimation() && !animator_->IsStopped()) {
         if (visible) {
             animator_->Forward();
         } else {
@@ -953,8 +961,8 @@ void ImagePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderCtx = host->GetRenderContext();
-    if (isAnimation_) {
-        CHECK_NULL_VOID(renderCtx);
+    CHECK_NULL_VOID(renderCtx);
+    if (GetIsAnimation()) {
         renderCtx->SetClipToFrame(true);
     } else {
         renderCtx->SetClipToBounds(false);
@@ -1829,7 +1837,7 @@ void ImagePattern::ResetFormAnimationFlag()
 void ImagePattern::SetIteration(int32_t iteration)
 {
     if (iteration < -1) {
-        iteration = DEFAULT_ITERATIONS;
+        return;
     }
     if (IsFormRender()) {
         iteration = DEFAULT_ITERATIONS;
@@ -1839,14 +1847,8 @@ void ImagePattern::SetIteration(int32_t iteration)
 
 void ImagePattern::SetDuration(int32_t duration)
 {
-    if (duration <= 0) {
+    if (duration < 0) {
         return;
-    }
-    if (durationTotal_ == 0) {
-        for (int i = 0; i < images_.size(); i++) {
-            images_[i].duration = duration / images_.size();
-            durationTotal_ += images_[i].duration;
-        }
     }
     int32_t finalDuration = durationTotal_ > 0 ? durationTotal_ : duration;
     if (IsFormRender()) {

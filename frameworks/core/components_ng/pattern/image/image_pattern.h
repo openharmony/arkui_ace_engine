@@ -47,6 +47,12 @@ class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
+    enum class ImageType {
+        BASE,
+        ANIMATION,
+        UNDEFINED,
+    };
+
     ImagePattern();
     ~ImagePattern() override;
 
@@ -217,6 +223,7 @@ public:
     void ImageAnimatorPattern();
     void SetImages(std::vector<ImageProperties>&& images)
     {
+        CHECK_NULL_VOID(images.size());
         images_ = std::move(images);
         durationTotal_ = 0;
         for (const auto& childImage : images_) {
@@ -255,14 +262,19 @@ public:
         OnAnimatedModifyDone();
     }
 
-    void SetIsAnimation(bool isAnimation)
+    void SetImageType(ImageType imageType)
     {
-        isAnimation_ = isAnimation;
+        imageType_ = imageType;
+    }
+
+    ImageType GetImageType()
+    {
+        return imageType_;
     }
 
     bool GetIsAnimation() const
     {
-        return isAnimation_;
+        return imageType_ == ImageType::ANIMATION;
     }
 
     bool IsAtomicNode() const override
@@ -286,6 +298,11 @@ public:
 
     void SetDuration(int32_t duration);
     void SetIteration(int32_t iteration);
+
+    void SetSrcUndefined(bool isUndefined)
+    {
+        isSrcUndefined_ = isUndefined;
+    }
 
     void SetImageAnimator(bool isImageAnimator)
     {
@@ -444,7 +461,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 
     //animation
-    bool isAnimation_ = false;
+    ImageType imageType_ = ImageType::BASE;
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
     std::list<CacheImageStruct> cacheImages_;
@@ -462,6 +479,7 @@ private:
     bool isImageAnimator_ = false;
     bool hasSizeChanged = false;
     bool isPixelMapChanged_ = true;
+    bool isSrcUndefined_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };
