@@ -348,38 +348,39 @@ class JSBuilderNode extends BaseNode {
  */
 class NodeAdapter {
     constructor() {
+        this.nodeRefs_ = new Array();
         this.count_ = 0;
         this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
         this.nativePtr_ = this.nativeRef_.getNativeHandle();
-        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this.onAttachToNode !== undefined ? this.onAttachToNodePtr : undefined, this.onDetachFromNode !== undefined ? this.onDetachFromNode : undefined, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined);
+        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNode !== undefined ? this.onAttachToNodePtr : undefined, this.onDetachFromNode !== undefined ? this.onDetachFromNode : undefined, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
     }
     dispose() {
         this.nativeRef_.dispose();
         this.nativePtr_ = null;
     }
     set totalNodeCount(count) {
+        getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, count);
         this.count_ = count;
-        getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, this.count_);
     }
     get totalNodeCount() {
         return this.count_;
     }
-    notifyItemReloaded() {
+    reloadAllItems() {
         getUINativeModule().nodeAdapter.notifyItemReloaded(this.nativePtr_);
     }
-    notifyItemChanged(start, count) {
+    reloadItem(start, count) {
         getUINativeModule().nodeAdapter.notifyItemChanged(this.nativePtr_, start, count);
     }
-    notifyItemRemoved(start, count) {
+    removeItem(start, count) {
         getUINativeModule().nodeAdapter.notifyItemRemoved(this.nativePtr_, start, count);
     }
-    notifyItemInserted(start, count) {
+    insertItem(start, count) {
         getUINativeModule().nodeAdapter.notifyItemInserted(this.nativePtr_, start, count);
     }
-    notifyItemMoved(from, to) {
+    moveItem(from, to) {
         getUINativeModule().nodeAdapter.notifyItemMoved(this.nativePtr_, from, to);
     }
-    getAllItems() {
+    getAllAvailableItems() {
         let result = new Array();
         let nodes = getUINativeModule().nodeAdapter.getAllItems(this.nativePtr_);
         nodes.forEach(node => {
@@ -403,6 +404,9 @@ class NodeAdapter {
     onCreateNewNodePtr(index) {
         if (this.onCreateNewChild !== undefined) {
             let node = this.onCreateNewChild(index);
+            if (!this.nodeRefs_.includes(node)) {
+                this.nodeRefs_.push(node);
+            }
             return node.getNodePtr();
         }
         return null;
@@ -413,6 +417,19 @@ class NodeAdapter {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
             if (this.onDisposeChild !== undefined && frameNode !== undefined) {
                 this.onDisposeChild(id, frameNode);
+                let index = this.nodeRefs_.indexOf(frameNode);
+                if (index > -1) {
+                    this.nodeRefs_.splice(index, 1);
+                }
+            }
+        }
+    }
+    onUpdateNodePtr(index, node) {
+        let nodeId = node.nodeId;
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            if (this.onUpdateChild !== undefined && frameNode !== undefined) {
+                this.onUpdateChild(index, frameNode);
             }
         }
     }
@@ -1024,30 +1041,30 @@ class TypedFrameNode extends FrameNode {
 }
 const __creatorMap__ = new Map([
     ["Text", (context) => {
-        return new TypedFrameNode(context, "Text", (node, type) => {
-            return new ArkTextComponent(node, type);
-        });
-    }],
+            return new TypedFrameNode(context, "Text", (node, type) => {
+                return new ArkTextComponent(node, type);
+            });
+        }],
     ["Column", (context) => {
-        return new TypedFrameNode(context, "Column", (node, type) => {
-            return new ArkColumnComponent(node, type);
-        });
-    }],
+            return new TypedFrameNode(context, "Column", (node, type) => {
+                return new ArkColumnComponent(node, type);
+            });
+        }],
     ["Row", (context) => {
-        return new TypedFrameNode(context, "Row", (node, type) => {
-            return new ArkRowComponent(node, type);
-        });
-    }],
+            return new TypedFrameNode(context, "Row", (node, type) => {
+                return new ArkRowComponent(node, type);
+            });
+        }],
     ["Stack", (context) => {
-        return new TypedFrameNode(context, "Stack", (node, type) => {
-            return new ArkStackComponent(node, type);
-        });
-    }],
+            return new TypedFrameNode(context, "Stack", (node, type) => {
+                return new ArkStackComponent(node, type);
+            });
+        }],
     ["GridRow", (context) => {
-        return new TypedFrameNode(context, "GridRow", (node, type) => {
-            return new ArkGridRowComponent(node, type);
-        });
-    }],
+            return new TypedFrameNode(context, "GridRow", (node, type) => {
+                return new ArkGridRowComponent(node, type);
+            });
+        }],
     ["GridCol", (context) => {
             return new TypedFrameNode(context, "GridCol", (node, type) => {
                 return new ArkGridColComponent(node, type);
@@ -1064,30 +1081,30 @@ const __creatorMap__ = new Map([
             });
         }],
     ["Flex", (context) => {
-        return new TypedFrameNode(context, "Flex", (node, type) => {
-            return new ArkFlexComponent(node, type);
-        });
-    }],
+            return new TypedFrameNode(context, "Flex", (node, type) => {
+                return new ArkFlexComponent(node, type);
+            });
+        }],
     ["Swiper", (context) => {
-        return new TypedFrameNode(context, "Swiper", (node, type) => {
-            return new ArkSwiperComponent(node, type);
-        });
-    }],
+            return new TypedFrameNode(context, "Swiper", (node, type) => {
+                return new ArkSwiperComponent(node, type);
+            });
+        }],
     ["Progress", (context) => {
-        return new TypedFrameNode(context, "Progress", (node, type) => {
-            return new ArkProgressComponent(node, type);
-        });
-    }],
+            return new TypedFrameNode(context, "Progress", (node, type) => {
+                return new ArkProgressComponent(node, type);
+            });
+        }],
     ["List", (context) => {
-        return new TypedFrameNode(context, "List", (node, type) => {
-            return new ArkListComponent(node, type);
-        });
-    }],
+            return new TypedFrameNode(context, "List", (node, type) => {
+                return new ArkListComponent(node, type);
+            });
+        }],
     ["ListItem", (context) => {
-        return new TypedFrameNode(context, "ListItem", (node, type) => {
-            return new ArkListItemComponent(node, type);
-        });
-    }],
+            return new TypedFrameNode(context, "ListItem", (node, type) => {
+                return new ArkListItemComponent(node, type);
+            });
+        }],
 ]);
 class TypedNode {
     static createNode(context, type) {

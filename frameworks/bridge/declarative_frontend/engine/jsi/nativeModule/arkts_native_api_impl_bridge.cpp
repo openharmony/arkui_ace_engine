@@ -757,6 +757,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeAdapterBridge::SetCallbacks));
     nodeAdapter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTotalNodeCount"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeAdapterBridge::SetTotalNodeCount));
+    nodeAdapter->Set(vm, panda::StringRef::NewFromUtf8(vm, "getTotalNodeCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeAdapterBridge::GetTotalNodeCount));
     nodeAdapter->Set(vm, panda::StringRef::NewFromUtf8(vm, "notifyItemReloaded"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeAdapterBridge::NotifyItemReloaded));
     nodeAdapter->Set(vm, panda::StringRef::NewFromUtf8(vm, "notifyItemChanged"),

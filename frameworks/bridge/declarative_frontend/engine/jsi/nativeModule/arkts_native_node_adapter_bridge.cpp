@@ -37,95 +37,103 @@ UINodeAdapter* GetNodeAdapter(ArkUIRuntimeCallInfo* runtimeCallInfo)
     return adapter;
 }
 
-void SetAttachCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<panda::JSValueRef>& argRef)
+void SetAttachCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<panda::JSValueRef>& argRef,
+    const panda::Local<panda::JSValueRef>& thisRef)
 {
     CHECK_NULL_VOID(adapter);
     CHECK_NULL_VOID(!argRef->IsUndefined());
     CHECK_NULL_VOID(argRef->IsFunction());
     auto attachObj = argRef->ToObject(vm);
     panda::Local<panda::FunctionRef> attachFunc = attachObj;
-    auto onAttachToNode = [vm, func = JsWeak(panda::CopyableGlobal(vm, attachFunc))](ArkUINodeHandle node) {
+    auto onAttachToNode = [vm, func = JsWeak(panda::CopyableGlobal(vm, attachFunc)),
+                              thisRef = JsWeak(panda::CopyableGlobal(vm, thisRef))](ArkUINodeHandle node) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         auto function = func.Lock();
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction());
         panda::Local<panda::JSValueRef> params[1] = { FrameNodeBridge::MakeFrameNodeInfo(vm, node) };
-        function->Call(vm, function.ToLocal(), params, 1);
+        function->Call(vm, thisRef.Lock().ToLocal(), params, 1);
     };
     adapter->SetOnAttachToNodeFunc(std::move(onAttachToNode));
 }
 
-void SetDetachCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<panda::JSValueRef>& argRef)
+void SetDetachCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<panda::JSValueRef>& argRef,
+    const panda::Local<panda::JSValueRef>& thisRef)
 {
     CHECK_NULL_VOID(adapter);
     CHECK_NULL_VOID(!argRef->IsUndefined());
     CHECK_NULL_VOID(argRef->IsFunction());
     auto detachObj = argRef->ToObject(vm);
     panda::Local<panda::FunctionRef> detachFunc = detachObj;
-    auto onDetachFromNode = [vm, func = JsWeak(panda::CopyableGlobal(vm, detachFunc))]() {
+    auto onDetachFromNode = [vm, func = JsWeak(panda::CopyableGlobal(vm, detachFunc)),
+                                thisRef = JsWeak(panda::CopyableGlobal(vm, thisRef))]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         auto function = func.Lock();
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction());
-        function->Call(vm, function.ToLocal(), {}, 0);
+        function->Call(vm, thisRef.Lock().ToLocal(), {}, 0);
     };
     adapter->SetOnDetachFromNodeFunc(std::move(onDetachFromNode));
 }
 
-void SetGetIdCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<panda::JSValueRef>& argRef)
+void SetGetIdCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<panda::JSValueRef>& argRef,
+    const panda::Local<panda::JSValueRef>& thisRef)
 {
     CHECK_NULL_VOID(adapter);
     CHECK_NULL_VOID(!argRef->IsUndefined());
     CHECK_NULL_VOID(argRef->IsFunction());
     auto getIdObj = argRef->ToObject(vm);
     panda::Local<panda::FunctionRef> getIdFunc = getIdObj;
-    auto onGetId = [vm, func = JsWeak(panda::CopyableGlobal(vm, getIdFunc))](uint32_t index) -> int32_t {
+    auto onGetId = [vm, func = JsWeak(panda::CopyableGlobal(vm, getIdFunc)),
+                       thisRef = JsWeak(panda::CopyableGlobal(vm, thisRef))](uint32_t index) -> int32_t {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         auto function = func.Lock();
         CHECK_NULL_RETURN(!function.IsEmpty(), index);
         CHECK_NULL_RETURN(function->IsFunction(), index);
         panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, index) };
-        auto result = function->Call(vm, function.ToLocal(), params, 1);
+        auto result = function->Call(vm, thisRef.Lock().ToLocal(), params, 1);
         CHECK_NULL_RETURN(result->IsNumber(), index);
         return result->Int32Value(vm);
     };
     adapter->SetOnGetChildIdFunc(std::move(onGetId));
 }
 
-void SetCreateNewChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<panda::JSValueRef>& argRef)
+void SetCreateNewChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<panda::JSValueRef>& argRef,
+    const panda::Local<panda::JSValueRef>& thisRef)
 {
     CHECK_NULL_VOID(adapter);
     CHECK_NULL_VOID(!argRef->IsUndefined());
     CHECK_NULL_VOID(argRef->IsFunction());
     auto createChildObj = argRef->ToObject(vm);
     panda::Local<panda::FunctionRef> createChildFunc = createChildObj;
-    auto onCreateChild = [vm, func = JsWeak(panda::CopyableGlobal(vm, createChildFunc))](
-                             uint32_t index) -> ArkUINodeHandle {
+    auto onCreateChild = [vm, func = JsWeak(panda::CopyableGlobal(vm, createChildFunc)),
+                             thisRef = JsWeak(panda::CopyableGlobal(vm, thisRef))](uint32_t index) -> ArkUINodeHandle {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         auto function = func.Lock();
         CHECK_NULL_RETURN(!function.IsEmpty(), nullptr);
         CHECK_NULL_RETURN(function->IsFunction(), nullptr);
         panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, index) };
-        auto result = function->Call(vm, function.ToLocal(), params, 1);
+        auto result = function->Call(vm, thisRef.Lock().ToLocal(), params, 1);
         CHECK_NULL_RETURN(result->IsNativePointer(), nullptr);
         return nodePtr(result->ToNativePointer(vm)->Value());
     };
     adapter->SetOnCreateNewChild(std::move(onCreateChild));
 }
 
-void SetDisposeChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<panda::JSValueRef>& argRef)
+void SetDisposeChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<panda::JSValueRef>& argRef,
+    const panda::Local<panda::JSValueRef>& thisRef)
 {
     CHECK_NULL_VOID(adapter);
     CHECK_NULL_VOID(!argRef->IsUndefined());
     CHECK_NULL_VOID(argRef->IsFunction());
     auto disposeChildObj = argRef->ToObject(vm);
     panda::Local<panda::FunctionRef> disposeChildFunc = disposeChildObj;
-    auto onDisposeChild = [vm, func = JsWeak(panda::CopyableGlobal(vm, disposeChildFunc))](
-                              ArkUINodeHandle node, int32_t id) {
+    auto onDisposeChild = [vm, func = JsWeak(panda::CopyableGlobal(vm, disposeChildFunc)),
+                              thisRef = JsWeak(panda::CopyableGlobal(vm, thisRef))](ArkUINodeHandle node, int32_t id) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         auto function = func.Lock();
@@ -133,9 +141,31 @@ void SetDisposeChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Lo
         CHECK_NULL_VOID(function->IsFunction());
         panda::Local<panda::JSValueRef> params[2] = { panda::NumberRef::New(vm, id),
             FrameNodeBridge::MakeFrameNodeInfo(vm, node) };
-        function->Call(vm, function.ToLocal(), params, 2);
+        function->Call(vm, thisRef.Lock().ToLocal(), params, 2);
     };
     adapter->SetOnDisposeChild(std::move(onDisposeChild));
+}
+
+void SetUpdateChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<panda::JSValueRef>& argRef,
+    const panda::Local<panda::JSValueRef>& thisRef)
+{
+    CHECK_NULL_VOID(adapter);
+    CHECK_NULL_VOID(!argRef->IsUndefined());
+    CHECK_NULL_VOID(argRef->IsFunction());
+    auto updateChildObj = argRef->ToObject(vm);
+    panda::Local<panda::FunctionRef> updateChildFunc = updateChildObj;
+    auto onUpdateChild = [vm, func = JsWeak(panda::CopyableGlobal(vm, updateChildFunc)),
+                              thisRef = JsWeak(panda::CopyableGlobal(vm, thisRef))](ArkUINodeHandle node, uint32_t index) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
+        panda::Local<panda::JSValueRef> params[2] = { panda::NumberRef::New(vm, index),
+            FrameNodeBridge::MakeFrameNodeInfo(vm, node) };
+        function->Call(vm, thisRef.Lock().ToLocal(), params, 2);
+    };
+    adapter->SetOnUpdateChind(std::move(onUpdateChild));
 }
 
 ArkUINativeModuleValue NodeAdapterBridge::CreateNodeAdapter(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -153,12 +183,13 @@ ArkUINativeModuleValue NodeAdapterBridge::SetCallbacks(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto* adapter = GetNodeAdapter(runtimeCallInfo);
     CHECK_NULL_RETURN(adapter, panda::JSValueRef::Undefined(vm));
-    SetAttachCallback(vm, adapter, runtimeCallInfo->GetCallArgRef(1));
-    SetDetachCallback(vm, adapter, runtimeCallInfo->GetCallArgRef(2));
-    SetGetIdCallback(vm, adapter, runtimeCallInfo->GetCallArgRef(3));
-    SetCreateNewChildCallback(vm, adapter, runtimeCallInfo->GetCallArgRef(4));
-    SetDisposeChildCallback(vm, adapter, runtimeCallInfo->GetCallArgRef(5));
-
+    auto thisRef = runtimeCallInfo->GetCallArgRef(1);
+    SetAttachCallback(vm, adapter, runtimeCallInfo->GetCallArgRef(2), thisRef);
+    SetDetachCallback(vm, adapter, runtimeCallInfo->GetCallArgRef(3), thisRef);
+    SetGetIdCallback(vm, adapter, runtimeCallInfo->GetCallArgRef(4), thisRef);
+    SetCreateNewChildCallback(vm, adapter, runtimeCallInfo->GetCallArgRef(5), thisRef);
+    SetDisposeChildCallback(vm, adapter, runtimeCallInfo->GetCallArgRef(6), thisRef);
+    SetUpdateChildCallback(vm, adapter, runtimeCallInfo->GetCallArgRef(7), thisRef);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -171,6 +202,16 @@ ArkUINativeModuleValue NodeAdapterBridge::SetTotalNodeCount(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(countArg->IsNumber(), panda::JSValueRef::Undefined(vm));
     adapter->SetTotalNodeCount(countArg->Uint32Value(vm));
     return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NodeAdapterBridge::GetTotalNodeCount(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto* adapter = GetNodeAdapter(runtimeCallInfo);
+    CHECK_NULL_RETURN(adapter, panda::JSValueRef::Undefined(vm));
+    uint32_t count = adapter->GetTotalNodeCount();
+    LOGE("UINodeAdapter GetTotalNodeCount %{public}d", count);
+    return panda::NumberRef::New(vm, count);
 }
 
 ArkUINativeModuleValue NodeAdapterBridge::NotifyItemReloaded(ArkUIRuntimeCallInfo* runtimeCallInfo)

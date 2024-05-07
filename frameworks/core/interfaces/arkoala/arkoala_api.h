@@ -4022,6 +4022,7 @@ typedef enum {
     ON_GET_NODE_ID = 3,
     ON_ADD_NODE_TO_ADAPTER = 4,
     ON_REMOVE_NODE_FROM_ADAPTER = 5,
+    ON_UPDATE_NODE = 6,
 } ArkUINodeAdapterEventType;
 
 typedef struct {

@@ -24,6 +24,7 @@ public:
     static ArkUINativeModuleValue CreateNodeAdapter(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCallbacks(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTotalNodeCount(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetTotalNodeCount(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue NotifyItemReloaded(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue NotifyItemChanged(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue NotifyItemRemoved(ArkUIRuntimeCallInfo* runtimeCallInfo);

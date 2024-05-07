@@ -114,6 +114,11 @@ public:
         return handle_;
     }
 
+    void SetNeedUpdateEvet(bool needUpdateEvent)
+    {
+        needUpdateEvent_ = needUpdateEvent;
+    }
+
 protected:
     int32_t OnGetTotalCount() override;
 
@@ -151,6 +156,7 @@ private:
     uint32_t totalCount_ = 0;
     void* userData_ = nullptr;
     void (*receiver_)(ArkUINodeAdapterEvent* event) = nullptr;
+    bool needUpdateEvent_ = false;
     ArkUINodeAdapterHandle handle_ = nullptr;
 };
 
@@ -186,12 +192,18 @@ public:
         disposeChildFunc_ = func;
     }
 
+    void SetOnUpdateChind(std::function<void(ArkUINodeHandle, uint32_t)>&& func)
+    {
+        updateChildFunc_ = func;
+    }
+
     ArkUINodeAdapterHandle GetHandle() const
     {
         return handle_;
     }
 
     void SetTotalNodeCount(uint32_t count);
+    uint32_t GetTotalNodeCount() const;
     void NotifyItemReloaded();
     void NotifyItemChanged(uint32_t start, uint32_t count);
     void NotifyItemRemoved(uint32_t start, uint32_t count);
@@ -206,6 +218,7 @@ private:
     std::function<int32_t(uint32_t)> getChildIdFunc_;
     std::function<ArkUINodeHandle(uint32_t)> createNewChildFunc_;
     std::function<void(ArkUINodeHandle, int32_t)> disposeChildFunc_;
+    std::function<void(ArkUINodeHandle, int32_t)> updateChildFunc_;
 };
 
 } // namespace OHOS::Ace::NG

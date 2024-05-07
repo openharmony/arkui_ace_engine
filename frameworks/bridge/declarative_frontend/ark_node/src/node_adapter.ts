@@ -21,22 +21,26 @@ interface NodeInfo {
 class NodeAdapter {
     nativePtr_: NodePtr;
     nativeRef_: NativeStrongRef;
+    nodeRefs_: Array<FrameNode> = new Array();
     count_: number = 0;
+
     onAttachToNode?: (target: FrameNode) => void;
     onDetachFromNode?: () => void;
     onGetChildId?: (index: number) => number;
     onCreateNewChild?: (index: number) => FrameNode;
     onDisposeChild?: (id: number, node: FrameNode) => void;
+    onUpdateChild?: (index: number, node: FrameNode) => void;
 
     constructor() {
         this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
         this.nativePtr_ = this.nativeRef_.getNativeHandle();
-        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_,
+        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this,
             this.onAttachToNode !== undefined ? this.onAttachToNodePtr : undefined,
             this.onDetachFromNode !== undefined ? this.onDetachFromNode : undefined,
             this.onGetChildId !== undefined ? this.onGetChildId : undefined,
             this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined,
-            this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined
+            this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined,
+            this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined
         )
     }
 
@@ -46,35 +50,35 @@ class NodeAdapter {
     }
 
     set totalNodeCount(count: number) {
+        getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, count);
         this.count_ = count;
-        getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, this.count_);
     }
 
     get totalNodeCount(): number {
         return this.count_;
     }
 
-    notifyItemReloaded(): void {
+    reloadAllItems(): void {
         getUINativeModule().nodeAdapter.notifyItemReloaded(this.nativePtr_);
     }
 
-    notifyItemChanged(start: number, count: number): void {
+    reloadItem(start: number, count: number): void {
         getUINativeModule().nodeAdapter.notifyItemChanged(this.nativePtr_, start, count);
     }
 
-    notifyItemRemoved(start: number, count: number): void {
+    removeItem(start: number, count: number): void {
         getUINativeModule().nodeAdapter.notifyItemRemoved(this.nativePtr_, start, count);
     }
 
-    notifyItemInserted(start: number, count: number): void {
+    insertItem(start: number, count: number): void {
         getUINativeModule().nodeAdapter.notifyItemInserted(this.nativePtr_, start, count);
     }
 
-    notifyItemMoved(from: number, to: number): void {
+    moveItem(from: number, to: number): void {
         getUINativeModule().nodeAdapter.notifyItemMoved(this.nativePtr_, from, to);
     }
 
-    getAllItems(): Array<FrameNode> {
+    getAllAvailableItems(): Array<FrameNode> {
         let result: Array<FrameNode> = new Array();
         let nodes: Array<NodeInfo> = getUINativeModule().nodeAdapter.getAllItems(this.nativePtr_);
         nodes.forEach(node => {
@@ -100,17 +104,34 @@ class NodeAdapter {
     onCreateNewNodePtr(index: number): NodePtr {
         if (this.onCreateNewChild !== undefined) {
             let node = this.onCreateNewChild(index);
+            if (!this.nodeRefs_.includes(node)) {
+                this.nodeRefs_.push(node);
+            }
             return node.getNodePtr();
         }
         return null;
     }
 
-    onDisposeNodePtr(id: number, node: NodeInfo) {
+    onDisposeNodePtr(id: number, node: NodeInfo): void {
         let nodeId = node.nodeId;
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
             if (this.onDisposeChild !== undefined && frameNode !== undefined) {
                 this.onDisposeChild(id, frameNode);
+                let index = this.nodeRefs_.indexOf(frameNode);
+                if (index > -1) {
+                    this.nodeRefs_.splice(index, 1);
+                }
+            }
+        }
+    }
+
+    onUpdateNodePtr(index: number, node: NodeInfo): void {
+        let nodeId = node.nodeId;
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            if (this.onUpdateChild !== undefined && frameNode !== undefined) {
+                this.onUpdateChild(index, frameNode);
             }
         }
     }

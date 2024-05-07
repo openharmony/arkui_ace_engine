@@ -91,6 +91,15 @@ LazyForEachChild NativeLazyForEachBuilder::OnGetChildByIndex(
     if (itemIter != cachedItems.end()) {
         child.second = itemIter->second.second;
         cachedItems.erase(itemIter);
+        // For not change C-API receiver
+        if (needUpdateEvent_) {
+            getIdevent.type = ON_UPDATE_NODE;
+            getIdevent.handle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(child.second));
+            if (!getIdevent.idSet) {
+                getIdevent.id = index;
+            }
+            receiver_(&getIdevent);
+        }
         return child;
     }
     ArkUINodeAdapterEvent getChildEvent {
@@ -141,6 +150,7 @@ UINodeAdapter::UINodeAdapter(ArkUINodeAdapterHandle handle) : handle_(handle)
             adapter->OnEventReceived(event);
         }
     });
+    handle_->builder->SetNeedUpdateEvet(true);
 }
 
 UINodeAdapter::~UINodeAdapter()
@@ -183,7 +193,10 @@ void UINodeAdapter::OnEventReceived(ArkUINodeAdapterEvent* event)
                 disposeChildFunc_(event->handle, event->id);
             }
             break;
-
+        case ON_UPDATE_NODE:
+            if (updateChildFunc_) {
+                updateChildFunc_(event->handle, event->id);
+            }
         default:
             break;
     }
@@ -194,6 +207,13 @@ void UINodeAdapter::SetTotalNodeCount(uint32_t count)
     CHECK_NULL_VOID(handle_);
     CHECK_NULL_VOID(handle_->builder);
     handle_->builder->SetNodeTotalCount(count);
+}
+
+uint32_t UINodeAdapter::GetTotalNodeCount() const
+{
+    CHECK_NULL_RETURN(handle_, 0);
+    CHECK_NULL_RETURN(handle_->builder, 0);
+    return handle_->builder->GetNodeTotalCount();
 }
 
 void UINodeAdapter::NotifyItemReloaded()
