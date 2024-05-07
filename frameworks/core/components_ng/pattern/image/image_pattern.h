@@ -297,6 +297,7 @@ protected:
     void UnregisterWindowStateChangedCallback();
     void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
+    bool gifAnimation_ = false;
 
 private:
     class ObscuredImage : public CanvasImage {

@@ -171,7 +171,7 @@ void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     SetOnFinishCallback(image);
     SetRedrawCallback(image);
     // GIF images are not played by default, but depend on OnVisibleAreaChange callback.
-    image->ControlAnimation(false);
+    image->ControlAnimation(gifAnimation_);
 }
 
 void ImagePattern::SetOnFinishCallback(const RefPtr<CanvasImage>& image)
@@ -933,6 +933,7 @@ void ImagePattern::OnVisibleAreaChange(bool visible)
             animator_->Pause();
         }
     }
+    gifAnimation_ = visible;
     // control svg / gif animation
     if (image_) {
         image_->ControlAnimation(visible);
