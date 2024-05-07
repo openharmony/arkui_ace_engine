@@ -90,7 +90,7 @@ public:
 
     bool AddFocusScope(const std::string& focusScopeId, const RefPtr<FocusHub>& scopeFocusHub);
     void RemoveFocusScope(const std::string& focusScopeId);
-    void AddScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub);
+    void AddScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub, bool pushFront);
     void RemoveScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub);
     std::optional<std::list<WeakPtr<FocusHub>>*> GetFocusScopePriorityList(const std::string& focusScopeId);
 

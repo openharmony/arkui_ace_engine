@@ -49,7 +49,7 @@ public:
      */
     virtual void SetAllowUpdate(bool allowUpdate) = 0;
 
-    virtual void DispatchSurfaceChangeEvent(float width, float height) = 0;
+    virtual void DispatchSurfaceChangeEvent(float width, float height, float borderWidth = 0.0) = 0;
     virtual void SetObscured(bool isObscured) = 0;
 
     enum Message : uint32_t {

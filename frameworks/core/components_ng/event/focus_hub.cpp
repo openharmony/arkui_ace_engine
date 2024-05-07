@@ -160,9 +160,11 @@ void FocusHub::DumpFocusNodeTree(int32_t depth)
             information += parentFocusable_ ? "" : " ParentFocusable:false";
         }
         information += IsDefaultFocus() ? "[Default]" : "";
-        if (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PRIOR ||
-            focusPriority_ == FocusPriority::PREVIOUS)) {
-            information += (" prefer-focus-in-" + focusScopeId_);
+        if (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PRIOR)) {
+            information += (" prior-focus-in-" + focusScopeId_);
+        }
+        if (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PREVIOUS)) {
+            information += (" previous-focus-in-" + focusScopeId_);
         }
         DumpLog::GetInstance().Print(depth, information, 0);
     }
@@ -1971,6 +1973,7 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncReq
     if (result || !isSyncRequest) {
         pipeline->AddDirtyRequestFocus(focusNode->GetFrameNode());
         if (isSyncRequest) {
+            focusNode->SetLastWeakFocusNodeToPreviousNode();
             pipeline->FlushRequestFocus();
         }
     }
@@ -2187,7 +2190,11 @@ bool FocusHub::UpdateFocusView()
     }
     auto curFocusView = FocusView::GetCurrentFocusView();
     if (focusView && focusView->IsFocusViewLegal() && focusView != curFocusView) {
-        focusView->SetIsViewRootScopeFocused(false);
+        auto focusViewRootScope = focusView->GetViewRootScope();
+        auto focusViewRootScopeChild = focusViewRootScope ? focusViewRootScope->lastWeakFocusNode_.Upgrade() : nullptr;
+        if (focusViewRootScopeChild && focusViewRootScopeChild->IsCurrentFocus()) {
+            focusView->SetIsViewRootScopeFocused(false);
+        }
         focusView->FocusViewShow();
     }
     return true;
@@ -2264,12 +2271,12 @@ void FocusHub::SetFocusScopePriority(const std::string& focusScopeId, const uint
     if (focusPriority == static_cast<uint32_t>(FocusPriority::PRIOR)) {
         focusPriority_ = FocusPriority::PRIOR;
         if (focusManager) {
-            focusManager->AddScopePriorityNode(focusScopeId_, AceType::Claim(this));
+            focusManager->AddScopePriorityNode(focusScopeId_, AceType::Claim(this), false);
         }
     } else if (focusPriority == static_cast<uint32_t>(FocusPriority::PREVIOUS)) {
         focusPriority_ = FocusPriority::PREVIOUS;
         if (focusManager) {
-            focusManager->AddScopePriorityNode(focusScopeId_, AceType::Claim(this));
+            focusManager->AddScopePriorityNode(focusScopeId_, AceType::Claim(this), true);
         }
     } else {
         focusPriority_ = FocusPriority::AUTO;
@@ -2353,6 +2360,39 @@ WeakPtr<FocusHub> FocusHub::GetChildPriorfocusNode(const std::string& focusScope
     return nullptr;
 }
 
+bool FocusHub::SetLastWeakFocusNodeToPreviousNode()
+{
+    if (focusType_ != FocusType::SCOPE || focusScopeId_.empty() || !isFocusScope_) {
+        return false;
+    }
+    auto newFocusNodeWeak = GetChildPriorfocusNode(focusScopeId_);
+    auto newFocusNode = newFocusNodeWeak.Upgrade();
+    if (!newFocusNode) {
+        return false;
+    }
+    if (newFocusNode->GetFocusPriority() == FocusPriority::PREVIOUS) {
+        newFocusNode->SetLastWeakFocusNodeWholeScope(focusScopeId_);
+        return true;
+    }
+    return false;
+}
+
+void FocusHub::SetLastWeakFocusToPreviousInFocusView()
+{
+    if (SetLastWeakFocusNodeToPreviousNode()) {
+        return;
+    }
+    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+    while (lastFocusNode) {
+        if (lastFocusNode->SetLastWeakFocusNodeToPreviousNode()) {
+            return;
+        }
+        auto newLastWeak = lastFocusNode->GetLastWeakFocusNode();
+        lastFocusNode = newLastWeak.Upgrade();
+    }
+    return;
+}
+
 bool FocusHub::AcceptFocusOfPriorityChild()
 {
     if (focusType_ != FocusType::SCOPE || focusScopeId_.empty() || !isFocusScope_) {
@@ -2370,6 +2410,7 @@ bool FocusHub::AcceptFocusOfPriorityChild()
         return true;
     } else {
         if (GetIsFocusGroup() && !IsNestingFocusGroup()) {
+            SetLastWeakFocusNodeToPreviousNode();
             return true;
         }
     }

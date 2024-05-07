@@ -112,6 +112,11 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
         case TouchType::DOWN: {
             deviceId_ = point.deviceId;
             deviceType_ = point.sourceType;
+            if (deviceType_ == SourceType::MOUSE) {
+                inputEventType_ = InputEventType::MOUSE_BUTTON;
+            } else {
+                inputEventType_ = InputEventType::TOUCH_SCREEN;
+            }
             auto result = AboutToAddCurrentFingers(point.id);
             if (result) {
                 HandleTouchDownEvent(point);
@@ -145,6 +150,7 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
         case AxisAction::BEGIN:
             deviceId_ = event.deviceId;
             deviceType_ = event.sourceType;
+            inputEventType_ = InputEventType::AXIS;
             HandleTouchDownEvent(event);
             break;
         case AxisAction::UPDATE:

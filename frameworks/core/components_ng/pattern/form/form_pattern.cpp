@@ -540,6 +540,12 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
     info.width = Dimension(size.Width());
     info.height = Dimension(size.Height());
+    auto &&borderWidthProperty = layoutProperty->GetBorderWidthProperty();
+    float borderWidth = 0.0f;
+    if (borderWidthProperty && borderWidthProperty->topDimen) {
+        borderWidth = borderWidthProperty->topDimen->ConvertToPx();
+    }
+    info.borderWidth = borderWidth;
     layoutProperty->UpdateRequestFormInfo(info);
 
     UpdateBackgroundColorWhenUnTrustForm();
@@ -569,7 +575,8 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         TAG_LOGW(AceLogTag::ACE_FORM, "Invalid form size.");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f", info.width.Value(), info.height.Value());
+    TAG_LOGI(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f  borderWidth: %{public}f",
+        info.width.Value(), info.height.Value(), info.borderWidth);
     cardInfo_ = info;
     if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)
         || info.shape == FORM_SHAPE_CIRCLE) {
@@ -620,7 +627,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
             formManagerBridge_->SetAllowUpdate(cardInfo_.allowUpdate);
         }
     }
-    if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
+    if (cardInfo_.width != info.width || cardInfo_.height != info.height || cardInfo_.borderWidth != info.borderWidth) {
         UpdateFormComponentSize(info);
     }
     if (cardInfo_.obscuredMode != info.obscuredMode) {
@@ -648,19 +655,20 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 
 void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "update size, width: %{public}f   height: %{public}f",
-        info.width.Value(), info.height.Value());
+    TAG_LOGI(AceLogTag::ACE_FORM, "update size, width: %{public}f   height: %{public}f  borderWidth: %{public}f",
+        info.width.Value(), info.height.Value(), info.borderWidth);
     cardInfo_.width = info.width;
     cardInfo_.height = info.height;
+    cardInfo_.borderWidth = info.borderWidth;
 
     if (formManagerBridge_) {
-        formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value());
+        formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value(), info.borderWidth);
     }
     if (isSnapshot_) {
         auto imageNode = GetImageNode();
         if (imageNode != nullptr) {
-            auto width = static_cast<float>(info.width.Value());
-            auto height = static_cast<float>(info.height.Value());
+            auto width = static_cast<float>(info.width.Value()) - info.borderWidth * DOUBLE;
+            auto height = static_cast<float>(info.height.Value()) - info.borderWidth * DOUBLE;
             CalcSize idealSize = { CalcLength(width), CalcLength(height) };
             MeasureProperty layoutConstraint;
             layoutConstraint.selfIdealSize = idealSize;
@@ -964,7 +972,8 @@ void FormPattern::InitFormManagerDelegate()
             }, "ArkUIFormFireSurfaceNodeCallback");
         });
 
-    formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height) {
+    formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height,
+        float borderWidth) {
         ContainerScope scope(instanceID);
         auto form = weak.Upgrade();
         CHECK_NULL_VOID(form);
@@ -972,11 +981,11 @@ void FormPattern::InitFormManagerDelegate()
         CHECK_NULL_VOID(host);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak, instanceID, width, height] {
+        uiTaskExecutor.PostTask([weak, instanceID, width, height, borderWidth] {
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
-            form->FireFormSurfaceChangeCallback(width, height);
+            form->FireFormSurfaceChangeCallback(width, height, borderWidth);
         }, "ArkUIFormFireSurfaceChange");
     });
 
@@ -1035,20 +1044,21 @@ void FormPattern::FireFormSurfaceNodeCallback(
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     RemoveFormSkeleton();
 
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
     externalRenderContext->SetRSNode(node);
+    float boundWidth = cardInfo_.width.Value() - cardInfo_.borderWidth * DOUBLE;
+    float boundHeight = cardInfo_.height.Value() - cardInfo_.borderWidth * DOUBLE;
     if (isBeenLayout_) {
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto size = geometryNode->GetFrameSize();
-        externalRenderContext->SetBounds(0, 0, size.Width(), size.Height());
-    } else {
-        externalRenderContext->SetBounds(0, 0, cardInfo_.width.Value(), cardInfo_.height.Value());
+        boundWidth = size.Width() - cardInfo_.borderWidth * DOUBLE;
+        boundHeight = size.Height() - cardInfo_.borderWidth * DOUBLE;
     }
+    externalRenderContext->SetBounds(cardInfo_.borderWidth, cardInfo_.borderWidth, boundWidth, boundHeight);
 
     if (isRecover) {
         externalRenderContext->SetOpacity(TRANSPARENT_VAL);
@@ -1104,11 +1114,12 @@ void FormPattern::DelayDeleteImageNode()
         DELAY_TIME_FOR_DELETE_IMAGE_NODE, "ArkUIFormDeleteImageNodeAfterRecover");
 }
 
-void FormPattern::FireFormSurfaceChangeCallback(float width, float height)
+void FormPattern::FireFormSurfaceChangeCallback(float width, float height, float borderWidth)
 {
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
-    externalRenderContext->SetBounds(0, 0, width, height);
+    externalRenderContext->SetBounds(borderWidth, borderWidth, width - borderWidth * DOUBLE,
+        height - borderWidth * DOUBLE);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();

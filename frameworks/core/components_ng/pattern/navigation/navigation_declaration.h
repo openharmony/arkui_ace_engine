@@ -121,10 +121,12 @@ enum class NavToolbarItemStatus {
 struct BarItem {
     std::optional<std::string> text;
     std::optional<std::string> icon;
+    std::optional<std::function<void(WeakPtr<NG::FrameNode>)>> iconSymbol;
     std::optional<bool> isEnabled;
     std::function<void()> action;
     NavToolbarItemStatus status;
     std::optional<std::string> activeIcon;
+    std::optional<std::function<void(WeakPtr<NG::FrameNode>)>> activeIconSymbol;
     std::string ToString() const
     {
         std::string result;

@@ -251,11 +251,28 @@ public:
         }
     }
 
+    void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
+    {
+        caretChangeListener_ = listener;
+    }
+
     void SetStyledString(const RefPtr<SpanString>& value);
+
+    RefPtr<MutableSpanString> GetStyledString() const
+    {
+        return styledString_;
+    }
+
     void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) override;
+    void ProcessStyledString();
+    void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
+    void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
     void InsertValueInStyledString(const std::string& insertValue);
     void DeleteBackwardInStyledString(int32_t length);
-    void DeleteForwardInStyledString(int32_t length);
+    void DeleteForwardInStyledString(int32_t length, bool isIME = true);
+
+    bool BeforeStyledStringChange(int32_t start, int32_t length, const std::string& string);
+    void AfterStyledStringChange(int32_t start, int32_t length, const std::string& string);
 
     void ResetBeforePaste();
     void ResetAfterPaste();
@@ -963,6 +980,7 @@ private:
     std::optional<Color> caretColor_;
     std::optional<Color> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
+    std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
     Offset selectionMenuOffset_;
     // add for scroll

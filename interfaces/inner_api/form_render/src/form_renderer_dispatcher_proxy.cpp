@@ -88,7 +88,7 @@ void FormRendererDispatcherProxy::SetAllowUpdate(bool allowUpdate)
     }
 }
 
-void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float height)
+void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float height, float borderWidth)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -103,6 +103,11 @@ void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float 
 
     if (!data.WriteFloat(height)) {
         HILOG_ERROR("write height fail, action error");
+        return;
+    }
+
+    if (!data.WriteFloat(borderWidth)) {
+        HILOG_ERROR("write borderWidth fail, action error");
         return;
     }
 

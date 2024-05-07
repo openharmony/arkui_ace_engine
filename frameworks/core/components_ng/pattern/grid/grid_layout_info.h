@@ -46,6 +46,13 @@ struct GridLayoutInfo {
      * @return height of all lines in viewport.
      */
     float GetTotalHeightOfItemsInView(float mainGap, bool regular = true) const;
+    /**
+     * @brief skip starting lines that are outside viewport in LayoutIrregular
+     *
+     * @return [iterator to the first line in view, offset of that first line]
+     */
+    using HeightMapIt = std::map<int32_t, float>::const_iterator;
+    std::pair<HeightMapIt, float> SkipLinesAboveView(float mainGap) const;
 
     void UpdateStartIndexByStartLine()
     {
@@ -134,28 +141,29 @@ struct GridLayoutInfo {
     EndIndexInfo FindEndIdx(int32_t endLine) const;
 
     /**
-     * Checks if the item at the specified index is partially or fully above the viewport.
-     *
      * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
      *
-     * @param idx The index of the item.
+     * @param line starting line of the item.
      * @param mainGap The gap between lines.
-     * @return True if the item is at least partially above the viewport, false otherwise.
+     * @return position of the item's top edge relative to the viewport.
      */
-    bool ItemAboveViewport(int32_t idx, float mainGap) const;
+    inline float GetItemTopPos(int32_t line, float mainGap) const
+    {
+        return currentOffset_ + GetHeightInRange(startMainLineIndex_, line, mainGap);
+    }
 
     /**
-     * Checks if the item at the specified index is partially or fully below the viewport.
-     *
      * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
      *
-     * @param idx The index of the item.
+     * @param line starting line of the item.
      * @param itemHeight The number of rows the item occupies.
-     * @param mainSize The size of the viewport on the main axis.
      * @param mainGap The gap between items in the main axis.
-     * @return True if the item is at least partially below the viewport, false otherwise.
+     * @return position of the item's bottom edge relative to the viewport.
      */
-    bool ItemBelowViewport(int32_t idx, int32_t itemHeight, float mainSize, float mainGap) const;
+    inline float GetItemBottomPos(int32_t line, int32_t itemHeight, float mainGap) const
+    {
+        return currentOffset_ + GetHeightInRange(startMainLineIndex_, line + itemHeight, mainGap) - mainGap;
+    }
 
     /**
      * @brief Perform a binary search to find item with [index] in the gridMatrix_.

@@ -404,6 +404,7 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
     // first create make layout property dirty.
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     layoutProperty_->SetHost(WeakClaim(this));
+    layoutSeperately_ = true;
 }
 
 FrameNode::~FrameNode()
@@ -3019,7 +3020,7 @@ void FrameNode::UpdatePercentSensitive()
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+    ACE_LAYOUT_TRACE_BEGIN("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
     ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
 
@@ -3039,6 +3040,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         layoutAlgorithm_->SetSkipLayout();
         geometryNode_->SetFrameSize(SizeF());
         isLayoutDirtyMarked_ = false;
+        ACE_LAYOUT_TRACE_END()
         return;
     }
     if (!isActive_) {
@@ -3047,6 +3049,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     if (layoutAlgorithm_->SkipMeasure()) {
         isLayoutDirtyMarked_ = false;
+        ACE_LAYOUT_TRACE_END()
         return;
     }
 
@@ -3076,6 +3079,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         if (!CheckNeedForceMeasureAndLayout()) {
             ACE_SCOPED_TRACE("SkipMeasure");
             layoutAlgorithm_->SetSkipMeasure();
+            ACE_LAYOUT_TRACE_END()
             return;
         }
     } else {
@@ -3120,12 +3124,13 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
 
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    ACE_LAYOUT_TRACE_END()
 }
 
 // Called to perform layout children.
 void FrameNode::Layout()
 {
-    ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+    ACE_LAYOUT_TRACE_BEGIN("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
     if (SelfOrParentExpansive()) {
         if (IsRootMeasureNode() && !needRestoreSafeArea_ && SelfExpansive()) {
@@ -3179,14 +3184,14 @@ void FrameNode::Layout()
     }
 
     auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID_LAYOUT_TRACE_END(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
     AvoidKeyboard(isFocusOnPage);
     bool needSyncRsNode = false;
     DirtySwapConfig config;
     bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode, config);
     // skip wrapping task if node will not sync
-    CHECK_NULL_VOID(willSyncGeoProperties);
+    CHECK_NULL_VOID_LAYOUT_TRACE_END(willSyncGeoProperties);
     auto task = [weak = WeakClaim(this), needSync = needSyncRsNode, dirtyConfig = config]() {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -3195,26 +3200,28 @@ void FrameNode::Layout()
     pipeline->AddSyncGeometryNodeTask(task);
     if (IsRootMeasureNode()) {
         auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID_LAYOUT_TRACE_END(pipeline);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
+        CHECK_NULL_VOID_LAYOUT_TRACE_END(safeAreaManager);
         safeAreaManager->SetRootMeasureNodeId(GetId());
     }
     if (SelfOrParentExpansive()) {
         auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID_LAYOUT_TRACE_END(pipeline);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
+        CHECK_NULL_VOID_LAYOUT_TRACE_END(safeAreaManager);
         safeAreaManager->AddNeedExpandNode(GetHostNode());
     }
     // if a node has geo transition but not the root node, add task only but not flush
     // or add to expand list, self node will be added to expand list in next layout
     if (geometryTransition != nullptr && !IsRootMeasureNode()) {
+        ACE_LAYOUT_TRACE_END()
         return;
     }
     if (geometryTransition != nullptr) {
         pipeline->FlushSyncGeometryNodeTasks();
     }
+    ACE_LAYOUT_TRACE_END()
 }
 
 bool FrameNode::SelfExpansive()
@@ -3315,8 +3322,9 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config)
 {
     if (SystemProperties::GetSyncDebugTraceEnabled()) {
-        ACE_LAYOUT_SCOPED_TRACE("SyncGeometryNode[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+        ACE_LAYOUT_TRACE_BEGIN("SyncGeometryNode[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
             GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+        ACE_LAYOUT_TRACE_END()
     }
 
     // update border.

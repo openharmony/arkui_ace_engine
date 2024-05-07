@@ -46,8 +46,10 @@ void MockPipelineContext::SetUp()
 
 void MockPipelineContext::TearDown()
 {
-    pipeline_->Destroy();
-    pipeline_ = nullptr;
+    if (pipeline_) {
+        pipeline_->Destroy();
+        pipeline_ = nullptr;
+    }
 }
 
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()

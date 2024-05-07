@@ -928,6 +928,8 @@ HWTEST_F(NavigationTestNg, NavigationStackTest001, TestSize.Level1)
     /**
      * @tc.steps: step1.create navigation, and set the navigation stack
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -935,6 +937,7 @@ HWTEST_F(NavigationTestNg, NavigationStackTest001, TestSize.Level1)
     RefPtr<NavigationGroupNode> navigationNode =
         AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navigationNode, nullptr);
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
 
     /**
      * @tc.steps: step2.add page A
@@ -1414,6 +1417,9 @@ HWTEST_F(NavigationTestNg, NestedNavigationTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create NavigationStack, setup mock function
      */
+
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     ScopedViewStackProcessor scopedViewStackProcessor;
     auto outerStack = AceType::MakeRefPtr<MockNavigationStack>();
     auto innerStack = AceType::MakeRefPtr<MockNavigationStack>();
@@ -1435,7 +1441,7 @@ HWTEST_F(NavigationTestNg, NestedNavigationTest001, TestSize.Level1)
     auto groupNode = AceType::DynamicCast<NavigationGroupNode>(
             ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(groupNode, nullptr);
-    groupNode->AttachToMainTree(true);
+    groupNode->AttachToMainTree(true, AceType::RawPtr(context));
 
     /**
      * @tc.steps: step2. create inner navigation and set stack

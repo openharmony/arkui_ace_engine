@@ -24,6 +24,7 @@
 namespace OHOS {
 namespace Ace {
 constexpr int32_t PROCESS_WAIT_TIME = 10;
+constexpr float DOUBLE = 2.0;
 FormRendererDispatcherImpl::FormRendererDispatcherImpl(
     const std::shared_ptr<UIContent> uiContent,
     const std::shared_ptr<FormRenderer> formRenderer,
@@ -92,7 +93,7 @@ void FormRendererDispatcherImpl::SetAllowUpdate(bool allowUpdate)
     allowUpdate_ = allowUpdate;
 }
 
-void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float height)
+void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float height, float borderWidth)
 {
     auto handler = eventHandler_.lock();
     if (!handler) {
@@ -100,16 +101,18 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         return;
     }
 
-    handler->PostTask([content = uiContent_, width, height]() {
+    handler->PostTask([content = uiContent_, width, height, borderWidth]() {
         HILOG_INFO("Root node update, width: %{public}f, height: %{public}f.", width, height);
         auto uiContent = content.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
-        uiContent->SetFormWidth(width);
-        uiContent->SetFormHeight(height);
-        uiContent->OnFormSurfaceChange(width, height);
+        float uiWidth = width - borderWidth * DOUBLE;
+        float uiHeight = height - borderWidth * DOUBLE;
+        uiContent->SetFormWidth(uiWidth);
+        uiContent->SetFormHeight(uiHeight);
+        uiContent->OnFormSurfaceChange(uiWidth, uiHeight);
     });
 
     auto formRenderer = formRenderer_.lock();
@@ -117,7 +120,7 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         HILOG_ERROR("formRenderer is nullptr");
         return;
     }
-    formRenderer->OnSurfaceChange(width, height);
+    formRenderer->OnSurfaceChange(width, height, borderWidth);
 }
 
 void FormRendererDispatcherImpl::SetObscured(bool isObscured)

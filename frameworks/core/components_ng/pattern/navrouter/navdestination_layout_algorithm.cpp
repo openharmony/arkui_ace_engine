@@ -70,20 +70,8 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinat
     auto index = hostNode->GetChildIndexById(contentNode->GetId());
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(contentWrapper, 0.0f);
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_RETURN(titleBarNode, 0.0f);
-    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_RETURN(titlePattern, 0.0f);
-    auto options = titlePattern->GetTitleBarOptions();
-    auto barStyle = options.bgOptions.barStyle.value_or(BarStyle::STANDARD);
-    float resetTitleBarHeight = 0.0f;
-    if (barStyle == BarStyle::STACK) {
-        resetTitleBarHeight = 0.0f;
-    } else {
-        resetTitleBarHeight = titleBarHeight;
-    }
     auto constraint = navDestinationLayoutProperty->CreateChildConstraint();
-    float contentHeight = size.Height() - resetTitleBarHeight;
+    float contentHeight = size.Height() - titleBarHeight;
     if (NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty)) {
         constraint.selfIdealSize.SetWidth(size.Width());
     } else {
@@ -133,25 +121,29 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
         return;
     }
 
+    auto contentOffset = OffsetT<float>(0.0f, titlebarHeight);
+    const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
+    contentOffset.AddX(padding.left.value_or(0.0f));
+    contentOffset.AddY(padding.top.value_or(0.0f));
+    geometryNode->SetMarginFrameOffset(contentOffset);
+    contentWrapper->Layout();
+}
+
+float TransferTitleBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float titleBarHeight)
+{
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleBarNode);
+    CHECK_NULL_RETURN(titleBarNode, 0.0f);
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
+    CHECK_NULL_RETURN(titlePattern, 0.0f);
     auto options = titlePattern->GetTitleBarOptions();
     auto barStyle = options.bgOptions.barStyle.value_or(BarStyle::STANDARD);
     float resetTitleBarHeight = 0.0f;
     if (barStyle == BarStyle::STACK) {
         resetTitleBarHeight = 0.0f;
     } else {
-        resetTitleBarHeight = titlebarHeight;
+        resetTitleBarHeight = titleBarHeight;
     }
-
-    auto contentOffset = OffsetT<float>(0, resetTitleBarHeight);
-    const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
-    contentOffset.AddX(padding.left.value_or(0));
-    contentOffset.AddY(padding.top.value_or(0));
-    geometryNode->SetMarginFrameOffset(contentOffset);
-    contentWrapper->Layout();
+    return resetTitleBarHeight;
 }
 
 } // namespace
@@ -172,11 +164,12 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
 
     float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
+    auto resetTitleBarHeight = TransferTitleBarHeight(hostNode, titleBarHeight);
     float contentChildHeight =
-            MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
+            MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, resetTitleBarHeight);
 
-    size.SetHeight(titleBarHeight + contentChildHeight);
-    if (titleBarHeight + contentChildHeight == 0) {
+    size.SetHeight(resetTitleBarHeight + contentChildHeight);
+    if (NearZero(resetTitleBarHeight + contentChildHeight)) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto height = pipeline->GetRootHeight();
@@ -197,7 +190,8 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(navDestinationLayoutProperty);
 
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty);
-    LayoutContent(layoutWrapper, hostNode, navDestinationLayoutProperty, titlebarHeight);
+    auto resetTitleBarHeight = TransferTitleBarHeight(hostNode, titlebarHeight);
+    LayoutContent(layoutWrapper, hostNode, navDestinationLayoutProperty, resetTitleBarHeight);
 
     auto&& opts = navDestinationLayoutProperty->GetSafeAreaExpandOpts();
     if (opts && opts->Expansive()) {

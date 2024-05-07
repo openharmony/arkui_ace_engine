@@ -38,6 +38,7 @@ RefPtr<NGGestureRecognizer> LongPressGesture::CreateRecognizer()
     if (onActionCancelId_) {
         longPressRecognizer->SetOnActionCancel(*onActionCancelId_);
     }
+    longPressRecognizer->SetUserData(userData_);
 
     return longPressRecognizer;
 }

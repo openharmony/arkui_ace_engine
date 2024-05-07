@@ -19,6 +19,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/common/ime/text_range.h"
 namespace OHOS::Ace::NG {
 class TextInsertValueInfo {
@@ -238,6 +239,27 @@ private:
     TextRange rangeAfter_;
 };
 
+class StyledStringChangeValue : public BaseEventInfo {
+    DECLARE_ACE_TYPE(StyledStringChangeValue, BaseEventInfo)
+public:
+    StyledStringChangeValue() : BaseEventInfo("StyledStringChangeValue") {}
+    ~StyledStringChangeValue() = default;
+
+    void SetRangeBefore(const TextRange& range);
+    TextRange GetRangeBefore() const;
+
+    void SetRangeAfter(const TextRange& range);
+    TextRange GetRangeAfter() const;
+
+    void SetReplacementString(const RefPtr<SpanStringBase>& styledString);
+    const RefPtr<SpanStringBase> GetReplacementString() const;
+
+private:
+    TextRange rangeBefore_;
+    TextRange rangeAfter_;
+    RefPtr<SpanStringBase> replacementString_;
+};
+
 class RichEditorEventHub : public EventHub {
     DECLARE_ACE_TYPE(RichEditorEventHub, EventHub)
 
@@ -320,6 +342,12 @@ public:
     void FireOnCut(NG::TextCommonEvent& value);
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)> && func);
     void FireOnCopy(NG::TextCommonEvent& value);
+    void SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)> && func);
+    bool FireOnStyledStringWillChange(const StyledStringChangeValue& info);
+    bool HasOnStyledStringWillChange() const;
+    void SetOnStyledStringDidChange(std::function<void(const StyledStringChangeValue&)> && func);
+    void FireOnStyledStringDidChange(const StyledStringChangeValue& info);
+    bool HasOnStyledStringDidChange() const;
 
 private:
     long long timestamp_ = 0;
@@ -337,6 +365,8 @@ private:
     std::function<void(const RichEditorChangeValue&)> onDidChange_;
     std::function<void(NG::TextCommonEvent&)> onCut_;
     std::function<void(NG::TextCommonEvent&)> onCopy_;
+    std::function<bool(const StyledStringChangeValue&)> onStyledStringWillChange_;
+    std::function<void(const StyledStringChangeValue&)> onStyledStringDidChange_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorEventHub);
 };
 } // namespace OHOS::Ace::NG

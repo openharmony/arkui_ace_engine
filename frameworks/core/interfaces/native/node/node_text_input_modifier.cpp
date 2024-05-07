@@ -1590,6 +1590,48 @@ void ResetTextInputLineBreakStrategy(ArkUINodeHandle node)
      // 0 is the default value of lineBreakStrategy::GREEDY
     TextFieldModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[0]);
 }
+
+void SetTextInputShowKeyBoardOnFocus(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowKeyBoardOnFocus(frameNode, value);
+}
+
+ArkUI_Bool GetTextInputShowKeyBoardOnFocus(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return static_cast<ArkUI_Bool>(TextFieldModelNG::GetShowKeyBoardOnFocus(frameNode));
+}
+
+void ResetTextInputShowKeyBoardOnFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetShowKeyBoardOnFocus(frameNode, true);
+}
+
+void SetTextInputNumberOfLines(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetNumberOfLines(frameNode, value);
+}
+
+ArkUI_Int32 GetTextInputNumberOfLines(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetNumberOfLines(frameNode));
+}
+
+void ResetTextInputNumberOfLines(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetNumberOfLines(frameNode);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -1641,7 +1683,9 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputAdaptMinFontSize, GetTextInputAdaptMaxFontSize, GetTextInputLineHeight, GetTextInputMaxLines,
         GetTextInputFontFeature, SetTextInputCustomKeyboard, GetTextInputCustomKeyboard,
         GetTextInputCustomKeyboardOption, ResetTextInputCustomKeyboard, SetTextInputLineBreakStrategy,
-        ResetTextInputLineBreakStrategy };
+        ResetTextInputLineBreakStrategy,  SetTextInputShowKeyBoardOnFocus, GetTextInputShowKeyBoardOnFocus,
+        ResetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, GetTextInputNumberOfLines,
+        ResetTextInputNumberOfLines};
     return &modifier;
 }
 
@@ -1778,8 +1822,8 @@ void SetTextInputOnTextContentScroll(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_TEXT_INPUT_CONTENT_SCROLL;
-        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetX);
-        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetY);
+        event.componentAsyncEvent.data[0].f32 = totalOffsetX;
+        event.componentAsyncEvent.data[1].f32 = totalOffsetY;
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onScroll));

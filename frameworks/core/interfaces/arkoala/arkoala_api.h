@@ -520,6 +520,11 @@ struct ArkUIBlendModeOptions {
     ArkUI_Int32 blendApplyType;
 };
 
+struct ArkUIScrollerAnimationType {
+    ArkUI_Float32 duration;
+    ArkUI_Int32 curve;
+};
+
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
     ARKUI_SPAN,
@@ -604,6 +609,7 @@ enum ArkUIEventSubKind {
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
     ON_IMAGE_SVG_PLAY_FINISH,
+    ON_IMAGE_DOWNLOAD_PROGRESS,
     // components events
     ON_LIST_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_LIST,
     ON_LIST_SCROLL_INDEX,
@@ -755,6 +761,13 @@ enum ArkUISwipeGestureDirection {
     ArkUI_SWIPE_GESTURE_DIRECTION_HORIZONTAL = 1,
     ArkUI_SWIPE_GESTURE_DIRECTION_VERTICAL = 2,
     ArkUI_SWIPE_GESTURE_DIRECTION_ALL = 3,
+};
+
+enum ArkUIScrollAlign {
+    SCROLL_ALIGN_START = 0,
+    SCROLL_ALIGN_CENTER,
+    SCROLL_ALIGN_END,
+    SCROLL_ALIGN_AUTO,
 };
 
 enum ArkUIAPICustomOp { MEASURE = 1, LAYOUT = 2, DRAW = 3 };
@@ -1551,6 +1564,9 @@ struct ArkUITextModifier {
     void (*setLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
     void (*resetLineBreakStrategy)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextLineBreakStrategy)(ArkUINodeHandle node);
+    void (*setTextSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    ArkUI_Uint32 (*getTextSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*resetTextSelectedBackgroundColor)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2057,9 +2073,12 @@ struct ArkUIScrollBarModifier {
 struct ArkUIScrollerModifier {
     ArkUINodeHandle (*getScroller)(ArkUINodeHandle node, ArkUINodeHandle proxy);
     ArkUINodeHandle (*getScrollerProxy)(ArkUINodeHandle node);
-    void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*scrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 value, ArkUI_Bool smooth,
+        ArkUIScrollAlign align);
     void (*scrollBy)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units);
     void (*getCurrentOffset)(ArkUINodeHandle node, ArkUI_Float32* out);
+    void (*scrollTo)(ArkUINodeHandle node, ArkUI_Float32* xOffsetArray, ArkUI_Float32* yOffsetArray,
+        ArkUI_Bool animation, const struct ArkUIScrollerAnimationType* animationType);
 };
 
 struct ArkUITabsModifier {
@@ -2118,13 +2137,20 @@ struct ArkUITabsControllerModifier {
 
 struct ArkUIGesture;
 
+struct ArkUIGestureInterruptInfo {
+    bool isSystemGesture;
+    ArkUI_Int32 systemRecognizerType;
+    ArkUIAPIEventGestureAsyncEvent* event = nullptr;
+    void* userData = nullptr;
+};
+
 struct ArkUIGestureModifier {
-    ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers);
-    ArkUIGesture* (*createLongPressGesture)(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration);
-    ArkUIGesture* (*createPanGesture)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance);
-    ArkUIGesture* (*createPinchGesture)(ArkUI_Int32 fingers, ArkUI_Float64 distance);
-    ArkUIGesture* (*createRotationGesture)(ArkUI_Int32 fingers, ArkUI_Float64 angle);
-    ArkUIGesture* (*createSwipeGesture)(ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed);
+    ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers, void* userData);
+    ArkUIGesture* (*createLongPressGesture)(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration, void* userData);
+    ArkUIGesture* (*createPanGesture)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, void* userData);
+    ArkUIGesture* (*createPinchGesture)(ArkUI_Int32 fingers, ArkUI_Float64 distance, void* userData);
+    ArkUIGesture* (*createRotationGesture)(ArkUI_Int32 fingers, ArkUI_Float64 angle, void* userData);
+    ArkUIGesture* (*createSwipeGesture)(ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed, void* userData);
     ArkUIGesture* (*createSwipeGestureByModifier)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed);
     ArkUIGesture* (*createGestureGroup)(ArkUI_Int32 mode);
     void (*addGestureToGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
@@ -2136,6 +2162,7 @@ struct ArkUIGestureModifier {
     void (*removeGestureFromNode)(ArkUINodeHandle node, ArkUIGesture* recognizer);
     void (*removeGestureFromNodeByTag)(ArkUINodeHandle node, ArkUI_CharPtr gestureTag);
     void (*clearGestures)(ArkUINodeHandle node);
+    void (*setGestureInterrupterToNode)(ArkUINodeHandle node, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo));
 };
 
 struct ArkUISliderModifier {
@@ -2535,6 +2562,12 @@ struct ArkUITextInputModifier {
     void (*resetTextInputCustomKeyboard)(ArkUINodeHandle node);
     void (*setTextInputLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
     void (*resetTextInputLineBreakStrategy)(ArkUINodeHandle node);
+    void (*setTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Bool (*getTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node);
+    void (*resetTextInputShowKeyBoardOnFocus)(ArkUINodeHandle node);
+    void (*setTextInputNumberOfLines)(ArkUINodeHandle node, ArkUI_Int32 value);
+    ArkUI_Int32 (*getTextInputNumberOfLines)(ArkUINodeHandle node);
+    void (*resetTextInputNumberOfLines)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

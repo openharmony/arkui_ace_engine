@@ -157,6 +157,12 @@ void ImageLoadingContext::OnDataReadyOnCompleteCallBack()
     }
 }
 
+void ImageLoadingContext::SetOnProgressCallback(
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress)
+{
+    onProgressCallback_ = onProgress;
+}
+
 void ImageLoadingContext::OnDataLoading()
 {
     if (!src_.GetIsConfigurationChange()) {
@@ -248,6 +254,18 @@ void ImageLoadingContext::PerformDownload()
         async ? NG::ImageUtils::PostToUI(callback, "ArkUIImageDownloadFailed") : callback();
     };
     downloadCallback.cancelCallback = downloadCallback.failCallback;
+    if (onProgressCallback_) {
+        downloadCallback.onProgressCallback = [weak = AceType::WeakClaim(this)](
+            uint32_t dlTotal, uint32_t dlNow, bool async, int32_t instanceId) {
+            ContainerScope scope(instanceId);
+            auto callback = [weak = weak, dlTotal = dlTotal, dlNow = dlNow]() {
+                auto ctx = weak.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                ctx->DownloadOnProgress(dlNow, dlTotal);
+            };
+            async ? NG::ImageUtils::PostToUI(callback, "ArkUIImageDownloadOnProcess") : callback();
+        };
+    }
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
 }
 
@@ -282,6 +300,13 @@ void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage)
 {
     TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image failed, the error message is %{public}s", errorMessage.c_str());
     FailCallback(errorMessage);
+}
+
+void ImageLoadingContext::DownloadOnProgress(const uint32_t& dlNow, const uint32_t& dlTotal)
+{
+    if (onProgressCallback_) {
+        onProgressCallback_(dlNow, dlTotal);
+    }
 }
 
 void ImageLoadingContext::OnMakeCanvasImage()

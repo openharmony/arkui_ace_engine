@@ -125,6 +125,7 @@ public:
     void CallbackAfterMeasureIfNeed();
 
     void OnDataReadyOnCompleteCallBack();
+    void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
@@ -147,6 +148,7 @@ private:
     bool NotifyReadyIfCacheHit();
     void DownloadImageSuccess(const std::string& imageData);
     void DownloadImageFailed(const std::string& errorMessage);
+    void DownloadOnProgress(const uint32_t& dlNow, const uint32_t& dlTotal);
     // round up int to the nearest 2-fold proportion of image width
     // REQUIRE: value > 0, image width > 0
     int32_t RoundUp(int32_t value);
@@ -154,7 +156,7 @@ private:
 
     inline bool SizeChanging(const SizeF& dstSize)
     {
-        return dstSize_.IsNonNegative() && dstSize != dstSize_;
+        return dstSize_.IsPositive() && dstSize != dstSize_;
     }
 
     ImageSourceInfo src_;
@@ -199,6 +201,8 @@ private:
 
     friend class ImageStateManager;
     ACE_DISALLOW_COPY_AND_MOVE(ImageLoadingContext);
+
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

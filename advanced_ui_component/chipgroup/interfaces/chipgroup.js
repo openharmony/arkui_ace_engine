@@ -55,7 +55,7 @@ function parseDimension(j4, k4, l4, m4) {
     const n4 = j4.getHostContext()?.resourceManager;
     if (typeof k4 === 'object') {
         let o4 = k4;
-        if (o4.type === 10002) {
+        if (o4.type === 10002 || o4.type === 10007) {
             if (n4.getNumber(o4.id) >= 0) {
                 return k4;
             }
@@ -421,9 +421,14 @@ export class ChipGroup extends ViewPU {
         w1 = (this.selectedIndexes ?? [0]).filter((y1, z1, a2) => {
             return (y1 >= 0 &&
                 y1 % 1 == 0 &&
+                y1 != null &&
+                y1 != undefined &&
                 a2.indexOf(y1) === z1 &&
                 y1 < (this.items || []).length);
         });
+        if (w1.length == 0) {
+            w1 = [0];
+        }
         return w1;
     }
     isMultiple() {

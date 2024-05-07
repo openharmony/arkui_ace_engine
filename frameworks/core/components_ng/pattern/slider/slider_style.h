@@ -57,6 +57,7 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SliderMode, SliderModel::SliderMode)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SliderInteractionMode, SliderModel::SliderInteraction)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinResponsiveDistance, float)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ValidSlideRange, RefPtr<SliderModel::SliderValidRange>)
 };
 struct SliderTipStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowTips, bool)

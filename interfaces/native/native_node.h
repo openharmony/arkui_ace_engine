@@ -1457,18 +1457,6 @@ typedef enum {
      */
     NODE_MARGIN_PERCENT,
 
-    NODE_RENDER_FIT,
-
-    NODE_OUTLINE_COLOR,
-
-    NODE_SIZE,
-
-    NODE_RENDER_GROUP,
-
-    NODE_COLOR_BLEND,
-
-    NODE_FOREGROUND_BLUR_STYLE,
-
     NODE_GEOMETRY_TRANSITION,
 
     /**
@@ -1484,6 +1472,18 @@ typedef enum {
      * .value[1].i32：链的样式。枚举{@link ArkUI_RelativeLayoutChainStyle}。 \n
      */
     NODE_RELATIVE_LAYOUT_CHAIN_MODE,
+
+    NODE_RENDER_FIT,
+
+    NODE_OUTLINE_COLOR,
+
+    NODE_SIZE,
+
+    NODE_RENDER_GROUP,
+
+    NODE_COLOR_BLEND,
+
+    NODE_FOREGROUND_BLUR_STYLE,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -1832,6 +1832,17 @@ typedef enum {
      *
      */
     NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG,
+    /**
+     * @brief 文本选中时的背景色属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式。\n
+     *
+     */
+    NODE_TEXT_SELECTED_BACKGROUND_COLOR,
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -2505,6 +2516,30 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_WORD_BREAK,
+
+    /**
+    * @brief 设置输入框获取焦点时是否弹出键盘，支持属性设置，属性重置和属性获取接口。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 是否弹出键盘。\n
+    * \n
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 是否弹出键盘。\n
+    *
+    */
+    NODE_TEXT_INPUT_SHOW_KEYBOARD_ON_FOCUS,
+    
+    /**
+     * @brief 设置该属性后，通过该属性计算textInput组件的高度。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置numberOfLines的值。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置numberOfLines的值。\n
+     *
+     */
+    NODE_TEXT_INPUT_NUMBER_OF_LINES,
     /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -2767,6 +2802,30 @@ typedef enum {
     *
     */
     NODE_TEXT_AREA_CONTENT_TYPE,
+
+    /**
+    * @brief 设置输入框获取焦点时是否弹出键盘，支持属性设置，属性重置和属性获取接口。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 是否弹出键盘。\n
+    * \n
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].i32： 是否弹出键盘。\n
+    *
+    */
+    NODE_TEXT_AREA_SHOW_KEYBOARD_ON_FOCUS,
+
+    /**
+     * @brief 设置该属性后，通过该属性计算textArea组件的高度。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置numberOfLines的值。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置numberOfLines的值。\n
+     *
+     */
+    NODE_TEXT_AREA_NUMBER_OF_LINES,
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4867,6 +4926,17 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} does not contain parameters.
      */
     NODE_IMAGE_ON_SVG_PLAY_FINISH,
+    /**
+     * @brief Defines image download process event.
+     *
+     * This event is triggered when downloading webpage images from page components.\n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].u32</b>: the num of bytes downloaded. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].u32</b>: the total number of bytes to download. \n
+     */
+    NODE_IMAGE_ON_DOWNLOAD_PROGRESS,
     /**
      * @brief Defines the event triggered when the toggle status changes.
      *

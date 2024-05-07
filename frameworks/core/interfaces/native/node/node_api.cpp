@@ -300,7 +300,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaChange,
     NodeModifier::SetOnTextAreaPaste,
     NodeModifier::SetOnTextAreaSelectionChange,
-    NodeModifier::SetTextInputOnSubmit,
+    NodeModifier::SetTextAreaOnSubmit,
     NodeModifier::SetOnTextAreaContentSizeChange,
     NodeModifier::SetOnTextAreaInputFilterError,
     NodeModifier::SetTextAreaOnTextContentScroll,
@@ -319,6 +319,7 @@ const ComponentAsyncEventHandler imageNodeAsyncEventHandlers[] = {
     NodeModifier::SetImageOnComplete,
     NodeModifier::SetImageOnError,
     NodeModifier::SetImageOnSvgPlayFinish,
+    NodeModifier::SetImageOnDownloadProgress,
 };
 
 const ComponentAsyncEventHandler DATE_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {

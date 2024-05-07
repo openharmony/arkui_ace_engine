@@ -33,6 +33,8 @@ public:
     void CloseSelectionMenu() override;
     bool IsEditing() override;
     void StopEditing() override;
+    void SetSelection(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
 
 protected:
     WeakPtr<RichEditorPattern> pattern_;

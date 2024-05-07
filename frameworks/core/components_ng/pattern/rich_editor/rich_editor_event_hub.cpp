@@ -378,6 +378,36 @@ TextRange RichEditorChangeValue::GetRangeAfter() const
     return rangeAfter_;
 }
 
+void StyledStringChangeValue::SetRangeBefore(const TextRange& range)
+{
+    rangeBefore_ = range;
+}
+
+TextRange StyledStringChangeValue::GetRangeBefore() const
+{
+    return rangeBefore_;
+}
+
+void StyledStringChangeValue::SetRangeAfter(const TextRange& range)
+{
+    rangeAfter_ = range;
+}
+
+TextRange StyledStringChangeValue::GetRangeAfter() const
+{
+    return rangeAfter_;
+}
+
+void StyledStringChangeValue::SetReplacementString(const RefPtr<SpanStringBase>& styledString)
+{
+    replacementString_ = styledString;
+}
+
+const RefPtr<SpanStringBase> StyledStringChangeValue::GetReplacementString() const
+{
+    return replacementString_;
+}
+
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
 {
     onReady_ = std::move(func);
@@ -525,5 +555,35 @@ void RichEditorEventHub::FireOnCopy(NG::TextCommonEvent& value)
     if (onCopy_) {
         onCopy_(value);
     }
+}
+
+void RichEditorEventHub::SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)> && func)
+{
+    onStyledStringWillChange_ = std::move(func);
+}
+
+bool RichEditorEventHub::FireOnStyledStringWillChange(const StyledStringChangeValue& info)
+{
+    return onStyledStringWillChange_ ? onStyledStringWillChange_(info) : true;
+}
+
+bool RichEditorEventHub::HasOnStyledStringWillChange() const
+{
+    return static_cast<bool>(onStyledStringWillChange_);
+}
+
+void RichEditorEventHub::SetOnStyledStringDidChange(std::function<void(const StyledStringChangeValue&)> && func)
+{
+    onStyledStringDidChange_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnStyledStringDidChange(const StyledStringChangeValue& info)
+{
+    onStyledStringDidChange_(info);
+}
+
+bool RichEditorEventHub::HasOnStyledStringDidChange() const
+{
+    return static_cast<bool>(onStyledStringDidChange_);
 }
 } // namespace OHOS::Ace::NG

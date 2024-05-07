@@ -308,7 +308,7 @@ HWTEST_F(GridIrregularLayoutTest, MeasureJump001, TestSize.Level1)
     });
     LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
     layoutProperty_->layoutConstraint_ = constraint;
-
+    frameNode_->isConstraintNotChanged_ = true;
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     auto& info = algorithm->gridLayoutInfo_;
     info.jumpIndex_ = 7;
@@ -469,7 +469,7 @@ HWTEST_F(GridIrregularLayoutTest, TestReset002, TestSize.Level1)
     auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
     algo->wrapper_ = AceType::RawPtr(frameNode_);
 
-    algo->CheckForReset(3);
+    algo->CheckForReset();
 
     const auto& info = algo->gridLayoutInfo_;
     EXPECT_TRUE(info.gridMatrix_.empty());
@@ -514,7 +514,7 @@ HWTEST_F(GridIrregularLayoutTest, TestReset003, TestSize.Level1)
     algo->wrapper_ = AceType::RawPtr(frameNode_);
 
     frameNode_->childrenUpdatedFrom_ = 5;
-    algo->CheckForReset(3);
+    algo->CheckForReset();
 
     const auto& info = algo->gridLayoutInfo_;
     EXPECT_EQ(info.currentOffset_, 0.0f);
@@ -768,6 +768,68 @@ HWTEST_F(GridIrregularLayoutTest, JumpCenter001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridIrregularLayout::TargetPosCenter001
+ * @tc.desc: Test calculate target position with align center
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, TargetPosCenter001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo12());
+        model.SetRowsGap(Dimension { 5.0f });
+        model.SetEdgeEffect(EdgeEffect::NONE, true);
+        CreateFixedHeightItems(1, 605.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 1825.0f);
+        CreateFixedHeightItems(4, 300.0f);
+    });
+
+    pattern_->ScrollToIndex(2, true, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 817.5f);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::JumpAuto001
+ * @tc.desc: Test jumping to irregular item with align center
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, JumpAuto001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo12());
+        model.SetRowsGap(Dimension { 5.0f });
+        model.SetEdgeEffect(EdgeEffect::NONE, true);
+        CreateFixedHeightItems(1, 605.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 1825.0f);
+        CreateFixedHeightItems(4, 300.0f);
+    });
+
+    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startMainLineIndex_, 1);
+    EXPECT_EQ(info.endMainLineIndex_, 6);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -1025.0f);
+
+    // shouldn't move
+    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -1025.0f);
+
+    pattern_->ScrollToIndex(2, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0.0f);
+
+    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 0.0f);
+}
+
+/**
  * @tc.name: GridIrregularLayout::ToEdge001
  * @tc.desc: Test jumping to bottom edge
  * @tc.type: FUNC
@@ -790,6 +852,10 @@ HWTEST_F(GridIrregularLayoutTest, ToEdge001, TestSize.Level1)
     EXPECT_EQ(info.currentOffset_, -1000.0f);
     EXPECT_EQ(info.endMainLineIndex_, 6);
     EXPECT_EQ(GetChildY(frameNode_, 2), -1000.0f);
+    for (int i = 0; i < 20; ++i) {
+        UpdateCurrentOffset(200.0f);
+    }
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 }
 
 /**
@@ -1368,6 +1434,11 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange001, TestSize.Level1)
     EXPECT_EQ(info.endMainLineIndex_, 5);
     EXPECT_EQ(info.GetIrregularOffset(10.0f), 210.0f + 4 * 510.0f);
     EXPECT_EQ(info.GetIrregularHeight(10.0f), 6 * 500.0f + 5 * 10.0f);
+
+    for (int i = 0; i < 20; ++i) {
+        UpdateCurrentOffset(200.0f);
+    }
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 }
 
 /**
@@ -1475,6 +1546,61 @@ HWTEST_F(GridIrregularLayoutTest, Width001, TestSize.Level1)
         EXPECT_EQ(GetChildSize(frameNode_, i).Width(), 300.0f);
     }
     EXPECT_EQ(GetChildSize(frameNode_, 1).Width(), 300.0f);
+}
+
+/**
+ * @tc.name: Horizontal001
+ * @tc.desc: Test horizontal layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Horizontal001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo14());
+        model.SetRowsGap(Dimension { 1.0f });
+        model.SetColumnsGap(Dimension { 5.0f });
+        CreateFixedWidthItems(1, 910.0f);
+        CreateFixedWidthItems(1, 300.0f);
+        CreateFixedWidthItems(20, 605.0f);
+        CreateFixedWidthItems(8, 300.0f);
+    });
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+
+    layoutProperty_->UpdateRowsTemplate("1fr 1fr 1fr 1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    // print all content of gridMatrix_
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_14);
+    for (int i = 0; i < 200; ++i) {
+        UpdateCurrentOffset(50.0f);
+    }
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+}
+
+/**
+ * @tc.name: ConstraintChange001
+ * @tc.desc: Test width update
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, ConstraintChange001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo14());
+        model.SetRowsGap(Dimension { 1.0f });
+        model.SetColumnsGap(Dimension { 5.0f });
+        CreateFixedWidthItems(1, 910.0f);
+        CreateFixedWidthItems(1, 300.0f);
+        CreateFixedWidthItems(20, 605.0f);
+        CreateFixedWidthItems(8, 300.0f);
+    });
+    EXPECT_EQ(GetChildSize(frameNode_, 0).Height(), 399.5f);
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(400.0f)));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildSize(frameNode_, 0).Height(), 199.5f);
 }
 
 /**

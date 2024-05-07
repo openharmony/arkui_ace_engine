@@ -167,15 +167,11 @@ void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     if (image->IsStatic()) {
         return;
     }
+    RegisterVisibleAreaChange();
     SetOnFinishCallback(image);
     SetRedrawCallback(image);
-    RegisterVisibleAreaChange();
-    auto layoutProps = GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
-    // pause animation if prop is initially set to invisible
-    if (layoutProps->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
-        image->ControlAnimation(false);
-    }
+    // GIF images are not played by default, but depend on OnVisibleAreaChange callback.
+    image->ControlAnimation(false);
 }
 
 void ImagePattern::SetOnFinishCallback(const RefPtr<CanvasImage>& image)
@@ -210,7 +206,7 @@ void ImagePattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        self->OnVisibleChange(visible);
+        self->OnVisibleAreaChange(visible);
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -509,10 +505,8 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-
     const auto& dstSize = dirty->GetGeometryNode()->GetContentSize();
     StartDecoding(dstSize);
-
     if (loadingCtx_) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && renderProp->HasImageResizableSlice() && image_) {
@@ -565,6 +559,9 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
+    if (onProgressCallback_) {
+        loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
+    }
     loadingCtx_->LoadImageData();
 }
 
@@ -585,7 +582,7 @@ void ImagePattern::LoadImageDataIfNeed()
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
-    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src) {
+    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
         LoadImage(src);
     } else {
         auto host = GetHost();
@@ -718,7 +715,6 @@ void ImagePattern::OnImageModifyDone()
     Pattern::OnModifyDone();
     LoadImageDataIfNeed();
     UpdateGestureAndDragWhenModify();
-
     if (copyOption_ != CopyOptions::None) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -921,6 +917,13 @@ void ImagePattern::OnWindowShow()
 }
 
 void ImagePattern::OnVisibleChange(bool visible)
+{
+    if (!visible) {
+        CloseSelectOverlay();
+    }
+}
+
+void ImagePattern::OnVisibleAreaChange(bool visible)
 {
     if (!visible) {
         CloseSelectOverlay();
@@ -1857,6 +1860,12 @@ void ImagePattern::SetDuration(int32_t duration)
         CHECK_NULL_VOID(imageAnimator);
         imageAnimator->animator_->SetDuration(finalDuration);
     });
+}
+
+void ImagePattern::SetOnProgressCallback(
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress)
+{
+    onProgressCallback_ = onProgress;
 }
 
 void ImagePattern::OnSensitiveStyleChange(bool isSensitive)

@@ -217,7 +217,7 @@ void UINode::RemoveChildAtIndex(int32_t index)
 
 RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 {
-    auto children = GetChildren();
+    auto& children = GetChildren();
     if ((index < 0) || (index >= static_cast<int32_t>(children.size()))) {
         return nullptr;
     }
@@ -841,7 +841,7 @@ bool UINode::RenderCustomChild(int64_t deadline)
 
 void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
-    ACE_LAYOUT_SCOPED_TRACE("Build[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
+    ACE_LAYOUT_TRACE_BEGIN("Build[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     for (const auto& child : GetChildren()) {
         if (InstanceOf<CustomNode>(child)) {
@@ -860,6 +860,7 @@ void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
             child->Build(extraInfos);
         }
     }
+    ACE_LAYOUT_TRACE_END()
 }
 
 void UINode::CreateExportTextureInfoIfNeeded()
@@ -1158,6 +1159,8 @@ std::string UINode::GetCurrentCustomNodeInfo()
                     .append(child.page)
                     .append(":")
                     .append(std::to_string(child.line))
+                    .append(":")
+                    .append(std::to_string(child.col))
                     .append(")\n");
             }
             break;

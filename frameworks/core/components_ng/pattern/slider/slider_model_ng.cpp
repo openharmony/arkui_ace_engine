@@ -106,6 +106,13 @@ void SliderModelNG::SetMinResponsiveDistance(float value)
     }
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, MinResponsiveDistance, minResponse);
 }
+
+void SliderModelNG::SetValidSlideRange(float from, float to)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SliderModelNG::SetValidSlideRange(frameNode, from, to);
+}
+
 void SliderModelNG::SetShowSteps(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, ShowSteps, value);
@@ -289,6 +296,11 @@ void SliderModelNG::ResetSliderInteractionMode()
 void SliderModelNG::ResetMinResponsiveDistance()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, MinResponsiveDistance, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetValidSlideRange()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, ValidSlideRange, PROPERTY_UPDATE_RENDER);
 }
 
 void SliderModelNG::SetShowTips(FrameNode* frameNode, bool value, const std::optional<std::string>& content)
@@ -475,6 +487,11 @@ void SliderModelNG::ResetBlockImage(FrameNode* frameNode)
         SliderPaintProperty, BlockImageModuleName, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
+void SliderModelNG::ResetValidSlideRange(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, ValidSlideRange, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
 RefPtr<FrameNode> SliderModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -531,6 +548,35 @@ void SliderModelNG::SetReverse(FrameNode* frameNode, bool value)
 void SliderModelNG::SetStep(FrameNode* frameNode, float value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Step, value, frameNode);
+}
+
+void SliderModelNG::SetValidSlideRange(FrameNode* frameNode, float from, float to)
+{
+    if (std::isnan(from) || std::isnan(to)) {
+        return SliderModelNG::ResetValidSlideRange(frameNode);
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto minValue = paintProperty->GetMinValue(0.0f);
+    auto maxValue = paintProperty->GetMaxValue(100.0f);
+    float fromValue = minValue;
+    float toValue = maxValue;
+    if (std::isfinite(from)) {
+        fromValue = from;
+    }
+    if (std::isfinite(to)) {
+        toValue = to;
+    }
+    if (GreatOrEqual(fromValue, minValue) && LessOrEqual(toValue, maxValue)) {
+        auto sliderValue = std::clamp(paintProperty->GetValueValue(fromValue), fromValue, toValue);
+        RefPtr<SliderModel::SliderValidRange> rangeValue =
+            AceType::MakeRefPtr<SliderModel::SliderValidRange>(fromValue, toValue);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Value, sliderValue, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, ValidSlideRange, rangeValue, frameNode);
+    } else {
+        SliderModelNG::ResetValidSlideRange(frameNode);
+    }
 }
 
 Color SliderModelNG::GetBlockColor(FrameNode* frameNode)

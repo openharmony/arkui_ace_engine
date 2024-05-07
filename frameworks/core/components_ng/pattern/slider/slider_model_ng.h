@@ -61,6 +61,7 @@ public:
     void SetStepSize(const Dimension& value) override;
     void SetSliderInteractionMode(SliderInteraction mode) override;
     void SetMinResponsiveDistance(float value) override;
+    void SetValidSlideRange(float fromValue, float toValue) override;
 
     void SetOnChange(SliderOnChangeEvent&& eventOnChange) override;
     void SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent) override;
@@ -77,6 +78,7 @@ public:
     void ResetStepSize() override;
     void ResetSliderInteractionMode() override;
     void ResetMinResponsiveDistance() override;
+    void ResetValidSlideRange() override;
 
     static void SetShowTips(FrameNode* frameNode, bool value, const std::optional<std::string>& content);
     static void SetThickness(FrameNode* frameNode, const Dimension& value);
@@ -94,6 +96,7 @@ public:
     static void SetShowSteps(FrameNode* frameNode, bool value);
     static void SetSliderInteractionMode(FrameNode* frameNode, SliderInteraction mode);
     static void SetMinResponsiveDistance(FrameNode* frameNode, float value);
+    static void SetValidSlideRange(FrameNode* frameNode, float fromValue, float toValue);
     static void SetBlockImage(
         FrameNode* frameNode, const std::string& value, const std::string& bundleName, const std::string& moduleName);
 
@@ -107,6 +110,7 @@ public:
     static void ResetBlockShape(FrameNode* frameNode);
     static void ResetStepSize(FrameNode* frameNode);
     static void ResetBlockColor(FrameNode* frameNode);
+    static void ResetValidSlideRange(FrameNode* frameNode);
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& eventOnChange);

@@ -119,7 +119,7 @@ function parseDimension<T>(
   const resourceManager = uiContext.getHostContext()?.resourceManager;
   if (typeof value === "object") {
     let temp: Resource = value as Resource;
-    if (temp.type === 10002) {
+    if (temp.type === 10002 || temp.type === 10007) {
       if (resourceManager.getNumber(temp.id) >= 0) {
         return value as T;
       }
@@ -297,9 +297,14 @@ export struct ChipGroup {
         return (
           element >= 0 &&
             element % 1 == 0 &&
+            element != null &&
+            element != undefined &&
             array.indexOf(element) === index &&
             element < (this.items || []).length);
       });
+    if (temp.length == 0) {
+      temp = [0];
+    }
     return temp;
   }
 

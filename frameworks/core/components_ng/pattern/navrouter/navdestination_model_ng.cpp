@@ -245,32 +245,19 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
         backButtonLayoutProperty->UpdatePadding(padding);
     }
 
-    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    CHECK_NULL_VOID(backButtonImageNode);
-
-    ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetResourceId(theme->GetBackResourceId());
-    auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(backButtonImageLayoutProperty);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto iconColor = theme->GetIconColor();
-        imageSourceInfo.SetFillColor(iconColor);
-        imageSourceInfo.SetResourceId(theme->GetBackBtnResourceId());
-        auto iconWidth = theme->GetIconWidth();
-        auto iconHeight = theme->GetIconHeight();
-        backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconWidth),
-            CalcLength(iconHeight)));
-    }
-    backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    backButtonNode->AddChild(backButtonImageNode);
-    backButtonImageNode->MarkModifyDone();
-    backButtonNode->MarkModifyDone();
-
+    auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(symbolNode);
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolProperty);
+    symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
+    symbolProperty->UpdateFontSize(BACK_BUTTON_ICON_SIZE);
+    symbolNode->MountToParent(backButtonNode);
+    symbolNode->MarkModifyDone();
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+    backButtonNode->MarkModifyDone();
 }
 
 void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context)
@@ -346,8 +333,8 @@ void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     titleBarPattern->SetTitlebarOptions(std::move(opt));
 }
 
-void NavDestinationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
-    const std::string& bundleName, const std::string& moduleName)
+void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
@@ -357,10 +344,11 @@ void NavDestinationModelNG::SetBackButtonIcon(const std::string& src, bool noPix
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    ImageSourceInfo imageSourceInfo(src, bundleName, moduleName);
+    ImageSourceInfo imageSourceInfo(src, nameList[0], nameList[1]);
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
     titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
+    titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarNode->MarkModifyDone();
 }
 

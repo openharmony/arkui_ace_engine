@@ -159,6 +159,156 @@ class LengthMetrics {
   }
 }
 
+declare type Resource = import('../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/global/resource').Resource;
+
+declare enum Color {
+  White,
+  Black,
+  Blue,
+  Brown,
+  Gray,
+  Green,
+  Grey,
+  Orange,
+  Pink,
+  Red,
+  Yellow,
+  Transparent,
+}
+
+declare type ResourceColor = Color | number | string | Resource;
+
+const MAX_CHANNEL_VALUE = 0xFF;
+const MAX_ALPHA_VALUE = 1;
+
+class ColorMetrics {
+  private red_: number;
+  private green_: number;
+  private blue_: number;
+  private alpha_: number;
+  private static clamp(value: number): number {
+    return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
+  }
+  private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE) {
+    this.red_ = ColorMetrics.clamp(red);
+    this.green_ = ColorMetrics.clamp(green);
+    this.blue_ = ColorMetrics.clamp(blue);
+    this.alpha_ = ColorMetrics.clamp(alpha);
+  }
+  private toNumeric() {
+    return (this.alpha_ << 24) + (this.red_ << 16) + (this.green_ << 8) + this.blue_;
+  }
+  static numeric(value: number): ColorMetrics {
+    const red = (value >> 16) & 0x000000FF;
+    const green = (value >> 8) & 0x000000FF;
+    const blue = value & 0x000000FF;
+    const alpha = (value >> 24) & 0x000000FF;
+    return new ColorMetrics(red, green, blue, alpha);
+  }
+  static rgba(red: number, green: number, blue: number, alpha: number = MAX_ALPHA_VALUE): ColorMetrics {
+    return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
+  }
+
+  private static rgbOrRGBA(format: string): ColorMetrics {
+    const rgbPattern = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
+    const rgbaPattern = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(\.\d+)?)\s*\)$/i;
+
+    const rgbMatch = rgbPattern.exec(format);
+    const rgbaMatch = rgbaPattern.exec(format);
+
+    if (rgbMatch) {
+      const [, red, green, blue] = rgbMatch;
+      return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10));
+    } else if (rgbaMatch) {
+      const [, red, green, blue, alpha] = rgbaMatch;
+      return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10), Number.parseFloat(alpha) * MAX_CHANNEL_VALUE);
+    } else {
+      throw new TypeError('Invalid color format.');
+    }
+  }
+
+  static resourceColor(color: ResourceColor): ColorMetrics {
+    let chanels: Array<number> = [];
+    if (typeof color === 'object') {
+      chanels = getUINativeModule().nativeUtils.parseResourceColor(color);
+      if (chanels === undefined) {
+        throw new TypeError('Invalid color format.');
+      }
+      const red = chanels[0];
+      const green = chanels[1];
+      const blue = chanels[2];
+      const alpha = chanels[3];
+      return new ColorMetrics(red, green, blue, alpha);
+    } else if (typeof color === 'number') {
+      return ColorMetrics.numeric(color);
+    } else if (typeof color === 'string') {
+      if (ColorMetrics.isHexFormat(color)) {
+        return ColorMetrics.hex(color);
+      } else {
+        return ColorMetrics.rgbOrRGBA(color);
+      }
+    } else {
+      throw new TypeError('Invalid color format.');
+    }
+  }
+  private static isHexFormat(format: string): boolean {
+    return /#(([0-9A-Fa-f]{3})|([0-9A-Fa-f]{6})|([0-9A-Fa-f]{4})|([0-9A-Fa-f]{8}))/.test(format);
+  }
+
+  private static hex(hexFormat: string): ColorMetrics {
+    let r: number = 0;
+    let g: number = 0;
+    let b: number = 0;
+    let a: number = 255;
+    if (hexFormat.length === 4) {
+      r = parseInt(hexFormat.slice(1, 2).repeat(2), 16);
+      g = parseInt(hexFormat.slice(2, 3).repeat(2), 16);
+      b = parseInt(hexFormat.slice(3).repeat(2), 16);
+    } else if (hexFormat.length === 7) {
+      r = parseInt(hexFormat.slice(1, 3), 16);
+      g = parseInt(hexFormat.slice(3, 5), 16);
+      b = parseInt(hexFormat.slice(5), 16);
+    } else if (hexFormat.length === 5) {
+      a = parseInt(hexFormat.slice(1, 2).repeat(2), 16);
+      r = parseInt(hexFormat.slice(2, 3).repeat(2), 16);
+      g = parseInt(hexFormat.slice(3, 4).repeat(2), 16);
+      b = parseInt(hexFormat.slice(4).repeat(2), 16);
+    } else if (hexFormat.length === 9) {
+      a = parseInt(hexFormat.slice(1, 3), 16);
+      r = parseInt(hexFormat.slice(3, 5), 16);
+      g = parseInt(hexFormat.slice(5, 7), 16);
+      b = parseInt(hexFormat.slice(7), 16);
+    }
+    return new ColorMetrics(r, g, b, a);
+  }
+  blendColor(overlayColor: ColorMetrics): ColorMetrics {
+    const chanels = getUINativeModule().nativeUtils.blendColor(this.toNumeric(), overlayColor.toNumeric());
+    if (chanels === undefined) {
+      throw new TypeError('Invalid color format.');
+    }
+    const red = chanels[0];
+    const green = chanels[1];
+    const blue = chanels[2];
+    const alpha = chanels[3];
+    return new ColorMetrics(red, green, blue, alpha);
+  }
+  get color(): string {
+    return `rgba(${this.red_}, ${this.green_}, ${this.blue_}, ${this.alpha_ / MAX_CHANNEL_VALUE})`;
+  }
+  get red(): number {
+    return this.red_;
+  }
+  get green(): number {
+    return this.green_;
+  }
+  get blue(): number {
+    return this.blue_;
+  }
+  get alpha(): number {
+    return this.alpha_;
+  }
+}
+
 class ShapeMask {
   public rect: Rect | null = null;
   public roundRect: RoundRect | null = null;
@@ -298,7 +448,7 @@ class RenderNode {
       this.frameValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(position.x, 0);
       this.frameValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(position.y, 0);
     }
-    getUINativeModule().common.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y);
+    getUINativeModule().common.setPosition(this.nodePtr, false, this.frameValue.x, this.frameValue.y);
   }
   set rotation(rotation: Vector3) {
     if (rotation === undefined || rotation === null) {

@@ -53,11 +53,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         TAG_LOGW(AceLogTag::ACE_GRID, "size of main axis value is 0, please check");
         return;
     }
-    if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
-        // TODO: use total height of all children as grid's main size when main size of ideal is infinite
-        TAG_LOGW(AceLogTag::ACE_GRID, "size of main axis value is infinity, please check");
-        return;
-    }
+    bool matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(idealSize, axis));
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
     gridLayoutInfo_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(gridLayoutProperty, axis);
@@ -82,7 +78,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     gridLayoutInfo_.lastMainSize_ = mainSize;
     gridLayoutInfo_.lastCrossSize_ = crossSize;
-    AdaptToChildMainSize(layoutWrapper, gridLayoutProperty, mainSize, idealSize);
+    AdaptToChildMainSize(layoutWrapper, gridLayoutProperty, mainSize, idealSize, matchChildren);
 
     // reset offsetEnd after scroll to moveToEndLineIndex_
     gridLayoutInfo_.offsetEnd_ = moveToEndLineIndex_ > 0
@@ -139,38 +135,21 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnVirtualKeyboardHeightChange(Layout
 }
 
 void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrapper,
-    RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, const SizeF& idealSize)
+    RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, SizeF idealSize, bool matchChildren)
 {
     // grid with columnsTemplate/rowsTemplate and maxCount
-    if (!gridLayoutProperty->HasMaxCount()) {
+    if (!matchChildren && !gridLayoutProperty->HasMaxCount()) {
         return;
     }
 
-    std::optional<CalcLength> mainAxisIdealSize;
-    const auto& selfLayoutConstraint = gridLayoutProperty->GetCalcLayoutConstraint();
-    if (selfLayoutConstraint && selfLayoutConstraint->selfIdealSize.has_value()) {
-        mainAxisIdealSize = axis_ == Axis::HORIZONTAL ? selfLayoutConstraint->selfIdealSize->Width()
-                                                      : selfLayoutConstraint->selfIdealSize->Height();
-    }
-
-    if (!mainAxisIdealSize.has_value()) {
-        float lengthOfItemsInViewport = 0;
-        for (auto i = gridLayoutInfo_.startMainLineIndex_; i <= gridLayoutInfo_.endMainLineIndex_; i++) {
-            lengthOfItemsInViewport += (gridLayoutInfo_.lineHeightMap_[i] + mainGap_);
-        }
-        lengthOfItemsInViewport -= mainGap_;
-        auto gridMainSize = std::min(lengthOfItemsInViewport, mainSize);
-        // should use minCount * cellLength ?
-        if (axis_ == Axis::HORIZONTAL) {
-            gridMainSize = std::max(gridMainSize, gridLayoutProperty->GetLayoutConstraint()->minSize.Width());
-            layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(gridMainSize, idealSize.Height()));
-        } else {
-            gridMainSize = std::max(gridMainSize, gridLayoutProperty->GetLayoutConstraint()->minSize.Height());
-            layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(idealSize.Width(), gridMainSize));
-        }
-        gridLayoutInfo_.lastMainSize_ = gridMainSize;
-        TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
-    }
+    auto lengthOfItemsInViewport = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
+    auto gridMainSize = std::min(lengthOfItemsInViewport, mainSize);
+    gridMainSize = std::max(gridMainSize, GetMainAxisSize(gridLayoutProperty->GetLayoutConstraint()->minSize, axis_));
+    idealSize.SetMainSize(gridMainSize, axis_);
+    AddPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    gridLayoutInfo_.lastMainSize_ = gridMainSize;
+    TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
 }
 
 void GridScrollLayoutAlgorithm::UpdateOffsetOnHeightChangeDuringAnimation(LayoutWrapper* layoutWrapper, float mainSize)
@@ -712,7 +691,7 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
             currentIndex++;
         }
     }
-    
+
     if (GreatNotEqual(mainLength, mainSize)) {
         if (IsScrollToEndLine()) {
             TAG_LOGI(AceLogTag::ACE_GRID, "scroll to end line with index:%{public}d", moveToEndLineIndex_);

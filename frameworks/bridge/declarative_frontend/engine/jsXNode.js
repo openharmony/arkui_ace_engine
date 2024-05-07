@@ -765,7 +765,8 @@ class FrameNode {
         return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
     }
     setMeasuredSize(size) {
-        getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), size.width, size.height);
+        getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), Math.max(size.width, 0),
+            Math.max(size.height, 0));
     }
     setLayoutPosition(position) {
         getUINativeModule().frameNode.setLayoutPosition(this.getNodePtr(), position.x, position.y);
@@ -1011,6 +1012,140 @@ class LengthMetrics {
         return new LengthMetrics(value, LengthUnit.LPX);
     }
 }
+const MAX_CHANNEL_VALUE = 0xFF;
+const MAX_ALPHA_VALUE = 1;
+class ColorMetrics {
+    constructor(red, green, blue, alpha = MAX_CHANNEL_VALUE) {
+        this.red_ = ColorMetrics.clamp(red);
+        this.green_ = ColorMetrics.clamp(green);
+        this.blue_ = ColorMetrics.clamp(blue);
+        this.alpha_ = ColorMetrics.clamp(alpha);
+    }
+    static clamp(value) {
+        return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
+    }
+    toNumeric() {
+        return (this.alpha_ << 24) + (this.red_ << 16) + (this.green_ << 8) + this.blue_;
+    }
+    static numeric(value) {
+        const red = (value >> 16) & 0x000000FF;
+        const green = (value >> 8) & 0x000000FF;
+        const blue = value & 0x000000FF;
+        const alpha = (value >> 24) & 0x000000FF;
+        return new ColorMetrics(red, green, blue, alpha);
+    }
+    static rgba(red, green, blue, alpha = MAX_ALPHA_VALUE) {
+        return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
+    }
+    static isRGBOrRGBA(format) {
+        const rgbPattern = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
+        const rgbaPattern = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(\.\d+)?)\s*\)$/i;
+        return rgbPattern.test(format) || rgbaPattern.test(format);
+    }
+    static rgbOrRGBA(format) {
+        const rgbPattern = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
+        const rgbaPattern = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(\.\d+)?)\s*\)$/i;
+        const rgbMatch = rgbPattern.exec(format);
+        const rgbaMatch = rgbaPattern.exec(format);
+        if (rgbMatch) {
+            const [, red, green, blue] = rgbMatch;
+            return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10));
+        }
+        else if (rgbaMatch) {
+            const [, red, green, blue, alpha] = rgbaMatch;
+            return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10), Number.parseFloat(alpha) * MAX_CHANNEL_VALUE);
+        }
+        else {
+            throw new TypeError('Invalid color format.');
+        }
+    }
+    static resourceColor(color) {
+        let chanels = [];
+        if (typeof color === 'object') {
+            chanels = getUINativeModule().nativeUtils.parseResourceColor(color);
+            if (chanels === undefined) {
+                throw new TypeError('Invalid color format.');
+            }
+            const red = chanels[0];
+            const green = chanels[1];
+            const blue = chanels[2];
+            const alpha = chanels[3];
+            return new ColorMetrics(red, green, blue, alpha);
+        }
+        else if (typeof color === 'number') {
+            return ColorMetrics.numeric(color);
+        }
+        else if (typeof color === 'string') {
+            if (ColorMetrics.isHexFormat(color)) {
+                return ColorMetrics.hex(color);
+            }
+            else {
+                return ColorMetrics.rgbOrRGBA(color);
+            }
+        }
+        else {
+            throw new TypeError('Invalid color format.');
+        }
+    }
+    static isHexFormat(format) {
+        return /#(([0-9A-Fa-f]{3})|([0-9A-Fa-f]{6})|([0-9A-Fa-f]{4})|([0-9A-Fa-f]{8}))/.test(format);
+    }
+    static hex(hexFormat) {
+        let r = 0;
+        let g = 0;
+        let b = 0;
+        let a = 255;
+        if (hexFormat.length === 4) {
+            r = parseInt(hexFormat.slice(1, 2).repeat(2), 16);
+            g = parseInt(hexFormat.slice(2, 3).repeat(2), 16);
+            b = parseInt(hexFormat.slice(3).repeat(2), 16);
+        }
+        else if (hexFormat.length === 7) {
+            r = parseInt(hexFormat.slice(1, 3), 16);
+            g = parseInt(hexFormat.slice(3, 5), 16);
+            b = parseInt(hexFormat.slice(5), 16);
+        }
+        else if (hexFormat.length === 5) {
+            a = parseInt(hexFormat.slice(1, 2).repeat(2), 16);
+            r = parseInt(hexFormat.slice(2, 3).repeat(2), 16);
+            g = parseInt(hexFormat.slice(3, 4).repeat(2), 16);
+            b = parseInt(hexFormat.slice(4).repeat(2), 16);
+        }
+        else if (hexFormat.length === 9) {
+            a = parseInt(hexFormat.slice(1, 3), 16);
+            r = parseInt(hexFormat.slice(3, 5), 16);
+            g = parseInt(hexFormat.slice(5, 7), 16);
+            b = parseInt(hexFormat.slice(7), 16);
+        }
+        return new ColorMetrics(r, g, b, a);
+    }
+    blendColor(overlayColor) {
+        const chanels = getUINativeModule().nativeUtils.blendColor(this.toNumeric(), overlayColor.toNumeric());
+        if (chanels === undefined) {
+            throw new TypeError('Invalid color format.');
+        }
+        const red = chanels[0];
+        const green = chanels[1];
+        const blue = chanels[2];
+        const alpha = chanels[3];
+        return new ColorMetrics(red, green, blue, alpha);
+    }
+    get color() {
+        return `rgba(${this.red_}, ${this.green_}, ${this.blue_}, ${this.alpha_ / MAX_CHANNEL_VALUE})`;
+    }
+    get red() {
+        return this.red_;
+    }
+    get green() {
+        return this.green_;
+    }
+    get blue() {
+        return this.blue_;
+    }
+    get alpha() {
+        return this.alpha_;
+    }
+}
 class ShapeMask {
     constructor() {
         this.rect = null;
@@ -1127,7 +1262,7 @@ class RenderNode {
             this.frameValue.x = this.checkUndefinedOrNullWithDefaultValue(position.x, 0);
             this.frameValue.y = this.checkUndefinedOrNullWithDefaultValue(position.y, 0);
         }
-        getUINativeModule().common.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y);
+        getUINativeModule().common.setPosition(this.nodePtr, false, this.frameValue.x, this.frameValue.y);
     }
     set rotation(rotation) {
         if (rotation === undefined || rotation === null) {

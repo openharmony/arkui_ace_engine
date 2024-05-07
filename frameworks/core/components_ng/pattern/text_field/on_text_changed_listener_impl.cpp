@@ -395,7 +395,7 @@ int32_t OnTextChangedListenerImpl::ReceivePrivateCommand(
     const std::unordered_map<std::string, MiscServices::PrivateDataValue> &privateCommand)
 {
     AutoFillReceivePrivateCommand(privateCommand);
-    int32_t ret = MiscServices::ErrorCode::ERROR_BAD_PARAMETERS;
+    int32_t ret = MiscServices::ErrorCode::NO_ERROR;
     if (privateCommand.empty()) {
         return ret;
     }

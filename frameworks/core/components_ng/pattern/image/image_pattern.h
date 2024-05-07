@@ -120,6 +120,7 @@ public:
 
     void SetImageQuality(AIImageQuality imageQuality)
     {
+        isImageQualityChange_ = (imageQuality_ != imageQuality);
         imageQuality_ = imageQuality;
     }
 
@@ -291,9 +292,12 @@ public:
         isImageAnimator_ = isImageAnimator;
     }
 
+    void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
+    void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
 
 private:
@@ -430,6 +434,7 @@ private:
 
     bool syncLoad_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
+    bool isImageQualityChange_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;
@@ -456,6 +461,8 @@ private:
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
     bool hasSizeChanged = false;
+
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

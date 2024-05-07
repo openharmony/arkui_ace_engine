@@ -1976,7 +1976,7 @@ void DragEventActuator::ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonValu
     arkExtraInfoJson->Put("drag_shadow_OffsetX", shadow.GetOffset().GetX());
     arkExtraInfoJson->Put("drag_shadow_OffsetY", shadow.GetOffset().GetY());
     arkExtraInfoJson->Put("shadow_mask", shadow.GetShadowType() == ShadowType::BLUR);
-    int64_t argb = shadow.GetColor().GetValue();
+    int32_t argb = static_cast<int32_t>(shadow.GetColor().GetValue());
     arkExtraInfoJson->Put("drag_shadow_argb", argb);
     int64_t strategy = static_cast<int64_t>(shadow.GetShadowColorStrategy());
     arkExtraInfoJson->Put("shadow_color_strategy", strategy);
@@ -2006,7 +2006,16 @@ void DragEventActuator::PrepareRadiusParametersForDragData(const RefPtr<FrameNod
     auto borderRadius = dragPreviewOption.options.borderRadius;
     if (borderRadius.has_value()) {
         if (borderRadius.value().radiusTopLeft.has_value()) {
-            arkExtraInfoJson->Put("drag_corner_radius", borderRadius.value().radiusTopLeft.value().Value());
+            arkExtraInfoJson->Put("drag_corner_radius1", borderRadius.value().radiusTopLeft.value().Value());
+        }
+        if (borderRadius.value().radiusTopRight.has_value()) {
+            arkExtraInfoJson->Put("drag_corner_radius2", borderRadius.value().radiusTopRight.value().Value());
+        }
+        if (borderRadius.value().radiusBottomRight.has_value()) {
+            arkExtraInfoJson->Put("drag_corner_radius3", borderRadius.value().radiusBottomRight.value().Value());
+        }
+        if (borderRadius.value().radiusBottomLeft.has_value()) {
+            arkExtraInfoJson->Put("drag_corner_radius4", borderRadius.value().radiusBottomLeft.value().Value());
         }
     }
 }

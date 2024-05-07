@@ -165,7 +165,6 @@ private:
     double newDistance_ = 0.0;
     PanDirection newDirection_;
     bool isFlushTouchEventsEnd_ = false;
-    InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     bool isForDrag_ = false;
     bool isAllowMouse_ = true;
 };

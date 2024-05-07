@@ -276,27 +276,23 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
     params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     params[1] = param;
     RefPtr<NG::UINode> node;
+    RefPtr<NG::NavDestinationGroupNode> desNode;
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
-    if (LoadCurrentDestinationBuilder(name, param, customNode) != ERROR_CODE_NO_ERROR) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load current destination builder failed: %{public}s", name.c_str());
+    int32_t errorCode = LoadDestination(name, param, customNode, node, desNode);
+    if (errorCode != ERROR_CODE_NO_ERROR) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
         return AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
     }
-    node = NG::ViewStackProcessor::GetInstance()->Finish();
-    RefPtr<NG::NavDestinationGroupNode> desNode;
-    if (GetNavDestinationNodeInUINode(node, desNode)) {
-        auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
-        if (pattern) {
-            pattern->SetName(name);
-            pattern->SetIndex(index);
-            auto onPop = GetOnPopByIndex(index);
-            auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
-            pattern->SetNavPathInfo(pathInfo);
-            pattern->SetNavigationStack(WeakClaim(this));
-        }
-        return node;
+    auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+    if (pattern) {
+        pattern->SetName(name);
+        pattern->SetIndex(index);
+        auto onPop = GetOnPopByIndex(index);
+        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
+        pattern->SetNavPathInfo(pathInfo);
+        pattern->SetNavigationStack(WeakClaim(this));
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
-    return AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
+    return node;
 }
 
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
@@ -313,19 +309,14 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Rou
     params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     params[1] = param;
     RefPtr<NG::UINode> node;
-    NG::ScopedViewStackProcessor scopedViewStackProcessor;
-    if (LoadCurrentDestinationBuilder(name, param, customNode) != ERROR_CODE_NO_ERROR) {
-        TAG_LOGE(
-            AceLogTag::ACE_NAVIGATION, "load destination builder failed: %{public}s", jsRouteInfo->GetName().c_str());
-            return DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
-    }
-    node = NG::ViewStackProcessor::GetInstance()->Finish();
     RefPtr<NG::NavDestinationGroupNode> desNode;
-    if (GetNavDestinationNodeInUINode(node, desNode)) {
+    int32_t errorCode = LoadDestination(name, param, customNode, node, desNode);
+    if (errorCode == ERROR_CODE_NO_ERROR) {
         auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
         if (pattern) {
             auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param);
             pattern->SetNavPathInfo(pathInfo);
+            pattern->SetName(name);
             pattern->SetNavigationStack(WeakClaim(this));
         }
         return node;
@@ -633,32 +624,27 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
     auto pathName = navPathInfo->GetProperty("name");
     auto param = navPathInfo->GetProperty("param");
     JSRef<JSVal> params[ARGC_COUNT_TWO] = { pathName, param };
+    auto name = pathName->ToString();
     RefPtr<NG::UINode> node;
-    NG::ScopedViewStackProcessor scopedViewStackProcessor;
     auto navigationNode = AceType::DynamicCast<NG::NavigationGroupNode>(navigationNode_.Upgrade());
     CHECK_NULL_RETURN(navigationNode, ERROR_CODE_INTERNAL_ERROR);
     auto navigationPattern = AceType::DynamicCast<NG::NavigationPattern>(navigationNode->GetPattern());
     CHECK_NULL_RETURN(navigationPattern, ERROR_CODE_INTERNAL_ERROR);
-    int32_t ret = LoadCurrentDestinationBuilder(pathName->ToString(), param, navigationPattern->GetParentCustomNode());
-    if (ret != ERROR_CODE_NO_ERROR) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load current destination builder failed: %{public}s",
-            pathName->ToString().c_str());
-        return ret;
-    }
-    node = NG::ViewStackProcessor::GetInstance()->Finish();
     RefPtr<NG::NavDestinationGroupNode> desNode;
-    if (GetNavDestinationNodeInUINode(node, desNode)) {
-        auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
-        if (pattern) {
-            auto onPop = navPathInfo->GetProperty("onPop");
-            auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(pathName->ToString(), param, onPop);
-            pattern->SetNavPathInfo(pathInfo);
-            pattern->SetNavigationStack(WeakClaim(this));
-        }
-        SaveNodeToPreBuildList(pathName->ToString(), param, node);
-        return ERROR_CODE_NO_ERROR;
+    int32_t errorCode = LoadDestination(name, param, navigationPattern->GetParentCustomNode(),
+        node, desNode);
+    if (errorCode != ERROR_CODE_NO_ERROR) {
+        return errorCode;
     }
-    return ERROR_CODE_DESTINATION_NOT_FOUND;
+    auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+    if (pattern) {
+        auto onPop = navPathInfo->GetProperty("onPop");
+        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
+        pattern->SetNavPathInfo(pathInfo);
+        pattern->SetNavigationStack(WeakClaim(this));
+    }
+    SaveNodeToPreBuildList(name, param, node);
+    return ERROR_CODE_NO_ERROR;
 }
 
 bool JSNavigationStack::GetFlagByIndex(int32_t index) const
@@ -760,19 +746,32 @@ bool JSNavigationStack::CheckAndGetInterceptionFunc(const std::string& name, JSR
     return true;
 }
 
-int32_t JSNavigationStack::LoadCurrentDestinationBuilder(
-    const std::string& name, const JSRef<JSVal>& param, const WeakPtr<NG::UINode>& customNode)
+bool JSNavigationStack::LoadDestinationByBuilder(const std::string& name, const JSRef<JSVal>& param,
+    RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
-    int res = ERROR_CODE_NO_ERROR;
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, ERROR_CODE_INTERNAL_ERROR);
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
     const int8_t paramSize = 2;
-    if (!navDestBuilderFunc_->IsEmpty()) {
-        JSRef<JSVal> params[paramSize];
-        params[0] = JSRef<JSVal>::Make(ToJSValue(name));
-        params[1] = param;
-        navDestBuilderFunc_->Call(JSRef<JSObject>(), paramSize, params);
-        return res;
+    if (navDestBuilderFunc_->IsEmpty()) {
+        return false;
     }
+    JSRef<JSVal> params[paramSize];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(name));
+    params[1] = param;
+    navDestBuilderFunc_->Call(JSRef<JSObject>(), paramSize, params);
+    node = NG::ViewStackProcessor::GetInstance()->Finish();
+    return GetNavDestinationNodeInUINode(node, desNode);
+}
+
+int32_t JSNavigationStack::LoadDestination(const std::string& name, const JSRef<JSVal>& param,
+    const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node,
+    RefPtr<NG::NavDestinationGroupNode>& desNode)
+{
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
+    // execute navdestination attribute builder
+    if (LoadDestinationByBuilder(name, param, node, desNode)) {
+        return ERROR_CODE_NO_ERROR;
+    }
+    // deal route config and execute route config builder
     auto container = Container::Current();
     auto navigationRoute = container->GetNavigationRoute();
     if (!navigationRoute->HasLoaded(name)) {
@@ -783,9 +782,9 @@ int32_t JSNavigationStack::LoadCurrentDestinationBuilder(
             return res;
         }
     }
-    auto node = AceType::DynamicCast<NG::CustomNode>(customNode.Upgrade());
-    CHECK_NULL_RETURN(node, ERROR_CODE_INTERNAL_ERROR);
-    auto thisObjTmp = node->FireThisFunc();
+    auto parentCustomNode = AceType::DynamicCast<NG::CustomNode>(customNode.Upgrade());
+    CHECK_NULL_RETURN(parentCustomNode, ERROR_CODE_INTERNAL_ERROR);
+    auto thisObjTmp = parentCustomNode->FireThisFunc();
     CHECK_NULL_RETURN(thisObjTmp, ERROR_CODE_INTERNAL_ERROR);
     JSRef<JSObject> thisObj = *(JSRef<JSObject>*)(thisObjTmp);
     auto engine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(EngineHelper::GetCurrentEngine());
@@ -801,18 +800,21 @@ int32_t JSNavigationStack::LoadCurrentDestinationBuilder(
         return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
     }
     auto builderObj = JSRef<JSObject>::Cast(builderProp);
-    auto lengthProp = builderObj->GetProperty("length");
-    const int32_t number = lengthProp->ToNumber<int32_t>();
+    const int32_t number = builderObj->GetProperty("length")->ToNumber<int32_t>();
     JSRef<JSVal> params[number];
     if (number > 1) {
         params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     }
-    if (number >= paramSize) {
+    if (number >= ARGC_COUNT_TWO) {
         params[1] = param;
     }
     auto builder = JSRef<JSFunc>::Cast(builderProp);
     builder->Call(thisObj, number, params);
-    return res;
+    node = NG::ViewStackProcessor::GetInstance()->Finish();
+    if (!GetNavDestinationNodeInUINode(node, desNode)) {
+        return ERROR_CODE_DESTINATION_NOT_FOUND;
+    }
+    return ERROR_CODE_NO_ERROR;
 }
 
 int32_t JSNavigationStack::GetJsIndexFromNativeIndex(int32_t index)
