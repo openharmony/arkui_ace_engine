@@ -19,7 +19,6 @@
 #include <functional>
 #include <string>
 
-#include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/text_clock/text_clock_controller.h"
@@ -30,7 +29,6 @@
 #include "core/components_ng/pattern/text_clock/text_clock_layout_algorithm.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
-#include "core/components_ng/property/property.h"
 #include "core/event/time/time_change_listener.h"
 
 namespace OHOS::Ace::NG {
@@ -117,6 +115,7 @@ private:
     void RequestUpdateForNextSecond();
     void FireChangeEvent() const;
     std::string GetCurrentFormatDateTime();
+    std::string ParseDateTime(const std::string& dateTimeValue, int32_t week);
     void RegistVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
     static void UpdateTextLayoutProperty(
@@ -150,7 +149,7 @@ private:
     bool isInVisibleArea_ = true;
     bool isForm_ = false;
     std::string prevTime_;
-    std::map<int32_t, TextClockFormatElement> formatElementMap;
+    std::map<int32_t, TextClockFormatElement> formatElementMap_;
     CancelableCallback<void()> delayTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextClockPattern);
