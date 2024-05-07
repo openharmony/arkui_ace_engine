@@ -96,6 +96,7 @@ void ScrollablePattern::SetAxis(Axis axis)
         return;
     }
     axis_ = axis;
+    SetParentScrollable();
     if (scrollBar_) {
         auto positionMode = GetPositionMode();
         scrollBar_->SetPositionMode(positionMode);
