@@ -882,6 +882,7 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 #endif
 }
 
+#ifdef OHOS_PLATFORM
 void XComponentPattern::ReportSlideToRss()
 {
     auto host = GetHost();
@@ -902,7 +903,6 @@ void XComponentPattern::ReportSlideToRss()
         "xcomponent_pattern_slide_off");
 }
 
-#ifdef OHOS_PLATFORM
 float XComponentPattern::GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo,
     OH_NativeXComponent_TouchEvent upEventInfo)
 {
