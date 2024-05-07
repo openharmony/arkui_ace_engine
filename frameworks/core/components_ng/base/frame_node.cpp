@@ -1905,6 +1905,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
 {
     bool isInChildRegion = false;
     auto paintRect = renderContext_->GetPaintRectWithoutTransform();
+    auto paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
     auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -1913,7 +1914,9 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
     renderContext->GetPointWithRevert(revertPoint);
     auto subRevertPoint = revertPoint - paintRect.GetOffset();
     auto clip = renderContext->GetClipEdge().value_or(false);
-    if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable()) {
+    if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable() ||
+        NearZero(paintRectWithTransform.Width() ||
+        NearZero(paintRectWithTransform.Height()))) {
         if (clip) {
             LOGD("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
             return true;
