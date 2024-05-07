@@ -275,6 +275,7 @@ void RichEditorModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCom
 
 void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)
 {
+    CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillChange(std::move(func));
@@ -282,6 +283,7 @@ void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChang
 
 void RichEditorModelNG::SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func)
 {
+    CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidChange(std::move(func));

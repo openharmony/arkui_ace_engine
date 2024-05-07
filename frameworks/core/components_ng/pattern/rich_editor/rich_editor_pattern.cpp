@@ -150,12 +150,78 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     SetSpanItemChildren(spans);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ProcessStyledString();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void RichEditorPattern::UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems)
 {
     SetSpanItemChildren(spanItems);
+    ProcessStyledString();
+}
+
+void RichEditorPattern::ProcessStyledString()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->Clean();
+    for (const auto& span : spans_) {
+        auto imageSpan = DynamicCast<ImageSpanItem>(span);
+        if (imageSpan) {
+            MountImageNode(imageSpan);
+        }
+    }
+}
+
+void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto pattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSyncLoad(true);
+    auto index = host->GetChildren().size();
+    imageNode->MountToParent(host, index);
+    CHECK_NULL_VOID(imageItem);
+    auto options = imageItem->options;
+    SetImageLayoutProperty(imageNode, options);
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    imageNode->MarkModifyDone();
+    imageItem->imageNodeId = imageNode->GetId();
+    imageNode->SetImageItem(imageItem);
+}
+
+void RichEditorPattern::SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options)
+{
+    CHECK_NULL_VOID(imageNode);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    std::function<ImageSourceInfo()> createSourceInfoFunc = CreateImageSourceInfo(options);
+    imageLayoutProperty->UpdateImageSourceInfo(createSourceInfoFunc());
+    CHECK_NULL_VOID(options.imageAttribute.has_value());
+    auto imgAttr = options.imageAttribute.value();
+    if (imgAttr.size.has_value()) {
+        imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
+    }
+    if (imgAttr.verticalAlign.has_value()) {
+        imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
+    }
+    if (imgAttr.objectFit.has_value()) {
+        imageLayoutProperty->UpdateImageFit(imgAttr.objectFit.value());
+    }
+    if (imgAttr.marginProp.has_value()) {
+        imageLayoutProperty->UpdateMargin(imgAttr.marginProp.value());
+    }
+    if (imgAttr.paddingProp.has_value()) {
+        imageLayoutProperty->UpdatePadding(imgAttr.paddingProp.value());
+    }
+    if (imgAttr.borderRadius.has_value()) {
+        auto imageRenderCtx = imageNode->GetRenderContext();
+        imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
+        imageRenderCtx->SetClipToBounds(true);
+    }
 }
 
 void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue)
@@ -473,7 +539,6 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     auto pattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_RETURN(pattern, -1);
     pattern->SetSyncLoad(true);
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     int32_t insertIndex = options.offset.value_or(GetTextContentLength());
     insertIndex = std::min(insertIndex, GetTextContentLength());
     RichEditorChangeValue changeValue;
@@ -499,28 +564,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
     }
     imageNode->MountToParent(host, spanIndex);
-    std::function<ImageSourceInfo()> createSourceInfoFunc = CreateImageSourceInfo(options);
-    imageLayoutProperty->UpdateImageSourceInfo(createSourceInfoFunc());
-    if (options.imageAttribute.has_value()) {
-        auto imgAttr = options.imageAttribute.value();
-        if (imgAttr.size.has_value()) {
-            imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
-        }
-        if (imgAttr.verticalAlign.has_value()) {
-            imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
-        }
-        if (imgAttr.objectFit.has_value()) {
-            imageLayoutProperty->UpdateImageFit(imgAttr.objectFit.value());
-        }
-        if (imgAttr.marginProp.has_value()) {
-            imageLayoutProperty->UpdateMargin(imgAttr.marginProp.value());
-        }
-        if (imgAttr.borderRadius.has_value()) {
-            auto imageRenderCtx = imageNode->GetRenderContext();
-            imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
-            imageRenderCtx->SetClipToBounds(true);
-        }
-    }
+    SetImageLayoutProperty(imageNode, options);
     if (isPaste) {
         isTextChange_ = true;
         moveDirection_ = MoveDirection::FORWARD;

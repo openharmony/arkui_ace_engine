@@ -33,10 +33,8 @@ int32_t RichEditorBaseController::GetCaretOffset()
 bool RichEditorBaseController::SetCaretOffset(int32_t caretPosition)
 {
     auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        return richEditorPattern->SetCaretOffset(caretPosition);
-    }
-    return false;
+    CHECK_NULL_RETURN(richEditorPattern, false);
+    return richEditorPattern->SetCaretOffset(caretPosition);
 }
 
 void RichEditorBaseController::SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle)
@@ -49,9 +47,8 @@ void RichEditorBaseController::SetTypingStyle(struct UpdateSpanStyle& typingStyl
 void RichEditorBaseController::CloseSelectionMenu()
 {
     auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        richEditorPattern->CloseSelectionMenu();
-    }
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->CloseSelectionMenu();
 }
 
 bool RichEditorBaseController::IsEditing()
@@ -64,8 +61,15 @@ bool RichEditorBaseController::IsEditing()
 void RichEditorBaseController::StopEditing()
 {
     auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        richEditorPattern->StopEditing();
-    }
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->StopEditing();
+}
+
+void RichEditorBaseController::SetSelection(
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
 }
 } // namespace OHOS::Ace::NG
