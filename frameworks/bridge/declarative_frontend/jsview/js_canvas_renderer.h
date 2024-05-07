@@ -179,7 +179,6 @@ public:
 
     double GetDensity()
     {
-        ContainerScope scope(instanceId_);
         return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
     }
 
