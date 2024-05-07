@@ -25,7 +25,7 @@ build_component_ng("xcomponent_pattern_ng") {
 
   if (is_ohos_standard_system) {
     deps = [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
-    external_deps += [
+    external_deps = [
       "c_utils:utils",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
