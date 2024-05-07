@@ -67,16 +67,6 @@
         }                          \
     } while (0)                    \
 
-#define CHECK_NULL_RETURN_LAYOUT_TRACE_END(ptr, ret) \
-    do {                                  \
-        if (!(ptr)) {                     \
-            if (SystemProperties::GetLayoutTraceEnabled() && AceTraceEnabled()) { \
-                AceTraceEnd();            \
-            }                             \
-            return ret;                   \
-        }                                 \
-    } while (0)                           \
-
 #define ACE_FUNCTION_TRACE() ACE_SCOPED_TRACE(__func__)
 
 #define ACE_COUNT_TRACE(count, fmt, ...) AceCountTraceWidthArgs(count, fmt, ##__VA_ARGS__)
