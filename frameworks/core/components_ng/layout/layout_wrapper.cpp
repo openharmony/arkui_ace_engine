@@ -173,14 +173,15 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
         CHECK_NULL_VOID(safeAreaManager);
         if (!(host->GetId() == safeAreaManager->GetRootMeasureNodeId() && geometryTransition != nullptr) &&
             CheckValidSafeArea()) {
-            ACE_LAYOUT_SCOPED_TRACE("ExpandSafeArea[%s][self:%d] save cache success res %s", host->GetTag().c_str(),
+            ACE_LAYOUT_TRACE_BEGIN("ExpandSafeArea[%s][self:%d] save cache success res %s", host->GetTag().c_str(),
                 host->GetId(), GetGeometryNode()->GetFrameRect().ToString().c_str());
             auto syncCasheSuccess = GetGeometryNode()->RestoreCache();
             auto renderContext = host->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
+            CHECK_NULL_VOID_LAYOUT_TRACE_END(renderContext);
             if (syncCasheSuccess) {
                 renderContext->SavePaintRect();
             }
+            ACE_LAYOUT_TRACE_END()
         }
         return;
     }
