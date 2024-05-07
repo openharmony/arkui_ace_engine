@@ -56,6 +56,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 #ifdef OHOS_PLATFORM
+constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 constexpr double INFLEXION = 0.35;
 constexpr double FLING_FRICTION = 0.002;
 constexpr double GRAVITY = 9.8;
@@ -860,6 +861,12 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 #ifdef OHOS_PLATFORM
     // increase cpu frequency
     if (touchType == TouchType::MOVE) {
+        auto currentTime = GetSysTimestamp();
+        auto increaseCpuTime = currentTime - startIncreaseTime_;
+        if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
+            startIncreaseTime_ = currentTime;
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        }
         lastTouchInfo_ = touchEventPoint_;
     } else if (touchType == TouchType::UP) {
         ReportSlideToRss();
