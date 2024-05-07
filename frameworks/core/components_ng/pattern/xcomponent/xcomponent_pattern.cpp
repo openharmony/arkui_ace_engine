@@ -294,8 +294,10 @@ void XComponentPattern::RequestFocus()
 void XComponentPattern::OnAttachToFrameNode()
 {
     Initialize();
+#ifdef OHOS_PLATFORM
     dpi_ = PipelineBase::GetCurrentDensity() * 160;
     physicalCoeff_ = GRAVITY * INCH_UNIT * dpi_ * TUNNING_FACTOR;
+#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
