@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 96
+#define ARKUI_FULL_API_VERSION 97
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 96
+#define ARKUI_NODE_API_VERSION 97
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -1861,6 +1861,7 @@ struct ArkUISwiperModifier {
     ArkUI_Float32 (*getSwiperNextMargin)(ArkUINodeHandle node, ArkUI_Int32 unit);
     void (*setSwiperIndicatorStyle)(ArkUINodeHandle node, ArkUISwiperIndicator* swiperIndicator);
     void (*getSwiperIndicator)(ArkUINodeHandle node, ArkUISwiperIndicator* swiperIndicator);
+    ArkUINodeHandle (*getSwiperController)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -2247,6 +2248,9 @@ struct ArkUIProgressModifier {
     ArkUI_Float32 (*getProgressTotal)(ArkUINodeHandle node);
     ArkUI_Int32 (*getProgressType)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getProgressColor)(ArkUINodeHandle node);
+    void (*setProgressInitialize)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Float32 total, ArkUI_Int32 progressStyle);
+    void (*resetProgressInitialize)(ArkUINodeHandle node);
 };
 
 struct ArkUIPluginModifier {
