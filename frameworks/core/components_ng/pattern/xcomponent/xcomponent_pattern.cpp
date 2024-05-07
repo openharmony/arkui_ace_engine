@@ -296,8 +296,7 @@ void XComponentPattern::OnAttachToFrameNode()
 {
     Initialize();
 #ifdef OHOS_PLATFORM
-    dpi_ = PipelineBase::GetCurrentDensity() * DPI_DENISTY_RATE;
-    physicalCoeff_ = GRAVITY * INCH_UNIT * dpi_ * TUNNING_FACTOR;
+    physicalCoeff_ = GRAVITY * INCH_UNIT * PipelineBase::GetCurrentDensity() * DPI_DENISTY_RATE * TUNNING_FACTOR;
 #endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
