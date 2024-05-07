@@ -13,16 +13,6 @@
 
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("$ace_root/frameworks/core/components_ng/components.gni")
-
-if (is_ohos_standard_system) {
-  config("ohos_xcomponent_config") {
-    include_dirs = [
-      "//foundation/window/window_manager/interfaces/innerkits/dm",
-      "//foundation/multimedia/image_framework/interfaces/innerkits/include"
-    ]
-  }
-}
-
 build_component_ng("xcomponent_pattern_ng") {
   sources = [
     "xcomponent_controller_ng.cpp",
@@ -33,7 +23,6 @@ build_component_ng("xcomponent_pattern_ng") {
     "xcomponent_pattern.cpp",
   ]
 
-  configs = [ ":ohos_xcomponent_config" ]
 
   if (is_ohos_standard_system) {
     deps = [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
@@ -41,7 +30,7 @@ build_component_ng("xcomponent_pattern_ng") {
       "c_utils:utils",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
-      "window_manager:libwm",
+      "window_manager:libdm",
     ]
   } else if (is_arkui_x) {
     deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
