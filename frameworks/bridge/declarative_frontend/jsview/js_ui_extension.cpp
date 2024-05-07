@@ -356,12 +356,17 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
 
     bool transferringCaller = false;
+    bool densityDpi = false;
     RefPtr<NG::FrameNode> placeholderNode = nullptr;
     if (info.Length() > 1 && info[1]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[1]);
         JSRef<JSVal> transferringCallerValue = obj->GetProperty("isTransferringCaller");
         if (transferringCallerValue->IsBoolean()) {
             transferringCaller = transferringCallerValue->ToBoolean();
+        }
+        JSRef<JSVal> enableDensityDPI = obj->GetProperty("enableDensityDPI");
+        if (enableDensityDPI->IsNumber()) {
+            densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? false :  true;
         }
         do {
             JSRef<JSVal> componentContent = obj->GetProperty("placeholder");
@@ -387,7 +392,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
             placeholderNode = AceType::Claim(frameNode);
         } while (false);
     }
-    UIExtensionModel::GetInstance()->Create(want, placeholderNode, transferringCaller);
+    UIExtensionModel::GetInstance()->Create(want, placeholderNode, transferringCaller, densityDpi);
 }
 
 void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)

@@ -195,6 +195,7 @@ void UIExtensionPattern::OnConnect()
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
+    DispatchFollowHostDensity(GetDensityDpi());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
@@ -816,6 +817,30 @@ void UIExtensionPattern::FireBindModalCallback()
     if (bindModalCallback_) {
         bindModalCallback_();
     }
+}
+
+void UIExtensionPattern::SetDensityDpi(bool densityDpi)
+{
+    densityDpi_ = densityDpi;
+}
+
+void UIExtensionPattern::DispatchFollowHostDensity(bool densityDpi)
+{
+    densityDpi_ = densityDpi;
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->SetDensityDpiImpl(densityDpi_);
+}
+
+void UIExtensionPattern::OnDpiConfigurationUpdate()
+{
+    if(GetDensityDpi()) {
+        DispatchFollowHostDensity(true);
+    }
+}
+
+bool UIExtensionPattern::GetDensityDpi()
+{
+    return densityDpi_;
 }
 
 void UIExtensionPattern::OnVisibleChange(bool visible)

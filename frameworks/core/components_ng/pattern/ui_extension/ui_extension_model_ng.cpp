@@ -69,7 +69,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
 }
 
 void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, const RefPtr<FrameNode>& placeholderNode,
-    bool transferringCaller)
+    bool transferringCaller, bool densityDpi)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -79,6 +79,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, con
     CHECK_NULL_VOID(pattern);
     pattern->SetPlaceholderNode(placeholderNode);
     pattern->UpdateWant(wantWrap);
+    pattern->SetDensityDpi(densityDpi);
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
