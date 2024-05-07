@@ -400,7 +400,7 @@ private:
     int64_t startIncreaseTime_ = 0;
     OH_NativeXComponent_TouchEvent lastTouchInfo_;
     std::atomic<int32_t> slideCount_ {0};
-    int dpi_ = 0;
+    double dpi_ = 0.0;
     double physicalCoeff_ = 0.0;
 #endif
 };

@@ -13,6 +13,7 @@
 
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("$ace_root/frameworks/core/components_ng/components.gni")
+
 build_component_ng("xcomponent_pattern_ng") {
   sources = [
     "xcomponent_controller_ng.cpp",
@@ -29,7 +30,6 @@ build_component_ng("xcomponent_pattern_ng") {
       "c_utils:utils",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
-      "window_manager:libdm",
     ]
   } else if (is_arkui_x) {
     deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]

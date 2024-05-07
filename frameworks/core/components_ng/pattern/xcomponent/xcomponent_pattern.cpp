@@ -43,7 +43,6 @@
 #include "transaction/rs_transaction_proxy.h"
 #include "ui/rs_ext_node_operation.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "display_manager.h"
 #endif
 
 #include "core/components_ng/event/input_event.h"
@@ -295,7 +294,7 @@ void XComponentPattern::RequestFocus()
 void XComponentPattern::OnAttachToFrameNode()
 {
     Initialize();
-    dpi_ = PipelineBase::GetCurrentDensity();
+    dpi_ = PipelineBase::GetCurrentDensity() * 160;
     physicalCoeff_ = GRAVITY * INCH_UNIT * dpi_ * TUNNING_FACTOR;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -861,7 +860,6 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::MOVE) {
         lastTouchInfo_ = touchEventPoint_;
     } else if (touchType == TouchType::UP) {
-        LOGE("flutter test: PipelineBase::GetCurrentDensity() is %{public}lf, OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay()->GetDpi() is %{public}d", PipelineBase::GetCurrentDensity(), OHOS::Rosen::DisplayManager::GetInstance().GetDefaultDisplay()->GetDpi());
         ReportSlideToRss();
     }
 #endif
@@ -889,13 +887,17 @@ void XComponentPattern::ReportSlideToRss()
     auto* context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostDelayedTask([this] {
-        slideCount_ ++;
+    uiTaskExecutor.PostDelayedTask([weakThis = WeakClaim(this)] {
+        auto self = weakThisa.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->slideCount_ ++;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         }, DELAY_TIME, "xcomponent_pattern_slide_on");
-    uiTaskExecutor.PostDelayedTask([this] {
-        slideCount_ --;
-        if (slideCount_.load() == 0) {
+    uiTaskExecutor.PostDelayedTask([weakThis = WeakClaim(this)] {
+        auto self = weakThisa.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->slideCount_ --;
+        if (self->slideCount_.load() == 0) {
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         }
         }, GetFlingDuration(GetUpVelocity(lastTouchInfo_, touchEventPoint_)) + DELAY_TIME,
@@ -916,11 +918,8 @@ float XComponentPattern::GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveIn
 
 int XComponentPattern::GetFlingDuration(float velocity)
 {
-#ifdef ENABLE_ROSEN_BACKEND
-    double l = log(INFLEXION * velocity / (FLING_FRICTION * physicalCoeff_));
-    return std::min((int)(SECOND_UNIT * exp(l / DECEL_MINUS_ONE)), MAX_SLIE_TIME);
-#endif
-    return 0;
+    double splineDeceleration = log(INFLEXION * velocity / (FLING_FRICTION * physicalCoeff_));
+    return std::min((int)(SECOND_UNIT * exp(splineDeceleration / DECEL_MINUS_ONE)), MAX_SLIE_TIME);
 }
 #endif
 
