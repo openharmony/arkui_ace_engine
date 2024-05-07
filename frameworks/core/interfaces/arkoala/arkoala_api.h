@@ -1396,6 +1396,9 @@ struct ArkUICommonModifier {
     void (*resetVisibleAreaChange)(ArkUINodeHandle node);
     void (*resetAreaChange)(ArkUINodeHandle node);
     void (*setBackgroundImagePixelMap)(ArkUINodeHandle node, void* drawableDescriptor, ArkUI_Int32 repeatIndex);
+    void (*setLayoutRect)(ArkUINodeHandle node, ArkUI_Int32* values);
+    void (*getLayoutRect)(ArkUINodeHandle node, ArkUI_Int32* values);
+    void (*resetLayoutRect)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
