@@ -888,13 +888,13 @@ void XComponentPattern::ReportSlideToRss()
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostDelayedTask([weakThis = WeakClaim(this)] {
-        auto self = weakThisa.Upgrade();
+        auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         self->slideCount_ ++;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         }, DELAY_TIME, "xcomponent_pattern_slide_on");
     uiTaskExecutor.PostDelayedTask([weakThis = WeakClaim(this)] {
-        auto self = weakThisa.Upgrade();
+        auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         self->slideCount_ --;
         if (self->slideCount_.load() == 0) {
