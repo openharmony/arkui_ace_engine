@@ -6469,6 +6469,12 @@ void WebDelegate::OnRenderProcessResponding()
         TaskExecutor::TaskType::JS, "ArkUIWebHandleRenderProcessResponding");
 }
 
+std::string WebDelegate::GetSelectInfo() const
+{
+    CHECK_NULL_RETURN(nweb_, std::string());
+    return nweb_->GetSelectInfo();
+}
+
 void WebDelegate::OnShowAutofillPopup(
     const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
 {

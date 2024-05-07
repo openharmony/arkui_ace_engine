@@ -2386,6 +2386,60 @@ void WebPattern::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, i
     }
 }
 
+void WebPattern::SelectCancel() const
+{
+    CHECK_NULL_VOID(menuCallback_);
+    menuCallback_->Cancel();
+}
+
+std::string WebPattern::GetSelectInfo() const
+{
+    CHECK_NULL_RETURN(delegate_, std::string());
+    return delegate_->GetSelectInfo();
+}
+
+void  WebPattern::OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption)
+{
+    menuOptionParam_ = std::move(webMenuOption.menuOption);
+    for (auto& menuOption : menuOptionParam_) {
+        std::function<void(const std::string&)> action = std::move(menuOption.action);
+        menuOption.action = [weak = AceType::WeakClaim(this), action] (
+                                const std::string selectInfo) {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->SelectCancel();
+            std::string selectStr = webPattern->GetSelectInfo();
+            if (action) {
+                action(selectStr);
+            }
+        };
+    }
+}
+
+void WebPattern::UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle)
+{
+    selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
+    isQuickMenuMouseTrigger_ = false;
+    if (selectInfo.isSingleHandle) {
+        selectInfo.firstHandle.isShow = IsTouchHandleShow(insertTouchHandle);
+        selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertTouchHandle);
+        selectInfo.secondHandle.isShow = false;
+    } else {
+        selectInfo.firstHandle.isShow = IsTouchHandleShow(beginTouchHandle);
+        selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(beginTouchHandle);
+        selectInfo.secondHandle.isShow = IsTouchHandleShow(endTouchHandle);
+        selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endTouchHandle);
+        QuickMenuIsNeedNewAvoid(selectInfo, params, beginTouchHandle, endTouchHandle);
+        selectInfo.menuOptionItems = menuOptionParam_;
+    }
+    selectInfo.menuInfo.menuIsShow = true;
+    selectInfo.handleReverse = false;
+}
+
 bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
@@ -2409,20 +2463,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     selectHotZone_ = theme->GetHandleHotZoneRadius().ConvertToPx();
     SelectOverlayInfo selectInfo;
     selectInfo.isSingleHandle = (overlayType == INSERT_OVERLAY);
-    selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
-    isQuickMenuMouseTrigger_ = false;
-    if (selectInfo.isSingleHandle) {
-        selectInfo.firstHandle.isShow = IsTouchHandleShow(insertTouchHandle);
-        selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertTouchHandle);
-        selectInfo.secondHandle.isShow = false;
-    } else {
-        selectInfo.firstHandle.isShow = IsTouchHandleShow(beginTouchHandle);
-        selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(beginTouchHandle);
-        selectInfo.secondHandle.isShow = IsTouchHandleShow(endTouchHandle);
-        selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endTouchHandle);
-        QuickMenuIsNeedNewAvoid(selectInfo, params, beginTouchHandle, endTouchHandle);
-    }
-    selectInfo.menuInfo.menuIsShow = true;
+    UpdateRunQuickMenuSelectInfo(selectInfo, params, insertTouchHandle, beginTouchHandle, endTouchHandle);
     RegisterSelectOverlayCallback(selectInfo, params, callback);
     RegisterSelectOverlayEvent(selectInfo);
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
