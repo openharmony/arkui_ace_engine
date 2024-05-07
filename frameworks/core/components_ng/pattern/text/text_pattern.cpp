@@ -1357,7 +1357,7 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
         }
         auto it = pattern->spans_.begin();
         if (resultObj.spanPosition.spanIndex >= static_cast<int32_t>(pattern->spans_.size())) {
-            std::advance(it, pattern->spans_.size() - 1);
+            std::advance(it, pattern->spans_.size() ? pattern->spans_.size() - 1 : 0);
             TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "resultObj.spanPosition.spanIndex is larger than spans size.");
         } else {
             std::advance(it, resultObj.spanPosition.spanIndex);
@@ -1581,7 +1581,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
         fontFamilyValue += str;
         fontFamilyValue += ",";
     }
-    fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() - 1);
+    fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() ? fontFamilyValue.size() - 1 : 0);
     textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
     textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
@@ -1713,7 +1713,7 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
     for (const auto& color : *symbolColors) {
         symbolColorValue += color.ColorToString() + ",";
     }
-    symbolColorValue = symbolColorValue.substr(0, symbolColorValue.size() - 1);
+    symbolColorValue = symbolColorValue.substr(0, symbolColorValue.size() ? symbolColorValue.size() - 1 : 0);
     symbolSpanStyle.symbolColor = !symbolColorValue.empty() ? symbolColorValue : SYMBOL_COLOR;
     symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToVp();
     symbolSpanStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));

@@ -108,7 +108,8 @@ public:
             }
         } else {
             if (static_cast<size_t>(extend) <= (text.length())) {
-                aroundChar = text[std::min(static_cast<int32_t>(text.length() - 1), extend)];
+                aroundChar =
+                    text[std::min(static_cast<int32_t>(text.length() ? text.length() - 1 : 0), extend)];
             }
         }
         return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;

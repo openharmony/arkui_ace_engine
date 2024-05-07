@@ -450,7 +450,7 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
     for (auto i = 0U; i < drawObscuredRects_.size(); i++) {
         if (!NearEqual(drawObscuredRects_[i].Width(), 0.0f) && !NearEqual(drawObscuredRects_[i].Height(), 0.0f)) {
             currentLineWidth += drawObscuredRects_[i].Width();
-            if (i == drawObscuredRects_.size() - 1) {
+            if (i == (drawObscuredRects_.size() ? drawObscuredRects_.size() - 1 : 0)) {
                 textLineWidth.push_back(currentLineWidth);
                 maxLineCount += LessOrEqual(drawObscuredRects_[i].Bottom(), contentSize_->Get().Height()) ? 1 : 0;
             } else if (!NearEqual(drawObscuredRects_[i].Bottom(), drawObscuredRects_[i + 1].Bottom())) {
