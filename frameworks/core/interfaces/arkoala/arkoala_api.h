@@ -1010,6 +1010,8 @@ struct ArkUISwiperIndicator {
     ArkUIOptionalUint selectedColorValue;
 };
 
+struct ArkUI_StyledString;
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -1574,6 +1576,8 @@ struct ArkUITextModifier {
     void (*setTextSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     ArkUI_Uint32 (*getTextSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*resetTextSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*setTextContentWithStyledString)(ArkUINodeHandle node, ArkUI_StyledString* styledString);
+    void (*resetTextContentWithStyledString)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {

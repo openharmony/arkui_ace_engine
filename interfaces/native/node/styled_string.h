@@ -12,17 +12,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef ARKUI_NATIVE_NODE_STYLED_STRING_H
+#define ARKUI_NATIVE_NODE_STYLED_STRING_H
 
-#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H
-#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H
+#include <stack>
+#include <string>
+#include <vector>
 
-#include "interfaces/native/node/styled_string.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "core/interfaces/native/node/node_api.h"
+struct ArkUI_SpanItem {
+    void* textStyle = nullptr;
+    std::string content;
+    void* placeholder = nullptr;
+};
 
-namespace OHOS::Ace::NG::NodeModifier {
-    const ArkUITextModifier* GetTextModifier();
-    void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam);
-}
+struct ArkUI_StyledString {
+    void* builder = nullptr;
+    void* paragraph = nullptr;
+    void* paragraphStyle = nullptr;
+    std::vector<ArkUI_SpanItem*> items;
+    std::stack<void*> styles;
+};
 
-#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H
+#ifdef __cplusplus
+};
+#endif
+#endif // ARKUI_NATIVE_NODE_STYLED_STRING_H

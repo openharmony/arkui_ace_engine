@@ -1843,6 +1843,19 @@ typedef enum {
      *
      */
     NODE_TEXT_SELECTED_BACKGROUND_COLOR,
+
+    /**
+    * @brief The text component uses a formatted string object to set text content properties,
+    * and supports property setting, property reset, and property acquisition interfaces.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .object indicates ArkUI_StyledString formatted string data. The parameter type is {@link ArkUI_StyledString}. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .object indicates ArkUI_StyledString formatted string data. The parameter type is {@link ArkUI_StyledString}. \n
+    */
+    NODE_TEXT_CONTENT_WITH_STYLED_STRING,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
