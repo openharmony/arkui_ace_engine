@@ -890,13 +890,14 @@ void XComponentPattern::ReportSlideToRss()
     uiTaskExecutor.PostDelayedTask([this] {
         slideCount_ ++;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-        }, DELAY_TIME);
+        }, DELAY_TIME, "xcomponent_pattern_slide_on");
     uiTaskExecutor.PostDelayedTask([this] {
         slideCount_ --;
         if (slideCount_.load() == 0) {
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         }
-        }, GetFlingDuration(GetUpVelocity(lastTouchInfo_, touchEventPoint_)) + DELAY_TIME);
+        }, GetFlingDuration(GetUpVelocity(lastTouchInfo_, touchEventPoint_)) + DELAY_TIME,
+        "xcomponent_pattern_slide_off");
 }
 
 #ifdef OHOS_PLATFORM
