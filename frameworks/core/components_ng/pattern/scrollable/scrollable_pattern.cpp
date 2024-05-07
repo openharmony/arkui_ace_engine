@@ -2028,6 +2028,13 @@ void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velo
 
 void ScrollablePattern::FireOnScrollStart()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(hub);
+    if (scrollStop_ && !GetScrollAbort()) {
+        OnScrollStop(hub->GetOnScrollStop());
+    }
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
         ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
@@ -2039,10 +2046,6 @@ void ScrollablePattern::FireOnScrollStart()
         scrollBar->PlayScrollBarAppearAnimation();
     }
     StopScrollBarAnimatorByProxy();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollableEventHub>();
-    CHECK_NULL_VOID(hub);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
