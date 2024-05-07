@@ -95,13 +95,10 @@ class FrameNode {
     }
     return null;
   }
-  setNodePtr(nativeRef: NativeStrongRef | NativeWeakRef): void {
+  setNodePtr(nativeRef: NativeStrongRef | NativeWeakRef, nodePtr: NodePtr): void {
+    FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
     this._nativeRef = nativeRef;
-    if (nativeRef === null || nativeRef === undefined) {
-      this.resetNodePtr();
-      return;
-    }
-    this.nodePtr_ = this._nativeRef.getNativeHandle();
+    this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
     this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
     if (this._nodeId === -1) {
       return;

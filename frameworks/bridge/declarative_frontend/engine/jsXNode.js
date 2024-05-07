@@ -140,7 +140,7 @@ class JSBuilderNode extends BaseNode {
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
         }
-        this.frameNode_.setNodePtr(this._nativeRef);
+        this.frameNode_.setNodePtr(this._nativeRef, this.nodePtr_);
         this.frameNode_.setRenderNode(this._nativeRef);
         this.frameNode_.setBaseNode(this);
         __JSScopeUtil__.restoreInstanceId();
@@ -486,13 +486,10 @@ class FrameNode {
         }
         return null;
     }
-    setNodePtr(nativeRef) {
+    setNodePtr(nativeRef, nodePtr) {
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nativeRef = nativeRef;
-        if (nativeRef === null || nativeRef === undefined) {
-            this.resetNodePtr();
-            return;
-        }
-        this.nodePtr_ = this._nativeRef.getNativeHandle();
+        this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
         this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
         if (this._nodeId === -1) {
             return;
@@ -1684,7 +1681,7 @@ class XComponentNode extends FrameNode {
         this.xcomponentNode_.registerOnCreateCallback(this.nativeModule_, this.onCreate);
         this.xcomponentNode_.registerOnDestroyCallback(this.nativeModule_, this.onDestroy);
         this.nodePtr_ = this.xcomponentNode_.getFrameNode(this.nativeModule_);
-        this.setNodePtr(getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_));
+        this.setNodePtr(getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_), this.nodePtr_);
     }
     onCreate(event) { }
     onDestroy() { }
