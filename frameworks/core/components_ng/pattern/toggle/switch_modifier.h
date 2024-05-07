@@ -116,7 +116,6 @@ public:
     void PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize);
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const OffsetF& offset) const;
     float GetSwitchWidth(const SizeF& contentSize) const;
-    void DrawFocusBorder(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize);
     void DrawFocusBoard(RSCanvas& canvas, const OffsetF& offset, const SizeF& size, double& actualGap);
     void DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize, double& actualGap);
 

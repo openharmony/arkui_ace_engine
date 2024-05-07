@@ -33,7 +33,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
-const Color TMP_INACTIVE_COLOR = Color(0x337F7F7F);
 } // namespace
 
 SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dragOffsetX)
@@ -80,7 +79,7 @@ void SwitchModifier::InitializeParam()
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     activeColor_ = switchTheme->GetActiveColor();
-    inactiveColor_ = TMP_INACTIVE_COLOR;
+    inactiveColor_ = switchTheme->GetInactiveColor();
     clickEffectColor_ = switchTheme->GetClickEffectColor();
     hoverColor_ = switchTheme->GetHoverColor();
     hoverRadius_ = switchTheme->GetHoverRadius();
@@ -90,33 +89,6 @@ void SwitchModifier::InitializeParam()
     touchDuration_ = switchTheme->GetTouchDuration();
     colorAnimationDuration_ = switchTheme->GetColorAnimationDuration();
     pointAnimationDuration_ = switchTheme->GetPointAnimationDuration();
-}
-
-void SwitchModifier::DrawFocusBorder(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize)
-{
-    if (!isFocused_->Get() || isOn_->Get()) {
-        return;
-    }
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
-    CHECK_NULL_VOID(switchTheme);
-    auto height = contentSize.Height();
-    auto radius = height / 2;
-    RSPoint point;
-    auto actualGap = radiusGap_.ConvertToPx() * height /
-                     (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
-    pointRadius_ = radius - actualGap;
-    point.SetX(contentOffset.GetX() + actualGap + pointRadius_ + pointOffset_->Get());
-    point.SetY(contentOffset.GetY() + radius);
-    RSPen pen;
-    pen.SetWidth(switchTheme->GetBorderWidthFocus().ConvertToPx());
-    pen.SetColor(ToRSColor(switchTheme->GetBorderColorFocus()));
-    pen.SetAntiAlias(true);
-    canvas.AttachPen(pen);
-    canvas.DrawCircle(point, pointRadius_);
-    canvas.DetachPen();
 }
 
 void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize)
@@ -164,9 +136,8 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     hoverBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
     hoverBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
     DrawTouchAndHoverBoard(canvas, hoverBoardOffset);
-    DrawRectCircle(canvas, contentOffset, contentSize, actualGap);
-    DrawFocusBorder(canvas, contentOffset, contentSize);
     DrawFocusBoard(canvas, contentOffset, contentSize, actualGap);
+    DrawRectCircle(canvas, contentOffset, contentSize, actualGap);
 }
 
 void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize,
