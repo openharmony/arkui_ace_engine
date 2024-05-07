@@ -4939,6 +4939,10 @@ class ArkGridComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, GridClipModifier.identity, GridClipModifier, value);
     return this;
   }
+  flingSpeedLimit(value) {
+    modifierWithKey(this._modifiersWithKeys, GridFlingSpeedLimitModifier.identity, GridFlingSpeedLimitModifier, value);
+    return this;
+  }
 
 }
 class GridColumnsTemplateModifier extends ModifierWithKey {
@@ -5247,6 +5251,20 @@ class GridClipModifier extends ModifierWithKey {
   }
 }
 GridClipModifier.identity = Symbol('gridClip');
+class GridFlingSpeedLimitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {    
+      getUINativeModule().grid.resetFlingSpeedLimit(node);
+    }
+    else {
+      getUINativeModule().grid.setFlingSpeedLimit(node, this.value);
+    }
+  }
+}
+GridFlingSpeedLimitModifier.identity = Symbol('gridFlingSpeedLimit');
 // @ts-ignore
 if (globalThis.Grid !== undefined) {
   globalThis.Grid.attributeModifier = function (modifier) {
