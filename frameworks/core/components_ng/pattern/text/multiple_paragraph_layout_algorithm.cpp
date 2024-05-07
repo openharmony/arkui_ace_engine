@@ -415,9 +415,6 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
             if (group.front()->fontStyle->HasFontSize()) {
                 spanParagraphStyle.fontSize = group.front()->fontStyle->GetFontSizeValue().ConvertToPx();
             }
-            if (group.front()->content.length() == 1 && group.front()->content.front() == '\n' && isSpanStringMode_) {
-                spanParagraphStyle.leadingMargin.reset();
-            }
         }
         if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
             if (!paragraphManager_->GetParagraphs().empty()) {
@@ -613,7 +610,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
     auto indentValue = paragraphStyle.indent;
     CHECK_NULL_VOID(paragraph);
     double value = 0.0;
-    if (GreatNotEqual(indentValue.ConvertToPx(), 0.0)) {
+    if (GreatNotEqual(indentValue.Value(), 0.0)) {
         // first line indent
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
