@@ -33,4 +33,10 @@ class ComponentContent extends Content {
   public getNodePtr(): NodePtr {
     return this.builderNode_.getNodePtr();
   }
+  reuse(param: Object): void {
+    this.builderNode_.reuse(param);
+  }
+  recycle(): void {
+    this.builderNode_.recycle();
+  }
 }
