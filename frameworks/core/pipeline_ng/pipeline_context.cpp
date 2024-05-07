@@ -1921,10 +1921,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "TouchEvent Process in ace_container: "
+            "InputTracking id:%{public}d, touchEvent Process in ace_container: "
             "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
             "type=%{public}d",
-            scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
+            scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
     }
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type != TouchType::MOVE && historyPointsById_.find(scalePoint.id) != historyPointsById_.end()) {
