@@ -18,7 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/canvas/rendering_context_2d_model.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
+#include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -116,7 +116,7 @@ public:
 private:
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
 
-    RefPtr<CustomPaintPattern> pattern_;
+    RefPtr<CanvasPattern> pattern_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasRenderingContext2DModelNG);
 };
