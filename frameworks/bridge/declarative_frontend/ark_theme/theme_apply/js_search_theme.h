@@ -34,6 +34,10 @@ public:
         SearchModel::GetInstance()->SetTextColor(themeColors.value().FontPrimary());
         SearchModel::GetInstance()->SetPlaceholderColor(themeColors.value().FontSecondary());
         SearchModel::GetInstance()->SetSearchIconColor(themeColors.value().IconSecondary());
+        SearchModel::GetInstance()->SetCaretColor(themeColors.value().Brand());
+        SearchModel::GetInstance()->SetCancelIconColor(themeColors.value().FontSecondary());
+        SearchModel::GetInstance()->SetSearchButtonFontColor(themeColors.value().FontEmphasize());
+        SearchModel::GetInstance()->SetSelectedBackgroundColor(themeColors.value().Brand());
         ViewAbstractModel::GetInstance()->SetBackgroundColor(themeColors.value().CompBackgroundTertiary());
     }
 };

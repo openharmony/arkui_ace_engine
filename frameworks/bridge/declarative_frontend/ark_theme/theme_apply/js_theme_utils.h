@@ -34,6 +34,9 @@ public:
     static int32_t GetWithThemeId()
     {
         int32_t ret = 0;
+        if (!JSThemeScope::jsThemeScopeEnabled) {
+            return ret;
+        }
         // take theme scope id from js level method
         auto elmId = NG::ViewStackProcessor::GetInstance()->GetNodeIdToAccountFor();
         auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());

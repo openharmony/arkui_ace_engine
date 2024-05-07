@@ -38,19 +38,22 @@ public:
         TextFieldModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary(), false);
         TextFieldModel::GetInstance()->SetTextColor(themeColors->FontPrimary());
         TextFieldModel::GetInstance()->SetPlaceholderColor(themeColors->FontSecondary());
-        TextFieldModel::GetInstance()->SetCaretColor(themeColors->InteractiveFocus());
+        TextFieldModel::GetInstance()->SetCaretColor(themeColors->Brand());
+        TextFieldModel::GetInstance()->SetSelectedBackgroundColor(themeColors->Brand());
         ViewAbstractModel::GetInstance()->SetOuterBorderColor(themeColors->InteractiveFocus());
         ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
 
         // focused
         ViewStackModel::GetInstance()->SetVisualState(VisualState::FOCUSED);
         TextFieldModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary(), false);
+        TextFieldModel::GetInstance()->SetCaretColor(themeColors->Brand());
         CalcDimension outerBorderWidth(JSTextInputTheme::outerBorderWidthPx, OHOS::Ace::DimensionUnit::PX);
         ViewAbstractModel::GetInstance()->SetOuterBorderWidth(outerBorderWidth);
 
         // pressed
         ViewStackModel::GetInstance()->SetVisualState(VisualState::PRESSED);
         TextFieldModel::GetInstance()->SetBackgroundColor(themeColors->InteractivePressed(), false);
+        TextFieldModel::GetInstance()->SetCaretColor(themeColors->Brand());
         ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
 
         // clear state
