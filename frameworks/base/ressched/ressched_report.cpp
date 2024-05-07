@@ -149,11 +149,12 @@ void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
 
 void ResSchedReport::OnTouchEvent(const TouchType& touchType)
 {
-    std::unordered_map<std::string, std::string> payload;
     if (touchType == TouchType::DOWN) {
+        std::unordered_map<std::string, std::string> payload;
         payload[NAME] = TOUCH;
         ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
     } else if (touchType == TouchType::UP) {
+        std::unordered_map<std::string, std::string> payload;
         payload[NAME] = TOUCH;
         ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_UP_EVENT, payload);
     }
