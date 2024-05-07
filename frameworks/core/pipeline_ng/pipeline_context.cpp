@@ -200,14 +200,16 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     CHECK_NULL_VOID(dirtyNode);
     auto customNode = DynamicCast<CustomNode>(dirtyNode);
     if (customNode && !dirtyNode->GetInspectorIdValue("").empty()) {
-        ACE_BUILD_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d][key:%s]",
+        ACE_BUILD_TRACE_BEGIN("AddDirtyCustomNode[%s][self:%d][parent:%d][key:%s]",
             customNode->GetJSViewName().c_str(),
             dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0,
             dirtyNode->GetInspectorIdValue("").c_str());
+        ACE_BUILD_TRACE_END()
     } else if (customNode) {
-        ACE_BUILD_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d]",
+        ACE_BUILD_TRACE_BEGIN("AddDirtyCustomNode[%s][self:%d][parent:%d]",
             customNode->GetJSViewName().c_str(),
             dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0);
+        ACE_BUILD_TRACE_END()
     }
     dirtyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
@@ -219,13 +221,15 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     if (!dirty->GetInspectorIdValue("").empty()) {
-        ACE_BUILD_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]",
+        ACE_BUILD_TRACE_BEGIN("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]",
             dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
             dirty->GetInspectorIdValue("").c_str());
+        ACE_BUILD_TRACE_END()
     } else {
-        ACE_BUILD_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
+        ACE_BUILD_TRACE_BEGIN("AddDirtyLayoutNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
+        ACE_BUILD_TRACE_END()
     }
     taskScheduler_->AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
@@ -247,12 +251,14 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     if (!dirty->GetInspectorIdValue("").empty()) {
-        ACE_BUILD_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
+        ACE_BUILD_TRACE_BEGIN("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
             dirty->GetInspectorIdValue("").c_str());
+        ACE_BUILD_TRACE_END()
     } else {
-        ACE_BUILD_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
+        ACE_BUILD_TRACE_BEGIN("AddDirtyRenderNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
+        ACE_BUILD_TRACE_END()
     }
     taskScheduler_->AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
@@ -1566,11 +1572,13 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
         keyboardHeight += safeAreaManager_->GetSafeHeight();
         float positionY = 0.0f;
+        float textfieldHeight = 0.0f;
         float keyboardPosition = rootHeight_ - keyboardHeight;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
         float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
         if (manager) {
             positionY = static_cast<float>(manager->GetClickPosition().GetY());
+            textfieldHeight = manager->GetHeight();
         }
         if (!NearZero(keyboardOffset)) {
             auto offsetY = keyboardPosition - safeAreaManager_->GetLastKeyboardPoistion();
@@ -1578,10 +1586,11 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         } else {
             if (NearZero(keyboardHeight)) {
                 safeAreaManager_->UpdateKeyboardOffset(0.0f);
-            } else if (LessOrEqual(positionY + safeHeight, rootHeight_ - keyboardHeight)) {
+            } else if (LessOrEqual(positionY + safeHeight + textfieldHeight, rootHeight_ - keyboardHeight)) {
                 safeAreaManager_->UpdateKeyboardOffset(0.0f);
-            } else if (positionY + safeHeight > rootHeight_ - keyboardHeight) {
-                safeAreaManager_->UpdateKeyboardOffset(-(positionY - rootHeight_ + keyboardHeight) - safeHeight);
+            } else if (positionY + safeHeight + textfieldHeight > rootHeight_ - keyboardHeight) {
+                safeAreaManager_->UpdateKeyboardOffset(
+                    -(positionY - rootHeight_ + keyboardHeight)- safeHeight - textfieldHeight);
             } else {
                 safeAreaManager_->UpdateKeyboardOffset(0.0f);
             }

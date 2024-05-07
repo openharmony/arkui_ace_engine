@@ -307,6 +307,14 @@ public:
 
     bool IsInAttachedNode(const TouchEvent& event);
 
+    
+    void SetUserData(void* userData)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetUserData(userData);
+        }
+    }
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {

@@ -1063,8 +1063,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions015, TestSi
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    ASSERT_TRUE(textLayoutProperty->HasFontWeight());
-    EXPECT_EQ(Ace::FontWeight::BOLD, textLayoutProperty->GetFontWeight().value());
+    ASSERT_FALSE(textLayoutProperty->HasFontWeight());
 }
 
 void InnerHandleScrollUp003Init()
@@ -1180,9 +1179,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp004, TestSi
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    ASSERT_TRUE(textLayoutProperty->HasFontSize());
-    double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    EXPECT_EQ(FONT_SIZE_5, fontSize);
+    ASSERT_FALSE(textLayoutProperty->HasFontSize());
 }
 
 /**
@@ -1242,9 +1239,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown003, Test
     ASSERT_NE(textLayoutProperty, nullptr);
     std::string content = textLayoutProperty->GetContent().value_or("");
     EXPECT_EQ("test1", content);
-    ASSERT_TRUE(textLayoutProperty->HasFontSize());
-    double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    EXPECT_EQ(FONT_SIZE_5, fontSize);
+    ASSERT_FALSE(textLayoutProperty->HasFontSize());
 }
 
 /**

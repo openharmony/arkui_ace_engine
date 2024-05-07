@@ -498,8 +498,18 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
 
     Rosen::Drawing::Brush brush;
     brush.SetAntiAlias(true);
-    auto colorType = ImageConverter::PixelFormatToColorType(background_.value()->GetPixelFormat());
-    auto alphaType = ImageConverter::AlphaTypeToAlphaType(background_.value()->GetAlphaType());
+    Rosen::Drawing::ColorType colorType;
+    if (background_.has_value()) {
+        colorType = ImageConverter::PixelFormatToColorType(background_.value()->GetPixelFormat());
+    } else {
+        colorType = ImageConverter::PixelFormatToColorType(Media::PixelFormat::RGBA_8888);
+    }
+    Rosen::Drawing::AlphaType alphaType;
+    if (background_.has_value()) {
+        alphaType = ImageConverter::AlphaTypeToAlphaType(background_.value()->GetAlphaType());
+    } else {
+        alphaType = ImageConverter::AlphaTypeToAlphaType(Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL);
+    }
     Rosen::Drawing::ImageInfo imageInfo(SIDE, SIDE, colorType, alphaType);
     Rosen::Drawing::Bitmap tempCache;
     tempCache.Build(imageInfo);
@@ -528,7 +538,11 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
     // convert bitmap back to pixelMap
     Media::InitializationOptions opts;
-    opts.alphaType = background_.value()->GetAlphaType();
+    if (background_.has_value()) {
+        opts.alphaType = background_.value()->GetAlphaType();
+    } else {
+        opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+    }
     opts.pixelFormat = Media::PixelFormat::BGRA_8888;
     layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<Rosen::Drawing::Bitmap>(tempCache), opts);
     return true;

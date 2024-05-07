@@ -19,6 +19,7 @@
 #include <string>
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
@@ -66,6 +67,7 @@ public:
         ResetSymbolSourceInfo();
         ResetAdaptFontSizeStep();
         ResetTextMarqueeOptions();
+        ResetSelectedBackgroundColor();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -118,6 +120,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ForegroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
 
     // placeholder
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Placeholder, std::string, PROPERTY_UPDATE_MEASURE);
@@ -175,6 +178,7 @@ protected:
         value->propForegroundColor_ = CloneForegroundColor();
         value->propAdaptFontSizeStep_ = CloneAdaptFontSizeStep();
         value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
+        value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
     }
 
 private:

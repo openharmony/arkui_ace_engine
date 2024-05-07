@@ -414,28 +414,6 @@ std::pair<int32_t, int32_t> GridLayoutInfo::FindItemInRange(int32_t target) cons
     return { -1, -1 };
 }
 
-bool GridLayoutInfo::ItemAboveViewport(int32_t idx, float mainGap) const
-{
-    auto [line, _] = FindItemInRange(idx);
-    float len = currentOffset_;
-    for (int i = startMainLineIndex_; i < line; ++i) {
-        len += lineHeightMap_.at(i) + mainGap;
-    }
-    return len < 0.0f;
-}
-
-bool GridLayoutInfo::ItemBelowViewport(int32_t idx, int32_t itemHeight, float mainSize, float mainGap) const
-{
-    auto [line, col] = FindItemInRange(idx);
-
-    float len = currentOffset_;
-    for (int i = startMainLineIndex_; i < line + itemHeight; ++i) {
-        len += lineHeightMap_.at(i) + mainGap;
-    }
-    len -= mainGap;
-    return len > mainSize;
-}
-
 // Use the index to get the line number where the item is located
 bool GridLayoutInfo::GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const
 {
@@ -700,18 +678,24 @@ float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool regular) c
     float len = 0.0f;
     auto it = lineHeightMap_.find(startMainLineIndex_);
     if (!regular) {
-        // skip adding starting lines that are outside viewport in LayoutIrregular
-        float offset = currentOffset_;
-        while (it != lineHeightMap_.end() && Negative(it->second + offset + mainGap)) {
-            offset += it->second + mainGap;
-            ++it;
-        }
+        it = SkipLinesAboveView(mainGap).first;
     }
     auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
     for (; it != endIt; ++it) {
         len += it->second + mainGap;
     }
     return len - mainGap;
+}
+
+std::pair<GridLayoutInfo::HeightMapIt, float> GridLayoutInfo::SkipLinesAboveView(float mainGap) const
+{
+    auto it = lineHeightMap_.find(startMainLineIndex_);
+    float offset = currentOffset_;
+    while (it != lineHeightMap_.end() && Negative(it->second + offset + mainGap)) {
+        offset += it->second + mainGap;
+        ++it;
+    }
+    return { it, offset };
 }
 
 float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, float mainGap) const

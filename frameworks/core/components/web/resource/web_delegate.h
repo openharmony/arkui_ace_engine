@@ -844,6 +844,7 @@ public:
 #endif
     void SetToken();
     void SetRenderMode(RenderMode renderMode);
+    void SetFitContentMode(WebLayoutMode layoutMode);
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
@@ -1013,6 +1014,7 @@ private:
     EventCallbackV2 onRenderProcessRespondingV2_;
 
     int32_t renderMode_;
+    int32_t layoutMode_;
     std::string bundlePath_;
     std::string bundleDataPath_;
     std::string hapPath_;

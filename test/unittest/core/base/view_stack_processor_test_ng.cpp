@@ -17,6 +17,10 @@
 #define protected public
 #define private public
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -36,7 +40,22 @@ const auto FRAME_NODE_ROOT = FrameNode::CreateFrameNode(TAG_ROOT, 1, MOCK_PATTER
 const auto FRAME_NODE_CHILD = FrameNode::CreateFrameNode(TAG_CHILD, 2, MOCK_PATTERN_ROOT, false);
 }; // namespace
 
-class ViewStackProcessorTestNg : public testing::Test {};
+class ViewStackProcessorTestNg : public testing::Test {
+public:
+    static void SetUpTestSuite()
+    {
+        MockPipelineContext::SetUp();
+        MockContainer::SetUp();
+        MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+        MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+        MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
+    }
+    static void TearDownTestSuite()
+    {
+        MockPipelineContext::TearDown();
+        MockContainer::TearDown();
+    }
+};
 
 /**
  * @tc.name: ViewStackProcessorTestNg001
@@ -194,10 +213,13 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg006, TestSize.Level1)
     /**
      * @tc.steps: step2. Create some node
      */
+    auto pipe = MockPipelineContext::GetCurrent();
     const auto root = FrameNode::CreateFrameNode(TAG_CHILD, 0, AceType::MakeRefPtr<RootPattern>(), true);
-    root->onMainTree_ = false;
-    const auto child = FrameNode::CreateFrameNode(TAG_CHILD, 1, AceType::MakeRefPtr<RootPattern>(), true);
-    const auto child2 = FrameNode::CreateFrameNode(TAG_CHILD, 2, AceType::MakeRefPtr<Pattern>(), true);
+    const auto child = FrameNode::CreateFrameNode(TAG_CHILD, 3, AceType::MakeRefPtr<RootPattern>(), true);
+    const auto child2 = FrameNode::CreateFrameNode(TAG_CHILD, 4, AceType::MakeRefPtr<Pattern>(), true);
+    root->context_ = AceType::RawPtr(pipe);
+    child->context_ = AceType::RawPtr(pipe);
+    child2->context_ = AceType::RawPtr(pipe);
     /**
      * @tc.steps: step3. Push root into container
      * @tc.expected: Pop failed elementsStack_ size still 1.
@@ -209,6 +231,7 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg006, TestSize.Level1)
      * @tc.steps: step4. pop root and put FRAME_NODE_ROOT into container
      * @tc.expected: Pop failed elementsStack_ size still 1.
      */
+    FRAME_NODE_ROOT->context_ = AceType::RawPtr(pipe);
     instance->elementsStack_.pop();
     instance->Push(FRAME_NODE_ROOT);
     instance->PopContainer();

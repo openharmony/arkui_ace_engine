@@ -68,7 +68,7 @@ void SliderPattern::OnModifyDone()
     sliderInteractionMode_ =
         sliderPaintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK);
     minResponse_ = sliderPaintProperty->GetMinResponsiveDistance().value_or(0.0f);
-    UpdateCircleCenterOffset();
+    UpdateToValidValue();
     UpdateBlock();
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
@@ -318,6 +318,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
             return;
         }
         fingerId_ = -1;
+        UpdateToValidValue();
         if (bubbleFlag_ && !isFocusActive_) {
             bubbleFlag_ = false;
         }
@@ -507,6 +508,47 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     sliderPaintProperty->UpdateValue(value_);
     valueChangeFlag_ = !NearEqual(oldValue, value_);
     UpdateCircleCenterOffset();
+}
+
+void SliderPattern::UpdateToValidValue()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+
+    float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+    float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
+    float oldValue = value_;
+    auto value = sliderPaintProperty->GetValueValue(value_);
+    value_ = GetValueInValidRange(sliderPaintProperty, value, min, max);
+    valueRatio_ = (value_ - min) / (max - min);
+    sliderPaintProperty->UpdateValue(value_);
+    valueChangeFlag_ = !NearEqual(oldValue, value_);
+    UpdateCircleCenterOffset();
+    UpdateBubble();
+}
+
+float SliderPattern::GetValueInValidRange(
+    const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max)
+{
+    CHECK_NULL_RETURN(paintProperty, value);
+    if (paintProperty->GetValidSlideRange().has_value()) {
+        auto range = paintProperty->GetValidSlideRange().value();
+        if (range->HasValidValues()) {
+            auto fromValue = range->GetFromValue();
+            auto toValue = range->GetToValue();
+            float step = stepRatio_ * (max - min);
+            if (NearEqual(step, 0.0f)) {
+                step = 1.0f;
+            }
+            auto toValueCorrection = NearEqual(toValue - step * static_cast<int>(toValue / step), 0) ? 0 : 1;
+            fromValue = LessOrEqual(fromValue, min) ? min : static_cast<int>(fromValue / step) * step;
+            toValue = GreatOrEqual(toValue, max) ? max : (static_cast<int>(toValue / step) + toValueCorrection) * step;
+            return LessNotEqual(value, fromValue) ? fromValue : GreatNotEqual(value, toValue) ? toValue : value;
+        }
+    }
+    return value;
 }
 
 void SliderPattern::UpdateTipsValue()
@@ -818,7 +860,13 @@ bool SliderPattern::MoveStep(int32_t stepCount)
             nextValue = std::ceil((nextValue - min) / step) * step + min;
         }
     }
-    nextValue = std::clamp(nextValue, min, max);
+    auto validSlideRange = sliderPaintProperty->GetValidSlideRange();
+    if (validSlideRange.has_value() && validSlideRange.value()->HasValidValues()) {
+        nextValue =
+            std::clamp(nextValue, validSlideRange.value()->GetFromValue(), validSlideRange.value()->GetToValue());
+    } else {
+        nextValue = std::clamp(nextValue, min, max);
+    }
     if (NearEqual(nextValue, value_)) {
         return false;
     }

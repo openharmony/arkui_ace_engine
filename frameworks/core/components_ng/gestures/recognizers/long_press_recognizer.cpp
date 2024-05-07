@@ -227,9 +227,14 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "long press recognizer receives touch cancel event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "Long press recognizer receives %{public}d touch cancel event, touchPoint size:%{public}d", event.id,
+        static_cast<int32_t>(touchPoints_.size()));
     if (refereeState_ == RefereeState::FAIL) {
         return;
+    }
+    if (touchPoints_.find(event.id) != touchPoints_.end()) {
+        touchPoints_.erase(event.id);
     }
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
         SendCancelMsg();

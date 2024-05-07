@@ -201,6 +201,11 @@ public:
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO) override;
     void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
     bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+    /**
+     * @brief irregular layout has items that occupy multiple rows, so Align::CENTER needs special treatment.
+     * @return target position to animateTo
+     */
+    float IrregularAnimateToCenter(float mainGap) const;
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
     int32_t GetChildrenCount() const;

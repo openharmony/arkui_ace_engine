@@ -222,6 +222,9 @@ public:
     void OnContentChanged(const JSCallbackInfo& args);
 
 private:
+    void SetOnWillChange(const JSCallbackInfo& args);
+    void SetOnDidChange(const JSCallbackInfo& args);
+    static JSRef<JSVal> CreateJsOnWillChange(const NG::StyledStringChangeValue& changeValue);
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorStyledStringController);
 };
 } // namespace OHOS::Ace::Framework

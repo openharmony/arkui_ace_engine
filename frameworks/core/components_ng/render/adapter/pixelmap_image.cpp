@@ -76,6 +76,20 @@ bool ConvertSlice(const ImagePaintConfig& config, RectF& result, float rawImageW
     return true;
 }
 
+std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
+{
+    switch (dynamicMode) {
+        case DynamicRangeMode::HIGH:
+            return "HIGH";
+        case DynamicRangeMode::CONSTRAINT:
+            return "CONSTRAINT";
+        case DynamicRangeMode::STANDARD:
+            return "STANDARD";
+        default:
+            return "STANDARD";
+    }
+}
+
 #ifndef USE_ROSEN_DRAWING
 void UpdateSKFilter(const ImagePaintConfig& config, SKPaint& paint)
 {
@@ -243,8 +257,10 @@ void PixelMapImage::DrawToRSCanvas(
         1.0, 0, 0, 0, static_cast<int32_t>(config.dynamicMode) };
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, sourceInfo:%{public}s ,width=%{public}d * height=%{public}d",
-            config.sourceInfo_.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight());
+        TAG_LOGI(AceLogTag::ACE_IMAGE,
+            "pixmap, sourceInfo:%{public}s ,width=%{public}d * height=%{public}d, dynamicRangeMode = %{public}s",
+            config.sourceInfo_.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight(),
+            GetDynamicModeString(config.dynamicMode).c_str());
         pixmap->SavePixelMapToFile("_ToRS_");
     }
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);

@@ -50,6 +50,7 @@ void* DetachOffscreenCanvas(napi_env env, void* value, void* hint)
     auto result = new (std::nothrow) JSOffscreenCanvas();
     result->SetWidth(workCanvas->GetWidth());
     result->SetHeight(workCanvas->GetHeight());
+    result->SetUnit(workCanvas->GetUnit());
     return result;
 }
 

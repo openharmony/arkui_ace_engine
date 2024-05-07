@@ -13,25 +13,13 @@
  * limitations under the License.
  */
 
-enum LogTag {
-    STATE_MGMT = 0,
-    ARK_COMPONENT = 1,
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_SCROLLER_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_SCROLLER_MODIFIER_H
+
+#include "core/interfaces/native/node/node_api.h"
+
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUIScrollerModifier* GetScrollerModifier();
 }
 
-class ArkLogConsole {
-  public static log(...args: Object[]): void {
-    aceConsole.log(LogTag.ARK_COMPONENT, ...args);
-  }
-  public static debug(...args: Object[]): void {
-    aceConsole.debug(LogTag.ARK_COMPONENT, ...args);
-  }
-  public static info(...args: Object[]): void {
-    aceConsole.info(LogTag.ARK_COMPONENT, ...args);
-  }
-  public static warn(...args: Object[]): void {
-    aceConsole.warn(LogTag.ARK_COMPONENT, ...args);
-  }
-  public static error(...args: Object[]): void {
-    aceConsole.error(LogTag.ARK_COMPONENT, ...args);
-  }
-}
+#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_SCROLLER_MODIFIER_H

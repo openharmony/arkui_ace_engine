@@ -927,4 +927,30 @@ LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, LineBreakStrategy, value, frameNode, value);
     return value;
 }
+
+void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value, frameNode);
+}
+
+Color TextModelNG::GetSelectedBackgroundColor(FrameNode* frameNode)
+{
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, Color::BLACK);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, Color::BLACK);
+    Color value = theme->GetSelectedColor();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, SelectedBackgroundColor, value, frameNode,
+        value);
+    return value;
+}
+
+void TextModelNG::ResetSelectedBackgroundColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->ResetSelectedBackgroundColor();
+    }
+}
 } // namespace OHOS::Ace::NG

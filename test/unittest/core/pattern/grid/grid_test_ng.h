@@ -62,6 +62,8 @@ public:
     static void CreateFixedItem(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
     static void CreateFixedHeightItems(
         int32_t itemNumber, float height, GridItemStyle gridItemStyle = GridItemStyle::NONE);
+    static void CreateFixedWidthItems(
+        int32_t itemNumber, float width, GridItemStyle gridItemStyle = GridItemStyle::NONE);
     static void CreateBigItem(int32_t rowStart = NULL_VALUE, int32_t rowEnd = NULL_VALUE, int32_t colStart = NULL_VALUE,
         int32_t colEnd = NULL_VALUE, float width = NULL_VALUE, float height = NULL_VALUE);
     static void CreateBigColItem(int32_t colStart, int32_t colEnd);

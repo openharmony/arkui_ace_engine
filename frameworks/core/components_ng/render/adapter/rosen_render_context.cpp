@@ -1413,8 +1413,14 @@ void RosenRenderContext::OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeM
 {
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
     CHECK_NULL_VOID(rsCanvasDrawingNode);
-    if (dynamicRangeMode < DynamicRangeMode::STANDARD) {
+    if (dynamicRangeMode < DynamicRangeMode::STANDARD && !isHdr_) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Set HDRPresent True.");
+        isHdr_ = true;
         rsCanvasDrawingNode->SetHDRPresent(true);
+    } else if (isHdr_) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Set HDRPresent False.");
+        isHdr_ = false;
+        rsCanvasDrawingNode->SetHDRPresent(false);
     }
 }
 

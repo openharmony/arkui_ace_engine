@@ -1611,12 +1611,10 @@ void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
         }
     }
     auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-        CHECK_NULL_VOID(richEditorController);
-        SelectionInfo value = richEditorController->GetSpansInfo(start, end);
-        args.SetReturnValue(CreateJSSpansInfo(value));
-    }
+    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+    CHECK_NULL_VOID(richEditorController);
+    SelectionInfo value = richEditorController->GetSpansInfo(start, end);
+    args.SetReturnValue(CreateJSSpansInfo(value));
 }
 
 void JSRichEditorController::DeleteSpans(const JSCallbackInfo& args)
@@ -1755,10 +1753,9 @@ void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-    if (richEditorController) {
-        SelectionInfo value = richEditorController->GetSelectionSpansInfo();
-        args.SetReturnValue(JSRichEditor::CreateJSSelection(value));
-    }
+    CHECK_NULL_VOID(richEditorController);
+    SelectionInfo value = richEditorController->GetSelectionSpansInfo();
+    args.SetReturnValue(JSRichEditor::CreateJSSelection(value));
 }
 
 void JSRichEditorController::JSBind(BindingTarget globalObj)
@@ -1943,12 +1940,10 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     }
 
     auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-        CHECK_NULL_VOID(richEditorController);
-        richEditorController->SetUpdateSpanStyle(updateSpanStyle_);
-        richEditorController->UpdateSpanStyle(start, end, textStyle, imageStyle);
-    }
+    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+    CHECK_NULL_VOID(richEditorController);
+    richEditorController->SetUpdateSpanStyle(updateSpanStyle_);
+    richEditorController->UpdateSpanStyle(start, end, textStyle, imageStyle);
 }
 
 void JSRichEditorController::GetParagraphsInfo(const JSCallbackInfo& args)
@@ -1962,12 +1957,10 @@ void JSRichEditorController::GetParagraphsInfo(const JSCallbackInfo& args)
         return;
     }
     auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-        CHECK_NULL_VOID(richEditorController);
-        auto info = richEditorController->GetParagraphsInfo(start, end);
-        args.SetReturnValue(CreateJSParagraphsInfo(info));
-    }
+    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+    CHECK_NULL_VOID(richEditorController);
+    auto info = richEditorController->GetParagraphsInfo(start, end);
+    args.SetReturnValue(CreateJSParagraphsInfo(info));
 }
 
 void JSRichEditorController::UpdateParagraphStyle(const JSCallbackInfo& info)
@@ -1992,11 +1985,10 @@ void JSRichEditorController::UpdateParagraphStyle(const JSCallbackInfo& info)
         return;
     }
     auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-        CHECK_NULL_VOID(richEditorController);
-        richEditorController->UpdateParagraphStyle(start, end, style);
-    }
+    CHECK_NULL_VOID(controller);
+    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+    CHECK_NULL_VOID(richEditorController);
+    richEditorController->UpdateParagraphStyle(start, end, style);
 }
 
 JSRef<JSVal> JSRichEditorController::CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info)
@@ -2285,19 +2277,17 @@ void JSRichEditorBaseController::IsEditing(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        bool value = controller->IsEditing();
-        auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-        args.SetReturnValue(JsiRef<JsiValue>::Make(panda::BooleanRef::New(runtime->GetEcmaVm(), value)));
-    }
+    CHECK_NULL_VOID(controller);
+    bool value = controller->IsEditing();
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    args.SetReturnValue(JsiRef<JsiValue>::Make(panda::BooleanRef::New(runtime->GetEcmaVm(), value)));
 }
 
 void JSRichEditorBaseController::StopEditing()
 {
     auto controller = controllerWeak_.Upgrade();
-    if (controller) {
-        controller->StopEditing();
-    }
+    CHECK_NULL_VOID(controller);
+    controller->StopEditing();
 }
 
 JSRef<JSObject> JSRichEditorBaseController::JSObjectCast(JSRef<JSVal> jsValue)
@@ -2313,11 +2303,10 @@ void JSRichEditorStyledStringController::GetSelection(const JSCallbackInfo& args
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
-    auto richEditorStyledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
-    if (richEditorStyledStringController) {
-        SelectionRangeInfo value = richEditorStyledStringController->GetSelection();
-        args.SetReturnValue(JSRichEditor::CreateJSSelectionRange(value));
-    }
+    auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+    CHECK_NULL_VOID(styledStringController);
+    SelectionRangeInfo value = styledStringController->GetSelection();
+    args.SetReturnValue(JSRichEditor::CreateJSSelectionRange(value));
 }
 
 void JSRichEditorStyledStringController::SetStyledString(const JSCallbackInfo& args)
@@ -2331,25 +2320,106 @@ void JSRichEditorStyledStringController::SetStyledString(const JSCallbackInfo& a
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
     auto controller = controllerWeak_.Upgrade();
-    auto richEditorStyledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
-    if (richEditorStyledStringController) {
-        richEditorStyledStringController->SetStyledString(spanStringController);
-    }
+    auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+    CHECK_NULL_VOID(styledStringController);
+    styledStringController->SetStyledString(spanStringController);
 }
 
 void JSRichEditorStyledStringController::GetStyledString(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     auto controller = controllerWeak_.Upgrade();
-    auto richEditorStyledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
-    if (richEditorStyledStringController) {
-        richEditorStyledStringController->GetStyledString();
-    }
+    auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+    CHECK_NULL_VOID(styledStringController);
+    auto mutableSpanString = AceType::DynamicCast<MutableSpanString>(styledStringController->GetStyledString());
+    CHECK_NULL_VOID(mutableSpanString);
+    JSRef<JSObject> obj = JSClass<JSMutableSpanString>::NewInstance();
+    auto jsMutableSpanString = Referenced::Claim(obj->Unwrap<JSMutableSpanString>());
+    CHECK_NULL_VOID(jsMutableSpanString);
+    jsMutableSpanString->IncRefCount();
+    jsMutableSpanString->SetController(mutableSpanString);
+    jsMutableSpanString->SetMutableController(mutableSpanString);
+    args.SetReturnValue(obj);
 }
 
 void JSRichEditorStyledStringController::OnContentChanged(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    CHECK_NULL_VOID(args[0]->IsObject());
+    SetOnWillChange(args);
+    SetOnDidChange(args);
+}
+
+void JSRichEditorStyledStringController::SetOnWillChange(const JSCallbackInfo& args)
+{
+    auto paramObject = JSRef<JSObject>::Cast(args[0]);
+    auto onWillChangeFunc = paramObject->GetProperty("onWillChange");
+    if (onWillChangeFunc->IsNull() || !onWillChangeFunc->IsFunction()) {
+        return;
+    }
+    auto jsOnWillChangeFunc = AceType::MakeRefPtr<JsEventFunction<NG::StyledStringChangeValue, 1>>(
+        JSRef<JSFunc>::Cast(onWillChangeFunc), CreateJsOnWillChange);
+    auto callback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnWillChangeFunc)](
+                        const NG::StyledStringChangeValue& changeValue) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(changeValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    auto controller = controllerWeak_.Upgrade();
+    auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+    CHECK_NULL_VOID(styledStringController);
+    styledStringController->SetOnWillChange(std::move(callback));
+}
+
+void JSRichEditorStyledStringController::SetOnDidChange(const JSCallbackInfo& args)
+{
+    auto paramObject = JSRef<JSObject>::Cast(args[0]);
+    auto onDidChangeFunc = paramObject->GetProperty("onDidChange");
+    if (onDidChangeFunc->IsNull() || !onDidChangeFunc->IsFunction()) {
+        return;
+    }
+    auto jsOnDidChangeFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::StyledStringChangeValue, 2>>(
+        JSRef<JSFunc>::Cast(onDidChangeFunc));
+    auto callback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnDidChangeFunc)](
+                        const NG::StyledStringChangeValue& changeValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        const auto& rangeBefore = changeValue.GetRangeBefore();
+        JSRef<JSObject> rangeBeforeObj = JSRef<JSObject>::New();
+        rangeBeforeObj->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(rangeBefore.start)));
+        rangeBeforeObj->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(rangeBefore.end)));
+
+        const auto& rangeAfter = changeValue.GetRangeAfter();
+        JSRef<JSObject> rangeAfterObj = JSRef<JSObject>::New();
+        rangeAfterObj->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(rangeAfter.start)));
+        rangeAfterObj->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(rangeAfter.end)));
+
+        JSRef<JSVal> param[2] = { JSRef<JSVal>::Cast(rangeBeforeObj), JSRef<JSVal>::Cast(rangeAfterObj) };
+        func->Execute(param);
+    };
+    auto controller = controllerWeak_.Upgrade();
+    auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+    CHECK_NULL_VOID(styledStringController);
+    styledStringController->SetOnDidChange(std::move(callback));
+}
+
+JSRef<JSVal> JSRichEditorStyledStringController::CreateJsOnWillChange(const NG::StyledStringChangeValue& changeValue)
+{
+    JSRef<JSObject> onWillChangeObj = JSRef<JSObject>::New();
+    JSRef<JSObject> rangeObj = JSRef<JSObject>::New();
+    auto rangeBefore = changeValue.GetRangeBefore();
+    rangeObj->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(rangeBefore.start)));
+    rangeObj->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(rangeBefore.end)));
+    auto spanString = AceType::DynamicCast<SpanString>(changeValue.GetReplacementString());
+    CHECK_NULL_RETURN(spanString, JSRef<JSVal>::Cast(onWillChangeObj));
+    JSRef<JSObject> replacementStringObj = JSClass<JSSpanString>::NewInstance();
+    auto jsSpanString = Referenced::Claim(replacementStringObj->Unwrap<JSSpanString>());
+    jsSpanString->SetController(spanString);
+    onWillChangeObj->SetPropertyObject("range", rangeObj);
+    onWillChangeObj->SetPropertyObject("replacementString", replacementStringObj);
+    return JSRef<JSVal>::Cast(onWillChangeObj);
 }
 
 void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)

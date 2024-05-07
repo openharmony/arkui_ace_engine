@@ -257,10 +257,19 @@ public:
     }
 
     void SetStyledString(const RefPtr<SpanString>& value);
+
+    RefPtr<MutableSpanString> GetStyledString() const
+    {
+        return styledString_;
+    }
+
     void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) override;
     void InsertValueInStyledString(const std::string& insertValue);
     void DeleteBackwardInStyledString(int32_t length);
-    void DeleteForwardInStyledString(int32_t length);
+    void DeleteForwardInStyledString(int32_t length, bool isIME = true);
+
+    bool BeforeStyledStringChange(int32_t start, int32_t length, const std::string& string);
+    void AfterStyledStringChange(int32_t start, int32_t length, const std::string& string);
 
     void ResetBeforePaste();
     void ResetAfterPaste();

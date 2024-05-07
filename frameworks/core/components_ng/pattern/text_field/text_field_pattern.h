@@ -172,11 +172,12 @@ public:
     }
     void SetBlurOnSubmit(bool blurOnSubmit)
     {
-        blurOnSubmit_ = blurOnSubmit;
+        textInputBlurOnSubmit_ = blurOnSubmit;
+        textAreaBlurOnSubmit_ = blurOnSubmit;
     }
     bool GetBlurOnSubmit()
     {
-        return blurOnSubmit_;
+        return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
     }
     bool GetNeedToRequestKeyboardOnFocus() const
     {
@@ -835,7 +836,7 @@ public:
     }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
-    void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false);
+    void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false, bool showMenu = false);
     void HandleOnSelectAll() override
     {
         HandleOnSelectAll(true);
@@ -1196,10 +1197,7 @@ public:
         return static_cast<float>(previewUnderlineWidth_.Value());
     }
 
-    void ReceivePreviewTextStyle(const std::string& style) override
-    {
-        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PreviewTextStyle, style);
-    }
+    void ReceivePreviewTextStyle(const std::string& style) override;
 
     PreviewTextStyle GetPreviewTextStyle() const;
 
@@ -1211,6 +1209,12 @@ public:
     bool GetCustomKeyboardOption()
     {
         return keyboardAvoidance_;
+    }
+
+    void SetShowKeyBoardOnFocus(bool value);
+    bool GetShowKeyBoardOnFocus()
+    {
+        return showKeyBoardOnFocus_;
     }
 
 protected:
@@ -1421,6 +1425,8 @@ private:
 
     bool CheckPreviewTextValidate(PreviewTextInfo info) const;
 
+    void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);
+
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
@@ -1582,7 +1588,8 @@ private:
     std::string autoFillNewPassword_;
     bool autoFillOtherAccount_ = false;
 
-    bool blurOnSubmit_ = true;
+    bool textInputBlurOnSubmit_ = true;
+    bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
 
     bool isFocusBGColorSet_ = false;
@@ -1593,6 +1600,7 @@ private:
     std::queue<PreviewTextInfo> previewTextOperation;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
+    bool showKeyBoardOnFocus_ = true;
 };
 } // namespace OHOS::Ace::NG
 

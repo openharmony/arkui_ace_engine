@@ -74,7 +74,9 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto clickableArea = layoutWrapper->GetOrCreateChildByIndex(CLICKABLE_AREA_VIEW_INDEX);
     if (idealWidth_ > 0.0f) {
         layoutWrapper->GetGeometryNode()->SetFrameWidth(idealWidth_);
-        clickableArea->GetGeometryNode()->SetFrameWidth(idealWidth_);
+        if (clickableArea) {
+            clickableArea->GetGeometryNode()->SetFrameWidth(idealWidth_);
+        }
     }
 
     CheckNeedExpandContent(layoutWrapper, childConstraint);
@@ -182,7 +184,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(float maxRowWidth, float middleSp
 
     auto expandableHeight = 0.0f;
     MeasureExpandableArea(expandableArea, childConstraint);
-    expandableHeight = expandableArea->GetGeometryNode()->GetMarginFrameSize().Height();
+    if (expandableArea) expandableHeight = expandableArea->GetGeometryNode()->GetMarginFrameSize().Height();
 
     UpdateSelfSize(layoutWrapper, width, itemHeight, minItemHeight, expandableHeight);
 }
@@ -265,7 +267,9 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto height = std::max(itemHeight, minItemHeight);
         layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(width, height + expandableHeight));
-        clickableArea->GetGeometryNode()->SetFrameSize(SizeF(width, height));
+        if (clickableArea) {
+            clickableArea->GetGeometryNode()->SetFrameSize(SizeF(width, height));
+        }
     } else {
         layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(width, itemHeight));
     }

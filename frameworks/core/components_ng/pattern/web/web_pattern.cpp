@@ -182,7 +182,7 @@ constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
 const std::vector<std::string> SYNC_RENDER_SLIDE {V2::LIST_ETS_TAG, V2::SCROLL_ETS_TAG};
 
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
-constexpr double DEFAULT_PINCH_DISTANCE = 4.0;
+constexpr double DEFAULT_PINCH_DISTANCE = 1.0;
 
 WebPattern::WebPattern() = default;
 
@@ -267,7 +267,9 @@ void WebPattern::InitEvent()
     InitTouchEvent(gestureHub);
     InitDragEvent(gestureHub);
     InitPanEvent(gestureHub);
-    InitPinchEvent(gestureHub);
+    if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+        InitPinchEvent(gestureHub);
+    }
 
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -1789,6 +1791,7 @@ void WebPattern::OnModifyDone()
         CHECK_NULL_VOID(observer_);
         delegate_->SetObserver(observer_);
         delegate_->SetRenderMode(renderMode_);
+        delegate_->SetFitContentMode(layoutMode_);
         InitEnhanceSurfaceFlag();
         delegate_->SetNGWebPattern(Claim(this));
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
@@ -3880,7 +3883,14 @@ bool WebPattern::GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t ac
         return false;
     }
 
-    paintRect.SetRect(info->GetRectX(), info->GetRectY(), info->GetRectWidth(), info->GetRectHeight());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto offset = geometryNode->GetContentOffset();
+
+    paintRect.SetRect(info->GetRectX() + offset.GetX(), info->GetRectY() + offset.GetY(), info->GetRectWidth(),
+        info->GetRectHeight());
     return true;
 }
 
