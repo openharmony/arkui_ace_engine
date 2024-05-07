@@ -361,6 +361,7 @@ private:
     bool dragEndAutoPlay_ = false;
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerCreated_ = false;
+    bool isPaused_ = false;
 
     uint32_t currentPos_ = 0;
     uint32_t duration_ = 0;
