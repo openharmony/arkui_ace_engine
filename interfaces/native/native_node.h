@@ -1833,6 +1833,17 @@ typedef enum {
      */
     NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG,
     /**
+     * @brief 文本选中时的背景色属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式，形如 0xFFFF0000 表示红色。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].u32：颜色数值，0xargb格式。\n
+     *
+     */
+    NODE_TEXT_SELECTED_BACKGROUND_COLOR,
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n

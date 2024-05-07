@@ -169,8 +169,11 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto theme = themeManager->GetTheme<TextTheme>();
-    auto selectedColor = theme->GetSelectedColor().GetValue();
-    textOverlayModifier_->SetSelectedColor(selectedColor);
+    CHECK_NULL_VOID(theme);
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto selectedColor = layoutProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
+    textOverlayModifier_->SetSelectedColor(selectedColor.GetValue());
     if (context->GetClipEdge().has_value()) {
         textOverlayModifier_->SetIsClip(context->GetClipEdge().value());
     }
