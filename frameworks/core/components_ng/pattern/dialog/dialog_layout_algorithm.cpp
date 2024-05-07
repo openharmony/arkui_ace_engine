@@ -104,7 +104,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!customSize_) {
         auto maxSize = layoutConstraint->maxSize;
         maxSize.MinusPadding(0, 0, safeAreaInsets_.top_.Length(), 0);
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && LessNotEqual(gridCount_, 0)) {
             maxSize.MinusPadding(0, 0, 0, safeAreaInsets_.bottom_.Length());
         }
         childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
@@ -255,6 +255,10 @@ LayoutConstraintF DialogLayoutAlgorithm::CreateDialogChildConstraint(
 bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout,
     const RefPtr<DialogLayoutProperty>& dialogProp)
 {
+    // when width is valid, gridCount_ is -1
+    if (GreatOrEqual(gridCount_, 0)) {
+        return false;
+    }
     CHECK_NULL_RETURN(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE), false);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
