@@ -300,7 +300,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaChange,
     NodeModifier::SetOnTextAreaPaste,
     NodeModifier::SetOnTextAreaSelectionChange,
-    NodeModifier::SetTextInputOnSubmit,
+    NodeModifier::SetTextAreaOnSubmit,
     NodeModifier::SetOnTextAreaContentSizeChange,
     NodeModifier::SetOnTextAreaInputFilterError,
     NodeModifier::SetTextAreaOnTextContentScroll,
