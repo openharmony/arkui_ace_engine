@@ -865,6 +865,8 @@ void VideoPattern::OnModifyDone()
     }
     if (!IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
+    } else if (isPaused_ && !isPlaying_ && !GetAnalyzerState()) {
+        StartImageAnalyzer();
     }
 }
 
@@ -1015,8 +1017,8 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
                             videoNodeSize.Width(), videoNodeSize.Height());
     } else {
         contentRect_ = Rect((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE + padding.left.value_or(0),
-                            (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE + padding.top.value_or(0),
-                            videoFrameSize.Width(), videoFrameSize.Height());
+            (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE + padding.top.value_or(0),
+            videoFrameSize.Width(), videoFrameSize.Height());
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1350,6 +1352,7 @@ void VideoPattern::Start()
     CHECK_NULL_VOID(context);
 
     DestroyAnalyzerOverlay();
+    isPaused_ = false;
 
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
@@ -1367,6 +1370,7 @@ void VideoPattern::Pause()
     }
     auto ret = mediaPlayer_->Pause();
     if (ret != -1) {
+        isPaused_ = true;
         StartImageAnalyzer();
     }
 }
