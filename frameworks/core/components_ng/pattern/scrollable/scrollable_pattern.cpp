@@ -582,7 +582,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     scrollable->SetEdgeEffect(edgeEffect);
 }
 
-bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size, bool reverse)
+bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     bool isAtTop = IsAtTop();
     bool isAtBottom = IsAtBottom();
@@ -592,7 +592,7 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
         (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION)) { // handle edge effect
         if ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset))) {
             auto isScrollFromUpdate = source == SCROLL_FROM_UPDATE;
-            scrollEffect_->HandleOverScroll(GetAxis(), !reverse ? -offset : offset,
+            scrollEffect_->HandleOverScroll(GetAxis(), -offset,
                 size, isScrollFromUpdate, isNotPositiveScrollableDistance);
         }
     }
