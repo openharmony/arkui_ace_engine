@@ -26,9 +26,9 @@ class OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
 public:
     explicit OnTextChangedListenerImpl(const WeakPtr<TextInputClient>& pattern) : pattern_(pattern)
     {
-        auto textFieldPattern = pattern_.Upgrade();
-        CHECK_NULL_VOID(textFieldPattern);
-        patternInstanceId_ = textFieldPattern->GetInstanceId();
+        auto client = pattern_.Upgrade();
+        CHECK_NULL_VOID(client);
+        patternInstanceId_ = client->GetInstanceId();
     }
     ~OnTextChangedListenerImpl() override = default;
 
