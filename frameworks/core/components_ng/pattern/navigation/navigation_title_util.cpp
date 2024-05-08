@@ -266,22 +266,21 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const BarItem& barI
         barItem.iconSymbol.value()(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
         iconNode->MarkModifyDone();
         return iconNode;
-    } else {
-        int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ImageSourceInfo info(barItem.icon.value());
-        auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
-        auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-        if (isButtonEnabled) {
-            info.SetFillColor(iconColor);
-        } else {
-            info.SetFillColor(iconColor.BlendOpacity(iconOpacity));
-        }
-        imageLayoutProperty->UpdateImageSourceInfo(info);
-        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconWidth), CalcLength(iconHeight)));
-        iconNode->MarkModifyDone();
-        return iconNode;
     }
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ImageSourceInfo info(barItem.icon.value());
+    auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+    if (isButtonEnabled) {
+        info.SetFillColor(iconColor);
+    } else {
+        info.SetFillColor(iconColor.BlendOpacity(iconOpacity));
+    }
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconWidth), CalcLength(iconHeight)));
+    iconNode->MarkModifyDone();
+    return iconNode;
 }
 
 void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode,
