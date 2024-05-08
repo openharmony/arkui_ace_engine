@@ -110,6 +110,9 @@ public:
     static void SetEnhancedImageQuality(FrameNode *frameNode, AIImageQuality imageQuality);
     static bool GetFitOriginalSize(FrameNode *frameNode);
     static uint32_t GetFillColor(FrameNode *frameNode);
+    static void SetPixelMap(FrameNode* frameNode, void* drawableDescriptor);
+    static void SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor);
+    static void SetResource(FrameNode* frameNode, void* resource);
 private:
     RefPtr<ImagePattern> GetImagePattern();
 };

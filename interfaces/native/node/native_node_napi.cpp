@@ -20,9 +20,11 @@
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 #include "native_type.h"
+#include "node/node_extened.h"
 #include "node/node_model.h"
 
 #include "base/error/error_code.h"
+#include "base/image/pixel_map.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -155,4 +157,50 @@ int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, Ark
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(
+    napi_env env, napi_value value, ArkUI_DrawableDescriptor** drawableDescriptor)
+{
+    void* objectNapi = nullptr;
+    napi_unwrap(env, value, &objectNapi);
+    if (!objectNapi) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_DrawableDescriptor* drawable =
+        new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, nullptr, nullptr, nullptr, nullptr };
+    auto* descriptor = reinterpret_cast<OHOS::Ace::Napi::DrawableDescriptor*>(objectNapi);
+    auto drawableType = descriptor->GetDrawableType();
+    if (drawableType == OHOS::Ace::Napi::DrawableDescriptor::DrawableType::BASE) {
+        drawable->drawableDescriptor = std::make_shared<OHOS::Ace::Napi::DrawableDescriptor>(descriptor->GetPixelMap());
+        *drawableDescriptor = drawable;
+        return OHOS::Ace::ERROR_CODE_NO_ERROR;
+    } else if (drawableType == OHOS::Ace::Napi::DrawableDescriptor::DrawableType::LAYERED) {
+        drawable->layeredDrawableDescriptor = std::make_shared<OHOS::Ace::Napi::LayeredDrawableDescriptor>(
+            nullptr, 0, nullptr);
+        *drawableDescriptor = drawable;
+        return OHOS::Ace::ERROR_CODE_NO_ERROR;
+    }
+    auto* animatedDrawable = static_cast<OHOS::Ace::Napi::AnimatedDrawableDescriptor*>(descriptor);
+    int32_t duration = animatedDrawable->GetDuration();
+    int32_t iteration = animatedDrawable->GetIterations();
+    drawable->animatedDrawableDescriptor = std::make_shared<OHOS::Ace::Napi::AnimatedDrawableDescriptor>(
+        animatedDrawable->GetPixelMapList(), duration, iteration);
+    *drawableDescriptor = drawable;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_GetDrawableDescriptorFromResourceNapiValue(
+    napi_env env, napi_value value, ArkUI_DrawableDescriptor** drawableDescriptor)
+{
+    auto parseApi = reinterpret_cast<void (*)(void*, void*)>(OHOS::Ace::NodeModel::GetParseJsMedia());
+    if (!parseApi) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+
+    ArkUI_DrawableDescriptor* drawable =
+        new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, nullptr, nullptr, nullptr, nullptr };
+    drawable->resource = std::make_shared<ArkUI_Resource>();
+    parseApi(value, drawable->resource.get());
+    *drawableDescriptor = drawable;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
 }

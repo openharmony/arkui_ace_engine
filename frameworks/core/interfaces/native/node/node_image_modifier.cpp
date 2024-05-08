@@ -570,6 +570,27 @@ uint32_t GetFillColor(ArkUINodeHandle node)
     return ImageModelNG::GetFillColor(frameNode);
 }
 
+void SetPixelMap(ArkUINodeHandle node, void* drawableDescriptor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetPixelMap(frameNode, drawableDescriptor);
+}
+
+void SetPixelMapArray(ArkUINodeHandle node, void* animatedDrawableDescriptor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetPixelMapArray(frameNode, animatedDrawableDescriptor);
+}
+
+void SetResourceSrc(ArkUINodeHandle node, void* resource)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetResource(frameNode, resource);
+}
+
 void ResetDynamicRangeMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -645,7 +666,8 @@ const ArkUIImageModifier* GetImageModifier()
         ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
         ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality, ResetEnhancedImageQuality,
         GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
-        GetImageDraggable, GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor };
+        GetImageDraggable, GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor,
+        SetPixelMap, SetPixelMapArray, SetResourceSrc };
     return &modifier;
 }
 
