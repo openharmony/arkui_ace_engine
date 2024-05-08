@@ -109,6 +109,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     if (!isTextArea) {
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+        pattern->SetTextInputFlag(true);
     } else {
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(Infinity<uint32_t>());
     }
@@ -901,7 +902,15 @@ void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& valu
 
 void TextFieldModelNG::SetInputStyle(FrameNode* frameNode, InputStyle value)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, InputStyle, value, frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    if (pattern->GetTextInputFlag() && value == InputStyle::DEFAULT) {
+        auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(textFieldLayoutProperty);
+        textFieldLayoutProperty->UpdateMaxLines(1);
+        textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+    }
 }
 
 void TextFieldModelNG::RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest)
