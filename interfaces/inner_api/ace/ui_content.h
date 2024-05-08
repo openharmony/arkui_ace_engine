@@ -32,7 +32,6 @@
 #include "serializeable_object.h"
 #include "viewport_config.h"
 #include "constants.h"
-
 namespace OHOS {
 
 namespace AbilityRuntime {
@@ -191,7 +190,6 @@ public:
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
     virtual void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) {};
-
 
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()
@@ -404,6 +402,11 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 
     virtual void SetContentNodeGrayScale(float grayscale) {};
+    
+    virtual sptr<IRemoteObject> GetRemoteObj()
+    {
+        return {};
+    }
 };
 
 } // namespace OHOS::Ace

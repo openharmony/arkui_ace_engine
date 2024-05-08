@@ -89,6 +89,7 @@ template("ace_ohos_standard_source_set") {
       "//commonlibrary/c_utils/base/include",
       "//foundation/arkui/napi/interfaces/kits",
       "//foundation/arkui/napi/native_engine",
+      "//foundation/arkui/ace_engine/interfaces/inner_api/ui_session",
       "//foundation/window/window_manager/interfaces/innerkits",
       "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
       "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
@@ -100,6 +101,7 @@ template("ace_ohos_standard_source_set") {
     deps += [
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",
       "$ace_root/interfaces/inner_api/ace:ace_uicontent",
+      "$ace_root/interfaces/inner_api/ui_session:ui_session",
       "//third_party/zlib:shared_libz",
     ]
 
