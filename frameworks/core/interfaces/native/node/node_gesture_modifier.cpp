@@ -163,28 +163,29 @@ void dispose(ArkUIGesture* recognizer)
 void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& touchPointes,
     std::array<ArkUITouchPoint, MAX_POINTS>& points)
 {
-    if (touchPointes.empty() || touchPointes.size() > info.GetFingerList().size()) {
+    if (touchPointes.empty()) {
         return;
     }
     size_t i = 0;
     auto fingureIterator = std::begin(info.GetFingerList());
+    auto fingureEnd = std::end(info.GetFingerList());
     for (auto& touchPoint : touchPointes) {
         if (i >= MAX_POINTS) {
             break;
         }
         points[i].id = touchPoint.id;
         double density = PipelineBase::GetCurrentDensity();
-        points[i].nodeX = NearEqual(density, 0.0) ? 0.0f :
+        points[i].nodeX = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
             fingureIterator->localLocation_.GetX() / density;
-        points[i].nodeY = NearEqual(density, 0.0) ? 0.0f :
+        points[i].nodeY = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
             fingureIterator->localLocation_.GetY() / density;
-        points[i].windowX = NearEqual(density, 0.0) ? 0.0f :
+        points[i].windowX = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
             fingureIterator->globalLocation_.GetX() / density;
-        points[i].windowY = NearEqual(density, 0.0) ? 0.0f :
+        points[i].windowY = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
             fingureIterator->globalLocation_.GetY() / density;
-        points[i].screenX = NearEqual(density, 0.0) ? 0.0f :
+        points[i].screenX = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
             touchPoint.screenX / density;
-        points[i].screenY = NearEqual(density, 0.0) ? 0.0f :
+        points[i].screenY = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
             touchPoint.screenY / density;
         points[i].contactAreaWidth = touchPoint.size;
         points[i].contactAreaHeight = touchPoint.size;
@@ -201,6 +202,7 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
 void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent,
     std::array<ArkUITouchPoint, MAX_POINTS>& points)
 {
+    CHECK_NULL_VOID(info.GetPointerEvent());
     auto tempTouchEvent = NG::ConvertToTouchEvent(info.GetPointerEvent());
     touchEvent.action = static_cast<int32_t>(tempTouchEvent.type);
     touchEvent.sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
