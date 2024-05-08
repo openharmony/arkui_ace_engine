@@ -338,7 +338,6 @@ public:
     static std::map<int32_t, JSTheme> jsThemes;
     // indicates whether application use WithTheme containers
     inline static bool jsThemeScopeEnabled = false;
-
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_H

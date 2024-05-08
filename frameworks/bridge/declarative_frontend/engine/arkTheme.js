@@ -554,42 +554,6 @@ class ArkTypographyImpl {
         };
     }
 }
-function applyStyleAttributes(modifier, nativeNode, component) {
-    let state = 0;
-    if (modifier.applyPressedAttribute !== undefined) {
-        state |= UI_STATE_PRESSED;
-    }
-    if (modifier.applyFocusedAttribute !== undefined) {
-        state |= UI_STATE_FOCUSED;
-    }
-    if (modifier.applyDisabledAttribute !== undefined) {
-        state |= UI_STATE_DISABLED;
-    }
-    if (modifier.applySelectedAttribute !== undefined) {
-        state |= UI_STATE_SELECTED;
-    }
-    getUINativeModule().setSupportedUIState(nativeNode, state);
-    const currentUIState = getUINativeModule().getUIState(nativeNode);
-    if (modifier.applyNormalAttribute !== undefined) {
-        modifier.applyNormalAttribute(component);
-    }
-    if ((currentUIState & UI_STATE_PRESSED) && (modifier.applyPressedAttribute !== undefined)) {
-        modifier.applyPressedAttribute(component);
-    }
-    if ((currentUIState & UI_STATE_FOCUSED) && (modifier.applyFocusedAttribute !== undefined)) {
-        modifier.applyFocusedAttribute(component);
-    }
-    if ((currentUIState & UI_STATE_DISABLED) && (modifier.applyDisabledAttribute !== undefined)) {
-        modifier.applyDisabledAttribute(component);
-    }
-    if ((currentUIState & UI_STATE_SELECTED) && (modifier.applySelectedAttribute !== undefined)) {
-        modifier.applySelectedAttribute(component);
-    }
-}
-function resetModifiers(component) {
-    component._modifiers = new Map();
-    component._modifiersWithKeys = new Map();
-}
 class ArkThemeImpl {
     constructor(baselineTheme, colors, shapes, typography) {
         this.colors = new ArkColorsImpl(colors, baselineTheme.colors);
@@ -598,6 +562,9 @@ class ArkThemeImpl {
     }
 }
 class ArkThemeScopeItem {
+    constructor() {
+        this.isInWhiteList = undefined;
+    }
 }
 class ArkThemeScopeArray extends Array {
     binarySearch(elmtId) {
@@ -624,6 +591,7 @@ class ArkThemeScope {
         this.withThemeId = withThemeId;
         this.withThemeOptions = withThemeOptions;
         this.theme = theme;
+        this.prevColorMode = this.colorMode();
     }
     getOwnerComponentId() {
         return this.ownerComponentId;
@@ -631,14 +599,14 @@ class ArkThemeScope {
     getWithThemeId() {
         return this.withThemeId;
     }
-    addComponentToScope(elmtId, owner) {
+    addComponentToScope(elmtId, owner, componentName) {
         if (this.isComponentInScope(elmtId)) {
             return;
         }
         if (!this.components) {
             this.components = new ArkThemeScopeArray();
         }
-        this.components.push({ elmtId: elmtId, owner: owner });
+        this.components.push({ elmtId: elmtId, owner: owner, name: componentName });
     }
     removeComponentFromScope(elmtId) {
         if (this.components) {
@@ -669,8 +637,12 @@ class ArkThemeScope {
         return this.withThemeOptions;
     }
     updateWithThemeOptions(options, theme) {
+        this.prevColorMode = this.colorMode();
         this.withThemeOptions = options;
         this.theme = theme;
+    }
+    isColorModeChanged() {
+        return this.prevColorMode !== this.colorMode();
     }
 }
 class ArkThemeScopeManager {
@@ -681,9 +653,9 @@ class ArkThemeScopeManager {
         this.listeners = [];
         this.defaultTheme = undefined;
     }
-    onComponentCreateEnter(componentName, elmtId, isFirstRender, ownerComponentId) {
+    onComponentCreateEnter(componentName, elmtId, isFirstRender, ownerComponent) {
         this.handledIsFirstRender = isFirstRender;
-        this.handledOwnerComponentId = ownerComponentId;
+        this.handledOwnerComponentId = ownerComponent.id__();
         if (this.themeScopes.length === 0 || componentName === 'WithTheme') {
             return;
         }
@@ -692,12 +664,12 @@ class ArkThemeScopeManager {
         if (isFirstRender) {
             if (scopesLength > 0) {
                 scope = this.localThemeScopes[scopesLength - 1];
-                scope.addComponentToScope(elmtId, ownerComponentId);
+                scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
             }
             else {
-                const parentScope = this.scopeForElmtId(ownerComponentId);
+                const parentScope = ownerComponent.themeScope_;
                 if (parentScope) {
-                    parentScope.addComponentToScope(elmtId, ownerComponentId);
+                    parentScope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
                     scope = parentScope;
                 }
             }
@@ -737,6 +709,7 @@ class ArkThemeScopeManager {
     }
     onViewPUCreate(ownerComponent) {
         this.subscribeListener(ownerComponent);
+        ownerComponent.themeScope_ = this.scopeForElmtId(ownerComponent.id__());
     }
     onViewPUDelete(ownerComponent) {
         this.unsubscribeListener(ownerComponent);
@@ -836,7 +809,19 @@ class ArkThemeScopeManager {
             var _a, _b;
             const listenerId = listener.id__();
             if (listenerId === item.owner) {
-                listener.forceRerenderNode(item.elmtId);
+                if (scope.isColorModeChanged()) {
+                    listener.forceRerenderNode(item.elmtId);
+                }
+                else {
+                    let isInWhiteList = item.isInWhiteList;
+                    if (isInWhiteList === undefined) {
+                        isInWhiteList = ArkThemeWhiteList.isInWhiteList(item.name);
+                        item.isInWhiteList = isInWhiteList;
+                    }
+                    if (isInWhiteList === true) {
+                        listener.forceRerenderNode(item.elmtId);
+                    }
+                }
             }
             else if (listenerId === item.elmtId) {
                 listener.onWillApplyTheme((_b = (_a = scope === null || scope === void 0 ? void 0 : scope.getTheme()) !== null && _a !== void 0 ? _a : this.defaultTheme) !== null && _b !== void 0 ? _b : ArkThemeScopeManager.SystemTheme);
@@ -877,3 +862,50 @@ class ArkThemeScopeManager {
 ArkThemeScopeManager.SystemTheme = new ArkSystemTheme();
 ArkThemeScopeManager.instance = undefined;
 globalThis.themeScopeMgr = ArkThemeScopeManager.getInstance();
+class ArkThemeWhiteList {
+    static isInWhiteList(componentName) {
+        let start = 0;
+        let end = ArkThemeWhiteList.whiteList.length - 1;
+        while (start <= end) {
+            let mid = (start + end) >> 1;
+            if (ArkThemeWhiteList.whiteList[mid].localeCompare(componentName) === 0) {
+                return true;
+            }
+            if (ArkThemeWhiteList.whiteList[mid].localeCompare(componentName) === 1) {
+                end = mid - 1;
+            }
+            else {
+                start = mid + 1;
+            }
+        }
+        return false;
+    }
+}
+ArkThemeWhiteList.whiteList = [
+    'AlphabetIndexer',
+    'Badge',
+    'Button',
+    'Checkbox',
+    'CheckboxGroup',
+    'Counter',
+    'DataPanel',
+    'DatePicker',
+    'Divider',
+    'LoadingProgress',
+    'Menu',
+    'MenuItem',
+    'PatternLock',
+    'Progress',
+    'QRCode',
+    'Radio',
+    'Search',
+    'Select',
+    'Slider',
+    'Swiper',
+    'Text',
+    'TextClock',
+    'TextPicker',
+    'TextInput',
+    'TimePicker',
+    'Toggle',
+];

@@ -6445,7 +6445,7 @@ class ViewPU extends PUV2ViewBase {
         const updateFunc = (elmtId, isFirstRender) => {
             this.syncInstanceId();
             
-            ArkThemeScopeManager.getInstance().onComponentCreateEnter(_componentName, elmtId, isFirstRender, this.id__());
+            ArkThemeScopeManager.getInstance().onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             if (!this.isViewV3) {
                 // Enable PU state tracking only in PU @Components

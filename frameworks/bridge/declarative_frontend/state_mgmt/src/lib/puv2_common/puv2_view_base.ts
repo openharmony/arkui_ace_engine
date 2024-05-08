@@ -25,7 +25,6 @@
 
 /// <reference path="../../../../ark_theme/export/ark_theme_scope_manager.d.ts" />
 
-type ExtraInfo = { page: string, line: number };
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
 

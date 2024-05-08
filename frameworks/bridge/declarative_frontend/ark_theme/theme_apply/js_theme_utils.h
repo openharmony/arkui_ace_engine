@@ -26,13 +26,14 @@
 
 namespace OHOS::Ace::Framework {
 class JSThemeUtils {
-public:
+private:
     /**
      * Obtain the Id of WithTheme container which corresponds to current node.
      * This invokes the globalThis.themeScopeMgr.getWithThemeIdForElmtId method on JS level.
      */
     static int32_t GetWithThemeId()
     {
+        // use default theme if theme scope is desabled
         int32_t ret = 0;
         if (!JSThemeScope::jsThemeScopeEnabled) {
             return ret;
@@ -58,6 +59,7 @@ public:
         return ret;
     }
 
+public:
     static std::optional<JSTheme> GetTheme()
     {
         auto themeId = GetWithThemeId();

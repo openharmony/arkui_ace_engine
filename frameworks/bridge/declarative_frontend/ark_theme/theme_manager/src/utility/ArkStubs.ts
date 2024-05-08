@@ -34,6 +34,7 @@ class ViewStackProcessor {
 }
 interface ViewPuInternal {
     parent_: ViewPuInternal
+    themeScope_: ArkThemeScope
     id__(): number
     onGlobalThemeChanged(): void
     forceRerenderNode(elmtId: number): void
@@ -43,6 +44,12 @@ class UINodeRegisterProxy {
     static ElementIdToOwningViewPU_: Map<any, any>
 }
 
+enum ThemeColorMode {
+    SYSTEM,
+    LIGHT,
+    DARK,
+}
+  
 // Hidden interfaces
 declare interface CustomThemeInternal extends CustomTheme {
     shapes?: CustomShapes

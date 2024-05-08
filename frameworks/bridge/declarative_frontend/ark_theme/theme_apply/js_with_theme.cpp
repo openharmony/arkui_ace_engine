@@ -62,5 +62,6 @@ void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
     if (themeScopeId > 0) {
         JSThemeScope::jsThemeScopeEnabled = true;
     }
+}
 
 } // namespace OHOS::Ace::Framework

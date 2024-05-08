@@ -25,7 +25,7 @@ declare class ArkThemeScopeManager {
     setDefaultTheme(customTheme: CustomThemeInternal): void;
     lastLocalThemeScope(): ArkThemeScope;
     getFinalTheme(elmtId: number): Theme;
-    onComponentCreateEnter(componentName: string, elmtId: number, isFirstRender: boolean, ownerComponentId: number): void;
+    onComponentCreateEnter(componentName: string, elmtId: number, isFirstRender: boolean, ownerComponent: ViewPuInternal): void;
     onComponentCreateExit(elmtId: number): void;
     onScopeEnter(withThemeId: number, withThemeOptions: WithThemeOptions, theme: ThemeInternal): void;
     onScopeExit(): void;

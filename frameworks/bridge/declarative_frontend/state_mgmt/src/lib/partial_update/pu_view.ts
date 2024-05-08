@@ -18,6 +18,7 @@
 */
 
 /// <reference path="../../../../ark_theme/export/ark_theme_scope_manager.d.ts" />
+
 type DFXCommand = { what: string, viewId: number, isRecursive: boolean };
 type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
@@ -691,7 +692,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV3 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
-      ArkThemeScopeManager.getInstance().onComponentCreateEnter(_componentName, elmtId, isFirstRender, this.id__())
+      ArkThemeScopeManager.getInstance().onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
 
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
 
