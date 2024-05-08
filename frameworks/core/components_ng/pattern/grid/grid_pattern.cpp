@@ -412,12 +412,12 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     gridLayoutInfo_.reachStart_ =
         gridLayoutInfo_.startIndex_ == 0 && GreatOrEqual(gridLayoutInfo_.currentOffset_, 0.0f);
 
-    currentHeight_ = EstimateHeight();
+    gridLayoutInfo_.currentHeight_ = EstimateHeight();
     if (!offsetEnd && gridLayoutInfo_.offsetEnd_) {
-        endHeight_ = currentHeight_;
+        endHeight_ = gridLayoutInfo_.currentHeight_;
     }
-    ProcessEvent(indexChanged, currentHeight_ - prevHeight_);
-    prevHeight_ = currentHeight_;
+    ProcessEvent(indexChanged, gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_);
+    gridLayoutInfo_.prevHeight_ = gridLayoutInfo_.currentHeight_;
     SetScrollSource(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
@@ -487,8 +487,10 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
         }
 
         if (!NearZero(finalOffset)) {
-            bool scrollUpToStart = GreatOrEqual(prevHeight_, 0.0) && LessOrEqual(currentHeight_, 0.0);
-            bool scrollDownToStart = LessNotEqual(prevHeight_, 0.0) && GreatOrEqual(currentHeight_, 0.0);
+            bool scrollUpToStart =
+                GreatOrEqual(gridLayoutInfo_.prevHeight_, 0.0) && LessOrEqual(gridLayoutInfo_.currentHeight_, 0.0);
+            bool scrollDownToStart =
+                LessNotEqual(gridLayoutInfo_.prevHeight_, 0.0) && GreatOrEqual(gridLayoutInfo_.currentHeight_, 0.0);
             if (scrollUpToStart || scrollDownToStart) {
                 onReachStart();
             }
@@ -498,8 +500,10 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onReachEnd = gridEventHub->GetOnReachEnd();
     if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
         if (!NearZero(finalOffset)) {
-            bool scrollDownToEnd = LessNotEqual(prevHeight_, endHeight_) && GreatOrEqual(currentHeight_, endHeight_);
-            bool scrollUpToEnd = GreatNotEqual(prevHeight_, endHeight_) && LessOrEqual(currentHeight_, endHeight_);
+            bool scrollDownToEnd = LessNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
+                                   GreatOrEqual(gridLayoutInfo_.currentHeight_, endHeight_);
+            bool scrollUpToEnd = GreatNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
+                                 LessOrEqual(gridLayoutInfo_.currentHeight_, endHeight_);
             if (scrollDownToEnd || scrollUpToEnd) {
                 onReachEnd();
             }
@@ -1254,7 +1258,7 @@ void GridPattern::ScrollPage(bool reverse, bool smooth)
 {
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     if (smooth) {
-        float position = -currentHeight_ + distance;
+        float position = -gridLayoutInfo_.currentHeight_ + distance;
         ScrollablePattern::AnimateTo(-position, -1, nullptr, true);
         return;
     } else {
@@ -1708,8 +1712,8 @@ void GridPattern::DumpAdvanceInfo()
     gridLayoutInfo_.synced_ ? DumpLog::GetInstance().AddDesc("synced:true")
                             : DumpLog::GetInstance().AddDesc("synced:false");
     DumpLog::GetInstance().AddDesc("scrollStop:" + std::to_string(scrollStop_));
-    DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(prevHeight_));
-    DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(currentHeight_));
+    DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(gridLayoutInfo_.prevHeight_));
+    DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(gridLayoutInfo_.currentHeight_));
     DumpLog::GetInstance().AddDesc("endHeight:" + std::to_string(endHeight_));
     DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(gridLayoutInfo_.currentOffset_));
     DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(gridLayoutInfo_.prevOffset_));
