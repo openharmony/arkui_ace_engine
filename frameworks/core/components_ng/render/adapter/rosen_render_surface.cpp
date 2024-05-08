@@ -441,9 +441,11 @@ void RosenRenderSurface::ReleaseSurfaceBuffers()
     {
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
         while (!availableBuffers_.empty()) {
-            auto surfaceNode = availableBuffers_.front();
+            auto& surfaceNode = availableBuffers_.front();
             availableBuffers_.pop();
-            consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
+            if (surfaceNode) {
+                consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
+            }
         }
     }
     consumerSurface_->CleanCache();
