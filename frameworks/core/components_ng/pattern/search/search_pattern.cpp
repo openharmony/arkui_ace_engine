@@ -244,6 +244,11 @@ void SearchPattern::HandleEnabled()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     eventHub->SetEnabled(searchEventHub->IsEnabled() ? true : false);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(searchLayoutProperty);
+    textFieldLayoutProperty->UpdateLayoutDirection(searchLayoutProperty->GetLayoutDirection());
     textFieldFrameNode->MarkModifyDone();
 }
 
