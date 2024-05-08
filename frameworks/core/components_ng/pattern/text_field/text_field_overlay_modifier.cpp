@@ -270,11 +270,8 @@ void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
 
 void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& context) const
 {
-    if (!showPreviewText_->Get() && !needPaintPreviewText) {
-        return;
-    }
-
-    if (previewTextStyle != PreviewTextStyle::UNDERLINE) {
+    if (previewTextStyle != PreviewTextStyle::UNDERLINE ||
+        (!showPreviewText_->Get() && !needPaintPreviewText)) {
         return;
     }
 
@@ -298,18 +295,28 @@ void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& contex
         return;
     }
 
+    auto paintOffset = contentOffset_->Get();
+    float clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
+    RSRect clipInnerRect;
+    auto defaultStyle = !textFieldPattern->IsNormalInlineState() || isTextArea;
+    if (defaultStyle) {
+        clipInnerRect = RSRect(paintOffset.GetX(), paintOffset.GetY(),
+            paintOffset.GetX() + contentSize_->Get().Width() + textFieldPattern->GetInlinePadding(), clipRectHeight);
+        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+    } else {
+        clipInnerRect = RSRect(paintOffset.GetX(), 0.0f, paintOffset.GetX() + contentSize_->Get().Width(),
+            textFieldPattern->GetFrameRect().Height());
+        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+    }
+
     RSPen pen;
     pen.SetColor(ToRSColor(previewTextDecorationColor_->Get()));
     pen.SetWidth(textFieldPattern->GetPreviewUnderlineWidth());
     pen.SetAntiAlias(true);
     canvas.AttachPen(pen);
     for (const auto& drawRect : previewTextRect) {
-        float startX = drawRect.Left();
-        float startY = drawRect.Bottom();
-        float endX = drawRect.Right();
-        float endY = drawRect.Bottom();
-        Point leftPoint(startX + offsetX, startY + offsetY);
-        Point rightPoint(endX + offsetX, endY + offsetY);
+        Point leftPoint(drawRect.Left() + offsetX, drawRect.Bottom() + offsetY);
+        Point rightPoint(drawRect.Right() + offsetX, drawRect.Bottom() + offsetY);
         canvas.DrawLine(ToRSPoint(PointF(leftPoint.GetX(), leftPoint.GetY())),
             ToRSPoint(PointF(rightPoint.GetX(), rightPoint.GetY())));
     }
