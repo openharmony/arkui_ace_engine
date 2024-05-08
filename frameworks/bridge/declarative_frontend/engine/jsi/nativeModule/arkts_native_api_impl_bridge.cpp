@@ -1972,6 +1972,10 @@ void ArkUINativeModule::RegisterTimepickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::SetTimepickerUseMilitaryTime));
     timepicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTimepickerUseMilitaryTime"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::ResetTimepickerUseMilitaryTime));
+    timepicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTimepickerLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::SetTimepickerLoop));
+    timepicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTimepickerLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::ResetTimepickerLoop));
     timepicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTimepickerDateTimeOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::SetTimepickerDateTimeOptions));
     timepicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTimepickerDateTimeOptions"),

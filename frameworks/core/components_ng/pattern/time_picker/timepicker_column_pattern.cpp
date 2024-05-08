@@ -1103,6 +1103,12 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
+        if (!NearZero(dragDelta) && !CanMove(LessNotEqual(dragDelta, 0))) {
+            dragDelta = 0.0;
+            auto toss = GetToss();
+            CHECK_NULL_VOID(toss);
+            toss->StopTossAnimation();
+        }
         ScrollOption(dragDelta, true);
         offsetCurSet_ = dragDelta;
         yOffset_ = dragDelta;
