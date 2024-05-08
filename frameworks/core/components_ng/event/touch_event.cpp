@@ -47,15 +47,14 @@ bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
 {
-    if (point.type == TouchType::DOWN && !firstInputTime_.has_value()) {
-        firstInputTime_ = point.time;
+    if (point.type == TouchType::DOWN &&
+        firstInputTimeWithId_.find(point.id) == firstInputTimeWithId_.end()) {
+        firstInputTimeWithId_[point.id] = point.time;
     }
-    if (point.type == TouchType::UP) {
+    if (point.type == TouchType::UP &&
+        firstInputTimeWithId_.find(point.id) != firstInputTimeWithId_.end()) {
         int64_t overTime = GetSysTimestamp();
-        int64_t inputTime = overTime;
-        if (firstInputTime_.has_value()) {
-            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
-        }
+        int64_t inputTime = static_cast<int64_t>(firstInputTimeWithId_[point.id].time_since_epoch().count());
         if (SystemProperties::GetTraceInputEventEnabled()) {
             ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:TouchEvent",
                 static_cast<long long>(inputTime), static_cast<long long>(overTime));
@@ -64,7 +63,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             ACE_SCOPED_TRACE("UserEvent InputTime:%lld AcceptTime:%lld InputType:TouchEvent",
                 static_cast<long long>(inputTime), static_cast<long long>(overTime));
         }
-        firstInputTime_.reset();
+        firstInputTimeWithId_.erase(point.id);
     }
 
     if (touchEvents_.empty() && !userCallback_ && !onTouchEventCallback_ && !commonTouchEventCallback_) {
