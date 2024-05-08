@@ -411,6 +411,12 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->HandleOverScroll(!pattern->IsReverse() ? velocity : -velocity);
     });
 
+    scrollable->SetIsReverseCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->IsReverse();
+    });
+
     auto scrollStart = [weak = WeakClaim(this)](float position) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

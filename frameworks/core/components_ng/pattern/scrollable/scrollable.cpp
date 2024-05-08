@@ -383,10 +383,23 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     }
 #endif
     auto mainDelta = info.GetMainDelta();
-    mainDelta = Round(mainDelta);
+    if (isReverseCallback_ && isReverseCallback_()) {
+        mainDelta = Round(-mainDelta);
+    } else {
+        mainDelta = Round(mainDelta);
+    }
     JankFrameReport::GetInstance().RecordFrameUpdate();
     auto source = IsMouseWheelScroll(info) ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
     HandleScroll(mainDelta, source, NestedState::GESTURE);
+}
+
+void Scrollable::LayoutDirectionEst(double& correctVelocity)
+{
+    if (isReverseCallback_ && isReverseCallback_()) {
+        correctVelocity = -correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+    } else {
+        correctVelocity = correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+    }
 }
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
@@ -407,7 +420,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     lastVelocity_ = info.GetMainVelocity();
     double correctVelocity = info.GetMainVelocity();
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
-    correctVelocity = correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+    LayoutDirectionEst(correctVelocity);
     // Apply max fling velocity limit, it must be calculated after all fling velocity gain.
     correctVelocity = std::clamp(correctVelocity, -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
     currentVelocity_ = correctVelocity;
