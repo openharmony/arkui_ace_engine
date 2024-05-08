@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_model.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_scroll_theme.h"
 
 namespace OHOS::Ace {
 
@@ -94,6 +95,7 @@ bool CheckSnapPaginations(std::vector<Dimension> snapPaginations)
 void JSScroll::Create(const JSCallbackInfo& info)
 {
     ScrollModel::GetInstance()->Create();
+    JSScrollTheme::ApplyTheme();
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSScroller* jsScroller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSScroller>();
         if (jsScroller) {
