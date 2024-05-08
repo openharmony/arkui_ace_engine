@@ -899,6 +899,7 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
     auto columnNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
+    CHECK_NULL_VOID(columnNode);
     RefPtr<FrameNode> imageNode = nullptr;
     RefPtr<FrameNode> textNode = nullptr;
     findTextAndImageNode(columnNode, textNode, imageNode);
@@ -910,6 +911,7 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
     RefPtr<FrameNode> dialogColumnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(dialogColumnNode);
@@ -945,6 +947,7 @@ void TabBarPattern::CloseDialog(int32_t index)
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
     overlayManager->CloseDialog(dialogNode_);
     dialogNode_.Reset();
 }
