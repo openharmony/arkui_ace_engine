@@ -156,6 +156,7 @@ public:
     static void EnableSmoothDragResize(bool isSmoothDragResizeEnabled);
     static void OnRenderProcessNotResponding(const JSCallbackInfo& args);
     static void OnRenderProcessResponding(const JSCallbackInfo& args);
+    static void SelectionMenuOptions(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
