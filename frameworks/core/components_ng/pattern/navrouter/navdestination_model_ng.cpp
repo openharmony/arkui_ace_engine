@@ -31,6 +31,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr int32_t TEXT_MAX_LINES_TWO = 2;
+} // namespace
 bool NavDestinationModelNG::ParseCommonTitle(
     bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title)
 {
@@ -63,7 +66,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
         if (mainTitle) {
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
+            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
                     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
@@ -74,7 +77,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
             mainTitle = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
+            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
             textLayoutProperty->UpdateContent(title);
             textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
             //max title font size should be 20.0 vp, because of backbutton

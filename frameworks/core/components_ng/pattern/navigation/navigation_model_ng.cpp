@@ -69,6 +69,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t TEXT_MAX_LINES_TWO = 2;
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -147,7 +148,6 @@ void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<
             if (!oldBarItem) {
                 break;
             }
-            // TODO: fix error for update condition when add or delete child, and update old bar item will not work
             if (newBarItem.text.has_value()) {
                 oldBarItem->UpdateText(newBarItem.text.value());
                 if (oldBarItem->GetTextNode()) {
@@ -794,7 +794,7 @@ bool NavigationModelNG::ParseCommonTitle(
         if (mainTitle) {
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
+            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
             textLayoutProperty->UpdateContent(title);
             break;
         }
@@ -809,7 +809,7 @@ bool NavigationModelNG::ParseCommonTitle(
             mainTitleColor = theme->GetMainTitleFontColor();
             mainTitleWeight = FontWeight::BOLD;
         }
-        textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
+        textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
         textLayoutProperty->UpdateContent(title);
         textLayoutProperty->UpdateTextColor(mainTitleColor);
         textLayoutProperty->UpdateFontWeight(mainTitleWeight);
