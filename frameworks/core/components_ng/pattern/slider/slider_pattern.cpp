@@ -542,9 +542,9 @@ float SliderPattern::GetValueInValidRange(
             if (NearEqual(step, 0.0f)) {
                 step = 1.0f;
             }
-            auto toValueCorrection = NearEqual(toValue - step * static_cast<int>(toValue / step), 0) ? 0 : 1;
-            fromValue = LessOrEqual(fromValue, min) ? min : static_cast<int>(fromValue / step) * step;
-            toValue = GreatOrEqual(toValue, max) ? max : (static_cast<int>(toValue / step) + toValueCorrection) * step;
+            auto toValueCorrection = NearEqual(toValue - step * std::floor(toValue / step), 0) ? 0 : 1;
+            fromValue = LessOrEqual(fromValue, min) ? min : std::floor(fromValue / step) * step;
+            toValue = GreatOrEqual(toValue, max) ? max : (std::floor(toValue / step) + toValueCorrection) * step;
             return LessNotEqual(value, fromValue) ? fromValue : GreatNotEqual(value, toValue) ? toValue : value;
         }
     }
