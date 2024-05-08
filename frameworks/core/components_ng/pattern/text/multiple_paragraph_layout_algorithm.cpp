@@ -341,9 +341,15 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
 {
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
+    
     auto direction = textLayoutProperty->GetLayoutDirection();
     if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
         return direction;
+    }
+
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        return TextDirection::RTL;
     }
 
     TextDirection textDirection = TextDirection::LTR;
