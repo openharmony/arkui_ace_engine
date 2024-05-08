@@ -1004,11 +1004,13 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         handledResults.clear();
         auto container = Container::Current();
         CHECK_NULL_RETURN(container, false);
+        std::optional<RefPtr<MouseEventTarget>> isStopPropagation;
         if (event.button == MouseButton::LEFT_BUTTON) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
                     handledResults.emplace_back(mouseTarget);
                     if (mouseTarget->HandleMouseEvent(event)) {
+                        isStopPropagation = mouseTarget;
                         break;
                     }
                 }
@@ -1023,6 +1025,9 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
             DoMouseActionRelease();
         }
         for (const auto& mouseTarget : currMouseTestResults_) {
+            if (isStopPropagation.has_value() && isStopPropagation.value() == mouseTarget) {
+                return true;
+            }
             if (mouseTarget &&
                 std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end()) {
                 if (mouseTarget->HandleMouseEvent(event)) {
