@@ -26,6 +26,8 @@ const Offset RIGHT_BOTTOM = Offset(360.f, 250.f);
 
 class ListCommonTestNg : public ListTestNg {
 public:
+    void CreateFocusableListItems(int32_t itemNumber);
+    void CreateFocusableListItemGroups(int32_t groupNumber);
     void MouseSelect(Offset start, Offset end);
     AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex);
     void CreateForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
@@ -35,6 +37,30 @@ public:
     RefPtr<ListItemDragManager> GetForEachItemDragManager(int32_t itemIndex);
     RefPtr<ListItemDragManager> GetLazyForEachItemDragManager(int32_t itemIndex);
 };
+
+void ListCommonTestNg::CreateFocusableListItems(int32_t itemNumber)
+{
+    for (int32_t index = 0; index < itemNumber; index++) {
+        CreateListItem();
+        {
+            ButtonModelNG buttonModelNG;
+            buttonModelNG.CreateWithLabel("label");
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+void ListCommonTestNg::CreateFocusableListItemGroups(int32_t groupNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        CreateListItemGroup();
+        CreateFocusableListItems(GROUP_LINE_NUMBER);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
 
 void ListCommonTestNg::MouseSelect(Offset start, Offset end)
 {
@@ -69,61 +95,53 @@ AssertionResult ListCommonTestNg::IsEqualNextFocusNode(FocusStep step, int32_t c
 void ListCommonTestNg::CreateForEachList(
     int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove)
 {
-    Create([itemNumber, lanes, &onMove](ListModelNG model) {
-        model.SetLanes(lanes);
-        auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
-        ForEachModelNG forEachModelNG;
-        forEachModelNG.Create();
-        auto forEachNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        forEachNode->SetParent(weakList); // for InitAllChildrenDragManager
-        std::list<std::string> newIds;
-        for (int32_t index = 0; index < itemNumber; index++) {
-            newIds.emplace_back(std::to_string(index));
-        }
-        forEachModelNG.SetNewIds(std::move(newIds));
-        forEachModelNG.OnMove(std::move(onMove));
-        for (int32_t index = 0; index < itemNumber; index++) {
-            // key is 0,1,2,3...
-            forEachModelNG.CreateNewChildStart(std::to_string(index));
-            ListItemModelNG itemModel;
-            itemModel.Create();
-            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-            ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
-            ViewStackProcessor::GetInstance()->Pop();
-            forEachModelNG.CreateNewChildFinish(std::to_string(index));
-        }
-        ViewStackProcessor::GetInstance()->Pop();
-    });
+    ListModelNG model = CreateList();
+    model.SetLanes(lanes);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    ForEachModelNG forEachModelNG;
+    forEachModelNG.Create();
+    auto forEachNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    forEachNode->SetParent(weakList); // for InitAllChildrenDragManager
+    std::list<std::string> newIds;
+    for (int32_t index = 0; index < itemNumber; index++) {
+        newIds.emplace_back(std::to_string(index));
+    }
+    forEachModelNG.SetNewIds(std::move(newIds));
+    forEachModelNG.OnMove(std::move(onMove));
+    for (int32_t index = 0; index < itemNumber; index++) {
+        // key is 0,1,2,3...
+        forEachModelNG.CreateNewChildStart(std::to_string(index));
+        CreateListItems(1);
+        forEachModelNG.CreateNewChildFinish(std::to_string(index));
+    }
 }
 
 void ListCommonTestNg::CreateLazyForEachList(
     int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove)
 {
-    Create([itemNumber, lanes, &onMove](ListModelNG model) {
-        model.SetLanes(lanes);
-        auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
-        const RefPtr<LazyForEachActuator> lazyForEachActuator =
-            AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
-        LazyForEachModelNG lazyForEachModelNG;
-        lazyForEachModelNG.Create(lazyForEachActuator);
-        auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        node->SetParent(weakList); // for InitAllChildrenDragManager
-        lazyForEachModelNG.OnMove(std::move(onMove));
-        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(node);
-        for (int32_t index = 0; index < itemNumber; index++) {
-            ListItemModelNG itemModel;
-            itemModel.Create();
-            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-            ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
-            auto listItemNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-            lazyForEachNode->builder_->cachedItems_.try_emplace(
-                index, LazyForEachChild(std::to_string(index), listItemNode));
-            ViewStackProcessor::GetInstance()->Pop();
-        }
+    ListModelNG model = CreateList();
+    model.SetLanes(lanes);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
+    const RefPtr<LazyForEachActuator> lazyForEachActuator =
+        AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    LazyForEachModelNG lazyForEachModelNG;
+    lazyForEachModelNG.Create(lazyForEachActuator);
+    auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    node->SetParent(weakList); // for InitAllChildrenDragManager
+    lazyForEachModelNG.OnMove(std::move(onMove));
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(node);
+    for (int32_t index = 0; index < itemNumber; index++) {
+        CreateListItem();
+        auto listItemNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        lazyForEachNode->builder_->cachedItems_.try_emplace(
+            index, LazyForEachChild(std::to_string(index), listItemNode));
         ViewStackProcessor::GetInstance()->Pop();
-    });
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
 }
 
 AssertionResult ListCommonTestNg::VerifyForEachItemsOrder(std::list<std::string> expectKeys)
@@ -182,7 +200,9 @@ RefPtr<ListItemDragManager> ListCommonTestNg::GetLazyForEachItemDragManager(int3
  */
 HWTEST_F(ListCommonTestNg, FocusStep001, TestSize.Level1)
 {
-    Create([](ListModelNG model) { CreateItem(VIEW_LINE_NUMBER, Axis::VERTICAL); });
+    CreateList();
+    CreateFocusableListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
 
     /**
      * @tc.steps: step1. GetNextFocusNode from top.
@@ -228,10 +248,10 @@ HWTEST_F(ListCommonTestNg, FocusStep001, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, FocusStep002, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        model.SetListDirection(Axis::HORIZONTAL);
-        CreateItem(VIEW_LINE_NUMBER, Axis::HORIZONTAL);
-    });
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    CreateFocusableListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
 
     /**
      * @tc.steps: step1. GetNextFocusNode from left.
@@ -277,7 +297,9 @@ HWTEST_F(ListCommonTestNg, FocusStep002, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, FocusStep003, TestSize.Level1)
 {
-    Create([](ListModelNG model) { CreateGroup(2); });
+    CreateList();
+    CreateFocusableListItemGroups(2);
+    CreateDone();
 
     /**
      * @tc.steps: step1. GetNextFocusNode from top.
@@ -347,10 +369,10 @@ HWTEST_F(ListCommonTestNg, FocusStep003, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, FocusStep004, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        model.SetListDirection(Axis::HORIZONTAL);
-        CreateGroup(2, Axis::HORIZONTAL);
-    });
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    CreateFocusableListItemGroups(2);
+    CreateDone();
 
     /**
      * @tc.steps: step1. GetNextFocusNode from left.
@@ -414,90 +436,16 @@ HWTEST_F(ListCommonTestNg, FocusStep004, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusStep005
- * @tc.desc: Test GetNextFocusNode other condition
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, FocusStep005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. when List has unfocuseable item
-     * @tc.expected: The unfocuseable item would be skiped.
-     */
-    Create([](ListModelNG model) { CreateItem(VIEW_LINE_NUMBER, Axis::VERTICAL); });
-    GetChildFocusHub(frameNode_, 1)->SetFocusable(false);
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 0, 2));
-
-    /**
-     * @tc.steps: step2. GetNextFocusNode func from top boundary item
-     * @tc.expected: Scroll to last item
-     */
-    Create([](ListModelNG model) { CreateItem(TOTAL_LINE_NUMBER, Axis::VERTICAL); });
-    UpdateCurrentOffset(-ITEM_HEIGHT - 1.f);
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT + 1.f));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 1, 0));
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-
-    /**
-     * @tc.steps: step3. GetNextFocusNode func from bottom boundary item
-     * @tc.expected: Scroll to next item
-     */
-    Create([](ListModelNG model) { CreateItem(TOTAL_LINE_NUMBER, Axis::VERTICAL); });
-    ScrollDown();
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 8, NULL_VALUE));
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * 2));
-
-    /**
-     * @tc.steps: step4. GetNextFocusNode func from bottom boundary item
-     * @tc.expected: Scroll to next item
-     */
-    // change focus between different group
-    const float groupHeight = ITEM_HEIGHT * GROUP_LINE_NUMBER;
-    int32_t groupNumber = 3; // create scrollable List
-    Create([groupNumber](ListModelNG model) { CreateGroup(groupNumber, Axis::VERTICAL); });
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 7, NULL_VALUE));
-    EXPECT_TRUE(IsEqualTotalOffset(groupHeight));
-    // change focus in same group
-    groupNumber = 3; // create scrollable List
-    Create([groupNumber](ListModelNG model) { CreateGroup(groupNumber, Axis::VERTICAL); });
-    ScrollDown(2);
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * 2));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 10, NULL_VALUE));
-    EXPECT_TRUE(IsEqualTotalOffset(groupHeight / 2));
-
-    /**
-     * @tc.steps: step5. GetNextFocusNode func from top boundary item
-     * @tc.expected: Scroll to next item
-     */
-    // change focus between different group
-    groupNumber = 3; // create scrollable List
-    Create([groupNumber](ListModelNG model) { CreateGroup(groupNumber, Axis::VERTICAL); });
-    ScrollDown(GROUP_LINE_NUMBER);
-    EXPECT_TRUE(IsEqualTotalOffset(groupHeight));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 3, 2));
-    EXPECT_FALSE(IsEqualTotalOffset(0));
-    // change focus in same group
-    groupNumber = 3; // create scrollable List
-    Create([groupNumber](ListModelNG model) { CreateGroup(groupNumber, Axis::VERTICAL); });
-    ScrollDown(3);
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * 3));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 2, 1));
-    EXPECT_FALSE(IsEqualTotalOffset(0));
-}
-
-/**
  * @tc.name: FocusStep006
  * @tc.desc: Test List focusing ability with lanes mode and VERTICAL.
  * @tc.type: FUNC
  */
 HWTEST_F(ListCommonTestNg, FocusStep006, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        model.SetLanes(4);
-        CreateItem(10, Axis::VERTICAL);
-    });
+    ListModelNG model = CreateList();
+    model.SetLanes(4);
+    CreateFocusableListItems(10);
+    CreateDone();
 
     /**
      * @tc.steps: step1. GetNextFocusNode from left_top.
@@ -587,11 +535,11 @@ HWTEST_F(ListCommonTestNg, FocusStep006, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, FocusStep007, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        model.SetListDirection(Axis::HORIZONTAL);
-        model.SetLanes(4);
-        CreateItem(10, Axis::HORIZONTAL);
-    });
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    model.SetLanes(4);
+    CreateFocusableListItems(10);
+    CreateDone();
 
     /**
      * @tc.steps: step1. GetNextFocusNode from left_top.
@@ -681,10 +629,10 @@ HWTEST_F(ListCommonTestNg, FocusStep007, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, FocusStep008, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        model.SetLanes(2);
-        CreateGroup(2, Axis::VERTICAL);
-    });
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    CreateFocusableListItemGroups(2);
+    CreateDone();
 
     int32_t currentIndex = 0;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
@@ -746,11 +694,11 @@ HWTEST_F(ListCommonTestNg, FocusStep008, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, FocusStep009, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        model.SetListDirection(Axis::HORIZONTAL);
-        model.SetLanes(2);
-        CreateGroup(2, Axis::HORIZONTAL);
-    });
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    model.SetLanes(2);
+    CreateFocusableListItemGroups(2);
+    CreateDone();
 
     int32_t currentIndex = 0;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, currentIndex, NULL_VALUE));
@@ -806,13 +754,123 @@ HWTEST_F(ListCommonTestNg, FocusStep009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FocusStep010
+ * @tc.desc: Test GetNextFocusNode other condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, FocusStep010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. when List has unfocuseable item
+     * @tc.expected: The unfocuseable item would be skiped.
+     */
+    CreateList();
+    CreateFocusableListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
+    GetChildFocusHub(frameNode_, 1)->SetFocusable(false);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 0, 2));
+}
+
+/**
+ * @tc.name: FocusStep011
+ * @tc.desc: Test GetNextFocusNode other condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, FocusStep011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. GetNextFocusNode func from top boundary item
+     * @tc.expected: Scroll to last item
+     */
+    CreateList();
+    CreateFocusableListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    UpdateCurrentOffset(-ITEM_HEIGHT - 1.f);
+    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT + 1.f));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 1, 0));
+    EXPECT_TRUE(IsEqualTotalOffset(0));
+
+    /**
+     * @tc.steps: step3. GetNextFocusNode func from bottom boundary item
+     * @tc.expected: Scroll to next item
+     */
+    ClearOldList();
+    CreateList();
+    CreateFocusableListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    ScrollDown();
+    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 8, NULL_VALUE));
+    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * 2));
+}
+
+/**
+ * @tc.name: FocusStep012
+ * @tc.desc: Test GetNextFocusNode other condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, FocusStep012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step4. GetNextFocusNode func from bottom boundary item
+     * @tc.expected: Scroll to next item
+     */
+    // change focus between different group
+    const float groupHeight = ITEM_HEIGHT * GROUP_LINE_NUMBER;
+    int32_t groupNumber = 3; // create scrollable List
+    CreateList();
+    CreateFocusableListItemGroups(groupNumber);
+    CreateDone();
+    EXPECT_TRUE(IsEqualTotalOffset(0));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 7, NULL_VALUE));
+    EXPECT_TRUE(IsEqualTotalOffset(groupHeight));
+    // change focus in same group
+    groupNumber = 3; // create scrollable List
+    ClearOldList();
+    CreateList();
+    CreateFocusableListItemGroups(groupNumber);
+    CreateDone();
+    ScrollDown(2);
+    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * 2));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 10, NULL_VALUE));
+    EXPECT_TRUE(IsEqualTotalOffset(groupHeight / 2));
+
+    /**
+     * @tc.steps: step5. GetNextFocusNode func from top boundary item
+     * @tc.expected: Scroll to next item
+     */
+    // change focus between different group
+    groupNumber = 3; // create scrollable List
+    ClearOldList();
+    CreateList();
+    CreateFocusableListItemGroups(groupNumber);
+    CreateDone();
+    ScrollDown(GROUP_LINE_NUMBER);
+    EXPECT_TRUE(IsEqualTotalOffset(groupHeight));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 3, 2));
+    EXPECT_FALSE(IsEqualTotalOffset(0));
+    // change focus in same group
+    groupNumber = 3; // create scrollable List
+    ClearOldList();
+    CreateList();
+    CreateFocusableListItemGroups(groupNumber);
+    CreateDone();
+    ScrollDown(3);
+    EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * 3));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 2, 1));
+    EXPECT_FALSE(IsEqualTotalOffset(0));
+}
+
+/**
  * @tc.name: KeyEvent001
  * @tc.desc: Test list_pattern OnKeyEvent function
  * @tc.type: FUNC
  */
 HWTEST_F(ListCommonTestNg, KeyEvent001, TestSize.Level1)
 {
-    CreateWithItem([](ListModelNG model) {});
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Test other KeyEvent.
@@ -840,7 +898,10 @@ HWTEST_F(ListCommonTestNg, KeyEvent001, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
 {
-    CreateWithItem([](ListModelNG model) { model.SetMultiSelectable(true); });
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Select item(index:0)
@@ -892,7 +953,10 @@ HWTEST_F(ListCommonTestNg, MouseSelect002, TestSize.Level1)
      * @tc.cases: Select from the item(index:1 LEFT_TOP) to the item(index:2 RIGHT_BOTTOM).
      * @tc.expected: The items(index:1,2) are selected.
      */
-    CreateWithItem([](ListModelNG model) { model.SetMultiSelectable(true); });
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     MouseSelect(LEFT_TOP, RIGHT_BOTTOM);
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
@@ -909,11 +973,11 @@ HWTEST_F(ListCommonTestNg, MouseSelect003, TestSize.Level1)
      * @tc.cases: Select from the item(index:6 RIGHT_TOP) to the item(index:1 LEFT_BOTTOM).
      * @tc.expected: The items(index:1,2,3,4,5,6) are selected.
      */
-    Create([](ListModelNG model) {
-        model.SetMultiSelectable(true);
-        model.SetListDirection(Axis::HORIZONTAL);
-        CreateItem(VIEW_LINE_NUMBER, Axis::HORIZONTAL);
-    });
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    model.SetMultiSelectable(true);
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
     MouseSelect(RIGHT_TOP, LEFT_BOTTOM);
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
@@ -934,10 +998,10 @@ HWTEST_F(ListCommonTestNg, MouseSelect004, TestSize.Level1)
      * @tc.cases: Select from the item(index:4 LEFT_BOTTOM) to the item(index:3 RIGHT_TOP).
      * @tc.expected: The items(index:2,3,4,5) are selected.
      */
-    Create([](ListModelNG model) {
-        model.SetLanes(2);
-        CreateItem(10, Axis::VERTICAL);
-    });
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     MouseSelect(LEFT_BOTTOM, RIGHT_TOP);
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
@@ -956,10 +1020,10 @@ HWTEST_F(ListCommonTestNg, MouseSelect005, TestSize.Level1)
      * @tc.cases: Select from the item(index:5 RIGHT_BOTTOM) to the item(index:2 LEFT_TOP).
      * @tc.expected: The items(index:0,1,2,3,4,5) are selected.
      */
-    Create([](ListModelNG model) {
-        model.SetLanes(2);
-        CreateGroup(2, Axis::VERTICAL);
-    });
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    CreateListItemGroups(2);
+    CreateDone();
     MouseSelect(RIGHT_BOTTOM, LEFT_TOP);
     std::vector<RefPtr<FrameNode>> listItems = GetALLItem(); // flat items
     EXPECT_TRUE(listItems[2]->GetPattern<ListItemPattern>()->IsSelected());
@@ -979,7 +1043,10 @@ HWTEST_F(ListCommonTestNg, MouseSelect006, TestSize.Level1)
      * @tc.steps: step1. Set item(index:1) unselectable, set item(index:2) unenabled,
      *                   set selectCallback for item(index:5)
      */
-    CreateWithItem([](ListModelNG model) { model.SetMultiSelectable(true); });
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     bool isSixthItemSelected = false;
     auto selectCallback = [&isSixthItemSelected](bool) { isSixthItemSelected = true; };
     GetChildPattern<ListItemPattern>(frameNode_, 1)->SetSelectable(false);
@@ -1009,7 +1076,10 @@ HWTEST_F(ListCommonTestNg, MouseSelect007, TestSize.Level1)
      * @tc.steps: step1. Move distance < DEFAULT_PAN_DISTANCE
      * @tc.expected: The item is not Selected
      */
-    CreateWithItem([](ListModelNG model) { model.SetMultiSelectable(true); });
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     MouseSelect(Offset(0.f, 0.f), Offset(1.f, 1.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
 }
@@ -1024,27 +1094,32 @@ HWTEST_F(ListCommonTestNg, AccessibilityProperty001, TestSize.Level1)
     /**
      * @tc.steps: step1. Scrollable List
      */
-    CreateWithItem([](ListModelNG model) {});
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
     EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 0);
-    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), VIEW_LINE_NUMBER - 1);
-    EXPECT_EQ(accessibilityProperty_->GetCollectionItemCounts(), TOTAL_LINE_NUMBER);
+    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), VIEW_ITEM_NUMBER - 1);
+    EXPECT_EQ(accessibilityProperty_->GetCollectionItemCounts(), TOTAL_ITEM_NUMBER);
 
     /**
      * @tc.steps: step2. scroll to second item
      */
     ScrollDown();
     EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 1);
-    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), VIEW_LINE_NUMBER);
+    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), VIEW_ITEM_NUMBER);
 
     /**
      * @tc.steps: step3. unScrollable List
      */
-    Create([](ListModelNG model) { CreateItem(VIEW_LINE_NUMBER); });
+    ClearOldList();
+    CreateList();
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
     EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 0);
-    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), VIEW_LINE_NUMBER - 1);
-    EXPECT_EQ(accessibilityProperty_->GetCollectionItemCounts(), VIEW_LINE_NUMBER);
+    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), VIEW_ITEM_NUMBER - 1);
+    EXPECT_EQ(accessibilityProperty_->GetCollectionItemCounts(), VIEW_ITEM_NUMBER);
 }
 
 /**
@@ -1057,7 +1132,9 @@ HWTEST_F(ListCommonTestNg, AccessibilityProperty002, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll to Top.
      */
-    CreateWithItem([](ListModelNG model) {});
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions = 0;
     exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
@@ -1085,7 +1162,10 @@ HWTEST_F(ListCommonTestNg, AccessibilityProperty002, TestSize.Level1)
     /**
      * @tc.steps: step4. UnScrollable List.
      */
-    Create([](ListModelNG model) { CreateItem(VIEW_LINE_NUMBER); });
+    ClearOldList();
+    CreateList();
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
     accessibilityProperty_->ResetSupportAction();
     EXPECT_EQ(GetActions(accessibilityProperty_), 0);
 }
@@ -1097,7 +1177,9 @@ HWTEST_F(ListCommonTestNg, AccessibilityProperty002, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, AccessibilityProperty003, TestSize.Level1)
 {
-    CreateWithItem([](ListModelNG model) {});
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     auto listItem = GetChildFrameNode(frameNode_, 0);
     auto itemAccessibilityProperty = listItem->GetAccessibilityProperty<ListItemAccessibilityProperty>();
     EXPECT_FALSE(itemAccessibilityProperty->IsSelected());
@@ -1116,8 +1198,9 @@ HWTEST_F(ListCommonTestNg, AccessibilityProperty003, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, AccessibilityProperty004, TestSize.Level1)
 {
-    Create(
-        [](ListModelNG model) { CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE); });
+    CreateList();
+    CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateDone();
     auto groupAccessibilityProperty =
         GetChildFrameNode(frameNode_, 0)->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
     EXPECT_EQ(groupAccessibilityProperty->GetBeginIndex(), 0);
@@ -1136,7 +1219,9 @@ HWTEST_F(ListCommonTestNg, AccessibilityProperty004, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, PerformActionTest001, TestSize.Level1)
 {
-    Create([](ListModelNG model) { CreateItem(VIEW_LINE_NUMBER); });
+    CreateList();
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
     auto listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, 0);
     auto listItemAccessibilityProperty = GetChildAccessibilityProperty<ListItemAccessibilityProperty>(frameNode_, 0);
 
@@ -1172,7 +1257,9 @@ HWTEST_F(ListCommonTestNg, PerformActionTest002, TestSize.Level1)
      * @tc.steps: step1. When list is not Scrollable
      * @tc.expected: can not scrollpage
      */
-    Create([](ListModelNG model) { CreateItem(VIEW_LINE_NUMBER); });
+    CreateList();
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone();
     accessibilityProperty_->ActActionScrollForward();
     EXPECT_TRUE(IsEqualTotalOffset(0));
     accessibilityProperty_->ActActionScrollBackward();
@@ -1182,7 +1269,10 @@ HWTEST_F(ListCommonTestNg, PerformActionTest002, TestSize.Level1)
      * @tc.steps: step2. When list is Scrollable
      * @tc.expected: can scrollpage
      */
-    CreateWithItem([](ListModelNG model) {});
+    ClearOldList();
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     accessibilityProperty_->ActActionScrollForward();
     EXPECT_TRUE(IsEqualTotalOffset(200.f));
     accessibilityProperty_->ActActionScrollBackward();
@@ -1196,7 +1286,8 @@ HWTEST_F(ListCommonTestNg, PerformActionTest002, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, FRCCallback001, TestSize.Level1)
 {
-    Create([](ListModelNG model) {});
+    CreateList();
+    CreateDone();
     // CalcExpectedFrameRate will be called
     pattern_->NotifyFRCSceneInfo("", 0.0f, SceneStatus::START);
 }
@@ -1213,6 +1304,8 @@ HWTEST_F(ListCommonTestNg, EventHub001, TestSize.Level1)
      */
     auto mockDragWindow = MockDragWindow::CreateDragWindow("", 0, 0, 0, 0);
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), DrawFrameNode(_)).Times(2);
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), MoveTo).Times(AnyNumber());
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), Destroy).Times(AnyNumber());
 
     /**
      * @tc.steps: step2. Run List GetDragExtraParams func.
@@ -1222,7 +1315,10 @@ HWTEST_F(ListCommonTestNg, EventHub001, TestSize.Level1)
         auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
         return AceType::DynamicCast<UINode>(dragItem);
     };
-    CreateWithItem([onItemDragStart](ListModelNG model) { model.SetOnItemDragStart(onItemDragStart); });
+    ListModelNG model = CreateList();
+    model.SetOnItemDragStart(onItemDragStart);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     auto jsonStr = eventHub_->GetDragExtraParams("", Point(0, 250), DragEventType::MOVE);
     EXPECT_EQ(jsonStr, "{\"insertIndex\":2}");
 
@@ -1254,7 +1350,9 @@ HWTEST_F(ListCommonTestNg, EventHub001, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, EventHub002, TestSize.Level1)
 {
-    CreateWithItem([](ListModelNG model) {});
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
     auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetEventHub<ListItemEventHub>();
     auto jsonStr = itemEventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::START);
     EXPECT_EQ(jsonStr, "{\"selectedIndex\":0}");
@@ -1269,13 +1367,13 @@ HWTEST_F(ListCommonTestNg, EventHub002, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest001, TestSize.Level1)
 {
-    Create([](ListModelNG model) {
-        model.SetMultiSelectable(true);
-        ListItemGroupModelNG groupModel;
-        groupModel.Create(V2::ListItemGroupStyle::CARD);
-        CreateItem(GROUP_LINE_NUMBER, Axis::VERTICAL, V2::ListItemStyle::CARD);
-        ViewStackProcessor::GetInstance()->Pop();
-    });
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    ListItemGroupModelNG groupModel;
+    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    CreateListItems(GROUP_LINE_NUMBER, V2::ListItemStyle::CARD);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
     RefPtr<FrameNode> group = GetChildFrameNode(frameNode_, 0);
 
     /**
@@ -1319,13 +1417,13 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest002, TestSize.Level1)
     const Offset LEFT_BOTTOM = Offset(0.f, 150.f);
     const Offset RIGHT_TOP = Offset(360.f, 0.f);
     const Offset RIGHT_BOTTOM = Offset(360.f, 150.f);
-    Create([](ListModelNG model) {
-        model.SetMultiSelectable(true);
-        ListItemGroupModelNG groupModel;
-        groupModel.Create(V2::ListItemGroupStyle::CARD);
-        CreateItem(GROUP_LINE_NUMBER, Axis::VERTICAL, V2::ListItemStyle::CARD);
-        ViewStackProcessor::GetInstance()->Pop();
-    });
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    ListItemGroupModelNG groupModel;
+    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    CreateListItems(GROUP_LINE_NUMBER, V2::ListItemStyle::CARD);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
     RefPtr<FrameNode> group = GetChildFrameNode(frameNode_, 0);
 
     /**
@@ -1371,13 +1469,13 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest003, TestSize.Level1)
      * @tc.steps: step1. create List/ListItemGroup/ListItem and ListItem set to unselectable.
      * @tc.expected: step1. create a card style ListItemGroup success.
      */
-    Create([](ListModelNG model) {
-        model.SetMultiSelectable(true);
-        ListItemGroupModelNG groupModel;
-        groupModel.Create(V2::ListItemGroupStyle::CARD);
-        CreateItem(5, Axis::VERTICAL, V2::ListItemStyle::CARD);
-        ViewStackProcessor::GetInstance()->Pop();
-    });
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    ListItemGroupModelNG groupModel;
+    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    CreateListItems(5, V2::ListItemStyle::CARD);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
     auto group = GetChildFrameNode(frameNode_, 0);
 
     bool isFifthItemSelected = false;
@@ -1405,7 +1503,9 @@ HWTEST_F(ListCommonTestNg, ListPattern_Distributed001, TestSize.Level1)
     /**
      * @tc.steps: step1. Init List node
      */
-    CreateWithItem([](ListModelNG model) {});
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
 
     /**
      * @tc.steps: step2. get pattern .
@@ -1436,6 +1536,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag001, TestSize.Level1)
         actualTo = to;
     };
     CreateForEachList(3, 1, onMoveEvent);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Drag item(index:0)
@@ -1500,6 +1601,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag002, TestSize.Level1)
 {
     auto onMoveEvent = [](int32_t, int32_t) {};
     CreateForEachList(10, 1, onMoveEvent);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Drag to the end of view
@@ -1554,6 +1656,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag003, TestSize.Level1)
         actualTo = to;
     };
     CreateForEachList(3, 1, onMoveEvent);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Drag item(index:0)
@@ -1645,6 +1748,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag004, TestSize.Level1)
         actualTo = to;
     };
     CreateForEachList(4, 2, onMoveEvent); // 2 lanes
+    CreateDone();
 
     /**
      * @tc.steps: step1. Drag item(index:0)
@@ -1705,6 +1809,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag005, TestSize.Level1)
 {
     auto onMoveEvent = [](int32_t, int32_t) {};
     CreateForEachList(3, 2, onMoveEvent); // 2 lanes but 3 items
+    CreateDone();
 
     /**
      * @tc.steps: step1. Drag item(index:1)
@@ -1738,6 +1843,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag005, TestSize.Level1)
 HWTEST_F(ListCommonTestNg, ForEachDrag006, TestSize.Level1)
 {
     CreateForEachList(1, 1, nullptr);
+    CreateDone();
     auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
@@ -1753,42 +1859,15 @@ HWTEST_F(ListCommonTestNg, ForEachDrag006, TestSize.Level1)
  */
 HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
 {
-    ListModelNG model;
-    model.Create();
-    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
-    auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
-    ForEachModelNG forEachModelNG;
-    forEachModelNG.Create();
-    auto forEachElement = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    forEachElement->SetParent(weakList); // for InitAllChildrenDragManager
-    std::list<std::string> newIds;
-    for (int32_t index = 0; index < 3; index++) {
-        newIds.emplace_back(std::to_string(index));
-    }
-    forEachModelNG.SetNewIds(std::move(newIds));
-
     /**
      * @tc.steps: step1. Set onMoveEvent
      * @tc.expected: dragEvent init
      */
     auto onMoveEvent = [](int32_t, int32_t) {};
-    forEachModelNG.OnMove(std::move(onMoveEvent));
-    for (int32_t index = 0; index < 3; index++) {
-        // key is 0,1,2,3...
-        forEachModelNG.CreateNewChildStart(std::to_string(index));
-        ListItemModelNG itemModel;
-        itemModel.Create();
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
-        ViewStackProcessor::GetInstance()->Pop();
-        forEachModelNG.CreateNewChildFinish(std::to_string(index));
-    }
-    auto forEachNode = AceType::DynamicCast<ForEachNode>(forEachElement);
-    forEachNode->CompareAndUpdateChildren();
-    forEachNode->MountToParent(listNode);
-    auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachElement->GetChildAtIndex(0));
+    CreateForEachList(3, 2, onMoveEvent);
+    CreateDone();
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
     auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
@@ -1798,8 +1877,14 @@ HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
      * @tc.steps: step2. Set onMoveEvent to null
      * @tc.expected: dragEvent uninit
      */
-    forEachModelNG.OnMove(nullptr);
-    EXPECT_EQ(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
+    CreateForEachList(3, 2, nullptr);
+    CreateDone();
+    forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
+    listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
+    listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
 }
 
 /**
@@ -1816,6 +1901,7 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag001, TestSize.Level1)
         actualTo = to;
     };
     CreateLazyForEachList(3, 1, onMoveEvent);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Drag item(index:0)
@@ -1908,6 +1994,7 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
         actualTo = to;
     };
     CreateLazyForEachList(4, 2, onMoveEvent); // 2 lanes
+    CreateDone();
 
     /**
      * @tc.steps: step1. Drag item(index:0)

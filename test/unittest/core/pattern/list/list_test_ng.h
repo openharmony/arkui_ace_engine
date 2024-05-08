@@ -80,10 +80,10 @@ using namespace testing;
 using namespace testing::ext;
 constexpr float LIST_WIDTH = 480.f;
 constexpr float LIST_HEIGHT = 800.f;
-constexpr int32_t TOTAL_LINE_NUMBER = 10;
-constexpr int32_t VIEW_LINE_NUMBER = 8;
-constexpr float ITEM_WIDTH = LIST_WIDTH / VIEW_LINE_NUMBER;
-constexpr float ITEM_HEIGHT = LIST_HEIGHT / VIEW_LINE_NUMBER;
+constexpr float ITEM_WIDTH = 60.f;
+constexpr float ITEM_HEIGHT = 100.f;
+constexpr int32_t TOTAL_ITEM_NUMBER = 10;
+constexpr int32_t VIEW_ITEM_NUMBER = 8;
 constexpr int32_t GROUP_NUMBER = 4;
 constexpr int32_t GROUP_LINE_NUMBER = 4;
 constexpr float GROUP_HEADER_LEN = 50.f;
@@ -116,27 +116,26 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void GetInstance();
-    void Create(const std::function<void(ListModelNG)>& callback);
-    void CreateWithItem(const std::function<void(ListModelNG)>& callback);
-    void CreateWithSwipe(bool isStartNode, V2::SwipeEdgeEffect swipeEdgeEffect, int32_t itemNumber = TOTAL_LINE_NUMBER);
-    void CreateWithSwipeAction(
-        SwipeActionItem& item, bool isStartArea, OnOffsetChangeFunc onOffsetChange, V2::SwipeEdgeEffect effect);
+    void ClearOldList();
+    void GetList();
+    ListModelNG CreateList();
+    ListItemModelNG CreateListItem(V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
+    void CreateListItems(int32_t itemNumber, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
+    ListItemGroupModelNG CreateListItemGroup(V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE);
+    void CreateListItemGroups(
+        int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE);
+    void CreateDone();
 
-    static void CreateItem(
-        int32_t itemNumber, Axis axis = Axis::VERTICAL, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
-    static void CreateItemWithSize(
-        int32_t itemNumber, SizeT<Dimension> itemSize, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
-    static void CreateGroup(int32_t groupNumber, Axis axis = Axis::VERTICAL);
-    static void CreateGroupChildrenMainSize(int32_t groupNumber);
-    static void CreateGroupWithItem(int32_t groupNumber, Axis axis = Axis::VERTICAL);
-    static void CreateGroupWithSetting(int32_t groupNumber, Axis axis, V2::ListItemGroupStyle listItemGroupStyle,
+    void CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize);
+    void CreateGroupChildrenMainSize(int32_t groupNumber);
+    void CreateGroupWithItem(int32_t groupNumber, Axis axis = Axis::VERTICAL);
+    void CreateGroupWithSetting(int32_t groupNumber, Axis axis, V2::ListItemGroupStyle listItemGroupStyle,
         int32_t itemNumber = GROUP_LINE_NUMBER);
-    static void CreateGroupWithSettingChildrenMainSize(int32_t groupNumber);
-    static void CreateItemWithSwipe(
+    void CreateGroupWithSettingChildrenMainSize(int32_t groupNumber);
+    void CreateItemWithSwipe(
         std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect);
-    static std::function<void()> GetDefaultSwiperBuilder(float crossSize);
-    static std::function<void()> GetDefaultHeaderBuilder();
+    std::function<void()> GetDefaultSwiperBuilder(float crossSize);
+    std::function<void()> GetDefaultHeaderBuilder();
 
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     float GetInterval();
