@@ -41,7 +41,7 @@ void RosenRenderParticle::UpdateDisturbance(
 }
 
 void RosenRenderParticle::updateEmitterPosition(
-    const RefPtr<FrameNode>& frameNode, const std::vector<EmitterProperty>& props)
+    const RefPtr<FrameNode>& frameNode, std::vector<EmitterProperty>& props)
 {
     if (props.size() == 0) {
         return;

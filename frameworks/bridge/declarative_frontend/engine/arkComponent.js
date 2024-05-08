@@ -23501,7 +23501,7 @@ class ParticleEmitterModifier extends ModifierWithKey {
       for (let i = 0; i < this.value.length; i++) {
         let data = this.value[i];
         let indexValue = 0;
-        if (data.index > 0 && data.index < this.value.length) {
+        if (data.index > 0) {
           indexValue = data.index;
         }
         dataArray.push(indexValue);
