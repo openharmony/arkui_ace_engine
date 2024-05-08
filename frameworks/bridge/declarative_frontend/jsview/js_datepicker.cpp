@@ -190,7 +190,9 @@ JSRef<JSVal> DatePickerDateChangeEventToJSValue(const DatePickerChangeEvent& eve
         dateTime.tm_min = minute->GetInt();
     }
 
-    auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
+    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
+    auto duration = timestamp.time_since_epoch();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     auto dateObj = JSDate::New(milliseconds);
     return JSRef<JSVal>::Cast(dateObj);
 }
