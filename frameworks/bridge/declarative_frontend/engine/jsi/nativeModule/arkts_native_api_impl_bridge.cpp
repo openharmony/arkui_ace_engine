@@ -1750,6 +1750,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetPadding));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPadding"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetPadding));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetContentType));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetContentType));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);
@@ -3391,6 +3395,18 @@ void ArkUINativeModule::RegisterMarqueeAttributes(Local<panda::ObjectRef> object
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetMarqueeUpdateStrategy));
     marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarqueeUpdateStrategy"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetMarqueeUpdateStrategy));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarqueeOnStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetMarqueeOnStart));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarqueeOnStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetMarqueeOnStart));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarqueeOnBounce"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetMarqueeOnBounce));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarqueeOnBounce"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetMarqueeOnBounce));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarqueeOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::SetMarqueeOnFinish));
+    marquee->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarqueeOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MarqueeBridge::ResetMarqueeOnFinish));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "marquee"), marquee);
 }
 

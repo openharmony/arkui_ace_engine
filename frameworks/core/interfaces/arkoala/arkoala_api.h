@@ -3200,6 +3200,12 @@ struct ArkUIMarqueeModifier {
     void (*resetMarqueeFontFamily)(ArkUINodeHandle node);
     void (*setMarqueeUpdateStrategy)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetMarqueeUpdateStrategy)(ArkUINodeHandle node);
+    void (*setMarqueeOnStart)(ArkUINodeHandle node, void* callback);
+    void (*resetMarqueeOnStart)(ArkUINodeHandle node);
+    void (*setMarqueeOnBounce)(ArkUINodeHandle node, void* callback);
+    void (*resetMarqueeOnBounce)(ArkUINodeHandle node);
+    void (*setMarqueeOnFinish)(ArkUINodeHandle node, void* callback);
+    void (*resetMarqueeOnFinish)(ArkUINodeHandle node);
 };
 
 struct ArkUIDatePickerModifier {
