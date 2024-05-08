@@ -41,12 +41,9 @@ public:
             auto borderColor = themeColors->BackgroundEmphasize();
             ViewAbstractModel::GetInstance()->SetBorderColor(borderColor, borderColor, borderColor, borderColor);
             ViewAbstractModel::GetInstance()->SetColorBlend(Color::BLACK); // default for restore color after pressed
-            ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
             // focused
             ViewStackModel::GetInstance()->SetVisualState(VisualState::FOCUSED);
             ViewAbstractModel::GetInstance()->SetOuterBorderColor(themeColors->InteractiveFocus());
-            CalcDimension outerBorderWidth(JSProgressTheme::outerBorderWidthValue, OHOS::Ace::DimensionUnit::PX);
-            ViewAbstractModel::GetInstance()->SetOuterBorderWidth(outerBorderWidth);
             // pressed
             ViewStackModel::GetInstance()->SetVisualState(VisualState::PRESSED);
             ViewAbstractModel::GetInstance()->SetColorBlend(themeColors->InteractivePressed());
@@ -69,8 +66,6 @@ public:
             ProgressModel::GetInstance()->SetColor(themeColors->BackgroundEmphasize());
         }
     }
-private:
-    static constexpr double outerBorderWidthValue = 2.0;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_PROGRESS_THEME_H
