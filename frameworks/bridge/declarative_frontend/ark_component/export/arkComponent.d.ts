@@ -20,6 +20,13 @@ declare enum ModifierType {
     FRAME_NODE = 2,
     EXPOSE_MODIFIER = 3,
 }
+declare class ArkLogConsole {
+  public static log(...args: Object[]): void;
+  public static debug(...args: Object[]): void;
+  public static info(...args: Object[]): void;
+  public static warn(...args: Object[]): void;
+  public static error(...args: Object[]): void;
+}
 declare class JsPointerClass {
     invalid(): boolean;
 }
