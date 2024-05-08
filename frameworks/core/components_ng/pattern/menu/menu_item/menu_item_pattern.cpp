@@ -307,7 +307,7 @@ void MenuItemPattern::HandleBlurEvent()
     CHECK_NULL_VOID(theme);
     if (isFocusBGColorSet_) {
         renderContext->ResetBackgroundColor();
-        renderContext->SetBackgroundColor(theme->GetBackgroundColor().GetValue());
+        renderContext->SetBackgroundColor(Color::TRANSPARENT.GetValue());
         isFocusBGColorSet_ = false;
     }
     if (isFocusShadowSet_) {
