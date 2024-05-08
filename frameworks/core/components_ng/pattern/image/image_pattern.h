@@ -406,7 +406,6 @@ private:
     void OnImageModifyDone();
     void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
-    void ChangeRenderContextProperties();
     void ControlAnimation(int32_t index);
     void SetObscured();
 
