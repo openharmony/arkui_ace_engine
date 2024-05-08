@@ -89,6 +89,7 @@ public:
 
     void FireChangeEvent(int32_t index) const
     {
+        ACE_SCOPED_TRACE("Swiper FireChangeEvent, index: %d eventSize: %zu", index, changeEvents_.size());
         if (!changeEvents_.empty()) {
             std::for_each(
                 changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
