@@ -1,0 +1,635 @@
+diff --git a/frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts b/frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts
+index b8193f1cd5f5c20a0436baf35997e77dd9bfcb17..460440de5ff47477a182f0c65e8b350a48015194 100644
+--- a/frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts
++++ b/frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts
+@@ -1843,6 +1843,10 @@ declare class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAtt
+     }): this;
+     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
+     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
++    scrollBarWidth(value: string | number): this;
++    scrollBarColor(value: string | number | Color): this;
++    scrollBar(value: BarState): this;
++    flingSpeedLimit(value: number): this;
+ }
+ declare class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
+     constructor(nativePtr: KNode, classType?: ModifierType);
+diff --git a/frameworks/bridge/declarative_frontend/ark_component/src/ArkWaterFlow.ts b/frameworks/bridge/declarative_frontend/ark_component/src/ArkWaterFlow.ts
+index b078bcb53b12678e5775a25aa6923b06042a2807..20b81b015f9d04b37d2833891a9938cd431bb045 100644
+--- a/frameworks/bridge/declarative_frontend/ark_component/src/ArkWaterFlow.ts
++++ b/frameworks/bridge/declarative_frontend/ark_component/src/ArkWaterFlow.ts
+@@ -194,6 +194,77 @@ class WaterFlowEdgeEffectModifier extends ModifierWithKey<ArkWaterFlowEdgeEffect
+   }
+ }
+ 
++
++class WaterFlowScrollBarWidthModifier extends ModifierWithKey<string | number> {
++  constructor(value: string | number) {
++    super(value);
++  }
++  static identity: Symbol = Symbol('waterFlowScrollBarWidth');
++  applyPeer(node: KNode, reset: boolean): void {
++    if (reset) {
++      getUINativeModule().waterFlow.resetScrollBarWidth(node);
++    } else {
++      getUINativeModule().waterFlow.setScrollBarWidth(node, this.value);
++    }
++  }
++}
++
++class WaterFlowScrollBarModifier extends ModifierWithKey<BarState> {
++  constructor(value: BarState) {
++    super(value);
++  }
++  static identity: Symbol = Symbol('waterFlowScrollBar');
++  applyPeer(node: KNode, reset: boolean): void {
++    if (reset) {
++      getUINativeModule().waterFlow.resetScrollBar(node);
++    } else {
++      getUINativeModule().waterFlow.setScrollBar(node, this.value);
++    }
++  }
++}
++
++class WaterFlowScrollBarColorModifier extends ModifierWithKey<string | number | Color> {
++  constructor(value: string | number | Color) {
++    super(value);
++  }
++  static identity: Symbol = Symbol('waterFlowScrollBarColor');
++  applyPeer(node: KNode, reset: boolean): void {
++    if (reset) {
++      getUINativeModule().waterFlow.resetScrollBarColor(node);
++    } else {
++      getUINativeModule().waterFlow.setScrollBarColor(node, this.value);
++    }
++  }
++}
++
++class WaterFlowCachedCountModifier extends ModifierWithKey<number> {
++  constructor(value: number) {
++    super(value);
++  }
++  static identity: Symbol = Symbol('waterFlowCachedCount');
++  applyPeer(node: KNode, reset: boolean): void {
++    if (reset) {
++      getUINativeModule().waterFlow.resetCachedCount(node);
++    } else {
++      getUINativeModule().waterFlow.setCachedCount(node, this.value);
++    }
++  }
++}
++
++class WaterFlowFlingSpeedLimitModifier extends ModifierWithKey<number> {
++  constructor(value: number) {
++    super(value);
++  }
++  static identity: Symbol = Symbol('waterFlowFlingSpeedLimit');
++  applyPeer(node: KNode, reset: boolean): void {
++    if (reset) {
++      getUINativeModule().waterFlow.resetFlingSpeedLimit(node);
++    } else {
++      getUINativeModule().waterFlow.setFlingSpeedLimit(node, this.value);
++    }
++  }
++}
++
+ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
+   constructor(nativePtr: KNode, classType?: ModifierType) {
+     super(nativePtr, classType);
+@@ -255,7 +326,8 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
+     return this;
+   }
+   cachedCount(value: number): this {
+-    throw new Error('Method not implemented.');
++    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, value);
++    return this;
+   }
+   onReachStart(event: () => void): this {
+     throw new Error('Method not implemented.');
+@@ -277,6 +349,22 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
+     modifierWithKey(this._modifiersWithKeys, WaterFlowEdgeEffectModifier.identity, WaterFlowEdgeEffectModifier, effect);
+     return this;
+   }
++  scrollBarWidth(value: string | number): this {
++    modifierWithKey(this._modifiersWithKeys, WaterFlowScrollBarWidthModifier.identity, WaterFlowScrollBarWidthModifier, value);
++    return this;
++  }
++  scrollBarColor(value: string | number | Color): this {
++    modifierWithKey(this._modifiersWithKeys, WaterFlowScrollBarColorModifier.identity, WaterFlowScrollBarColorModifier, value);
++    return this;
++  }
++  scrollBar(value: BarState): this {
++    modifierWithKey(this._modifiersWithKeys, WaterFlowScrollBarModifier.identity, WaterFlowScrollBarModifier, value);
++    return this;
++  }
++  flingSpeedLimit(value: number): this {
++    modifierWithKey(this._modifiersWithKeys, WaterFlowFlingSpeedLimitModifier.identity, WaterFlowFlingSpeedLimitModifier, value);
++    return this;
++  }
+ }
+ 
+ // @ts-ignore
+diff --git a/frameworks/bridge/declarative_frontend/engine/arkComponent.js b/frameworks/bridge/declarative_frontend/engine/arkComponent.js
+index cf0b8886bfcd1280899a85135f214f9a1bb52e8e..84c0315c3fc4fbf90edb5f69e08f54dd52efba75 100644
+--- a/frameworks/bridge/declarative_frontend/engine/arkComponent.js
++++ b/frameworks/bridge/declarative_frontend/engine/arkComponent.js
+@@ -21828,6 +21828,79 @@ class WaterFlowEdgeEffectModifier extends ModifierWithKey {
+   }
+ }
+ WaterFlowEdgeEffectModifier.identity = Symbol('waterFlowEdgeEffect');
++
++class WaterFlowScrollBarWidthModifier extends ModifierWithKey {
++  constructor(value) {
++    super(value);
++  }
++  applyPeer(node, reset) {
++    if (reset) {
++      getUINativeModule().waterFlow.resetScrollBarWidth(node);
++    }
++    else {
++      getUINativeModule().waterFlow.setScrollBarWidth(node, this.value);
++    }
++  }
++}
++WaterFlowScrollBarWidthModifier.identity = Symbol('waterFlowScrollBarWidth');
++class WaterFlowScrollBarModifier extends ModifierWithKey {
++  constructor(value) {
++    super(value);
++  }
++  applyPeer(node, reset) {
++    if (reset) {
++      getUINativeModule().waterFlow.resetScrollBar(node);
++    }
++    else {
++      getUINativeModule().waterFlow.setScrollBar(node, this.value);
++    }
++  }
++}
++WaterFlowScrollBarModifier.identity = Symbol('waterFlowScrollBar');
++class WaterFlowScrollBarColorModifier extends ModifierWithKey {
++  constructor(value) {
++    super(value);
++  }
++  applyPeer(node, reset) {
++    if (reset) {
++      getUINativeModule().waterFlow.resetScrollBarColor(node);
++    }
++    else {
++      getUINativeModule().waterFlow.setScrollBarColor(node, this.value);
++    }
++  }
++}
++WaterFlowScrollBarColorModifier.identity = Symbol('waterFlowScrollBarColor');
++
++class WaterFlowCachedCountModifier extends ModifierWithKey {
++  constructor(value) {
++    super(value);
++  }
++  applyPeer(node, reset) {
++    if (reset) {
++      getUINativeModule().waterFlow.resetCachedCount(node);
++    }
++    else {
++      getUINativeModule().waterFlow.setCachedCount(node, this.value);
++    }
++  }
++}
++WaterFlowCachedCountModifier.identity = Symbol('waterFlowCachedCount');
++
++class WaterFlowFlingSpeedLimitModifier extends ModifierWithKey {
++  constructor(value) {
++    super(value);
++  }
++  applyPeer(node, reset) {
++    if (reset) {
++      getUINativeModule().waterFlow.resetFlingSpeedLimit(node);
++    }
++    else {
++      getUINativeModule().waterFlow.setFlingSpeedLimit(node, this.value);
++    }
++  }
++}
++WaterFlowFlingSpeedLimitModifier.identity = Symbol('waterFlowFlingSpeedLimit');
+ class ArkWaterFlowComponent extends ArkComponent {
+   constructor(nativePtr, classType) {
+     super(nativePtr, classType);
+@@ -21887,7 +21960,8 @@ class ArkWaterFlowComponent extends ArkComponent {
+     return this;
+   }
+   cachedCount(value) {
+-    throw new Error('Method not implemented.');
++    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, value);
++    return this;
+   }
+   onReachStart(event) {
+     throw new Error('Method not implemented.');
+@@ -21909,6 +21983,22 @@ class ArkWaterFlowComponent extends ArkComponent {
+     modifierWithKey(this._modifiersWithKeys, WaterFlowEdgeEffectModifier.identity, WaterFlowEdgeEffectModifier, effect);
+     return this;
+   }
++  scrollBarWidth(value) {
++    modifierWithKey(this._modifiersWithKeys, WaterFlowScrollBarWidthModifier.identity, WaterFlowScrollBarWidthModifier, value);
++    return this;
++  }
++  scrollBarColor(value) {
++    modifierWithKey(this._modifiersWithKeys, WaterFlowScrollBarColorModifier.identity, WaterFlowScrollBarColorModifier, value);
++    return this;
++  }
++  scrollBar(value) {
++    modifierWithKey(this._modifiersWithKeys, WaterFlowScrollBarModifier.identity, WaterFlowScrollBarModifier, value);
++    return this;
++  }
++  flingSpeedLimit(value) {
++    modifierWithKey(this._modifiersWithKeys, WaterFlowFlingSpeedLimitModifier.identity, WaterFlowFlingSpeedLimitModifier, value);
++    return this;
++  }
+ }
+ 
+ // @ts-ignore
+diff --git a/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_impl_bridge.cpp b/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_impl_bridge.cpp
+index 04055f1648f4ef0333950a85460449070ebb3dda..79e3d9083059f0d3a166ab1fdf18c611e7831339 100644
+--- a/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_impl_bridge.cpp
++++ b/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_impl_bridge.cpp
+@@ -3077,6 +3077,26 @@ void ArkUINativeModule::RegisterWaterFlowAttributes(Local<panda::ObjectRef> obje
+         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::SetEdgeEffect));
+     waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEdgeEffect"),
+         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::ResetEdgeEffect));
++    waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBar"),
++        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::SetScrollBar));
++    waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBar"),
++        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::ResetScrollBar));
++    waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarWidth"),
++        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::SetScrollBarWidth));
++    waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarWidth"),
++        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::ResetScrollBarWidth));
++    waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarColor"),
++        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::SetScrollBarColor));
++    waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarColor"),
++        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::ResetScrollBarColor));
++    waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCachedCount"),
++        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::SetCachedCount));
++    waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCachedCount"),
++        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::ResetCachedCount));
++    waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFlingSpeedLimit"),
++        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::SetFlingSpeedLimit));
++    waterflow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlingSpeedLimit"),
++        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WaterFlowBridge::ResetFlingSpeedLimit));
+     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "waterFlow"), waterflow);
+ }
+ 
+diff --git a/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.cpp b/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.cpp
+index 2f77d011f149acc36b8b6b50d60e03e51df5b3f8..200111123817944786ea350be4d1f2836b6eb22d 100644
+--- a/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.cpp
++++ b/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.cpp
+@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
+ namespace {
+ constexpr double FRICTION_DEFAULT = -1.0;
+ constexpr double DIMENSION_DEFAULT = 0.0;
++constexpr int32_t DISPLAY_MODE_SIZE = 3;
+ constexpr int32_t NUM_0 = 0;
+ constexpr int32_t NUM_1 = 1;
+ constexpr int32_t NUM_2 = 2;
+@@ -373,4 +374,138 @@ ArkUINativeModuleValue WaterFlowBridge::ResetEdgeEffect(ArkUIRuntimeCallInfo* ru
+     GetArkUINodeModifiers()->getWaterFlowModifier()->resetEdgeEffect(nativeNode);
+     return panda::JSValueRef::Undefined(vm);
+ }
++
++ArkUINativeModuleValue WaterFlowBridge::SetScrollBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
++{
++    EcmaVM* vm = runtimeCallInfo->GetVM();
++    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
++    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
++    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
++    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
++    int32_t barState = 0;
++    if (!ArkTSUtils::ParseJsInteger(vm, secondArg, barState) || barState < 0 || barState >= DISPLAY_MODE_SIZE) {
++        GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBar(nativeNode);
++    } else {
++        GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBar(nativeNode, barState);
++    }
++    return panda::JSValueRef::Undefined(vm);
++}
++
++ArkUINativeModuleValue WaterFlowBridge::ResetScrollBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
++{
++    EcmaVM* vm = runtimeCallInfo->GetVM();
++    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
++    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
++    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
++    GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBar(nativeNode);
++    return panda::JSValueRef::Undefined(vm);
++}
++
++ArkUINativeModuleValue WaterFlowBridge::SetScrollBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
++{
++    EcmaVM* vm = runtimeCallInfo->GetVM();
++    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
++    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
++    Local<JSValueRef> scrollBarArg = runtimeCallInfo->GetCallArgRef(NUM_1);
++    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
++
++    CalcDimension scrollBarWidth;
++    if (!ArkTSUtils::ParseJsDimension(vm, scrollBarArg, scrollBarWidth,DimensionUnit::VP) || scrollBarArg->IsNull() ||
++        scrollBarArg->IsUndefined() || (scrollBarArg->IsString() && scrollBarWidth.ToString().empty()) ||
++        LessNotEqual(scrollBarWidth.Value(), 0.0) || scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
++        GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarWidth(nativeNode);
++    } else {
++        GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarWidth(nativeNode, scrollBarWidth.ToString().c_str());
++    }
++    return panda::JSValueRef::Undefined(vm);
++}
++
++ArkUINativeModuleValue WaterFlowBridge::ResetScrollBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
++{
++    EcmaVM* vm = runtimeCallInfo->GetVM();
++    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
++    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
++    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
++    GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarWidth(nativeNode);
++    return panda::JSValueRef::Undefined(vm);
++}
++
++ArkUINativeModuleValue WaterFlowBridge::SetScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
++{
++    EcmaVM* vm = runtimeCallInfo->GetVM();
++    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
++    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
++    Local<JSValueRef> argColor = runtimeCallInfo->GetCallArgRef(NUM_1);
++    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
++    std::string color = "";
++    if (!ArkTSUtils::ParseJsString(vm, argColor, color) || argColor->IsUndefined() || color.empty()) {
++        GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarColor(nativeNode);
++    } else {
++        GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarColor(nativeNode, color.c_str());
++    }
++    return panda::JSValueRef::Undefined(vm);
++}
++
++ArkUINativeModuleValue WaterFlowBridge::ResetScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
++{
++    EcmaVM* vm = runtimeCallInfo->GetVM();
++    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
++    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
++    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
++    GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarColor(nativeNode);
++    return panda::JSValueRef::Undefined(vm);
++}
++
++ArkUINativeModuleValue WaterFlowBridge::SetCachedCount(ArkUIRuntimeCallInfo* runtimeCallInfo)
++{
++    EcmaVM* vm = runtimeCallInfo->GetVM();
++    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
++    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
++    Local<JSValueRef> argCachedCount = runtimeCallInfo->GetCallArgRef(NUM_1);
++    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
++    int32_t cachedCount = 0;
++    if (!ArkTSUtils::ParseJsInteger(vm, argCachedCount, cachedCount) || cachedCount < 0) {
++        GetArkUINodeModifiers()->getWaterFlowModifier()->resetCachedCount(nativeNode);
++    } else {
++        GetArkUINodeModifiers()->getWaterFlowModifier()->setCachedCount(nativeNode, cachedCount);
++    }
++    return panda::JSValueRef::Undefined(vm);
++}
++
++ArkUINativeModuleValue WaterFlowBridge::ResetCachedCount(ArkUIRuntimeCallInfo* runtimeCallInfo)
++{
++    EcmaVM* vm = runtimeCallInfo->GetVM();
++    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
++    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
++    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
++    GetArkUINodeModifiers()->getWaterFlowModifier()->resetCachedCount(nativeNode);
++    return panda::JSValueRef::Undefined(vm);
++}
++
++ArkUINativeModuleValue WaterFlowBridge::SetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
++{
++    EcmaVM* vm = runtimeCallInfo->GetVM();
++    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
++    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
++    Local<JSValueRef> argSpeed = runtimeCallInfo->GetCallArgRef(NUM_1);
++    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
++    double limitSpeed = -1.0;
++    if (!ArkTSUtils::ParseJsDouble(vm, argSpeed, limitSpeed)) {
++        GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowFlingSpeedLimit(nativeNode);
++    } else {
++        GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowFlingSpeedLimit(
++            nativeNode, static_cast<ArkUI_Float32>(limitSpeed));
++    }
++    return panda::JSValueRef::Undefined(vm);
++}
++
++ArkUINativeModuleValue WaterFlowBridge::ResetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
++{
++    EcmaVM* vm = runtimeCallInfo->GetVM();
++    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
++    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
++    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
++    GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowFlingSpeedLimit(nativeNode);
++    return panda::JSValueRef::Undefined(vm);
++}
+ } // namespace OHOS::Ace::NG
+\ No newline at end of file
+diff --git a/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.h b/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.h
+index f9d12f026c52c366aaa43efc0fa0ebcedcd035da..c05cff98d7302a170e37ca5806c14d4452eb76f5 100644
+--- a/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.h
++++ b/frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.h
+@@ -41,6 +41,16 @@ public:
+     static ArkUINativeModuleValue ResetFriction(ArkUIRuntimeCallInfo* runtimeCallInfo);
+     static ArkUINativeModuleValue SetEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
+     static ArkUINativeModuleValue ResetEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
++    static ArkUINativeModuleValue SetScrollBar(ArkUIRuntimeCallInfo* runtimeCallInfo);
++    static ArkUINativeModuleValue ResetScrollBar(ArkUIRuntimeCallInfo* runtimeCallInfo);
++    static ArkUINativeModuleValue SetScrollBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
++    static ArkUINativeModuleValue ResetScrollBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
++    static ArkUINativeModuleValue SetScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
++    static ArkUINativeModuleValue ResetScrollBarColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
++    static ArkUINativeModuleValue SetCachedCount(ArkUIRuntimeCallInfo* runtimeCallInfo);
++    static ArkUINativeModuleValue ResetCachedCount(ArkUIRuntimeCallInfo* runtimeCallInfo);
++    static ArkUINativeModuleValue SetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo);
++    static ArkUINativeModuleValue ResetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo);
+ };
+ } // namespace OHOS::Ace::NG
+ 
+diff --git a/frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.cpp b/frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.cpp
+index 2146e838b001ac4dfb73047e26301901473f9d00..ed860c52c7993250286d390c11773b5ad91345a0 100644
+--- a/frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.cpp
++++ b/frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.cpp
+@@ -185,4 +185,11 @@ void ScrollableModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onRea
+     eventHub->SetOnReachEnd(std::move(onReachEnd));
+ }
+ 
++void ScrollableModelNG::SetMaxFlingSpeed(FrameNode* frameNode, double maxSpeed)
++{
++    CHECK_NULL_VOID(frameNode);
++    auto pattern = frameNode->GetPattern<ScrollablePattern>();
++    CHECK_NULL_VOID(pattern);
++    pattern->SetMaxFlingVelocity(maxSpeed);
++}
+ } // namespace OHOS::Ace::NG
+diff --git a/frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.h b/frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.h
+index bf469bbbb0a07ca1e8f10087aec733f4100ea80f..6994fb4981c66531ad4089597a32a35ab3addf34 100644
+--- a/frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.h
++++ b/frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.h
+@@ -45,6 +45,7 @@ public:
+     static void SetScrollBarColor(FrameNode* frameNode, const std::string& value);
+     static void SetMaxFlingSpeed(double max);
+     static void SetOnWillScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
++    static void SetMaxFlingSpeed(FrameNode* frameNode, double max);
+ 
+     static int32_t GetEdgeEffect(FrameNode* frameNode);
+     static int32_t GetAlwaysEnabled(FrameNode* frameNode);
+diff --git a/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.cpp b/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.cpp
+index 85a8b120f69a81e0ef746b2e8c02b3776ba595a8..028c5886293c8c51bbf3fa3f5bb427700cfe2f96 100644
+--- a/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.cpp
++++ b/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.cpp
+@@ -424,4 +424,24 @@ void WaterFlowModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect
+ {
+     ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+ }
++
++void WaterFlowModelNG::SetScrollBarMode(FrameNode* frameNode, int32_t barState)
++{
++    ScrollableModelNG::SetScrollBarMode(frameNode, barState);
++}
++
++void WaterFlowModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::string& scrollBarWidth)
++{
++    ScrollableModelNG::SetScrollBarWidth(frameNode, scrollBarWidth);
++}
++
++void WaterFlowModelNG::SetScrollBarColor(FrameNode* frameNode, const std::string& scrollBarColor)
++{
++    ScrollableModelNG::SetScrollBarColor(frameNode, scrollBarColor);
++}
++
++void WaterFlowModelNG::SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed)
++{
++    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
++}
+ } // namespace OHOS::Ace::NG
+diff --git a/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.h b/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.h
+index 39a18dbdc5e38a3c8249ac65621b886076f8c92a..6ac7879fdd5fff4f8964adb065a4df0400c06da9 100644
+--- a/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.h
++++ b/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.h
+@@ -84,6 +84,10 @@ public:
+     static void SetCachedCount(FrameNode* frameNode, int32_t value);
+     static int32_t GetCachedCount(FrameNode* frameNode);
+     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
++    static void SetScrollBarMode(FrameNode* frameNode, int32_t scrollBarMode);
++    static void SetScrollBarWidth(FrameNode* frameNode, const std::string& scrollBarWidth);
++    static void SetScrollBarColor(FrameNode* frameNode, const std::string& scrollBarColor);
++    static void SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed);
+ };
+ } // namespace OHOS::Ace::NG
+ #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H
+\ No newline at end of file
+diff --git a/frameworks/core/interfaces/arkoala/arkoala_api.h b/frameworks/core/interfaces/arkoala/arkoala_api.h
+index 2e40705432a0edb336bb2ff0196abf31c2120d39..8c256f0880bc7f821229742e3b7399ff891cd836 100644
+--- a/frameworks/core/interfaces/arkoala/arkoala_api.h
++++ b/frameworks/core/interfaces/arkoala/arkoala_api.h
+@@ -2472,6 +2472,14 @@ struct ArkUIWaterFlowModifier {
+     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
+     void (*setEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled);
+     void (*resetEdgeEffect)(ArkUINodeHandle node);
++    void (*setWaterFlowScrollBar)(ArkUINodeHandle node, ArkUI_Int32 scrollBar);
++    void (*resetWaterFlowScrollBar)(ArkUINodeHandle node);
++     void (*setWaterFlowScrollBarWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
++     void (*resetWaterFlowScrollBarWidth)(ArkUINodeHandle node);
++    void (*setWaterFlowScrollBarColor)(ArkUINodeHandle node, ArkUI_CharPtr scrollBarColor);
++    void (*resetWaterFlowScrollBarColor)(ArkUINodeHandle node);
++    void (*setWaterFlowFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
++    void (*resetWaterFlowFlingSpeedLimit)(ArkUINodeHandle node);
+ };
+ 
+ struct ArkUIMenuItemModifier {
+diff --git a/frameworks/core/interfaces/native/node/water_flow_modifier.cpp b/frameworks/core/interfaces/native/node/water_flow_modifier.cpp
+index 2aa26b7ef922354992f821cc60fd599de553c14c..3bfbf7a4d3376a94ad79595f2900c957531deb2e 100644
+--- a/frameworks/core/interfaces/native/node/water_flow_modifier.cpp
++++ b/frameworks/core/interfaces/native/node/water_flow_modifier.cpp
+@@ -26,6 +26,8 @@ constexpr ArkUI_Float64 FRICTION_DEFAULT = -1.0;
+ constexpr ArkUI_Float64 DIMENSION_DEFAULT = 0.0;
+ const int32_t ERROR_INT_CODE = -1;
+ const float ERROR_FLOAT_CODE = -1.0f;
++constexpr int32_t DEFAULT_SCROLL_BAR = 1;
++const std::string DEFAULT_SCROLL_BAR_WIDTH = "4.0vp";
+ std::string g_strValue;
+ 
+ void ResetColumnsTemplate(ArkUINodeHandle node)
+@@ -333,6 +335,63 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
+     return WaterFlowModelNG::GetCachedCount(frameNode);
+ }
+ 
++void SetWaterFlowScrollBar(ArkUINodeHandle node, ArkUI_Int32 scrollBar)
++{
++    auto* frameNode = reinterpret_cast<FrameNode*>(node);
++    CHECK_NULL_VOID(frameNode);
++    WaterFlowModelNG::SetScrollBarMode(frameNode, scrollBar);
++}
++
++void ResetWaterFlowScrollBar(ArkUINodeHandle node)
++{
++    auto* frameNode = reinterpret_cast<FrameNode*>(node);
++    CHECK_NULL_VOID(frameNode);
++    WaterFlowModelNG::SetScrollBarMode(frameNode, DEFAULT_SCROLL_BAR);
++}
++
++void SetWaterFlowScrollBarWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
++{
++    CHECK_NULL_VOID(value);
++    auto* frameNode = reinterpret_cast<FrameNode*>(node);
++    CHECK_NULL_VOID(frameNode);
++    WaterFlowModelNG::SetScrollBarWidth(frameNode, value);
++}
++
++void ResetWaterFlowScrollBarWidth(ArkUINodeHandle node)
++{
++    auto* frameNode = reinterpret_cast<FrameNode*>(node);
++    CHECK_NULL_VOID(frameNode);
++    WaterFlowModelNG::SetScrollBarWidth(frameNode, DEFAULT_SCROLL_BAR_WIDTH);
++}
++
++void SetWaterFlowScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
++{
++    CHECK_NULL_VOID(value);
++    auto* frameNode = reinterpret_cast<FrameNode*>(node);
++    CHECK_NULL_VOID(frameNode);
++    WaterFlowModelNG::SetScrollBarColor(frameNode, value);
++}
++
++void ResetWaterFlowScrollBarColor(ArkUINodeHandle node)
++{
++    auto* frameNode = reinterpret_cast<FrameNode*>(node);
++    CHECK_NULL_VOID(frameNode);
++    WaterFlowModelNG::SetScrollBarColor(frameNode, "#FF000000");
++}
++
++void SetWaterFlowFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
++{
++    auto* frameNode = reinterpret_cast<FrameNode*>(node);
++    CHECK_NULL_VOID(frameNode);
++    WaterFlowModelNG::SetFlingSpeedLimit(frameNode, maxSpeed);
++}
++
++void ResetWaterFlowFlingSpeedLimit(ArkUINodeHandle node)
++{
++    auto* frameNode = reinterpret_cast<FrameNode*>(node);
++    CHECK_NULL_VOID(frameNode);
++    WaterFlowModelNG::SetFlingSpeedLimit(frameNode, -1.0);
++}
+ } // namespace
+ namespace NodeModifier {
+ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
+@@ -376,6 +435,14 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
+         GetCachedCount,
+         SetEdgeEffect,
+         ResetEdgeEffect,
++        SetWaterFlowScrollBar,
++        ResetWaterFlowScrollBar,
++        SetWaterFlowScrollBarWidth,
++        ResetWaterFlowScrollBarWidth,
++        SetWaterFlowScrollBarColor,
++        ResetWaterFlowScrollBarColor,
++        SetWaterFlowFlingSpeedLimit,
++        ResetWaterFlowFlingSpeedLimit,
+     };
+     return &modifier;
+ }

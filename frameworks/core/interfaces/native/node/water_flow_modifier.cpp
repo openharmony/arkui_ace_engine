@@ -31,9 +31,14 @@ constexpr ArkUI_Float64 FRICTION_DEFAULT = -1.0;
 constexpr ArkUI_Float64 DIMENSION_DEFAULT = 0.0;
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
+<<<<<<< HEAD
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t INDEX_2 = 2;
+=======
+constexpr int32_t DEFAULT_SCROLL_BAR = 1;
+const std::string DEFAULT_SCROLL_BAR_WIDTH = "4.0vp";
+>>>>>>> 2264ebe862 (waterflow：modifier属性对接)
 std::string g_strValue;
 
 void ResetColumnsTemplate(ArkUINodeHandle node)
@@ -384,14 +389,6 @@ ArkUI_Float32 GetWaterFlowBarWidth(ArkUINodeHandle node)
     return WaterFlowModelNG::GetScrollBarWidth(frameNode);
 }
 
-void SetWaterFlowScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
-{
-    CHECK_NULL_VOID(value);
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    WaterFlowModelNG::SetScrollBarColor(frameNode, value);
-}
-
 void ResetWaterFlowScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -542,6 +539,19 @@ void ResetWaterflowFooter(ArkUINodeHandle node)
     WaterFlowModelNG::SetWaterflowFooter(frameNode, nullptr);
 }
 
+void SetWaterFlowFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetFlingSpeedLimit(frameNode, maxSpeed);
+}
+
+void ResetWaterFlowFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetFlingSpeedLimit(frameNode, -1.0);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
@@ -558,7 +568,8 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         GetWaterFlowBarWidth, SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor, GetWaterFlowScrollBarColor,
         GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions,
         GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
-        GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter, ResetWaterflowFooter, };
+        GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter, ResetWaterflowFooter, SetWaterFlowFlingSpeedLimit,
+        ResetWaterFlowFlingSpeedLimit, };
     return &modifier;
 }
 

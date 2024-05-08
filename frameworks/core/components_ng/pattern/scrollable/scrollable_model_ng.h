@@ -46,6 +46,8 @@ public:
     static void SetMaxFlingSpeed(double max);
     static void SetOnWillScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
+    static void SetMaxFlingSpeed(FrameNode* frameNode, double max);
+
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static int32_t GetAlwaysEnabled(FrameNode* frameNode);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
