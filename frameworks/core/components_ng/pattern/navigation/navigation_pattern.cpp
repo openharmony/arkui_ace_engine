@@ -1297,9 +1297,13 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         return false;
     }
     auto transition = navigationTransition.transition;
-    proxy->SetFinishTransitionEvent([weakPattern = WeakClaim(this), preTopNavDestination, newTopNavDestination, proxy,
-                                        isPopPage, endCallBack = navigationTransition.endCallback](bool isSuccess) {
+    proxy->SetFinishTransitionEvent([weakPattern = WeakClaim(this), endCallBack = navigationTransition.endCallback,
+                                        weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
+                                        weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
+                                        proxy, isPopPage](bool isSuccess) {
         auto navigationPattern = weakPattern.Upgrade();
+        auto preTopNavDestination = weakPreNavDestination.Upgrade();
+        auto newTopNavDestination = weakNewNavDestination.Upgrade();
         CHECK_NULL_VOID(navigationPattern);
         if (proxy != nullptr && proxy->GetIsFinished()) {
             TAG_LOGD(AceLogTag::ACE_NAVIGATION, "custom animation has finished");
