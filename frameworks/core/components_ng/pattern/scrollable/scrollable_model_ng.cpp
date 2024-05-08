@@ -232,5 +232,4 @@ void ScrollableModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onRea
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachEnd(std::move(onReachEnd));
 }
-
 } // namespace OHOS::Ace::NG

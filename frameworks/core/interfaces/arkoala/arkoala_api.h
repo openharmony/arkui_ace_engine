@@ -2743,6 +2743,8 @@ struct ArkUIWaterFlowModifier {
     void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment);
     void (*setWaterflowFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
     void (*resetWaterflowFooter)(ArkUINodeHandle node);
+    void (*setWaterFlowFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
+    void (*resetWaterFlowFlingSpeedLimit)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {

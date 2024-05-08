@@ -634,4 +634,8 @@ void WaterFlowModelNG::SetWaterflowFooter(FrameNode* frameNode, FrameNode* foote
     pattern->AddFooter(AceType::Claim<UINode>(footerNode));
 }
 
+void WaterFlowModelNG::SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed)
+{
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
+}
 } // namespace OHOS::Ace::NG

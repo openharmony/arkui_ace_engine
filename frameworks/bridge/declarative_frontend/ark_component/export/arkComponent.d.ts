@@ -1850,6 +1850,10 @@ declare class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAtt
     }): this;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
+    scrollBarWidth(value: string | number): this;
+    scrollBarColor(value: string | number | Color): this;
+    scrollBar(value: BarState): this;
+    flingSpeedLimit(value: number): this;
 }
 declare class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
