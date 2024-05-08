@@ -3980,39 +3980,45 @@ void RosenRenderContext::OnDynamicLightUpDegreeUpdate(const float degree)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption)
+void RosenRenderContext::OnBgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption)
 {
+    if (!brightnessOption.has_value()) {
+        return;
+    }
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBgBrightnessParams(
         {
-            brightnessOption.rate, 
-            brightnessOption.lightUpDegree,
-            brightnessOption.cubicCoeff, 
-            brightnessOption.quadCoeff, 
-            brightnessOption.saturation,
-            { brightnessOption.posRGB[0], brightnessOption.posRGB[1], brightnessOption.posRGB[2] },
-            { brightnessOption.negRGB[0], brightnessOption.negRGB[1], brightnessOption.negRGB[2] }
+            brightnessOption->rate,
+            brightnessOption->lightUpDegree,
+            brightnessOption->cubicCoeff,
+            brightnessOption->quadCoeff,
+            brightnessOption->saturation,
+            { brightnessOption->posRGB[0], brightnessOption->posRGB[1], brightnessOption->posRGB[2] },
+            { brightnessOption->negRGB[0], brightnessOption->negRGB[1], brightnessOption->negRGB[2] }
         }
     );
-    rsNode_->SetBgBrightnessFract(brightnessOption.fraction);
+    rsNode_->SetBgBrightnessFract(brightnessOption->fraction);
     RequestNextFrame();
 }
  
-void RosenRenderContext::OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption)
+void RosenRenderContext::OnFgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption)
 {
+    if (!brightnessOption.has_value()) {
+        return;
+    }
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetFgBrightnessParams(
         {
-            brightnessOption.rate, 
-            brightnessOption.lightUpDegree,
-            brightnessOption.cubicCoeff, 
-            brightnessOption.quadCoeff, 
-            brightnessOption.saturation,
-            { brightnessOption.posRGB[0], brightnessOption.posRGB[1], brightnessOption.posRGB[2] },
-            { brightnessOption.negRGB[0], brightnessOption.negRGB[1], brightnessOption.negRGB[2] }
+            brightnessOption->rate, 
+            brightnessOption->lightUpDegree,
+            brightnessOption->cubicCoeff, 
+            brightnessOption->quadCoeff, 
+            brightnessOption->saturation,
+            { brightnessOption->posRGB[0], brightnessOption->posRGB[1], brightnessOption->posRGB[2] },
+            { brightnessOption->negRGB[0], brightnessOption->negRGB[1], brightnessOption->negRGB[2] }
         }
     );
-    rsNode_->SetFgBrightnessFract(brightnessOption.fraction);
+    rsNode_->SetFgBrightnessFract(brightnessOption->fraction);
     RequestNextFrame();
 }
 
