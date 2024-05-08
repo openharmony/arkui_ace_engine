@@ -194,11 +194,24 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
         const auto& setting = container->GetSettings();
         needPostJsTask = !(setting.usePlatformAsUIThread && setting.useUIAsJSThread);
     }
+
+#if defined(PREVIEW)
+    auto initJSEngineTask = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_), delegate = delegate_,
+        pkgNameMap = pkgNameMap_, pkgAliasMap = pkgAliasMap_, pkgContextInfoMap = pkgContextInfoMap_] {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->SetPkgNameList(pkgNameMap);
+        jsEngine->SetPkgAliasList(pkgAliasMap);
+        jsEngine->SetpkgContextInfoList(pkgContextInfoMap);
+#else
     auto initJSEngineTask = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_), delegate = delegate_] {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
         }
+#endif
         jsEngine->Initialize(delegate);
     };
     if (needPostJsTask) {

@@ -23,6 +23,7 @@
 
 #include "adapter/preview/entrance/ace_run_args.h"
 #include "adapter/preview/entrance/ace_view_preview.h"
+#include "adapter/preview/external/ability/stage/stage_pkg_context_info.h"
 #include "adapter/preview/osal/fetch_manager.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
@@ -215,6 +216,8 @@ public:
 
     void SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl);
 
+    void SetPkgContextInfo(const RefPtr<StagePkgContextInfo>& PkgContextInfo);
+
     void SetPageProfile(const std::string& pageProfile)
     {
         pageProfile_ = pageProfile;
@@ -338,6 +341,7 @@ private:
     void* sharedRuntime_ = nullptr;
     std::string bundleName_;
     std::string moduleName_;
+    RefPtr<StagePkgContextInfo> PkgContextInfo_;
 
     // Support to execute the ets code mocked by developer
     std::map<std::string, std::string> mockJsonInfo_;

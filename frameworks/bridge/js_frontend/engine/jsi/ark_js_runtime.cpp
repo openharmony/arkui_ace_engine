@@ -80,6 +80,17 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
     instanceId_ = instanceId;
 
     vm_ = JSNApi::CreateJSVM(option);
+#if defined(PREVIEW)
+    if (!pkgNameMap_.empty()) {
+        JSNApi::SetPkgNameList(vm_, pkgNameMap_);
+    }
+    if (!pkgAliasMap_.empty()) {
+        JSNApi::SetPkgAliasList(vm_, pkgAliasMap_);
+    }
+    if (!pkgContextInfoMap_.empty()) {
+        JSNApi::SetpkgContextInfoList(vm_, pkgContextInfoMap_);
+    }
+#endif
     return vm_ != nullptr;
 }
 

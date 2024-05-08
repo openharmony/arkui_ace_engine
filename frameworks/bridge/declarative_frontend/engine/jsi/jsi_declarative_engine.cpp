@@ -295,6 +295,13 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         return false;
     }
 
+#if defined(PREVIEW)
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    arkRuntime->SetPkgNameList(pkgNameMap_);
+    arkRuntime->SetPkgAliasList(pkgAliasMap_);
+    arkRuntime->SetpkgContextInfoList(pkgContextInfoMap_);
+#endif
+
     runtime_->SetLogPrint(PrintLog);
     std::string libraryPath = "";
     if (debuggerMode) {
@@ -1034,6 +1041,11 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     }
     engineInstance_->SetInstanceId(instanceId_);
     engineInstance_->SetDebugMode(NeedDebugBreakPoint());
+#if defined(PREVIEW)
+    engineInstance_->SetPkgNameList(pkgNameMap_);
+    engineInstance_->SetPkgAliasList(pkgAliasMap_);
+    engineInstance_->SetpkgContextInfoList(pkgContextInfoMap_);
+#endif
     bool result = engineInstance_->InitJsEnv(IsDebugVersion(), GetExtraNativeObject(), arkRuntime);
     if (!result) {
         return false;
