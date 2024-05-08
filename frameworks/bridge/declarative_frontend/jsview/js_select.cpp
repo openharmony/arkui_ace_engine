@@ -125,7 +125,9 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSelect>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSelect>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSSelect>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSelect>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSelect>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSelect>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSelect>::InheritAndBind<JSViewAbstract>(globalObj);
 }

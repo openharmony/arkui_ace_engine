@@ -84,7 +84,9 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
     JSClass<JSCheckboxGroup>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCheckboxGroup>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSCheckboxGroup>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSCheckboxGroup>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSCheckboxGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSCheckboxGroup>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSCheckboxGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSCheckboxGroup>::InheritAndBind<JSViewAbstract>(globalObj);
 }

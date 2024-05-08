@@ -60,7 +60,9 @@ void JSRelativeContainer::JSBind(BindingTarget globalObj)
     JSClass<JSRelativeContainer>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRelativeContainer>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSRelativeContainer>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSRelativeContainer>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRelativeContainer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRelativeContainer>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSRelativeContainer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRelativeContainer>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSRelativeContainer>::StaticMethod("barrier", &JSRelativeContainer::JsBarrier);

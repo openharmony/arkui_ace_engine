@@ -1622,6 +1622,34 @@ class OnDisappearModifier extends ModifierWithKey<VoidCallback> {
   }
 }
 
+class OnAttachModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAttach');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnAttach(node);
+    } else {
+      getUINativeModule().common.setOnAttach(node, this.value);
+    }
+  }
+}
+
+class OnDetachModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDetach');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDetach(node);
+    } else {
+      getUINativeModule().common.setOnDetach(node, this.value);
+    }
+  }
+}
+
 declare type KeyEventCallback = (event: KeyEvent) => void;
 class OnKeyEventModifier extends ModifierWithKey<KeyEventCallback> {
   constructor(value: KeyEventCallback) {
@@ -3480,6 +3508,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  onAttach(event: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnAttachModifier.identity, OnAttachModifier, event);
+    return this;
+  }
+
+  onDetach(event: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
+    return this;
+  }
   onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
     modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
     return this;
@@ -3964,6 +4001,8 @@ class UICommonEvent {
   private _touchEvent?: (event: TouchEvent) => void;
   private _onAppearEvent?: () => void;
   private _onDisappearEvent?: () => void;
+  private _onAttachEvent?: () => void;
+  private _onDetachEvent?: () => void;
   private _onKeyEvent?: (event: KeyEvent) => void;
   private _onFocusEvent?: () => void;
   private _onBlur?: () => void;
@@ -3992,6 +4031,14 @@ class UICommonEvent {
   setOnDisappear(callback: () => void): void {
     this._onDisappearEvent = callback;
     getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback, this._instanceId);
+  }
+  setOnAttach(callback: () => void): void {
+    this._onAttachEvent = callback;
+    getUINativeModule().frameNode.setOnAttach(this._nodePtr, callback, this._instanceId);
+  }
+  setOnDetach(callback: () => void): void {
+    this._onDetachEvent = callback;
+    getUINativeModule().frameNode.setOnDetach(this._nodePtr, callback, this._instanceId);
   }
   setOnKeyEvent(callback: (event: KeyEvent) => void): void {
     this._onKeyEvent = callback;

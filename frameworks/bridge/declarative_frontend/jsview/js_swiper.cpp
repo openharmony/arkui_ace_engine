@@ -139,7 +139,9 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSwiper>::StaticMethod("remoteMessage", &JSSwiper::JsRemoteMessage);
     JSClass<JSSwiper>::StaticMethod("onClick", &JSSwiper::SetOnClick);
+    JSClass<JSSwiper>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSwiper>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSwiper>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSwiper>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSwiper>::StaticMethod("indicatorStyle", &JSSwiper::SetIndicatorStyle);
     JSClass<JSSwiper>::StaticMethod("enabled", &JSSwiper::SetEnabled);

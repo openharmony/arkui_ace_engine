@@ -412,7 +412,9 @@ void JSShapeAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSShapeAbstract>::StaticMethod("width", &JSShapeAbstract::JsWidth, opt);
     JSClass<JSShapeAbstract>::StaticMethod("height", &JSShapeAbstract::JsHeight, opt);
     JSClass<JSShapeAbstract>::StaticMethod("size", &JSShapeAbstract::JsSize, opt);
+    JSClass<JSShapeAbstract>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSShapeAbstract>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSShapeAbstract>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSShapeAbstract>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSShapeAbstract>::InheritAndBind<JSViewAbstract>(globalObj);
 }

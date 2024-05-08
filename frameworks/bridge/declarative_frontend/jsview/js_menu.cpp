@@ -217,7 +217,9 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::StaticMethod("width", &JSMenu::SetWidth, opt);
     JSClass<JSMenu>::StaticMethod("radius", &JSMenu::SetRadius, opt);
     JSClass<JSMenu>::StaticMethod("subMenuExpandingMode", &JSMenu::SetExpandingMode);
+    JSClass<JSMenu>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSMenu>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMenu>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSMenu>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMenu>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSMenu>::InheritAndBind<JSViewAbstract>(globalObj);

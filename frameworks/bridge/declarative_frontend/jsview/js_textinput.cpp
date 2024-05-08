@@ -96,7 +96,9 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSTextInput>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTextInput>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTextInput>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTextInput>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextInput>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextInput>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextInput>::StaticMethod("passwordIcon", &JSTextField::SetPasswordIcon);
     JSClass<JSTextInput>::StaticMethod("showUnderline", &JSTextField::SetShowUnderline);

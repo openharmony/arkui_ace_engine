@@ -60,7 +60,9 @@ void JSLoadingProgress::JSBind(BindingTarget globalObj)
     JSClass<JSLoadingProgress>::StaticMethod("enableLoading", &JSLoadingProgress::SetEnableLoading, opt);
     JSClass<JSLoadingProgress>::StaticMethod("foregroundColor", &JSLoadingProgress::SetForegroundColor, opt);
 
+    JSClass<JSLoadingProgress>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSLoadingProgress>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSLoadingProgress>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSLoadingProgress>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSLoadingProgress>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSLoadingProgress>::InheritAndBind<JSViewAbstract>(globalObj);

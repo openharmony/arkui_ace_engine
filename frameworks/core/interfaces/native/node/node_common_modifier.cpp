@@ -5340,6 +5340,40 @@ void SetOnDisappear(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnDisappear(frameNode, std::move(onDisappear));
 }
 
+void SetOnAttach(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onAttach = [frameNode, nodeId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.nodeId = nodeId;
+        event.componentAsyncEvent.subKind = ON_ATTACH;
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
+}
+
+void SetOnDetach(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onDetach = [frameNode, nodeId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.nodeId = nodeId;
+        event.componentAsyncEvent.subKind = ON_DETACH;
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
+}
+
 void SetOnFocus(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

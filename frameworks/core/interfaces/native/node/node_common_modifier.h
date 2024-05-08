@@ -22,6 +22,8 @@ const ArkUICommonModifier* GetCommonModifier();
 
 void SetOnAppear(ArkUINodeHandle node,  void* extraParam);
 void SetOnDisappear(ArkUINodeHandle node,  void* extraParam);
+void SetOnAttach(ArkUINodeHandle node, void* extraParam);
+void SetOnDetach(ArkUINodeHandle node, void* extraParam);
 void SetOnFocus(ArkUINodeHandle node, void* extraParam);
 void SetOnBlur(ArkUINodeHandle node, void* extraParam);
 void SetOnAreaChange(ArkUINodeHandle node, void* extraParam);

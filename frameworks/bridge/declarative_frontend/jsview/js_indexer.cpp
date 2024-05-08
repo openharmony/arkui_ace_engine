@@ -562,7 +562,9 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     // keep compatible, need remove after
     JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);
+    JSClass<JSIndexer>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSIndexer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSIndexer>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSIndexer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSIndexer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSIndexer>::InheritAndBind<JSViewAbstract>(globalObj);

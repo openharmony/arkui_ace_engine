@@ -105,7 +105,9 @@ void JSQRCode::JSBind(BindingTarget globalObj)
     JSClass<JSQRCode>::StaticMethod("color", &JSQRCode::SetQRCodeColor, opt);
     JSClass<JSQRCode>::StaticMethod("backgroundColor", &JSQRCode::SetBackgroundColor, opt);
     JSClass<JSQRCode>::StaticMethod("contentOpacity", &JSQRCode::SetContentOpacity, opt);
+    JSClass<JSQRCode>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSQRCode>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSQRCode>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSQRCode>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSQRCode>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSQRCode>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

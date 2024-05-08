@@ -164,6 +164,7 @@ void JSFolderStack::JSBind(BindingTarget globalObj)
     JSClass<JSFolderStack>::StaticMethod("alignContent", &JSFolderStack::SetAlignContent);
     JSClass<JSFolderStack>::StaticMethod("enableAnimation", &JSFolderStack::JsEnableAnimation);
     JSClass<JSFolderStack>::StaticMethod("autoHalfFold", &JSFolderStack::SetAutoHalfFold);
+    JSClass<JSFolderStack>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSFolderStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSFolderStack>::StaticMethod("onFolderStateChange", &JSFolderStack::JSOnFolderStateChange);
     JSClass<JSFolderStack>::StaticMethod("onHoverStatusChange", &JSFolderStack::JSOnHoverStatusChange);

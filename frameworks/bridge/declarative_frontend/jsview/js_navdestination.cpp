@@ -377,7 +377,9 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onHidden", &JSNavDestination::SetOnHidden);
     JSClass<JSNavDestination>::StaticMethod("onBackPressed", &JSNavDestination::SetOnBackPressed);
     JSClass<JSNavDestination>::StaticMethod("onReady", &JSNavDestination::SetOnReady);
+    JSClass<JSNavDestination>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSNavDestination>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSNavDestination>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSNavDestination>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSNavDestination>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavDestination>::StaticMethod("id", &JSViewAbstract::JsId);

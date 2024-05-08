@@ -850,6 +850,20 @@ void ViewAbstract::DisableOnDisAppear()
     eventHub->ClearUserOnDisAppear();
 }
 
+void ViewAbstract::DisableOnAttach()
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnAttach();
+}
+
+void ViewAbstract::DisableOnDetach()
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnDetach();
+}
+
 void ViewAbstract::DisableOnAreaChange()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -920,6 +934,20 @@ void ViewAbstract::DisableOnDisappear(FrameNode* frameNode)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnDisAppear();
+}
+
+void ViewAbstract::DisableOnAttach(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnAttach();
+}
+
+void ViewAbstract::DisableOnDetach(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnDetach();
 }
 
 void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
@@ -1084,6 +1112,20 @@ void ViewAbstract::SetOnDisappear(std::function<void()> &&onDisappear)
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(std::move(onDisappear));
+}
+
+void ViewAbstract::SetOnAttach(std::function<void()> &&onAttach)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAttach(std::move(onAttach));
+}
+
+void ViewAbstract::SetOnDetach(std::function<void()> &&onDetach)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDetach(std::move(onDetach));
 }
 
 void ViewAbstract::SetOnAreaChanged(std::function<void(const RectF &oldRect, const OffsetF &oldOrigin,
@@ -3291,6 +3333,22 @@ void ViewAbstract::SetOnDisappear(FrameNode* frameNode, std::function<void()> &&
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(std::move(onDisappear));
+}
+
+void ViewAbstract::SetOnAttach(FrameNode* frameNode, std::function<void()> &&onAttach)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAttach(std::move(onAttach));
+}
+
+void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()> &&onDetach)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDetach(std::move(onDetach));
 }
 
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,

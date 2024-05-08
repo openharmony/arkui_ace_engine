@@ -235,7 +235,9 @@ public:
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
+    virtual void SetOnAttach(std::function<void()>&& onAttachCallback) = 0;
     virtual void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) = 0;
+    virtual void SetOnDetach(std::function<void()>&& onDetachCallback) = 0;
     virtual void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) = 0;
     virtual void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) = 0;
     virtual void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) = 0;
@@ -271,6 +273,8 @@ public:
     virtual void DisableOnMouse() = 0;
     virtual void DisableOnAppear() = 0;
     virtual void DisableOnDisAppear() = 0;
+    virtual void DisableOnAttach() = 0;
+    virtual void DisableOnDetach() = 0;
     virtual void DisableOnAreaChange() = 0;
     virtual void DisableOnFocus() = 0;
     virtual void DisableOnBlur() = 0;

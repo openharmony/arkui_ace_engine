@@ -80,8 +80,10 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("sliderInteractionMode", &JSSlider::SetSliderInteractionMode);
     JSClass<JSSlider>::StaticMethod("slideRange", &JSSlider::SetValidSlideRange);
     JSClass<JSSlider>::StaticMethod("onChange", &JSSlider::OnChange);
+    JSClass<JSSlider>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSlider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSSlider>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSlider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSlider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSlider>::InheritAndBind<JSViewAbstract>(globalObj);

@@ -143,7 +143,9 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
     JSClass<JSMenuItem>::StaticMethod("contentFontColor", &JSMenuItem::ContentFontColor, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFont", &JSMenuItem::LabelFont, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFontColor", &JSMenuItem::LabelFontColor, opt);
+    JSClass<JSMenuItem>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSMenuItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSMenuItem>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSMenuItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMenuItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSMenuItem>::InheritAndBind<JSContainerBase>(globalObj);

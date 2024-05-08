@@ -828,9 +828,19 @@ public:
         ViewAbstract::SetOnAppear(std::move(onAppearCallback));
     }
 
+    void SetOnAttach(std::function<void()>&& onAttachCallback) override
+    {
+        ViewAbstract::SetOnAttach(std::move(onAttachCallback));
+    }
+
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override
     {
         ViewAbstract::SetOnDisappear(std::move(onDisAppearCallback));
+    }
+
+    void SetOnDetach(std::function<void()>&& onDetachCallback) override
+    {
+        ViewAbstract::SetOnDetach(std::move(onDetachCallback));
     }
 
     void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) override {}
@@ -1158,6 +1168,16 @@ public:
     void DisableOnDisAppear() override
     {
         ViewAbstract::DisableOnDisAppear();
+    }
+
+    void DisableOnAttach() override
+    {
+        ViewAbstract::DisableOnAttach();
+    }
+
+    void DisableOnDetach() override
+    {
+        ViewAbstract::DisableOnDetach();
     }
 
     void DisableOnAreaChange() override

@@ -270,6 +270,8 @@ public:
     static void SetGroupDefaultFocus(bool isSet);
     static void SetOnAppear(std::function<void()> &&onAppear);
     static void SetOnDisappear(std::function<void()> &&onDisappear);
+    static void SetOnAttach(std::function<void()> &&onAttach);
+    static void SetOnDetach(std::function<void()> &&onDetach);
     static void SetOnAreaChanged(std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect,
         const OffsetF &origin)> &&onAreaChanged);
     static void SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
@@ -362,6 +364,8 @@ public:
     static void DisableOnMouse();
     static void DisableOnAppear();
     static void DisableOnDisAppear();
+    static void DisableOnAttach();
+    static void DisableOnDetach();
     static void DisableOnAreaChange();
     static void DisableOnFocus();
     static void DisableOnBlur();
@@ -372,6 +376,8 @@ public:
     static void DisableOnMouse(FrameNode* frameNode);
     static void DisableOnAppear(FrameNode* frameNode);
     static void DisableOnDisappear(FrameNode* frameNode);
+    static void DisableOnAttach(FrameNode* frameNode);
+    static void DisableOnDetach(FrameNode* frameNode);
     static void DisableOnFocus(FrameNode* frameNode);
     static void DisableOnBlur(FrameNode* frameNode);
     static void DisableOnAreaChange(FrameNode* frameNode);
@@ -558,6 +564,8 @@ public:
 
     static void SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear);
     static void SetOnDisappear(FrameNode* frameNode, std::function<void()> &&onDisappear);
+    static void SetOnAttach(FrameNode* frameNode, std::function<void()> &&onAttach);
+    static void SetOnDetach(FrameNode* frameNode, std::function<void()> &&onDetach);
     static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);

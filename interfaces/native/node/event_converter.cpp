@@ -274,6 +274,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_RADIO_CHANGE;
         case NODE_LIST_ON_DID_SCROLL:
             return ON_LIST_DID_SCROLL;
+        case NODE_EVENT_ON_ATTACH:
+            return ON_ATTACH;
+        case NODE_EVENT_ON_DETACH:
+            return ON_DETACH;
         case NODE_LIST_ON_WILL_SCROLL:
             return ON_LIST_WILL_SCROLL;
         default:
@@ -428,6 +432,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_REACH_START;
         case ON_DETECT_RESULT_UPDATE:
             return NODE_TEXT_ON_DETECT_RESULT_UPDATE;
+        case ON_ATTACH:
+            return NODE_EVENT_ON_ATTACH;
+        case ON_DETACH:
+            return NODE_EVENT_ON_DETACH;
         case ON_RADIO_CHANGE:
             return NODE_RADIO_EVENT_ON_CHANGE;
         default:

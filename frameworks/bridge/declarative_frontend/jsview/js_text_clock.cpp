@@ -123,7 +123,9 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextClock>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTextClock>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTextClock>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTextClock>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextClock>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextClock>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextClock>::StaticMethod("fontColor", &JSTextClock::SetTextColor, opt);
     JSClass<JSTextClock>::StaticMethod("fontSize", &JSTextClock::SetFontSize, opt);
