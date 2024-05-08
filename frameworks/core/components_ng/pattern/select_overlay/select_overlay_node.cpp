@@ -549,6 +549,11 @@ RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_p
     selectOverlayNode->UpdateToolBar(true);
     auto selectContext = selectOverlayNode->GetRenderContext();
     selectContext->UpdateUseShadowBatching(true);
+
+    auto accessibilityProperty = selectOverlayNode->GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty) {
+        accessibilityProperty->SetAccessibilityLevel("no");
+    }
     return selectOverlayNode;
 }
 
