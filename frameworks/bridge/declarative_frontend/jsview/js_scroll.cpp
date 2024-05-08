@@ -95,7 +95,6 @@ bool CheckSnapPaginations(std::vector<Dimension> snapPaginations)
 void JSScroll::Create(const JSCallbackInfo& info)
 {
     ScrollModel::GetInstance()->Create();
-    JSScrollTheme::ApplyTheme();
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSScroller* jsScroller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSScroller>();
         if (jsScroller) {
@@ -117,6 +116,7 @@ void JSScroll::Create(const JSCallbackInfo& info)
     std::pair<bool, Dimension> barWidth;
     barWidth.first = false;
     ScrollModel::GetInstance()->InitScrollBar(GetTheme<ScrollBarTheme>(), barColor, barWidth, EdgeEffect::NONE);
+    JSScrollTheme::ApplyTheme();
 }
 
 void JSScroll::SetScrollable(int32_t value)
