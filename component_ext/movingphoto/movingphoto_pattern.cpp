@@ -676,7 +676,6 @@ void MovingPhotoPattern::StopPlayback()
         return;
     }
     isPlayByController_ = false;
-    // Stop();
     Pause();
     StopAnimation();
 }
@@ -755,7 +754,7 @@ void MovingPhotoPattern::Pause()
         auto mediaPlayer = weak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->Pause();
-    }, "ArkUIMovingPhotoPausePlay");
+        }, "ArkUIMovingPhotoPausePlay");
 }
 
 void MovingPhotoPattern::Stop()
@@ -791,7 +790,7 @@ void MovingPhotoPattern::Seek(int32_t position)
         auto mediaPlayer = weak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->Seek(pos, SeekMode::SEEK_PREVIOUS_SYNC);
-    }, "ArkUIMovingPhotoSeek");
+        }, "ArkUIMovingPhotoSeek");
 }
 
 void MovingPhotoPattern::UpdateMediaPlayerSpeed()
