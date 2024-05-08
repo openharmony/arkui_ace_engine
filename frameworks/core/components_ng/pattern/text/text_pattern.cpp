@@ -1864,13 +1864,14 @@ void TextPattern::OnModifyDone()
             CloseSelectOverlay();
             ResetSelection();
         }
-        if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
-            dataDetectorAdapter_->textForAI_ = textForDisplay_;
-            dataDetectorAdapter_->StartAITask();
-        }
     }
 
     RecoverCopyOption();
+
+    if (GetAllChildren().empty() && CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
+        dataDetectorAdapter_->textForAI_ = textForDisplay_;
+        dataDetectorAdapter_->StartAITask();
+    }
 }
 
 void TextPattern::RecoverCopyOption()
