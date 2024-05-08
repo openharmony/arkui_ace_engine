@@ -226,12 +226,16 @@ export struct ChipGroup {
   @Prop @Watch('itemStyleOnChange') itemStyle: ChipItemStyle = defaultTheme.itemStyle;
   @Provide chipSize: ChipSize | SizeOptions = defaultTheme.itemStyle.size;
   @Prop selectedIndexes: Array<number> = [0];
-  @Prop multiple: boolean = false;
+  @Prop @Watch('onMultipleChange') multiple: boolean = false;
   @Prop chipGroupSpace: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace;
   @BuilderParam suffix?: Callback<void>;
   public onChange: Callback<Array<number>> = noop;
   private scroller: Scroller = new Scroller();
   @State isReachEnd: boolean = this.scroller.isAtEnd();
+
+  onMultipleChange() {
+    this.selectedIndexes = [0];
+  }
 
   itemStyleOnChange() {
     this.chipSize = this.getChipSize();
@@ -249,6 +253,16 @@ export struct ChipGroup {
   }
 
   private getFontColor(): ResourceColor {
+    if (typeof this.itemStyle.fontColor == 'object') {
+      let temp: Resource = this.itemStyle.fontColor as Resource;
+      if (temp == undefined || temp == null) {
+        return defaultTheme.itemStyle.fontColor;
+      }
+      if (temp.type === 10001) {
+        return this.itemStyle.fontColor
+      }
+      return defaultTheme.itemStyle.fontColor;
+    }
     if (this.itemStyle && this.itemStyle.fontColor) {
       return this.itemStyle.fontColor;
     }
@@ -256,6 +270,16 @@ export struct ChipGroup {
   }
 
   private getSelectedFontColor(): ResourceColor {
+    if (typeof this.itemStyle.selectedFontColor == 'object') {
+      let temp: Resource = this.itemStyle.selectedFontColor as Resource;
+      if (temp == undefined || temp == null) {
+        return defaultTheme.itemStyle.selectedFontColor;
+      }
+      if (temp.type === 10001) {
+        return this.itemStyle.selectedFontColor
+      }
+      return defaultTheme.itemStyle.selectedFontColor;
+    }
     if (this.itemStyle && this.itemStyle.selectedFontColor) {
       return this.itemStyle.selectedFontColor;
     }
@@ -277,6 +301,16 @@ export struct ChipGroup {
   }
 
   private getBackgroundColor(): ResourceColor {
+    if (typeof this.itemStyle.backgroundColor == 'object') {
+      let temp: Resource = this.itemStyle.backgroundColor as Resource;
+      if (temp == undefined || temp == null) {
+        return defaultTheme.itemStyle.backgroundColor;
+      }
+      if (temp.type === 10001) {
+        return this.itemStyle.backgroundColor
+      }
+      return defaultTheme.itemStyle.backgroundColor;
+    }
     if (this.itemStyle && this.itemStyle.backgroundColor) {
       return this.itemStyle.backgroundColor;
     }
@@ -284,6 +318,16 @@ export struct ChipGroup {
   }
 
   private getSelectedBackgroundColor(): ResourceColor {
+    if (typeof this.itemStyle.selectedBackgroundColor == 'object') {
+      let temp: Resource = this.itemStyle.selectedBackgroundColor as Resource;
+      if (temp == undefined || temp == null) {
+        return defaultTheme.itemStyle.selectedBackgroundColor;
+      }
+      if (temp.type === 10001) {
+        return this.itemStyle.selectedBackgroundColor
+      }
+      return defaultTheme.itemStyle.selectedBackgroundColor;
+    }
     if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
       return this.itemStyle.selectedBackgroundColor;
     }
@@ -388,7 +432,11 @@ export struct ChipGroup {
                   activatedBackgroundColor: this.getSelectedBackgroundColor(),
                   onClicked: () => {
                     if (this.isSelected(index)) {
-                      this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1);
+                      if (!(!this.isMultiple())) {
+                        if (this.getSelectedIndexes().length > 1) {
+                          this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1);
+                        }
+                      }
                     } else {
                       if (!this.isMultiple()) {
                         this.selectedIndexes = [];
