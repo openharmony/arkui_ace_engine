@@ -2646,6 +2646,8 @@ void ArkUINativeModule::RegisterNodeContainerAttributes(Local<panda::ObjectRef> 
     auto nodeContainer = panda::ObjectRef::New(vm);
     nodeContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "rebuild"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeContainerBridge::Rebuild));
+    nodeContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "clean"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeContainerBridge::Clean));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "nodeContainer"), nodeContainer);
 }
 
