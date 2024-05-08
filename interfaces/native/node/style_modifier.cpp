@@ -781,11 +781,14 @@ int32_t SetPadding(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     struct ArkUISizeType bottom = { item->value[bottomIndex].f32, unit };
     struct ArkUISizeType left = { item->value[leftIndex].f32, unit };
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
-        fullImpl->getNodeModifiers()->getTextInputModifier()->setPadding(node->uiNodeHandle, &top, &right, &bottom, &left);
+        fullImpl->getNodeModifiers()->getTextInputModifier()->setPadding(
+            node->uiNodeHandle, &top, &right, &bottom, &left);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
-        fullImpl->getNodeModifiers()->getTextAreaModifier()->setPadding(node->uiNodeHandle, &top, &right, &bottom, &left);
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->setPadding(
+            node->uiNodeHandle, &top, &right, &bottom, &left);
     } else {
-        fullImpl->getNodeModifiers()->getCommonModifier()->setPadding(node->uiNodeHandle, &top, &right, &bottom, &left);
+        fullImpl->getNodeModifiers()->getCommonModifier()->setPadding(
+            node->uiNodeHandle, &top, &right, &bottom, &left);
     }
     return ERROR_CODE_NO_ERROR;
 }
