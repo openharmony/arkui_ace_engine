@@ -567,9 +567,9 @@ void FrameNode::DumpSafeAreaInfo()
 
 void FrameNode::DumpCommonInfo()
 {
-    if (!geometryNode_->GetFrameRect().ToString().compare(renderContext_->GetPaintRectWithoutTransform().ToString())) {
-        DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
-    }
+    DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("PaintRect without transform: ").append(renderContext_->GetPaintRectWithoutTransform().ToString()));
     if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
         DumpLog::GetInstance().AddDesc(
             std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
@@ -1175,7 +1175,10 @@ void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
 
 RectF FrameNode::GetRectWithRender()
 {
-    auto currFrameRect = geometryNode_->GetFrameRect();
+    RectF currFrameRect;
+    if (renderContext_) {
+        currFrameRect = renderContext_->GetPaintRectWithoutTransform();
+    }
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
             auto renderPosition = ContextPositionConvertToPX(
@@ -1662,7 +1665,7 @@ void FrameNode::FlushUpdateAndMarkDirty()
     MarkDirtyNode();
 }
 
-void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
+void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
     if (CheckNeedMakePropertyDiff(extraFlag)) {
         if (isPropertyDiffMarked_) {
@@ -1674,7 +1677,7 @@ void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag, bool childExpansiveA
         isPropertyDiffMarked_ = true;
         return;
     }
-    MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag, childExpansiveAndMark);
+    MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
 }
 
 RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame(bool checkBoundary) const
@@ -1756,16 +1759,15 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
     }
 }
 
-bool FrameNode::RequestParentDirty(bool childExpansiveAndMark)
+bool FrameNode::RequestParentDirty()
 {
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_RETURN(parent, false);
-    parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST, childExpansiveAndMark);
+    parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     return true;
 }
 
-void FrameNode::MarkDirtyNode(
-    bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
+void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag)
 {
     if (CheckNeedRender(extraFlag)) {
         paintProperty_->UpdatePropertyChangeFlag(extraFlag);
@@ -1781,21 +1783,8 @@ void FrameNode::MarkDirtyNode(
     CHECK_NULL_VOID(context);
 
     if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
-        auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-        auto selfExpansiveToMark = opts && opts->ExpansiveToMark();
-        if ((!isMeasureBoundary && IsNeedRequestParentMeasure()) || selfExpansiveToMark) {
-            bool parentStopMark = false;
-            auto parent = GetAncestorNodeOfFrame();
-            if (parent) {
-                auto parentPattern = parent->GetPattern();
-                parentStopMark = parentPattern && parentPattern->StopExpandMark();
-            }
-            // case 1: child not expand and mark, but self expand, need to check if parent stop expand mark
-            // case 2: child and self not expand, regular mark parent
-            // case 3: child expand and mark, need to check parent stop expand
-            bool needMarkParent =
-                !childExpansiveAndMark || ((childExpansiveAndMark || selfExpansiveToMark) && !parentStopMark);
-            if (needMarkParent && RequestParentDirty(selfExpansiveToMark)) {
+        if ((!isMeasureBoundary && IsNeedRequestParentMeasure())) {
+            if (RequestParentDirty()) {
                 return;
             }
         }
@@ -2385,8 +2374,9 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
                 continue;
             }
         }
-
-        offset += parent->geometryNode_->GetFrameOffset();
+        if (parentRenderContext) {
+            offset += parentRenderContext->GetPaintRectWithoutTransform().GetOffset();
+        }
         parent = parent->GetAncestorNodeOfFrame(true);
     }
 
@@ -3023,11 +3013,6 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     ACE_LAYOUT_TRACE_BEGIN("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
     ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
-
-    if (SelfOrParentExpansive() && needRestoreSafeArea_) {
-        RestoreGeoState();
-        needRestoreSafeArea_ = false;
-    }
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
@@ -3132,16 +3117,6 @@ void FrameNode::Layout()
 {
     ACE_LAYOUT_TRACE_BEGIN("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
-    if (SelfOrParentExpansive()) {
-        if (IsRootMeasureNode() && !needRestoreSafeArea_ && SelfExpansive()) {
-            GetGeometryNode()->RestoreCache();
-        } else if (needRestoreSafeArea_) {
-            // if safeArea not restored in measure because of constraint not changed and so on,
-            // restore this node
-            RestoreGeoState();
-            needRestoreSafeArea_ = false;
-        }
-    }
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
@@ -3186,10 +3161,10 @@ void FrameNode::Layout()
     auto pipeline = GetContext();
     CHECK_NULL_VOID_LAYOUT_TRACE_END(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
-    AvoidKeyboard(isFocusOnPage);
     bool needSyncRsNode = false;
     DirtySwapConfig config;
     bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode, config);
+    needSyncRsNode |= AvoidKeyboard(isFocusOnPage);
     // skip wrapping task if node will not sync
     CHECK_NULL_VOID_LAYOUT_TRACE_END(willSyncGeoProperties);
     auto task = [weak = WeakClaim(this), needSync = needSyncRsNode, dirtyConfig = config]() {
@@ -3198,13 +3173,6 @@ void FrameNode::Layout()
         frameNode->SyncGeometryNode(needSync, dirtyConfig);
     };
     pipeline->AddSyncGeometryNodeTask(task);
-    if (IsRootMeasureNode()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_LAYOUT_TRACE_END(pipeline);
-        auto safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID_LAYOUT_TRACE_END(safeAreaManager);
-        safeAreaManager->SetRootMeasureNodeId(GetId());
-    }
     if (SelfOrParentExpansive()) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID_LAYOUT_TRACE_END(pipeline);

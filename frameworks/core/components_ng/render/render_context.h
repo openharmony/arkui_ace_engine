@@ -303,6 +303,7 @@ public:
 
     virtual void SavePaintRect(bool isRound = true, uint8_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
+    virtual void UpdatePaintRect(const RectF& paintRect) {}
 
     virtual std::pair<RectF, bool> GetPaintRectWithTranslate()
     {

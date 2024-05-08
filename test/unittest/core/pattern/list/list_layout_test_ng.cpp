@@ -798,6 +798,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod001, TestSize.Level1)
     itemDivider.startMargin = Dimension(LIST_WIDTH / 2);
     itemDivider.endMargin = Dimension(LIST_WIDTH / 2 + 1);
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
+    auto renderContext = frameNode_->GetRenderContext();
+    renderContext->UpdatePaintRect(frameNode_->GetGeometryNode()->GetFrameRect());
     UpdateContentModifier();
     dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
     lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
@@ -813,6 +815,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod001, TestSize.Level1)
      */
     itemDivider = ITEM_DIVIDER;
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
+    renderContext = frameNode_->GetRenderContext();
+    renderContext->UpdatePaintRect(frameNode_->GetGeometryNode()->GetFrameRect());
     UpdateContentModifier();
     dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
     lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
@@ -1032,6 +1036,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod006, TestSize.Level1)
      */
     auto itemDivider = ITEM_DIVIDER;
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
+    auto renderContext = frameNode_->GetRenderContext();
+    renderContext->UpdatePaintRect(frameNode_->GetGeometryNode()->GetFrameRect());
     UpdateDividerMap();
     auto dividerList = pattern_->listContentModifier_->dividerList_->Get();
     auto dividerMap = AceType::DynamicCast<ListDividerArithmetic>(dividerList)->GetDividerMap();
@@ -1053,6 +1059,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod006, TestSize.Level1)
     for (auto itemDivider : dividerArray) {
         layoutProperty_->UpdateDivider(itemDivider);
         FlushLayoutTask(frameNode_);
+        auto renderContext = frameNode_->GetRenderContext();
+        renderContext->UpdatePaintRect(frameNode_->GetGeometryNode()->GetFrameRect());
         UpdateDividerMap();
         dividerList = pattern_->listContentModifier_->dividerList_->Get();
         dividerMap = AceType::DynamicCast<ListDividerArithmetic>(dividerList)->GetDividerMap();
@@ -1626,6 +1634,8 @@ HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask001, TestSize.Level1)
         child.second.id += cur;
         cur++;
     }
+    auto renderContext = frameNode_->GetRenderContext();
+    renderContext->UpdatePaintRect(frameNode_->GetGeometryNode()->GetFrameRect());
     UpdateContentModifier();
     auto dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
     auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);

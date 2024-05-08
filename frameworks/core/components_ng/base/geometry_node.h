@@ -302,6 +302,11 @@ public:
         return pixelGridRoundSize_;
     }
 
+    RectF GetPixelGridRoundRect() const
+    {
+        return RectF(pixelGridRoundOffset_, pixelGridRoundSize_);
+    }
+
     void SetPixelGridRoundSize(const SizeF& pixelGridRoundSize)
     {
         pixelGridRoundSize_ = pixelGridRoundSize;
@@ -342,13 +347,12 @@ public:
         return baselineDistance_.value_or(frame_.rect_.GetY());
     }
 
-    const std::unique_ptr<RectF>& GetPreviousState() const
-    {
-        return previousState_;
-    }
-    void Restore();
-    bool RestoreCache();
-    void Save();
+    RectF GetParentAdjust() const;
+    void SetParentAdjust(RectF parentAdjust);
+    RectF GetSelfAdjust() const;
+    void SetSelfAdjust(RectF selfAdjust);
+    RectF GetFrameRectWithoutSafeArea() const;
+    RectF GetFrameRectWithSafeArea() const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
@@ -367,9 +371,8 @@ private:
     // the size of content rect in current node local coordinate.
     std::unique_ptr<GeometryProperty> content_;
 
-    // save node's state before SafeArea expansion
-    std::unique_ptr<RectF> previousState_;
-    std::unique_ptr<RectF> restoreCache_;
+    RectF parentAdjust_;
+    RectF selfAdjust_;
 
     OffsetF parentGlobalOffset_;
     OffsetF parentAbsoluteOffset_;

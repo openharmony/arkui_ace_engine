@@ -143,11 +143,10 @@ public:
 
     virtual void MarkModifyDone();
 
-    void MarkDirtyNode(
-        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false) override;
+    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
-    void MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary,
-        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     void ProcessPropertyDiff()
     {
@@ -702,14 +701,6 @@ public:
     bool SelfOrParentExpansive();
     bool SelfExpansive();
     bool ParentExpansive();
-    void SetNeedRestoreSafeArea(bool needRestore)
-    {
-        needRestoreSafeArea_ = needRestore;
-    }
-    bool NeedRestoreSafeArea()
-    {
-        return needRestoreSafeArea_;
-    }
 
     bool IsActive() const override
     {
@@ -734,8 +725,8 @@ public:
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
     void SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config);
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
-        bool addToRenderTree = false) override;
+    RefPtr<UINode> GetFrameChildByIndex(
+        uint32_t index, bool needBuild, bool isCache = false, bool addToRenderTree = false) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
@@ -866,7 +857,7 @@ private:
      *
      * @return true if Parent is successfully marked dirty.
      */
-    virtual bool RequestParentDirty(bool childExpansiveAndMark = false);
+    virtual bool RequestParentDirty();
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
@@ -1013,7 +1004,6 @@ private:
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
-    bool needRestoreSafeArea_ = true;
     bool isDisallowDropForcedly_ = false;
 
     RefPtr<FrameNode> overlayNode_;
