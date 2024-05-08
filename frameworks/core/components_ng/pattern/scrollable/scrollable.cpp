@@ -305,7 +305,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
 {
     ACE_FUNCTION_TRACE();
     if (info.GetSourceTool() == SourceTool::TOUCHPAD) {
-        isTouching_ = true;
+        HandleTouchDown();
     }
     currentVelocity_ = info.GetMainVelocity();
     if (dragFRCSceneCallback_) {
