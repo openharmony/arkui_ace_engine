@@ -1913,8 +1913,8 @@ struct ArkUISwiperModifier {
 
 struct ArkUISwiperControllerModifier {
     ArkUINodeHandle (*getSwiperController)(ArkUINodeHandle node);
-    void (*setShowNext)(ArkUINodeHandle node);
-    void (*setShowPrevious)(ArkUINodeHandle node);
+    void (*showNext)(ArkUINodeHandle node);
+    void (*showPrevious)(ArkUINodeHandle node);
 };
 
 struct ArkUIStackModifier {

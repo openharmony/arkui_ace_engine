@@ -135,6 +135,7 @@ public:
     static int32_t GetIndicatorType(FrameNode* frameNode);
     static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
     static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
+    static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG
