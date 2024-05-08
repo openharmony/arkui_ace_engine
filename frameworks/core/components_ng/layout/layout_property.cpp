@@ -564,26 +564,27 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float padding
         padding.bottom.value_or(paddingVerticalDefault) + borderWidth.bottomDimen.value_or(borderVerticalDefault) };
 }
 
-PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder(bool useRootConstraint)
+PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder(bool useRootConstraint, bool roundPixel)
 {
     if (layoutConstraint_.has_value()) {
         return ConvertToPaddingPropertyF(
-            padding_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+            padding_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width(), roundPixel);
     }
 
     return ConvertToPaddingPropertyF(padding_, ScaleProperty::CreateScaleProperty(),
-        useRootConstraint ? PipelineContext::GetCurrentRootWidth() : 0.0f);
+        useRootConstraint ? PipelineContext::GetCurrentRootWidth() : 0.0f, roundPixel);
 }
 
 BorderWidthPropertyF LayoutProperty::CreateBorder()
 {
+    // no pixel rounding
     if (layoutConstraint_.has_value()) {
         return ConvertToBorderWidthPropertyF(
-            borderWidth_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+            borderWidth_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width(), false);
     }
 
     return ConvertToBorderWidthPropertyF(
-        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth(), false);
 }
 
 MarginPropertyF LayoutProperty::CreateMargin()
@@ -608,12 +609,13 @@ MarginPropertyF LayoutProperty::CreateMarginWithoutCache()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, MarginPropertyF());
     const auto& parentConstraint = host->GetGeometryNode()->GetParentLayoutConstraint();
+    // no pixel rounding
     if (parentConstraint) {
         return ConvertToMarginPropertyF(
-            margin_, parentConstraint->scaleProperty, parentConstraint->percentReference.Width());
+            margin_, parentConstraint->scaleProperty, parentConstraint->percentReference.Width(), false);
     }
     // the root width is not considered at present.
-    return ConvertToMarginPropertyF(margin_, ScaleProperty::CreateScaleProperty(), 0.0f);
+    return ConvertToMarginPropertyF(margin_, ScaleProperty::CreateScaleProperty(), 0.0f, false);
 }
 
 void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)
