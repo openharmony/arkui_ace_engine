@@ -60,10 +60,6 @@ inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t l
 
 inline bool ParseJsDoubleArray(const JSRef<JSVal>& jsValue, std::vector<double>& result)
 {
-    if (!jsValue->IsArray() && !jsValue->IsObject()) {
-        return false;
-    }
-
     if (jsValue->IsArray()) {
         JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
         for (size_t i = 0; i < array->Length(); i++) {
@@ -88,26 +84,12 @@ inline bool ParseJsDoubleArray(const JSRef<JSVal>& jsValue, std::vector<double>&
 
 inline bool ParseJsInt(const JSRef<JSVal>& jsValue, int32_t& result)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsObject()) {
-        return false;
-    }
-
     if (jsValue->IsNumber()) {
         result = jsValue->ToNumber<int32_t>();
         return true;
-    }
-
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (!type->IsNumber()) {
+    } else {
         return false;
     }
-
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
-        return false;
-    }
-    return false;
 }
 
 const LinearMapNode<TextBaseline> BASELINE_TABLE[] = {
@@ -135,6 +117,17 @@ JSCanvasRenderer::JSCanvasRenderer()
     SetInstanceId(Container::CurrentIdSafely());
 }
 
+// A helper fucntion to create GradientObj
+JSRef<JSObject> JSCanvasRenderer::createGradientObj(Gradient* gradient)
+{
+    JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
+    pasteObj->SetProperty("__type", "gradient");
+    auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
+    pasteData->SetGradient(gradient);
+    return pasteObj;
+}
+
+
 // createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient
 void JSCanvasRenderer::JsCreateLinearGradient(const JSCallbackInfo& info)
 {
@@ -149,11 +142,7 @@ void JSCanvasRenderer::JsCreateLinearGradient(const JSCallbackInfo& info)
         gradient->SetType(GradientType::LINEAR);
         gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
         gradient->SetEndOffset(Offset(x1 * density, y1 * density));
-
-        JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
-        pasteObj->SetProperty("__type", "gradient");
-        auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
-        pasteData->SetGradient(gradient);
+        JSRef<JSObject> pasteObj = createGradientObj(gradient);
         info.SetReturnValue(pasteObj);
     }
 }
@@ -177,11 +166,7 @@ void JSCanvasRenderer::JsCreateRadialGradient(const JSCallbackInfo& info)
         gradient->SetEndOffset(Offset(endX * density, endY * density));
         gradient->SetInnerRadius(startRadial * density);
         gradient->SetOuterRadius(endRadial * density);
-
-        JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
-        pasteObj->SetProperty("__type", "gradient");
-        auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
-        pasteData->SetGradient(gradient);
+        JSRef<JSObject> pasteObj = createGradientObj(gradient);
         info.SetReturnValue(pasteObj);
     }
 }
@@ -206,11 +191,7 @@ void JSCanvasRenderer::JsCreateConicGradient(const JSCallbackInfo& info)
     gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (2 * M_PI))));
     gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
     gradient->GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
-
-    JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
-    pasteObj->SetProperty("__type", "gradient");
-    auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
-    pasteData->SetGradient(gradient);
+    JSRef<JSObject> pasteObj = createGradientObj(gradient);
     info.SetReturnValue(pasteObj);
 }
 
@@ -1410,7 +1391,7 @@ Pattern JSCanvasRenderer::GetPattern(unsigned int id)
 
 std::weak_ptr<Ace::Pattern> JSCanvasRenderer::GetPatternNG(int32_t id)
 {
-    if (id < 0) {
+    if (id < 0 || id >= static_cast<int32_t>(pattern_.size())) {
         return std::shared_ptr<Pattern>();
     }
     return pattern_[id];
