@@ -729,9 +729,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
     if (!jsViewExtraInfo->IsUndefined()) {
         JSRef<JSVal> jsPage = jsViewExtraInfo->GetProperty("page");
         JSRef<JSVal> jsLine = jsViewExtraInfo->GetProperty("line");
-        JSRef<JSVal> jsColumn = jsViewExtraInfo->GetProperty("col");
-        info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>(),
-            .col = jsColumn->ToNumber<int32_t>()};
+        info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>()};
     }
     
     if (isTitleNode) {

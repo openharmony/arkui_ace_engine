@@ -23,7 +23,7 @@
  * 
  */
 
-type ExtraInfo = { page: string, line: number, col: number };
+type ExtraInfo = { page: string, line: number };
 type ProfileRecursionCounter = { total: number };
 
 // NativeView

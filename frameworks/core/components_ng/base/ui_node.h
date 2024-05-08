@@ -42,7 +42,6 @@ namespace OHOS::Ace::NG {
 struct ExtraInfo {
     std::string page;
     int32_t line = 0;
-    int32_t col = 0;
 };
 
 enum class NodeStatus : char {
