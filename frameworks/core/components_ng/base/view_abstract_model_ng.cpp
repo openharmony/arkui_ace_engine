@@ -159,8 +159,7 @@ void ViewAbstractModelNG::BindMenu(
         if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
             overlayManager->HideMenu(menuNode, targetId, false);
         }
-    }
-    if (menuParam.isShow) {
+    } else if (menuParam.isShow) {
         if (!params.empty()) {
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
         } else if (buildFunc) {
