@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Theme } from '@ohos.arkui.theme'
+import { Theme } from '@ohos.arkui.theme';
 
 export enum IconType {
   BADGE = 1,
@@ -301,13 +301,13 @@ struct OperateItemStruct {
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
       if (isHover && this.parentFrontColor === this.hoveringColor) {
-        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString()
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
-            (this.parentIsActive ? this.activedColor : Color.Transparent.toString())
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
@@ -342,13 +342,13 @@ struct OperateItemStruct {
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
       if (isHover && this.parentFrontColor === this.hoveringColor) {
-        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString()
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
-            (this.parentIsActive ? this.activedColor : Color.Transparent.toString())
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
@@ -635,7 +635,7 @@ struct OperateItemStruct {
 export struct ComposeListItem {
   @Prop contentItem: ContentItem | null = null;
   @Prop operateItem: OperateItem | null = null;
-  @State frontColor: ResourceColor = Color.Transparent.toString()
+  @State frontColor: ResourceColor = Color.Transparent.toString();
   @State borderSize: number = 0;
   @State canFocus: boolean = false
   @State canTouch: boolean = true
