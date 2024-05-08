@@ -158,9 +158,9 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
 
 void LayoutInspector::SetArkUIStateProfilerStatus(bool status)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
-    context->setProfilerStatus(status);
+    context->SetStateProfilerStatus(status);
 }
 
 void LayoutInspector::SetCallback(int32_t instanceId)
