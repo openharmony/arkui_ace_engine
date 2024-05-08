@@ -253,8 +253,8 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // set swiper cache info.
-    auto displayCount = GetDisplayCount(layoutWrapper);
-    auto maxCachedCount = static_cast<int32_t>(std::ceil(static_cast<float>(totalItemCount_ - displayCount) / 2));
+    auto measuredItemCount = static_cast<int32_t>(measuredItems_.size());
+    auto maxCachedCount = static_cast<int32_t>(std::ceil(static_cast<float>(realTotalCount_ - measuredItemCount) / 2));
     layoutWrapper->SetCacheCount(std::min(swiperPattern->GetCachedCount(), maxCachedCount), childLayoutConstraint);
     layoutWrapper->SetLongPredictTask();
 
@@ -383,7 +383,7 @@ float SwiperLayoutAlgorithm::GetChildMaxSize(LayoutWrapper* layoutWrapper, Axis 
 void SwiperLayoutAlgorithm::AdjustStartInfoOnSwipeByGroup(
     int32_t startIndex, const PositionMap& itemPosition, int32_t& startIndexInVisibleWindow, float& startPos)
 {
-    if (!swipeByGroup_) {
+    if (!swipeByGroup_ || isFrameAnimation_) {
         return;
     }
 
@@ -566,29 +566,14 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
                 wrapper->GetHostNode()->GetParent() ? wrapper->GetHostNode()->GetParent()->GetId() : 0, startPos);
         }
         wrapper->Measure(layoutConstraint);
-    }
-
-    float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
-
-    if (!placeItemWidth_.has_value()) {
-        placeItemWidth_ = mainLen;
+        measuredItems_.insert(measureIndex);
     }
 
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(swiperLayoutProperty, 0);
+    CHECK_NULL_RETURN(swiperLayoutProperty, false);
 
-    if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
-        auto layoutProperty = wrapper->GetLayoutProperty();
-        CHECK_NULL_RETURN(layoutProperty, 0);
-        auto visibilityValue = layoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
-        if (visibilityValue == VisibleType::INVISIBLE || visibilityValue == VisibleType::GONE) {
-            if (swiperLayoutProperty->GetDisplayCountValue(1) != 0) {
-                mainLen = (contentMainSize_ - (swiperLayoutProperty->GetDisplayCountValue(1) - 1) * spaceWidth_) /
-                          swiperLayoutProperty->GetDisplayCountValue(1);
-            }
-        }
-    }
-    endPos = startPos + mainLen;
+    float mainAxisSize = GetChildMainAxisSize(wrapper, swiperLayoutProperty, axis);
+    endPos = startPos + mainAxisSize;
     itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
     return true;
 }
@@ -633,25 +618,11 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
                 wrapper->GetHostNode()->GetParent() ? wrapper->GetHostNode()->GetParent()->GetId() : 0, endPos);
         }
         wrapper->Measure(layoutConstraint);
-    }
-    float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
-
-    if (!placeItemWidth_.has_value()) {
-        placeItemWidth_ = mainLen;
+        measuredItems_.insert(measureIndex);
     }
 
-    if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
-        auto layoutProperty = wrapper->GetLayoutProperty();
-        CHECK_NULL_RETURN(layoutProperty, 0);
-        auto visibilityValue = layoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
-        if (visibilityValue == VisibleType::INVISIBLE || visibilityValue == VisibleType::GONE) {
-            if (swiperLayoutProperty->GetDisplayCountValue(1) != 0) {
-                mainLen = (contentMainSize_ - (swiperLayoutProperty->GetDisplayCountValue(1) - 1) * spaceWidth_) /
-                          swiperLayoutProperty->GetDisplayCountValue(1);
-            }
-        }
-    }
-    startPos = endPos - mainLen;
+    float mainAxisSize = GetChildMainAxisSize(wrapper, swiperLayoutProperty, axis);
+    startPos = endPos - mainAxisSize;
     itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
     return true;
 }
@@ -684,6 +655,31 @@ int32_t SwiperLayoutAlgorithm::GetDisplayCount(LayoutWrapper* layoutWrapper) con
     auto layoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, 1);
     return layoutProperty->GetDisplayCount().value_or(1);
+}
+
+float SwiperLayoutAlgorithm::GetChildMainAxisSize(
+    const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty, Axis axis)
+{
+    CHECK_NULL_RETURN(childWrapper, 0.0f);
+
+    float mainAxisSize = GetMainAxisSize(childWrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
+    if (!placeItemWidth_.has_value()) {
+        placeItemWidth_ = mainAxisSize;
+    }
+
+    auto displayCount = swiperProperty->GetDisplayCountValue(1);
+    if (!SwiperUtils::IsStretch(swiperProperty) || displayCount == 0) {
+        return mainAxisSize;
+    }
+
+    auto childProperty = childWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(childProperty, mainAxisSize);
+    auto visibilityValue = childProperty->GetVisibilityValue(VisibleType::VISIBLE);
+    if (visibilityValue == VisibleType::INVISIBLE || visibilityValue == VisibleType::GONE) {
+        mainAxisSize = (contentMainSize_ - (displayCount - 1) * spaceWidth_) / displayCount;
+    }
+
+    return mainAxisSize;
 }
 
 void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
