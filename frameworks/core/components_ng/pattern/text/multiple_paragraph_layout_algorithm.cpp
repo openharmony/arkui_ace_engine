@@ -621,6 +621,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
             }
         } else {
             value = static_cast<float>(width * indentValue.Value());
+            paragraphStyle.indent = Dimension(value);
         }
     }
     auto indent = static_cast<float>(value);
