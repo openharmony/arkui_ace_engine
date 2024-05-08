@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,12 @@
 #include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_parser.h"
 #include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_config.h"
 #endif
+#endif
+#ifdef ANDROID_PLATFORM
+#include "adapter/android/capability/java/jni/font/system_font_manager.h"
+#endif
+#ifdef IOS_PLATFORM
+#include "adapter/ios/capability/font/system_font_manager.h"
 #endif
 
 namespace OHOS::Ace {
@@ -86,6 +92,10 @@ void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
         fontList.emplace_back(fontName);
     }
 #endif
+#endif
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    Platform::SystemFontManager systemFontManager;
+    systemFontManager.GetSystemFontList(fontList);
 #endif
 }
 
@@ -156,6 +166,10 @@ bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
         isGetFont = true;
     }
 #endif
+#endif
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    Platform::SystemFontManager systemFontManager;
+    return systemFontManager.GetSystemFont(fontName, fontInfo);
 #endif
     return isGetFont;
 }
