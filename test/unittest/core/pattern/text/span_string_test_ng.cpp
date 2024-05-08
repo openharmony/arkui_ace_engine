@@ -332,6 +332,65 @@ HWTEST_F(SpanStringTestNg, SpanString006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanStringTest007
+ * @tc.desc: Test basic function of CustomSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString007, TestSize.Level1)
+{
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
+    auto spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 1);
+    auto span = AceType::DynamicCast<CustomSpan>(spans[0]);
+    EXPECT_EQ(span->GetStartIndex(), 0);
+    EXPECT_EQ(span->GetEndIndex(), 1);
+    EXPECT_EQ(span->GetOnMeasure(), std::nullopt);
+    EXPECT_EQ(span->GetOnDraw(), std::nullopt);
+
+    spanString->AppendSpanString(spanString);
+    spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 2);
+    auto span0 = AceType::DynamicCast<CustomSpan>(spans[0]);
+    EXPECT_EQ(span0->GetStartIndex(), 0);
+    EXPECT_EQ(span0->GetEndIndex(), 1);
+    EXPECT_EQ(span0->GetOnMeasure(), std::nullopt);
+    EXPECT_EQ(span0->GetOnDraw(), std::nullopt);
+    auto span1 = AceType::DynamicCast<CustomSpan>(spans[1]);
+    EXPECT_EQ(span1->GetStartIndex(), 1);
+    EXPECT_EQ(span1->GetEndIndex(), 2);
+    EXPECT_EQ(span1->GetOnMeasure(), std::nullopt);
+    EXPECT_EQ(span1->GetOnDraw(), std::nullopt);
+    EXPECT_FALSE(span0->IsAttributesEqual(span1));
+    spanString->RemoveSpans(0, spanString->GetLength());
+    EXPECT_EQ(spanString->GetLength(), 0);
+}
+
+/**
+ * @tc.name: SpanStringTest008
+ * @tc.desc: Test basic function of CustomSpan/Image
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString008, TestSize.Level1)
+{
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    mutableStr->InsertString(0, "123");
+    mutableStr->InsertString(4, "456");
+    auto imageOption1 = SpanStringTestNg::GetImageOption("src/icon-2.png");
+    auto imageSpan1 = AceType::MakeRefPtr<SpanString>(imageOption1);
+    mutableStr->AppendSpanString(imageSpan1);
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
+    spanString->AppendSpanString(mutableStr);
+    auto spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 3);
+    spanString->AppendSpanString(spanString);
+    spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 6);
+}
+
+/**
  * @tc.name: SpanStringTest001
  * @tc.desc: Test basic function of ReplaceString/InsertString/RemoveString
  * @tc.type: FUNC
