@@ -154,6 +154,7 @@ void GaugePattern::InitDescriptionNode()
     CHECK_NULL_VOID(property);
 
     linearNode->MountToParent(frameNode);
+    linearNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     linearNode->MarkModifyDone();
 }
 

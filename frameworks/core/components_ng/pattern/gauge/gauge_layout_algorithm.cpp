@@ -375,9 +375,7 @@ void GaugeLayoutAlgorithm::SetLimitFontSize(LayoutWrapper* layoutWrapper, bool i
     CHECK_NULL_VOID(textLayoutProperty);
     auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
-    textLayoutProperty->ResetAdaptMaxFontSize();
-    textLayoutProperty->ResetAdaptMinFontSize();
-    textLayoutProperty->UpdateFontSize(fontSize);
+    textLayoutProperty->UpdateAdaptMaxFontSize(fontSize);
     limitValueTextWrapper->Measure(layoutConstraint);
 }
 } // namespace OHOS::Ace::NG
