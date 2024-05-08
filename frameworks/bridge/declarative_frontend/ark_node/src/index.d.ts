@@ -128,6 +128,12 @@ declare class ArkGridRowComponent extends ArkComponent {}
 
 declare class ArkGridColComponent extends ArkComponent {}
 
+declare class ArkFlexComponent extends ArkComponent {}
+
+declare class ArkSwiperComponent extends ArkComponent {}
+
+declare class ArkProgressComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;

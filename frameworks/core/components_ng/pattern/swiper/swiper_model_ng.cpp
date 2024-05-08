@@ -782,4 +782,11 @@ int32_t SwiperModelNG::GetIndicatorType(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, IndicatorType, value, frameNode, value);
     return static_cast<int32_t>(value);
 }
+
+RefPtr<SwiperController> SwiperModelNG::GetSwiperController(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetSwiperController();
+}
 } // namespace OHOS::Ace::NG

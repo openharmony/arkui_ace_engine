@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_animator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_row_bridge.h"
@@ -1859,6 +1860,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterFormAttributes(object, vm);
 #endif
     RegisterResourceAttributes(object, vm);
+    RegisterFlexAttributes(object, vm);
     return object;
 }
 
@@ -3497,6 +3499,10 @@ void ArkUINativeModule::RegisterGridItemAttributes(Local<panda::ObjectRef> objec
 void ArkUINativeModule::RegisterProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto progress = panda::ObjectRef::New(vm);
+    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "setProgressInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::SetProgressInitialize));
+    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetProgressInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::ResetProgressInitialize));
     progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetProgressValue"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::SetProgressValue));
     progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetProgressValue"),
@@ -3635,6 +3641,10 @@ void ArkUINativeModule::RegisterRectAttributes(Local<panda::ObjectRef> object, E
 void ArkUINativeModule::RegisterSwiperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto swiper = panda::ObjectRef::New(vm);
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperInitialize));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperInitialize));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperNextMargin"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperNextMargin));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperNextMargin"),
@@ -4035,5 +4045,15 @@ void ArkUINativeModule::RegisterResourceAttributes(Local<panda::ObjectRef> objec
     resource->Set(vm, panda::StringRef::NewFromUtf8(vm, "getColorValue"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ResourceBridge::GetColorValue));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "resource"), resource);
+}
+
+void ArkUINativeModule::RegisterFlexAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto flex = panda::ObjectRef::New(vm);
+    flex->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFlexInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FlexBridge::SetFlexInitialize));
+    flex->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlexInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FlexBridge::ResetFlexInitialize));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "flex"), flex);
 }
 } // namespace OHOS::Ace::NG

@@ -4634,12 +4634,32 @@ if (globalThis.Divider !== undefined) {
 }
 
 /// <reference path='./import.ts' />
+class FlexInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().flex.resetFlexInitialize(node);
+    } else {
+      getUINativeModule().flex.setFlexInitialize(node, this.value.direction, this.value.wrap,
+        this.value.justifyContent, this.value.alignItems, this.value.alignContent);
+    }
+  }
+}
+FlexInitializeModifier.identity = Symbol('flexInitialize');
 class ArkFlexComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
   pointLight(value) {
     throw new Error('Method not implemented.');
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, FlexInitializeModifier.identity, FlexInitializeModifier, value[0]);
+    }
+    return this;
   }
 }
 // @ts-ignore
@@ -18743,6 +18763,13 @@ class ArkProgressComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys,
+        ProgressInitializeModifier.identity, ProgressInitializeModifier, value[0]);
+    }
+    return this;
+  }
   value(value) {
     modifierWithKey(this._modifiersWithKeys, ProgressValueModifier.identity, ProgressValueModifier, value);
     return this;
@@ -18786,6 +18813,21 @@ class ArkProgressComponent extends ArkComponent {
     return this.progressNode.getFrameNode();
   }
 }
+class ProgressInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().progress.resetProgressInitialize(node);
+    }
+    else {
+      getUINativeModule().progress.setProgressInitialize(node, this.value.value,
+        this.value.total, this.value.style, this.value.type);
+    }
+  }
+}
+ProgressInitializeModifier.identity = Symbol('progressInitialize');
 class ProgressValueModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
@@ -21325,6 +21367,12 @@ class ArkSwiperComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, SwiperInitializeModifier.identity, SwiperInitializeModifier, value[0]);
+    }
+    return this;
+  }
   index(value) {
     modifierWithKey(this._modifiersWithKeys, SwiperIndexModifier.identity, SwiperIndexModifier, value);
     return this;
@@ -21423,6 +21471,17 @@ class ArkSwiperComponent extends ArkComponent {
     return this;
   }
 }
+class SwiperInitializeModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperInitialize(node);
+    }
+    else {
+      getUINativeModule().swiper.setSwiperInitialize(node, this.value);
+    }
+  }
+}
+SwiperInitializeModifier.identity = Symbol('swiperInitialize');
 class SwiperNextMarginModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {

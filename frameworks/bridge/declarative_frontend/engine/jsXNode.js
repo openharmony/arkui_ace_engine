@@ -941,6 +941,21 @@ const __creatorMap__ = new Map([
                 return new ArkGridColComponent(node, type);
             });
         }],
+    ["Flex", (context) => {
+            return new TypedFrameNode(context, "Flex", (node, type) => {
+                return new ArkFlexComponent(node, type);
+            });
+        }],
+    ["Swiper", (context) => {
+            return new TypedFrameNode(context, "Swiper", (node, type) => {
+                return new ArkSwiperComponent(node, type);
+            });
+        }],
+    ["Progress", (context) => {
+            return new TypedFrameNode(context, "Progress", (node, type) => {
+                return new ArkProgressComponent(node, type);
+            });
+        }],
 ]);
 class TypedNode {
     static createNode(context, type) {

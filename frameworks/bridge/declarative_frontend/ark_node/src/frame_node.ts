@@ -605,6 +605,21 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkGridColComponent(node, type);
       })
     }],
+    ["Flex", (context: UIContext) => {
+      return new TypedFrameNode(context, "Flex", (node: NodePtr, type: ModifierType) => {
+        return new ArkFlexComponent(node, type);
+      })
+    }],
+    ["Swiper", (context: UIContext) => {
+      return new TypedFrameNode(context, "Swiper", (node: NodePtr, type: ModifierType) => {
+        return new ArkSwiperComponent(node, type);
+      })
+    }],
+    ["Progress", (context: UIContext) => {
+      return new TypedFrameNode(context, "Progress", (node: NodePtr, type: ModifierType) => {
+        return new ArkProgressComponent(node, type);
+      })
+    }],
   ]
 )
 
