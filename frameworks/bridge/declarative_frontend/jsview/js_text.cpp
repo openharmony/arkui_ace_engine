@@ -934,7 +934,9 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
     JSClass<JSText>::StaticMethod("onCopy", &JSText::SetOnCopy);
+    JSClass<JSText>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
     JSClass<JSText>::StaticMethod("onDragEnter", &JSText::JsOnDragEnter);

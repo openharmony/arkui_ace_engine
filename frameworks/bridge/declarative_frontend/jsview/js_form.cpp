@@ -287,7 +287,9 @@ void JSForm::JSBind(BindingTarget globalObj)
     JSClass<JSForm>::StaticMethod("onUninstall", &JSForm::JsOnUninstall);
     JSClass<JSForm>::StaticMethod("onRouter", &JSForm::JsOnRouter);
     JSClass<JSForm>::StaticMethod("onLoad", &JSForm::JsOnLoad);
+    JSClass<JSForm>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSForm>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSForm>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSForm>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSForm>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSForm>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);

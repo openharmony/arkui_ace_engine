@@ -886,6 +886,7 @@ void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
+    eventHub_->FireOnAttach();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
@@ -998,6 +999,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
     if (detachFunc_) {
         detachFunc_(GetId());
     }
+    eventHub_->FireOnDetach();
     eventHub_->FireOnDisappear();
     renderContext_->OnNodeDisappear(recursive);
 }

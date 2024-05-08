@@ -148,6 +148,8 @@ public:
     static void JsOnDestroy(const JSCallbackInfo& args);
     static void JsOnAppear(const JSCallbackInfo& args);
     static void JsOnDisAppear(const JSCallbackInfo& args);
+    static void JsOnAttach(const JSCallbackInfo& args);
+    static void JsOnDetach(const JSCallbackInfo& args);
 
     static void JsOnTouch(const JSCallbackInfo& args);
     static void JsOnClick(const JSCallbackInfo& args);

@@ -121,7 +121,9 @@ void JSRow::JSBind(BindingTarget globalObj)
     JSClass<JSRow>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRow>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSRow>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSRow>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRow>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSRow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSRow>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
