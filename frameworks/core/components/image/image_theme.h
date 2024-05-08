@@ -60,6 +60,7 @@ public:
             theme->fillColor_ = pattern->GetAttr<Color>("fill_color", Color());
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
+            theme->minEdgeAntialiasing_ = pattern->GetAttr<double>("min_edge_antialiasing", 0.0);
         }
     };
 
@@ -74,6 +75,11 @@ public:
     {
         return draggable_;
     }
+    
+    float GetMinEdgeAntialiasing() const
+    {
+        return minEdgeAntialiasing_;
+    }
 
 protected:
     ImageTheme() = default;
@@ -81,6 +87,7 @@ protected:
 private:
     Color fillColor_;
     bool draggable_ = false;
+    float minEdgeAntialiasing_ = 0.0;
 };
 
 } // namespace OHOS::Ace
