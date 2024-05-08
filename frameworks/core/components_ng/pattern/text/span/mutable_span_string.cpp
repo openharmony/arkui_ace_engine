@@ -78,7 +78,7 @@ void MutableSpanString::RemoveSpecialSpans(int32_t start, int32_t length)
         [](const RefPtr<SpanBase>& a, const RefPtr<SpanBase>& b) { return a->GetStartIndex() < b->GetStartIndex(); });
     for (const auto& span : spanBaseList) {
         auto index = span->GetStartIndex();
-        RemoveSpan(index, index + 1, span->GetSpanType());
+        RemoveSpan(index, 1, span->GetSpanType());
     }
 }
 

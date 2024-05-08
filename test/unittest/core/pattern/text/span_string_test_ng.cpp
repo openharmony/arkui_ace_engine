@@ -1062,7 +1062,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString015, TestSize.Level1)
 
 /**
  * @tc.name: MutableSpanString016
- * @tc.desc: Test isAttributesEqual of LineHeightSpan/ParagraphStyleSpan
+ * @tc.desc: Test AppendSpanString/ReplaceSpanString of LineHeightSpan/ParagraphStyleSpan
  * @tc.type: FUNC
  */
 HWTEST_F(SpanStringTestNg, MutableSpanString016, TestSize.Level1)
@@ -1076,14 +1076,19 @@ HWTEST_F(SpanStringTestNg, MutableSpanString016, TestSize.Level1)
     spanParagraphStyle.leadingMargin = LeadingMargin();
     spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
     auto paraSpan = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1);
-    auto paraSpan2 = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1);
-    EXPECT_TRUE(paraSpan->IsAttributesEqual(paraSpan2));
-
     auto lineHeightSpan = AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3);
-    auto lineHeightSpan2 = AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3);
-    auto lineHeightSpan3 = AceType::MakeRefPtr<LineHeightSpan>(Dimension(25), 0, 3);
-    EXPECT_TRUE(lineHeightSpan->IsAttributesEqual(lineHeightSpan2));
-    EXPECT_FALSE(lineHeightSpan->IsAttributesEqual(lineHeightSpan3));
+
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    auto mutableStr2 = AceType::MakeRefPtr<MutableSpanString>("123456");
+    mutableStr->AddSpan(paraSpan);
+    mutableStr2->AddSpan(lineHeightSpan);
+    mutableStr->AppendSpanString(mutableStr2);
+    EXPECT_EQ(mutableStr->GetString(), " 123456");
+    auto spans = mutableStr->GetSpans(0, 7);
+    EXPECT_EQ(spans.size(), 3);
+    mutableStr->ReplaceSpanString(1, 1, mutableStr2);
+    EXPECT_EQ(mutableStr->GetString(), " 12345623456");
 }
 
 /**
