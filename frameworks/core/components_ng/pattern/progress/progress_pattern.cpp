@@ -20,6 +20,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -340,14 +341,10 @@ void ProgressPattern::ObscureText(bool isSensitive)
     CHECK_NULL_VOID(frameNode);
     auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(textHost);
-    auto renderContext = textHost->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    if (isSensitive) {
-        renderContext->UpdateObscured({ ObscuredReasons::PLACEHOLDER });
-    } else {
-        renderContext->UpdateObscured({});
-    }
+    auto textPattern = textHost->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->OnSensitiveStyleChange(isSensitive);
+    textHost->SetPrivacySensitive(isSensitive);
     textHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
