@@ -390,10 +390,11 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
             selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
         GetLocalPointWithTransform(movingCaretOffset);
         pattern->SetMovingCaretOffset(movingCaretOffset);
-        auto magnifierLocalOffset = localOffset;
-        float x = std::clamp(magnifierLocalOffset.GetX(), 0.0f, pattern->GetContentRect().Width());
-        float y = std::clamp(magnifierLocalOffset.GetY(), 0.0f, pattern->GetContentRect().Height());
-        magnifierLocalOffset = OffsetF(x, y);
+        auto contentRect = pattern->GetContentRect();
+        auto caretRect = pattern->GetCaretRect();
+        float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
+        float y = std::clamp(localOffset.GetY(), contentRect.Top(), contentRect.Bottom() - caretRect.Height());
+        auto magnifierLocalOffset = OffsetF(x, y);
         GetLocalPointWithTransform(magnifierLocalOffset);
         pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
     }
