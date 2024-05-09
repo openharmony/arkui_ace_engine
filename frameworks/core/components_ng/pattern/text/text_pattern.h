@@ -507,8 +507,6 @@ public:
         selectionMenuMap_.clear();
     }
 
-    virtual const std::list<RefPtr<UINode>>& GetAllChildren() const;
-
     void HandleSelectionChange(int32_t start, int32_t end);
 
     CopyOptions GetCopyOptions() const
@@ -587,6 +585,11 @@ public:
     void ClearCustomSpanPlaceholderInfo()
     {
         customSpanPlaceholder_.clear();
+    }
+
+    const std::list<RefPtr<UINode>>& GetChildNodes() const
+    {
+        return childNodes_;
     }
 
 protected:
@@ -773,7 +776,7 @@ private:
     int32_t dragRecordSize_ = -1;
     RefPtr<TextController> textController_;
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
-    mutable std::list<RefPtr<UINode>> childNodes_;
+    std::list<RefPtr<UINode>> childNodes_;
     bool isShowMenu_ = true;
     RefPtr<TextSelectOverlay> selectOverlay_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;

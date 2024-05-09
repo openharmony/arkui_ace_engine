@@ -626,13 +626,6 @@ public:
         showSelect_ = isShowSelect;
     }
 
-    const std::list<RefPtr<UINode>>& GetAllChildren() const override
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, TextPattern::GetAllChildren());
-        return host->GetChildren();
-    }
-
     void OnVirtualKeyboardAreaChanged() override;
 
     void SetCaretColor(const Color& caretColor)
