@@ -1072,6 +1072,7 @@ RefPtr<SearchNode> SearchModelNG::CreateFrameNode(int32_t nodeId)
 
 void SearchModelNG::SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     auto searchNode = AceType::Claim(AceType::DynamicCast<SearchNode>(frameNode));
     if (!searchNode->HasTextFieldNode()) {
         return;
@@ -1091,6 +1092,7 @@ void SearchModelNG::SetTextValue(FrameNode* frameNode, const std::optional<std::
 
 void SearchModelNG::SetIcon(FrameNode* frameNode, const std::optional<std::string>& icon)
 {
+    CHECK_NULL_VOID(frameNode);
     auto searchNode = AceType::Claim(AceType::DynamicCast<SearchNode>(frameNode));
     if (!searchNode->HasImageNode()) {
         return;
@@ -1117,6 +1119,7 @@ void SearchModelNG::SetIcon(FrameNode* frameNode, const std::optional<std::strin
 
 void SearchModelNG::SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder)
 {
+    CHECK_NULL_VOID(frameNode);
     auto searchNode = AceType::Claim(AceType::DynamicCast<SearchNode>(frameNode));
     if (!searchNode->HasTextFieldNode()) {
         return;
@@ -1128,6 +1131,17 @@ void SearchModelNG::SetPlaceholder(FrameNode* frameNode, const std::optional<std
     if (textFieldLayoutProperty) {
         textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
     }
+}
+
+void SearchModelNG::SetCaretPosition(FrameNode* frameNode, const int32_t& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto searchNode = AceType::Claim(AceType::DynamicCast<SearchNode>(frameNode));
+    auto pattern = searchNode->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto controller = pattern->GetSearchController();
+    CHECK_NULL_VOID(controller);
+    controller->CaretPosition(value);
 }
 
 void SearchModelNG::RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest)
