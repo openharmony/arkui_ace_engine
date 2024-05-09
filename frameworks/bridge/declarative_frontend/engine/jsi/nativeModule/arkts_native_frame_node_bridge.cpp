@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
+#include <limits>
 
 #include "jsnapi_expo.h"
 
@@ -278,19 +279,31 @@ void FrameNodeBridge::FireMeasureCallback(EcmaVM* vm, JsWeak<panda::CopyableGlob
     auto funcObj = obj->Get(vm, funcName);
     CHECK_NULL_VOID(funcObj->IsFunction());
     panda::Local<panda::FunctionRef> func = funcObj;
+    auto replaceInfinityFunc = [](float value) -> double {
+        double res = static_cast<double>(value);
+        if (GreatOrEqual(res, Infinity<double>())) {
+            return std::numeric_limits<double>::infinity();
+        }
+
+        if (LessOrEqual(res, -Infinity<double>())) {
+            return -std::numeric_limits<double>::infinity();
+        }
+
+        return res;
+    };
 
     const char* keysOfSize[] = { "height", "width" };
     Local<JSValueRef> valuesOfMaxSize[] = {
-        panda::NumberRef::New(vm, static_cast<double>(layoutConstraint.maxSize.Height())),
-        panda::NumberRef::New(vm, static_cast<double>(layoutConstraint.maxSize.Width()))
+        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.maxSize.Height())),
+        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.maxSize.Width()))
     };
     Local<JSValueRef> valuesOfMinSize[] = {
-        panda::NumberRef::New(vm, static_cast<double>(layoutConstraint.minSize.Height())),
-        panda::NumberRef::New(vm, static_cast<double>(layoutConstraint.minSize.Width()))
+        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.minSize.Height())),
+        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.minSize.Width()))
     };
     Local<JSValueRef> valuesOfPercentReference[] = {
-        panda::NumberRef::New(vm, static_cast<double>(layoutConstraint.percentReference.Height())),
-        panda::NumberRef::New(vm, static_cast<double>(layoutConstraint.percentReference.Width()))
+        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.percentReference.Height())),
+        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.percentReference.Width()))
     };
     auto maxSizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize, valuesOfMaxSize);
     auto minSizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize, valuesOfMinSize);
