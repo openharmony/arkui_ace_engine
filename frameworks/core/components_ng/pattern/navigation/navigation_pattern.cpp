@@ -399,33 +399,32 @@ void NavigationPattern::CheckTopNavPathChange(
                 navDestinationFocusView->SetIsViewRootScopeFocused(false);
             }
             navDestinationFocusView->FocusViewShow();
-        } else {
-            // back to navBar case
-            auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-            CHECK_NULL_VOID(navBarNode);
-            auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(
-                hostNode->GetLayoutProperty());
-            if (!navigationLayoutProperty->GetHideNavBarValue(false)) {
-                navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-                navBarNode->SetJSViewActive(true);
-            }
-            auto stageManager = context->GetStageManager();
-            if (stageManager != nullptr) {
-                RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
-                CHECK_NULL_VOID(pageNode);
-                auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-                CHECK_NULL_VOID(pagePattern);
-                auto pageInfo = pagePattern->GetPageInfo();
-                NotifyPageShow(pageInfo->GetPageUrl());
-            }
-            navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-            auto navBarFocusView = navBarNode->GetPattern<FocusView>();
-            CHECK_NULL_VOID(navBarFocusView);
-            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                navBarFocusView->SetIsViewRootScopeFocused(false);
-            }
-            navBarFocusView->FocusViewShow();
         }
+    } else {
+        // back to navBar case
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+        CHECK_NULL_VOID(navBarNode);
+        auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
+        if (!navigationLayoutProperty->GetHideNavBarValue(false)) {
+            navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            navBarNode->SetJSViewActive(true);
+        }
+        auto stageManager = context->GetStageManager();
+        if (stageManager != nullptr) {
+            RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+            CHECK_NULL_VOID(pageNode);
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            CHECK_NULL_VOID(pagePattern);
+            auto pageInfo = pagePattern->GetPageInfo();
+            NotifyPageShow(pageInfo->GetPageUrl());
+        }
+        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+        auto navBarFocusView = navBarNode->GetPattern<FocusView>();
+        CHECK_NULL_VOID(navBarFocusView);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            navBarFocusView->SetIsViewRootScopeFocused(false);
+        }
+        navBarFocusView->FocusViewShow();
     }
     bool isShow = false;
     bool isDialog =
