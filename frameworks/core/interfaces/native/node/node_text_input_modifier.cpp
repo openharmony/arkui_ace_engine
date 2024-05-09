@@ -1184,7 +1184,12 @@ void SetTextInputHeightAdaptivePolicy(ArkUINodeHandle node, ArkUI_Int32 value)
     TextFieldModelNG::SetHeightAdaptivePolicy(frameNode, static_cast<Ace::TextHeightAdaptivePolicy>(value));
 }
 
-void ResetTextInputHeightAdaptivePolicy(ArkUINodeHandle node) {}
+void ResetTextInputHeightAdaptivePolicy(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetHeightAdaptivePolicy(frameNode, TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+}
 
 ArkUI_Bool GetTextInputSelectionMenuHidden(ArkUINodeHandle node)
 {
