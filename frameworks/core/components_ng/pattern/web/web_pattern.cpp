@@ -590,6 +590,23 @@ Offset WebPattern::GetDragOffset() const
     return webDragOffset;
 }
 
+SizeF WebPattern::GetDragPixelMapSize() const
+{
+    SizeF pixelMapSize;
+    int32_t width = 0;
+    int32_t height = 0;
+    RefPtr<PixelMap> pixelMap = nullptr;
+    if (delegate_) {
+        pixelMap = delegate_->GetDragPixelMap();
+    }
+    if (pixelMap) {
+        width = pixelMap->GetWidth();
+        height = pixelMap->GetHeight();
+    }
+    pixelMapSize = SizeF(width, height);
+    return pixelMapSize;
+}
+
 bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
 {
     if (info.GetButton() != MouseButton::LEFT_BUTTON || info.GetAction() != MouseAction::PRESS) {
