@@ -4369,7 +4369,7 @@ const ArkUI_AttributeItem* GetScrollScrollSnap(ArkUI_NodeHandle node)
     g_numberValues[NUM_0].i32 = values[NUM_0];
     g_numberValues[NUM_1].i32 = values[NUM_1];
     g_numberValues[NUM_2].i32 = values[NUM_2];
-    for (auto i = 0; i < size - NUM_3; i++) {
+    for (auto i = NUM_3; i < size; i++) {
         g_numberValues[i].i32 = values[i];
     }
     g_attributeItem.size = size;
