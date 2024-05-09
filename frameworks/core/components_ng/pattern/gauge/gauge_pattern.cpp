@@ -331,14 +331,11 @@ void GaugePattern::ObscureText(int32_t valueTextId, bool isSensitive)
 {
     auto textNode = FrameNode::GetFrameNode(V2::TEXT_ETS_TAG, valueTextId);
     CHECK_NULL_VOID(textNode);
-    auto renderContext = textNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (isSensitive) {
-        renderContext->UpdateObscured({ ObscuredReasons::PLACEHOLDER });
-    } else {
-        renderContext->UpdateObscured({});
-    }
-    textNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->OnSensitiveStyleChange(isSensitive);
+    textNode->SetPrivacySensitive(isSensitive);
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void GaugePattern::OnSensitiveStyleChange(bool isSensitive)
