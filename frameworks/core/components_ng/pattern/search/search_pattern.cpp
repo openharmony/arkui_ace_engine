@@ -1238,10 +1238,11 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json, c
     // icon size
     auto searchIconGeometryNode = imageFrameNode->GetGeometryNode();
     CHECK_NULL_VOID(searchIconGeometryNode);
-    auto searchIconFrameSize = searchIconGeometryNode->GetFrameSize().Width();
+    auto searchIconFrameSize = Dimension(searchIconGeometryNode->GetFrameSize().Width()).ConvertToVp();
     auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(searchLayoutProperty);
-    auto searchIconSize = searchLayoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconFrameSize));
+    auto searchIconSize =
+        searchLayoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconFrameSize, DimensionUnit::VP));
     searchIconJson->Put("size", Dimension(searchIconSize).ToString().c_str());
 
     // icon color
@@ -1281,11 +1282,11 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json,
     // icon size
     auto cancelIconGeometryNode = cancelImageFrameNode->GetGeometryNode();
     CHECK_NULL_VOID(cancelIconGeometryNode);
-    auto cancelIconFrameSize = cancelIconGeometryNode->GetFrameSize().Width();
+    auto cancelIconFrameSize = Dimension(cancelIconGeometryNode->GetFrameSize().Width()).ConvertToVp();
     auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(searchLayoutProperty);
     auto cancelIconSize =
-        searchLayoutProperty->GetCancelButtonUDSizeValue(Dimension(cancelIconFrameSize));
+        searchLayoutProperty->GetCancelButtonUDSizeValue(Dimension(cancelIconFrameSize, DimensionUnit::VP));
     cancelIconJson->Put("size", Dimension(cancelIconSize).ToString().c_str());
 
     // icon color
