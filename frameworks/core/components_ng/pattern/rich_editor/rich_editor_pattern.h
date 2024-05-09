@@ -227,16 +227,6 @@ public:
         richEditorStyledStringController_ = controller;
     }
 
-    void SetStyledStringMode(bool isStyledStringMode)
-    {
-        isStyledStringMode_ = isStyledStringMode;
-    }
-
-    bool IsStyledStringMode()
-    {
-        return isStyledStringMode_;
-    }
-
     long long GetTimestamp() const
     {
         return timestamp_;
@@ -941,7 +931,6 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
-    bool isStyledStringMode_ = false;
     bool isTextChange_ = false;
     bool caretVisible_ = false;
     bool caretTwinkling_ = false;
