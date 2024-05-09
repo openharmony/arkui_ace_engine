@@ -60,6 +60,9 @@ private:
     }
 
 public:
+    static constexpr int32_t DEFAULT_ALPHA = 255;
+    static constexpr double DEFAULT_OPACITY = 0.2;
+    
     static std::optional<JSTheme> GetTheme()
     {
         auto themeId = GetWithThemeId();

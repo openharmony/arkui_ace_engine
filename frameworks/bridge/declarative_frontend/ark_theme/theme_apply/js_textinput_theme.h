@@ -39,9 +39,15 @@ public:
         TextFieldModel::GetInstance()->SetTextColor(themeColors->FontPrimary());
         TextFieldModel::GetInstance()->SetPlaceholderColor(themeColors->FontSecondary());
         TextFieldModel::GetInstance()->SetCaretColor(themeColors->Brand());
-        TextFieldModel::GetInstance()->SetSelectedBackgroundColor(themeColors->Brand());
         ViewAbstractModel::GetInstance()->SetOuterBorderColor(themeColors->InteractiveFocus());
         ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
+        Color selectedColor = themeColors.value().Brand();
+        // Alpha = 255 means opaque
+        if (selectedColor.GetAlpha() == JSThemeUtils::DEFAULT_ALPHA) {
+            // Default setting of 20% opacity
+            selectedColor = selectedColor.ChangeOpacity(JSThemeUtils::DEFAULT_OPACITY);
+        }
+        TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 
         // focused
         ViewStackModel::GetInstance()->SetVisualState(VisualState::FOCUSED);
