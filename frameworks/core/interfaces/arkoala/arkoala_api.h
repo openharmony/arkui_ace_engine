@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 99
+#define ARKUI_FULL_API_VERSION 100
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 99
+#define ARKUI_NODE_API_VERSION 100
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -1403,6 +1403,7 @@ struct ArkUICommonModifier {
     void (*getLayoutRect)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*resetLayoutRect)(ArkUINodeHandle node);
     ArkUI_Bool (*getFocusOnTouch)(ArkUINodeHandle node);
+    void (*setSystemBarEffect)(ArkUINodeHandle node, ArkUI_Bool enable);
 };
 
 struct ArkUICommonShapeModifier {
