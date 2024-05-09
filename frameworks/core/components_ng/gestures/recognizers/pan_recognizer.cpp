@@ -748,6 +748,22 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     return true;
 }
 
+Axis PanRecognizer::GetAxisDirection()
+{
+    auto hasHorizontal = direction_.type & PanDirection::HORIZONTAL;
+    auto hasVertical = direction_.type & PanDirection::VERTICAL;
+    if (direction_.type == PanDirection::ALL || (hasHorizontal && hasVertical)) {
+        return Axis::FREE;
+    }
+    if (hasHorizontal) {
+        return Axis::HORIZONTAL;
+    }
+    if (hasVertical) {
+        return Axis::VERTICAL;
+    }
+    return Axis::NONE;
+}
+
 void PanRecognizer::SetDirection(const PanDirection& direction)
 {
     ChangeDirection(direction);
