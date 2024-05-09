@@ -1099,6 +1099,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::SetBlankHeight));
     blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlankHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetBlankHeight));
+    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlankMin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::SetBlankMin));
+    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlankMin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetBlankMin));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "blank"), blank);
 
     auto span = panda::ObjectRef::New(vm);

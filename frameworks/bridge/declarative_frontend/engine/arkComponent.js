@@ -4328,6 +4328,24 @@ class BlankHeightModifier extends ModifierWithKey {
   }
 }
 BlankHeightModifier.identity = Symbol('blankHeight');
+
+class BlankMinModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().blank.resetBlankMin(node);
+    } else {
+      getUINativeModule().blank.setBlankMin(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+BlankMinModifier.identity = Symbol('blankMin');
+
 class ArkBlankComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -4338,6 +4356,13 @@ class ArkBlankComponent extends ArkComponent {
   }
   height(value) {
     modifierWithKey(this._modifiersWithKeys, BlankHeightModifier.identity, BlankHeightModifier, value);
+    return this;
+  }
+
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, BlankMinModifier.identity, BlankMinModifier, value[0]);
+    }
     return this;
   }
 }

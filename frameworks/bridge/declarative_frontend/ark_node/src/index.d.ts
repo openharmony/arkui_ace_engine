@@ -128,6 +128,10 @@ declare class ArkGridRowComponent extends ArkComponent {}
 
 declare class ArkGridColComponent extends ArkComponent {}
 
+declare class ArkBlankComponent extends ArkComponent {}
+
+declare class ArkImageComponent extends ArkComponent {}
+
 declare class ArkFlexComponent extends ArkComponent {}
 
 declare class ArkSwiperComponent extends ArkComponent {}
