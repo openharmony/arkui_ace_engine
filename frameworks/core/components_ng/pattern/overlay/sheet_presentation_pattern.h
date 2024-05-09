@@ -560,6 +560,7 @@ private:
     std::function<void(const float)> onTypeDidChange_;
     std::function<void()> onAppear_;
     RefPtr<PanEvent> panEvent_;
+    OffsetF arrowOffset_;
     float currentOffset_ = 0.0f;
 
     float preDidHeight_ = 0.0f;
