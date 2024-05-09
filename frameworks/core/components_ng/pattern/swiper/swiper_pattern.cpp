@@ -2933,7 +2933,6 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
     auto curve = GetCurve();
     auto container = Container::Current();
     bool isLauncherFeature = container ? container->IsLauncherContainer() : false;
-
     if (isLauncherFeature) {
         finishCallbackType_ = FinishCallbackType::LOGICALLY;
     }
@@ -3407,11 +3406,11 @@ int32_t SwiperPattern::CalculateDisplayCount() const
         if (LessOrEqual(minSize, 0)) {
             displayCount = 1;
         }
+
         displayCount = displayCount > 0 ? displayCount : 1;
         auto totalCount = TotalCount();
         displayCount = displayCount > totalCount ? totalCount : displayCount;
         auto displayCountProperty = swiperLayoutProperty->GetDisplayCount().value_or(1);
-
         if (displayCountProperty != displayCount) {
             swiperLayoutProperty->UpdateDisplayCount(displayCount);
             auto host = GetHost();
@@ -4038,7 +4037,6 @@ bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper()
         auto itemSpace = GetItemSpace();
         auto prevMarginMontage = Positive(prevMargin) ? prevMargin + itemSpace : 0.0f;
         auto nextMarginMontage = Positive(nextMargin) ? nextMargin + itemSpace : 0.0f;
-
         if (totalChildrenSize <= (contentMainSize_ - prevMarginMontage - nextMarginMontage)) {
             return true;
         }

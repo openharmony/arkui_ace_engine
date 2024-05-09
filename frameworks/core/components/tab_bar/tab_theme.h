@@ -400,7 +400,6 @@ public:
         return dialog_fontColor_;
     }
     
-
 protected:
     TabTheme() = default;
 

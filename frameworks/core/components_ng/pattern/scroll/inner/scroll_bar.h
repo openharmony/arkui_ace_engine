@@ -329,7 +329,6 @@ public:
         hoverAnimationType_ = hoverAnimationType;
     }
 
-
     void PlayScrollBarGrowAnimation()
     {
         PlayScrollBarAppearAnimation();

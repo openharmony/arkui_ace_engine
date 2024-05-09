@@ -298,7 +298,6 @@ void ListItemGroupLayoutAlgorithm::LayoutListItemAll(LayoutWrapper* layoutWrappe
         if (currentIndex < (totalItemCount_ - 1)) {
             currentEndPos += spaceWidth_;
         }
-
     }
 }
 
