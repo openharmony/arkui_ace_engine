@@ -290,9 +290,11 @@ RectF TextFieldSelectOverlay::GetSelectArea()
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, {});
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, {});
     auto selectRects = pattern->GetTextBoxes();
     RectF res(pattern->GetCaretRect());
-    auto textPaintOffset = GetPaintOffsetWithoutTransform();
+    auto textPaintOffset = host->GetTransformRelativeOffset();
     if (selectRects.empty()) {
         if (hasTransform_) {
             GetGlobalRectWithTransform(res);

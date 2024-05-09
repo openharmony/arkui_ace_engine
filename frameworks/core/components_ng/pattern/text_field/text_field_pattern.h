@@ -1269,6 +1269,11 @@ public:
         hasSupportedPreviewText_ = isSupported;
     }
 
+    void OnTouchTestHit(SourceType hitTestType) override
+    {
+        selectOverlay_->OnTouchTestHit(hitTestType);
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override

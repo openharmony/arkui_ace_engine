@@ -740,6 +740,11 @@ public:
         return isMoveCaretAnywhere_;
     }
 
+    void OnTouchTestHit(SourceType hitTestType) override
+    {
+        selectOverlay_->OnTouchTestHit(hitTestType);
+    }
+
 protected:
     bool CanStartAITask() override;
 
