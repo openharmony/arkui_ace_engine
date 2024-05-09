@@ -2982,6 +2982,21 @@ HWTEST_F(RichEditorTestNg, Selection003, TestSize.Level1)
     options.menuPolicy = MenuPolicy::DEFAULT;
     richEditorPattern->OnModifyDone();
     richEditorPattern->SetSelection(start, end, options);
+
+    /**
+     * @tc.step: step4. Call SetSelection with forward selection
+     * @tc.expected: Cursor at start position
+     */
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), start);
+
+    /**
+     * @tc.step: step5. Call SetSelection with backward selection
+     * @tc.expected: Cursor at end position
+     */
+    richEditorPattern->SetSelection(start, end, options, false);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), end);
+
     ClearSpan();
     EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, start);
@@ -3027,6 +3042,21 @@ HWTEST_F(RichEditorTestNg, Selection004, TestSize.Level1)
     SelectionOptions options;
     options.menuPolicy = MenuPolicy::DEFAULT;
     richEditorPattern->SetSelection(start, end, options);
+
+    /**
+     * @tc.step: step5. Call SetSelection with forward selection
+     * @tc.expected: Cursor at start position
+     */
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
+
+    /**
+     * @tc.step: step6. Call SetSelection with backward selection
+     * @tc.expected: Cursor at end position
+     */
+    richEditorPattern->SetSelection(start, end, options, false);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), INIT_VALUE_1.length());
+
     ClearSpan();
     EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
