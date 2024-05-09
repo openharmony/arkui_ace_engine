@@ -884,14 +884,14 @@ void PipelineContext::FlushFrameRate()
 
     bool currAnimationStatus = scheduleTasks_.empty() ? true : false;
 
-    bool isAnimationStatusChanged = currAnimationStatus != animationStatusRec_ ? true : false;
+    bool isAnimationStatusChanged = currAnimationStatus != lastAnimationStatus_ ? true : false;
 
     if (frameRateManager_->IsRateChanged() || isAnimationStatusChanged) {
         auto rate = frameRateManager_->GetExpectedRate();
         ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d", rate);
         window_->FlushFrameRate(rate, currentAnimatorStatus);
         frameRateManager_->SetIsRateChanged(false);
-        animationStatusRec_ = currentAnimatorStatus;
+        lastAnimationStatus_ = currentAnimatorStatus;
     }
 }
 
