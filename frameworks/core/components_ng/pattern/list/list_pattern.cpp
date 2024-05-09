@@ -99,12 +99,27 @@ void ListPattern::OnModifyDone()
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
     }
+    ReadThemeToFadingEdge();
+}
+
+void ListPattern::ReadThemeToFadingEdge()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
     auto conlist = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(conlist);
     auto listTheme = conlist->GetTheme<ListTheme>();
     CHECK_NULL_VOID(listTheme);
     auto listThemeFadingEdge = listTheme->GetFadingEdge();
-    isFadingEdge_ = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
+    if (listLayoutProperty->GetFadingEdge().has_value()) {
+        isFadingEdge_ = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
+    } else if (GetAxis() == Axis::HORIZONTAL) {
+        isFadingEdge_ = false;
+    } else {
+        isFadingEdge_ = listThemeFadingEdge;
+    }
     auto overlayNode = host->GetOverlayNode();
     if (!overlayNode && isFadingEdge_) {
         CreateAnalyzerOverlay(host);
@@ -387,7 +402,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
 
 void ListPattern::UpdateFadingEdge(const RefPtr<ListPaintMethod> paint)
 {
-    if (!isFadingEdge_ || LIST_START_MAIN_POS == contentMainSize_) {
+    if (LIST_START_MAIN_POS == contentMainSize_) {
         return;
     }
     auto host = GetHost();
@@ -396,14 +411,22 @@ void ListPattern::UpdateFadingEdge(const RefPtr<ListPaintMethod> paint)
     CHECK_NULL_VOID(overlayNode);
     auto overlayRenderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(overlayRenderContext);
+    if (!isFadingEdge_) {
+        paint->SetOverlayRenderContext(overlayRenderContext);
+        paint->SetFadingInfo(false, false);
+        isTopEdgeFading_ = false;
+        isLowerEdgeFading_ = false;
+        return;
+    }
     auto isFadingTop = LessNotEqual(startMainPos_, LIST_START_MAIN_POS - LIST_FADE_ERROR_RANGE);
     auto isFadingBottom = GreatNotEqual(endMainPos_, contentMainSize_ + LIST_FADE_ERROR_RANGE);
     if (isFadingTop || isFadingBottom) {
         auto isTopEdgeFadingUpdate = isTopEdgeFading_ != isFadingTop;
         auto isLowerEdgeFadingUpdate = isLowerEdgeFading_ != isFadingBottom;
-        if (isTopEdgeFadingUpdate || isLowerEdgeFadingUpdate) {
+        if (isTopEdgeFadingUpdate || isLowerEdgeFadingUpdate || (fadingAxis_ != GetAxis())) {
             paint->SetOverlayRenderContext(overlayRenderContext);
             UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
+            fadingAxis_ = GetAxis();
         }
     } else if (isTopEdgeFading_ || isLowerEdgeFading_) {
         paint->SetOverlayRenderContext(overlayRenderContext);
