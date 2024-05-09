@@ -139,6 +139,16 @@ void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrappe
     if (!matchChildren && !gridLayoutProperty->HasMaxCount()) {
         return;
     }
+    std::optional<CalcLength> mainAxisIdealSize;
+    const auto& selfLayoutConstraint = gridLayoutProperty->GetCalcLayoutConstraint();
+    if (selfLayoutConstraint && selfLayoutConstraint->selfIdealSize.has_value()) {
+        mainAxisIdealSize = axis_ == Axis::HORIZONTAL ? selfLayoutConstraint->selfIdealSize->Width()
+                                                      : selfLayoutConstraint->selfIdealSize->Height();
+    }
+
+    if (mainAxisIdealSize.has_value()) {
+        return;
+    }
 
     auto lengthOfItemsInViewport = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
     auto gridMainSize = std::min(lengthOfItemsInViewport, mainSize);
