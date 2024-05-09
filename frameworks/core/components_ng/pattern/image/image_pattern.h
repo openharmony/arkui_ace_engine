@@ -459,6 +459,7 @@ private:
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
     bool hasSizeChanged = false;
+    bool isPixelMapChanged_ = true;
 };
 
 } // namespace OHOS::Ace::NG
