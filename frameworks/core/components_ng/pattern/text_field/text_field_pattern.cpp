@@ -2563,12 +2563,10 @@ bool TextFieldPattern::IsDisabled()
 
 void TextFieldPattern::ProcessInnerPadding()
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
     BorderWidthProperty currentBorderWidth;
@@ -5288,7 +5286,7 @@ void TextFieldPattern::ProcessInlinePaddingAndMargin()
     }
     MarginProperty margin;
     margin.bottom = CalcLength(userMargin.bottom->GetDimension() + userPadding.bottom->GetDimension());
-    margin.right = CalcLength(userMargin.right->GetDimension() + userPadding.bottom->GetDimension());
+    margin.right = CalcLength(userMargin.right->GetDimension() + userPadding.right->GetDimension());
     margin.left = CalcLength(userMargin.left->GetDimension() + userPadding.left->GetDimension());
     margin.top = CalcLength(userMargin.top->GetDimension() + userPadding.top->GetDimension());
     layoutProperty->UpdateMargin(margin);
@@ -5324,8 +5322,6 @@ void TextFieldPattern::ApplyInlineTheme()
     renderContext->UpdateBorderColor(inlineBorderColor);
     layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) });
     ProcessInnerPadding();
-    textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
-    textRect_.SetTop(GetPaddingTop() + GetBorderTop());
     ProcessInlinePaddingAndMargin();
 }
 
