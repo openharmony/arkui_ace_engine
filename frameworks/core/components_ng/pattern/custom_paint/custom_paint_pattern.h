@@ -181,8 +181,8 @@ private:
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
     bool isCanvasInit_ = false;
-    SizeF dirtyPixelGridRoundSize_ = { 0, 0 };
-    SizeF lastDirtyPixelGridRoundSize_ = { 0, 0 };
+    SizeF dirtyPixelGridRoundSize_ = { -1, -1 };
+    SizeF lastDirtyPixelGridRoundSize_ = { -1, -1 };
     DirtySwapConfig recordConfig_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
