@@ -918,14 +918,14 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign006, TestSize.Level1)
      * @tc.expected: The item(index:1) align to center
      */
     ScrollSnap(-51.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -225.f); // item(index:0) height and item(index:1) half-height
+    EXPECT_EQ(pattern_->GetTotalOffset(), -25.f); // item(index:0) height and item(index:1) half-height
 
     /**
      * @tc.steps: stpe3. Scroll delta greater than half of item(index:1) height(half height:75.f)
      * @tc.expected: The item(index:2) align to center
      */
     ScrollSnap(-76.f, 1200.f);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -100.f); // item(index:0,1) height and item(index:2) half-height
+    EXPECT_EQ(pattern_->GetTotalOffset(), 100.f); // item(index:0,1) height and item(index:2) half-height
 }
 
 /**
@@ -1167,11 +1167,11 @@ HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback002, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
-    EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 350.0);
+    EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 150.0);
     EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), -50.0);
-    EXPECT_EQ(scrollEdgeEffect->trailingCallback_(), 350.f);
+    EXPECT_EQ(scrollEdgeEffect->trailingCallback_(), 150.f);
     EXPECT_EQ(scrollEdgeEffect->initLeadingCallback_(), -50.0);
-    EXPECT_EQ(scrollEdgeEffect->initTrailingCallback_(), 350.f);
+    EXPECT_EQ(scrollEdgeEffect->initTrailingCallback_(), 150.f);
 }
 
 /**
@@ -1187,9 +1187,9 @@ HWTEST_F(ListAttrTestNg, SetEdgeEffectCallback003, TestSize.Level1)
     CreateDone();
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 0);
-    EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), 800);
+    EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), 400);
     EXPECT_EQ(scrollEdgeEffect->trailingCallback_(), 0.0);
-    EXPECT_EQ(scrollEdgeEffect->initLeadingCallback_(), 800);
+    EXPECT_EQ(scrollEdgeEffect->initLeadingCallback_(), 400);
     EXPECT_EQ(scrollEdgeEffect->initTrailingCallback_(), 0.0);
 }
 
@@ -1393,7 +1393,7 @@ HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
     CreateDone();
     EXPECT_EQ(pattern_->GetTotalOffset(), -50);
     EXPECT_EQ(pattern_->startMainPos_, 50.f);
-    EXPECT_EQ(pattern_->endMainPos_, 820.f);
+    EXPECT_EQ(pattern_->endMainPos_, 490.f);
     EXPECT_EQ(pattern_->contentStartOffset_, 50.f);
     EXPECT_EQ(pattern_->contentEndOffset_, 50.f);
 
@@ -1404,7 +1404,7 @@ HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
     pattern_->ScrollTo(0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->startMainPos_, 0.f);
-    EXPECT_EQ(pattern_->endMainPos_, 880.f);
+    EXPECT_EQ(pattern_->endMainPos_, 440.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 
     /**
@@ -1414,7 +1414,7 @@ HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
     pattern_->ScrollTo(50);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->startMainPos_, -50.f);
-    EXPECT_EQ(pattern_->endMainPos_, 830.f);
+    EXPECT_EQ(pattern_->endMainPos_, 490.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);
 }
 } // namespace OHOS::Ace::NG

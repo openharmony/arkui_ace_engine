@@ -17,7 +17,16 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+struct SwipeActionItem {
+    std::function<void()> builderAction;
+    Dimension actionAreaDistance;
+    OnDeleteEvent onDelete;
+    OnEnterDeleteAreaEvent onEnterDeleteArea;
+    OnExitDeleteAreaEvent onExitDeleteArea;
+    OnStateChangedEvent onStateChange;
+};
+} // namespace
 
 class ListSwipeTestNg : public ListTestNg {
 public:

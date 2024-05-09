@@ -122,7 +122,7 @@ void ListTestNg::CreateListItemGroups(int32_t groupNumber, V2::ListItemGroupStyl
 {
     for (int32_t index = 0; index < groupNumber; index++) {
         CreateListItemGroup(listItemGroupStyle);
-        CreateListItems(GROUP_LINE_NUMBER);
+        CreateListItems(GROUP_ITEM_NUMBER);
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
