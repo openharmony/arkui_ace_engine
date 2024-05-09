@@ -209,6 +209,7 @@ sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& s
 std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
 #endif
 {
+    ACE_LAYOUT_SCOPED_TRACE("QueryImageDataFromImageCache[%s]", sourceInfo.ToString().c_str());
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto imageCache = pipelineCtx->GetImageCache();
@@ -493,9 +494,7 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
 #endif
 
     // 2. if not found. download it.
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Download network image, uri=%{public}s", uri.c_str());
-    }
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "Download network image, uri=%{public}s", uri.c_str());
     std::vector<uint8_t> imageData;
     if (!DownloadManager::GetInstance()->Download(uri, imageData) || imageData.empty()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Download network image %{private}s failed!", uri.c_str());
@@ -742,7 +741,7 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 #if !defined(PIXEL_MAP_SUPPORTED)
     return nullptr;
 #else
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("LoadDecodedImageData[%s]", src.ToString().c_str());
     auto pipeline = pipelineWk.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dataProvider = pipeline->GetDataProviderManager();
