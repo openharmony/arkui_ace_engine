@@ -297,11 +297,9 @@ public:
     void SetDefaultColor(RefPtr<SpanNode>& spanNode);
     void HandleOnDelete(bool backward) override;
     std::pair<bool, bool> IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length);
-    int32_t CalculateDeleteLength(int32_t length, bool isBackward, bool& isSpanSelected);
+    int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 0) override;
-    void DeleteBackward(int32_t length = 0, bool isExternalkeyboard = false);
-    std::wstring DeleteBackwardOperation(int32_t length = 0, bool isExternalkeyboard = false);
-    std::wstring GetBackwardDeleteText(int32_t length);
+    std::wstring DeleteBackwardOperation(int32_t length = 0);
     void DeleteForward(int32_t length) override;
     std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
@@ -819,9 +817,6 @@ private:
     int32_t DeleteValueSetTextSpan(const RefPtr<SpanItem>& spanItem, int32_t currentPosition, int32_t length,
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
-    bool DeleteImageBySoftKeyboard(const RichEditorDeleteValue& info);
-    void DeleteTextSpanInfo(const RefPtr<FrameNode>& host, std::set<int32_t, std::greater<int32_t>>& SpanNodes,
-        const RichEditorAbstractSpanResult& spanResult);
     bool OnKeyEvent(const KeyEvent& keyEvent);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
