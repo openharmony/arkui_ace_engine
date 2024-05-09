@@ -78,7 +78,10 @@ class BuilderNode {
         return this._JSBuilderNode.getFrameNodeWithoutCheck();
     }
     postTouchEvent(touchEvent) {
-        return this._JSBuilderNode.postTouchEvent(touchEvent);
+        __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+        let ret = this._JSBuilderNode.postTouchEvent(touchEvent);
+        __JSScopeUtil__.restoreInstanceId();
+        return ret;
     }
     dispose() {
         this._JSBuilderNode.dispose();
