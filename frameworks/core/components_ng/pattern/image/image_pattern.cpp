@@ -171,7 +171,7 @@ void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     SetOnFinishCallback(image);
     SetRedrawCallback(image);
     // GIF images are not played by default, but depend on OnVisibleAreaChange callback.
-    image->ControlAnimation(false);
+    image->ControlAnimation(gifAnimation_);
 }
 
 void ImagePattern::SetOnFinishCallback(const RefPtr<CanvasImage>& image)
@@ -558,6 +558,9 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
+    if (onProgressCallback_) {
+        loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
+    }
     loadingCtx_->LoadImageData();
 }
 
@@ -650,7 +653,6 @@ void ImagePattern::OnAnimatedModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    ChangeRenderContextProperties();
     Pattern::OnModifyDone();
     auto size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
@@ -713,7 +715,6 @@ void ImagePattern::ControlAnimation(int32_t index)
 
 void ImagePattern::OnImageModifyDone()
 {
-    ChangeRenderContextProperties();
     Pattern::OnModifyDone();
     LoadImageDataIfNeed();
     UpdateGestureAndDragWhenModify();
@@ -938,6 +939,7 @@ void ImagePattern::OnVisibleAreaChange(bool visible)
             animator_->Pause();
         }
     }
+    gifAnimation_ = visible;
     // control svg / gif animation
     if (image_) {
         image_->ControlAnimation(visible);
@@ -951,16 +953,20 @@ void ImagePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderCtx = host->GetRenderContext();
-    CHECK_NULL_VOID(renderCtx);
-    renderCtx->SetClipToBounds(false);
-    renderCtx->SetUsingContentRectForRenderFrame(true);
+    if (isAnimation_) {
+        CHECK_NULL_VOID(renderCtx);
+        renderCtx->SetClipToFrame(true);
+    } else {
+        renderCtx->SetClipToBounds(false);
+        renderCtx->SetUsingContentRectForRenderFrame(true);
 
-    // register image frame node to pipeline context to receive memory level notification and window state change
-    // notification
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
-    pipeline->AddWindowStateChangedCallback(host->GetId());
+        // register image frame node to pipeline context to receive memory level notification and window state change
+        // notification
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+        pipeline->AddWindowStateChangedCallback(host->GetId());
+    }
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1864,6 +1870,12 @@ void ImagePattern::SetDuration(int32_t duration)
     });
 }
 
+void ImagePattern::SetOnProgressCallback(
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress)
+{
+    onProgressCallback_ = onProgress;
+}
+
 void ImagePattern::OnSensitiveStyleChange(bool isSensitive)
 {
     auto host = GetHost();
@@ -1958,23 +1970,6 @@ void ImagePattern::SetImageFit(const RefPtr<FrameNode>& imageFrameNode)
     if (layoutProperty->HasImageFit()) {
         imageLayoutProperty->UpdateImageFit(layoutProperty->GetImageFit().value());
     }
-}
-
-void ImagePattern::ChangeRenderContextProperties()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderCtx = host->GetRenderContext();
-    CHECK_NULL_VOID(renderCtx);
-
-    if (isAnimation_) {
-        renderCtx->SetClipToBounds(true);
-        renderCtx->SetUsingContentRectForRenderFrame(false);
-    } else {
-        renderCtx->SetClipToBounds(false);
-        renderCtx->SetUsingContentRectForRenderFrame(true);
-    }
-    renderCtx->SyncGeometryProperties(nullptr);
 }
 
 void ImagePattern::SetObscured()

@@ -36,6 +36,7 @@ RefPtr<NGGestureRecognizer> SwipeGesture::CreateRecognizer()
     swipeRecognizer->SetPriority(priority_);
     swipeRecognizer->SetPriorityMask(gestureMask_);
     swipeRecognizer->SetGestureInfo(gestureInfo_);
+    swipeRecognizer->SetUserData(userData_);
     return swipeRecognizer;
 }
 

@@ -384,6 +384,7 @@ public:
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -479,6 +480,7 @@ public:
     {
         return drawSize_;
     }
+    SizeF GetDragPixelMapSize() const;
     bool IsVirtualKeyBoardShow() const
     {
         return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
@@ -494,6 +496,7 @@ public:
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     void Backward();
+    void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
 
 private:
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
@@ -691,6 +694,13 @@ private:
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback();
     bool CheckSafeAreaIsExpand();
+    void SelectCancel() const;
+    std::string GetSelectInfo() const;
+    void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
+        std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -787,6 +797,7 @@ private:
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
     std::unordered_map<int32_t, bool> naitve_map_;
+    std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
 };
 } // namespace OHOS::Ace::NG
 

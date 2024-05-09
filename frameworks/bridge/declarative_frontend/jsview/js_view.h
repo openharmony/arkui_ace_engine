@@ -180,7 +180,7 @@ protected:
 
 private:
     int32_t instanceId_ = -1;
-    std::stack<int32_t> restoreInstanceIdStack_;
+    std::vector<int32_t> restoreInstanceIdStack_;
     bool isStatic_ = false;
     std::function<void()> notifyRenderDone_;
 };
@@ -342,8 +342,6 @@ public:
 
     void JSGetUIContext(const JSCallbackInfo& info);
 
-    void JSSendStateInfo(const std::string& stateInfo);
-
     void JSGetUniqueId(const JSCallbackInfo& info);
 
     // Release the UINode hold on the JS object and trigger the delete phase.
@@ -351,6 +349,10 @@ public:
     {
         recycleCustomNode_.Reset();
     }
+
+    void JSGetStateProfilerStatus(const JSCallbackInfo& info);
+
+    void JSSendStateInfo(const std::string& stateInfo);
 
     bool isFullUpdate() const override
     {

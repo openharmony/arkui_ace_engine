@@ -849,11 +849,10 @@ HWTEST_F(TextTimerTestNg, TextTimerTest013, TestSize.Level1)
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
                 EXPECT_EQ(IS_COUNT_DOWN_2, config.isCountDown_);
                 EXPECT_EQ(INPUT_COUNT_2, config.count_);
-                EXPECT_FALSE(config.started_);
+                EXPECT_TRUE(config.started_);
                 return nullptr;
             };
     pattern->HandleStart();
-    pattern->HandlePause();
     pattern->SetBuilderFunc(nextNode);
     pattern->BuildContentModifierNode();
 }

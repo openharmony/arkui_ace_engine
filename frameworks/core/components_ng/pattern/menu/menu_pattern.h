@@ -30,29 +30,12 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 constexpr uint32_t MAX_SEARCH_DEPTH = 5;
 namespace OHOS::Ace::NG {
-enum class MenuType {
-    // ----- Menu Containers ------
-    MENU,         // corresponds to .bindMenu attribute
-    CONTEXT_MENU, // corresponds to .bindContextMenu attribute, lives in a SubWindow
-    SUB_MENU,     // secondary menu container in a multi-level menu
-
-    // ----- innerMenu Node, corersponds to <Menu> tag in the frontend ------
-    MULTI_MENU,   // called multi because it's a multi-leveled menu, its MenuItems can trigger subMenus
-    DESKTOP_MENU, // menu specialized for desktop UI, enabled when multiple sibiling <Menu> nodes are present
-
-    // ----- special menu used in other components ------
-    NAVIGATION_MENU,               // menu used in a Navigation component
-    SELECT_OVERLAY_EXTENSION_MENU, // menu used in SelectOverlay Extension of text component,skip menu layout algorithm
-    SELECT_OVERLAY_CUSTOM_MENU,    // menu used in SelectOverlay for custom menu
-                                   // click menu item whill not trigger close menu
-    SELECT_OVERLAY_SUB_MENU,       // menu type used for select overlay sub menu
-    SELECT_OVERLAY_RIGHT_CLICK_MENU, // menu type used for select overlay menu triggered by right-click
-};
 
 struct SelectProperties {
     std::string value;
@@ -284,17 +267,17 @@ public:
     {
         return showedSubMenu_;
     }
-    
+
     void SetIsWidthModifiedBySelect(bool isModified)
     {
         isWidthModifiedBySelect_ = isModified;
     }
-    
+
     bool IsWidthModifiedBySelect() const
     {
         return isWidthModifiedBySelect_;
     }
-    
+
     float GetSelectMenuWidth();
     void HideSubMenu();
     void OnModifyDone() override;
@@ -357,12 +340,12 @@ public:
     {
         return targetSize_;
     }
-	
+
     void SetIsHeightModifiedBySelect(bool isModified)
     {
         isHeightModifiedBySelect_ = isModified;
     }
-    
+
     bool IsHeightModifiedBySelect() const
     {
         return isHeightModifiedBySelect_;
@@ -377,7 +360,7 @@ public:
     {
         makeFunc_ = std::move(makeFunc);
     }
-    
+
     void ResetBuilderFunc()
     {
         makeFunc_ = std::nullopt;

@@ -639,6 +639,7 @@ public:
     }
 
     void ProcessInnerPadding();
+    void ProcessNumberOfLines();
     void OnCursorMoveDone(
         TextAffinity textAffinity = TextAffinity::UPSTREAM, std::optional<Offset> offset = std::nullopt);
     bool IsDisabled();
@@ -1525,6 +1526,8 @@ private:
     BorderRadiusProperty borderRadius_;
     PasswordModeStyle passwordModeStyle_;
     SelectMenuInfo selectMenuInfo_;
+
+    RefPtr<PanEvent> boxSelectPanEvent_;
 
     // inline
     bool isTextInput_ = false;

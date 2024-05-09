@@ -88,7 +88,7 @@ void PluginManagerResource::CallResRegisterMethod(
         if (callback) {
             callback(result);
         }
-    }, "ArkUIPluginCallResRegister");
+    }, "ArkUIPluginCallResRegisterMethod");
 }
 
 int32_t PluginManagerResource::GetIntParam(const std::string& param, const std::string& name) const

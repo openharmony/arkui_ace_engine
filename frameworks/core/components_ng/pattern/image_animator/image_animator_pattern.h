@@ -138,7 +138,7 @@ private:
     void ResetFormAnimationFlag();
     void RunAnimatorByStatus(int32_t index);
 
-    int32_t iteration_ = 0;
+    int32_t iteration_ = 1;
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
     std::list<CacheImageStruct> cacheImages_;

@@ -172,12 +172,12 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateClipPath()
     return path;
 }
 
-std::shared_ptr<RSPath> TextDragPattern::GenerateBackgroundPath(float offset)
+std::shared_ptr<RSPath> TextDragPattern::GenerateBackgroundPath(float offset, float radiusRatio)
 {
     std::shared_ptr<RSPath> path = std::make_shared<RSPath>();
     std::vector<TextPoint> points;
     GenerateBackgroundPoints(points, offset);
-    CalculateLineAndArc(points, path);
+    CalculateLineAndArc(points, path, radiusRatio);
     return path;
 }
 
@@ -238,9 +238,11 @@ void TextDragPattern::GenerateBackgroundPoints(std::vector<TextPoint>& points, f
     }
 }
 
-void TextDragPattern::CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path)
+void TextDragPattern::CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path,
+    float radiusRatio)
 {
-    auto radius = TEXT_DRAG_RADIUS.ConvertToPx();
+    auto originRadius = TEXT_DRAG_RADIUS.ConvertToPx();
+    auto radius = originRadius * radiusRatio;
     path->MoveTo(points[0].x + radius, points[0].y);
     size_t step = 2;
     for (size_t i = 0; i + step < points.size(); i++) {

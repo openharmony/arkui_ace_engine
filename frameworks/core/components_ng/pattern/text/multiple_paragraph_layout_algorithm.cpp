@@ -341,9 +341,15 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
 {
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
+    
     auto direction = textLayoutProperty->GetLayoutDirection();
     if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
         return direction;
+    }
+
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        return TextDirection::RTL;
     }
 
     TextDirection textDirection = TextDirection::LTR;
@@ -414,9 +420,6 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
             GetSpanParagraphStyle(group.front()->textLineStyle, spanParagraphStyle);
             if (group.front()->fontStyle->HasFontSize()) {
                 spanParagraphStyle.fontSize = group.front()->fontStyle->GetFontSizeValue().ConvertToPx();
-            }
-            if (group.front()->content.length() == 1 && group.front()->content.front() == '\n' && isSpanStringMode_) {
-                spanParagraphStyle.leadingMargin.reset();
             }
         }
         if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
@@ -613,7 +616,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
     auto indentValue = paragraphStyle.indent;
     CHECK_NULL_VOID(paragraph);
     double value = 0.0;
-    if (GreatNotEqual(indentValue.ConvertToPx(), 0.0)) {
+    if (GreatNotEqual(indentValue.Value(), 0.0)) {
         // first line indent
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -624,6 +627,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
             }
         } else {
             value = static_cast<float>(width * indentValue.Value());
+            paragraphStyle.indent = Dimension(value);
         }
     }
     auto indent = static_cast<float>(value);

@@ -703,8 +703,8 @@ protected:
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
     virtual void OnDynamicLightUpRateUpdate(const float rate) {}
     virtual void OnDynamicLightUpDegreeUpdate(const float degree) {}
-    virtual void OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) {}
-    virtual void OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) {}
+    virtual void OnBgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) {}
+    virtual void OnFgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
     virtual void OnBackBlendModeUpdate(BlendMode blendMode) {}
     virtual void OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType) {}

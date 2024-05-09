@@ -200,9 +200,6 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
 void ListPaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& listRenderContext)
 {
-    if (Negative(percentFading_)) {
-        return;
-    }
     CHECK_NULL_VOID(listRenderContext);
     CHECK_NULL_VOID(overlayRenderContext_);
     NG::Gradient gradient;

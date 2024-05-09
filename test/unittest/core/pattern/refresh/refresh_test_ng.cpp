@@ -204,7 +204,10 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper001, TestSize.Level1)
     pullDownRatio = pattern_->CalculatePullDownRatio();
     swiperPattern_->HandleScroll(static_cast<float>(-40.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
     EXPECT_EQ(pattern_->scrollOffset_, 0.f);
-    EXPECT_EQ(swiperPattern_->currentDelta_, lastDelta - (-40.f + lastScrollOffset / pullDownRatio));
+    EXPECT_EQ(swiperPattern_->currentDelta_, lastDelta);
+    swiperPattern_->HandleScroll(static_cast<float>(-20.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+    EXPECT_EQ(swiperPattern_->currentDelta_, 20.f);
 }
 
 /**

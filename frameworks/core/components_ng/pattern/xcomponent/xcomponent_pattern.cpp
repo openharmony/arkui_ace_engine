@@ -37,7 +37,6 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
-#include "transaction/rs_transaction_proxy.h"
 #include "ui/rs_ext_node_operation.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
@@ -490,11 +489,6 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     }
 #endif
     UpdateSurfaceBounds(false, config.frameOffsetChange);
-    // XComponentType::SURFACE has set surface default size in RSSurfaceNode->SetBounds()
-    if (type_ == XComponentType::TEXTURE) {
-        renderSurface_->SetSurfaceDefaultSize(
-            static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
-    }
     if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {
         AddAfterLayoutTaskForExportTexture();
     }
@@ -1321,12 +1315,10 @@ void XComponentPattern::UpdateSurfaceBounds(bool needForceRender, bool frameOffs
             handlingSurfaceRenderContext_->SetBounds(
                 localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
         }
-#ifdef ENABLE_ROSEN_BACKEND
-        auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        }
-#endif
+    }
+    if (renderSurface_) {
+        renderSurface_->SetSurfaceDefaultSize(
+            static_cast<int32_t>(surfaceSize_.Width()), static_cast<int32_t>(surfaceSize_.Height()));
     }
     if (needForceRender) {
         auto host = GetHost();

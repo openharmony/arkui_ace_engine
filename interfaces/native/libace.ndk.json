@@ -997,7 +997,11 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_DrawableDescriptor_Create"
+        "name": "OH_ArkUI_DrawableDescriptor_CreateFromPixelMap"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_DrawableDescriptor_CreateFromAnimatedPixelMap"
     },
     {
         "first_introduced": "12",
@@ -1005,15 +1009,7 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_DrawableDescriptor_SetPixelMap"
-    },
-    {
-        "first_introduced": "12",
-        "name": "OH_ArkUI_DrawableDescriptor_GetPixelMap"
-    },
-    {
-        "first_introduced": "12",
-        "name": "OH_ArkUI_DrawableDescriptor_SetAnimatedPixelMapArray"
+        "name": "OH_ArkUI_DrawableDescriptor_GetStaticPixelMap"
     },
     {
         "first_introduced": "12",
@@ -1054,5 +1050,13 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_GestureInterruptInfo_GetSystemRecognizerType"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetDrawableDescriptorFromNapiValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetDrawableDescriptorFromResourceNapiValue"
     }
 ]

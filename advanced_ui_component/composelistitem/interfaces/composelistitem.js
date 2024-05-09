@@ -1322,21 +1322,21 @@ export class ComposeListItem extends ViewPU {
               ViewStackProcessor.StartGetAccessRecordingFor(a1);
               if (b1) {
                 let c1 = new ContentItemStruct(this, {
-                  icon: typeof this.contentItem.icon === 'string' ? null : this.contentItem.icon,
+                  icon: this.contentItem.icon,
                   iconStyle: this.contentItem.iconStyle,
-                  primaryText: typeof this.contentItem.primaryText === 'string' ? this.contentItem.primaryText : null,
-                  secondaryText: typeof this.contentItem.secondaryText === 'string' ? this.contentItem.secondaryText : null,
-                  description: typeof this.contentItem.description === 'string' ? this.contentItem.description : null,
+                  primaryText: this.contentItem.primaryText,
+                  secondaryText: this.contentItem.secondaryText,
+                  description: this.contentItem.description,
                   leftWidth: this.calculatedLeftWidth()
                 }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 682 });
                 ViewPU.create(c1);
                 let d1 = () => {
                   return {
-                    icon: typeof this.contentItem.icon === 'string' ? null : this.contentItem.icon,
+                    icon: this.contentItem.icon,
                     iconStyle: this.contentItem.iconStyle,
-                    primaryText: typeof this.contentItem.primaryText === 'string' ? this.contentItem.primaryText : null,
-                    secondaryText: typeof this.contentItem.secondaryText === 'string' ? this.contentItem.secondaryText : null,
-                    description: typeof this.contentItem.description === 'string' ? this.contentItem.description : null,
+                    primaryText: this.contentItem.primaryText,
+                    secondaryText: this.contentItem.secondaryText,
+                    description: this.contentItem.description,
                     leftWidth: this.calculatedLeftWidth()
                   };
                 };
@@ -1390,9 +1390,9 @@ export class ComposeListItem extends ViewPU {
                   switch: this.operateItem.switch,
                   checkBox: this.operateItem.checkbox,
                   radio: this.operateItem.radio,
-                  image: typeof this.operateItem.image === 'string' ? null : this.operateItem.image,
-                  text: typeof this.operateItem.text === 'string' ? this.operateItem.text : null,
-                  arrow: typeof this.operateItem.arrow === 'string' ? null : this.operateItem.arrow,
+                  image: this.operateItem.image,
+                  text: this.operateItem.text,
+                  arrow: this.operateItem.arrow,
                   parentCanFocus: this.__canFocus,
                   parentCanTouch: this.__canTouch,
                   parentIsHover: this.__isHover,
@@ -1410,9 +1410,9 @@ export class ComposeListItem extends ViewPU {
                     switch: this.operateItem.switch,
                     checkBox: this.operateItem.checkbox,
                     radio: this.operateItem.radio,
-                    image: typeof this.operateItem.image === 'string' ? null : this.operateItem.image,
-                    text: typeof this.operateItem.text === 'string' ? this.operateItem.text : null,
-                    arrow: typeof this.operateItem.arrow === 'string' ? null : this.operateItem.arrow,
+                    image: this.operateItem.image,
+                    text: this.operateItem.text,
+                    arrow: this.operateItem.arrow,
                     parentCanFocus: this.canFocus,
                     parentCanTouch: this.canTouch,
                     parentIsHover: this.isHover,

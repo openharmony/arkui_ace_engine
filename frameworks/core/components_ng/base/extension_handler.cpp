@@ -147,7 +147,7 @@ void ExtensionHandler::InvalidateRender()
         invalidateRender_();
     } else {
         if (node_) {
-            node_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            node_->MarkNeedRenderOnly();
         }
     }
     needRender_ = true;

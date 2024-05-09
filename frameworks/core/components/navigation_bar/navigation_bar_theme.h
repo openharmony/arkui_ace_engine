@@ -40,11 +40,10 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-
+            SetSymbolTheme(themeConstants, theme);
             theme->backBtnResourceId_ = InternalResource::ResourceId::TITLEBAR_BACK;
             theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
             theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
-
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_NAVIGATION_BAR);
             if (pattern) {
                 theme->height_ = pattern->GetAttr<Dimension>("navigation_bar_height", 0.0_vp);
@@ -90,6 +89,11 @@ public:
         }
 
     private:
+        void SetSymbolTheme(const RefPtr<ThemeConstants>& themeConstants, RefPtr<NavigationBarTheme>& theme) const
+        {
+            theme->backSymbolId_ = themeConstants->GetSymbolByName("arrow_left");
+            theme->moreSymbolId_ = themeConstants->GetSymbolByName("dot_grid_2x2");
+        }
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<NavigationBarTheme>& theme) const
         {
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_NAVIGATION_BAR);
@@ -203,6 +207,14 @@ public:
     InternalResource::ResourceId GetBackBtnResourceId() const
     {
         return backBtnResourceId_;
+    }
+    uint32_t GetBackSymbolId() const
+    {
+        return backSymbolId_;
+    }
+    uint32_t GetMoreSymbolId() const
+    {
+        return moreSymbolId_;
     }
     InternalResource::ResourceId GetBackResourceId() const
     {
@@ -546,6 +558,8 @@ private:
     InternalResource::ResourceId backBtnResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
+    uint32_t backSymbolId_;
+    uint32_t moreSymbolId_;
     Dimension menuZoneSize_;
     Dimension menuIconSize_;
     Dimension logoIconSize_;

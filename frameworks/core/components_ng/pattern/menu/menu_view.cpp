@@ -413,7 +413,14 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
         parent = parent->GetParent();
         CHECK_NULL_VOID(parent);
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto containerId = Container::CurrentId();
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        containerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+    }
+    ContainerScope scope(containerId);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
@@ -426,8 +433,6 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
         columnNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
         // set filter
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
         if (container->IsScenceBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);

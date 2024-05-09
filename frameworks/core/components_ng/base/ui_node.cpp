@@ -1159,6 +1159,8 @@ std::string UINode::GetCurrentCustomNodeInfo()
                     .append(child.page)
                     .append(":")
                     .append(std::to_string(child.line))
+                    .append(":")
+                    .append(std::to_string(child.col))
                     .append(")\n");
             }
             break;

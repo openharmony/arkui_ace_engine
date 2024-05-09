@@ -217,11 +217,6 @@ void RichEditorOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas
 void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
     ACE_SCOPED_TRACE("RichEditorOverlayOnDraw");
-    if (!showSelect_->Get()) {
-        PaintScrollBar(drawingContext);
-        PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
-        return;
-    }
     drawingContext.canvas.Save();
     if (contentRect_.has_value()) {
         auto pipeline = PipelineContext::GetCurrentContext();

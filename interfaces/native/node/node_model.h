@@ -137,4 +137,5 @@ void* GetUserData(ArkUI_NodeHandle node);
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit);
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
+void* GetParseJsMedia();
 }; // namespace OHOS::Ace::NodeModel

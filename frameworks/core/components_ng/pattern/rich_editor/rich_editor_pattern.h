@@ -264,6 +264,9 @@ public:
     }
 
     void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) override;
+    void ProcessStyledString();
+    void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
+    void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
     void InsertValueInStyledString(const std::string& insertValue);
     void DeleteBackwardInStyledString(int32_t length);
     void DeleteForwardInStyledString(int32_t length, bool isIME = true);
@@ -382,7 +385,10 @@ public:
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
-    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
+    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
+        bool updateCaret = true);
+    void DisableDrag(RefPtr<ImageSpanNode> imageNode);
+    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);

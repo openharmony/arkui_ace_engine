@@ -168,8 +168,8 @@ struct BrightnessOption {
     double cubicCoeff { 0.0f };
     double quadCoeff { 0.0f };
     double saturation { 1.0f };
-    std::vector<float> posRGB;
-    std::vector<float> negRGB;
+    std::vector<float> posRGB = { 0.0f, 0.0f, 0.0f };
+    std::vector<float> negRGB = { 0.0f, 0.0f, 0.0f };
     double fraction { 1.0f };
     bool operator==(const BrightnessOption& other) const
     {

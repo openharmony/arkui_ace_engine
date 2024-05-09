@@ -505,6 +505,7 @@ private:
         const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index, int32_t indicator);
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
     bool IsNeedUpdateFontWeight(int32_t index);
+    std::pair<float, float> GetOverScrollInfo(const SizeF& size);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<LongPressEvent> longPressEvent_;

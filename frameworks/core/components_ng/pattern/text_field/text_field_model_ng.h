@@ -249,6 +249,9 @@ public:
     static bool GetCustomKeyboardOption(FrameNode* frameNode);
     static void SetShowKeyBoardOnFocus(FrameNode* frameNode, bool value);
     static bool GetShowKeyBoardOnFocus(FrameNode* frameNode);
+    static void SetNumberOfLines(FrameNode* frameNode, int32_t value);
+    static int32_t GetNumberOfLines(FrameNode* frameNode);
+    static void ResetNumberOfLines(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

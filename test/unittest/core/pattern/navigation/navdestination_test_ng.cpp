@@ -146,8 +146,11 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest005, TestSize.Level1)
     std::string imageSource = "src";
     bool noPixMap = true;
     RefPtr<PixelMap> pixMap = nullptr;
+    std::vector<std::string> nameList;
+    nameList.push_back("");
+    nameList.push_back("");
     navDestinationModelNG.Create(std::move(builderFunc));
-    navDestinationModelNG.SetBackButtonIcon(imageSource, noPixMap, pixMap, "", "");
+    navDestinationModelNG.SetBackButtonIcon(nullptr, imageSource, noPixMap, pixMap, nameList);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);

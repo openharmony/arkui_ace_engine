@@ -737,8 +737,7 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
         return;
     }
-    if (tabBarStyle_ != TabBarStyle::SUBTABBATSTYLE || axis == Axis::VERTICAL ||
-        previousChildrenMainSize_ != childrenMainSize_) {
+    if (previousChildrenMainSize_ != childrenMainSize_) {
         auto scrollableDistance = std::max(childrenMainSize_ - frameSize.MainSize(axis), 0.0f);
         currentOffset_ = std::clamp(currentOffset_, -scrollableDistance, 0.0f);
     }

@@ -133,6 +133,7 @@ public:
     static float GetNextMargin(FrameNode* frameNode, int32_t unit);
     static std::shared_ptr<SwiperParameters> GetDotIndicator(FrameNode* frameNode);
     static int32_t GetIndicatorType(FrameNode* frameNode);
+    static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

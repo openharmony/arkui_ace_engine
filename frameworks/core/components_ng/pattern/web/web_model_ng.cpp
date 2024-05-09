@@ -1070,4 +1070,11 @@ void WebModelNG::SetRenderProcessRespondingId(std::function<void(const BaseEvent
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnRenderProcessRespondingEvent(std::move(uiCallback));
 }
+
+void WebModelNG::SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateSelectionMenuOptions(std::move(webMenuOption));
+}
 } // namespace OHOS::Ace::NG

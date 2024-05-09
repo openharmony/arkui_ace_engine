@@ -64,6 +64,7 @@ using CalePredictSnapOffsetCallback =
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
+using IsReverseCallback = std::function<bool()>;
 
 class FrameNode;
 class PipelineContext;
@@ -158,6 +159,7 @@ public:
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
+    void LayoutDirectionEst(double& correctVelocity);
 
     void SetMoved(bool value)
     {
@@ -244,6 +246,11 @@ public:
     {
         return currentVelocity_;
     };
+
+    void SetIsReverseCallback(const IsReverseCallback& isReverseCallback)
+    {
+        isReverseCallback_ = isReverseCallback;
+    }
 
     void OnAnimateStop();
     void ProcessScrollSnapStop();
@@ -455,6 +462,7 @@ private:
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring
     ScrollOverCallback notifyScrollOverCallback_; // scroll motion controller when edge set to spring
     OutBoundaryCallback outBoundaryCallback_;     // whether out of boundary check when edge set to spring
+    IsReverseCallback isReverseCallback_;
 
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;

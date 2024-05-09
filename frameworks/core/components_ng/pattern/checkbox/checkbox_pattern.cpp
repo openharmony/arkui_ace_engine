@@ -286,13 +286,43 @@ void CheckBoxPattern::InitFocusEvent()
 void CheckBoxPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(checkboxModifier_);
-    checkboxModifier_->SetIsFocused(true);
+    AddIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(true);
 }
 
 void CheckBoxPattern::HandleBlurEvent()
 {
     CHECK_NULL_VOID(checkboxModifier_);
-    checkboxModifier_->SetIsFocused(false);
+    RemoveIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(false);
+}
+
+void CheckBoxPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void CheckBoxPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void CheckBoxPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    CHECK_NULL_VOID(checkboxModifier_);
+    checkboxModifier_->SetIsFocused(isFocusAcitve);
 }
 
 void CheckBoxPattern::OnClick()
