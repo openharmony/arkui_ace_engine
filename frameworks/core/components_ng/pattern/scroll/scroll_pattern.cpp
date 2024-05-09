@@ -182,9 +182,9 @@ void ScrollPattern::CheckScrollable()
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (GreatNotEqual(scrollableDistance_, 0.0f)) {
-        SetScrollEnable(layoutProperty->GetScrollEnabled().value_or(true));
+        SetScrollEnabled(layoutProperty->GetScrollEnabled().value_or(true));
     } else {
-        SetScrollEnable(layoutProperty->GetScrollEnabled().value_or(true) && GetAlwaysEnabled());
+        SetScrollEnabled(layoutProperty->GetScrollEnabled().value_or(true) && GetAlwaysEnabled());
     }
 }
 

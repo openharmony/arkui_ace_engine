@@ -264,13 +264,13 @@ HWTEST_F(ScrollTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
      * @tc.steps: step1. Test default value: true
      */
     CreateWithContent();
-    EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnable());
+    EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());
 
     /**
      * @tc.steps: step2. Test set value: false
      */
     CreateWithContent([](ScrollModelNG model) { model.SetScrollEnabled(false); });
-    EXPECT_FALSE(pattern_->GetScrollableEvent()->GetEnable());
+    EXPECT_FALSE(pattern_->GetScrollableEvent()->GetEnabled());
 }
 
 /**

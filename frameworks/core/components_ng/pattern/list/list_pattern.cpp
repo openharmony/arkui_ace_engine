@@ -602,10 +602,10 @@ void ListPattern::CheckScrollable()
         }
     }
 
-    SetScrollEnable(isScrollable_);
+    SetScrollEnabled(isScrollable_);
 
     if (!listProperty->GetScrollEnabled().value_or(isScrollable_)) {
-        SetScrollEnable(false);
+        SetScrollEnabled(false);
     }
 }
 
