@@ -730,6 +730,35 @@ HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BadgePatternTest010
+ * @tc.desc: test SetSizeInit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgePatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create badge and get frameNode.
+     */
+    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    RefPtr<FrameNode> frameNode = obj.first;
+    BadgeModelNG badge = obj.second;
+
+    /**
+     * @tc.steps: step2. get layoutproperty
+     * @tc.expected: step2. related function is called.
+     */
+    auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(badgeLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. call SetIsDefault with badgeLayoutProperty.
+     */
+    badgeLayoutProperty->SetIsDefault(true, true);
+    EXPECT_EQ(badgeLayoutProperty->GetFontSizeIsDefault(), true);
+    EXPECT_EQ(badgeLayoutProperty->GetBadgeSizeIsDefault(), true);
+}
+
+/**
  * @tc.name: BadgeAccessibilityPropertyTestNg001
  * @tc.desc: Test Text property for BadgeValue of Badge.
  * @tc.type: FUNC
