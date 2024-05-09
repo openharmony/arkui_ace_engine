@@ -449,6 +449,12 @@ public:
     }
     virtual void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) {}
 
+    virtual bool CreateThumbnailPixelMapAsyncTask(
+        bool needScale, std::function<void(const RefPtr<PixelMap>)>&& callback)
+    {
+        return false;
+    }
+
     virtual void SetActualForegroundColor(const Color& value) {}
 
     virtual void ResetSurface() {}

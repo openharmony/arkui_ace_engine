@@ -1434,27 +1434,33 @@ class DrawDragThumbnailCallback : public SurfaceCaptureCallback {
 public:
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
-        if (pixelMap == nullptr) {
-            TAG_LOGW(AceLogTag::ACE_DRAG, "pixelMap is null!");
+        if (pixelMap) {
+            std::unique_lock<std::mutex> lock(g_mutex);
+#ifdef PIXEL_MAP_SUPPORTED
+            g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+#endif // PIXEL_MAP_SUPPORTED
+        } else {
             g_pixelMap = nullptr;
+            TAG_LOGW(AceLogTag::ACE_DRAG, "get drag thumbnail pixelMap failed!");
+        }
+
+        if (callback_ == nullptr) {
             thumbnailGet.notify_all();
             return;
         }
-        std::unique_lock<std::mutex> lock(g_mutex);
-#ifdef PIXEL_MAP_SUPPORTED
-        g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
-#endif // PIXEL_MAP_SUPPORTED
-        thumbnailGet.notify_all();
+        callback_(g_pixelMap);
     }
+
+    std::function<void(const RefPtr<PixelMap>&)> callback_;
 };
 
 RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
 {
-    if (rsNode_ == nullptr) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(rsNode_, nullptr);
     std::shared_ptr<DrawDragThumbnailCallback> drawDragThumbnailCallback =
         std::make_shared<DrawDragThumbnailCallback>();
+    CHECK_NULL_RETURN(drawDragThumbnailCallback, nullptr);
+    drawDragThumbnailCallback->callback_ = nullptr;
     float scaleX = 1.0f;
     float scaleY = 1.0f;
     if (needScale) {
@@ -1470,6 +1476,22 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
         return nullptr;
     }
     return g_pixelMap;
+}
+
+bool RosenRenderContext::CreateThumbnailPixelMapAsyncTask(
+    bool needScale, std::function<void(const RefPtr<PixelMap>)>&& callback)
+{
+    CHECK_NULL_RETURN(rsNode_, false);
+    std::shared_ptr<DrawDragThumbnailCallback> thumbnailCallback =
+        std::make_shared<DrawDragThumbnailCallback>();
+    CHECK_NULL_RETURN(thumbnailCallback, false);
+    thumbnailCallback->callback_ = std::move(callback);
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    if (needScale) {
+        UpdateThumbnailPixelMapScale(scaleX, scaleY);
+    }
+    return RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, thumbnailCallback, scaleX, scaleY, true);
 }
 
 void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY)
