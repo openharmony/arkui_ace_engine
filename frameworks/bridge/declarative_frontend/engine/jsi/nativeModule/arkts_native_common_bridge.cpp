@@ -2681,10 +2681,16 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
         CalcDimension y(0, DimensionUnit::VP);
         ArkTSUtils::ParseJsDimensionVp(vm, xArg, x);
         ArkTSUtils::ParseJsDimensionVp(vm, yArg, y);
-        valueX = x.Value();
-        typeX = x.Unit();
-        valueY = y.Value();
-        typeY = y.Unit();
+        valueX = x.ConvertToPx();
+        valueY = y.ConvertToPx();
+        if (x.Unit() == DimensionUnit::PERCENT) {
+            valueX = x.Value();
+            typeX = DimensionUnit::PERCENT;
+        }
+        if (y.Unit() == DimensionUnit::PERCENT) {
+            valueY = y.Value();
+            typeY = DimensionUnit::PERCENT;
+        }
     }
 
     ArkUI_Float32 values[SIZE_OF_TWO];
