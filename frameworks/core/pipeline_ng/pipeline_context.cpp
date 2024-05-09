@@ -2063,6 +2063,14 @@ bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEve
                 lastMoveEvent = movePoint;
                 iter = touchEvents_.erase(iter);
             } else {
+                auto& pointers = iter->pointers;
+                for (auto pointerIter = pointers.begin(); pointerIter != pointers.end();) {
+                    if (pointerIter->id == event.id) {
+                        pointerIter = pointers.erase(pointerIter);
+                    } else {
+                        ++pointerIter;
+                    }
+                }
                 ++iter;
             }
         }
