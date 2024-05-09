@@ -248,7 +248,6 @@ struct FingerInfo {
     Offset screenLocation_;
     SourceType sourceType_ = SourceType::NONE;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
-    int32_t originalId_ = 0;
 };
 } // namespace OHOS::Ace
 

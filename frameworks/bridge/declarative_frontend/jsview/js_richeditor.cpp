@@ -1707,47 +1707,6 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
     }
 }
 
-void JSRichEditorController::SetSelection(const JSCallbackInfo& args)
-{
-    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    if (args.Length() < 2) { // 2:At least two parameters
-        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Info length error.");
-        return;
-    }
-    int32_t selectionStart = 0;
-    int32_t selectionEnd = 0;
-    JSContainerBase::ParseJsInt32(args[0], selectionStart);
-    JSContainerBase::ParseJsInt32(args[1], selectionEnd);
-    auto controller = controllerWeak_.Upgrade();
-    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-    CHECK_NULL_VOID(richEditorController);
-    std::optional<SelectionOptions> options = std::nullopt;
-    ParseJsSelectionOptions(args, options);
-    richEditorController->SetSelection(selectionStart, selectionEnd, options);
-}
-
-void JSRichEditorController::ParseJsSelectionOptions(
-    const JSCallbackInfo& args, std::optional<SelectionOptions>& options)
-{
-    if (args.Length() < 3) { // 3:Protect operations
-        return;
-    }
-    auto temp = args[2]; // 2:Get the third parameter
-    if (!temp->IsObject()) {
-        return;
-    }
-    SelectionOptions optionTemp;
-    JSRef<JSObject> placeholderOptionObject = JSRef<JSObject>::Cast(temp);
-    JSRef<JSVal> menuPolicy = placeholderOptionObject->GetProperty("menuPolicy");
-    double tempPolicy = 0.0;
-    if (!menuPolicy->IsNull() && JSContainerBase::ParseJsDouble(menuPolicy, tempPolicy)) {
-        if (0 == tempPolicy || 1 == tempPolicy || 2 == tempPolicy) { // 0:DEFAULT, 1:HIDE, 2:SHOW
-            optionTemp.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
-            options = optionTemp;
-        }
-    }
-}
-
 void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -2299,6 +2258,46 @@ JSRef<JSObject> JSRichEditorBaseController::JSObjectCast(JSRef<JSVal> jsValue)
     return JSRef<JSObject>::Cast(jsValue);
 }
 
+void JSRichEditorBaseController::SetSelection(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    if (args.Length() < 2) { // 2:At least two parameters
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Info length error.");
+        return;
+    }
+    int32_t selectionStart = 0;
+    int32_t selectionEnd = 0;
+    JSContainerBase::ParseJsInt32(args[0], selectionStart);
+    JSContainerBase::ParseJsInt32(args[1], selectionEnd);
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    std::optional<SelectionOptions> options = std::nullopt;
+    ParseJsSelectionOptions(args, options);
+    controller->SetSelection(selectionStart, selectionEnd, options);
+}
+
+void JSRichEditorBaseController::ParseJsSelectionOptions(
+    const JSCallbackInfo& args, std::optional<SelectionOptions>& options)
+{
+    if (args.Length() < 3) { // 3:Protect operations
+        return;
+    }
+    auto temp = args[2]; // 2:Get the third parameter
+    if (!temp->IsObject()) {
+        return;
+    }
+    SelectionOptions optionTemp;
+    JSRef<JSObject> placeholderOptionObject = JSRef<JSObject>::Cast(temp);
+    JSRef<JSVal> menuPolicy = placeholderOptionObject->GetProperty("menuPolicy");
+    double tempPolicy = 0.0;
+    if (!menuPolicy->IsNull() && JSContainerBase::ParseJsDouble(menuPolicy, tempPolicy)) {
+        if (0 == tempPolicy || 1 == tempPolicy || 2 == tempPolicy) { // 0:DEFAULT, 1:HIDE, 2:SHOW
+            optionTemp.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
+            options = optionTemp;
+        }
+    }
+}
+
 void JSRichEditorStyledStringController::GetSelection(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -2435,6 +2434,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "setTypingStyle", &JSRichEditorStyledStringController::SetTypingStyle);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getSelection", &JSRichEditorStyledStringController::GetSelection);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "setSelection", &JSRichEditorStyledStringController::SetSelection);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "isEditing", &JSRichEditorStyledStringController::IsEditing);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(

@@ -21,14 +21,12 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/time/time_event_proxy.h"
-#include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -310,7 +308,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     dateTime.week = timeZoneTime->tm_wday; // 0-6
 
     // parse input format
-    formatElementMap.clear();
+    formatElementMap_.clear();
     bool is24H = is24H_;
     ParseInputFormat(is24H);
 
@@ -321,7 +319,12 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     dateTimeFormat += "mmss";
     dateTimeFormat += "SSS";
     std::string dateTimeValue = Localization::GetInstance()->FormatDateTime(dateTime, dateTimeFormat);
+    std::string outputDateTime = ParseDateTime(dateTimeValue, timeZoneTime->tm_wday);
+    return outputDateTime;
+}
 
+std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue, int32_t week)
+{
     // parse data time
     std::string tempdateTimeValue = dateTimeValue;
     std::string strAmPm = GetAmPm(tempdateTimeValue);
@@ -333,27 +336,27 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     curDateTime[(int32_t)(TextClockElementIndex::CUR_AMPM_INDEX)] = strAmPm;
 
     // parse week
-    curDateTime[(int32_t)(TextClockElementIndex::CUR_WEEK_INDEX)] = GetWeek(false, timeZoneTime->tm_wday);
-    curDateTime[(int32_t)(TextClockElementIndex::CUR_SHORT_WEEK_INDEX)] = GetWeek(true, timeZoneTime->tm_wday);
+    curDateTime[(int32_t)(TextClockElementIndex::CUR_WEEK_INDEX)] = GetWeek(false, week);
+    curDateTime[(int32_t)(TextClockElementIndex::CUR_SHORT_WEEK_INDEX)] = GetWeek(true, week);
     // splice date time
     std::string outputDateTime = SpliceDateTime(curDateTime);
     if ((curDateTime[(int32_t)(TextClockElementIndex::CUR_YEAR_INDEX)] == "1900") || (outputDateTime == "")) {
         if (isForm_) {
             TextClockFormatElement tempFormatElement;
             std::vector<std::string> formSplitter = { "h", ":", "m" };
-            formatElementMap.clear();
+            formatElementMap_.clear();
             tempFormatElement.formatElement = formSplitter[0];
             tempFormatElement.elementKey = 'h';
             tempFormatElement.formatElementNum = (int32_t)(TextClockElementIndex::CUR_HOUR_INDEX);
-            formatElementMap[0] = tempFormatElement;
+            formatElementMap_[0] = tempFormatElement;
             tempFormatElement.formatElement = formSplitter[1];
             tempFormatElement.elementKey = ':';
             tempFormatElement.formatElementNum = (int32_t)(TextClockElementIndex::CUR_MAX_INDEX);
-            formatElementMap[1] = tempFormatElement;
+            formatElementMap_[1] = tempFormatElement;
             tempFormatElement.formatElement = formSplitter[2];
             tempFormatElement.elementKey = 'm';
             tempFormatElement.formatElementNum = (int32_t)(TextClockElementIndex::CUR_MINUTE_INDEX);
-            formatElementMap[2] = tempFormatElement;
+            formatElementMap_[2] = tempFormatElement;
             outputDateTime = SpliceDateTime(curDateTime);
         } else {
             outputDateTime = dateTimeValue;
@@ -389,7 +392,7 @@ void TextClockPattern::ParseInputFormat(bool& is24H)
                 tempFormatElement.formatElementNum++;
                 GetDateTimeIndex(inputFormat[i], tempFormatElement);
                 tempFormatElement.elementKey = inputFormat[i];
-                formatElementMap[j] = tempFormatElement;
+                formatElementMap_[j] = tempFormatElement;
                 j++;
                 // clear current element
                 tempFormat = "";
@@ -402,7 +405,7 @@ void TextClockPattern::ParseInputFormat(bool& is24H)
             tempFormatElement.formatElementNum++;
             GetDateTimeIndex(inputFormat[i], tempFormatElement);
             tempFormatElement.elementKey = inputFormat[i];
-            formatElementMap[j] = tempFormatElement;
+            formatElementMap_[j] = tempFormatElement;
         }
     }
 }
@@ -614,12 +617,12 @@ std::string TextClockPattern::SpliceDateTime(const std::vector<std::string>& cur
     std::string format = "";
     std::string tempFormat = "";
     bool oneElement = false;
-    if (((int32_t)(formatElementMap.size()) == (int32_t)TextClockElementLen::ONLY_ONE_DATE_ELEMENT) &&
+    if (((int32_t)(formatElementMap_.size()) == (int32_t)TextClockElementLen::ONLY_ONE_DATE_ELEMENT) &&
         ((strcmp(Localization::GetInstance()->GetLanguage().c_str(), "zh") == 0))) {
         oneElement = true; // year,month or day need Chinese suffix when Chinese system
     }
-    auto it = formatElementMap.begin();
-    while (it != formatElementMap.end()) {
+    auto it = formatElementMap_.begin();
+    while (it != formatElementMap_.end()) {
         tempFormat = CheckDateTimeElement(curDateTime, it->second.elementKey, it->second.formatElementNum, oneElement);
         if (tempFormat.empty()) {
             tempFormat = Abstract(it->second.formatElement, false); // get non letter splitter

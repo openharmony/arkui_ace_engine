@@ -373,12 +373,6 @@ void SetOptionsAction(const std::shared_ptr<SelectOverlayInfo>& info, const std:
     }
 }
 
-void SetOptionsAction(const std::vector<RefPtr<FrameNode>>& options)
-{
-    for (const auto& option : options) {
-        SetOptionDisable(option);
-    }
-}
 } // namespace
 
 SelectOverlayNode::SelectOverlayNode(const RefPtr<Pattern>& pattern)
@@ -555,6 +549,11 @@ RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_p
     selectOverlayNode->UpdateToolBar(true);
     auto selectContext = selectOverlayNode->GetRenderContext();
     selectContext->UpdateUseShadowBatching(true);
+
+    auto accessibilityProperty = selectOverlayNode->GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty) {
+        accessibilityProperty->SetAccessibilityLevel("no");
+    }
     return selectOverlayNode;
 }
 
@@ -861,7 +860,6 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
         auto menuPattern = menu->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
         auto options = menuPattern->GetOptions();
-        SetOptionsAction(options);
         ElementRegister::GetInstance()->AddUINode(menu);
         menu->MountToParent(Claim(this));
 

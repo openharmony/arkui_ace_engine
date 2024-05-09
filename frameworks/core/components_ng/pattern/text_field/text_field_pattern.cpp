@@ -524,7 +524,7 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
         auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterLayoutTask([textRect, eventHub]() {
-            eventHub->FireOnContentSizeChange(textRect.Width(), textRect.Height());
+            eventHub->FireOnContentSizeChange(std::max(0.0f, textRect.Width()), textRect.Height());
         });
     }
 }
@@ -1116,6 +1116,7 @@ void TextFieldPattern::ProcNormalInlineStateInBlurEvent()
             layoutProperty->UpdateMaxLines(1);
             layoutProperty->UpdatePlaceholderMaxLines(1);
         }
+        layoutProperty->ResetTextOverflowMaxLines();
         inlineSelectAllFlag_ = false;
         inlineFocusState_ = false;
         RestorePreInlineStates();
@@ -1161,6 +1162,9 @@ void TextFieldPattern::HandleBlurEvent()
     }
 #endif
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+    if (GetIsPreviewText()) {
+        FinishTextPreview();
+    }
     NotifyOnEditChanged(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -1169,6 +1173,7 @@ void TextFieldPattern::HandleBlurEvent()
         context->RemoveOnAreaChangeNode(host->GetId());
     }
     ClearFocusStyle();
+    isCursorAlwaysDisplayed_ = false;
 }
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
@@ -1232,7 +1237,7 @@ void TextFieldPattern::HandleOnRedoAction()
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
+void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool showMenu)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
@@ -1264,7 +1269,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
         }
         return;
     }
-    selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = false, .animation = true });
+    selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
 }
 
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
@@ -2374,6 +2379,7 @@ void TextFieldPattern::OnModifyDone()
     ApplyUnderlineTheme();
     ApplyInlineTheme();
     ProcessInnerPadding();
+    ProcessNumberOfLines();
 
     InitClickEvent();
     InitLongPressEvent();
@@ -2515,7 +2521,9 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
-    eventHub->FireOnChange(contentController_->GetTextValue());
+    if (!GetIsPreviewText()) {
+        eventHub->FireOnChange(contentController_->GetTextValue());
+    }
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
@@ -2597,6 +2605,28 @@ void TextFieldPattern::ProcessInnerPadding()
     paddings.left = NG::CalcLength(left);
     paddings.right = NG::CalcLength(right);
     layoutProperty->UpdatePadding(paddings);
+}
+
+void TextFieldPattern::ProcessNumberOfLines()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty && layoutProperty->HasNumberOfLines());
+    auto numberOfLines = layoutProperty->GetNumberOfLines().value();
+    CHECK_NULL_VOID(numberOfLines > 0);
+    auto lineHeight = PreferredLineHeight(false);
+    auto lineSpacing = layoutProperty->HasLineSpacing() ? layoutProperty->GetLineSpacing().value().ConvertToPx() : 0.f;
+    auto contentHeight = numberOfLines * lineHeight + (numberOfLines - 1) * lineSpacing;
+    auto height = contentHeight + GetVerticalPaddingAndBorderSum();
+
+    // get previously user defined ideal width
+    std::optional<CalcLength> width = std::nullopt;
+    auto &&layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        width = layoutConstraint->selfIdealSize->Width();
+    }
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, CalcLength(height)));
 }
 
 void TextFieldPattern::InitLongPressEvent()
@@ -2802,6 +2832,27 @@ void TextFieldPattern::InitMouseEvent()
     };
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
     inputHub->AddOnHoverEvent(hoverEvent_);
+
+    auto gestureHub = tmpHost->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (!boxSelectPanEvent_) {
+        auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
+        auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
+        auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
+        GestureEventNoParameter actionCancelTask;
+        boxSelectPanEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
+            std::move(actionEndTask), std::move(actionCancelTask));
+    }
+    PanDirection panDirection = { .type = PanDirection::ALL };
+    gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
+                                                 const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
+            gestureInfo->GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+            return GestureJudgeResult::REJECT;
+        }
+        return GestureJudgeResult::CONTINUE;
+    });
 }
 
 void TextFieldPattern::OnHover(bool isHover)
@@ -3342,6 +3393,7 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
         };
         SetPreviewTextOperation(info);
         FinishTextPreview();
+        return;
     }
 
     auto start = selectController_->GetStartIndex();
@@ -4511,6 +4563,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
+    UpdateCaretInfoToController();
     if (HasFocus() && !magnifierController_->GetShowMagnifier()) {
         StartTwinkling();
     }
@@ -4523,7 +4576,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 void TextFieldPattern::SetSelectionFlag(
     int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
 {
-    if (!HasFocus()) {
+    if (!HasFocus() || GetIsPreviewText()) {
         return;
     }
     isTouchCaret_ = false;
@@ -5298,6 +5351,9 @@ void TextFieldPattern::ProcessInlinePaddingAndMargin()
     if (!IsTextArea()) {
         layoutProperty->UpdatePlaceholderMaxLines(layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
         layoutProperty->ResetMaxLines();
+    }
+    if (layoutProperty->HasTextOverflow()) {
+        layoutProperty->UpdateTextOverflowMaxLines(layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
     }
 }
 
@@ -6416,6 +6472,7 @@ void TextFieldPattern::UnitResponseKeyEvent()
     auto unitArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
     CHECK_NULL_VOID(unitArea);
     auto frameNode = unitArea->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
         auto selectPattern = frameNode->GetPattern<SelectPattern>();
         CHECK_NULL_VOID(selectPattern);
@@ -6439,7 +6496,7 @@ void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& no
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (isCursorAlwaysDisplayed_) {
+    if (HasFocus()) {
         if (SystemProperties::GetDebugEnabled()) {
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
                 "In OnDragMoved, the cursor has always Displayed in the textField, id:%{public}d", host->GetId());

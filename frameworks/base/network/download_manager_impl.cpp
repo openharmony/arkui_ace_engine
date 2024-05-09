@@ -167,6 +167,13 @@ public:
                                    ", msg from netStack: " + error.GetErrorMessage();
             failCallback(errorMsg, true, instanceId);
         });
+        if (downloadCallback.onProgressCallback) {
+            task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
+                const NetStackRequest& request,
+                u_long dlTotal, u_long dlNow, u_long ulTotal, u_long ulNow) {
+                onProgressCallback(dlTotal, dlNow, true, instanceId);
+            });
+        }
         auto result = task->Start();
         LOGI("Task of netstack with src [%{private}s] [%{public}s]", url.c_str(),
             result ? " started on another thread successfully"
@@ -222,6 +229,13 @@ public:
             }
             downloadCondition->cv.notify_all();
         });
+        if (downloadCallback.onProgressCallback) {
+            task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
+                const NetStackRequest& request,
+                u_long dlTotal, u_long dlNow, u_long ulTotal, u_long ulNow) {
+                onProgressCallback(dlTotal, dlNow, false, instanceId);
+            });
+        }
         auto result = task->Start();
         return HandleDownloadResult(result, std::move(downloadCallback), downloadCondition, instanceId, url);
     }

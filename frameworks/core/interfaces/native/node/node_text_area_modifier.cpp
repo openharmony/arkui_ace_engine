@@ -1245,11 +1245,26 @@ void SetTextAreaOnTextContentScroll(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_TEXT_AREA_CONTENT_SCROLL;
-        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetX);
-        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetY);
+        event.componentAsyncEvent.data[0].f32 = totalOffsetX;
+        event.componentAsyncEvent.data[1].f32 = totalOffsetY;
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onScroll));
+}
+
+void SetTextAreaOnSubmit(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](int32_t value, NG::TextFieldCommonEvent& commonEvent) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXTAREA_ON_SUBMIT;
+        event.componentAsyncEvent.data[0].i32 = value;
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnSubmit(frameNode, std::move(onEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

@@ -125,8 +125,11 @@ private:
     static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
     static void UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
         std::function<int32_t(JSRef<JSObject>)> checkFunc);
-    int32_t LoadCurrentDestinationBuilder(const std::string& name, const JSRef<JSVal>& param,
-        const WeakPtr<NG::UINode>& customNode);
+
+    int LoadDestination(const std::string& name, const JSRef<JSVal>& param, const WeakPtr<NG::UINode>& customNode,
+        RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
+    bool LoadDestinationByBuilder(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node,
+        RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool GetFlagByIndex(int32_t index) const;
     void SaveNodeToPreBuildList(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
     RefPtr<NG::UINode> GetNodeFromPreBuildList(const std::string& name, const JSRef<JSVal>& param);

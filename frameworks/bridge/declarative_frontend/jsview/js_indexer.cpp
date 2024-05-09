@@ -54,8 +54,10 @@ IndexerModel* IndexerModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::AlignStyle::RIGHT };
-const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT };
+const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::AlignStyle::RIGHT, V2::AlignStyle::START,
+    V2::AlignStyle::END };
+const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT, NG::AlignStyle::START,
+    NG::AlignStyle::END };
 constexpr Dimension DEFAULT_ITEM_SIZE = 16.0_vp;
 constexpr double ZERO_RADIUS = 0.0;
 constexpr double POPUP_ITEM_DEFAULT_RADIUS = 24.0;
@@ -324,8 +326,8 @@ void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    int32_t value = Container::IsCurrentUseNewPipeline() ? static_cast<int32_t>(NG::AlignStyle::RIGHT)
-                                                         : static_cast<int32_t>(V2::AlignStyle::RIGHT);
+    int32_t value = Container::IsCurrentUseNewPipeline() ? static_cast<int32_t>(NG::AlignStyle::END)
+                                                         : static_cast<int32_t>(V2::AlignStyle::END);
     auto alignValue = -1;
     if (args[0]->IsNumber()) {
         alignValue = args[0]->ToNumber<int32_t>();

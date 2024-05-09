@@ -508,6 +508,7 @@ public:
     void GetBuilderInitHeight();
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
+    float GetTitleHeight();
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -524,6 +525,7 @@ private:
     void UpdateCloseIconStatus();
     void UpdateSheetTitle();
     void UpdateInteractive();
+    void UpdateFontScaleStatus();
     RefPtr<RenderContext> GetRenderContext();
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
@@ -602,6 +604,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 
     float preDetentsHeight_ = 0.0f;
+    float scale_ = 1.0;
 };
 } // namespace OHOS::Ace::NG
 

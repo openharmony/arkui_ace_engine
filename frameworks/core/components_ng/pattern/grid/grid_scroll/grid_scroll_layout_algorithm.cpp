@@ -21,10 +21,8 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -1169,23 +1167,14 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
 
     // skip lines not in matrix
     if (GreatOrEqual(gridLayoutInfo_.currentOffset_, mainSize) && gridLayoutInfo_.startIndex_ > 0) {
-        auto grid = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(grid);
-        auto pattern = grid->GetPattern<GridPattern>();
-        CHECK_NULL_VOID(pattern);
         if (!gridLayoutInfo_.hasBigItem_) {
             SkipRegularLines(true);
         } else {
-            auto averageHeight = pattern->GetAverageHeight();
-            if (LessOrEqual(averageHeight, 0.0)) {
-                return;
-            }
-            int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
-            gridLayoutInfo_.startIndex_ = std::max(gridLayoutInfo_.startIndex_ - estimatedIndex, 0);
-            gridLayoutInfo_.currentOffset_ =
-                gridLayoutInfo_.startIndex_ > estimatedIndex ? gridLayoutInfo_.prevOffset_ : 0.0f;
+            SkipIrregularLines(layoutWrapper, true);
         }
         TAG_LOGI(AceLogTag::ACE_GRID, "estimatedIndex:%{public}d", gridLayoutInfo_.startIndex_);
+        auto grid = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(grid);
         grid->ChildrenUpdatedFrom(0);
     }
 }
@@ -1216,24 +1205,15 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
 
     // skip lines not in matrix
     if (GreatOrEqual(-gridLayoutInfo_.currentOffset_, mainSize)) {
-        auto grid = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(grid);
-        auto pattern = grid->GetPattern<GridPattern>();
-        CHECK_NULL_VOID(pattern);
         if (!gridLayoutInfo_.hasBigItem_) {
             SkipRegularLines(false);
         } else {
-            auto averageHeight = pattern->GetAverageHeight();
-            if (LessOrEqual(averageHeight, 0.0)) {
-                return;
-            }
-            int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
-            gridLayoutInfo_.startIndex_ =
-                std::min(gridLayoutInfo_.startIndex_ - estimatedIndex, gridLayoutInfo_.childrenCount_);
-            gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_;
+            SkipIrregularLines(layoutWrapper, false);
         }
         TAG_LOGI(AceLogTag::ACE_GRID, "estimatedIndex:%{public}d, currentOffset:%{public}f",
             gridLayoutInfo_.startIndex_, gridLayoutInfo_.currentOffset_);
+        auto grid = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(grid);
         grid->ChildrenUpdatedFrom(0);
     }
 }
@@ -1252,6 +1232,22 @@ void GridScrollLayoutAlgorithm::SkipRegularLines(bool forward)
         gridLayoutInfo_.startIndex_ -= estimatedLines * static_cast<int32_t>(crossCount_);
         gridLayoutInfo_.currentOffset_ -= lineHeight * estimatedLines;
     }
+}
+
+void GridScrollLayoutAlgorithm::SkipIrregularLines(LayoutWrapper* layoutWrapper, bool forward)
+{
+    auto grid = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(grid);
+    auto pattern = grid->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto averageHeight = pattern->GetAverageHeight();
+    if (LessOrEqual(averageHeight, 0.0)) {
+        return;
+    }
+    int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
+    gridLayoutInfo_.startIndex_ =
+        std::min(gridLayoutInfo_.startIndex_ - estimatedIndex, gridLayoutInfo_.childrenCount_);
+    gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_;
 }
 
 float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper)

@@ -170,7 +170,6 @@ void NavigationPattern::OnModifyDone()
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
     isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
-
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
@@ -220,6 +219,7 @@ void NavigationPattern::OnLanguageConfigurationUpdate()
 void NavigationPattern::SyncWithJsStackIfNeeded()
 {
     if (!needSyncWithJsStack_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "not need SyncWithJsStack");
         return;
     }
     CHECK_NULL_VOID(navigationStack_);
@@ -844,18 +844,8 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(hostNode, false);
     if (navigationModeChange_) {
         if (NavigationMode::STACK == navigationMode_) {
-            auto newTopNavPath = navigationStack_->GetTopNavPath();
-            if (newTopNavPath.has_value()) {
-                auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-                    NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
-                CHECK_NULL_RETURN(newTopNavDestination, false);
-                auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
-                CHECK_NULL_RETURN(navDestinationFocusView, false);
-                if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                    navDestinationFocusView->SetIsViewRootScopeFocused(false);
-                }
-                navDestinationFocusView->FocusViewShow();
-            }
+            // Set focus on navDestination when mode changes to STACK
+            RefreshFocusToDestination();
         }
         AbortAnimation(hostNode);
     }
@@ -1304,9 +1294,13 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         return false;
     }
     auto transition = navigationTransition.transition;
-    proxy->SetFinishTransitionEvent([weakPattern = WeakClaim(this), preTopNavDestination, newTopNavDestination, proxy,
-                                        isPopPage, endCallBack = navigationTransition.endCallback](bool isSuccess) {
+    proxy->SetFinishTransitionEvent([weakPattern = WeakClaim(this), endCallBack = navigationTransition.endCallback,
+                                        weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
+                                        weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
+                                        proxy, isPopPage](bool isSuccess) {
         auto navigationPattern = weakPattern.Upgrade();
+        auto preTopNavDestination = weakPreNavDestination.Upgrade();
+        auto newTopNavDestination = weakNewNavDestination.Upgrade();
         CHECK_NULL_VOID(navigationPattern);
         if (proxy != nullptr && proxy->GetIsFinished()) {
             TAG_LOGD(AceLogTag::ACE_NAVIGATION, "custom animation has finished");
@@ -1894,6 +1888,21 @@ void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*heigh
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         AbortAnimation(hostNode);
+    }
+}
+void NavigationPattern::RefreshFocusToDestination()
+{
+    auto newTopNavPath = navigationStack_->GetTopNavPath();
+    if (newTopNavPath.has_value()) {
+        auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
+        CHECK_NULL_VOID(newTopNavDestination);
+        auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
+        CHECK_NULL_VOID(navDestinationFocusView);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            navDestinationFocusView->SetIsViewRootScopeFocused(false);
+        }
+        navDestinationFocusView->FocusViewShow();
     }
 }
 } // namespace OHOS::Ace::NG

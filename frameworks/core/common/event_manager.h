@@ -253,7 +253,7 @@ private:
     void GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std::string>& touchTestIds,
         bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     void CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
-    void LogTouchTestResultRecognizers(const TouchTestResult& result);
+    void LogTouchTestResultRecognizers(const TouchTestResult& result, int32_t touchEventId);
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
     bool innerEventWin_ = false;

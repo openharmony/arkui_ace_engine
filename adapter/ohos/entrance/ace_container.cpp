@@ -1658,7 +1658,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
                 CHECK_NULL_VOID(container);
                 container->OnFinish();
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIFinishEventHandler");
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleFinishEvent");
     };
     pipelineContext_->SetFinishEventHandler(finishEventHandler);
 
@@ -1674,7 +1674,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
                 CHECK_NULL_VOID(container);
                 container->OnStartAbility(address);
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIStartAbilityHandler");
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleStartAbility");
     };
     pipelineContext_->SetStartAbilityHandler(startAbilityHandler);
 

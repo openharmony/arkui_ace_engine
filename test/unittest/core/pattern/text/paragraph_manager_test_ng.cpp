@@ -1,0 +1,190 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include <ostream>
+
+#include "gmock/gmock-actions.h"
+#include "gtest/gtest.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
+#include "base/geometry/offset.h"
+#include "base/memory/referenced.h"
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+
+#undef private
+#undef protected
+
+using namespace testing;
+using namespace testing::ext;
+namespace OHOS::Ace::NG {
+namespace {} // namespace
+class ParagraphManagerTestNg : public testing::Test {
+public:
+    void SetUp() override;
+    void TearDown() override;
+
+    void ConstructParagraphs(RefPtr<ParagraphManager>& pManager);
+
+    RefPtr<ParagraphManager> pManager = AceType::MakeRefPtr<ParagraphManager>();
+};
+
+void ParagraphManagerTestNg::SetUp()
+{
+    MockParagraph::GetOrCreateMockParagraph();
+    ConstructParagraphs(pManager);
+}
+
+void ParagraphManagerTestNg::TearDown()
+{
+    MockParagraph::TearDown();
+}
+
+void ParagraphManagerTestNg::ConstructParagraphs(RefPtr<ParagraphManager>& pManager)
+{
+    std::cout << "lijuan test ConstructParagraphs" << std::endl;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(100.f));
+    EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(100.f));
+    EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(100.f));
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(1));
+    EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(100.f));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(4));
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(1), Return(true)));
+    pManager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+
+    pManager->AddParagraph({ .paragraph = paragraph, .start = 20, .end = 35 });
+
+    pManager->AddParagraph({ .paragraph = paragraph, .start = 35, .end = 40 });
+}
+
+/**
+ * @tc.name: GetGlyphIndexByCoordinate001
+ * @tc.desc: Test GetGlyphIndexByCoordinate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphIndexByCoordinate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pManager and construct paragraphs.
+     */
+
+    /**
+     * @tc.steps: step2. call GetGlyphIndexByCoordinate.
+     * @tc.expected: the position of the acquisition is in the first paragraph.
+     */
+    auto offset = Offset(50.0, 80.0);
+    auto result = pManager->GetGlyphIndexByCoordinate(offset);
+    EXPECT_EQ(result, 4);
+
+    /**
+     * @tc.steps: step3. call GetGlyphIndexByCoordinate.
+     * @tc.expected: the position of the acquisition is in the second paragraph.
+     */
+    offset = Offset(50.0, 110.0);
+    result = pManager->GetGlyphIndexByCoordinate(offset);
+    EXPECT_EQ(result, 24);
+
+    /**
+     * @tc.steps: step4. call GetGlyphIndexByCoordinate.
+     * @tc.expected: the position of the acquisition is in the third paragraph.
+     */
+    offset = Offset(50.0, 210.0);
+    result = pManager->GetGlyphIndexByCoordinate(offset);
+    EXPECT_EQ(result, 39);
+
+    /**
+     * @tc.steps: step4. call GetGlyphIndexByCoordinate.
+     * @tc.expected: the position of the acquisition is in the third paragraph.
+     */
+    offset = Offset(50.0, 310.0);
+    result = pManager->GetGlyphIndexByCoordinate(offset);
+    EXPECT_EQ(result, 40);
+}
+
+/**
+ * @tc.name: GetWordBoundary001
+ * @tc.desc: Test GetWordBoundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetWordBoundary001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pManager and construct paragraphs.
+     */
+    int32_t start;
+    int32_t end;
+
+    /**
+     * @tc.steps: step2. call GetWordBoundary.
+     * @tc.expected: the position of the acquisition is in the first paragraph.
+     */
+    auto offset = 10;
+    pManager->GetWordBoundary(offset, start, end);
+    EXPECT_EQ(start, 0);
+    EXPECT_EQ(end, 1);
+
+    /**
+     * @tc.steps: step3. call GetWordBoundary.
+     * @tc.expected: the position of the acquisition is in the first paragraph.
+     */
+    offset = 25;
+    pManager->GetWordBoundary(offset, start, end);
+    EXPECT_EQ(start, 20);
+    EXPECT_EQ(end, 21);
+
+    /**
+     * @tc.steps: step4. call GetWordBoundary.
+     * @tc.expected: the position of the acquisition is in the first paragraph.
+     */
+    offset = 37;
+    pManager->GetWordBoundary(offset, start, end);
+    EXPECT_EQ(start, 35);
+    EXPECT_EQ(end, 36);
+}
+
+/**
+ * @tc.name: GetLongestLine001
+ * @tc.desc: Test GetLongestLine.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetLongestLine001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pManager and construct paragraphs.
+     */
+
+    /**
+     * @tc.steps: step2. call GetLongestLine.
+     * @tc.expected: the LongestLine of the paragraphs is correct.
+     */
+    auto result = pManager->GetLongestLine();
+    EXPECT_EQ(result, 100);
+
+    /**
+     * @tc.steps: step3. call GetGetMaxWidth.
+     * @tc.expected: the MaxWidth of the paragraphs is correct.
+     */
+    result = pManager->GetLongestLine();
+    EXPECT_EQ(result, 100);
+
+    /**
+     * @tc.steps: step4. call GetLineCount.
+     * @tc.expected: the number of lines is the sum of the paragraphs.
+     */
+    result = pManager->GetLineCount();
+    EXPECT_EQ(result, 3);
+}
+
+} // namespace OHOS::Ace::NG

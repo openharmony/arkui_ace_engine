@@ -1413,8 +1413,14 @@ void RosenRenderContext::OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeM
 {
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
     CHECK_NULL_VOID(rsCanvasDrawingNode);
-    if (dynamicRangeMode < DynamicRangeMode::STANDARD) {
+    if (dynamicRangeMode < DynamicRangeMode::STANDARD && !isHdr_) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Set HDRPresent True.");
+        isHdr_ = true;
         rsCanvasDrawingNode->SetHDRPresent(true);
+    } else if (isHdr_) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Set HDRPresent False.");
+        isHdr_ = false;
+        rsCanvasDrawingNode->SetHDRPresent(false);
     }
 }
 
@@ -1668,6 +1674,40 @@ void SkewRect(float sx, float sy, RectF& rect)
     rect.SetHeight(bottomAfterSkew - topAfterSkew);
 }
 
+void PerspectiveRect(float px, float py, RectF& rect)
+{
+    auto left = rect.Left();
+    auto right = rect.Right();
+    auto top = rect.Top();
+    auto bottom = rect.Bottom();
+
+    auto leftAfterSkew = Infinity<double>();
+    auto rightAfterSkew = -Infinity<double>();
+    auto topAfterSkew = Infinity<double>();
+    auto bottomAfterSkew = -Infinity<double>();
+
+    double xValues[] = { left, right };
+    double yValues[] = { top, bottom };
+
+    for (uint32_t i = 0; i < 2; i++) {
+        for (uint32_t j = 0; j < 2; j++) {
+            double perspectiveValue = px * xValues[i] + py * yValues[j] + 1;
+            if (NearZero(perspectiveValue)) {
+                return;
+            }
+            leftAfterSkew = std::min(leftAfterSkew, xValues[i] / perspectiveValue);
+            rightAfterSkew = std::max(rightAfterSkew, xValues[i] / perspectiveValue);
+            topAfterSkew = std::min(topAfterSkew, yValues[i] / perspectiveValue);
+            bottomAfterSkew = std::max(bottomAfterSkew, yValues[i] / perspectiveValue);
+        }
+    }
+
+    rect.SetLeft(leftAfterSkew);
+    rect.SetWidth(rightAfterSkew - leftAfterSkew);
+    rect.SetTop(topAfterSkew);
+    rect.SetHeight(bottomAfterSkew - topAfterSkew);
+}
+
 void SkewPoint(float sx, float sy, PointF& point)
 {
     auto x = point.GetX();
@@ -1685,6 +1725,7 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto skew = rsNode_->GetStagingProperties().GetSkew();
+    auto perspective = rsNode_->GetStagingProperties().GetPersp();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     auto center = rsNode_->GetStagingProperties().GetPivot();
     auto degree = rsNode_->GetStagingProperties().GetRotation();
@@ -1728,6 +1769,9 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
             newSize = SizeF(oldSize.Height() * scale[1], oldSize.Width() * scale[0]);
         }
         rect.SetSize(newSize);
+
+        // calculate perspective
+        PerspectiveRect(perspective[0], perspective[1], rect);
     }
     gRect = rect;
     return rect;
@@ -1907,6 +1951,7 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto scale = rsNode_->GetStagingProperties().GetScale();
+    auto perspective = rsNode_->GetStagingProperties().GetPersp();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
     SkewPoint(skew[0], skew[1], point);
     RectF rect = GetPaintRectWithoutTransform();
@@ -1927,10 +1972,18 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
 
         double currentPointX = (point.GetX() - centerX) * cos(radian) + (point.GetY() - centerY) * sin(radian);
         double currentPointY = -1 * (point.GetX() - centerX) * sin(radian) + (point.GetY() - centerY) * cos(radian);
-        currentPointX = currentPointX + centerX;
-        currentPointY = currentPointY + centerY;
-        point.SetX(currentPointX - rect.Left());
-        point.SetY(currentPointY - rect.Top());
+        currentPointX = currentPointX + centerX - rect.Left();
+        currentPointY = currentPointY + centerY - rect.Top();
+
+        double perspectiveValue = perspective[0] * currentPointX + perspective[1] * currentPointY + 1;
+        if (NearZero(perspectiveValue)) {
+            point.SetX(currentPointX);
+            point.SetY(currentPointY);
+            return;
+        }
+
+        point.SetX(currentPointX / perspectiveValue);
+        point.SetY(currentPointY / perspectiveValue);
     }
 }
 
@@ -3927,39 +3980,45 @@ void RosenRenderContext::OnDynamicLightUpDegreeUpdate(const float degree)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption)
+void RosenRenderContext::OnBgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption)
 {
+    if (!brightnessOption.has_value()) {
+        return;
+    }
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBgBrightnessParams(
         {
-            brightnessOption.rate, 
-            brightnessOption.lightUpDegree,
-            brightnessOption.cubicCoeff, 
-            brightnessOption.quadCoeff, 
-            brightnessOption.saturation,
-            { brightnessOption.posRGB[0], brightnessOption.posRGB[1], brightnessOption.posRGB[2] },
-            { brightnessOption.negRGB[0], brightnessOption.negRGB[1], brightnessOption.negRGB[2] }
+            brightnessOption->rate,
+            brightnessOption->lightUpDegree,
+            brightnessOption->cubicCoeff,
+            brightnessOption->quadCoeff,
+            brightnessOption->saturation,
+            { brightnessOption->posRGB[0], brightnessOption->posRGB[1], brightnessOption->posRGB[2] },
+            { brightnessOption->negRGB[0], brightnessOption->negRGB[1], brightnessOption->negRGB[2] }
         }
     );
-    rsNode_->SetBgBrightnessFract(brightnessOption.fraction);
+    rsNode_->SetBgBrightnessFract(brightnessOption->fraction);
     RequestNextFrame();
 }
  
-void RosenRenderContext::OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption)
+void RosenRenderContext::OnFgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption)
 {
+    if (!brightnessOption.has_value()) {
+        return;
+    }
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetFgBrightnessParams(
         {
-            brightnessOption.rate, 
-            brightnessOption.lightUpDegree,
-            brightnessOption.cubicCoeff, 
-            brightnessOption.quadCoeff, 
-            brightnessOption.saturation,
-            { brightnessOption.posRGB[0], brightnessOption.posRGB[1], brightnessOption.posRGB[2] },
-            { brightnessOption.negRGB[0], brightnessOption.negRGB[1], brightnessOption.negRGB[2] }
+            brightnessOption->rate, 
+            brightnessOption->lightUpDegree,
+            brightnessOption->cubicCoeff, 
+            brightnessOption->quadCoeff, 
+            brightnessOption->saturation,
+            { brightnessOption->posRGB[0], brightnessOption->posRGB[1], brightnessOption->posRGB[2] },
+            { brightnessOption->negRGB[0], brightnessOption->negRGB[1], brightnessOption->negRGB[2] }
         }
     );
-    rsNode_->SetFgBrightnessFract(brightnessOption.fraction);
+    rsNode_->SetFgBrightnessFract(brightnessOption->fraction);
     RequestNextFrame();
 }
 

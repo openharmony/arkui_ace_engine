@@ -249,6 +249,8 @@ public:
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;
+    virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
 };
 
 class ACE_EXPORT RichEditorControllerBase : virtual public RichEditorBaseControllerBase {
@@ -267,8 +269,6 @@ public:
     virtual std::vector<ParagraphInfo> GetParagraphsInfo(int32_t start, int32_t end) = 0;
     virtual void DeleteSpans(const RangeOptions& options) = 0;
     virtual SelectionInfo GetSelectionSpansInfo() = 0;
-    virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
-        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
 };
 
 class ACE_EXPORT RichEditorStyledStringControllerBase : virtual public RichEditorBaseControllerBase {

@@ -57,6 +57,7 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     auto pattern = AceType::DynamicCast<ScrollablePattern>(ref);
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
     std::string id = host->GetInspectorId().value_or("");
     float offset = pattern->GetTotalOffset();
     CHECK_NULL_VOID(scrollEventHandleFunc_);

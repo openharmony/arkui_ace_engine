@@ -317,7 +317,7 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
             pattern->HandleOnCut();
             return;
         case OptionMenuActionId::SELECT_ALL:
-            pattern->HandleOnSelectAll(type == OptionMenuType::MOUSE_MENU);
+            pattern->HandleOnSelectAll(type == OptionMenuType::MOUSE_MENU, false, true);
             return;
         case OptionMenuActionId::PASTE:
             pattern->HandleOnPaste();
@@ -391,6 +391,9 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         GetLocalPointWithTransform(movingCaretOffset);
         pattern->SetMovingCaretOffset(movingCaretOffset);
         auto magnifierLocalOffset = localOffset;
+        float x = std::clamp(magnifierLocalOffset.GetX(), 0.0f, pattern->GetContentRect().Width());
+        float y = std::clamp(magnifierLocalOffset.GetY(), 0.0f, pattern->GetContentRect().Height());
+        magnifierLocalOffset = OffsetF(x, y);
         GetLocalPointWithTransform(magnifierLocalOffset);
         pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
     }

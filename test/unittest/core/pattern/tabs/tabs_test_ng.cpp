@@ -29,6 +29,8 @@ void TabsTestNg::SetUpTestSuite()
     tabTheme->tabBarDefaultHeight_ = Dimension(TABBAR_DEFAULT_HEIGHT);
     tabTheme->subTabBarHoverColor_ = Color::RED;
     tabTheme->subTabBarPressedColor_ = Color::GREEN;
+    tabTheme->bottomTabIconOn_ = Color::BLUE;
+    tabTheme->bottomTabIconOff_ = Color::BLACK;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(tabTheme));
 }
 

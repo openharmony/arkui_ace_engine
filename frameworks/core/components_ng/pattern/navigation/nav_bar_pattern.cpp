@@ -61,32 +61,25 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
         auto barItemNode = weakBarItemNode.Upgrade();
         CHECK_NULL_VOID(barItemNode);
 
-        auto imageNode = barItemNode->GetChildAtIndex(0);
-        CHECK_NULL_VOID(imageNode);
-
-        auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
-        CHECK_NULL_VOID(imageFrameNode);
-        auto imgOffset = imageFrameNode->GetOffsetRelativeToWindow();
-        auto imageSize = imageFrameNode->GetGeometryNode()->GetFrameSize();
-
         auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
         CHECK_NULL_VOID(menuNode);
-        auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-        CHECK_NULL_VOID(menuLayoutProperty);
-        menuLayoutProperty->UpdateTargetSize(imageSize);
+
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
         // navigation menu show like select.
         menuPattern->SetIsSelectMenu(true);
 
-        bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-        if (isRightToLeft) {
-            imgOffset.SetX(imgOffset.GetX() + imageSize.Width());
-        } else {
-            imgOffset.SetX(imgOffset.GetX());
-        }
-        imgOffset.SetY(imgOffset.GetY() + imageSize.Height());
-        overlayManager->ShowMenu(id, imgOffset, menu);
+        overlayManager->ShowMenu(id, OffsetF(0.0f, 0.0f), menu);
+
+        auto symbol = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
+        auto symbolProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolProperty);
+        auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.SetEffectType(SymbolEffectType::BOUNCE);
+        symbolEffectOptions.SetIsTxtActive(true);
+        symbolEffectOptions.SetIsTxtActiveSource(0);
+        symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+        symbol->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         auto navBarNode = weakNavBarNode.Upgrade();
         CHECK_NULL_VOID(navBarNode);
@@ -147,11 +140,9 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         ++count;
         if (needMoreButton && (count > mostMenuItemCount - 1)) {
             params.push_back({ menuItem.text.value_or(""), menuItem.icon.value_or(""),
-                menuItem.isEnabled.value_or(true), menuItem.action });
+                menuItem.isEnabled.value_or(true), menuItem.action, menuItem.iconSymbol.value_or(nullptr) });
         } else {
             auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
-            NavigationTitleUtil::InitTitleBarButtonEvent(
-                menuItemNode, false, menuItem, menuItem.isEnabled.value_or(true));
             int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
             auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
             barItemNode->InitializePatternAndContext();
@@ -160,6 +151,9 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
             barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
+            auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
+            NavigationTitleUtil::InitTitleBarButtonEvent(
+                menuItemNode, iconNode, false, menuItem, menuItem.isEnabled.value_or(true));
             barItemNode->MountToParent(menuItemNode);
             barItemNode->MarkModifyDone();
             menuItemNode->MarkModifyDone();
@@ -189,7 +183,8 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         auto barMenuNode = MenuView::Create(
             std::move(params), targetId, targetTag, MenuType::NAVIGATION_MENU, menuParam);
         BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, navBarNode);
-        NavigationTitleUtil::InitTitleBarButtonEvent(menuItemNode, true);
+        auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
+        NavigationTitleUtil::InitTitleBarButtonEvent(menuItemNode, iconNode, true);
 
         barItemNode->MountToParent(menuItemNode);
         barItemNode->MarkModifyDone();
@@ -455,7 +450,9 @@ float NavBarPattern::OnCoordScrollUpdate(float offset)
 
 void NavBarPattern::OnCoordScrollEnd()
 {
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "OnCoordScroll end");
     if (titleMode_ != NavigationTitleMode::FREE) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "titleMode_ is not free");
         return;
     }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());

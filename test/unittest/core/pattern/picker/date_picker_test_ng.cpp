@@ -3528,4 +3528,74 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0012, TestSize.Level1)
     ASSERT_NE(dialogNode, nullptr);
 }
 
+/**
+ * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus001
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus001, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    info1.isAcceptButton = true;
+    buttonInfos.push_back(info1);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus002
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus002, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    buttonInfos.push_back(info1);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, false);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus003
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus003, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    info1.isAcceptButton = true;
+    buttonInfos.push_back(info1);
+
+    ButtonInfo info2;
+    buttonInfos.push_back(info2);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
 } // namespace OHOS::Ace::NG

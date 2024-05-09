@@ -179,7 +179,6 @@ public:
 
     double GetDensity()
     {
-        ContainerScope scope(instanceId_);
         return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
     }
 
@@ -210,6 +209,7 @@ protected:
 
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
+    JSRef<JSObject> createGradientObj(Gradient* gradient);
     PaintState paintState_;
     TextStyle style_;
     static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;

@@ -349,9 +349,9 @@ void ImageDecoder::TryCompress(const RefPtr<DrawingImage>& image)
         if (taskExecutor) {
             taskExecutor->PostDelayedTask(
                 releaseTask, TaskExecutor::TaskType::UI,
-                ImageCompressor::releaseTimeMs, "ArkUIImageCompressorGetInstance");
+                ImageCompressor::releaseTimeMs, "ArkUIImageCompressorScheduleRelease");
         } else {
-            ImageUtils::PostToBg(std::move(releaseTask), "ArkUIImageDecoderTryCompress");
+            ImageUtils::PostToBg(std::move(releaseTask), "ArkUIImageCompressorScheduleRelease");
         }
     }
     SkGraphics::PurgeResourceCache();

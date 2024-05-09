@@ -426,8 +426,8 @@ private:
     void OnDynamicLightUpRateUpdate(const float rate) override;
     void OnDynamicDimDegreeUpdate(const float degree) override;
     void OnDynamicLightUpDegreeUpdate(const float degree) override;
-    void OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
-    void OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
+    void OnBgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) override;
+    void OnFgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
@@ -580,6 +580,7 @@ private:
     RefPtr<CanvasImage> bdImage_;
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
+    bool isHdr_ = false;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool firstTransitionIn_ = false;

@@ -28,6 +28,7 @@ struct DownloadCallback {
     std::function<void(const std::string&&, bool, int32_t)> successCallback;
     std::function<void(std::string, bool, int32_t)> failCallback;
     std::function<void(std::string, bool, int32_t)> cancelCallback;
+    std::function<void(uint32_t, uint32_t, bool, int32_t)> onProgressCallback;
 };
 
 struct DownloadCondition {
