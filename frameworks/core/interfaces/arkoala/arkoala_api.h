@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 97
+#define ARKUI_FULL_API_VERSION 98
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 97
+#define ARKUI_NODE_API_VERSION 98
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -573,6 +573,7 @@ enum ArkUINodeType {
     ARKUI_SEARCH,
     ARKUI_GRID_ROW,
     ARKUI_GRID_COL,
+    ARKUI_SELECT,
 };
 
 enum ArkUIEventCategory {
@@ -704,6 +705,8 @@ enum ArkUIEventSubKind {
     ON_SEARCH_COPY,
     ON_SEARCH_CUT,
     ON_SEARCH_PASTE,
+
+    ON_SELECT_SELECT = ARKUI_MAX_EVENT_NUM * ARKUI_SELECT,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -3093,6 +3096,8 @@ struct ArkUISearchModifier {
     void (*resetSearchPlaceholder)(ArkUINodeHandle node);
     void (*setSearchIcon)(ArkUINodeHandle node, ArkUI_CharPtr icon);
     void (*resetSearchIcon)(ArkUINodeHandle node);
+    void (*setSearchCaretPosition)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetSearchCaretPosition)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
@@ -3331,6 +3336,12 @@ struct ArkUISelectModifier {
     void (*resetSelectOptionHeight)(ArkUINodeHandle node);
     void (*setControlSize)(ArkUINodeHandle node, ArkUI_Int32 controlSize);
     void (*resetControlSize)(ArkUINodeHandle node);
+    void (*setSelectValue)(ArkUINodeHandle node, ArkUI_CharPtr* values, ArkUI_CharPtr* icons, ArkUI_Uint32 length);
+    void (*resetSelectValue)(ArkUINodeHandle node);
+    void (*setMenuBgColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetMenuBgColor)(ArkUINodeHandle node);
+    void (*setMenuBgBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 style);
+    void (*resetMenuBgBlurStyle)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

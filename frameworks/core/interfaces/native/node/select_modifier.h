@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISelectModifier* GetSelectModifier();
+void SetOnSelectSelect(ArkUINodeHandle node, void* extraParam);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SELECT_MODIFIER_H
