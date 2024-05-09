@@ -256,6 +256,8 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
     symbolProperty->UpdateFontSize(BACK_BUTTON_ICON_SIZE);
     symbolNode->MountToParent(backButtonNode);
+    auto iconColor = theme->GetIconColor();
+    symbolProperty->UpdateSymbolColorList({ iconColor });
     symbolNode->MarkModifyDone();
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);

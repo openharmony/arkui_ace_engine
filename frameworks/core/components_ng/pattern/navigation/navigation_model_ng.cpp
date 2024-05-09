@@ -278,22 +278,7 @@ RefPtr<FrameNode> CreateToolbarItemIconNode(const BarItem& barItem)
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
-    if (barItem.icon.has_value() && !barItem.icon.value().empty()) {
-        int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ImageSourceInfo info(barItem.icon.value());
-        auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
-        auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-
-        info.SetFillColor(theme->GetToolbarIconColor());
-        imageLayoutProperty->UpdateImageSourceInfo(info);
-
-        auto iconSize = theme->GetToolbarIconSize();
-        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
-
-        iconNode->MarkModifyDone();
-        return iconNode;
-    } else {
+    if (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr) {
         auto iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_RETURN(iconNode, nullptr);
@@ -306,6 +291,20 @@ RefPtr<FrameNode> CreateToolbarItemIconNode(const BarItem& barItem)
         iconNode->MarkModifyDone();
         return iconNode;
     }
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ImageSourceInfo info(barItem.icon.value());
+    auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+
+    info.SetFillColor(theme->GetToolbarIconColor());
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+
+    auto iconSize = theme->GetToolbarIconSize();
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+
+    iconNode->MarkModifyDone();
+    return iconNode;
 }
 
 bool CheckNavigationGroupEnableStatus()
@@ -509,7 +508,6 @@ void BuildToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
     barItemNode->SetIconNode(symbolNode);
     barItemNode->AddChild(symbolNode);
     barItemNode->MarkModifyDone();
-    return;
 }
 
 RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNode)
