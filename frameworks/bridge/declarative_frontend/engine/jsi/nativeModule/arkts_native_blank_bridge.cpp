@@ -80,4 +80,33 @@ ArkUINativeModuleValue BlankBridge::ResetBlankHeight(ArkUIRuntimeCallInfo* runti
     GetArkUINodeModifiers()->getBlankModifier()->resetBlankHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+ArkUINativeModuleValue BlankBridge::SetBlankMin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    CalcDimension blankMin;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, valueArg, blankMin)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (blankMin.IsNegative() || blankMin.Unit() == DimensionUnit::PERCENT) {
+        blankMin.SetValue(0.0);
+    }
+    GetArkUINodeModifiers()->getBlankModifier()->setBlankMin(
+        nativeNode, blankMin.Value(), static_cast<int32_t>(blankMin.Unit()));
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue BlankBridge::ResetBlankMin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getBlankModifier()->resetBlankMin(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 }

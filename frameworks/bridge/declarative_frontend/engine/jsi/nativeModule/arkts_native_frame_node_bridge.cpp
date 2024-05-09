@@ -164,6 +164,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
     std::string type = firstArg->IsString() ? firstArg->ToString(vm)->ToString() : "";
     static const std::unordered_map<std::string, ArkUINodeType> typeMap = { { "Text", ARKUI_TEXT },
         { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK },
+        { "Blank", ARKUI_BLANK }, { "Image", ARKUI_IMAGE },
         { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }, { "Flex", ARKUI_FLEX },
         { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }};
     ArkUINodeType nodeType = ARKUI_CUSTOM;

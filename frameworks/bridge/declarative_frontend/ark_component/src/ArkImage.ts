@@ -522,7 +522,7 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  initialize(value: Object[]) {
+  initialize(value: Object[]): this {
     if (value[0] != undefined) {
       modifierWithKey(this._modifiersWithKeys, ImageSrcModifier.identity, ImageSrcModifier, value[0]);
     }

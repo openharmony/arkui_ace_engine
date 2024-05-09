@@ -626,6 +626,16 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkGridColComponent(node, type);
       })
     }],
+    ["Blank", (context: UIContext) => {
+      return new TypedFrameNode(context, "Blank", (node: NodePtr, type: ModifierType) => {
+        return new ArkBlankComponent(node, type);
+      })
+    }],
+    ["Image", (context: UIContext) => {
+      return new TypedFrameNode(context, "Image", (node: NodePtr, type: ModifierType) => {
+        return new ArkImageComponent(node, type);
+      })
+    }],
     ["Flex", (context: UIContext) => {
       return new TypedFrameNode(context, "Flex", (node: NodePtr, type: ModifierType) => {
         return new ArkFlexComponent(node, type);

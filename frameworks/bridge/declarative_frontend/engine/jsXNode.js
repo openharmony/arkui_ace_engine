@@ -964,6 +964,16 @@ const __creatorMap__ = new Map([
                 return new ArkGridColComponent(node, type);
             });
         }],
+    ["Blank", (context) => {
+            return new TypedFrameNode(context, "Blank", (node, type) => {
+                return new ArkBlankComponent(node, type);
+            });
+        }],
+    ["Image", (context) => {
+            return new TypedFrameNode(context, "Image", (node, type) => {
+                return new ArkImageComponent(node, type);
+            });
+        }],
     ["Flex", (context) => {
             return new TypedFrameNode(context, "Flex", (node, type) => {
                 return new ArkFlexComponent(node, type);
