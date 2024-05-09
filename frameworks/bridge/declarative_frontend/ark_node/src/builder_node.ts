@@ -43,7 +43,10 @@ class BuilderNode {
     return this._JSBuilderNode.getFrameNodeWithoutCheck();
   }
   public postTouchEvent(touchEvent: TouchEvent): boolean {
-    return this._JSBuilderNode.postTouchEvent(touchEvent);
+    __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+    let ret = this._JSBuilderNode.postTouchEvent(touchEvent);
+    __JSScopeUtil__.restoreInstanceId();
+    return ret;
   }
   public dispose(): void {
     this._JSBuilderNode.dispose();

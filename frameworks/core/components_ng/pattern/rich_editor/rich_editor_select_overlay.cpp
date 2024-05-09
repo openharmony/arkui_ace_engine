@@ -112,6 +112,9 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     TextSelectOverlay::OnHandleMove(handleRect, isFirst);
     auto parentGlobalOffset = pattern->GetParentGlobalOffset();
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset;
+    float x = std::clamp(localOffset.GetX(), 0.0f, pattern->GetContentRect().Width());
+    float y = std::clamp(localOffset.GetY(), 0.0f, pattern->GetContentRect().Height());
+    localOffset = OffsetF(x, y);
     pattern->magnifierController_->SetLocalOffset(localOffset);
     if (isFirst) {
         pattern->textSelector_.firstHandle.SetOffset(localOffset);

@@ -341,9 +341,15 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
 {
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
+    
     auto direction = textLayoutProperty->GetLayoutDirection();
     if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
         return direction;
+    }
+
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        return TextDirection::RTL;
     }
 
     TextDirection textDirection = TextDirection::LTR;
@@ -621,6 +627,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
             }
         } else {
             value = static_cast<float>(width * indentValue.Value());
+            paragraphStyle.indent = Dimension(value);
         }
     }
     auto indent = static_cast<float>(value);

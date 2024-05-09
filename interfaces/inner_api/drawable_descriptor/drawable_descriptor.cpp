@@ -640,4 +640,22 @@ int32_t AnimatedDrawableDescriptor::GetIterations()
     }
     return iterations_;
 }
+
+void AnimatedDrawableDescriptor::SetDuration(int32_t duration)
+{
+    if (duration_ <= 0) {
+        duration_ = DEFAULT_DURATION * static_cast<int32_t>(pixelMapList_.size());
+    } else {
+        duration_ = duration;
+    }
+}
+
+void AnimatedDrawableDescriptor::SetIterations(int32_t iterations)
+{
+    if (iterations_ < -1) {
+        iterations_ = 1;
+    } else {
+        iterations_ = iterations;
+    }
+}
 } // namespace OHOS::Ace::Napi

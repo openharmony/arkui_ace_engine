@@ -1527,6 +1527,8 @@ private:
     PasswordModeStyle passwordModeStyle_;
     SelectMenuInfo selectMenuInfo_;
 
+    RefPtr<PanEvent> boxSelectPanEvent_;
+
     // inline
     bool isTextInput_ = false;
     bool inlineSelectAllFlag_ = false;

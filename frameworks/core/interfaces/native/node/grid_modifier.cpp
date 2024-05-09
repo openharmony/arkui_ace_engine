@@ -19,6 +19,7 @@
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 
@@ -344,6 +345,21 @@ void ResetFriction(ArkUINodeHandle node)
     GridModelNG::SetFriction(frameNode, friction);
 }
 
+void SetFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 flingSpeedLimit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, flingSpeedLimit);
+}
+
+void ResetFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ArkUI_Float32 flingSpeedLimit = -1.0;
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, flingSpeedLimit);
+}
+
 ArkUI_CharPtr GetColumnsTemplate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -429,7 +445,7 @@ const ArkUIGridModifier* GetGridModifier()
         SetGridSupportAnimation, ResetGridSupportAnimation, SetEdgeEffect, ResetEdgeEffect, SetNestedScroll,
         ResetNestedScroll, SetEnableScroll, ResetEnableScroll, SetFriction, ResetFriction, GetColumnsTemplate,
         GetRowsTemplate, GetColumnsGap, GetRowsGap, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, SetCachedCount,
-        ResetCachedCount, GetCachedCount };
+        ResetCachedCount, GetCachedCount, SetFlingSpeedLimit, ResetFlingSpeedLimit };
     return &modifier;
 }
 

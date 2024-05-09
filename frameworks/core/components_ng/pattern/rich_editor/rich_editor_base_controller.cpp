@@ -26,6 +26,7 @@ int32_t RichEditorBaseController::GetCaretOffset()
 {
     int32_t position = -1;
     auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, -1);
     position = richEditorPattern->GetCaretPosition();
     return position;
 }

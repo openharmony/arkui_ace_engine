@@ -24,6 +24,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_constants.h"
@@ -161,6 +162,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     swiperLayoutAlgorithm->SetSwipeByGroup(IsSwipeByGroup());
     swiperLayoutAlgorithm->SetRealTotalCount(RealTotalCount());
     swiperLayoutAlgorithm->SetPlaceItemWidth(placeItemWidth_);
+    swiperLayoutAlgorithm->SetIsFrameAnimation(translateAnimationIsRunning_);
 
     auto swiperPaintProperty = host->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(host, nullptr);
@@ -930,7 +932,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                     auto swiper = weak.Upgrade();
                     CHECK_NULL_VOID(swiper);
                     swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, stopAutoPlay);
-                    swiper->PlayIndicatorTranslateAnimation(-targetPos);
+                    swiper->PlayIndicatorTranslateAnimation(-targetPos, nextIndex);
                 });
             } else {
                 PlayTranslateAnimation(
@@ -1690,57 +1692,51 @@ void SwiperPattern::InitSwiperController()
 {
     swiperController_->SetSwipeToImpl([weak = WeakClaim(this)](int32_t index, bool reverse) {
         auto swiper = weak.Upgrade();
-        if (swiper) {
-            swiper->SwipeTo(index);
-        }
+        CHECK_NULL_VOID(swiper);
+        swiper->SwipeTo(index);
     });
 
     swiperController_->SetSwipeToWithoutAnimationImpl([weak = WeakClaim(this)](int32_t index) {
         auto swiper = weak.Upgrade();
-        if (swiper) {
-            swiper->SwipeToWithoutAnimation(index);
-        }
+        CHECK_NULL_VOID(swiper);
+        swiper->SwipeToWithoutAnimation(index);
     });
 
     swiperController_->SetShowNextImpl([weak = WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
-        if (swiper) {
-            auto swiperNode = swiper->GetHost();
-            CHECK_NULL_VOID(swiperNode);
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowNext, id:%{public}d", swiperNode->GetId());
-            swiper->ShowNext();
-        }
+        CHECK_NULL_VOID(swiper);
+        auto swiperNode = swiper->GetHost();
+        CHECK_NULL_VOID(swiperNode);
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowNext, id:%{public}d", swiperNode->GetId());
+        swiper->ShowNext();
     });
 
     swiperController_->SetShowPrevImpl([weak = WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
-        if (swiper) {
-            auto swiperNode = swiper->GetHost();
-            CHECK_NULL_VOID(swiperNode);
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowPrevious, id:%{public}d", swiperNode->GetId());
-            swiper->ShowPrevious();
-        }
+        CHECK_NULL_VOID(swiper);
+        auto swiperNode = swiper->GetHost();
+        CHECK_NULL_VOID(swiperNode);
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowPrevious, id:%{public}d", swiperNode->GetId());
+        swiper->ShowPrevious();
     });
 
     swiperController_->SetChangeIndexImpl([weak = WeakClaim(this)](int32_t index, bool useAnimation) {
         auto swiper = weak.Upgrade();
-        if (swiper) {
-            swiper->ChangeIndex(index, useAnimation);
-        }
+        CHECK_NULL_VOID(swiper);
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ChangeIndex %{public}d, useAnimation:%{public}d", index, useAnimation);
+        swiper->ChangeIndex(index, useAnimation);
     });
 
     swiperController_->SetFinishImpl([weak = WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
-        if (swiper) {
-            swiper->FinishAnimation();
-        }
+        CHECK_NULL_VOID(swiper);
+        swiper->FinishAnimation();
     });
 
     swiperController_->SetPreloadItemsImpl([weak = WeakClaim(this)](const std::set<int32_t>& indexSet) {
         auto swiper = weak.Upgrade();
-        if (swiper) {
-            swiper->PreloadItems(indexSet);
-        }
+        CHECK_NULL_VOID(swiper);
+        swiper->PreloadItems(indexSet);
     });
 }
 
@@ -2228,7 +2224,7 @@ void SwiperPattern::UpdateNextValidIndex()
     }
 }
 
-void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
+void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset, std::optional<int32_t> nextIndex)
 {
     if (!indicatorId_.has_value()) {
         return;
@@ -2261,6 +2257,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
         }
     }
 
+    currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
     CalculateGestureState(additionalOffset, currentTurnPageRate, preFirstIndex);
@@ -2326,6 +2323,8 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 {
+    ACE_SCOPED_TRACE("Swiper HandleTouchDown");
+    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchDown");
     isTouchDown_ = true;
     if (HasIndicatorNode()) {
         auto host = GetHost();
@@ -2378,9 +2377,12 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 
 void SwiperPattern::HandleTouchUp()
 {
+    ACE_SCOPED_TRACE("Swiper HandleTouchUp");
+    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchUp");
     isTouchDown_ = false;
     auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
-    if (!isDragging_ && !childScrolling_ && !NearZero(firstItemInfoInVisibleArea.second.startPos)) {
+    if (!isDragging_ && !childScrolling_ && !NearZero(firstItemInfoInVisibleArea.second.startPos) &&
+        !isTouchDownSpringAnimation_) {
         UpdateAnimationProperty(0.0);
     }
 
@@ -2766,9 +2768,16 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
 #endif
         if (!swiper->hasTabsAncestor_) {
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, false);
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
         }
-        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish property translate animation");
+        OffsetF finalOffset =
+            swiper->itemPosition_.empty()
+                ? OffsetF()
+                : swiper->itemPosition_.begin()->second.node->GetRenderContext()->GetTranslateXYProperty();
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "Swiper finish property translate animation with offsetX: %{public}f, offsetY: %{public}f",
+            finalOffset.GetX(), finalOffset.GetY());
+        ACE_SCOPED_TRACE("Swiper finish property animation X: %f, Y: %f", finalOffset.GetX(), finalOffset.GetY());
         swiper->targetIndex_.reset();
         swiper->OnPropertyTranslateAnimationFinish(offset);
     };
@@ -2786,9 +2795,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     // property callback will call immediately.
     auto propertyUpdateCallback = [swiper = WeakClaim(this), offset]() {
         auto swiperPattern = swiper.Upgrade();
-        if (!swiperPattern) {
-            return;
-        }
+        CHECK_NULL_VOID(swiperPattern);
 #ifdef OHOS_PLATFORM
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
 #endif
@@ -2798,6 +2805,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         TAG_LOGI(AceLogTag::ACE_SWIPER,
             "Swiper start property translate animation with offsetX: %{public}f, offsetY: %{public}f", offset.GetX(),
             offset.GetY());
+        ACE_SCOPED_TRACE("Swiper start property animation, X: %f, Y: %f", offset.GetX(), offset.GetY());
         for (auto& item : swiperPattern->itemPosition_) {
             auto frameNode = item.second.node;
             if (frameNode) {
@@ -2955,7 +2963,7 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
     return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1, 328, 34);
 }
 
-void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
+void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex)
 {
     if (!stopIndicatorAnimation_) {
         stopIndicatorAnimation_ = true;
@@ -2965,7 +2973,7 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
     if (!indicatorId_.has_value() && !turnPageRateCallback) {
         return;
     }
-    CheckMarkDirtyNodeForRenderIndicator(translate);
+    CheckMarkDirtyNodeForRenderIndicator(translate, nextIndex);
     AnimationUtils::StopAnimation(indicatorAnimation_);
     indicatorAnimationIsRunning_ = false;
     if (itemPosition_.empty()) {
@@ -3013,7 +3021,7 @@ void SwiperPattern::PlayTranslateAnimation(
     }
 
     if (indicatorId_.has_value()) {
-        CheckMarkDirtyNodeForRenderIndicator(endPos - startPos);
+        CheckMarkDirtyNodeForRenderIndicator(endPos - startPos, nextIndex);
     }
 
     auto host = GetHost();
@@ -3174,8 +3182,12 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     host->CreateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, 0, [weak = AceType::WeakClaim(this)](float position) {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
+        auto positionDelta = static_cast<float>(position) - swiper->currentIndexOffset_;
         if (!swiper->isTouchDown_) {
-            swiper->UpdateCurrentOffset(static_cast<float>(position) - swiper->currentIndexOffset_);
+            swiper->UpdateCurrentOffset(positionDelta);
+            if (LessNotEqual(std::abs(positionDelta), 1) && !NearZero(positionDelta)) {
+                AceAsyncTraceBegin(0, TRAILING_ANIMATION);
+            }
         }
     }, PropertyUnit::PIXEL_POSITION);
 
@@ -3196,7 +3208,8 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         option,
         [weak = AceType::WeakClaim(this), dragVelocity, host, delta]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation delta:%{public}f", delta);
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation");
+            ACE_SCOPED_TRACE("Swiper start spring animation");
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->springAnimationIsRunning_ = true;
@@ -3205,9 +3218,12 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         },
         [weak = AceType::WeakClaim(this)]() {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation");
+            AceAsyncTraceEnd(0, TRAILING_ANIMATION);
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f",
+                swiperPattern->currentIndexOffset_);
+            ACE_SCOPED_TRACE("Swiper finish spring animation offset %f", swiperPattern->currentIndexOffset_);
             swiperPattern->springAnimationIsRunning_ = false;
             swiperPattern->isTouchDownSpringAnimation_ = false;
             swiperPattern->OnSpringAndFadeAnimationFinish();

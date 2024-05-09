@@ -299,6 +299,7 @@ protected:
     void UnregisterWindowStateChangedCallback();
     void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
+    bool gifAnimation_ = false;
 
 private:
     class ObscuredImage : public CanvasImage {
@@ -405,7 +406,6 @@ private:
     void OnImageModifyDone();
     void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
-    void ChangeRenderContextProperties();
     void ControlAnimation(int32_t index);
     void SetObscured();
 
@@ -461,6 +461,7 @@ private:
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
     bool hasSizeChanged = false;
+    bool isPixelMapChanged_ = true;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

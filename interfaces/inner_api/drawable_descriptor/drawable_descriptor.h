@@ -195,6 +195,8 @@ public:
     std::vector<std::shared_ptr<Media::PixelMap>> GetPixelMapList();
     int32_t GetDuration();
     int32_t GetIterations();
+    void SetDuration(int32_t duration);
+    void SetIterations(int32_t iteration);
 private:
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList_;
     int32_t duration_ = -1;

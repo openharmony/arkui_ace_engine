@@ -21,6 +21,7 @@
 #include <vector>
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
+#include "base/image/pixel_map.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
@@ -1939,6 +1940,22 @@ void SetBackgroundImage(
     } else {
         ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
     }
+}
+
+void SetBackgroundImagePixelMap(ArkUINodeHandle node, void* drawableDescriptor, ArkUI_Int32 repeatIndex)
+{
+#ifndef ACE_UNITTEST
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<OHOS::Ace::PixelMap> pixelmap = PixelMap::GetFromDrawable(drawableDescriptor);
+    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { pixelmap });
+    auto repeat = static_cast<ImageRepeat>(repeatIndex);
+    if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, repeat);
+    } else {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
+    }
+#endif
 }
 
 void ResetBackgroundImage(ArkUINodeHandle node)
@@ -5234,6 +5251,28 @@ void ResetAreaChange(ArkUINodeHandle node)
     ViewAbstract::ResetAreaChanged(frameNode);
 }
 
+void SetLayoutRect(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto rect = NG::RectF(values[0], values[1], values[2], values[3]); // 2:index of width, 3:index of height
+    ViewAbstract::SetLayoutRect(frameNode, rect);
+}
+
+void GetLayoutRect(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto rect = ViewAbstract::GetLayoutRect(frameNode);
+    values[0] = rect.GetX();
+    values[1] = rect.GetY();
+    values[2] = rect.Width(); // 2:index of width
+    values[3] = rect.Height(); // 3:index of height
+}
+
+void ResetLayoutRect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    ViewAbstract::ResetLayoutRect(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -5301,7 +5340,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize, GetRenderGroup,
         SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
         SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
-        ResetVisibleAreaChange, ResetAreaChange };
+        ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap, SetLayoutRect, GetLayoutRect,
+        ResetLayoutRect };
 
     return &modifier;
 }

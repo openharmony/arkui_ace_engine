@@ -1363,15 +1363,21 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
     SetRootMeasureNode(true);
     UpdateLayoutPropertyFlag();
     SetSkipSyncGeometryNode(false);
-    {
-        ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
-            GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0);
-        Measure(GetLayoutConstraint());
-    }
-    {
-        ACE_SCOPED_TRACE("CreateTaskLayout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
-            GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0);
+    if (layoutProperty_->GetLayoutRect()) {
+        SetActive(true);
+        Measure(std::nullopt);
         Layout();
+    } else {
+        {
+            ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
+                GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0);
+            Measure(GetLayoutConstraint());
+        }
+        {
+            ACE_SCOPED_TRACE("CreateTaskLayout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
+                GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0);
+            Layout();
+        }
     }
     SetRootMeasureNode(false);
 }
@@ -1905,6 +1911,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
 {
     bool isInChildRegion = false;
     auto paintRect = renderContext_->GetPaintRectWithoutTransform();
+    auto paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
     auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -1913,7 +1920,9 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
     renderContext->GetPointWithRevert(revertPoint);
     auto subRevertPoint = revertPoint - paintRect.GetOffset();
     auto clip = renderContext->GetClipEdge().value_or(false);
-    if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable()) {
+    if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable() ||
+        NearZero(paintRectWithTransform.Width() ||
+        NearZero(paintRectWithTransform.Height()))) {
         if (clip) {
             LOGD("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
             return true;
@@ -3061,7 +3070,9 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     auto contentConstraint = layoutProperty_->GetContentLayoutConstraint();
     layoutProperty_->BuildGridProperty(Claim(this));
 
-    if (parentConstraint) {
+    if (layoutProperty_->GetLayoutRect()) {
+        layoutProperty_->UpdateLayoutConstraintWithLayoutRect();
+    } else if (parentConstraint) {
         ApplyConstraint(*parentConstraint);
     } else {
         CreateRootConstraint();
@@ -3113,7 +3124,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
     UpdatePercentSensitive();
     // check aspect radio.
-    if (pattern_ && pattern_->IsNeedAdjustByAspectRatio()) {
+    if (pattern_ && pattern_->IsNeedAdjustByAspectRatio() && !layoutProperty_->GetLayoutRect()) {
         const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
         auto aspectRatio = magicItemProperty.GetAspectRatioValue();
         // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
@@ -3132,6 +3143,9 @@ void FrameNode::Layout()
 {
     ACE_LAYOUT_TRACE_BEGIN("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
+    if (layoutProperty_->GetLayoutRect()) {
+        GetGeometryNode()->SetFrameOffset(layoutProperty_->GetLayoutRect().value().GetOffset());
+    }
     if (SelfOrParentExpansive()) {
         if (IsRootMeasureNode() && !needRestoreSafeArea_ && SelfExpansive()) {
             GetGeometryNode()->RestoreCache();
@@ -3153,7 +3167,9 @@ void FrameNode::Layout()
     if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag())) {
         if (!layoutProperty_->GetLayoutConstraint()) {
             const auto& parentLayoutConstraint = geometryNode_->GetParentLayoutConstraint();
-            if (parentLayoutConstraint) {
+            if (layoutProperty_->GetLayoutRect()) {
+                layoutProperty_->UpdateLayoutConstraintWithLayoutRect();
+            } else if (parentLayoutConstraint) {
                 layoutProperty_->UpdateLayoutConstraint(parentLayoutConstraint.value());
             } else {
                 LayoutConstraintF layoutConstraint;

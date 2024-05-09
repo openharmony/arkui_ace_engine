@@ -24,4 +24,14 @@ ArkUINativeModuleValue NodeContainerBridge::Rebuild(ArkUIRuntimeCallInfo* runtim
     GetArkUINodeModifiers()->getNodeContainerModifier()->rebuild(nodeId);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue NodeContainerBridge::Clean(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNodeContainerModifier()->clean(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

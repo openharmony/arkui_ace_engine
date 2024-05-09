@@ -24,6 +24,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
@@ -38,7 +39,10 @@ public:
     virtual void ResizeWindow() = 0;
     virtual NG::RectF GetRect() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
-    virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
+    virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, const NG::MenuParam& menuParam,
+        const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) = 0;
+    virtual void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
+        const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) = 0;
     virtual bool ShowPreviewNG() = 0;
     virtual void HidePreviewNG() = 0;
     virtual void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) = 0;
@@ -126,6 +130,7 @@ public:
     virtual void RequestFocus() = 0;
     virtual void ResizeWindowForFoldStatus() = 0;
     virtual void ResizeWindowForFoldStatus(int32_t parentContainerId) = 0;
+
 private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;

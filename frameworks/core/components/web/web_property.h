@@ -24,6 +24,7 @@
 #include "core/components/declaration/web/web_client.h"
 #include "core/components/web/resource/web_javascript_value.h"
 #include "core/components/web/web_event.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -62,6 +63,14 @@ enum class WebDarkMode {
 enum class WebLayoutMode {
     NONE,
     FIT_CONTENT,
+};
+
+struct WebMenuOptionsParam {
+    std::vector<NG::MenuOptionsParam> menuOption;
+    bool operator==(const WebMenuOptionsParam& webMenuOption) const
+    {
+        return menuOption.data() == webMenuOption.menuOption.data();
+    }
 };
 
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;

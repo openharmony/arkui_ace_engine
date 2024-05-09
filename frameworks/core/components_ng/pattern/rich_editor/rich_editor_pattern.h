@@ -227,16 +227,6 @@ public:
         richEditorStyledStringController_ = controller;
     }
 
-    void SetStyledStringMode(bool isStyledStringMode)
-    {
-        isStyledStringMode_ = isStyledStringMode;
-    }
-
-    bool IsStyledStringMode()
-    {
-        return isStyledStringMode_;
-    }
-
     long long GetTimestamp() const
     {
         return timestamp_;
@@ -385,7 +375,10 @@ public:
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
-    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
+    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
+        bool updateCaret = true);
+    void DisableDrag(RefPtr<ImageSpanNode> imageNode);
+    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
@@ -938,7 +931,6 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
-    bool isStyledStringMode_ = false;
     bool isTextChange_ = false;
     bool caretVisible_ = false;
     bool caretTwinkling_ = false;

@@ -147,7 +147,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     }
     std::string resultInfo = std::string("fingerId: ").append(std::to_string(touchPoint.id));
     for (const auto& item : touchTestResultInfo) {
-        resultInfo.append(" id: ")
+        resultInfo.append("{ id: ")
             .append(std::to_string(item.first))
             .append(", tag: ")
             .append(item.second.tag)
@@ -157,9 +157,10 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             .append(item.second.frameRect)
             .append(", depth: ")
             .append(std::to_string(item.second.depth))
-            .append(".");
+            .append(" };");
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Touch test hitted node info: %{public}s", resultInfo.c_str());
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
+        touchPoint.touchEventId, resultInfo.c_str());
     if (touchTestResultInfo.empty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "Touch test result is empty.");
         std::list<std::pair<int32_t, std::string>> dumpList;
@@ -176,7 +177,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         }
         RecordHitEmptyMessage(touchPoint, resultInfo, frameNode);
     }
-    LogTouchTestResultRecognizers(touchTestResults_[touchPoint.id]);
+    LogTouchTestResultRecognizers(touchTestResults_[touchPoint.id], touchPoint.touchEventId);
 }
 
 void EventManager::RecordHitEmptyMessage(
@@ -212,7 +213,7 @@ void EventManager::RecordHitEmptyMessage(
     XcollieInterface::GetInstance().TriggerTimerCount("HIT_EMPTY_WARNING", true, hitEmptyMessage->ToString());
 }
 
-void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result)
+void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, int32_t touchEventId)
 {
     std::map<std::string, std::list<NG::TouchTestResultInfo>> hittedRecognizerInfo;
     for (const auto& item : result) {
@@ -235,7 +236,8 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result)
             group->AddHittedRecognizerType(hittedRecognizerInfo);
         }
     }
-    std::string hittedRecognizerTypeInfo = std::string("Touch test hitted recognizer type info: ");
+    std::string hittedRecognizerTypeInfo = std::string("InputTracking id:");
+    hittedRecognizerTypeInfo.append(std::to_string(touchEventId)).append(", touch test hitted recognizer type info: ");
     for (const auto& item : hittedRecognizerInfo) {
         hittedRecognizerTypeInfo.append("recognizer type ").append(item.first).append(" node info:");
         for (const auto& nodeInfo : item.second) {
@@ -312,7 +314,7 @@ void EventManager::TouchTest(
     TouchTestResult hitTestResult;
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, event.id);
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
-    LogTouchTestResultRecognizers(axisTouchTestResults_[event.id]);
+    LogTouchTestResultRecognizers(axisTouchTestResults_[event.id], event.touchEventId);
 }
 
 bool EventManager::HasDifferentDirectionGesture()
@@ -1002,11 +1004,13 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         handledResults.clear();
         auto container = Container::Current();
         CHECK_NULL_RETURN(container, false);
+        std::optional<RefPtr<MouseEventTarget>> isStopPropagation;
         if (event.button == MouseButton::LEFT_BUTTON) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
                     handledResults.emplace_back(mouseTarget);
                     if (mouseTarget->HandleMouseEvent(event)) {
+                        isStopPropagation = mouseTarget;
                         break;
                     }
                 }
@@ -1021,6 +1025,9 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
             DoMouseActionRelease();
         }
         for (const auto& mouseTarget : currMouseTestResults_) {
+            if (isStopPropagation.has_value() && isStopPropagation.value() == mouseTarget) {
+                return true;
+            }
             if (mouseTarget &&
                 std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end()) {
                 if (mouseTarget->HandleMouseEvent(event)) {

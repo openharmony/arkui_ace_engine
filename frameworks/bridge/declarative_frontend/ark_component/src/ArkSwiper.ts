@@ -18,6 +18,12 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  initialize(value: Object[]): SwiperAttribute {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, SwiperInitializeModifier.identity, SwiperInitializeModifier, value[0]);
+    }
+    return this
+  }
   index(value: number): this {
     modifierWithKey(this._modifiersWithKeys, SwiperIndexModifier.identity, SwiperIndexModifier, value);
     return this;
@@ -122,6 +128,16 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
   indicatorInteractive(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
     return this;
+  }
+}
+class SwiperInitializeModifier extends ModifierWithKey<SwiperController> {
+  static identity: Symbol = Symbol('swiperInitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperInitialize(node);
+    } else {
+      getUINativeModule().swiper.setSwiperInitialize(node, this.value);
+    }
   }
 }
 class SwiperNextMarginModifier extends ModifierWithKey<Length> {

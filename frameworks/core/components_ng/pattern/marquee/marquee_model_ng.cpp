@@ -245,4 +245,28 @@ void MarqueeModelNG::SetMarqueeUpdateStrategy(
     }
 }
 
+void MarqueeModelNG::SetOnStart(FrameNode* frameNode, std::function<void()>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStart(std::move(onChange));
+}
+
+void MarqueeModelNG::SetOnBounce(FrameNode* frameNode, std::function<void()>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnBounce(std::move(onChange));
+}
+
+void MarqueeModelNG::SetOnFinish(FrameNode* frameNode, std::function<void()>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnFinish(std::move(onChange));
+}
+
 } // namespace OHOS::Ace::NG

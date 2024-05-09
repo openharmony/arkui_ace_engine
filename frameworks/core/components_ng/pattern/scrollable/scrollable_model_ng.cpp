@@ -232,4 +232,13 @@ void ScrollableModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onRea
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnReachEnd(std::move(onReachEnd));
 }
+
+void ScrollableModelNG::SetMaxFlingSpeed(FrameNode* frameNode, double max)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxFlingVelocity(max);
+}
+
 } // namespace OHOS::Ace::NG
