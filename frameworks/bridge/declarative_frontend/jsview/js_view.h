@@ -180,7 +180,7 @@ protected:
 
 private:
     int32_t instanceId_ = -1;
-    std::stack<int32_t> restoreInstanceIdStack_;
+    std::vector<int32_t> restoreInstanceIdStack_;
     bool isStatic_ = false;
     std::function<void()> notifyRenderDone_;
 };

@@ -134,7 +134,7 @@ void JSView::RenderJSExecution()
 
 void JSView::SyncInstanceId()
 {
-    restoreInstanceIdStack_.push(Container::CurrentId());
+    restoreInstanceIdStack_.emplace_back(Container::CurrentId());
     ContainerScope::UpdateCurrent(instanceId_);
 }
 
@@ -144,8 +144,8 @@ void JSView::RestoreInstanceId()
         ContainerScope::UpdateCurrent(-1);
         return;
     }
-    ContainerScope::UpdateCurrent(restoreInstanceIdStack_.top());
-    restoreInstanceIdStack_.pop();
+    ContainerScope::UpdateCurrent(restoreInstanceIdStack_.back());
+    restoreInstanceIdStack_.pop_back();
 }
 
 void JSView::GetInstanceId(const JSCallbackInfo& info)
