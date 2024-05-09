@@ -4294,4 +4294,30 @@ void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }
+
+void ViewAbstract::SetLayoutRect(FrameNode* frameNode, const NG::RectF& rect)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetIsMeasureBoundary(true);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetLayoutRect(rect);
+}
+
+void ViewAbstract::ResetLayoutRect(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetIsMeasureBoundary(false);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetLayoutRect();
+}
+
+NG::RectF ViewAbstract::GetLayoutRect(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, NG::RectF());
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, NG::RectF());
+    return layoutProperty->GetLayoutRect().value_or(NG::RectF());
+}
 } // namespace OHOS::Ace::NG

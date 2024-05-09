@@ -5251,6 +5251,28 @@ void ResetAreaChange(ArkUINodeHandle node)
     ViewAbstract::ResetAreaChanged(frameNode);
 }
 
+void SetLayoutRect(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto rect = NG::RectF(values[0], values[1], values[2], values[3]); // 2:index of width, 3:index of height
+    ViewAbstract::SetLayoutRect(frameNode, rect);
+}
+
+void GetLayoutRect(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto rect = ViewAbstract::GetLayoutRect(frameNode);
+    values[0] = rect.GetX();
+    values[1] = rect.GetY();
+    values[2] = rect.Width(); // 2:index of width
+    values[3] = rect.Height(); // 3:index of height
+}
+
+void ResetLayoutRect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    ViewAbstract::ResetLayoutRect(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -5318,7 +5340,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize, GetRenderGroup,
         SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
         SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
-        ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap };
+        ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap, SetLayoutRect, GetLayoutRect,
+        ResetLayoutRect };
 
     return &modifier;
 }

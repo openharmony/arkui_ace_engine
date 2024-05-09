@@ -641,6 +641,9 @@ public:
     static Color GetColorBlend(FrameNode* frameNode);
     static void ResetAreaChanged(FrameNode* frameNode);
     static void ResetVisibleChange(FrameNode* frameNode);
+    static void SetLayoutRect(FrameNode* frameNode, const NG::RectF& rect);
+    static void ResetLayoutRect(FrameNode* frameNode);
+    static NG::RectF GetLayoutRect(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

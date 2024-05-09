@@ -301,6 +301,19 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
     CheckAspectRatio();
 }
 
+void LayoutProperty::UpdateLayoutConstraintWithLayoutRect()
+{
+    CHECK_NULL_VOID(layoutRect_);
+    auto size = layoutRect_.value().GetSize();
+    layoutConstraint_ = {
+        .scaleProperty = ScaleProperty::CreateScaleProperty(),
+        .minSize = size,
+        .maxSize = size,
+        .percentReference = size,
+        .selfIdealSize = OptionalSizeF(size),
+    };
+}
+
 void LayoutProperty::CheckBorderAndPadding()
 {
     auto selfWidth = layoutConstraint_->selfIdealSize.Width();

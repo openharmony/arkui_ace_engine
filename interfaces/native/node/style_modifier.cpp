@@ -7817,6 +7817,47 @@ const ArkUI_AttributeItem* GetForegroundBlurStyle(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetLayoutRect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_FOUR_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->value[2].i32 < 0) { // 2:index of width
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->value[3].i32 < 0) { // 3:index of height
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Int32 intArray[NUM_4];
+    intArray[0] = item->value[0].i32;
+    intArray[1] = item->value[1].i32;
+    intArray[2] = item->value[2].i32; // 2:index of width
+    intArray[3] = item->value[3].i32; // 3:index of height
+    fullImpl->getNodeModifiers()->getCommonModifier()->setLayoutRect(node->uiNodeHandle, intArray);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetLayoutRect(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    ArkUI_Int32 intArray[NUM_4];
+    fullImpl->getNodeModifiers()->getCommonModifier()->getLayoutRect(node->uiNodeHandle, intArray);
+    g_numberValues[0].i32 = intArray[0];
+    g_numberValues[1].i32 = intArray[1];
+    g_numberValues[2].i32 = intArray[2]; // 2:index of width
+    g_numberValues[3].f32 = intArray[3]; // 3:index of height
+    g_attributeItem.size = NUM_4;
+    return &g_attributeItem;
+}
+
+void ResetLayoutRect(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetLayoutRect(node->uiNodeHandle);
+}
+
 bool CheckTransformCenter(const ArkUI_AttributeItem* item, int32_t size)
 {
     CHECK_NULL_RETURN(item, false);
@@ -11217,6 +11258,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetRenderGroup,
         SetColorBlend,
         SetForegroundBlurStyle,
+        SetLayoutRect,
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -11311,6 +11353,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetRenderGroup,
         GetColorBlend,
         GetForegroundBlurStyle,
+        GetLayoutRect,
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -11409,6 +11452,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetRenderGroup,
         ResetColorBlend,
         ResetForegroundBlurStyle,
+        ResetLayoutRect,
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

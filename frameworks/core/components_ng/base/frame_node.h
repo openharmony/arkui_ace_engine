@@ -832,6 +832,11 @@ public:
         isWindowBoundary_ = isWindowBoundary;
     }
 
+    void SetIsMeasureBoundary(bool isMeasureBoundary)
+    {
+        isMeasureBoundary_ = isMeasureBoundary;
+    }
+
     void InitLastArea();
 
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
