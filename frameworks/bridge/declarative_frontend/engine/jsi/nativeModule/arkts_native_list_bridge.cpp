@@ -697,7 +697,6 @@ ArkUINativeModuleValue ListBridge::SetInitialIndex(ArkUIRuntimeCallInfo* runtime
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     int32_t index = secondArg->ToNumber(vm)->Value();
-    LOGE("TypedNode set List InitialIndex: %{public}d", index);
     GetArkUINodeModifiers()->getListModifier()->setInitialIndex(nativeNode, index);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -720,7 +719,6 @@ ArkUINativeModuleValue ListBridge::SetSpace(ArkUIRuntimeCallInfo* runtimeCallInf
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     float space = secondArg->ToNumber(vm)->Value();
-    LOGE("TypedNode set List Space: %{public}f", space);
     GetArkUINodeModifiers()->getListModifier()->setListSpace(nativeNode, space);
     return panda::JSValueRef::Undefined(vm);
 }

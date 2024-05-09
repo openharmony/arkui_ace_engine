@@ -163,11 +163,10 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(1);
     std::string type = firstArg->IsString() ? firstArg->ToString(vm)->ToString() : "";
     static const std::unordered_map<std::string, ArkUINodeType> typeMap = { { "Text", ARKUI_TEXT },
-        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK },
-        { "Blank", ARKUI_BLANK }, { "Image", ARKUI_IMAGE },
-        { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }, { "Flex", ARKUI_FLEX },
-        { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }},
-        { "List", ARKUI_LIST }, { "ListItem", ARKUI_LIST_ITEM } };
+        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK }, { "Blank", ARKUI_BLANK },
+        { "Image", ARKUI_IMAGE }, { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }, { "Flex", ARKUI_FLEX },
+        { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }, { "List", ARKUI_LIST },
+        { "ListItem", ARKUI_LIST_ITEM } };
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     RefPtr<FrameNode> node;
     auto iter = typeMap.find(type);
@@ -189,7 +188,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
     auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     return reslut;
-}
+} // namespace OHOS::Ace::NG
 
 ArkUINativeModuleValue FrameNodeBridge::Invalidate(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -294,14 +293,12 @@ void FrameNodeBridge::FireMeasureCallback(EcmaVM* vm, JsWeak<panda::CopyableGlob
     };
 
     const char* keysOfSize[] = { "height", "width" };
-    Local<JSValueRef> valuesOfMaxSize[] = {
-        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.maxSize.Height())),
-        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.maxSize.Width()))
-    };
-    Local<JSValueRef> valuesOfMinSize[] = {
-        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.minSize.Height())),
-        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.minSize.Width()))
-    };
+    Local<JSValueRef> valuesOfMaxSize[] = { panda::NumberRef::New(
+                                                vm, replaceInfinityFunc(layoutConstraint.maxSize.Height())),
+        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.maxSize.Width())) };
+    Local<JSValueRef> valuesOfMinSize[] = { panda::NumberRef::New(
+                                                vm, replaceInfinityFunc(layoutConstraint.minSize.Height())),
+        panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.minSize.Width())) };
     Local<JSValueRef> valuesOfPercentReference[] = {
         panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.percentReference.Height())),
         panda::NumberRef::New(vm, replaceInfinityFunc(layoutConstraint.percentReference.Width()))

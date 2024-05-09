@@ -39,6 +39,9 @@ class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  initialize(value: Object[]): this {
+    return this;
+  }
   sticky(value: Sticky): this {
     throw new Error('Method not implemented.');
   }

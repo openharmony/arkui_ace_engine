@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 #include <cstdint>
+
 #include "jsnapi_expo.h"
+
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h"

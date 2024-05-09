@@ -150,7 +150,7 @@ UINodeAdapter::UINodeAdapter(ArkUINodeAdapterHandle handle) : handle_(handle)
             adapter->OnEventReceived(event);
         }
     });
-    handle_->builder->SetNeedUpdateEvet(true);
+    handle_->builder->SetNeedUpdateEvent(true);
 }
 
 UINodeAdapter::~UINodeAdapter()
@@ -197,6 +197,7 @@ void UINodeAdapter::OnEventReceived(ArkUINodeAdapterEvent* event)
             if (updateChildFunc_) {
                 updateChildFunc_(event->handle, event->id);
             }
+            break;
         default:
             break;
     }
@@ -276,7 +277,9 @@ namespace {
 
 ArkUINodeAdapterHandle Create()
 {
-    return new _ArkUINodeAdapter { .builder = AceType::MakeRefPtr<NG::NativeLazyForEachBuilder>() };
+    auto* adapter = new _ArkUINodeAdapter { .builder = AceType::MakeRefPtr<NG::NativeLazyForEachBuilder>() };
+    adapter->builder->SetHostHandle(adapter);
+    return adapter;
 }
 
 void Dispose(ArkUINodeAdapterHandle handle)
@@ -289,6 +292,9 @@ void Dispose(ArkUINodeAdapterHandle handle)
         if (parent) {
             parent->RemoveChild(handle->node);
         }
+    }
+    if (handle->builder) {
+        handle->builder->SetHostHandle(nullptr);
     }
     delete handle;
 }
@@ -397,6 +403,11 @@ void DetachHostNode(ArkUINodeHandle host)
     const auto& child = AceType::DynamicCast<NG::LazyForEachNode>(uiNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(child);
     uiNode->RemoveChild(child);
+    const auto& builder = AceType::DynamicCast<NG::NativeLazyForEachBuilder>(child->GetBuilder());
+    CHECK_NULL_VOID(builder);
+    auto handle = builder->GetHostHandle();
+    CHECK_NULL_VOID(handle);
+    handle->node = nullptr;
 }
 
 ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle host)

@@ -153,7 +153,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_data_panel_bridge.cpp",
       "nativeModule/arkts_native_date_picker_bridge.cpp",
       "nativeModule/arkts_native_divider_bridge.cpp",
-      "nativeModule/arkts_native_flex_bridge.cpp",      
+      "nativeModule/arkts_native_flex_bridge.cpp",
       "nativeModule/arkts_native_frame_node_bridge.cpp",
       "nativeModule/arkts_native_gauge_bridge.cpp",
       "nativeModule/arkts_native_grid_bridge.cpp",

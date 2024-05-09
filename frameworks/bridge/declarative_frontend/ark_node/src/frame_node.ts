@@ -30,6 +30,7 @@ class FrameNode {
   protected uiContext_: UIContext | undefined | null;
   protected nodePtr_: NodePtr;
   protected instanceId_?: number;
+  private nodeAdapterRef_?: NodeAdapter;
   constructor(uiContext: UIContext, type: string) {
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
@@ -119,6 +120,9 @@ class FrameNode {
   setBaseNode(baseNode: BaseNode | null): void {
     this.baseNode_ = baseNode;
     this.renderNode_?.setBaseNode(baseNode);
+  }
+  setAdapterRef(adapter: NodeAdapter | undefined): void {
+    this.nodeAdapterRef_ = adapter;
   }
   getNodePtr(): NodePtr | null {
     return this.nodePtr_;

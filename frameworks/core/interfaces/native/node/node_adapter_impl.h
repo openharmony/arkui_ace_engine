@@ -114,7 +114,7 @@ public:
         return handle_;
     }
 
-    void SetNeedUpdateEvet(bool needUpdateEvent)
+    void SetNeedUpdateEvent(bool needUpdateEvent)
     {
         needUpdateEvent_ = needUpdateEvent;
     }
@@ -192,7 +192,7 @@ public:
         disposeChildFunc_ = func;
     }
 
-    void SetOnUpdateChind(std::function<void(ArkUINodeHandle, uint32_t)>&& func)
+    void SetOnUpdateChind(std::function<void(ArkUINodeHandle, int32_t)>&& func)
     {
         updateChildFunc_ = func;
     }

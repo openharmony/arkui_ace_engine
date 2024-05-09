@@ -352,9 +352,13 @@ class NodeAdapter {
         this.count_ = 0;
         this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
         this.nativePtr_ = this.nativeRef_.getNativeHandle();
-        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNode !== undefined ? this.onAttachToNodePtr : undefined, this.onDetachFromNode !== undefined ? this.onDetachFromNode : undefined, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
+        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
     }
     dispose() {
+        let hostNode = this.attachedNodeRef_.deref();
+        if (hostNode !== undefined) {
+            NodeAdapter.detachNodeAdapter(hostNode);
+        }
         this.nativeRef_.dispose();
         this.nativePtr_ = null;
     }
@@ -383,23 +387,40 @@ class NodeAdapter {
     getAllAvailableItems() {
         let result = new Array();
         let nodes = getUINativeModule().nodeAdapter.getAllItems(this.nativePtr_);
-        nodes.forEach(node => {
-            let nodeId = node.nodeId;
-            if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-                let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-                result.push(frameNode);
-            }
-        });
+        if (nodes !== undefined) {
+            nodes.forEach(node => {
+                let nodeId = node.nodeId;
+                if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+                    let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+                    result.push(frameNode);
+                }
+            });
+        }
         return result;
     }
     onAttachToNodePtr(target) {
         let nodeId = target.nodeId;
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            if (this.onAttachToNode !== undefined && frameNode !== undefined) {
+            if (frameNode === undefined) {
+                return;
+            }
+            frameNode.setAdapterRef(this);
+            this.attachedNodeRef_ = new WeakRef(frameNode);
+            if (this.onAttachToNode !== undefined) {
                 this.onAttachToNode(frameNode);
             }
         }
+    }
+    onDetachFromNodePtr() {
+        if (this.onDetachFromNode !== undefined) {
+            this.onDetachFromNode();
+        }
+        let attachedNode = this.attachedNodeRef_.deref();
+        if (attachedNode !== undefined) {
+            attachedNode.setAdapterRef(undefined);
+        }
+        this.nodeRefs_.splice(0, this.nodeRefs_.length);
     }
     onCreateNewNodePtr(index) {
         if (this.onCreateNewChild !== undefined) {
@@ -424,12 +445,12 @@ class NodeAdapter {
             }
         }
     }
-    onUpdateNodePtr(index, node) {
+    onUpdateNodePtr(id, node) {
         let nodeId = node.nodeId;
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
             if (this.onUpdateChild !== undefined && frameNode !== undefined) {
-                this.onUpdateChild(index, frameNode);
+                this.onUpdateChild(id, frameNode);
             }
         }
     }
@@ -621,6 +642,9 @@ class FrameNode {
     setBaseNode(baseNode) {
         this.baseNode_ = baseNode;
         this.renderNode_?.setBaseNode(baseNode);
+    }
+    setAdapterRef(adapter) {
+        this.nodeAdapterRef_ = adapter;
     }
     getNodePtr() {
         return this.nodePtr_;

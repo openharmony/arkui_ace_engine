@@ -201,7 +201,7 @@ namespace OHOS::Ace::NG {
             return nodeList_;
         }
         auto iter = cachedItems_.begin();
-        while(iter != cachedItems_.end()) {
+        while (iter != cachedItems_.end()) {
             auto itemIndex = iter->first;
             const auto& child = iter->second;
             if (static_cast<size_t>(itemIndex) >= index && static_cast<size_t>(itemIndex) < index + count) {
