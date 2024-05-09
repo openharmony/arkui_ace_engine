@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
-#include <limits>
 
 #include "jsnapi_expo.h"
 
