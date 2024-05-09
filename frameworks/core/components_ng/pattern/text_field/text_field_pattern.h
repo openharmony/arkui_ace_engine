@@ -1364,6 +1364,8 @@ private:
         return cleanNodeArea->IsShow();
     }
 
+    void InitPanEvent();
+
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
     void ProcNormalInlineStateInBlurEvent();

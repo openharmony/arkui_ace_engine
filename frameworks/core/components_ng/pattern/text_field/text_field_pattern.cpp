@@ -2830,8 +2830,14 @@ void TextFieldPattern::InitMouseEvent()
     };
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
     inputHub->AddOnHoverEvent(hoverEvent_);
+    InitPanEvent();
+}
 
-    auto gestureHub = tmpHost->GetOrCreateGestureEventHub();
+void TextFieldPattern::InitPanEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (!boxSelectPanEvent_) {
         auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
@@ -2843,10 +2849,15 @@ void TextFieldPattern::InitMouseEvent()
     }
     PanDirection panDirection = { .type = PanDirection::ALL };
     gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetPanEventType(GestureTypeName::TEXTFIELD_BOXSELECT);
     gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
                                                  const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
             gestureInfo->GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+            return GestureJudgeResult::REJECT;
+        }
+        if (gestureInfo->GetType() == GestureTypeName::TEXTFIELD_BOXSELECT &&
+            gestureInfo->GetInputEventType() != InputEventType::MOUSE_BUTTON) {
             return GestureJudgeResult::REJECT;
         }
         return GestureJudgeResult::CONTINUE;
