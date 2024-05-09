@@ -301,11 +301,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         }
         fingerId_ = touchInfo.GetFingerId();
         axisFlag_ = false;
-        // when Touch Down area is at Pan Area, value is unchanged.
-        allowDragEvents_ = sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_ONLY;
-        if (allowDragEvents_ && !AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
-            UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
-        }
+        lastTouchLocation_ = touchInfo.GetLocalLocation();
         if (showTips_) {
             bubbleFlag_ = true;
             UpdateBubble();
@@ -317,13 +313,20 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         if (fingerId_ != touchInfo.GetFingerId()) {
             return;
         }
+        if (lastTouchLocation_.has_value() && lastTouchLocation_.value() == touchInfo.GetLocalLocation()) {
+            // when Touch Down area is at Pan Area, value is unchanged.
+            allowDragEvents_ = sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_ONLY;
+            if (allowDragEvents_ && !AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
+                UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
+            }
+            FireChangeEvent(SliderChangeMode::Click);
+        }
         fingerId_ = -1;
         UpdateToValidValue();
         if (bubbleFlag_ && !isFocusActive_) {
             bubbleFlag_ = false;
         }
         mousePressedFlag_ = false;
-        FireChangeEvent(SliderChangeMode::Click);
         FireChangeEvent(SliderChangeMode::End);
         CloseTranslateAnimation();
     }
