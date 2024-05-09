@@ -461,6 +461,7 @@ private:
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
     bool hasSizeChanged = false;
+    bool isPixelMapChanged_ = true;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

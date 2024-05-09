@@ -343,11 +343,10 @@ void ImagePattern::OnImageLoadSuccess()
     altImage_ = nullptr;
     altDstRect_.reset();
     altSrcRect_.reset();
-    if (!IsSupportImageAnalyzerFeature()) {
-        DestroyAnalyzerOverlay();
-    }
-    UpdateAnalyzerOverlay();
 
+    if (isPixelMapChanged_) {
+        UpdateAnalyzerOverlay();
+    }
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -582,6 +581,12 @@ void ImagePattern::LoadImageDataIfNeed()
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
+    if (loadingCtx_) {
+        auto srcPixelMap = src.GetPixmap();
+        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
+        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
+                                                              loadPixelMap->GetRawPixelMapPtr();
+    }
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
         LoadImage(src);
     } else {
