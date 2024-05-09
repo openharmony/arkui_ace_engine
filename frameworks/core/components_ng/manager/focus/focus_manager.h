@@ -38,7 +38,7 @@ public:
     explicit FocusManager(const WeakPtr<PipelineContext>& pipeline) : pipeline_(pipeline) {}
     ~FocusManager() override = default;
 
-    void FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByPageSwitch);
+    void FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByPageSwitch = true);
     void FocusViewHide(const RefPtr<FocusView>& focusView);
     void FocusViewClose(const RefPtr<FocusView>& focusView);
 
