@@ -1357,12 +1357,16 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     Color paintColor;
     if (HasPaintColor()) {
         paintColor = GetPaintColor();
+    } else if (box_.paintStyle_ && box_.paintStyle_->strokeColor) {
+        paintColor = box_.paintStyle_->strokeColor.value();
     } else {
         paintColor = appTheme->GetFocusColor();
     }
     Dimension paintWidth;
     if (HasPaintWidth()) {
         paintWidth = GetPaintWidth();
+    } else if (box_.paintStyle_ && box_.paintStyle_->strokeWidth) {
+        paintWidth = box_.paintStyle_->strokeWidth.value();
     } else {
         paintWidth = appTheme->GetFocusWidthVp();
     }
@@ -1378,6 +1382,8 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
     if (HasFocusPadding()) {
         focusPaddingVp = GetFocusPadding();
+    } else if (box_.paintStyle_ && box_.paintStyle_->margin) {
+        focusPaddingVp = box_.paintStyle_->margin.value();
     } else {
         if (focusStyleType_ == FocusStyleType::INNER_BORDER) {
             focusPaddingVp = -appTheme->GetFocusWidthVp();
@@ -1394,6 +1400,18 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     return true;
 }
 
+void FocusHub::RaiseZIndex()
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    const auto& target = frameNode->GetRenderContext();
+    if (target && !target->HasZIndex()) {
+        int32_t FOCUS_STATE_ZINDEX = 100; // default focus zIndex
+        target->UpdateZIndex(FOCUS_STATE_ZINDEX);
+        isRaisedZIndex_ = true;
+    }
+}
+
 bool FocusHub::PaintAllFocusState()
 {
     auto focusManager = GetFocusManager();
@@ -1401,6 +1419,7 @@ bool FocusHub::PaintAllFocusState()
 
     if (PaintFocusState()) {
         focusManager->SetLastFocusStateNode(AceType::Claim(this));
+        RaiseZIndex();
         if (onPaintFocusStateCallback_) {
             return onPaintFocusStateCallback_();
         }
@@ -1417,7 +1436,9 @@ bool FocusHub::PaintAllFocusState()
     // Force paint focus box for the component on the tail of focus-chain.
     // This is designed for the focus-chain that all components' focus style are none.
     focusStyleType_ = FocusStyleType::FORCE_BORDER;
-    PaintFocusState();
+    if (PaintFocusState()) {
+        RaiseZIndex();
+    }
     focusManager->SetLastFocusStateNode(AceType::Claim(this));
     return !isFocusActiveWhenFocused_;
 }
@@ -1438,12 +1459,16 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     Color paintColor;
     if (HasPaintColor()) {
         paintColor = GetPaintColor();
+    } else if (box_.paintStyle_ && box_.paintStyle_->strokeColor) {
+        paintColor = box_.paintStyle_->strokeColor.value();
     } else {
         paintColor = appTheme->GetFocusColor();
     }
     Dimension paintWidth;
     if (HasPaintWidth()) {
         paintWidth = GetPaintWidth();
+    } else if (box_.paintStyle_ && box_.paintStyle_->strokeWidth) {
+        paintWidth = box_.paintStyle_->strokeWidth.value();
     } else {
         paintWidth = appTheme->GetFocusWidthVp();
     }
@@ -1467,6 +1492,10 @@ void FocusHub::ClearFocusState(bool isNeedStateStyles)
         auto renderContext = frameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->ClearFocusState();
+        if (isRaisedZIndex_) {
+            renderContext->ResetZIndex();
+            isRaisedZIndex_ = false;
+        }
     }
 }
 

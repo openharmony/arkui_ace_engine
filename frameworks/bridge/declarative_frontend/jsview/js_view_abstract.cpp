@@ -83,6 +83,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
@@ -4890,6 +4891,21 @@ bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimensi
     return ParseJsDimension(jsValue, result, DimensionUnit::PX);
 }
 
+bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    auto colorObj = JSRef<JSObject>::Cast(jsValue);
+    auto toNumericProp = colorObj->GetProperty("toNumeric");
+    if (toNumericProp->IsFunction()) {
+        auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
+        result.SetValue(colorVal->ToNumber<uint32_t>());
+        return true;
+    }
+    return false;
+}
+
 bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
     if (jsValue->IsNumber()) {
@@ -6719,6 +6735,30 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetFocusable(info[0]->ToBoolean());
 }
 
+void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject() || info.Length() != 1) {
+        return;
+    }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    NG::FocusBoxStyle style;
+
+    CalcDimension margin;
+    if (ParseLengthMetricsToDimension(obj->GetProperty("margin"), margin)) {
+        style.margin = margin;
+    }
+    CalcDimension strokeWidth;
+    if (ParseLengthMetricsToDimension(obj->GetProperty("strokeWidth"), strokeWidth)) {
+        style.strokeWidth = strokeWidth;
+    }
+    Color strokeColor;
+    if (ParseColorMetricsToColor(obj->GetProperty("strokeColor"), strokeColor)) {
+        style.strokeColor = strokeColor;
+    }
+
+    ViewAbstractModel::GetInstance()->SetFocusBoxStyle(style);
+}
+
 void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
 {
     JSRef<JSVal> arg = args[0];
@@ -7985,6 +8025,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("blendMode", &JSViewAbstract::JsBlendMode);
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
     JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
+    JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onKeyPreIme", &JSInteractableView::JsOnKeyPreIme);
     JSClass<JSViewAbstract>::StaticMethod("onFocusMove", &JSViewAbstract::JsOnFocusMove);
