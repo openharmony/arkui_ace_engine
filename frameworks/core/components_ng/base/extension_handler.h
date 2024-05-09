@@ -94,7 +94,7 @@ public:
         drawModifier_ = drawModifier;
     }
 
-    bool NeedRender() const
+    virtual bool NeedRender() const
     {
         return drawModifier_ || needRender_ ;
     }
