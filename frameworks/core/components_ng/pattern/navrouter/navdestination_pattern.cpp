@@ -261,4 +261,11 @@ void NavDestinationPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("name: ").append(name_));
 }
+
+bool NavDestinationPattern::OverlayOnBackPressed()
+{
+    CHECK_NULL_RETURN(overlayManager_, false);
+    CHECK_EQUAL_RETURN(overlayManager_->IsModalEmpty(), true,  false);
+    return overlayManager_->RemoveOverlay(true);
+}
 } // namespace OHOS::Ace::NG
