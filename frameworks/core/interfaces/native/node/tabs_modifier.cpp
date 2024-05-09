@@ -101,6 +101,12 @@ void SetBarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color(color));
 }
+void SetBarBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 blurStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, static_cast<BlurStyle>(blurStyle));
+}
 void SetBarOverlap(ArkUINodeHandle node, ArkUI_Bool barOverlap)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -206,6 +212,12 @@ void ResetBarBackgroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color::BLACK.BlendOpacity(0.0f));
+}
+void ResetBarBackgroundBlurStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, BlurStyle::NO_MATERIAL);
 }
 void ResetBarOverlap(ArkUINodeHandle node)
 {
@@ -316,6 +328,7 @@ const ArkUITabsModifier* GetTabsModifier()
         SetDivider,
         SetFadingEdge,
         SetBarBackgroundColor,
+        SetBarBackgroundBlurStyle,
         SetBarOverlap,
         SetIsVertical,
         SetTabBarPosition,
@@ -330,6 +343,7 @@ const ArkUITabsModifier* GetTabsModifier()
         ResetDivider,
         ResetFadingEdge,
         ResetBarBackgroundColor,
+        ResetBarBackgroundBlurStyle,
         ResetBarOverlap,
         ResetIsVertical,
         ResetTabBarPosition,

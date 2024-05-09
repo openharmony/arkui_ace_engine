@@ -21927,6 +21927,10 @@ class ArkTabsComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, BarBackgroundColorModifier.identity, BarBackgroundColorModifier, value);
     return this;
   }
+  barBackgroundBlurStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, value);
+    return this;
+  }
   barGridAlign(value) {
     modifierWithKey(this._modifiersWithKeys, BarGridAlignModifier.identity, BarGridAlignModifier, value);
     return this;
@@ -22167,6 +22171,23 @@ class BarBackgroundColorModifier extends ModifierWithKey {
   }
 }
 BarBackgroundColorModifier.identity = Symbol('barbackgroundcolor');
+class BarBackgroundBlurStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetBarBackgroundBlurStyle(node);
+    }
+    else {
+      getUINativeModule().tabs.setBarBackgroundBlurStyle(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+BarBackgroundBlurStyleModifier.identity = Symbol('barbackgroundblurstyle');
 class FadingEdgeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
