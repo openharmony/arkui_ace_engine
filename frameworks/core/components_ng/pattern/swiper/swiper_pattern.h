@@ -296,7 +296,8 @@ public:
      */
     bool SpringOverScroll(float offset);
 
-    void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f);
+    void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f,
+        std::optional<int32_t> nextIndex = std::nullopt);
 
     int32_t TotalCount() const;
 
@@ -694,7 +695,7 @@ private:
     void StopPropertyTranslateAnimation(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
-    void PlayIndicatorTranslateAnimation(float translate);
+    void PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex = std::nullopt);
 
     // Implement of swiper controller
 

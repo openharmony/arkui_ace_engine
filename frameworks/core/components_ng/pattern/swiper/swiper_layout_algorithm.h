@@ -152,7 +152,7 @@ public:
         if (itemPosition_.empty()) {
             return 0.0f;
         }
-        if (GetStartIndex() == 0) {
+        if (GetStartIndex() == 0 && !isLoop_) {
             return itemPosition_.begin()->second.startPos;
         }
         return itemPosition_.begin()->second.startPos - spaceWidth_;
@@ -163,7 +163,7 @@ public:
         if (itemPosition_.empty()) {
             return 0.0f;
         }
-        if (GetEndIndex() == totalItemCount_ - 1) {
+        if (GetEndIndex() == totalItemCount_ - 1 && !isLoop_) {
             return itemPosition_.rbegin()->second.endPos;
         }
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
