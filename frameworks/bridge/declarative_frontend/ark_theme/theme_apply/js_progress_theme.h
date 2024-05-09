@@ -41,9 +41,6 @@ public:
             auto borderColor = themeColors->BackgroundEmphasize();
             ViewAbstractModel::GetInstance()->SetBorderColor(borderColor, borderColor, borderColor, borderColor);
             ViewAbstractModel::GetInstance()->SetColorBlend(Color::BLACK); // default for restore color after pressed
-            // focused
-            ViewStackModel::GetInstance()->SetVisualState(VisualState::FOCUSED);
-            ViewAbstractModel::GetInstance()->SetOuterBorderColor(themeColors->InteractiveFocus());
             // pressed
             ViewStackModel::GetInstance()->SetVisualState(VisualState::PRESSED);
             ViewAbstractModel::GetInstance()->SetColorBlend(themeColors->InteractivePressed());

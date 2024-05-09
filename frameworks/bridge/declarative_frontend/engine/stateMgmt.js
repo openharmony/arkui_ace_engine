@@ -4050,12 +4050,13 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
     ifElseBranchUpdateFunction(branchId, branchfunc) {
+        var _a, _b;
         const oldBranchid = If.getBranchId();
         if (branchId === oldBranchid) {
             
             return;
         }
-        ArkThemeScopeManager.getInstance().onIfElseBranchUpdateEnter();
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onIfElseBranchUpdateEnter();
         // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
         // ifElseNode stores the most recent branch, so we can compare
         // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
@@ -4067,7 +4068,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         
         this.purgeDeletedElmtIds();
         branchfunc();
-        ArkThemeScopeManager.getInstance().onIfElseBranchUpdateExit(removedChildElmtIds);
+        (_b = PUV2ViewBase.arkThemeScopeManager) === null || _b === void 0 ? void 0 : _b.onIfElseBranchUpdateExit(removedChildElmtIds);
     }
     /**
      Partial updates for ForEach.
@@ -4236,6 +4237,9 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     onGlobalThemeChanged() {
     }
+    static setArkThemeScopeManager(mgr) {
+        PUV2ViewBase.arkThemeScopeManager = mgr;
+    }
 } // class PUV2ViewBase
 // List of inactive components used for Dfx
 PUV2ViewBase.inactiveComponents_ = new Set();
@@ -4246,6 +4250,7 @@ PUV2ViewBase.compareNumber = (a, b) => {
 // static flag for paused rendering
 // when paused, getCurrentlyRenderedElmtId() will return UINodeRegisterProxy.notRecordingDependencies
 PUV2ViewBase.renderingPaused = false;
+PUV2ViewBase.arkThemeScopeManager = undefined;
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -5867,6 +5872,7 @@ class ViewPU extends PUV2ViewBase {
      *
     */
     constructor(parent, localStorage, elmtId = UINodeRegisterProxy.notRecordingDependencies, extraInfo = undefined) {
+        var _a;
         super(parent, elmtId, extraInfo);
         // flag for initial rendering or re-render on-going.
         this.isRenderInProgress = false;
@@ -5908,7 +5914,7 @@ class ViewPU extends PUV2ViewBase {
         //this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
         this.localStoragebackStore_ = undefined;
         
-        ArkThemeScopeManager.getInstance().onViewPUCreate(this);
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUCreate(this);
         if (localStorage) {
             this.localStorage_ = localStorage;
             
@@ -5999,7 +6005,8 @@ class ViewPU extends PUV2ViewBase {
     aboutToReuse(params) { }
     aboutToRecycle() { }
     onWillApplyThemeInternally() {
-        const theme = ArkThemeScopeManager.getInstance().getFinalTheme(this.id__());
+        var _a;
+        const theme = (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.getFinalTheme(this.id__());
         if (theme) {
             this.onWillApplyTheme(theme);
         }
@@ -6008,6 +6015,7 @@ class ViewPU extends PUV2ViewBase {
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
+        var _a;
         
         // if this isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
         // to set and recursively set its children any more
@@ -6046,7 +6054,7 @@ class ViewPU extends PUV2ViewBase {
         if (this.getParent()) {
             this.getParent().removeChild(this);
         }
-        ArkThemeScopeManager.getInstance().onViewPUDelete(this);
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUDelete(this);
         this.localStoragebackStore_ = undefined;
     }
     debugInfoStateVars() {
@@ -6443,9 +6451,10 @@ class ViewPU extends PUV2ViewBase {
         const _componentName = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') : 'unspecified UINode';
         const _popFunc = (classObject && 'pop' in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
+            var _a, _b;
             this.syncInstanceId();
             
-            ArkThemeScopeManager.getInstance().onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
+            (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             if (!this.isViewV3) {
                 // Enable PU state tracking only in PU @Components
@@ -6474,7 +6483,7 @@ class ViewPU extends PUV2ViewBase {
                 this.currentlyRenderedElmtIdStack_.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
-            ArkThemeScopeManager.getInstance().onComponentCreateExit(elmtId);
+            (_b = PUV2ViewBase.arkThemeScopeManager) === null || _b === void 0 ? void 0 : _b.onComponentCreateExit(elmtId);
             
             this.restoreInstanceId();
         };

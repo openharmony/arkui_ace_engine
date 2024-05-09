@@ -17,8 +17,6 @@
 * all definitions in this file are framework internal
 */
 
-/// <reference path="../../../../ark_theme/export/ark_theme_scope_manager.d.ts" />
-
 type DFXCommand = { what: string, viewId: number, isRecursive: boolean };
 type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
@@ -154,7 +152,8 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = undefined;
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
-    ArkThemeScopeManager.getInstance().onViewPUCreate(this);
+    PUV2ViewBase.arkThemeScopeManager?.onViewPUCreate(this)
+
     if (localStorage) {
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry or view instance creation.`);
@@ -185,7 +184,7 @@ abstract class ViewPU extends PUV2ViewBase
   aboutToRecycle(): void { }
 
   private onWillApplyThemeInternally(): void {
-    const theme = ArkThemeScopeManager.getInstance().getFinalTheme(this.id__())
+    const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this.id__())
     if (theme) {
         this.onWillApplyTheme(theme)
     }
@@ -243,7 +242,7 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.getParent()) {
       this.getParent().removeChild(this);
     }
-    ArkThemeScopeManager.getInstance().onViewPUDelete(this);
+    PUV2ViewBase.arkThemeScopeManager?.onViewPUDelete(this);
     this.localStoragebackStore_ = undefined;
   }
 
@@ -692,7 +691,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV3 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
-      ArkThemeScopeManager.getInstance().onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
+      PUV2ViewBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
 
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
 
@@ -728,7 +727,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
       ViewStackProcessor.StopGetAccessRecording();
 
-      ArkThemeScopeManager.getInstance().onComponentCreateExit(elmtId)
+      PUV2ViewBase.arkThemeScopeManager?.onComponentCreateExit(elmtId)
 
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
       this.restoreInstanceId();

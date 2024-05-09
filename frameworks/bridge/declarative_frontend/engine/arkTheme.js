@@ -119,23 +119,21 @@ globalThis.LazyForEach.create = function (paramViewId, paramParentView, paramDat
     }
 };
 globalThis.ListItem.create = function (deepRenderFunction, isLazy, options) {
-    var _a;
     if (isLazy === false) {
         ListItem.createInternal(deepRenderFunction, isLazy, options);
         return;
     }
     const listItemElmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    const themeScope = (_a = globalThis.themeScopeMgr) === null || _a === void 0 ? void 0 : _a.scopeForElmtId(listItemElmtId);
+    const themeScope = ArkThemeScopeManager.getInstance().scopeForElmtId(listItemElmtId);
     if (themeScope === undefined) {
         ListItem.createInternal(deepRenderFunction, isLazy, options);
         return;
     }
     const deepRenderFunctionWrapper = (elmtId, isInitialRender) => {
-        var _a, _b;
-        const result = (_a = globalThis.themeScopeMgr) === null || _a === void 0 ? void 0 : _a.onDeepRenderScopeEnter(themeScope);
+        const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
         deepRenderFunction(elmtId, isInitialRender);
         if (result === true) {
-            (_b = globalThis.themeScopeMgr) === null || _b === void 0 ? void 0 : _b.onDeepRenderScopeExit();
+            ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
         }
     };
     ListItem.createInternal(deepRenderFunctionWrapper, isLazy, options);
@@ -345,22 +343,20 @@ class ArkSystemTheme {
     }
 }
 globalThis.WithTheme.create = function (themeOptions) {
-    var _a, _b, _c, _d;
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    const theme = (_a = globalThis.themeScopeMgr) === null || _a === void 0 ? void 0 : _a.makeTheme(themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.theme);
+    const theme = ArkThemeScopeManager.getInstance().makeTheme(themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.theme);
     const colorMode = themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.colorMode;
     if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-        (_b = globalThis.themeScopeMgr) === null || _b === void 0 ? void 0 : _b.onEnterLocalColorMode(colorMode);
+        ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
     }
     ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
     if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-        (_c = globalThis.themeScopeMgr) === null || _c === void 0 ? void 0 : _c.onExitLocalColorMode();
+        ArkThemeScopeManager.getInstance().onExitLocalColorMode();
     }
-    (_d = globalThis.themeScopeMgr) === null || _d === void 0 ? void 0 : _d.onScopeEnter(elmtId, themeOptions, theme);
+    ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
 };
 globalThis.WithTheme.pop = function () {
-    var _a;
-    (_a = globalThis.themeScopeMgr) === null || _a === void 0 ? void 0 : _a.onScopeExit();
+    ArkThemeScopeManager.getInstance().onScopeExit();
 };
 class ArkColorsImpl {
     constructor(colors = {}, baselineColors) {
@@ -855,6 +851,7 @@ class ArkThemeScopeManager {
     static getInstance() {
         if (!ArkThemeScopeManager.instance) {
             ArkThemeScopeManager.instance = new ArkThemeScopeManager();
+            PUV2ViewBase.setArkThemeScopeManager(ArkThemeScopeManager.instance);
         }
         return ArkThemeScopeManager.instance;
     }

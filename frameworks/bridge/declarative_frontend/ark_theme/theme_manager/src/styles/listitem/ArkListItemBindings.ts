@@ -23,7 +23,7 @@ globalThis.ListItem.create = function (deepRenderFunction: (elmtId, isInitialRen
     }
 
     const listItemElmtId = ViewStackProcessor.GetElmtIdToAccountFor()
-    const themeScope = globalThis.themeScopeMgr?.scopeForElmtId(listItemElmtId)
+    const themeScope = ArkThemeScopeManager.getInstance().scopeForElmtId(listItemElmtId)
 
     // if ListItem isn`t in theme scope we shouldn`t use any theme scope for deep render
     if (themeScope === undefined) {
@@ -34,10 +34,10 @@ globalThis.ListItem.create = function (deepRenderFunction: (elmtId, isInitialRen
 
     // create wrapper under original deepRenderFunction to add enter/exit callbacks for ThemeScopeManager
     const deepRenderFunctionWrapper = (elmtId, isInitialRender) => {
-        const result = globalThis.themeScopeMgr?.onDeepRenderScopeEnter(themeScope)
+        const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope)
         deepRenderFunction(elmtId, isInitialRender)
         if (result === true) {
-            globalThis.themeScopeMgr?.onDeepRenderScopeExit()
+            ArkThemeScopeManager.getInstance().onDeepRenderScopeExit()
         }
     }
 

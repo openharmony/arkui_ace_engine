@@ -438,6 +438,7 @@ class ArkThemeScopeManager {
     static getInstance() : ArkThemeScopeManager {
         if (!ArkThemeScopeManager.instance) {
             ArkThemeScopeManager.instance = new ArkThemeScopeManager()
+            PUV2ViewBase.setArkThemeScopeManager(ArkThemeScopeManager.instance);
         }
         return ArkThemeScopeManager.instance;
     }

@@ -73,6 +73,8 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   protected extraInfo_: ExtraInfo = undefined;
 
+  protected static arkThemeScopeManager: ArkThemeScopeManager | undefined = undefined
+
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super();
     // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
@@ -337,8 +339,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       stateMgmtConsole.debug(`${this.debugInfo__()}: ifElseBranchUpdateFunction: IfElse branch unchanged, no work to do.`);
       return;
     }
-    ArkThemeScopeManager.getInstance().onIfElseBranchUpdateEnter()
-
+    PUV2ViewBase.arkThemeScopeManager?.onIfElseBranchUpdateEnter()
     // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
     // ifElseNode stores the most recent branch, so we can compare
     // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
@@ -353,7 +354,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     this.purgeDeletedElmtIds();
 
     branchfunc();
-    ArkThemeScopeManager.getInstance().onIfElseBranchUpdateExit(removedChildElmtIds)
+    PUV2ViewBase.arkThemeScopeManager?.onIfElseBranchUpdateExit(removedChildElmtIds)
   }
 
   /**
@@ -556,4 +557,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   onGlobalThemeChanged(): void {
   }
 
+  public static setArkThemeScopeManager(mgr: ArkThemeScopeManager): void {
+    PUV2ViewBase.arkThemeScopeManager = mgr
+  }
 } // class PUV2ViewBase
