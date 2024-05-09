@@ -879,12 +879,19 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushFrameRate()
 {
+    ACE_FUNCTION_TRACE();
     frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate());
-    if (frameRateManager_->IsRateChanged()) {
+
+    bool currAnimationStatus = scheduleTasks_.empty() ? true : false;
+
+    bool isAnimationStatusChanged = currAnimationStatus != animationStatusRec_ ? true : false;
+
+    if (frameRateManager_->IsRateChanged() || isAnimationStatusChanged) {
         auto rate = frameRateManager_->GetExpectedRate();
         ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d", rate);
-        window_->FlushFrameRate(rate);
+        window_->FlushFrameRate(rate, currentAnimatorStatus);
         frameRateManager_->SetIsRateChanged(false);
+        animationStatusRec_ = currentAnimatorStatus;
     }
 }
 

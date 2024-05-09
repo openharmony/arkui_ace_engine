@@ -942,6 +942,7 @@ private:
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
+    bool animationStatusRec_ = true;
 };
 } // namespace OHOS::Ace::NG
 
