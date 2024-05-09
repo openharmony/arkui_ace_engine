@@ -2047,6 +2047,7 @@ HWTEST_F(GesturesTestNg, GestureRecognizerTest001, TestSize.Level1)
     touchEvent.type = TouchType::UNKNOWN;
     clickRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(clickRecognizer->inputEventType_, InputEventType::TOUCH_SCREEN);
 
     /**
      * @tc.steps: step2. call AxisEvent function and compare result.
@@ -2068,6 +2069,7 @@ HWTEST_F(GesturesTestNg, GestureRecognizerTest001, TestSize.Level1)
     axisEvent.action = AxisAction::NONE;
     clickRecognizer->HandleEvent(axisEvent);
     EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(clickRecognizer->inputEventType_, InputEventType::AXIS);
 }
 
 /**
@@ -2809,7 +2811,6 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest002, TestSize.Level1)
     panRecognizer.HandleTouchDownEvent(touchEvent);
     EXPECT_EQ(panRecognizer.deviceId_, touchEvent.deviceId);
     EXPECT_EQ(panRecognizer.deviceType_, touchEvent.sourceType);
-    EXPECT_EQ(panRecognizer.inputEventType_, InputEventType::TOUCH_SCREEN);
 
     /**
      * @tc.steps: step2. call HandleTouchDown function and compare result.
@@ -2849,7 +2850,6 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest002, TestSize.Level1)
     panRecognizer.HandleTouchDownEvent(axisEvent);
     EXPECT_EQ(panRecognizer.deviceId_, axisEvent.deviceId);
     EXPECT_EQ(panRecognizer.deviceType_, axisEvent.sourceType);
-    EXPECT_EQ(panRecognizer.inputEventType_, InputEventType::AXIS);
     EXPECT_EQ(panRecognizer.refereeState_, RefereeState::DETECTING);
 }
 
@@ -2926,7 +2926,6 @@ HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchDownEventTest001, TestSize.Leve
     panRecognizer.HandleTouchDownEvent(axisEvent);
     EXPECT_EQ(panRecognizer.deviceId_, axisEvent.deviceId);
     EXPECT_EQ(panRecognizer.deviceType_, axisEvent.sourceType);
-    EXPECT_EQ(panRecognizer.inputEventType_, InputEventType::AXIS);
     EXPECT_EQ(panRecognizer.refereeState_, RefereeState::DETECTING);
 }
 
