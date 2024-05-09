@@ -1907,7 +1907,7 @@ float GridPattern::IrregularAnimateToCenter(float mainGap) const
     }
     auto size = GridLayoutUtils::GetItemSize(&info, RawPtr(host), *targetIndex_);
     auto [center, offset] = info.FindItemCenter(it->first, size.rows, mainGap);
-    return info.GetHeightInRange(0, center, mainGap) + offset - info.lastMainSize_ / 2.0f;
+    return info.GetTotalHeightFromZeroIndex(center, mainGap) + offset - info.lastMainSize_ / 2.0f;
 }
 
 std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()
