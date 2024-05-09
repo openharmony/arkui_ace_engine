@@ -63,9 +63,18 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
     timePickerRowPattern->SetShowCount(showCount);
     timePickerRowPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
+    auto timePickerLayout = timePickerNode->GetLayoutProperty<TimePickerLayoutProperty>();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ZeroPrefixType hourType = ZeroPrefixType::SHOW;
-        timePickerRowPattern->SetPrefixHour(hourType);
+        ZeroPrefixType hourOptions = settingData.dateTimeOptions.hourType;
+        ZeroPrefixType minuteOptions = settingData.dateTimeOptions.minuteType;
+        if ((timePickerRowPattern->GetPrefixHour() != hourOptions) ||
+            (timePickerRowPattern->GetPrefixMinute() != minuteOptions)) {
+            timePickerRowPattern->SetDateTimeOptionUpdate(true);
+        }
+        timePickerRowPattern->SetPrefixHour(hourOptions);
+        timePickerRowPattern->SetPrefixMinute(minuteOptions);
+        timePickerLayout->UpdatePrefixHour(static_cast<int32_t>(hourOptions));
+        timePickerLayout->UpdatePrefixMinute(static_cast<int32_t>(minuteOptions));
     }
 
     auto hasHourNode = timePickerRowPattern->HasHourNode();
