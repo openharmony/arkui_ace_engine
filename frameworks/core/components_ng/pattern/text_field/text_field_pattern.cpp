@@ -524,7 +524,7 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
         auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterLayoutTask([textRect, eventHub]() {
-            eventHub->FireOnContentSizeChange(textRect.Width(), textRect.Height());
+            eventHub->FireOnContentSizeChange(std::max(0.0f, textRect.Width()), textRect.Height());
         });
     }
 }
