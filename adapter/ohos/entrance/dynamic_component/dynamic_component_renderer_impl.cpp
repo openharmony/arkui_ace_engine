@@ -28,7 +28,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -120,7 +120,7 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
                     ContainerScope scope(hostInstanceId);
                     auto host = hostWeak.Upgrade();
                     CHECK_NULL_VOID(host);
-                    auto pattern = AceType::DynamicCast<UIExtensionPattern>(host->GetPattern());
+                    auto pattern = AceType::DynamicCast<IsolatedPattern>(host->GetPattern());
                     CHECK_NULL_VOID(pattern);
                     pattern->OnSizeChanged(width, height);
                 },
