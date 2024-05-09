@@ -45,18 +45,13 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem001, Te
      * @tc.steps: step2. get child frame node from index
      */
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    ASSERT_NE(groupFrameNode, nullptr);
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-    ASSERT_NE(groupPattern, nullptr);
-
     RefPtr<LayoutAlgorithm> layoutAl = groupPattern->CreateLayoutAlgorithm();
-    ASSERT_NE(layoutAl, nullptr);
 
     /* *
      * @tc.steps: step3. build a object about ListItemGroupLayoutAlgorithm
      */
     RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupAl = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAl);
-    ASSERT_NE(listItemGroupAl, nullptr);
     EXPECT_TRUE(listItemGroupAl->forwardLayout_ && listItemGroupAl->headerIndex_ >= 0);
 
     bool resTypeInit = listItemGroupAl->NeedMeasureItem();
@@ -108,18 +103,14 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem002, Te
      * @tc.steps: step2. get child frame node from index
      */
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    ASSERT_NE(groupFrameNode, nullptr);
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-    ASSERT_NE(groupPattern, nullptr);
 
     RefPtr<LayoutAlgorithm> layoutAl = groupPattern->CreateLayoutAlgorithm();
-    ASSERT_NE(layoutAl, nullptr);
 
     /* *
      * @tc.steps: step3. build a object about ListItemGroupLayoutAlgorithm
      */
     RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupAl = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAl);
-    ASSERT_NE(listItemGroupAl, nullptr);
     EXPECT_TRUE(listItemGroupAl->forwardLayout_ && listItemGroupAl->headerIndex_ >= 0);
 
     // forwardLayout equ false, GreatNotEqual
@@ -178,15 +169,12 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_Layout, TestSize.Level
      * @tc.steps: step2. get child frame node from index
      */
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_NE(groupFrameNode, nullptr);
 
     /* *
      * @tc.steps: step3. build a object about layoutWraper
      */
     RefPtr<LayoutWrapper> layoutWrapper = groupFrameNode->CreateLayoutWrapper(true, true);
-    EXPECT_NE(layoutWrapper, nullptr);
     RefPtr<LayoutWrapperNode> layoutWrapper_ = AceType::DynamicCast<LayoutWrapperNode>(layoutWrapper);
-
     // Set LayoutProperty null , CHECK_NULL_VOID eq null
     layoutWrapper_->layoutProperty_ = nullptr;
     const auto &layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -196,14 +184,8 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_Layout, TestSize.Level
      * @tc.steps: step4. build a object about ListItemGroupLayoutAlgorithm
      */
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
-    ASSERT_NE(groupPattern, nullptr);
-
     RefPtr<LayoutAlgorithm> layoutAl = groupPattern->CreateLayoutAlgorithm();
-    ASSERT_NE(layoutAl, nullptr);
-
     RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupAl = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAl);
-    ASSERT_NE(listItemGroupAl, nullptr);
-
     listItemGroupAl->headerIndex_ = -1;
     listItemGroupAl->Layout(AceType::RawPtr<LayoutWrapper>(layoutWrapper));
 }

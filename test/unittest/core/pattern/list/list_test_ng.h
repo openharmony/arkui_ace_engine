@@ -78,14 +78,14 @@
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-constexpr float LIST_WIDTH = 480.f;
-constexpr float LIST_HEIGHT = 800.f;
+constexpr float LIST_WIDTH = 240.f;
+constexpr float LIST_HEIGHT = 400.f;
 constexpr float ITEM_WIDTH = 60.f;
 constexpr float ITEM_HEIGHT = 100.f;
-constexpr int32_t TOTAL_ITEM_NUMBER = 10;
-constexpr int32_t VIEW_ITEM_NUMBER = 8;
+constexpr int32_t TOTAL_ITEM_NUMBER = 6;
+constexpr int32_t VIEW_ITEM_NUMBER = 4;
 constexpr int32_t GROUP_NUMBER = 4;
-constexpr int32_t GROUP_LINE_NUMBER = 4;
+constexpr int32_t GROUP_ITEM_NUMBER = 2;
 constexpr float GROUP_HEADER_LEN = 50.f;
 constexpr float START_NODE_LEN = 80.f;
 constexpr float END_NODE_LEN = 100.f;
@@ -101,14 +101,6 @@ constexpr float DEFAULT_STARTOFFSET = 0.f;
 constexpr float SPACE = 10.f;
 constexpr float STROKE_WIDTH = 5.f;
 const V2::ItemDivider ITEM_DIVIDER = { Dimension(STROKE_WIDTH), Dimension(10), Dimension(20), Color(0x000000) };
-struct SwipeActionItem {
-    std::function<void()> builderAction;
-    Dimension actionAreaDistance;
-    OnDeleteEvent onDelete;
-    OnEnterDeleteAreaEvent onEnterDeleteArea;
-    OnExitDeleteAreaEvent onExitDeleteArea;
-    OnStateChangedEvent onStateChange;
-};
 
 class ListTestNg : public TestNG {
 public:
@@ -130,7 +122,7 @@ public:
     void CreateGroupChildrenMainSize(int32_t groupNumber);
     void CreateGroupWithItem(int32_t groupNumber, Axis axis = Axis::VERTICAL);
     void CreateGroupWithSetting(int32_t groupNumber, Axis axis, V2::ListItemGroupStyle listItemGroupStyle,
-        int32_t itemNumber = GROUP_LINE_NUMBER);
+        int32_t itemNumber = GROUP_ITEM_NUMBER);
     void CreateGroupWithSettingChildrenMainSize(int32_t groupNumber);
     void CreateItemWithSwipe(
         std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect);
