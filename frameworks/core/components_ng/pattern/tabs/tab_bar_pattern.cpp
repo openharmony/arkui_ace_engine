@@ -80,6 +80,7 @@ constexpr double BIG_DIALOG_WIDTH = 216.0f;
 constexpr double MAX_DIALOG_WIDTH = 256.0f;
 constexpr int8_t GRIDCOUNT = 2;
 constexpr int8_t MAXLINES = 6;
+constexpr float MAX_FLING_VELOCITY = 4200.0f;
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 } // namespace
 
@@ -277,37 +278,27 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
             return true;
         }
         auto pattern = weak.Upgrade();
-        if (!pattern) {
-            return false;
-        }
-        if (pattern->tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && pattern->axis_ == Axis::HORIZONTAL &&
-            pattern->IsOutOfBoundary()) {
+        CHECK_NULL_RETURN(pattern, false);
+
+        if (pattern->IsOutOfBoundary()) {
+            // over scroll in drag update from normal to over scroll or during over scroll.
             auto scrollable = pattern->scrollableEvent_->GetScrollable();
             if (scrollable) {
                 scrollable->SetCanOverScroll(true);
             }
-            // over scroll in drag update from normal to over scroll.
-            float overScroll = 0.0f;
-            // over scroll in drag update during over scroll.
             if (pattern->tabItemOffsets_.empty()) {
                 return false;
             }
-            auto startPos =
-                pattern->tabItemOffsets_.begin()->GetX() - pattern->scrollMargin_ - pattern->GetLeftPadding();
+
             auto host = pattern->GetHost();
             CHECK_NULL_RETURN(host, false);
-            auto mainSize = host->GetGeometryNode()->GetPaddingSize().Width();
-            if (Positive(startPos)) {
-                overScroll = startPos;
-            } else {
-                overScroll = mainSize + pattern->GetLeftPadding() - pattern->tabItemOffsets_.back().GetX() -
-                             pattern->scrollMargin_;
-            }
-
+            auto geometryNode = host->GetGeometryNode();
+            CHECK_NULL_RETURN(geometryNode, false);
+            auto overScrollInfo = pattern->GetOverScrollInfo(geometryNode->GetPaddingSize());
             if (source == SCROLL_FROM_UPDATE) {
                 // adjust offset.
-                if (mainSize != 0.0f) {
-                    auto friction = CalculateFriction(std::abs(overScroll) / mainSize);
+                if (overScrollInfo.second != 0.0f) {
+                    auto friction = CalculateFriction(std::abs(overScrollInfo.first) / overScrollInfo.second);
                     pattern->UpdateCurrentOffset(static_cast<float>(offset * friction));
                 }
                 return true;
@@ -328,13 +319,40 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     auto scrollable = MakeRefPtr<Scrollable>(task, axis);
     scrollable->SetNodeId(host->GetAccessibilityId());
     scrollable->Initialize(host->GetContextRefPtr());
+    scrollable->SetMaxFlingVelocity(MAX_FLING_VELOCITY);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto property = scrollable->GetSpringProperty();
-    renderContext->AttachNodeAnimatableProperty(property);
+    auto springProperty = scrollable->GetSpringProperty();
+    renderContext->AttachNodeAnimatableProperty(springProperty);
+    auto frictionProperty = scrollable->GetFrictionProperty();
+    renderContext->AttachNodeAnimatableProperty(frictionProperty);
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
     scrollableEvent_->GetScrollable()->SetEdgeEffect(EdgeEffect::SPRING);
+}
+
+std::pair<float, float> TabBarPattern::GetOverScrollInfo(const SizeF& size)
+{
+    auto overScroll = 0.0f;
+    auto mainSize = 0.0f;
+    if (axis_ == Axis::HORIZONTAL) {
+        auto startPos = tabItemOffsets_.front().GetX() - scrollMargin_ - GetLeftPadding();
+        mainSize = size.Width();
+        if (Positive(startPos)) {
+            overScroll = startPos;
+        } else {
+            overScroll = mainSize + GetLeftPadding() - tabItemOffsets_.back().GetX() - scrollMargin_;
+        }
+    } else {
+        auto startPos = tabItemOffsets_.front().GetY();
+        mainSize = size.Height();
+        if (Positive(startPos)) {
+            overScroll = startPos;
+        } else {
+            overScroll = mainSize - tabItemOffsets_.back().GetY();
+        }
+    }
+    return std::make_pair(overScroll, mainSize);
 }
 
 void TabBarPattern::InitTouch(const RefPtr<GestureEventHub>& gestureHub)
@@ -727,9 +745,7 @@ void TabBarPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
         InitScrollable(gestureHub);
-        if (layoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
-            SetEdgeEffect(gestureHub);
-        }
+        SetEdgeEffect(gestureHub);
     }
     InitTouch(gestureHub);
     InitHoverEvent();
@@ -962,8 +978,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
-        layoutProperty->GetAxis() == Axis::HORIZONTAL) {
+    if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
         auto scrollable = scrollableEvent_->GetScrollable();
         if (scrollable && !scrollable->IsSpringStopped()) {
             if (IsOutOfBoundary()) {
@@ -2244,19 +2259,24 @@ void TabBarPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto tabBar = weak.Upgrade();
         CHECK_NULL_RETURN(tabBar, 0.0);
-        return tabBar->tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE ? tabBar->currentOffset_ : 0.0;
+        return tabBar->currentOffset_;
     });
-    scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
+    auto leadingCallback = [weak = AceType::WeakClaim(this)]() -> double {
         auto tabBar = weak.Upgrade();
+        CHECK_NULL_RETURN(tabBar, 0.0);
         auto host = tabBar->GetHost();
-        return host->GetGeometryNode()->GetPaddingSize().Width() - tabBar->childrenMainSize_;
-    });
+        CHECK_NULL_RETURN(host, 0.0);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, 0.0);
+        if (tabBar->axis_ == Axis::HORIZONTAL) {
+            return geometryNode->GetPaddingSize().Width() - tabBar->childrenMainSize_;
+        } else {
+            return geometryNode->GetPaddingSize().Height() - tabBar->childrenMainSize_;
+        }
+    };
+    scrollEffect->SetLeadingCallback(leadingCallback);
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
-    scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
-        auto tabBar = weak.Upgrade();
-        auto host = tabBar->GetHost();
-        return host->GetGeometryNode()->GetPaddingSize().Width() - tabBar->childrenMainSize_;
-    });
+    scrollEffect->SetInitLeadingCallback(leadingCallback);
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
 }
 
@@ -2272,8 +2292,15 @@ bool TabBarPattern::IsAtBottom() const
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    return LessOrEqual(tabItemOffsets_.back().GetX() + scrollMargin_,
-        host->GetGeometryNode()->GetPaddingSize().Width() + GetLeftPadding());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+
+    if (axis_ == Axis::HORIZONTAL) {
+        return LessOrEqual(tabItemOffsets_.back().GetX() + scrollMargin_,
+            geometryNode->GetPaddingSize().Width() + GetLeftPadding());
+    } else {
+        return LessOrEqual(tabItemOffsets_.back().GetY(), geometryNode->GetPaddingSize().Height());
+    }
 }
 
 bool TabBarPattern::IsOutOfBoundary()
@@ -2286,12 +2313,21 @@ bool TabBarPattern::IsOutOfBoundary()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
 
-    auto mainSize = geometryNode->GetPaddingSize().Width();
-    bool outOfStart = Positive(tabItemOffsets_.front().GetX() - scrollMargin_ - GetLeftPadding()) &&
-                      GreatNotEqual(tabItemOffsets_.back().GetX() + scrollMargin_, mainSize + GetLeftPadding());
-    bool outOfEnd = LessNotEqual(tabItemOffsets_.back().GetX() + scrollMargin_, mainSize + GetLeftPadding()) &&
-                    Negative(tabItemOffsets_.front().GetX() - scrollMargin_ - GetLeftPadding());
-    return outOfStart || outOfEnd;
+    if (axis_ == Axis::HORIZONTAL) {
+        auto mainSize = geometryNode->GetPaddingSize().Width();
+        bool outOfStart = Positive(tabItemOffsets_.front().GetX() - scrollMargin_ - GetLeftPadding()) &&
+            GreatNotEqual(tabItemOffsets_.back().GetX() + scrollMargin_, mainSize + GetLeftPadding());
+        bool outOfEnd = LessNotEqual(tabItemOffsets_.back().GetX() + scrollMargin_, mainSize + GetLeftPadding()) &&
+            Negative(tabItemOffsets_.front().GetX() - scrollMargin_ - GetLeftPadding());
+        return outOfStart || outOfEnd;
+    } else {
+        auto mainSize = geometryNode->GetPaddingSize().Height();
+        bool outOfStart = Positive(tabItemOffsets_.front().GetY()) &&
+            GreatNotEqual(tabItemOffsets_.back().GetY(), mainSize);
+        bool outOfEnd = LessNotEqual(tabItemOffsets_.back().GetY(), mainSize) &&
+            Negative(tabItemOffsets_.front().GetY());
+        return outOfStart || outOfEnd;
+    }
 }
 
 void TabBarPattern::SetAccessibilityAction()
@@ -2581,7 +2617,12 @@ void TabBarPattern::AdjustOffset(double& offset) const
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto mainSize = geometryNode->GetPaddingSize().Width();
+    auto mainSize = 0.0f;
+    if (axis_ == Axis::HORIZONTAL) {
+        mainSize = geometryNode->GetPaddingSize().Width();
+    } else {
+        mainSize = geometryNode->GetPaddingSize().Height();
+    }
     if (GreatNotEqual(currentOffset_ + offset, 0.0f)) {
         offset = -currentOffset_;
     } else if (LessNotEqual(childrenMainSize_ + currentOffset_ + offset, mainSize)) {
