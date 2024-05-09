@@ -136,7 +136,7 @@ constexpr int32_t CHILD_WITH_AMPM_SIZE = 3;
 const double YOFFSET_START1 = 0.0;
 const double YOFFSET_END1 = 1000.0;
 const double TIME_PLUS = 1 * 100.0;
-const SizeF TEST_FRAME_SIZE { 20, 50 };
+const SizeF TEST_FRAME_SIZE { 20, 30 };
 constexpr double COLUMN_VELOCITY = 2000.0;
 const double FONT_SIZE_5 = 5.0;
 const double FONT_SIZE_10 = 10.0;
