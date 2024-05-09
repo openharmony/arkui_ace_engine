@@ -165,10 +165,14 @@ void RichEditorPattern::ProcessStyledString()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->Clean();
+    textForDisplay_.clear();
     for (const auto& span : spans_) {
         auto imageSpan = DynamicCast<ImageSpanItem>(span);
         if (imageSpan) {
             MountImageNode(imageSpan);
+        }
+        if (span) {
+            textForDisplay_ += span->content;
         }
     }
 }
@@ -422,7 +426,7 @@ void RichEditorPattern::HandleEnabled()
 void RichEditorPattern::BeforeCreateLayoutWrapper()
 {
     ACE_SCOPED_TRACE("RichEditorBeforeCreateLayoutWrapper");
-    if (!isStyledStringMode_) {
+    if (!isSpanStringMode_) {
         TextPattern::PreCreateLayoutWrapper();
     } else if (contentMod_) {
         contentMod_->ContentChange();
@@ -3224,7 +3228,7 @@ void RichEditorPattern::InsertValueInPreview(const std::string& insertValue)
 
 void RichEditorPattern::InsertValue(const std::string& insertValue)
 {
-    if (isStyledStringMode_) {
+    if (isSpanStringMode_) {
         InsertValueInStyledString(insertValue);
         return;
     }
@@ -3674,7 +3678,7 @@ int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward
 void RichEditorPattern::DeleteBackward(int32_t length)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "length=%{public}d", length);
-    if (isStyledStringMode_) {
+    if (isSpanStringMode_) {
         DeleteBackwardInStyledString(length);
         return;
     }
@@ -3756,7 +3760,7 @@ std::wstring RichEditorPattern::GetBackwardDeleteText(int32_t length)
 void RichEditorPattern::DeleteForward(int32_t length)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "length=%{public}d", length);
-    if (isStyledStringMode_) {
+    if (isSpanStringMode_) {
         DeleteForwardInStyledString(length);
         return;
     }

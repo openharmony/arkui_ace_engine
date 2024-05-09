@@ -35,7 +35,7 @@ void RichEditorModelNG::Create(bool isStyledStringMode)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
-    richEditorPattern->SetStyledStringMode(isStyledStringMode);
+    richEditorPattern->SetSpanStringMode(isStyledStringMode);
     isStyledStringMode_ = isStyledStringMode;
     if (isStyledStringMode) {
         richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
@@ -70,7 +70,7 @@ RefPtr<RichEditorBaseControllerBase> RichEditorModelNG::GetRichEditorController(
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_RETURN(richEditorPattern, nullptr);
-    if (richEditorPattern->IsStyledStringMode()) {
+    if (richEditorPattern->GetSpanStringMode()) {
         return richEditorPattern->GetRichEditorStyledStringController();
     }
     return richEditorPattern->GetRichEditorController();

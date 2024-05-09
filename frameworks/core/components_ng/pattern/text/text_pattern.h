@@ -654,6 +654,7 @@ protected:
     bool touchEventInitialized_ = false;
     bool focusInitialized_ = false;
     bool hoverInitialized_ = false;
+    bool isSpanStringMode_ = false;
 
     RefPtr<FrameNode> dragNode_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -747,7 +748,6 @@ private:
     bool blockPress_ = false;
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
-    bool isSpanStringMode_ = false;
     bool showSelected_ = false;
     bool isSensitive_ = false;
     int32_t clickedSpanPosition_ = -1;
