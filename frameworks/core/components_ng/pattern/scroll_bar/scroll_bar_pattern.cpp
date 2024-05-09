@@ -560,6 +560,9 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 {
     if (scrollPositionCallback_) {
         auto offset = info.GetMainDelta();
+        if (IsReverse()) {
+            offset = -offset;
+        }
         // The offset of the mouse wheel and gesture is opposite.
         if (info.GetInputEventType() == InputEventType::AXIS && !NearZero(controlDistance_)) {
             offset = - offset * scrollableDistance_ / controlDistance_;
@@ -779,5 +782,15 @@ void ScrollBarPattern::InitMouseEvent()
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseCallback));
     inputHub->AddOnMouseEvent(mouseEvent_);
+}
+
+bool ScrollBarPattern::IsReverse() const
+{
+    return isReverse_;
+}
+
+void ScrollBarPattern::SetReverse(bool reverse)
+{
+    isReverse_ = reverse;
 }
 } // namespace OHOS::Ace::NG

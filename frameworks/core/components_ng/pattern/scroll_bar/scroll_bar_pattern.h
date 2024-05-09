@@ -204,6 +204,8 @@ public:
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
     void RegisterScrollBarEventTask();
     bool UpdateScrollBarDisplay();
+    bool IsReverse() const;
+    void SetReverse(bool reverse);
 
     RefPtr<GestureEventHub> GetGestureHub()
     {
@@ -335,6 +337,7 @@ private:
     //Determine whether the current scroll direction is scrolling upwards or downwards
     bool scrollingUp_ = false;
     bool scrollingDown_ = false;
+    bool isReverse_ = false;
 };
 
 } // namespace OHOS::Ace::NG

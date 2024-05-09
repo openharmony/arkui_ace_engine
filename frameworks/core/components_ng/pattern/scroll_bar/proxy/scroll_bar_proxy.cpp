@@ -168,6 +168,7 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrol
         }
 
         scrollBar->SetControlDistance(controlDistance);
+        scrollBar->SetReverse(scrollable->IsReverse());
         scrollBar->SetScrollOffset(!scrollable->IsReverse() ? scrollOffset : controlDistance - scrollOffset);
         scrollBar->HandleScrollBarOutBoundary(scrollBarOutBoundaryDistance);
         auto host = scrollBar->GetHost();

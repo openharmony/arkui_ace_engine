@@ -310,17 +310,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    if (layoutProperty->IsReverse()) {
-        if (source != SCROLL_FROM_ANIMATION_SPRING && source != SCROLL_FROM_ANIMATION_CONTROLLER &&
-            source != SCROLL_FROM_JUMP) {
-            offset = -offset;
-        }
-    }
 
     // check edgeEffect is not springEffect
-    if (!HandleEdgeEffect(offset, source, GetContentSize(), layoutProperty->IsReverse())) {
+    if (!HandleEdgeEffect(offset, source, GetContentSize())) {
         if (IsOutOfBoundary()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
