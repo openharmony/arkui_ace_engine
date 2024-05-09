@@ -156,29 +156,15 @@ void ProgressPattern::HandleEnabled()
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
-    auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    RefPtr<ProgressTheme> progressTheme = pipeline->GetTheme<ProgressTheme>();
-    CHECK_NULL_VOID(progressTheme);
-    auto alpha = progressTheme->GetProgressDisable();
-    auto backgroundColor = paintProperty->GetBackgroundColor().value_or(progressTheme->GetCapsuleBgColor());
-    auto selectColor = paintProperty->GetColor().value_or(progressTheme->GetCapsuleSelectColor());
-    auto borderColor = paintProperty->GetBorderColor().value_or(progressTheme->GetBorderColor());
-    if (!enabled) {
-        auto textHost = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-        CHECK_NULL_VOID(textHost);
-        auto textLayoutProperty = textHost->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        auto textColor = textLayoutProperty->GetTextColor().value_or(progressTheme->GetTextColor());
-        textLayoutProperty->UpdateTextColor(textColor.BlendOpacity(alpha));
-        textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        paintProperty->UpdateBackgroundColor(backgroundColor.BlendOpacity(alpha));
-        paintProperty->UpdateColor(selectColor.BlendOpacity(alpha));
-        paintProperty->UpdateBorderColor(borderColor.BlendOpacity(alpha));
-        host->MarkDirtyNode();
-    }
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto alpha = theme->GetProgressDisable();
+    auto originalOpacity = renderContext->GetOpacityValue(1.0);
+    renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
 }
 
 void ProgressPattern::OnPress(const TouchEventInfo& info)
