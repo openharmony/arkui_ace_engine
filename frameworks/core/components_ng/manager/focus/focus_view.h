@@ -48,7 +48,7 @@ public:
     std::string GetFrameName();
     int32_t GetFrameId();
 
-    void FocusViewShow();
+    void FocusViewShow(bool isTriggerByPageSwitch = true);
     void FocusViewHide();
     void FocusViewClose();
 
