@@ -8930,6 +8930,10 @@ class __RepeatV2 {
         this.isVirtualScroll = true;
         return this;
     }
+    onMove(handler) {
+        this.onMoveHandler_ = handler;
+        return this;
+    }
     genKeys() {
         const key2Item = new Map();
         this.arr_.forEach((item, index) => {
@@ -8970,6 +8974,7 @@ class __RepeatV2 {
         });
         let removedChildElmtIds = new Array();
         // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
+        RepeatNative.onMove(this.onMoveHandler_);
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         
@@ -9036,6 +9041,7 @@ class __RepeatV2 {
         // C++  tempChildren.clear() , trigger re-layout
         let removedChildElmtIds = new Array();
         // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
+        RepeatNative.onMove(this.onMoveHandler_);
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         
