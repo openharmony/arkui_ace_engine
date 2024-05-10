@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,6 +22,7 @@ common_napi_libs = [
   "arkui/focus_controller",
   "arkui/inspector",
   "arkui/observer",
+  "arkui/performancemonitor",
   "configuration",
   "device",
   "font",
@@ -36,10 +37,6 @@ common_napi_libs = [
   "atomic_service_bar",
   "graphics/display_sync",
 ]
-
-if (!is_arkui_x) {
-  common_napi_libs += [ "arkui/performancemonitor" ]
-}
 
 template("ace_napi_lib") {
   forward_variables_from(invoker, "*")
