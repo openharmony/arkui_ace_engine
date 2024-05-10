@@ -1820,6 +1820,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     divider(value: DividerStyle | null): TabsAttribute;
     barOverlap(value: boolean): TabsAttribute;
     barBackgroundColor(value: ResourceColor): TabsAttribute;
+    barBackgroundBlurStyle(value: BlurStyle): TabsAttribute;
     barGridAlign(value: BarGridColumnOptions): TabsAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
 }
