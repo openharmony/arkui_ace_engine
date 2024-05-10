@@ -147,10 +147,10 @@ template("declarative_js_engine") {
     }
 
     deps = [
-      ":gen_obj_src_ark_theme",
-      ":ark_theme_control",
       ":ark_modifier",
+      ":ark_theme_control",
       ":gen_obj_src_ark_component",
+      ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":shape",
@@ -667,10 +667,10 @@ template("declarative_js_engine_ng") {
     }
 
     deps = [
-      ":gen_obj_src_ark_theme",
-      ":ark_theme_control",
       ":ark_modifier",
+      ":ark_theme_control",
       ":gen_obj_src_ark_component",
+      ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":shape",

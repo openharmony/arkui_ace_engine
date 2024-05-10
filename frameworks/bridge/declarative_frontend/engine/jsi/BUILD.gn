@@ -366,8 +366,8 @@ template("declarative_js_engine_ark") {
     }
 
     deps += [
-      ":gen_obj_src_abc_ark_theme",
       ":gen_obj_src_abc_ark_component",
+      ":gen_obj_src_abc_ark_theme",
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
     ]
