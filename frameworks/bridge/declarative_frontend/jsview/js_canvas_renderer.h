@@ -49,8 +49,7 @@ public:
     static RefPtr<CanvasPath2D> JsMakePath2D(const JSCallbackInfo& info);
     void SetAntiAlias();
 
-    void ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint8_t>& array);
-    void ParseImageDataAsStr(const JSCallbackInfo& info, ImageData& imageData);
+    void ParseImageData(const JSCallbackInfo& info, ImageData& imageData);
     void JsCloseImageBitmap(const std::string& src);
 
     void JsFillRect(const JSCallbackInfo& info);
@@ -209,6 +208,7 @@ protected:
 
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
+    JSRef<JSObject> createGradientObj(Gradient* gradient);
     PaintState paintState_;
     TextStyle style_;
     static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;

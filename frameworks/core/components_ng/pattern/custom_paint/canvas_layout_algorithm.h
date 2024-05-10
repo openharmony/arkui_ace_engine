@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_LAYOUT_ALGORITHM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_LAYOUT_ALGORITHM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_LAYOUT_ALGORITHM_H
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT CustomPaintLayoutAlgorithm : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(CustomPaintLayoutAlgorithm, BoxLayoutAlgorithm);
+class ACE_EXPORT CanvasLayoutAlgorithm : public BoxLayoutAlgorithm {
+    DECLARE_ACE_TYPE(CanvasLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    CustomPaintLayoutAlgorithm() = default;
+    CanvasLayoutAlgorithm() = default;
 
-    ~CustomPaintLayoutAlgorithm() override = default;
+    ~CanvasLayoutAlgorithm() override = default;
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
@@ -34,8 +34,8 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(CustomPaintLayoutAlgorithm);
+    ACE_DISALLOW_COPY_AND_MOVE(CanvasLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_LAYOUT_ALGORITHM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_LAYOUT_ALGORITHM_H

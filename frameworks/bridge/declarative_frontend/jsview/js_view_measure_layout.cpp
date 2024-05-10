@@ -610,7 +610,9 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetPadding(panda::JsiRuntim
     }
     auto layoutProperty = child->GetLayoutProperty();
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
-    return GenEdgesGlobalized(layoutProperty->CreatePaddingWithoutBorder(false), direction).Get().GetLocalHandle();
+    return GenEdgesGlobalized(layoutProperty->CreatePaddingWithoutBorder(false, false), direction)
+        .Get()
+        .GetLocalHandle();
 }
 
 panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetBorderWidth(panda::JsiRuntimeCallInfo* runtimeCallInfo)

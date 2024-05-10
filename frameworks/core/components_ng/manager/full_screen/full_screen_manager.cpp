@@ -118,7 +118,7 @@ bool FullScreenManager::OnBackPressed()
         CHECK_NULL_RETURN(pattern, false);
         auto webPattern = AceType::DynamicCast<WebPattern>(pattern);
         CHECK_NULL_RETURN(webPattern, false);
-        return webPattern->OnBackPressed();
+        return webPattern->OnBackPressedForFullScreen();
     }
 #endif
     return false;

@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+
 #include "modifier.h"
 
 #include "base/geometry/dimension.h"
@@ -37,12 +38,14 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
@@ -78,44 +81,10 @@ struct OptionParam {
     ~OptionParam() = default;
 };
 
-enum class ContextMenuRegisterType : char {
-    NORMAL_TYPE = 0,
-    CUSTOM_TYPE = 1,
-};
-
 enum class OverlayType {
     BUILDER = 0,
     TEXT = 1,
     RESET = 2,
-};
-
-struct MenuParam {
-    std::string title;
-    OffsetF positionOffset;
-    bool setShow = false;
-    bool isShow = false;
-    ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
-    std::function<void(const std::string&)> onStateChange;
-    std::optional<Placement> placement;
-    std::function<void()> onAppear;
-    std::function<void()> onDisappear;
-    std::function<void()> aboutToAppear;
-    std::function<void()> aboutToDisappear;
-    std::optional<bool> enableArrow;
-    std::optional<Dimension> arrowOffset;
-    bool isAboveApps = false;
-    bool isShowInSubWindow = false;
-    bool hasTransitionEffect = false;
-    RefPtr<NG::ChainedTransitionEffect> transition;
-    bool hasPreviewTransitionEffect = false;
-    RefPtr<NG::ChainedTransitionEffect> previewTransition;
-    MenuType type = MenuType::MENU;
-    MenuPreviewMode previewMode = MenuPreviewMode::NONE;
-    MenuPreviewAnimationOptions previewAnimationOptions;
-    std::optional<EffectOption> backgroundEffectOption;
-    std::optional<Color> backgroundColor;
-    std::optional<int32_t> backgroundBlurStyle;
-    std::optional<NG::BorderRadiusProperty> borderRadius;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -268,6 +237,7 @@ public:
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
     static void SetGroupDefaultFocus(bool isSet);
+    static void SetFocusBoxStyle(const NG::FocusBoxStyle& style);
     static void SetOnAppear(std::function<void()> &&onAppear);
     static void SetOnDisappear(std::function<void()> &&onDisappear);
     static void SetOnAreaChanged(std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect,
@@ -318,8 +288,8 @@ public:
     static void DismissPopup();
     static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
         const NG::OffsetF &offset, const MenuParam &menuParam);
-    static void BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
-        const NG::OffsetF &offset, const MenuParam &menuParam, const RefPtr<UINode> &previewCustomNode = nullptr);
+    static void BindMenuWithCustomNode(std::function<void()>&& buildFunc, const RefPtr<FrameNode>& targetNode,
+        const NG::OffsetF& offset, MenuParam menuParam, std::function<void()>&& previewBuildFunc);
     static void ShowMenu(
         int32_t targetId, const NG::OffsetF& offset, bool isShowInSubWindow, bool isContextMenu = false);
     // inspector
@@ -673,6 +643,9 @@ public:
     static Color GetColorBlend(FrameNode* frameNode);
     static void ResetAreaChanged(FrameNode* frameNode);
     static void ResetVisibleChange(FrameNode* frameNode);
+    static void SetLayoutRect(FrameNode* frameNode, const NG::RectF& rect);
+    static void ResetLayoutRect(FrameNode* frameNode);
+    static NG::RectF GetLayoutRect(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

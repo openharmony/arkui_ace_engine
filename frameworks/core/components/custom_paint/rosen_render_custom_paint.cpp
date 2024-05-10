@@ -269,7 +269,10 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
 
     canvas->Save();
     canvas->Scale(1.0 / viewScale, 1.0 / viewScale);
+    RSBrush brush;
+    canvas->AttachBrush(brush);
     canvas->DrawBitmap(canvasCache_, 0.0f, 0.0f);
+    canvas->DetachBrush();
     canvas->Restore();
 #endif
 }
@@ -2723,7 +2726,10 @@ void RosenRenderCustomPaint::PutImageData(const Offset& offset, const ImageData&
     RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
     bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
     bitmap.SetPixels(data);
+    RSBrush brush;
+    drawingCanvas_->AttachBrush(brush);
     drawingCanvas_->DrawBitmap(bitmap, imageData.x, imageData.y);
+    drawingCanvas_->DetachBrush();
 #endif
     delete[] data;
 }
@@ -2847,7 +2853,10 @@ void RosenRenderCustomPaint::WebGLUpdate()
         RSMatrix matrix;
         matrix.Scale(1.0, -1.0, 0.0, 0.0);
         drawingCanvas_->SetMatrix(matrix);
+        RSBrush brush;
+        drawingCanvas_->AttachBrush(brush);
         drawingCanvas_->DrawBitmap(webglBitmap_, 0, -webglBitmap_.GetHeight());
+        drawingCanvas_->DetachBrush();
         drawingCanvas_->Restore();
     }
 #endif

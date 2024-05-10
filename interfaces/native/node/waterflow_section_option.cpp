@@ -51,7 +51,7 @@ void OH_ArkUI_WaterFlowSectionOption_SetSize(ArkUI_WaterFlowSectionOption* optio
 void OH_ArkUI_WaterFlowSectionOption_SetItemCount(
     ArkUI_WaterFlowSectionOption* option, int32_t index, int32_t itemCount)
 {
-    auto size = option->sections.size();
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(index + 1);
         option->sections[index].itemsCount = itemCount;
@@ -63,7 +63,7 @@ void OH_ArkUI_WaterFlowSectionOption_SetItemCount(
 void OH_ArkUI_WaterFlowSectionOption_SetCrossCount(
     ArkUI_WaterFlowSectionOption* option, int32_t index, int32_t crossCount)
 {
-    auto size = option->sections.size();
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(index + 1);
         option->sections[index].crossCount = crossCount;
@@ -74,7 +74,7 @@ void OH_ArkUI_WaterFlowSectionOption_SetCrossCount(
 
 void OH_ArkUI_WaterFlowSectionOption_SetColumnGap(ArkUI_WaterFlowSectionOption* option, int32_t index, float columnGap)
 {
-    auto size = option->sections.size();
+    auto size = static_cast<int32_t>(option->sections.size());
     ArkUIWaterFlowSection section;
     if (size == 0 || size <= index + 1) {
         option->sections.resize(index + 1);
@@ -86,7 +86,7 @@ void OH_ArkUI_WaterFlowSectionOption_SetColumnGap(ArkUI_WaterFlowSectionOption* 
 
 void OH_ArkUI_WaterFlowSectionOption_SetRowGap(ArkUI_WaterFlowSectionOption* option, int32_t index, float rowGap)
 {
-    auto size = option->sections.size();
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(index + 1);
         option->sections[index].rowsGap = rowGap;
@@ -99,7 +99,7 @@ void OH_ArkUI_WaterFlowSectionOption_SetMargin(ArkUI_WaterFlowSectionOption* opt
     float marginRight, float marginBottom, float marginLeft)
 {
     float margins[4] = { 0.0, 0.0, 0.0, 0.0 };
-    auto size = option->sections.size();
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(index + 1);
         //marginTop
@@ -126,7 +126,7 @@ void OH_ArkUI_WaterFlowSectionOption_SetMargin(ArkUI_WaterFlowSectionOption* opt
 
 int32_t OH_ArkUI_WaterFlowSectionOption_GetItemCount(ArkUI_WaterFlowSectionOption* option, int32_t index)
 {
-    auto size = option->sections.size();
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size < index + 1) {
         return 0;
     }
@@ -135,7 +135,7 @@ int32_t OH_ArkUI_WaterFlowSectionOption_GetItemCount(ArkUI_WaterFlowSectionOptio
 
 int32_t OH_ArkUI_WaterFlowSectionOption_GetCrossCount(ArkUI_WaterFlowSectionOption* option, int32_t index)
 {
-    auto size = option->sections.size();
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size < index + 1) {
         return 0;
     }
@@ -144,7 +144,7 @@ int32_t OH_ArkUI_WaterFlowSectionOption_GetCrossCount(ArkUI_WaterFlowSectionOpti
 
 float OH_ArkUI_WaterFlowSectionOption_GetColumnGap(ArkUI_WaterFlowSectionOption* option, int32_t index)
 {
-    auto size = option->sections.size();
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size < index + 1) {
         return 0.0f;
     }
@@ -153,7 +153,7 @@ float OH_ArkUI_WaterFlowSectionOption_GetColumnGap(ArkUI_WaterFlowSectionOption*
 
 float OH_ArkUI_WaterFlowSectionOption_GetRowGap(ArkUI_WaterFlowSectionOption* option, int32_t index)
 {
-    auto size = option->sections.size();
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size < index + 1) {
         return 0.0f;
     }
@@ -163,7 +163,7 @@ float OH_ArkUI_WaterFlowSectionOption_GetRowGap(ArkUI_WaterFlowSectionOption* op
 ArkUI_Margin OH_ArkUI_WaterFlowSectionOption_GetMargin(ArkUI_WaterFlowSectionOption* option, int32_t index)
 {
     ArkUI_Margin margin = { 0.0, 0.0, 0.0, 0.0 };
-    auto size = option->sections.size();
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size < index + 1) {
         return margin;
     }

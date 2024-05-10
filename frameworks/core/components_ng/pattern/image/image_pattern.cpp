@@ -343,11 +343,10 @@ void ImagePattern::OnImageLoadSuccess()
     altImage_ = nullptr;
     altDstRect_.reset();
     altSrcRect_.reset();
-    if (!IsSupportImageAnalyzerFeature()) {
-        DestroyAnalyzerOverlay();
-    }
-    UpdateAnalyzerOverlay();
 
+    if (isPixelMapChanged_) {
+        UpdateAnalyzerOverlay();
+    }
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -357,6 +356,7 @@ void ImagePattern::OnImageLoadSuccess()
         ContainerScope scope(pattern->GetHostInstanceId());
         pattern->CreateAnalyzerOverlay();
     }, "ArkUIImageCreateAnalyzerOverlay");
+    ACE_LAYOUT_SCOPED_TRACE("OnImageLoadSuccess[self:%d]", host->GetId());
     host->MarkNeedRenderOnly();
 }
 
@@ -582,6 +582,12 @@ void ImagePattern::LoadImageDataIfNeed()
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
+    if (loadingCtx_) {
+        auto srcPixelMap = src.GetPixmap();
+        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
+        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
+                                                              loadPixelMap->GetRawPixelMapPtr();
+    }
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
         LoadImage(src);
     } else {
@@ -648,7 +654,6 @@ void ImagePattern::OnAnimatedModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    ChangeRenderContextProperties();
     Pattern::OnModifyDone();
     auto size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
@@ -711,7 +716,6 @@ void ImagePattern::ControlAnimation(int32_t index)
 
 void ImagePattern::OnImageModifyDone()
 {
-    ChangeRenderContextProperties();
     Pattern::OnModifyDone();
     LoadImageDataIfNeed();
     UpdateGestureAndDragWhenModify();
@@ -950,16 +954,20 @@ void ImagePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderCtx = host->GetRenderContext();
-    CHECK_NULL_VOID(renderCtx);
-    renderCtx->SetClipToBounds(false);
-    renderCtx->SetUsingContentRectForRenderFrame(true);
+    if (isAnimation_) {
+        CHECK_NULL_VOID(renderCtx);
+        renderCtx->SetClipToFrame(true);
+    } else {
+        renderCtx->SetClipToBounds(false);
+        renderCtx->SetUsingContentRectForRenderFrame(true);
 
-    // register image frame node to pipeline context to receive memory level notification and window state change
-    // notification
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
-    pipeline->AddWindowStateChangedCallback(host->GetId());
+        // register image frame node to pipeline context to receive memory level notification and window state change
+        // notification
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+        pipeline->AddWindowStateChangedCallback(host->GetId());
+    }
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1963,23 +1971,6 @@ void ImagePattern::SetImageFit(const RefPtr<FrameNode>& imageFrameNode)
     if (layoutProperty->HasImageFit()) {
         imageLayoutProperty->UpdateImageFit(layoutProperty->GetImageFit().value());
     }
-}
-
-void ImagePattern::ChangeRenderContextProperties()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderCtx = host->GetRenderContext();
-    CHECK_NULL_VOID(renderCtx);
-
-    if (isAnimation_) {
-        renderCtx->SetClipToBounds(true);
-        renderCtx->SetUsingContentRectForRenderFrame(false);
-    } else {
-        renderCtx->SetClipToBounds(false);
-        renderCtx->SetUsingContentRectForRenderFrame(true);
-    }
-    renderCtx->SyncGeometryProperties(nullptr);
 }
 
 void ImagePattern::SetObscured()

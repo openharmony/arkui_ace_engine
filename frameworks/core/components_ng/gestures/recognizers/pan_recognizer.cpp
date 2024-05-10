@@ -184,7 +184,8 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Pan recognizer receives %{public}d touch down event, begin to detect pan event", event.id);
+        "InputTracking id:%{public}d, pan recognizer receives %{public}d touch down event, begin to detect pan event",
+        event.touchEventId, event.id);
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -236,7 +237,9 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (event.isRotationEvent) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives axis start event, begin to detect pan event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, pan recognizer receives axis start event, begin to detect pan event",
+        event.touchEventId);
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -269,7 +272,8 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives %{public}d touch up event", event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pan recognizer receives %{public}d touch up event",
+        event.touchEventId, event.id);
     if (currentFingers_ < fingers_) {
         return;
     }
@@ -320,7 +324,8 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives axis end event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pan recognizer receives axis end event",
+        event.touchEventId);
     // if axisEvent received rotateEvent, no need to active Pan recognizer.
     if (event.isRotationEvent) {
         return;
@@ -482,8 +487,11 @@ bool PanRecognizer::HandlePanAccept()
     return false;
 }
 
-void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& /*event*/)
+void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, pan recognizer receives %{public}d touch cancel event", event.touchEventId,
+        event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -496,8 +504,10 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& /*event*/)
     }
 }
 
-void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& /*event*/)
+void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pan recognizer receives axis cancel event",
+        event.touchEventId);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -736,6 +746,22 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     onActionCancel_ = std::move(curr->onActionCancel_);
 
     return true;
+}
+
+Axis PanRecognizer::GetAxisDirection()
+{
+    auto hasHorizontal = direction_.type & PanDirection::HORIZONTAL;
+    auto hasVertical = direction_.type & PanDirection::VERTICAL;
+    if (direction_.type == PanDirection::ALL || (hasHorizontal && hasVertical)) {
+        return Axis::FREE;
+    }
+    if (hasHorizontal) {
+        return Axis::HORIZONTAL;
+    }
+    if (hasVertical) {
+        return Axis::VERTICAL;
+    }
+    return Axis::NONE;
 }
 
 void PanRecognizer::SetDirection(const PanDirection& direction)

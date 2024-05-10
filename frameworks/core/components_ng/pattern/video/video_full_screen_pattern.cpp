@@ -115,6 +115,7 @@ void VideoFullScreenPattern::UpdateState()
     UpdateMuted(videoPattern->GetMuted());
     UpdateAutoPlay(videoPattern->GetAutoPlay());
     UpdateProgressRate(videoPattern->GetProgressRate());
+    UpdateAnalyzerState(videoPattern->GetAnalyzerState());
 
     // update full screen layout
     auto fullScreenNode = GetHost();

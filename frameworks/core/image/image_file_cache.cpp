@@ -123,7 +123,7 @@ std::string ImageFileCache::GetImageCacheKey(const std::string& fileName)
 
 void ImageFileCache::SetCacheFileLimit(size_t cacheFileLimit)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "Set file cache limit size : %{public}d", static_cast<int32_t>(cacheFileLimit));
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "User Set file cache limit size : %{public}d", static_cast<int32_t>(cacheFileLimit));
     fileLimit_ = cacheFileLimit;
 }
 

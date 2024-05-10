@@ -20,7 +20,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
+#include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace {
@@ -43,16 +43,16 @@ RefPtr<AceType> CanvasModelNG::Create()
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::CANVAS_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CustomPaintPattern>(); });
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
     stack->Push(frameNode);
-    return frameNode->GetPattern<CustomPaintPattern>();
+    return frameNode->GetPattern<CanvasPattern>();
 }
 
 void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CustomPaintEventHub>();
+    auto eventHub = frameNode->GetEventHub<CanvasEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto func = onReady;
@@ -64,7 +64,7 @@ void CanvasModelNG::EnableAnalyzer(bool enable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<CustomPaintPattern>();
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->EnableAnalyzer(enable);
 }
@@ -72,7 +72,7 @@ void CanvasModelNG::EnableAnalyzer(bool enable)
 void CanvasModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CustomPaintEventHub>();
+    auto eventHub = frameNode->GetEventHub<CanvasEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto func = onReady;
     auto onReadyEvent = [func]() { func(); };
@@ -83,13 +83,13 @@ RefPtr<AceType> CanvasModelNG::GetCanvasPattern(FrameNode* node)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    return frameNode->GetPattern<CustomPaintPattern>();
+    return frameNode->GetPattern<CanvasPattern>();
 }
 
 RefPtr<FrameNode> CanvasModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CustomPaintPattern>(); });
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
     return frameNode;
 }
 } // namespace OHOS::Ace::NG

@@ -106,7 +106,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
 {
     static std::once_flag onceFlag;
     std::call_once(onceFlag, []() {
-        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+        Container::UpdateCurrent(ACE_INSTANCE_ID);
     });
     SystemProperties::SetExtSurfaceEnabled(!runArgs.containerSdkPath.empty());
     SystemProperties::InitDeviceInfo(runArgs.deviceWidth, runArgs.deviceHeight,

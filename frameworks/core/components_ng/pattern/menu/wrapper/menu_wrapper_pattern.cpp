@@ -158,21 +158,23 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
     position -= host->GetPaintRectOffset();
     auto children = host->GetChildren();
     for (auto child = children.rbegin(); child != children.rend(); ++child) {
-        // get menu frame node (child of menu wrapper)
-        auto menuNode = DynamicCast<FrameNode>(*child);
-        CHECK_NULL_VOID(menuNode);
-        // get menuNode's touch region
-        auto menuZone = menuNode->GetGeometryNode()->GetFrameRect();
-        if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+        // get child frame node of menu wrapper
+        auto menuWrapperChildNode = DynamicCast<FrameNode>(*child);
+        CHECK_NULL_VOID(menuWrapperChildNode);
+        // get menuWrapperChildNode's touch region
+        auto menuWrapperChildZone = menuWrapperChildNode->GetGeometryNode()->GetFrameRect();
+        if (menuWrapperChildZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
             return;
         }
         // if DOWN-touched outside the menu region, then hide menu
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
+        auto menuPattern = menuWrapperChildNode->GetPattern<MenuPattern>();
+        if (!menuPattern) {
+            continue;
+        }
         if (menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu()) {
             HideSubMenu();
         } else {
-            HideMenu(menuNode);
+            HideMenu(menuWrapperChildNode);
         }
     }
 }
@@ -238,6 +240,15 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
             frameRect.Height());
 
         rects.emplace_back(rect);
+    }
+    // If container is UIExtensionWindow, set hotArea size equals to subwindow's filterColumnNode's size
+    if (IsContextMenu() && GetPreviewMode() != MenuPreviewMode::NONE) {
+        auto filterNode = GetFilterColumnNode();
+        if (filterNode) {
+            auto frameRect = filterNode->GetGeometryNode()->GetFrameRect();
+            auto rect = Rect(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
+            rects.emplace_back(rect);
+        }
     }
     SubwindowManager::GetInstance()->SetHotAreas(rects, GetHost()->GetId(), GetContainerId());
 }
@@ -314,6 +325,43 @@ bool MenuWrapperPattern::IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, false);
     return menuPattern->IsSelectOverlayCustomMenu();
+}
+
+void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "register menu enter");
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RegisterMenuAppearCallback(menuParam.onAppear);
+    pattern->RegisterMenuDisappearCallback(menuParam.onDisappear);
+    pattern->RegisterMenuAboutToAppearCallback(menuParam.aboutToAppear);
+    pattern->RegisterMenuAboutToDisappearCallback(menuParam.aboutToDisappear);
+    pattern->RegisterMenuStateChangeCallback(menuParam.onStateChange);
+}
+
+void MenuWrapperPattern::SetMenuTransitionEffect(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "set menu transition effect");
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasTransitionEffect(menuParam.hasTransitionEffect);
+    if (menuParam.hasTransitionEffect) {
+        auto renderContext = menuWrapperNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CHECK_NULL_VOID(menuParam.transition);
+        renderContext->UpdateChainedTransition(menuParam.transition);
+    }
+    pattern->SetHasPreviewTransitionEffect(menuParam.hasPreviewTransitionEffect);
+    if (menuParam.hasPreviewTransitionEffect) {
+        auto previewChild = pattern->GetPreview();
+        CHECK_NULL_VOID(previewChild);
+        auto renderContext = previewChild->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CHECK_NULL_VOID(menuParam.previewTransition);
+        renderContext->UpdateChainedTransition(menuParam.previewTransition);
+    }
 }
 
 void MenuWrapperPattern::DumpInfo()

@@ -199,7 +199,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
             src = icon;
         }
         auto controllerObj = param->GetProperty("controller");
-        if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+        if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }

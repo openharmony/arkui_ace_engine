@@ -62,7 +62,7 @@ void OffscreenCanvasPattern::ClearRect(const Rect& rect)
 
 void OffscreenCanvasPattern::Fill()
 {
-    offscreenPaintMethod_->Fill(nullptr);
+    offscreenPaintMethod_->Fill();
 }
 
 void OffscreenCanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
@@ -72,7 +72,7 @@ void OffscreenCanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
 
 void OffscreenCanvasPattern::Stroke()
 {
-    offscreenPaintMethod_->Stroke(nullptr);
+    offscreenPaintMethod_->Stroke();
 }
 
 void OffscreenCanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)

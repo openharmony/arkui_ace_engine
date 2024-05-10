@@ -732,6 +732,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
             if (webPattern) {
                 frameNodeOffset_.SetX(frameNodeOffset_.GetX() + webPattern->GetDragOffset().GetX());
                 frameNodeOffset_.SetY(frameNodeOffset_.GetY() + webPattern->GetDragOffset().GetY());
+                frameNodeSize_ = webPattern->GetDragPixelMapSize();
             }
         }
 #endif
@@ -893,6 +894,18 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
                 DragEventActuator::UpdatePreviewPositionAndScale(imageNode, dragNodeOffset);
             }
         }
+
+        if (IsPixelMapNeedScale() && frameTag == V2::WEB_ETS_TAG) {
+            OffsetF webOffset;
+            CHECK_NULL_VOID(pipeline);
+            auto window = pipeline->GetWindow();
+            CHECK_NULL_VOID(window);
+            auto offset = window->GetCurrentWindowRect().GetOffset();
+            webOffset.SetX(frameNodeOffset_.GetX() + offset.GetX());
+            webOffset.SetY(frameNodeOffset_.GetY() + offset.GetY());
+            DragEventActuator::UpdatePreviewPositionAndScale(imageNode, webOffset);
+        }
+
         CHECK_NULL_VOID(imageNode);
         float previewScale = DEFALUT_DRAG_PPIXELMAP_SCALE;
         if (IsPixelMapNeedScale()) {

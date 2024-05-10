@@ -227,16 +227,6 @@ public:
         richEditorStyledStringController_ = controller;
     }
 
-    void SetStyledStringMode(bool isStyledStringMode)
-    {
-        isStyledStringMode_ = isStyledStringMode;
-    }
-
-    bool IsStyledStringMode()
-    {
-        return isStyledStringMode_;
-    }
-
     long long GetTimestamp() const
     {
         return timestamp_;
@@ -307,11 +297,9 @@ public:
     void SetDefaultColor(RefPtr<SpanNode>& spanNode);
     void HandleOnDelete(bool backward) override;
     std::pair<bool, bool> IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length);
-    int32_t CalculateDeleteLength(int32_t length, bool isBackward, bool& isSpanSelected);
+    int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 0) override;
-    void DeleteBackward(int32_t length = 0, bool isExternalkeyboard = false);
-    std::wstring DeleteBackwardOperation(int32_t length = 0, bool isExternalkeyboard = false);
-    std::wstring GetBackwardDeleteText(int32_t length);
+    std::wstring DeleteBackwardOperation(int32_t length = 0);
     void DeleteForward(int32_t length) override;
     std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
@@ -385,7 +373,10 @@ public:
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
-    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
+    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
+        bool updateCaret = true);
+    void DisableDrag(RefPtr<ImageSpanNode> imageNode);
+    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
@@ -623,13 +614,6 @@ public:
         showSelect_ = isShowSelect;
     }
 
-    const std::list<RefPtr<UINode>>& GetAllChildren() const override
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, TextPattern::GetAllChildren());
-        return host->GetChildren();
-    }
-
     void OnVirtualKeyboardAreaChanged() override;
 
     void SetCaretColor(const Color& caretColor)
@@ -826,9 +810,6 @@ private:
     int32_t DeleteValueSetTextSpan(const RefPtr<SpanItem>& spanItem, int32_t currentPosition, int32_t length,
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
-    bool DeleteImageBySoftKeyboard(const RichEditorDeleteValue& info);
-    void DeleteTextSpanInfo(const RefPtr<FrameNode>& host, std::set<int32_t, std::greater<int32_t>>& SpanNodes,
-        const RichEditorAbstractSpanResult& spanResult);
     bool OnKeyEvent(const KeyEvent& keyEvent);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
@@ -938,7 +919,6 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
-    bool isStyledStringMode_ = false;
     bool isTextChange_ = false;
     bool caretVisible_ = false;
     bool caretTwinkling_ = false;

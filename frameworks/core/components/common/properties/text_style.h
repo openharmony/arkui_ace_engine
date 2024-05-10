@@ -237,6 +237,7 @@ public:
     TextStyle() = default;
     TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight, FontStyle fontStyle,
         const Color& textColor);
+    TextStyle(double fontSize) : fontSize_(fontSize) {}
     ~TextStyle() = default;
 
     bool operator==(const TextStyle& rhs) const;

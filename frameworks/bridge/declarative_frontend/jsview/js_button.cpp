@@ -93,11 +93,12 @@ void JSButton::SetFontStyle(int32_t value)
 void JSButton::SetFontFamily(const JSCallbackInfo& info)
 {
     std::vector<std::string> fontFamilies;
-    if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        return;
-    }
-    if (fontFamilies.empty()) {
-        return;
+    if (!ParseJsFontFamilies(info[0], fontFamilies) || fontFamilies.empty()) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto textTheme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(textTheme);
+        fontFamilies = textTheme->GetTextStyle().GetFontFamilies();
     }
 
     ButtonModel::GetInstance()->SetFontFamily(fontFamilies);

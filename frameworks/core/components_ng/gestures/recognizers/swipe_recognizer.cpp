@@ -100,7 +100,9 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Swipe recognizer receives %{public}d touch down event, begin to detect swipe event", event.id);
+        "InputTracking id:%{public}d, swipe recognizer receives %{public}d touch down event, begin to detect swipe "
+        "event",
+        event.touchEventId, event.id);
     if (fingers_ > MAX_SWIPE_FINGERS) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
@@ -135,7 +137,9 @@ void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe recognizer receives axis down event, begin to detect swipe event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, swipe recognizer receives axis start event, begin to detect swipe event",
+        event.touchEventId);
     if (direction_.type == SwipeDirection::NONE) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
@@ -153,7 +157,8 @@ void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe recognizer receives %{public}d touch up event", event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, swipe recognizer receives %{public}d touch up event",
+        event.touchEventId, event.id);
     globalPoint_ = Point(event.x, event.y);
     time_ = event.time;
     lastTouchEvent_ = event;
@@ -193,7 +198,8 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe recognizer receives axis up event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, swipe recognizer receives axis end event",
+        event.touchEventId);
     globalPoint_ = Point(event.x, event.y);
     time_ = event.time;
     lastAxisEvent_ = event;
@@ -304,7 +310,9 @@ void SwipeRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void SwipeRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe recognizer receives cancel event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, swipe recognizer receives %{public}d touch cancel event", event.touchEventId,
+        event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -317,7 +325,16 @@ void SwipeRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void SwipeRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    HandleTouchCancelEvent(TouchEvent());
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, swipe recognizer receives axis cancel event",
+        event.touchEventId);
+    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+
+    if (refereeState_ == RefereeState::SUCCEED) {
+        SendCancelMsg();
+    }
 }
 
 bool SwipeRecognizer::CheckAngle(double angle)

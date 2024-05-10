@@ -69,6 +69,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t TEXT_MAX_LINES_TWO = 2;
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -147,7 +148,6 @@ void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<
             if (!oldBarItem) {
                 break;
             }
-            // TODO: fix error for update condition when add or delete child, and update old bar item will not work
             if (newBarItem.text.has_value()) {
                 oldBarItem->UpdateText(newBarItem.text.value());
                 if (oldBarItem->GetTextNode()) {
@@ -278,22 +278,7 @@ RefPtr<FrameNode> CreateToolbarItemIconNode(const BarItem& barItem)
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
-    if (barItem.icon.has_value() && !barItem.icon.value().empty()) {
-        int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ImageSourceInfo info(barItem.icon.value());
-        auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
-        auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-
-        info.SetFillColor(theme->GetToolbarIconColor());
-        imageLayoutProperty->UpdateImageSourceInfo(info);
-
-        auto iconSize = theme->GetToolbarIconSize();
-        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
-
-        iconNode->MarkModifyDone();
-        return iconNode;
-    } else {
+    if (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr) {
         auto iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_RETURN(iconNode, nullptr);
@@ -306,6 +291,20 @@ RefPtr<FrameNode> CreateToolbarItemIconNode(const BarItem& barItem)
         iconNode->MarkModifyDone();
         return iconNode;
     }
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ImageSourceInfo info(barItem.icon.value());
+    auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+
+    info.SetFillColor(theme->GetToolbarIconColor());
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+
+    auto iconSize = theme->GetToolbarIconSize();
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+
+    iconNode->MarkModifyDone();
+    return iconNode;
 }
 
 bool CheckNavigationGroupEnableStatus()
@@ -509,7 +508,6 @@ void BuildToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
     barItemNode->SetIconNode(symbolNode);
     barItemNode->AddChild(symbolNode);
     barItemNode->MarkModifyDone();
-    return;
 }
 
 RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNode)
@@ -794,7 +792,7 @@ bool NavigationModelNG::ParseCommonTitle(
         if (mainTitle) {
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
+            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
             textLayoutProperty->UpdateContent(title);
             break;
         }
@@ -809,7 +807,7 @@ bool NavigationModelNG::ParseCommonTitle(
             mainTitleColor = theme->GetMainTitleFontColor();
             mainTitleWeight = FontWeight::BOLD;
         }
-        textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
+        textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TEXT_MAX_LINES_TWO);
         textLayoutProperty->UpdateContent(title);
         textLayoutProperty->UpdateTextColor(mainTitleColor);
         textLayoutProperty->UpdateFontWeight(mainTitleWeight);

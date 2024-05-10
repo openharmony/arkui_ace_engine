@@ -15,17 +15,17 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_layout_algorithm.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
+#include "core/components_ng/pattern/custom_paint/canvas_layout_algorithm.h"
+#include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
-std::optional<SizeF> CustomPaintLayoutAlgorithm::MeasureContent(
+std::optional<SizeF> CanvasLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     std::optional<SizeF> canvasSize = contentConstraint.maxSize;
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, canvasSize);
-    auto pattern = host->GetPattern<CustomPaintPattern>();
+    auto pattern = host->GetPattern<CanvasPattern>();
     CHECK_NULL_RETURN(pattern, canvasSize);
     if (contentConstraint.selfIdealSize.IsValid()) {
         canvasSize = contentConstraint.selfIdealSize.ConvertToSizeT();
@@ -36,7 +36,7 @@ std::optional<SizeF> CustomPaintLayoutAlgorithm::MeasureContent(
     return canvasSize;
 }
 
-void CustomPaintLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void CanvasLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::Layout(layoutWrapper);
 }

@@ -549,6 +549,9 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
         // The offset of the mouse wheel and gesture is opposite.
         auto offset = info.GetInputEventType() == InputEventType::AXIS ?
                       info.GetMainDelta() : CalcPatternOffset(info.GetMainDelta());
+        if (IsReverse()) {
+            offset = -offset;
+        }
         scrollPositionCallback_(offset, SCROLL_FROM_BAR);
         if (dragFRCSceneCallback_) {
             dragFRCSceneCallback_(NearZero(info.GetMainDelta()) ? info.GetMainVelocity()

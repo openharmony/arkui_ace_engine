@@ -59,6 +59,8 @@ public:
         peer_ = peer;
     }
 
+    bool NeedRender() const override;
+
     void SetExtraParam(ArkUI_Int32 type, void* extraParam);
     ArkUI_Int64 GetExtraParam(ArkUI_Int32 type);
     void EraseExtraParam(ArkUI_Int32 type);

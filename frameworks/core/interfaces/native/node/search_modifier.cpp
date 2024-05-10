@@ -43,6 +43,7 @@ constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
+constexpr int32_t DEFAULT_CARET_POSITION = 0;
 
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value)
 {
@@ -489,6 +490,22 @@ void ResetSearchIcon(ArkUINodeHandle node)
     SearchModelNG::SetIcon(frameNode, "");
 }
 
+void SetSearchCaretPosition(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    SearchModelNG::SetCaretPosition(frameNode, value);
+}
+
+void ResetSearchCaretPosition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    SearchModelNG::SetCaretPosition(frameNode, DEFAULT_CARET_POSITION);
+}
+
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -505,7 +522,7 @@ const ArkUISearchModifier* GetSearchModifier()
         ResetSearchAdaptMinFontSize, SetSearchAdaptMaxFontSize, ResetSearchAdaptMaxFontSize,
         SetSearchSelectedBackgroundColor, ResetSearchSelectedBackgroundColor, SetSearchTextIndent,
         ResetSearchTextIndent, SetSearchValue, ResetSearchValue, SetSearchPlaceholder, ResetSearchPlaceholder,
-        SetSearchIcon, ResetSearchIcon };
+        SetSearchIcon, ResetSearchIcon, SetSearchCaretPosition, ResetSearchCaretPosition };
     return &modifier;
 }
 

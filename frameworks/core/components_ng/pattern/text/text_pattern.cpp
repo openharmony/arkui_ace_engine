@@ -271,8 +271,7 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
         selection.SetResultObjectList(result);
         return selection;
     }
-    auto children = GetAllChildren();
-    for (const auto& uinode : children) {
+    for (const auto& uinode : childNodes_) {
         if (uinode->GetTag() == V2::IMAGE_ETS_TAG) {
             ResultObject resultObject = GetImageResultObject(uinode, index, realStart, realEnd);
             if (!resultObject.valueString.empty() || resultObject.valuePixelMap) {
@@ -561,7 +560,7 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
                 textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
                 return;
             }
-            if ((!textPattern->GetAllChildren().empty() || !ifHaveObscured) && eventHub->IsEnabled()) {
+            if ((!textPattern->GetChildNodes().empty() || !ifHaveObscured) && eventHub->IsEnabled()) {
                 textPattern->ActSetSelection(selectionStart, selectionEnd);
             }
         });
@@ -1514,7 +1513,7 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         auto pattern = wk.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->BetweenSelectedPosition(point)) {
-            auto children = pattern->GetAllChildren();
+            const auto& children = pattern->GetChildNodes();
             std::list<RefPtr<FrameNode>> imageChildren;
             for (const auto& child : children) {
                 auto node = DynamicCast<FrameNode>(child);
@@ -1533,27 +1532,6 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
-}
-
-const std::list<RefPtr<UINode>>& TextPattern::GetAllChildren() const
-{
-    childNodes_.clear();
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, childNodes_);
-    const auto& children = host->GetChildren();
-    for (const auto& child : children) {
-        if (child->GetTag() == V2::CONTAINER_SPAN_ETS_TAG) {
-            auto spanChildren = child->GetChildren();
-            childNodes_.insert(childNodes_.end(), spanChildren.begin(), spanChildren.end());
-        } else if (!child->GetChildren().empty()) {
-            std::vector<RefPtr<UINode>> res;
-            UINode::DFSAllChild(child, res);
-            childNodes_.insert(childNodes_.end(), res.begin(), res.end());
-        } else {
-            childNodes_.push_back(child);
-        }
-    }
-    return childNodes_;
 }
 
 std::string TextPattern::GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const
@@ -1600,7 +1578,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
 
 RefPtr<UINode> TextPattern::GetChildByIndex(int32_t index) const
 {
-    const auto& children = GetAllChildren();
+    const auto& children = childNodes_;
     int32_t size = static_cast<int32_t>(children.size());
     if (index < 0 || index >= size) {
         return nullptr;
@@ -1847,6 +1825,7 @@ void TextPattern::OnModifyDone()
     if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
         if (!renderContext->GetClipEdge().has_value()) {
             renderContext->UpdateClipEdge(true);
+            renderContext->SetClipToFrame(true);
         }
         if (textLayoutProperty->GetTextMarqueeStartPolicyValue(MarqueeStartPolicy::DEFAULT) ==
             MarqueeStartPolicy::ON_FOCUS) {
@@ -1855,7 +1834,8 @@ void TextPattern::OnModifyDone()
         }
     }
 
-    if (GetAllChildren().empty()) {
+    const auto& children = host->GetChildren();
+    if (children.empty()) {
         std::string textCache = textForDisplay_;
         textForDisplay_ = textLayoutProperty->GetContent().value_or("");
         if (textCache != textForDisplay_) {
@@ -1864,13 +1844,14 @@ void TextPattern::OnModifyDone()
             CloseSelectOverlay();
             ResetSelection();
         }
-        if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
-            dataDetectorAdapter_->textForAI_ = textForDisplay_;
-            dataDetectorAdapter_->StartAITask();
-        }
     }
 
     RecoverCopyOption();
+
+    if (children.empty() && CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
+        dataDetectorAdapter_->textForAI_ = textForDisplay_;
+        dataDetectorAdapter_->StartAITask();
+    }
 }
 
 void TextPattern::RecoverCopyOption()
@@ -1885,7 +1866,7 @@ void TextPattern::RecoverCopyOption()
     copyOption_ =
         isMarqueeRunning_ ? CopyOptions::None : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
 
-    if (GetAllChildren().empty()) {
+    if (childNodes_.empty()) {
         auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
         bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
             [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
@@ -2095,6 +2076,7 @@ void TextPattern::PreCreateLayoutWrapper()
     }
 
     spans_.clear();
+    childNodes_.clear();
 
     // When dirty areas are marked because of child node changes, the text rendering node tree is reset.
     const auto& children = host->GetChildren();
@@ -2130,6 +2112,11 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
 
     bool isSpanHasClick = false;
     CollectSpanNodes(nodes, isSpanHasClick);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (childNodes_.empty()) {
+        textForDisplay_ = textLayoutProperty->GetContent().value_or("");
+    }
     if (oldPlaceholderCount != placeholderCount_) {
         CloseSelectOverlay();
         ResetSelection();
@@ -2273,6 +2260,7 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
             textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
+            childNodes_.push_back(current.node);
         } else if (spanNode && tag != V2::PLACEHOLDER_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
@@ -2282,6 +2270,7 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
+            childNodes_.push_back(current.node);
         } else if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             placeholderCount_++;
             AddChildSpanItem(current.node);
@@ -2294,12 +2283,16 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             if (focus_hub && focus_hub->GetOnClickCallback()) {
                 isSpanHasClick = true;
             }
+            childNodes_.push_back(current.node);
         }
         if (tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             continue;
         }
-        auto containerSpanNode = tag == V2::CONTAINER_SPAN_ETS_TAG ? current.node : current.containerSpanNode;
         const auto& nextChildren = current.node->GetChildren();
+        if (nextChildren.empty()) {
+            continue;
+        }
+        auto containerSpanNode = tag == V2::CONTAINER_SPAN_ETS_TAG ? current.node : current.containerSpanNode;
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
             nodes.push({ .node = *iter, .containerSpanNode = containerSpanNode });
         }

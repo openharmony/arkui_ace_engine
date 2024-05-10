@@ -140,6 +140,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
     private arr_: Array<T>;
     private itemGenFunc_?: RepeatItemGenFunc<T>;
     private keyGenFunction_?: RepeatKeyGenFunc<T>;
+    private onMoveHandler_?: OnMoveHandler;
     private isVirtualScroll: boolean = false;
     private key2Item_: Map<string, __RepeatItemInfo<T>> = new Map<string, __RepeatItemInfo<T>>();
 
@@ -165,6 +166,11 @@ class __RepeatV2<T> implements RepeatAPI<T> {
 
     public virtualScroll(): RepeatAPI<T> {
         this.isVirtualScroll = true;
+        return this;
+    }
+
+    public onMove(handler: OnMoveHandler): RepeatAPI<T> {
+        this.onMoveHandler_ = handler;
         return this;
     }
 
@@ -213,6 +219,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         })
         let removedChildElmtIds = new Array<number>();
         // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
+        RepeatNative.onMove(this.onMoveHandler_);
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         stateMgmtConsole.debug(`RepeatPU: initialRenderNoneVirtual elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
@@ -289,6 +296,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         // C++  tempChildren.clear() , trigger re-layout
         let removedChildElmtIds = new Array<number>();
         // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
+        RepeatNative.onMove(this.onMoveHandler_);
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         stateMgmtConsole.debug(`RepeatPU: rerenderNoneVirtual elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);

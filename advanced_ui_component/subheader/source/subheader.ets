@@ -14,11 +14,8 @@
  */
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
-import hilog from '@ohos.hilog';
-import resourceManager from '@ohos.resourceManager';
-import { BusinessError } from '@ohos.base';
+import { TextModifier } from '@ohos.arkui.modifier'
 
-const DIVIDEND_NUM: number = 3;
 const INDEX_ZERO: number = 0;
 const INDEX_ONE: number = 1;
 const INDEX_TWO: number = 2;
@@ -39,15 +36,10 @@ const ARROW_ICON_WIDTH: number = 12;
 const ARROW_ICON_HEIGHT: number = 24;
 const SINGLE_ICON_ZONE_SIZE: number = 32;
 const RIGHT_SINGLE_ICON_SIZE: number = 24;
-const MAX_ICON_GROUP_WIDTH_VALUE: number = SINGLE_ICON_ZONE_SIZE * 3 + getNumberByResource('padding_level4') * 2 +
-getNumberByResource('padding_level2') + getNumberByResource('padding_level6');
 const LOADING_SIZE: number = 24;
-// margin
-const COMMON_MARGIN_VALUE: number = getNumberByResource('margin_left') + getNumberByResource('margin_right');
-const ICON_GROUP_MARGIN_VALUE: number = getNumberByResource('padding_level2') + getNumberByResource('padding_level6');
-const TEXT_ARROW_MARGIN_VALUE: number = getNumberByResource('padding_level4') + getNumberByResource('padding_level4');
-const BUTTON_MARGIN_VALUE: number = getNumberByResource('padding_level1') + getNumberByResource('padding_level5');
-const LOADING_MARGIN_VALUE: number = getNumberByResource('padding_level4') + getNumberByResource('margin_right');
+const PADDING_LEVEL_2: number = 4;
+const PADDING_LEVEL_4: number = 8;
+const MAX_RIGHT_WIDTH: Length = '34%';
 
 export enum OperationType {
   TEXT_ARROW = 0,
@@ -93,14 +85,6 @@ class FontStyle {
   public fontWeight: number = 0;
   public fontColor?: ResourceColor;
   public alignment?: Alignment;
-}
-
-@Styles
-function commonMargin() {
-  .margin({
-    left: $r('sys.float.margin_left'),
-    right: $r('sys.float.margin_right'),
-  })
 }
 
 @Styles
@@ -158,7 +142,9 @@ export struct SubHeader {
   @Prop icon: Resource | null = null;
   iconSymbolOptions?: SymbolOptions | null = null;
   @Prop primaryTitle: string | null = null;
+  @State primaryTitleModifier: TextModifier = new TextModifier();
   @Prop secondaryTitle: string | null = null;
+  @State secondaryTitleModifier: TextModifier = new TextModifier();
   select: SelectOptions | null = null;
   @Prop operationType: OperationType = OperationType.BUTTON;
   operationItem: Array<OperationOption> | null = null;
@@ -167,42 +153,63 @@ export struct SubHeader {
   @State isDuplicateLine: boolean = false;
   @State textArrowBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State buttonBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
-  @State flexWidth: number = 0;
-  @State rightWidth: number = 0;
-  @State leftWidth: number = 0;
   @State textArrowFocus: boolean = false;
   @State buttonFocus: boolean = false;
   @State textArrowStyleWidth: number = 0;
   @State textArrowStyleHeight: number = 0;
   @State buttonStyleWidth: number = 0;
   @State buttonStyleHeight: number = 0;
-  @State iconTextStyleWidth: number = 0;
-  @State iconTextWidth: number = 0;
   @State iconWidth: number = 0;
   @State selectedIndex: number | Resource | undefined = -1;
   @State selectValue: ResourceStr | undefined = '';
   @State flexAlign: FlexAlign = FlexAlign.SpaceBetween;
+  @BuilderParam titleBuilder?: () => void;
+  @Prop contentMargin: Margin;
 
   build() {
-    Row() {
-      this.leftArea();
-      this.rightArea();
+    Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.End }) {
+      Row() {
+        this.leftArea();
+      }
+      .width('100%')
+      .margin({
+        left: this.contentMargin?.left ?? $r('sys.float.margin_left'),
+        right: this.getMarginRight()
+      })
+      .flexShrink(1)
+
+      Row() {
+        this.rightArea();
+      }
+      .justifyContent(FlexAlign.End)
+      .constraintSize({ maxWidth: this.getMaxWidth() })
+      .flexShrink(0)
     }
     .width('100%')
-    .alignItems(VerticalAlign.Bottom)
-    .justifyContent(this.flexAlign)
     .focusable(true)
-    .onAreaChange((oldValue: Area, newValue: Area) => {
-      let flexWidth: number = Number(newValue.width);
-      this.flexWidth = flexWidth;
-      this.updateAreaWidth(false);
-    })
     .constraintSize({ minHeight: this.isDuplicateLine ? DOUBLE_LINE_HEIGHT : SINGLE_LINE_HEIGHT })
+  }
+
+  private getMarginRight(): Length {
+    if (this.operationType === OperationType.LOADING || (this.operationItem && this.operationItem.length > 0)) {
+      return $r('sys.float.padding_level0');
+    }
+    return this.contentMargin?.right ?? $r('sys.float.margin_right');
+  }
+
+  private getMaxWidth(): Length {
+    if (this.operationType === OperationType.ICON_GROUP && (this.operationItem && this.operationItem.length > 0)) {
+      return '100%';
+    } else {
+      return MAX_RIGHT_WIDTH;
+    }
   }
 
   @Builder
   leftArea(): void {
-    if (this.secondaryTitle && this.icon) {
+    if (this.titleBuilder) {
+      this.titleBuilder();
+    } else if (this.secondaryTitle && this.icon) {
       this.IconSecondaryTitleStyle({
         content: this.secondaryTitle,
         iconOptions: {
@@ -242,57 +249,39 @@ export struct SubHeader {
 
   @Builder
   IconSecondaryTitleStyle($$: ContentIconOption): void {
-    Row() {
-      Row() {
-        if (Util.isSymbolResource($$.iconOptions?.icon)) {
-          SymbolGlyph($$.iconOptions?.icon)
-            .focusable(true)
-            .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?? LEFT_ICON_SIZE)
-            .fontColor($$.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_secondary')])
-            .fontWeight($$.iconOptions?.symbolicIconOption?.fontWeight)
-            .renderingStrategy($$.iconOptions?.symbolicIconOption?.renderingStrategy)
-            .effectStrategy($$.iconOptions?.symbolicIconOption?.effectStrategy)
-            .margin({ right: $r('sys.float.padding_level4') })
-        } else {
-          Image($$.iconOptions?.icon)
-            .width(LEFT_ICON_SIZE)
-            .height(LEFT_ICON_SIZE)
-            .margin({ right: $r('sys.float.padding_level4') })
-            .draggable(false)
-        }
+    Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
+      if (Util.isSymbolResource($$.iconOptions?.icon)) {
+        SymbolGlyph($$.iconOptions?.icon)
+          .focusable(true)
+          .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?? LEFT_ICON_SIZE)
+          .fontColor($$.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_secondary')])
+          .fontWeight($$.iconOptions?.symbolicIconOption?.fontWeight)
+          .renderingStrategy($$.iconOptions?.symbolicIconOption?.renderingStrategy)
+          .effectStrategy($$.iconOptions?.symbolicIconOption?.effectStrategy)
+          .margin({ right: $r('sys.float.padding_level4') })
+          .flexShrink(0)
+      } else {
+        Image($$.iconOptions?.icon)
+          .width(LEFT_ICON_SIZE)
+          .height(LEFT_ICON_SIZE)
+          .margin({ right: $r('sys.float.padding_level4') })
+          .draggable(false)
+          .flexShrink(0)
       }
-      .onAreaChange((oldValue: Area, newValue: Area) => {
-        this.iconWidth = Number(newValue.width);
-        this.updateMaxIconTextWidth();
-      })
-
       Text($$.content)
         .secondaryTitleStyles({
           maxLines: DOUBLE_LINE_NUM,
           fontWeight: FontWeight.Medium,
           alignment: Alignment.Start,
         })
-        .width(this.iconTextWidth)
+        .attributeModifier(this.secondaryTitleModifier)
+        .flexShrink(1)
     }
-    .width(this.leftWidth - COMMON_MARGIN_VALUE)
     .commonListPadding()
-    .commonMargin()
     .onAppear(() => {
       this.isDuplicateLine = false;
       this.changeFlexAlign(FlexAlign.SpaceBetween);
     })
-    .onAreaChange((oldValue: Area, newValue: Area) => {
-      this.iconTextStyleWidth = Number(newValue.width);
-      this.updateMaxIconTextWidth();
-    })
-  }
-
-  /**
-   * 文字最大宽度 = 整体宽度 减去 icon宽度和间距
-   */
-  private updateMaxIconTextWidth(): void {
-    this.iconTextWidth = this.iconTextStyleWidth - getNumberByResource('padding_level6') - this.iconWidth -
-    getNumberByResource('padding_level6');
   }
 
   @Builder
@@ -304,6 +293,7 @@ export struct SubHeader {
           maxLines: SINGLE_LINE_NUM,
           alignment: Alignment.Start,
         })
+        .attributeModifier(this.primaryTitleModifier)
         .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
@@ -315,9 +305,8 @@ export struct SubHeader {
         .margin({
           top: $r('sys.float.padding_level1'),
         })
+        .attributeModifier(this.secondaryTitleModifier)
     }
-    .width(this.leftWidth - COMMON_MARGIN_VALUE)
-    .commonMargin()
     .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
     .onAppear(() => {
@@ -340,11 +329,10 @@ export struct SubHeader {
           this.isDuplicateLine = false;
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
+        .attributeModifier(this.secondaryTitleModifier)
     }
     .alignItems(HorizontalAlign.Start)
-    .width(this.leftWidth - COMMON_MARGIN_VALUE)
     .commonListPadding()
-    .commonMargin()
   }
 
   @Builder
@@ -367,12 +355,7 @@ export struct SubHeader {
           weight: FontWeight.Medium,
         })
     }
-    .width(this.leftWidth - COMMON_MARGIN_VALUE)
     .alignItems(HorizontalAlign.Start)
-    .margin({
-      left: $r('sys.float.margin_left'),
-      right: $r('sys.float.margin_right'),
-    })
     .onAppear(() => {
       this.isDuplicateLine = false;
       this.changeFlexAlign(FlexAlign.SpaceBetween);
@@ -393,10 +376,9 @@ export struct SubHeader {
           this.isDuplicateLine = false;
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
+        .attributeModifier(this.primaryTitleModifier)
     }
-    .width(this.leftWidth - COMMON_MARGIN_VALUE)
     .alignItems(HorizontalAlign.Start)
-    .commonMargin()
     .commonContentPadding()
   }
 
@@ -426,28 +408,8 @@ export struct SubHeader {
           .constraintSize({ minHeight: BUTTON_HEIGHT })
           .justifyContent(FlexAlign.End)
           .borderRadius($r('sys.float.corner_radius_level4'))
-          .stateStyles({
-            focused: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                width: this.buttonStyleWidth,
-                color: $r('sys.color.interactive_focus'),
-                style: BorderStyle.Solid,
-              })
-              .backgroundColor($r('sys.color.interactive_focus'))
-            },
-            pressed: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                color: $r('sys.color.interactive_pressed'),
-              })
-              .backgroundColor($r('sys.color.interactive_pressed'))
-            },
-            disabled: disabledStyle,
-          })
           .onFocus(() => {
             this.buttonFocus = true;
-            this.buttonBgColor = $r('sys.color.interactive_focus');
           })
           .onBlur(() => {
             this.buttonFocus = false;
@@ -474,7 +436,7 @@ export struct SubHeader {
               }
             }
           })
-          .onClick((event)=>{
+          .onClick((event) => {
             if (button.action) {
               button.action();
             }
@@ -484,6 +446,17 @@ export struct SubHeader {
             this.buttonStyleHeight = Number(newValue.height);
           })
         }
+        if (this.buttonFocus) {
+          Row()
+            .height(BUTTON_HEIGHT)
+            .width(this.buttonStyleWidth)
+            .hitTestBehavior(HitTestMode.None)
+            .border({
+              width: BORDER_WIDTH,
+              color: $r('sys.color.interactive_focus')
+            })
+            .borderRadius($r('sys.float.corner_radius_level4'))
+        }
       }
       .focusable(true)
     }
@@ -491,7 +464,6 @@ export struct SubHeader {
       left: $r('sys.float.padding_level1'),
       right: $r('sys.float.padding_level5'),
     })
-    .width(this.rightWidth - BUTTON_MARGIN_VALUE)
     .justifyContent(FlexAlign.End)
     .focusable(true)
   }
@@ -560,7 +532,7 @@ export struct SubHeader {
             }
           }
         })
-        .onClick((event)=>{
+        .onClick((event) => {
           if (textArrow.action) {
             textArrow.action();
           }
@@ -601,11 +573,10 @@ export struct SubHeader {
       }
     }
     .focusable(true)
-    .width(this.rightWidth - TEXT_ARROW_MARGIN_VALUE)
     .justifyContent(FlexAlign.End)
     .margin({
       left: $r('sys.float.padding_level4'),
-      right: $r('sys.float.padding_level4'),
+      right: this.contentMargin?.right ?? $r('sys.float.padding_level4'),
     })
   }
 
@@ -614,7 +585,7 @@ export struct SubHeader {
    * @returns 文字最大宽度
    */
   private getMaxArrowTextWidth(): number {
-    return this.rightWidth - getNumberByResource('padding_level2') * 2 - getNumberByResource('padding_level4') * 3 -
+    return this.textArrowStyleWidth - PADDING_LEVEL_2 * 2 - PADDING_LEVEL_4 -
       ARROW_ICON_WIDTH;
   }
 
@@ -655,25 +626,11 @@ export struct SubHeader {
       });
     }
     .justifyContent(FlexAlign.End)
-    .width(this.updateAreaWidth(true) - ICON_GROUP_MARGIN_VALUE)
     .focusable(true)
     .margin({
       left: $r('sys.float.padding_level2'),
-      right: $r('sys.float.padding_level6'),
+      right: this.contentMargin?.right ?? $r('sys.float.padding_level6'),
     })
-  }
-
-  private updateAreaWidth(isIconGroupStyle: boolean): number {
-    if (this.flexWidth === 0) {
-      return 0;
-    }
-    if (isIconGroupStyle) {
-      this.rightWidth = Math.max(this.flexWidth / DIVIDEND_NUM, MAX_ICON_GROUP_WIDTH_VALUE);
-    } else {
-      this.rightWidth = this.flexWidth / DIVIDEND_NUM;
-    }
-    this.leftWidth = this.flexWidth - this.rightWidth;
-    return this.rightWidth;
   }
 
   @Builder
@@ -689,7 +646,6 @@ export struct SubHeader {
         })
     }
     .focusable(true)
-    .width(this.rightWidth - LOADING_MARGIN_VALUE)
     .justifyContent(FlexAlign.End)
     .padding({
       top: $r('sys.float.padding_level2'),
@@ -697,7 +653,7 @@ export struct SubHeader {
     })
     .margin({
       left: $r('sys.float.padding_level4'),
-      right: $r('sys.float.margin_right'),
+      right: this.contentMargin?.right ? this.contentMargin.right : $r('sys.float.margin_right'),
     })
   }
 
@@ -745,6 +701,10 @@ struct SingleIconStyle {
       .borderRadius($r('sys.float.corner_radius_level4'))
       .backgroundColor(this.bgColor)
       .stateStyles({
+        normal: {
+          .border({ width: 0 })
+          .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
+        },
         focused: {
           .border({
             radius: $r('sys.float.corner_radius_level4'),
@@ -779,7 +739,7 @@ struct SingleIconStyle {
           }
         }
       })
-      .onClick((event)=>{
+      .onClick((event) => {
         if (this.item?.action) {
           this.item?.action();
         }
@@ -837,22 +797,5 @@ class Util {
       return false;
     }
     return true;
-  }
-}
-
-/**
- * get resource size
- *
- * @param resourceName resource name
- * @returns resource size
- */
-function getNumberByResource(resourceName: string): number {
-  try {
-    return resourceManager.getSystemResourceManager().getNumberByName(resourceName);
-  } catch (error) {
-    let code: number = (error as BusinessError).code;
-    let message: string = (error as BusinessError).message;
-    hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResource error, code: ${code}, message: ${message}`);
-    return 0;
   }
 }

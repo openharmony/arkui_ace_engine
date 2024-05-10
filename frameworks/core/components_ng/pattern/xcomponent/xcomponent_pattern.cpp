@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#include <cmath>
+#include <cstdlib>
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
 
+#include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
 #include "base/log/frame_report.h"
@@ -53,6 +56,19 @@ namespace OHOS::Ace::NG {
 namespace {
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
+constexpr double INFLEXION = 0.35;
+constexpr double FLING_FRICTION = 0.002;
+constexpr double GRAVITY = 9.8;
+const double DECELERATION  = log(0.78) / log(0.9);
+const double DECEL_MINUS_ONE = DECELERATION - 1.0;
+constexpr int32_t MAX_SLIE_TIME = 5000;
+constexpr int32_t SECOND_UNIT = 1000;
+constexpr int32_t SQUARE = 2;
+constexpr int32_t DISTANCE_UNIT = 1000 * 1000;
+constexpr int32_t DELAY_TIME = 1;
+constexpr int32_t DPI_DENISTY_RATE = 160;
+constexpr double INCH_UNIT = 39.37;
+constexpr double TUNNING_FACTOR = 0.84;
 #endif
 std::string XComponentTypeToString(XComponentType type)
 {
@@ -279,6 +295,9 @@ void XComponentPattern::RequestFocus()
 void XComponentPattern::OnAttachToFrameNode()
 {
     Initialize();
+#ifdef OHOS_PLATFORM
+    physicalCoeff_ = GRAVITY * INCH_UNIT * PipelineBase::GetCurrentDensity() * DPI_DENISTY_RATE * TUNNING_FACTOR;
+#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -842,9 +861,9 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
             startIncreaseTime_ = currentTime;
             ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         }
+        lastTouchInfo_ = touchEventPoint_;
     } else if (touchType == TouchType::UP) {
-        startIncreaseTime_ = 0;
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        ReportSlideToRss();
     }
 #endif
     SetTouchPoint(info.GetTouches(), timeStamp, touchType);
@@ -862,6 +881,50 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 #endif
 }
+
+#ifdef OHOS_PLATFORM
+void XComponentPattern::ReportSlideToRss()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostDelayedTask([weakThis = WeakClaim(this)] {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->slideCount_ ++;
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        }, DELAY_TIME, "xcomponent_pattern_slide_on");
+    uiTaskExecutor.PostDelayedTask([weakThis = WeakClaim(this)] {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->slideCount_ --;
+        if (self->slideCount_.load() == 0) {
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        }
+        }, GetFlingDuration(GetUpVelocity(lastTouchInfo_, touchEventPoint_)) + DELAY_TIME,
+        "xcomponent_pattern_slide_off");
+}
+
+float XComponentPattern::GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo,
+    OH_NativeXComponent_TouchEvent upEventInfo)
+{
+    float distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
+    int64_t time = abs(lastMoveInfo.timeStamp - upEventInfo.timeStamp);
+    if (time == 0) {
+        return 0.0f;
+    }
+    return distance * DISTANCE_UNIT / (time / SECOND_UNIT); // unit: pixel/ms
+}
+
+
+int XComponentPattern::GetFlingDuration(float velocity)
+{
+    double splineDeceleration = log(INFLEXION * velocity / (FLING_FRICTION * physicalCoeff_));
+    return std::min((int)(SECOND_UNIT * exp(splineDeceleration / DECEL_MINUS_ONE)), MAX_SLIE_TIME);
+}
+#endif
 
 void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
 {

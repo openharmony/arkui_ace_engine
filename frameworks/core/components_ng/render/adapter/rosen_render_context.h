@@ -69,9 +69,14 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
+    void SyncGeometryPropertiesWithoutAnimation(
+        GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
+
+    void SyncGeometryFrame(const RectF& paintRect);
+
     void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
 
-    void SyncGeometryProperties(const RectF& paintRect) override;
+    void SyncGeometryProperties(const RectF& paintRect, bool isSkipFrameTransition = false) override;
 
     void SetBorderRadius(const BorderRadiusProperty& value) override;
 
@@ -316,6 +321,8 @@ public:
     void MarkDrivenRenderFramePaintState(bool flag) override;
     RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false) override;
     void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
+    bool CreateThumbnailPixelMapAsyncTask(
+        bool needScale, std::function<void(const RefPtr<PixelMap>)> &&callback) override;
     std::vector<double> transInfo_;
     std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
@@ -427,8 +434,8 @@ private:
     void OnDynamicLightUpRateUpdate(const float rate) override;
     void OnDynamicDimDegreeUpdate(const float degree) override;
     void OnDynamicLightUpDegreeUpdate(const float degree) override;
-    void OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
-    void OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
+    void OnBgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) override;
+    void OnFgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;

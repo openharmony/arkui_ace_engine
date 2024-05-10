@@ -48,6 +48,9 @@ constexpr Dimension SHEET_PC_DEVICE_WIDTH_BREAKPOINT = 840.0_vp;
 constexpr Dimension SHEET_DOUBLE_TITLE_TOP_PADDING = 15.0_vp;
 constexpr Dimension SHEET_DOUBLE_TITLE_BOTTON_PADDING = 8.0_vp;
 constexpr Dimension SHEET_TITLE_AERA_MARGIN = -8.0_vp;
+constexpr float SHEET_MAX_SCALE = 1.75f;
+constexpr int32_t SHEET_TITLE_MAX_LINES = 1;
+constexpr int32_t SHEET_AGING_MAX_LINES = 10;
 } // namespace
 class SheetTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SheetTheme, Theme);

@@ -596,6 +596,9 @@ void JSText::Create(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     if (args->IsObject() && JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>()) {
         auto *spanString = JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>();
+        if (spanString == nullptr) {
+            return;
+        }
         auto spanStringController = spanString->GetController();
         if (spanStringController) {
             TextModel::GetInstance()->Create(spanStringController);
@@ -614,7 +617,7 @@ void JSText::Create(const JSCallbackInfo& info)
     JSTextController* jsController = nullptr;
     auto paramObject = JSRef<JSObject>::Cast(info[1]);
     auto controllerObj = paramObject->GetProperty("controller");
-    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
         jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextController>();
     }
 

@@ -823,6 +823,11 @@ public:
         isWindowBoundary_ = isWindowBoundary;
     }
 
+    void SetIsMeasureBoundary(bool isMeasureBoundary)
+    {
+        isMeasureBoundary_ = isMeasureBoundary;
+    }
+
     void InitLastArea();
 
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
@@ -840,6 +845,12 @@ public:
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
+
+    void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
+    {
+        SetSkipSyncGeometryNode();
+        UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+    }
 
 protected:
     void DumpInfo() override;

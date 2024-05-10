@@ -83,6 +83,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
@@ -99,6 +100,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "interfaces/native/node/resource.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -3071,6 +3073,10 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         ParseJsDimensionVp(object->GetProperty("y"), y);
         double valueX = x.Value();
         double valueY = y.Value();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            valueX = x.ConvertToPx();
+            valueY = y.ConvertToPx();
+        }
         DimensionUnit typeX = DimensionUnit::PX;
         DimensionUnit typeY = DimensionUnit::PX;
         if (x.Unit() == DimensionUnit::PERCENT) {
@@ -3080,10 +3086,6 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         if (y.Unit() == DimensionUnit::PERCENT) {
             valueY = y.Value();
             typeY = DimensionUnit::PERCENT;
-        }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            typeX = x.Unit();
-            typeY = y.Unit();
         }
         SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
     }
@@ -4887,6 +4889,21 @@ bool JSViewAbstract::ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimen
 bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
     return ParseJsDimension(jsValue, result, DimensionUnit::PX);
+}
+
+bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    auto colorObj = JSRef<JSObject>::Cast(jsValue);
+    auto toNumericProp = colorObj->GetProperty("toNumeric");
+    if (toNumericProp->IsFunction()) {
+        auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
+        result.SetValue(colorVal->ToNumber<uint32_t>());
+        return true;
+    }
+    return false;
 }
 
 bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
@@ -6718,6 +6735,30 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetFocusable(info[0]->ToBoolean());
 }
 
+void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject() || info.Length() != 1) {
+        return;
+    }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    NG::FocusBoxStyle style;
+
+    CalcDimension margin;
+    if (ParseLengthMetricsToDimension(obj->GetProperty("margin"), margin)) {
+        style.margin = margin;
+    }
+    CalcDimension strokeWidth;
+    if (ParseLengthMetricsToDimension(obj->GetProperty("strokeWidth"), strokeWidth)) {
+        style.strokeWidth = strokeWidth;
+    }
+    Color strokeColor;
+    if (ParseColorMetricsToColor(obj->GetProperty("strokeColor"), strokeColor)) {
+        style.strokeColor = strokeColor;
+    }
+
+    ViewAbstractModel::GetInstance()->SetFocusBoxStyle(style);
+}
+
 void JSViewAbstract::JsOnFocusMove(const JSCallbackInfo& args)
 {
     JSRef<JSVal> arg = args[0];
@@ -7984,6 +8025,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("blendMode", &JSViewAbstract::JsBlendMode);
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
     JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
+    JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onKeyPreIme", &JSInteractableView::JsOnKeyPreIme);
     JSClass<JSViewAbstract>::StaticMethod("onFocusMove", &JSViewAbstract::JsOnFocusMove);
@@ -9780,5 +9822,37 @@ void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
             symbolApply = onApply;
         }
     }
+}
+
+int32_t JSViewAbstract::ParseJsPropertyId(const JSRef<JSVal>& jsValue)
+{
+    int32_t resId = 0;
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        JSRef<JSVal> tmp = jsObj->GetProperty("id");
+        if (!tmp->IsNull() && tmp->IsNumber()) {
+            resId = tmp->ToNumber<int32_t>();
+        }
+    }
+    return resId;
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resource)
+{
+    napi_value napiValue = reinterpret_cast<napi_value>(value);
+    ArkUI_Resource* res = reinterpret_cast<ArkUI_Resource*>(resource);
+    if (!napiValue || !res) {
+        return;
+    }
+    JSRef<JSVal> jsVal = JsConverter::ConvertNapiValueToJsVal(napiValue);
+    std::string src;
+    std::string bundleName;
+    std::string moduleName;
+    JSViewAbstract::ParseJsMedia(jsVal, src);
+    JSViewAbstract::GetJsMediaBundleInfo(jsVal, bundleName, moduleName);
+    res->resId = JSViewAbstract::ParseJsPropertyId(jsVal);
+    res->src = src;
+    res->bundleName = bundleName;
+    res->moduleName = moduleName;
 }
 } // namespace OHOS::Ace::Framework

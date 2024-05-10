@@ -96,6 +96,7 @@ void ScrollablePattern::SetAxis(Axis axis)
         return;
     }
     axis_ = axis;
+    SetParentScrollable();
     if (scrollBar_) {
         auto positionMode = GetPositionMode();
         scrollBar_->SetPositionMode(positionMode);
@@ -411,6 +412,12 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->HandleOverScroll(!pattern->IsReverse() ? velocity : -velocity);
     });
 
+    scrollable->SetIsReverseCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->IsReverse();
+    });
+
     auto scrollStart = [weak = WeakClaim(this)](float position) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -576,7 +583,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     scrollable->SetEdgeEffect(edgeEffect);
 }
 
-bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size, bool reverse)
+bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     bool isAtTop = IsAtTop();
     bool isAtBottom = IsAtBottom();
@@ -586,7 +593,7 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
         (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION)) { // handle edge effect
         if ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset))) {
             auto isScrollFromUpdate = source == SCROLL_FROM_UPDATE;
-            scrollEffect_->HandleOverScroll(GetAxis(), !reverse ? -offset : offset,
+            scrollEffect_->HandleOverScroll(GetAxis(), -offset,
                 size, isScrollFromUpdate, isNotPositiveScrollableDistance);
         }
     }
@@ -2028,6 +2035,13 @@ void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velo
 
 void ScrollablePattern::FireOnScrollStart()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(hub);
+    if (scrollStop_ && !GetScrollAbort()) {
+        OnScrollStop(hub->GetOnScrollStop());
+    }
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
         ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
@@ -2039,10 +2053,6 @@ void ScrollablePattern::FireOnScrollStart()
         scrollBar->PlayScrollBarAppearAnimation();
     }
     StopScrollBarAnimatorByProxy();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollableEventHub>();
-    CHECK_NULL_VOID(hub);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);

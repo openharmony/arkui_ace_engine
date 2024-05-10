@@ -95,13 +95,10 @@ class FrameNode {
     }
     return null;
   }
-  setNodePtr(nativeRef: NativeStrongRef | NativeWeakRef): void {
+  setNodePtr(nativeRef: NativeStrongRef | NativeWeakRef, nodePtr: NodePtr): void {
+    FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
     this._nativeRef = nativeRef;
-    if (nativeRef === null || nativeRef === undefined) {
-      this.resetNodePtr();
-      return;
-    }
-    this.nodePtr_ = this._nativeRef.getNativeHandle();
+    this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
     this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
     if (this._nodeId === -1) {
       return;
@@ -129,6 +126,27 @@ class FrameNode {
     this._nodeId = -1;
     this._nativeRef = null;
     this.nodePtr_ = null;
+  }
+
+  static disposeTreeRecursively(node: FrameNode | null): void {
+    if (node === null) {
+      return;
+    }
+    let child = node.getFirstChild();
+    FrameNode.disposeTreeRecursively(child);
+    let sibling = node.getNextSibling();
+    FrameNode.disposeTreeRecursively(sibling);
+    node.dispose();
+  }
+
+  disposeTree(): void {
+    let parent = this.getParent();
+    if (parent?.getNodeType() == "NodeContainer") {
+        getUINativeModule().nodeContainer.clean(parent?.getNodePtr());
+    } else {
+        parent?.removeChild(this);
+    }
+    FrameNode.disposeTreeRecursively(this);
   }
 
   checkType(): void {
@@ -603,6 +621,31 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
     ["GridCol", (context: UIContext) => {
       return new TypedFrameNode(context, "GridCol", (node: NodePtr, type: ModifierType) => {
         return new ArkGridColComponent(node, type);
+      })
+    }],
+    ["Blank", (context: UIContext) => {
+      return new TypedFrameNode(context, "Blank", (node: NodePtr, type: ModifierType) => {
+        return new ArkBlankComponent(node, type);
+      })
+    }],
+    ["Image", (context: UIContext) => {
+      return new TypedFrameNode(context, "Image", (node: NodePtr, type: ModifierType) => {
+        return new ArkImageComponent(node, type);
+      })
+    }],
+    ["Flex", (context: UIContext) => {
+      return new TypedFrameNode(context, "Flex", (node: NodePtr, type: ModifierType) => {
+        return new ArkFlexComponent(node, type);
+      })
+    }],
+    ["Swiper", (context: UIContext) => {
+      return new TypedFrameNode(context, "Swiper", (node: NodePtr, type: ModifierType) => {
+        return new ArkSwiperComponent(node, type);
+      })
+    }],
+    ["Progress", (context: UIContext) => {
+      return new TypedFrameNode(context, "Progress", (node: NodePtr, type: ModifierType) => {
+        return new ArkProgressComponent(node, type);
       })
     }],
   ]

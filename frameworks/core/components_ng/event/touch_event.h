@@ -164,6 +164,7 @@ private:
     // isFlushTouchEventsEnd_ means the last one touch event info during one vsync period, used only for web_pattern
     // if isFlushTouchEventsEnd_ is true, web_pattern start to send touch event list to chromium
     bool isFlushTouchEventsEnd_ = false;
+    std::map<int32_t, TimeStamp> firstInputTimeWithId_;
 };
 
 } // namespace OHOS::Ace::NG

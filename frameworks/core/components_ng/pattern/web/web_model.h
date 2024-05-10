@@ -177,6 +177,7 @@ public:
     virtual void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) = 0;
     virtual void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
+    virtual void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) {};
 
 private:
     static std::unique_ptr<WebModel> instance_;

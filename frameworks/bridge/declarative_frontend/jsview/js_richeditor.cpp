@@ -675,7 +675,7 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
 }
 
 void JSRichEditor::SetChangeTextSpans(
-    JSRef<JSArray>& jsArray, const std::list<NG::RichEditorAbstractSpanResult>& spanList)
+    JSRef<JSArray>& jsArray, const std::vector<NG::RichEditorAbstractSpanResult>& spanList)
 {
     int32_t index = 0;
     for (const auto& it : spanList) {
@@ -783,7 +783,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnWillChange(const NG::RichEditorChangeValue&
     return JSRef<JSVal>::Cast(OnWillChangeObj);
 }
 
-JSRef<JSVal> JSRichEditor::CreateJsOnDidChange(const std::list<NG::RichEditorAbstractSpanResult>& spanList)
+JSRef<JSVal> JSRichEditor::CreateJsOnDidChange(const std::vector<NG::RichEditorAbstractSpanResult>& spanList)
 {
     JSRef<JSArray> richEditorReplacedSpans = JSRef<JSArray>::New();
     SetChangeTextSpans(richEditorReplacedSpans, spanList);
