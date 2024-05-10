@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 
-void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByPageSwitch)
+void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByStep)
 {
     CHECK_NULL_VOID(focusView);
     if (!focusView->HasParentFocusHub()) {
@@ -50,8 +50,8 @@ void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTrig
     focusViewStack_.emplace_back(focusViewWeak);
     lastFocusView_ = focusViewWeak;
 
-    // Set LastWeakFocus to Previous node/scope in focusView only when FocusViewShow trigger by page switch
-    if (isTriggerByPageSwitch) {
+    // do not set LastWeakFocus to Previous node/scope in focusView when FocusViewShow trigger by FocusStep
+    if (!isTriggerByStep) {
         lastFocusView = lastFocusView_.Upgrade();
         if (!lastFocusView) {
             return;

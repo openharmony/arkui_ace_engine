@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void FocusView::FocusViewShow(bool isTriggerByPageSwitch)
+void FocusView::FocusViewShow(bool isTriggerByStep)
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d show", GetFrameName().c_str(), GetFrameId());
     auto viewRootScope = GetViewRootScope();
@@ -34,7 +34,7 @@ void FocusView::FocusViewShow(bool isTriggerByPageSwitch)
     CHECK_NULL_VOID(pipeline);
     auto focusManager = pipeline->GetFocusManager();
     CHECK_NULL_VOID(focusManager);
-    focusManager->FocusViewShow(AceType::Claim(this), isTriggerByPageSwitch);
+    focusManager->FocusViewShow(AceType::Claim(this), isTriggerByStep);
     pipeline->RequestFrame();
 }
 

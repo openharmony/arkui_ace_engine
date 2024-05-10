@@ -2195,7 +2195,7 @@ bool FocusHub::UpdateFocusView()
         if (focusViewRootScopeChild && focusViewRootScopeChild->IsCurrentFocus()) {
             focusView->SetIsViewRootScopeFocused(false);
         }
-        focusView->FocusViewShow(false);
+        focusView->FocusViewShow(true);
     }
     return true;
 }
