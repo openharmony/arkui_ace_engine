@@ -5997,6 +5997,12 @@ void RosenRenderContext::SetCommandPathMask(
     rsNode_->SetMask(mask);
 }
 
+void RosenRenderContext::SetMarkNodeGroup(bool isNodeGroup)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkNodeGroup(isNodeGroup);
+}
+
 void RosenRenderContext::ResetSurface(int width, int height)
 {
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);

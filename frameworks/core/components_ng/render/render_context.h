@@ -336,6 +336,7 @@ public:
     virtual void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) {}
     virtual void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) {}
     virtual void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) {}
+    virtual void SetMarkNodeGroup(bool isNodeGroup) {}
 
     virtual RectF GetPaintRectWithTransform()
     {

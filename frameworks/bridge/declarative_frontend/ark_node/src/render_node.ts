@@ -410,6 +410,7 @@ class RenderNode {
   private _nativeRef: NativeStrongRef;
   private _frameNode: WeakRef<FrameNode>;
   private lengthMetricsUnitValue: LengthMetricsUnit;
+  private markNodeGroupValue: boolean;
 
   constructor(type: string) {
     this.nodePtr = null;
@@ -433,6 +434,7 @@ class RenderNode {
       0, 0, 0, 1];
     this.translationValue = { x: 0, y: 0 };
     this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
+    this.markNodeGroupValue = false;
     if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
       return;
     }
@@ -569,6 +571,14 @@ class RenderNode {
       this.lengthMetricsUnit = unit;
     }
   }
+  set markNodeGroup(isNodeGroup) {
+    if (isNodeGroup === undefined || isNodeGroup === null) {
+        this.markNodeGroupValue = false;
+    } else {
+        this.markNodeGroupValue = isNodeGroup;
+    }
+    getUINativeModule().renderNode.setMarkNodeGroup(this.nodePtr, this.markNodeGroupValue);
+  }
   get backgroundColor(): number {
     return this.backgroundColorValue;
   }
@@ -619,7 +629,10 @@ class RenderNode {
   }
   get lengthMetricsUnit() {
     return this.lengthMetricsUnitValue;
-}
+  }
+  get markNodeGroup() {
+    return this.markNodeGroupValue;
+  }
   checkUndefinedOrNullWithDefaultValue<T>(arg: T, defaultValue: T): T {
     if (arg === undefined || arg === null) {
       return defaultValue;

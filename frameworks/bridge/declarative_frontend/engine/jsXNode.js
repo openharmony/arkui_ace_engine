@@ -1590,6 +1590,7 @@ class RenderNode {
             0, 0, 0, 1];
         this.translationValue = { x: 0, y: 0 };
         this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
+        this.markNodeGroupValue = false;
         if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
             return;
         }
@@ -1735,6 +1736,14 @@ class RenderNode {
             this.lengthMetricsUnitValue = unit;
         }
     }
+    set markNodeGroup(isNodeGroup) {
+        if (isNodeGroup === undefined || isNodeGroup === null) {
+            this.markNodeGroupValue = false;
+        } else {
+            this.markNodeGroupValue = isNodeGroup;
+        }
+        getUINativeModule().renderNode.setMarkNodeGroup(this.nodePtr, this.markNodeGroupValue);
+    }
     get backgroundColor() {
         return this.backgroundColorValue;
     }
@@ -1785,6 +1794,9 @@ class RenderNode {
     }
     get lengthMetricsUnit() {
         return this.lengthMetricsUnitValue;
+    }
+    get markNodeGroup() {
+        return this.markNodeGroupValue;
     }
     checkUndefinedOrNullWithDefaultValue(arg, defaultValue) {
         if (arg === undefined || arg === null) {
