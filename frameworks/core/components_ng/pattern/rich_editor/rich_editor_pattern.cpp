@@ -685,7 +685,9 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
         record.beforeCaretPosition + static_cast<int32_t>(StringUtils::ToWstring(options.value).length());
     AddOperationRecord(record);
     auto ret = AddTextSpanOperation(options, isPaste, index, false);
-    AfterChangeText(changeValue);
+    if (!previewTextRecord_.isPreviewTextInputting) {
+        AfterChangeText(changeValue);
+    }
     return ret;
 }
 
@@ -3050,6 +3052,7 @@ bool RichEditorPattern::CloseCustomKeyboard()
 
 int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, const PreviewRange range)
 {
+    CHECK_NULL_RETURN(!isSpanStringMode_, ERROR_BAD_PARAMETERS);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "previewTextValue = %{public}s, range = [%{public}d, %{public}d]",
         previewTextValue.c_str(), range.start, range.end);
     auto host = GetHost();
@@ -3086,6 +3089,7 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
     if (textSelector_.IsValid()) {
         DeleteBackward(1, false);
     }
+    previewTextRecord_.isPreviewTextInputting = true;
     TextSpanOptions options;
     options.value = previewTextValue;
     options.offset = caretPosition_;
@@ -3132,16 +3136,22 @@ bool RichEditorPattern::UpdatePreviewText(const std::string& previewTextValue, c
         auto length = static_cast<int32_t>(StringUtils::ToWstring(previewTextSpan->content).length());
         previewTextRecord_.endOffset = previewTextRecord_.startOffset + length;
     }
+    UpdateSpanPosition();
     return true;
 }
 
 void RichEditorPattern::FinishTextPreview()
 {
     CHECK_NULL_VOID(IsPreviewTextInputting());
-    if (previewTextRecord_.previewTextSpan && !previewTextRecord_.previewTextSpan->content.empty()) {
-        OperationRecord record;
-        record.addText = previewTextRecord_.previewTextSpan->content;
-        AddOperationRecord(record);
+    if (previewTextRecord_.previewTextSpan && previewTextRecord_.previewTextSpan->content.empty()) {
+        auto iter = std::find(spans_.begin(), spans_.end(), previewTextRecord_.previewTextSpan);
+        if (iter != spans_.end()) {
+            auto spanIndex = std::distance(spans_.begin(), iter);
+            spans_.erase(iter);
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->RemoveChildAtIndex(spanIndex);
+        }
     }
     previewTextRecord_.Reset();
     auto host = GetHost();
@@ -3219,10 +3229,9 @@ bool RichEditorPattern::BetweenPreviewTextPosition(const Offset& globalOffset)
 
 void RichEditorPattern::InsertValueInPreview(const std::string& insertValue)
 {
-    auto previewTextSpan = previewTextRecord_.previewTextSpan;
-    previewTextSpan->content = insertValue;
-    auto length = static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
-    SetCaretPosition(previewTextRecord_.startOffset + length);
+    if (previewTextRecord_.previewTextSpan) {
+        previewTextRecord_.previewTextSpan->content.clear();
+    }
     FinishTextPreview();
 }
 
@@ -3234,7 +3243,6 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     }
     if (IsPreviewTextInputting()) {
         InsertValueInPreview(insertValue);
-        return;
     }
     InsertValue(insertValue, true);
 }
