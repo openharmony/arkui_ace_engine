@@ -36,6 +36,7 @@ class ArkThemeWhiteList {
         'Progress',
         'QRCode',
         'Radio',
+        "Scroll",
         'Search',
         'Select',
         'Slider',

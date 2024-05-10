@@ -895,6 +895,7 @@ ArkThemeWhiteList.whiteList = [
     'Progress',
     'QRCode',
     'Radio',
+    "Scroll",
     'Search',
     'Select',
     'Slider',
