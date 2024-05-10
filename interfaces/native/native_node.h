@@ -1485,6 +1485,10 @@ typedef enum {
 
     NODE_FOREGROUND_BLUR_STYLE,
 
+    NODE_LAYOUT_RECT,
+
+    NODE_FOCUS_ON_TOUCH,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *

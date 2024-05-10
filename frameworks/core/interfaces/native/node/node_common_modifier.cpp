@@ -2560,6 +2560,14 @@ void ResetFocusOnTouch(ArkUINodeHandle node)
     bool focusOnTouch = false;
     ViewAbstract::SetFocusOnTouch(frameNode, focusOnTouch);
 }
+
+ArkUI_Bool GetFocusOnTouch(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(ViewAbstract::GetFocusOnTouch(frameNode));
+}
+
 void SetFocusable(ArkUINodeHandle node, ArkUI_Bool focusable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5341,7 +5349,7 @@ const ArkUICommonModifier* GetCommonModifier()
         SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
         SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
         ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap, SetLayoutRect, GetLayoutRect,
-        ResetLayoutRect };
+        ResetLayoutRect, GetFocusOnTouch };
 
     return &modifier;
 }

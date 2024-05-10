@@ -644,6 +644,7 @@ public:
     static void SetLayoutRect(FrameNode* frameNode, const NG::RectF& rect);
     static void ResetLayoutRect(FrameNode* frameNode);
     static NG::RectF GetLayoutRect(FrameNode* frameNode);
+    static bool GetFocusOnTouch(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();
