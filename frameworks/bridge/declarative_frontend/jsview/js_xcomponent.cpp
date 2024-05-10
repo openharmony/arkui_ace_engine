@@ -215,9 +215,14 @@ void JSXComponent::Create(const JSCallbackInfo& info)
 
 void* JSXComponent::Create(const XComponentParams& params)
 {
+    std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
+    if (params.controller) {
+        xcomponentController = params.controller->GetController();
+    }
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(XComponentModel::GetInstance()->Create(params.elmtId,
         static_cast<float>(params.width), static_cast<float>(params.height), params.xcomponentId,
-        static_cast<XComponentType>(params.xcomponentType), params.libraryName, nullptr));
+        static_cast<XComponentType>(params.xcomponentType), params.libraryName, xcomponentController));
+    frameNode->SetIsArkTsFrameNode(true);
     auto pattern = frameNode->GetPattern<NG::XComponentPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->SetRenderType(static_cast<NodeRenderType>(params.renderType));

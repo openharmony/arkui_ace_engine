@@ -55,6 +55,8 @@ declare enum XComponentType {
   TEXTURE
 }
 
+declare interface XComponentController { }
+
 declare abstract class ViewPU {
   id__(): number;
   aboutToUpdate?: (updateParams: Object) => void;

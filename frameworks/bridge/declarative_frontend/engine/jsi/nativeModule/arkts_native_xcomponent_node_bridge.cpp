@@ -16,6 +16,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_node_bridge.h"
 
 #include "bridge/declarative_frontend/jsview/js_xcomponent.h"
+#include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
+
 namespace OHOS::Ace::NG {
 
 ArkUINativeModuleValue XComponentNodeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -63,6 +65,12 @@ ArkUINativeModuleValue XComponentNodeBridge::Create(ArkUIRuntimeCallInfo* runtim
     arg = runtimeCallInfo->GetCallArgRef(7);
     if (arg->IsString()) {
         params.libraryName = arg->ToString(vm)->ToString();
+    }
+    // xComponentController
+    arg = runtimeCallInfo->GetCallArgRef(8);
+    if (!arg->IsUndefined()) {
+        params.controller =
+            static_cast<Framework::JSXComponentController*>(Local<panda::ObjectRef>(arg)->GetNativePointerField(0));
     }
 
     void* jsXComponent = Framework::JSXComponent::Create(params);
