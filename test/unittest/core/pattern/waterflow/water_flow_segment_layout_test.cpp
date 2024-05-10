@@ -1684,6 +1684,17 @@ HWTEST_F(WaterFlowSegmentTest, Replace003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.currentOffset_, -2000.0f);
     EXPECT_EQ(info.startIndex_, 20);
+    EXPECT_EQ(GetChildY(frameNode_, 20), -61.0f);
+
+    AddItems(7);
+    frameNode_->ChildrenUpdatedFrom(7);
+    secObj->ChangeData(1, 1, ADD_SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    EXPECT_EQ(info.itemInfos_.size(), 14);
+    EXPECT_EQ(info.segmentTails_[1], 13);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 20);
+    EXPECT_EQ(GetChildY(frameNode_, 20), -61.0f);
 }
 
 /**

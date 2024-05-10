@@ -176,6 +176,13 @@ const std::vector<WaterFlowSections::Section> SECTION_7 = {
         .margin = MARGIN_2 },
 };
 
+const std::vector<WaterFlowSections::Section> ADD_SECTION_7 = {
+    WaterFlowSections::Section { .itemsCount = 10,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC,
+        .crossCount = 2,
+        .columnsGap = 5.0_vp },
+};
+
 const std::function<float(int32_t)> GET_MAIN_SIZE_ILLEGAL = [](int32_t idx) { return -100.0f; };
 const std::vector<WaterFlowSections::Section> SECTION_8 = {
     WaterFlowSections::Section { .itemsCount = 10,
