@@ -482,6 +482,63 @@ void SetControlSize(ArkUINodeHandle node, ArkUI_Int32 value)
 
 void ResetControlSize(ArkUINodeHandle node) {}
 
+void SetSelectValue(ArkUINodeHandle node, ArkUI_CharPtr* values, ArkUI_CharPtr* icons, ArkUI_Uint32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(values);
+    CHECK_NULL_VOID(icons);
+    std::vector<SelectParam> params;
+    for (uint32_t i = 0; i < length; i++) {
+        if (!values[i]) {
+            return;
+        }
+        params.emplace_back(std::make_pair(values[i], icons[i]));
+    }
+    SelectModelNG::InitSelect(frameNode, params);
+}
+
+void ResetSelectValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<SelectParam> params;
+    SelectModelNG::InitSelect(frameNode, params);
+}
+
+void SetMenuBgColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetMenuBackgroundColor(frameNode, Color(color));
+}
+
+void ResetMenuBgColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto selectTheme = GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    SelectModelNG::SetMenuBackgroundColor(frameNode, selectTheme->GetBackgroundColor());
+}
+
+void SetMenuBgBlurStyle(ArkUINodeHandle node, ArkUI_Int32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = static_cast<OHOS::Ace::BlurStyle>(style);
+    SelectModelNG::SetMenuBackgroundBlurStyle(frameNode, styleOption);
+}
+
+void ResetMenuBgBlurStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlurStyleOption styleOption;
+    SelectModelNG::SetMenuBackgroundBlurStyle(frameNode, styleOption);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -492,9 +549,26 @@ const ArkUISelectModifier* GetSelectModifier()
         ResetSelectedOptionFontColor, ResetArrowPosition, ResetMenuAlign, ResetFont, ResetOptionFont,
         ResetSelectedOptionFont, SetSelectWidth, ResetSelectWidth, SetSelectHeight, ResetSelectHeight, SetSelectSize,
         ResetSelectSize, SetSelectOptionWidthFitTrigger, SetSelectOptionWidth, ResetSelectOptionWidth,
-        SetSelectOptionHeight, ResetSelectOptionHeight, SetControlSize, ResetControlSize };
+        SetSelectOptionHeight, ResetSelectOptionHeight, SetControlSize, ResetControlSize, SetSelectValue,
+        ResetSelectValue, SetMenuBgColor, ResetMenuBgColor, SetMenuBgBlurStyle, ResetMenuBgBlurStyle };
 
     return &modifier;
+}
+
+void SetOnSelectSelect(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](int32_t index, const std::string& value) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_ARRAY;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        const char* arrayValue[] = {value.c_str(), std::to_string(index).c_str()};
+        event.textArrayEvent.subKind = ON_SELECT_SELECT;
+        event.textArrayEvent.nativeStringArrayPtr = reinterpret_cast<intptr_t>(arrayValue);
+        SendArkUIAsyncEvent(&event);
+    };
+    SelectModelNG::SetOnSelect(frameNode, std::move(onEvent));
 }
 }
 } // namespace OHOS::Ace::NG

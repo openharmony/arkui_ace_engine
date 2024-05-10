@@ -78,7 +78,10 @@ class BuilderNode {
         return this._JSBuilderNode.getFrameNodeWithoutCheck();
     }
     postTouchEvent(touchEvent) {
-        return this._JSBuilderNode.postTouchEvent(touchEvent);
+        __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+        let ret = this._JSBuilderNode.postTouchEvent(touchEvent);
+        __JSScopeUtil__.restoreInstanceId();
+        return ret;
     }
     dispose() {
         this._JSBuilderNode.dispose();
@@ -521,6 +524,26 @@ class FrameNode {
         this._nativeRef = null;
         this.nodePtr_ = null;
     }
+    static disposeTreeRecursively(node) {
+        if (node === null) {
+            return;
+        }
+        let child = node.getFirstChild();
+        FrameNode.disposeTreeRecursively(child);
+        let sibling = node.getNextSibling();
+        FrameNode.disposeTreeRecursively(sibling);
+        node.dispose();
+    }
+    disposeTree() {
+        let parent = this.getParent();
+        if (parent?.getNodeType() == "NodeContainer") {
+            getUINativeModule().nodeContainer.clean(parent?.getNodePtr());
+        }
+        else {
+            parent?.removeChild(this);
+        }
+        FrameNode.disposeTreeRecursively(this);
+    }
     checkType() {
         if (!this.isModifiable()) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -939,6 +962,31 @@ const __creatorMap__ = new Map([
     ["GridCol", (context) => {
             return new TypedFrameNode(context, "GridCol", (node, type) => {
                 return new ArkGridColComponent(node, type);
+            });
+        }],
+    ["Blank", (context) => {
+            return new TypedFrameNode(context, "Blank", (node, type) => {
+                return new ArkBlankComponent(node, type);
+            });
+        }],
+    ["Image", (context) => {
+            return new TypedFrameNode(context, "Image", (node, type) => {
+                return new ArkImageComponent(node, type);
+            });
+        }],
+    ["Flex", (context) => {
+            return new TypedFrameNode(context, "Flex", (node, type) => {
+                return new ArkFlexComponent(node, type);
+            });
+        }],
+    ["Swiper", (context) => {
+            return new TypedFrameNode(context, "Swiper", (node, type) => {
+                return new ArkSwiperComponent(node, type);
+            });
+        }],
+    ["Progress", (context) => {
+            return new TypedFrameNode(context, "Progress", (node, type) => {
+                return new ArkProgressComponent(node, type);
             });
         }],
 ]);

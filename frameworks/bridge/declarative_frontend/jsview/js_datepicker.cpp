@@ -190,7 +190,9 @@ JSRef<JSVal> DatePickerDateChangeEventToJSValue(const DatePickerChangeEvent& eve
         dateTime.tm_min = minute->GetInt();
     }
 
-    auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
+    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
+    auto duration = timestamp.time_since_epoch();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     auto dateObj = JSDate::New(milliseconds);
     return JSRef<JSVal>::Cast(dateObj);
 }
@@ -959,6 +961,11 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     settingData.lunarswitch = lunarSwitch->ToBoolean();
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
+    auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
+    if (dateTimeOptionsValue->IsObject()) {
+        auto dateTimeOptionsObj = JSRef<JSObject>::Cast(dateTimeOptionsValue);
+        JSDatePickerDialog::ParseDateTimeOptions(dateTimeOptionsObj, settingData.dateTimeOptions);
+    }
     auto parseStartDate = ParseDate(startDate);
     auto parseEndDate = ParseDate(endDate);
     if (parseStartDate.GetYear() <= 0) {
@@ -1219,6 +1226,31 @@ PickerTime JSDatePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
         pickerTime.SetSecond(second->ToNumber<int32_t>());
     }
     return pickerTime;
+}
+
+void JSDatePickerDialog::ParseDateTimeOptions(const JSRef<JSObject>& paramObj, DateTimeType& dateTimeOptions)
+{
+    dateTimeOptions.hourType = ZeroPrefixType::AUTO;
+    dateTimeOptions.minuteType = ZeroPrefixType::AUTO;
+    dateTimeOptions.secondType = ZeroPrefixType::AUTO;
+
+    auto hourValue = paramObj->GetProperty(TIMEPICKER_OPTIONS_HOUR);
+    if (hourValue->IsString()) {
+        std::string hour = hourValue->ToString();
+        if (hour == TIMEPICKER_OPTIONS_TWO_DIGIT_VAL) {
+            dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+        } else if (hour == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+            dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+        }
+    }
+    auto minuteValue = paramObj->GetProperty(TIMEPICKER_OPTIONS_MINUTE);
+    if (minuteValue->IsString()) {
+        dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+        std::string minute = minuteValue->ToString();
+        if (minute == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+            dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+        }
+    }
 }
 
 void JSTimePicker::JSBind(BindingTarget globalObj)
@@ -1571,6 +1603,11 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
     JSDatePicker::ParseTextProperties(paramObject, settingData.properties);
+    auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
+    if (dateTimeOptionsValue->IsObject()) {
+        auto dateTimeOptionsObj = JSRef<JSObject>::Cast(dateTimeOptionsValue);
+        JSDatePickerDialog::ParseDateTimeOptions(dateTimeOptionsObj, settingData.dateTimeOptions);
+    }
 
     // Parse alignment
     auto alignmentValue = paramObject->GetProperty("alignment");

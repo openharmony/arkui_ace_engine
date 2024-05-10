@@ -53,9 +53,16 @@ struct SpanParagraphStyle {
 
     bool Equal(const SpanParagraphStyle& other) const
     {
-        return align == other.align && maxLines == other.maxLines && wordBreak == other.wordBreak &&
-               textOverflow == other.textOverflow && leadingMargin == other.leadingMargin &&
-               textIndent == other.textIndent;
+        auto flag = align == other.align && maxLines == other.maxLines && wordBreak == other.wordBreak &&
+                    textOverflow == other.textOverflow && textIndent == other.textIndent;
+        if (leadingMargin.has_value() && other.leadingMargin.has_value()) {
+            flag &= leadingMargin.value().CheckLeadingMargin(other.leadingMargin.value());
+        } else if (!leadingMargin.has_value() && !other.textOverflow.has_value()) {
+            flag &= true;
+        } else {
+            flag &= false;
+        }
+        return flag;
     }
 };
 

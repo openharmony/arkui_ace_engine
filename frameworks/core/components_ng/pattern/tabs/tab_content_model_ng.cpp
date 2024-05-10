@@ -549,8 +549,6 @@ void TabContentModelNG::UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<Te
 
 void TabContentModelNG::UpdateDefaultSymbol(RefPtr<TabTheme>& tabTheme, RefPtr<TextLayoutProperty> symbolProperty)
 {
-    symbolProperty->UpdateUserDefinedIdealSize(CalcSize(
-        NG::CalcLength(tabTheme->GetBottomTabImageSize()), NG::CalcLength(tabTheme->GetBottomTabImageSize())));
     symbolProperty->UpdateFontSize(tabTheme->GetBottomTabImageSize());
     symbolProperty->UpdateSymbolRenderingStrategy(DEFAULT_RENDERING_STRATEGY);
     auto symbolEffectOptions = SymbolEffectOptions(SymbolEffectType::BOUNCE);

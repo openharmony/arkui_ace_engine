@@ -58,7 +58,10 @@ public:
     void ResizeWindow() override;
     NG::RectF GetRect() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
-    void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
+    void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, const NG::MenuParam& menuParam,
+        const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
+    void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
+        const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
     bool ShowPreviewNG() override;
     void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
@@ -139,6 +142,7 @@ public:
     void ResizeWindowForFoldStatus() override;
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
     void MarkDirtyDialogSafeArea() override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);

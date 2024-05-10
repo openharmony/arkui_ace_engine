@@ -21,11 +21,13 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
-#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS {
 
+namespace Ace {
+class Rect;
+}
 namespace Media {
 class PixelMap;
 }

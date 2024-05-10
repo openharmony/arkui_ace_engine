@@ -38,6 +38,12 @@ namespace OHOS::Ace {
         OFF = 3
     };
 
+    struct DateTimeType {
+        ZeroPrefixType hourType;
+        ZeroPrefixType minuteType;
+        ZeroPrefixType secondType;
+    };
+
 class ACE_FORCE_EXPORT TimeFormat : public NonCopyable {
 public:
 

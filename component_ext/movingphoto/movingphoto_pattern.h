@@ -66,7 +66,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::SCOPE, true };
+        return { FocusType::NODE, false };
     }
 
 protected:
@@ -117,7 +117,9 @@ private:
     void OnStartRenderFrame();
 
     void Start();
+    void Pause();
     void Stop();
+    void Seek(int32_t position);
 
     void StartPlayback();
     void StartAnimation();
@@ -136,11 +138,10 @@ private:
     // video related params
     int32_t fd_ = -1;
     bool isPrepared_ = false;
-    bool isPlaying_ = false;
-    bool isStoped_ = false;
     bool isMuted_ = false;
-    bool isShowVideo_ = false;
     bool isPlayByController_ = false;
+    bool isFastKeyUp_ = false;
+    PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
 
     Rect lastBoundsRect_;
 

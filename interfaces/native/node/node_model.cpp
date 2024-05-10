@@ -139,7 +139,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         ARKUI_CHECKBOX, ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER,
         ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST,
         ARKUI_LIST_ITEM, ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW,
-        ARKUI_FLOW_ITEM, ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_GRID_ROW, ARKUI_GRID_COL };
+        ARKUI_FLOW_ITEM, ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM };
     // already check in entry point.
     int32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     auto* impl = GetFullImpl();
@@ -587,6 +587,23 @@ int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(
         nodePtr->eventListeners = nullptr;
     }
     return ERROR_CODE_NO_ERROR;
+}
+
+void* GetParseJsMedia()
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return nullptr;
+    }
+    void (*parseJsMedia)(void* value, void* resource) = nullptr;
+    parseJsMedia = reinterpret_cast<void (*)(void*, void*)>(
+        FindFunction(module, "OHOS_ACE_ParseJsMedia"));
+    if (!parseJsMedia) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_ParseJsMedia");
+        return nullptr;
+    }
+    return reinterpret_cast<void*>(parseJsMedia);
 }
 } // namespace OHOS::Ace::NodeModel
 

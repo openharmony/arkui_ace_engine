@@ -41,6 +41,7 @@ public:
     static RefPtr<FrameNode> CreateCalendarNodeChild(
         int32_t contentId, const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme);
     static RefPtr<FrameNode> CreateButtonFlexChild(int32_t buttonFlexId, const RefPtr<CalendarTheme>& theme);
+    static void CreateDateNode(int32_t contentId, const CalendarSettingData& settingData);
     static RefPtr<FrameNode> CreateDateTextNode(const std::string& textContent);
     static void SetHintRadiusWithNode(FrameNode* frameNode, Dimension& radius);
     static void SetSelectDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day);

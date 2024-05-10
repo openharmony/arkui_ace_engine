@@ -165,7 +165,7 @@ void SwitchPattern::UpdateSwitchLayoutProperty()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    direction_ = layoutProperty->GetLayoutDirection();
+    direction_ = layoutProperty->GetNonAutoLayoutDirection();
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {

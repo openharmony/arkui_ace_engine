@@ -19,6 +19,7 @@ namespace OHOS::Ace {
 
 // theme attributes
 const char THEME_ATTR_BG_COLOR[] = "bg_color";
+const char THEME_ATTR_HOVER_COLOR[] = "hover_color";
 
 // component patterns
 const char THEME_PATTERN_BUTTON[] = "button_pattern";

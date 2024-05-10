@@ -74,9 +74,10 @@ public:
 
     bool operator==(const ParticlePropertyAnimation<T>& other) const
     {
+        bool isCurveEqual = (curve_ && curve_->IsEqual(other.GetCurve())) || (!curve_ && !other.GetCurve());
         return NearEqual(from_, other.GetFrom()) && NearEqual(to_, other.GetTo()) &&
                (startMills_ == other.GetStartMills()) && (endMills_ == other.GetEndMills()) &&
-               (curve_ == other.GetCurve());
+               isCurveEqual;
     }
 
     std::string ToString() const

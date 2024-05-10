@@ -1481,6 +1481,37 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridIrregularLayout::TemplateChange003
+ * @tc.desc: Test changing template
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, TemplateChange003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo13());
+        model.SetColumnsGap(Dimension { 1.0f });
+        CreateFixedHeightItems(1, 900.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 600.0f);
+        CreateFixedHeightItems(1, 1800.0f);
+        CreateFixedHeightItems(5, 300.0f);
+    });
+    pattern_->ScrollToIndex(3, false, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 3), -500.0f);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr 1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    pattern_->ScrollToIndex(3, true, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    pattern_->finalPosition_ = Infinity<float>();
+    // finalPosition shouldn't be set because targetPos = current pos
+    EXPECT_EQ(pattern_->finalPosition_, Infinity<float>());
+}
+
+/**
  * @tc.name: DeleteItem001
  * @tc.desc: Test removing item from end
  * @tc.type: FUNC

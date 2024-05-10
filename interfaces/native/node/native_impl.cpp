@@ -143,7 +143,7 @@ extern "C" {
 
 void* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version)
 {
-    if (!OHOS::Ace::NodeModel::GetFullImpl()) {
+    if (!OHOS::Ace::NodeModel::InitialFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
             "fail to get %{public}d node api family of %{public}d version, impl library is not found", type, version);
         return nullptr;

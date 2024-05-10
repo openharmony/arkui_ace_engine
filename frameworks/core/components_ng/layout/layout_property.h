@@ -236,9 +236,31 @@ public:
 
     bool UpdateGridOffset(const RefPtr<FrameNode>& host);
 
+    void SetLayoutRect(const NG::RectF& rect)
+    {
+        if (layoutRect_ != rect) {
+            propertyChangeFlag_ |= PROPERTY_UPDATE_MEASURE_SELF;
+            layoutRect_ = rect;
+        }
+    }
+
+    void ResetLayoutRect()
+    {
+        if (layoutRect_) {
+            propertyChangeFlag_ |= PROPERTY_UPDATE_MEASURE_SELF;
+            layoutRect_.reset();
+        }
+    }
+
+    std::optional<NG::RectF> GetLayoutRect() const
+    {
+        return layoutRect_;
+    }
+
     void BuildGridProperty(const RefPtr<FrameNode>& host);
 
     void UpdateContentConstraint();
+    void UpdateLayoutConstraintWithLayoutRect();
 
     LayoutConstraintF CreateChildConstraint() const;
 
@@ -347,6 +369,7 @@ private:
     std::unique_ptr<GridProperty> gridProperty_;
     std::optional<MeasureType> measureType_;
     std::optional<TextDirection> layoutDirection_;
+    std::optional<RectF> layoutRect_;
 
     WeakPtr<GeometryTransition> geometryTransition_;
 

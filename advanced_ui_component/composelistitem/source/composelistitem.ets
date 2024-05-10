@@ -58,7 +58,7 @@ export declare class OperateIcon {
 }
 
 export declare class OperateButton {
-  text?: string;
+  text?: ResourceStr;
 }
 
 export declare class OperateCheck {
@@ -116,10 +116,10 @@ const ICON_SIZE_MAP: Map<number, number> = new Map([
 @Component
 struct ContentItemStruct {
   iconStyle: IconType | null = null;
-  icon: Resource | null = null;
-  primaryText: string | null = null;
-  secondaryText: string | null = null;
-  description: string | null = null;
+  icon: ResourceStr | null = null;
+  primaryText: ResourceStr | null = null;
+  secondaryText: ResourceStr | null = null;
+  description: ResourceStr | null = null;
   private itemRowSpace: number = NORMAL_ITEM_ROW_SPACE
   @State leftWidth: string = LEFT_PART_WIDTH
 
@@ -218,8 +218,8 @@ struct OperateItemStruct {
   switch: OperateCheck | null = null;
   checkBox: OperateCheck | null = null;
   radio: OperateCheck | null = null;
-  image: Resource | null = null;
-  text: string | null = null;
+  image: ResourceStr | null = null;
+  text: ResourceStr | null = null;
   @State switchState: boolean = false
   @State radioState: boolean = false
   @State checkBoxState: boolean = false
@@ -250,7 +250,7 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createButton(text: string) {
+  createButton(text: ResourceStr) {
     Button() {
       Row() {
         Text(text)
@@ -337,7 +337,7 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createImage(image: Resource) {
+  createImage(image: ResourceStr) {
     Image(image)
       .height(OPERATEITEM_IMAGE_SIZE)
       .width(OPERATEITEM_IMAGE_SIZE)
@@ -346,7 +346,7 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createText(text: string) {
+  createText(text: ResourceStr) {
     Text(text)
       .margin({ right: LISTITEM_PADDING })
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
@@ -505,7 +505,7 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createTextArrow(text: string, icon: OperateIcon) {
+  createTextArrow(text: ResourceStr, icon: OperateIcon) {
     Button({ type: ButtonType.Normal }) {
       Row({ space: SPECICAL_ROW_SPACE }) {
         Text(text)
@@ -566,7 +566,7 @@ struct OperateItemStruct {
       space: this.rowSpace
     }) {
       if (this.button != null) {
-        this.createButton(this.button.text as string)
+        this.createButton(this.button.text as ResourceStr)
       }
 
       else if (this.image != null) {
@@ -681,11 +681,11 @@ export struct ComposeListItem {
         }
         if (this.contentItem !== null) {
           ContentItemStruct({
-            icon: typeof this.contentItem.icon === 'string' ? null : this.contentItem.icon,
+            icon: this.contentItem.icon,
             iconStyle: this.contentItem.iconStyle,
-            primaryText: typeof this.contentItem.primaryText === 'string' ? this.contentItem.primaryText : null,
-            secondaryText: typeof this.contentItem.secondaryText === 'string' ? this.contentItem.secondaryText : null,
-            description: typeof this.contentItem.description === 'string' ? this.contentItem.description : null,
+            primaryText: this.contentItem.primaryText,
+            secondaryText: this.contentItem.secondaryText,
+            description: this.contentItem.description,
             leftWidth: this.calculatedLeftWidth()
           })
         }
@@ -697,9 +697,9 @@ export struct ComposeListItem {
             switch: this.operateItem.switch,
             checkBox: this.operateItem.checkbox,
             radio: this.operateItem.radio,
-            image: typeof this.operateItem.image === 'string' ? null : this.operateItem.image,
-            text: typeof this.operateItem.text === 'string' ? this.operateItem.text : null,
-            arrow: typeof this.operateItem.arrow === 'string' ? null : this.operateItem.arrow,
+            image: this.operateItem.image,
+            text: this.operateItem.text,
+            arrow: this.operateItem.arrow,
             parentCanFocus: this.canFocus,
             parentCanTouch: this.canTouch,
             parentIsHover: this.isHover,

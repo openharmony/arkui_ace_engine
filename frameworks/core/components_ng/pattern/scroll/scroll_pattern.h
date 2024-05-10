@@ -299,7 +299,6 @@ public:
 
     void SetEnablePaging(ScrollPagingStatus status)
     {
-        CHECK_NULL_VOID(enablePagingStatus_ != ScrollPagingStatus::INVALID);
         enablePagingStatus_ =  status;
     }
 

@@ -952,6 +952,24 @@ class TextInputPaddingModifier extends ModifierWithKey<ArkPadding> {
   }
 }
 
+class TextInputContentTypeModifier extends ModifierWithKey<ContentType> {
+  constructor(value: ContentType) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputContentType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetContentType(node);
+    }
+    else {
+      getUINativeModule().textInput.setContentType(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1249,6 +1267,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     else {
       modifierWithKey(this._modifiersWithKeys, TextInputPaddingModifier.identity, TextInputPaddingModifier, undefined);
     }
+    return this;
+  }
+  contentType(value: ContentType): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputContentTypeModifier.identity, TextInputContentTypeModifier, value);
     return this;
   }
 }

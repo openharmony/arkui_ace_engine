@@ -154,11 +154,9 @@ ArkUI_GestureRecognizer* OH_ArkUI_GestureInterruptInfo_GetRecognizer(const ArkUI
 ArkUI_GestureEvent* OH_ArkUI_GestureInterruptInfo_GetGestureEvent(const ArkUI_GestureInterruptInfo* event)
 {
     ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent *>(event->interruptData.event);
-    ArkUI_UIInputEvent uiEvent;
-    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
-    uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
-    uiEvent.inputEvent = gestureEvent->eventData.rawPointerEvent;
-    gestureEvent->eventData.rawPointerEvent = &uiEvent;
+    ArkUI_UIInputEvent* uiEvent = new ArkUI_UIInputEvent{
+        ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, gestureEvent->eventData.rawPointerEvent };
+    gestureEvent->eventData.rawPointerEvent = uiEvent;
     return gestureEvent;
 }
 
@@ -336,7 +334,7 @@ int32_t SetGestureInterrupterToNode(
 {
     auto callback = reinterpret_cast<int32_t (*)(ArkUIGestureInterruptInfo*)>(interrupter);
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->setGestureInterrupterToNode(
-         node->uiNodeHandle, callback);
+        node->uiNodeHandle, callback);
     return 0;
 }
 

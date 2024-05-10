@@ -206,10 +206,10 @@ RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
     return subwindow;
 }
 
-void SubwindowManager::ShowMenuNG(
-    const RefPtr<NG::FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset, bool isAboveApps)
+void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const NG::MenuParam& menuParam,
+    const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menung enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
     auto containerId = Container::CurrentId();
     auto subwindow = GetSubwindow(containerId);
     if (!subwindow) {
@@ -217,7 +217,21 @@ void SubwindowManager::ShowMenuNG(
         subwindow->InitContainer();
         AddSubwindow(containerId, subwindow);
     }
-    subwindow->ShowMenuNG(menuNode, targetId, offset);
+    subwindow->ShowMenuNG(menuNode, menuParam, targetNode, offset);
+}
+
+void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
+    const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    subwindow->ShowMenuNG(std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
 }
 
 void SubwindowManager::HidePreviewNG()
@@ -239,7 +253,7 @@ void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t tar
 
 void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menung enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
         subwindow->HideMenuNG(showPreviewAnimation, startDrag);
@@ -256,7 +270,7 @@ void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
 
 void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool inWindow, bool showAnimation)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menung enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -589,14 +603,14 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
         auto subwindow = GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast");
-        subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
+        subwindow->ShowToast(message, duration, bottom, showMode, alignment, offset);
     } else {
         // for ability
         auto container = Container::CurrentSafely();
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [containerId, message, duration, bottom, showMode, alignment,  offset] {
+            [containerId, message, duration, bottom, showMode, alignment, offset] {
                 auto manager = SubwindowManager::GetInstance();
                 CHECK_NULL_VOID(manager);
                 auto subwindow = manager->GetSubwindow(containerId);
@@ -607,7 +621,7 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
                     manager->AddSubwindow(containerId, subwindow);
                 }
                 TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
-                subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
+                subwindow->ShowToast(message, duration, bottom, showMode, alignment, offset);
             },
             TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToast");
     }
@@ -846,7 +860,6 @@ void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId)
     }
     subwindow->ResizeWindowForFoldStatus(parentContainerId);
 }
-
 
 void SubwindowManager::MarkDirtyDialogSafeArea()
 {

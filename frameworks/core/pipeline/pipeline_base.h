@@ -1151,12 +1151,12 @@ public:
         return false;
     }
 
-    void setProfilerStatus(bool stateProfilerStatus)
+    void SetStateProfilerStatus(bool stateProfilerStatus)
     {
         stateProfilerStatus_ = stateProfilerStatus;
     }
 
-    bool getProfilerStatus() const
+    bool GetStateProfilerStatus() const
     {
         return stateProfilerStatus_;
     }

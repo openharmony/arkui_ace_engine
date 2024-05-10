@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -41,39 +43,138 @@ void BarItemPattern::OnModifyDone()
     gesture->AddClickEvent(clickListener_);
 }
 
+void UpdateSymbolBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& iconNode,
+    const Color& iconColor, std::function<void(WeakPtr<NG::FrameNode>)>& symbol, ImageSourceInfo& info)
+{
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto iconSize = theme->GetToolbarIconSize();
+    if (symbol != nullptr) {
+        // symbol -> symbol
+        symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
+        auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolProperty);
+        symbolProperty->UpdateSymbolColorList({iconColor});
+        iconNode->MarkModifyDone();
+        iconNode->MarkDirtyNode();
+    } else {
+        // symbol -> image
+        barItemNode->RemoveChild(iconNode);
+        auto iconNodeNew = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        auto imageLayoutProperty = iconNodeNew->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdateImageSourceInfo(info);
+        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+        iconNodeNew->MarkModifyDone();
+        iconNodeNew->MarkDirtyNode();
+        barItemNode->SetIconNode(iconNodeNew);
+        barItemNode->AddChild(iconNodeNew);
+    }
+}
+
+void UpdateImageBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& iconNode,
+    const Color& iconColor, std::function<void(WeakPtr<NG::FrameNode>)>& symbol, ImageSourceInfo& info)
+{
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto iconSize = theme->GetToolbarIconSize();
+    if (symbol != nullptr) {
+        // image -> symbol
+        barItemNode->RemoveChild(iconNode);
+        auto iconNodeNew = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_VOID(iconNodeNew);
+        auto symbolProperty = iconNodeNew->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolProperty);
+        auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.SetEffectType(SymbolEffectType::BOUNCE);
+        symbolEffectOptions.SetIsTxtActive(true);
+        symbolEffectOptions.SetIsTxtActiveSource(0);
+        symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+        symbolProperty->UpdateFontSize(iconSize);
+        symbolProperty->UpdateSymbolColorList({ iconColor });
+        symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNodeNew)));
+        iconNodeNew->MarkModifyDone();
+        iconNodeNew->MarkDirtyNode();
+        barItemNode->SetIconNode(iconNodeNew);
+        barItemNode->AddChild(iconNodeNew);
+    } else {
+        // image -> image
+        auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdateImageSourceInfo(info);
+        iconNode->MarkModifyDone();
+        iconNode->MarkDirtyNode();
+    }
+}
+
+void UpdateSymbolEffect(const RefPtr<FrameNode>& iconNode)
+{
+    auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolProperty);
+    auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    symbolEffectOptions.SetEffectType(SymbolEffectType::BOUNCE);
+    symbolEffectOptions.SetIsTxtActive(true);
+    symbolEffectOptions.SetIsTxtActiveSource(0);
+    symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void BarItemPattern::UpdateBarItemActiveStatusResource()
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
 
     auto barItemNode = AceType::DynamicCast<BarItemNode>(GetHost());
+    CHECK_NULL_VOID(barItemNode);
     auto status = GetToolbarItemStatus();
     auto iconStatus = GetCurrentIconStatus();
 
     auto iconNode = DynamicCast<FrameNode>(barItemNode->GetIconNode());
     CHECK_NULL_VOID(iconNode);
-    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
+
+    if (iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        UpdateSymbolEffect(iconNode);
+    }
+
     auto textNode = DynamicCast<FrameNode>(barItemNode->GetTextNode());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (status == NavToolbarItemStatus::ACTIVE && iconStatus == ToolbarIconStatus::INITIAL) {
-        imageLayoutProperty->UpdateImageSourceInfo(GetActiveIconImageSourceInfo());
-        iconNode->MarkModifyDone();
-        iconNode->MarkDirtyNode();
-        textLayoutProperty->UpdateTextColor(theme->GetToolBarItemActiveFontColor());
+
+    ImageSourceInfo info;
+    ToolbarIconStatus barIconStatus;
+    Color textColor;
+    Color iconColor;
+    std::function<void(WeakPtr<NG::FrameNode>)> symbol;
+    if (iconStatus == ToolbarIconStatus::INITIAL) {
+        info = GetActiveIconImageSourceInfo();
+        barIconStatus = ToolbarIconStatus::ACTIVE;
+        textColor = theme->GetToolBarItemActiveFontColor();
+        symbol = GetActiveIconSymbol();
+        iconColor = theme->GetToolbarActiveIconColor();
+    }
+    if (iconStatus == ToolbarIconStatus::ACTIVE) {
+        info = GetInitialIconImageSourceInfo();
+        barIconStatus = ToolbarIconStatus::INITIAL;
+        textColor = theme->GetToolBarItemFontColor();
+        symbol = GetInitialIconSymbol();
+        iconColor = theme->GetToolbarIconColor();
+    }
+
+    if (status == NavToolbarItemStatus::ACTIVE) {
+        if (iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+            UpdateSymbolBarButton(barItemNode, iconNode, iconColor, symbol, info);
+        } else {
+            UpdateImageBarButton(barItemNode, iconNode, iconColor, symbol, info);
+        }
+        barItemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        barItemNode->MarkDirtyNode();
+        textLayoutProperty->UpdateTextColor(textColor);
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
-        SetCurrentIconStatus(ToolbarIconStatus::ACTIVE);
-    } else if (status == NavToolbarItemStatus::ACTIVE && iconStatus == ToolbarIconStatus::ACTIVE) {
-        imageLayoutProperty->UpdateImageSourceInfo(GetInitialIconImageSourceInfo());
-        iconNode->MarkModifyDone();
-        iconNode->MarkDirtyNode();
-        textLayoutProperty->UpdateTextColor(theme->GetToolBarItemFontColor());
-        textNode->MarkModifyDone();
-        textNode->MarkDirtyNode();
-        SetCurrentIconStatus(ToolbarIconStatus::INITIAL);
+        SetCurrentIconStatus(barIconStatus);
     }
 }
 } // namespace OHOS::Ace::NG

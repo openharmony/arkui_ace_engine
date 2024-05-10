@@ -154,6 +154,8 @@ public:
         isFirstShow_ = true;
     }
 
+    void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
+
     void RegisterMenuAppearCallback(const std::function<void()>& onAppear)
     {
         onAppearCallback_ = onAppear;
@@ -244,6 +246,8 @@ public:
         hasTransitionEffect_ = hasTransitionEffect;
     }
 
+    void SetMenuTransitionEffect(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
+
     bool HasPreviewTransitionEffect() const
     {
         return hasPreviewTransitionEffect_;
@@ -263,7 +267,7 @@ public:
     {
         return filterColumnNode_;
     }
-    
+
     void DumpInfo() override;
 
     MenuDumpInfo GetDumpInfo() const

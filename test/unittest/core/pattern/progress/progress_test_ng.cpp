@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
@@ -3117,16 +3118,22 @@ HWTEST_F(ProgressTestNg, ProgressPrivacySensitiveTest001, TestSize.Level1)
     progressModelNG.Create(5.0, 10.0, 10.0, 20.0, PROGRESS_TYPE_CAPSULE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
+    auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+    ASSERT_NE(textHost, nullptr);
+    auto textPattern = textHost->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
     /**
      * @tc.steps: step2. change privacy sensitive and check status.
      */
     auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
     ASSERT_NE(progressPaintProperty, nullptr);
     pattern->OnSensitiveStyleChange(false);
     EXPECT_EQ(progressPaintProperty->GetIsSensitive().value_or(false), false);
+    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), false);
     pattern->OnSensitiveStyleChange(true);
     EXPECT_EQ(progressPaintProperty->GetIsSensitive().value_or(false), true);
+    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), true);
 }
 } // namespace OHOS::Ace::NG

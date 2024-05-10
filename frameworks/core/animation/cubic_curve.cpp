@@ -16,6 +16,7 @@
 #include "core/animation/cubic_curve.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -64,6 +65,16 @@ const std::string CubicCurve::ToString()
     curveString.append(std::string("(") + std::to_string(x0_) + comma + std::to_string(y0_)
         + comma + std::to_string(x1_) + comma + std::to_string(y1_) + std::string(")"));
     return curveString;
+}
+
+bool CubicCurve::IsEqual(const RefPtr<Curve>& curve) const
+{
+    auto other = DynamicCast<CubicCurve>(curve);
+    if (!other) {
+        return false;
+    }
+    return NearEqual(other->GetX0(), x0_) && NearEqual(other->GetY0(), y0_)
+        && NearEqual(other->GetX1(), x1_) && NearEqual(other->GetY1(), y1_);
 }
 
 float CubicCurve::CalculateCubic(float a, float b, float m)

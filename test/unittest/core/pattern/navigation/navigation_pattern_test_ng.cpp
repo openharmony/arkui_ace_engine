@@ -1043,13 +1043,16 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNGTest002, TestSize.Level1)
     RefPtr<PixelMap> pixMap = nullptr;
     NG::BarItem bar;
     std::vector<NG::BarItem> toolBarItems;
+    std::vector<std::string> nameList;
+    nameList.push_back("");
+    nameList.push_back("");
     toolBarItems.push_back(bar);
     navigationModel.Create();
     navigationModel.SetNavigationStack();
     navigationModel.SetTitleHeight(SPLIT_WIDTH);
     navigationModel.SetSubtitle("navigationModel");
     navigationModel.SetHideNavBar(true);
-    navigationModel.SetBackButtonIcon("navigationModel", true, pixMap, "", "");
+    navigationModel.SetBackButtonIcon(nullptr, "navigationModel", true, pixMap, nameList);
     navigationModel.SetHideBackButton(true);
     navigationModel.NeedSetItems();
     navigationModel.SetToolBarItems(std::move(toolBarItems));

@@ -123,13 +123,11 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality)
     CHECK_NULL_RETURN(pixmap, nullptr);
     auto image = PixelMapImage::Create(pixmap);
 
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE,
-            "decode to pixmap, src=%{public}s, resolutionQuality = %{public}s, desiredSize = %{public}s, pixmap size = "
-            "%{public}d x %{public}d",
-            obj_->GetSourceInfo().ToString().c_str(), GetResolutionQuality(imageQuality).c_str(),
-            desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight());
-    }
+    TAG_LOGD(AceLogTag::ACE_IMAGE,
+        "decode to pixmap, src=%{public}s, resolutionQuality = %{public}s, desiredSize = %{public}s, pixmap size = "
+        "%{public}d x %{public}d",
+        obj_->GetSourceInfo().ToString().c_str(), GetResolutionQuality(imageQuality).c_str(),
+        desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight());
 
     return image;
 }
@@ -217,10 +215,8 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
         // DesiredSize might not be compatible with the codec, so we find the closest size supported by the codec
         auto scale = std::max(static_cast<float>(width) / info.width(), static_cast<float>(height) / info.height());
         auto idealSize = codec->getScaledDimensions(scale);
-        if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_IMAGE, "desiredSize = %{public}s, codec idealSize: %{public}dx%{public}d",
-                desiredSize_.ToString().c_str(), idealSize.width(), idealSize.height());
-        }
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "desiredSize = %{public}s, codec idealSize: %{public}dx%{public}d",
+            desiredSize_.ToString().c_str(), idealSize.width(), idealSize.height());
 
         info = info.makeWH(idealSize.width(), idealSize.height());
 #ifndef USE_ROSEN_DRAWING
@@ -349,9 +345,9 @@ void ImageDecoder::TryCompress(const RefPtr<DrawingImage>& image)
         if (taskExecutor) {
             taskExecutor->PostDelayedTask(
                 releaseTask, TaskExecutor::TaskType::UI,
-                ImageCompressor::releaseTimeMs, "ArkUIImageCompressorGetInstance");
+                ImageCompressor::releaseTimeMs, "ArkUIImageCompressorScheduleRelease");
         } else {
-            ImageUtils::PostToBg(std::move(releaseTask), "ArkUIImageDecoderTryCompress");
+            ImageUtils::PostToBg(std::move(releaseTask), "ArkUIImageCompressorScheduleRelease");
         }
     }
     SkGraphics::PurgeResourceCache();

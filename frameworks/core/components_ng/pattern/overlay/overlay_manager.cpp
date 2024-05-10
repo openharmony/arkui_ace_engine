@@ -3883,7 +3883,6 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
             sheetHeight_ = height;
         }
     }
-
 }
 
 void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId)
@@ -4615,7 +4614,8 @@ bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode,
     CHECK_NULL_RETURN(theme, false);
     auto expandDisplay = theme->GetExpandDisplay();
     if (expandDisplay) {
-        SubwindowManager::GetInstance()->ShowMenuNG(menuWrapperNode, targetNode->GetId(), aiRect.GetOffset());
+        MenuParam menuParam {};
+        SubwindowManager::GetInstance()->ShowMenuNG(menuWrapperNode, menuParam, targetNode, aiRect.GetOffset());
     } else {
         ShowMenu(targetNode->GetId(), aiRect.GetOffset(), menuWrapperNode);
     }

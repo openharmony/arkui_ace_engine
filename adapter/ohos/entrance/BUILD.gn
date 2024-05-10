@@ -120,8 +120,6 @@ template("ace_ohos_standard_source_set") {
       "data_share:datashare_consumer",
       "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
-      "form_fwk:fmskit_native",
-      "form_fwk:form_manager",
       "graphic_2d:2d_graphics",
       "graphic_2d:librender_service_client",
       "i18n:intl_util",
@@ -139,6 +137,14 @@ template("ace_ohos_standard_source_set") {
       "window_manager:scene_session",
       "window_manager:screen_session_manager_client",
     ]
+
+    if (form_fwk_enable) {
+      external_deps += [
+        "form_fwk:fmskit_native",
+        "form_fwk:fmskit_provider_client",
+        "form_fwk:form_manager",
+      ]
+    }
 
     if (defined(config.media_library_exists) && config.media_library_exists) {
       include_dirs += [ "//foundation/multimedia/media_library/interfaces/inner_api/media_library_helper/include" ]

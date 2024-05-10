@@ -598,16 +598,6 @@ public:
         touchType_ = type;
     }
 
-    void SetOriginalId(int32_t originalId)
-    {
-        originalId_ = originalId;
-    }
-
-    int32_t GetOriginalId() const
-    {
-        return originalId_;
-    }
-
 private:
     // The finger id is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
@@ -629,10 +619,6 @@ private:
 
     // touch type
     TouchType touchType_ = TouchType::UNKNOWN;
-
-    // The finger id is used to identify the point of contact between the finger and the screen. Different fingers have
-    // different ids.
-    int32_t originalId_ = 0;
 };
 
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;

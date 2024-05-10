@@ -166,10 +166,17 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
+    std::vector<std::string> nameList;
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
-    NavDestinationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap, bundleName, moduleName);
+    nameList.emplace_back(bundleName);
+    nameList.emplace_back(moduleName);
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
+    if (src.empty() && pixMap == nullptr) {
+        SetSymbolOptionApply(info, iconSymbol, info[0]);
+    }
+    NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, noPixMap, pixMap, nameList);
 }
 
 void JSNavDestination::SetOnShown(const JSCallbackInfo& info)

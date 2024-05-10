@@ -57,7 +57,7 @@ void TitleBarLayoutAlgorithm::BackButtonLayout(const RefPtr<FrameNode>& backButt
 {
     auto backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
     CHECK_NULL_VOID(backButtonImageNode);
-    auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
     backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(backIconWidth_),
         CalcLength(backIconHeight_)));
@@ -151,7 +151,6 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAV_DESTINATION) {
-
         // nav destination custom title
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(titleBarNode->GetParent());
         CHECK_NULL_RETURN(navDestination, 0.0f);

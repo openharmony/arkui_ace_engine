@@ -14,6 +14,12 @@
  */
 
 /// <reference path='./import.ts' />
+interface ProgressParam {
+  value: number;
+  total?: number;
+  style?: ProgressStyle
+  type?: Type
+}
 class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -21,7 +27,13 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   modifier: ContentModifier<ProgressConfiguration> | null = null;
   progressNode: BuilderNode<[ProgressConfiguration]> | null = null;
-
+  initialize(value: Object[]): ProgressAttribute {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ProgressInitializeModifier.identity,
+        ProgressInitializeModifier, (value[0] as ProgressParam));
+    }
+    return this;
+  }
   value(value: number): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions |
   ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions |
   CapsuleStyleOptions> {
@@ -64,6 +76,21 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
       this.progressNode.update(progressConfig);
     }
     return this.progressNode.getFrameNode();
+  }
+}
+
+class ProgressInitializeModifier extends ModifierWithKey<ProgressParam> {
+  constructor(value: ProgressParam) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('progressInitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().progress.resetProgressInitialize(node);
+    } else {
+      getUINativeModule().progress.setProgressInitialize(node, this.value.value,
+        this.value.total, this.value.style, this.value.type);
+    }
   }
 }
 

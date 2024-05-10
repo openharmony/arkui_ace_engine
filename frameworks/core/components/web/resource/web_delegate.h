@@ -870,6 +870,7 @@ public:
     void OnRenderProcessNotResponding(
         const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
     void OnRenderProcessResponding();
+    std::string GetSelectInfo() const;
 
 private:
     void InitWebEvent();

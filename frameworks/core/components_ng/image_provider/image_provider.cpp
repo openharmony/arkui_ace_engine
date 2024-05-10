@@ -159,7 +159,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
         std::string errorMessage("Failed to create image loader, Image source type not supported");
-        FailCallback(src.GetKey(), errorMessage, sync);
+        FailCallback(src.GetKey(), src.ToString() + errorMessage, sync);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();

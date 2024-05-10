@@ -20,6 +20,7 @@
 
 #include "core/components/common/properties/text_style.h"
 #include "core/components/picker/picker_data.h"
+#include "frameworks/base/i18n/time_format.h"
 
 namespace OHOS::Ace::NG {
 // update flag of text properties
@@ -73,6 +74,7 @@ struct DatePickerSettingData {
     std::map<std::string, PickerDate> datePickerProperty;
     std::map<std::string, PickerTime> timePickerProperty;
     PickerTextProperties properties;
+    DateTimeType dateTimeOptions;
 };
 
 struct TextPickerSettingData {
@@ -92,6 +94,7 @@ struct TimePickerSettingData {
     bool isUseMilitaryTime;
     PickerDate dialogTitleDate;
     PickerTextProperties properties;
+    DateTimeType dateTimeOptions;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_TYPE_DEFINE_H

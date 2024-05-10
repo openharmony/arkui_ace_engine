@@ -32,8 +32,9 @@ public:
     void SetSubtitle(const std::string& subtitle) override;
     void SetHideTitleBar(bool hideTitleBar) override;
     void SetHideNavBar(bool hideNavBar) override;
-    void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
-        const std::string& bundleName, const std::string& moduleName) override;
+    void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar) override;
     void SetCustomToolBar(const RefPtr<AceType>& customToolBar) override;

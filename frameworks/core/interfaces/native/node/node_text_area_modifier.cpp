@@ -1245,8 +1245,8 @@ void SetTextAreaOnTextContentScroll(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_TEXT_AREA_CONTENT_SCROLL;
-        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetX);
-        event.componentAsyncEvent.data[0].f32 = static_cast<int>(totalOffsetY);
+        event.componentAsyncEvent.data[0].f32 = totalOffsetX;
+        event.componentAsyncEvent.data[1].f32 = totalOffsetY;
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onScroll));
