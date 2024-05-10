@@ -387,8 +387,14 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     if (!listContentModifier_) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, paint);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, paint);
         const auto& geometryNode = host->GetGeometryNode();
-        auto size = geometryNode->GetPaddingSize();
+        auto size = renderContext->GetPaintRectWithoutTransform().GetSize();
+        auto& padding = geometryNode->GetPadding();
+        if (padding) {
+            size.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
+        }
         OffsetF offset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
         listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>(offset, size);
     }
@@ -978,7 +984,14 @@ SizeF ListPattern::GetContentSize() const
     CHECK_NULL_RETURN(host, SizeF());
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, SizeF());
-    return geometryNode->GetPaddingSize();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, SizeF());
+    auto size = renderContext->GetPaintRectWithoutTransform().GetSize();
+    auto& padding = geometryNode->GetPadding();
+    if (padding) {
+        size.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
+    }
+    return size;
 }
 
 bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)

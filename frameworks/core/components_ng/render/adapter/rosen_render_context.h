@@ -374,6 +374,7 @@ public:
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
     void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
     void SyncPartialRsProperties() override;
+    void UpdatePaintRect(const RectF& paintRect) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

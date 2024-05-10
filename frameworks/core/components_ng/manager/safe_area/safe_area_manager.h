@@ -168,16 +168,6 @@ public:
     bool SetIsAtomicService(bool value);
     bool IsAtomicService() const;
 
-    void SetRootMeasureNodeId(const int32_t rootMeasureNodeId)
-    {
-        rootMeasureNodeId_ = rootMeasureNodeId;
-    }
-
-    int32_t GetRootMeasureNodeId()
-    {
-        return rootMeasureNodeId_;
-    }
-
     float GetSafeHeight() const
     {
         Dimension safeDistance = 16.0_vp;
@@ -193,6 +183,8 @@ public:
     {
         return lastKeyboardY_;
     }
+
+    bool IsSafeAreaValid() const;
 
 private:
     bool isAtomicService_ = false;
@@ -252,8 +244,6 @@ private:
     float keyboardOffset_ = 0.0f;
 
     float lastKeyboardY_ = 0.0f;
-
-    int32_t rootMeasureNodeId_ = 0;
 
     static constexpr float SAFE_AREA_VELOCITY = 0.0f;
     static constexpr float SAFE_AREA_MASS = 1.0f;

@@ -291,8 +291,7 @@ public:
 
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
-    virtual void MarkDirtyNode(
-        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
+    virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     virtual void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 

@@ -54,9 +54,14 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(listContentModifier_);
     const auto& geometryNode = paintWrapper->GetGeometryNode();
-    auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto frameSize = renderContext->GetPaintRectWithoutTransform().GetSize();
+    auto& padding = geometryNode->GetPadding();
+    if (padding) {
+        frameSize.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
+    }
     UpdateFadingGradient(renderContext);
     bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
     listContentModifier_->SetClipOffset(paddingOffset);

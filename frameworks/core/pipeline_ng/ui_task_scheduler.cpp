@@ -66,23 +66,6 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
-void UITaskScheduler::RestoreGeoState()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto safeAreaManager = pipeline->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
-    if (safeAreaManager) {
-        std::set<WeakPtr<FrameNode>> geoRestoreNodes = safeAreaManager->GetGeoRestoreNodes();
-        for (auto& node : geoRestoreNodes) {
-            auto frameNode = node.Upgrade();
-            if (frameNode && frameNode->GetTag() != V2::PAGE_ETS_TAG) {
-                frameNode->RestoreGeoState();
-            }
-        }
-    }
-}
-
 void UITaskScheduler::ExpandSafeArea()
 {
     auto pipeline = PipelineContext::GetCurrentContext();

@@ -78,6 +78,11 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
     return res;
 }
 
+bool SafeAreaManager::IsSafeAreaValid() const
+{
+    return !(ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_));
+}
+
 bool SafeAreaManager::SetIsFullScreen(bool value)
 {
     if (isFullScreen_ == value) {
@@ -182,12 +187,13 @@ void SafeAreaManager::ExpandSafeArea()
     ACE_LAYOUT_SCOPED_TRACE("ExpandSafeArea node count %zu", needExpandNodes_.size());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
     bool isFocusOnPage = pipeline->CheckPageFocus();
     auto iter = needExpandNodes_.begin();
     while (iter != needExpandNodes_.end()) {
         auto frameNode = (*iter).Upgrade();
         if (frameNode) {
-            frameNode->SaveGeoState();
+            manager->AddGeoRestoreNode(frameNode);
             frameNode->ExpandSafeArea(isFocusOnPage);
         }
         ++iter;

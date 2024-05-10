@@ -615,7 +615,9 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto displaySize = geometryNode->GetFrameSize();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto displaySize = renderContext->GetPaintRectWithoutTransform().GetSize();
     auto displayArea = RectF(displayOffset, displaySize);
     if (displayArea_ != displayArea || isForce) {
         displayArea_ = displayArea;

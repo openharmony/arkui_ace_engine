@@ -5854,6 +5854,11 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
     }
 }
 
+void RosenRenderContext::UpdatePaintRect(const RectF& paintRect)
+{
+    paintRect_ = paintRect;
+}
+
 void RosenRenderContext::SyncPartialRsProperties()
 {
     if (propTransform_ && propTransform_->HasTransformCenter()) {
