@@ -231,6 +231,7 @@
 
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_form.h"
+#include "bridge/declarative_frontend/jsview/js_form_menu_item.h"
 #endif
 
 #ifdef WEB_SUPPORTED
@@ -688,6 +689,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "QRCode", JSQRCode::JSBind },
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
+    { "FormMenuItem", JSFormMenuItem::JSBind },
 #endif
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     { "PluginComponent", JSPlugin::JSBind },

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,18 @@
 
 #include "core/components_ng/pattern/form/form_model_ng.h"
 
+#include "form_mgr.h"
+#include "want.h"
+
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
+#include "core/common/form_manager.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 void FormModelNG::Create(const RequestFormInfo& formInfo)
@@ -120,6 +124,12 @@ void FormModelNG::SetModuleName(const std::string& moduleName)
     auto formInfo = property->GetRequestFormInfoValue();
     formInfo.moduleName = moduleName;
     property->UpdateRequestFormInfo(formInfo);
+}
+
+int32_t FormModelNG::RequestPublishFormWithSnapshot(const AAFwk::Want& want, int64_t& formId)
+{
+    auto formUtils = FormManager::GetInstance().GetFormUtils();
+    return formUtils->RequestPublishFormEvent(want, formId);
 }
 
 void FormModelNG::SetOnAcquired(std::function<void(const std::string&)>&& onAcquired)

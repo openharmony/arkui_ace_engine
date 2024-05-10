@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <unordered_map>
 
 #include "core/components/form/resource/form_utils.h"
+#include "want.h"
 
 namespace OHOS::Ace {
 class FormUtilsImpl final : public FormUtils {
@@ -29,6 +30,8 @@ public:
 
     int32_t RouterEvent(
         int64_t formId, const std::string& action, int32_t containerId, const std::string& defaultBundleName) override;
+    
+    int32_t RequestPublishFormEvent(const AAFwk::Want& want, int64_t& formId) override;
 
     int32_t BackgroundEvent(
         int64_t formId, const std::string& action, int32_t containerId, const std::string& defaultBundleName) override;
