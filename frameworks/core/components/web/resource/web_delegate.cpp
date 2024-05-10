@@ -4918,7 +4918,7 @@ bool WebDelegate::OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info)
             CHECK_NULL_VOID(fileSelectCallback);
             fileSelectCallback(info);
             result = true;
-        }, "ArkUIWebDefaultFileSelectorShow");
+            }, "ArkUIWebDefaultFileSelectorShow");
     }
     return result;
 }
