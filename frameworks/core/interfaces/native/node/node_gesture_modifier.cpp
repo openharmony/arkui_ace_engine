@@ -174,19 +174,12 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
             break;
         }
         points[i].id = touchPoint.id;
-        double density = PipelineBase::GetCurrentDensity();
-        points[i].nodeX = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
-            fingureIterator->localLocation_.GetX() / density;
-        points[i].nodeY = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
-            fingureIterator->localLocation_.GetY() / density;
-        points[i].windowX = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
-            fingureIterator->globalLocation_.GetX() / density;
-        points[i].windowY = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
-            fingureIterator->globalLocation_.GetY() / density;
-        points[i].screenX = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
-            touchPoint.screenX / density;
-        points[i].screenY = (NearEqual(density, 0.0) || fingureIterator == fingureEnd) ? 0.0f :
-            touchPoint.screenY / density;
+        points[i].nodeX = fingureIterator == fingureEnd ? 0.0f : fingureIterator->localLocation_.GetX();
+        points[i].nodeY = fingureIterator == fingureEnd ? 0.0f : fingureIterator->localLocation_.GetY();
+        points[i].windowX = fingureIterator == fingureEnd ? 0.0f : fingureIterator->globalLocation_.GetX();
+        points[i].windowY = fingureIterator == fingureEnd ? 0.0f : fingureIterator->globalLocation_.GetY();
+        points[i].screenX = fingureIterator == fingureEnd ? 0.0f : touchPoint.screenX;
+        points[i].screenY = fingureIterator == fingureEnd ? 0.0f : touchPoint.screenY;
         points[i].contactAreaWidth = touchPoint.size;
         points[i].contactAreaHeight = touchPoint.size;
         points[i].pressure = touchPoint.force;
@@ -207,19 +200,12 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
     touchEvent.action = static_cast<int32_t>(tempTouchEvent.type);
     touchEvent.sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
     touchEvent.timeStamp = tempTouchEvent.time.time_since_epoch().count();
-    double density = PipelineBase::GetCurrentDensity();
-    touchEvent.actionTouchPoint.nodeX = NearEqual(density, 0.0) ? 0.0f :
-        info.GetLocalLocation().GetX() / density;
-    touchEvent.actionTouchPoint.nodeY = NearEqual(density, 0.0) ? 0.0f :
-        info.GetLocalLocation().GetY() / density;
-    touchEvent.actionTouchPoint.windowX = NearEqual(density, 0.0) ? 0.0f :
-        info.GetGlobalLocation().GetX() / density;
-    touchEvent.actionTouchPoint.windowY = NearEqual(density, 0.0) ? 0.0f :
-        info.GetGlobalLocation().GetY() / density;
-    touchEvent.actionTouchPoint.screenX = NearEqual(density, 0.0) ? 0.0f :
-        info.GetScreenLocation().GetX() / density;
-    touchEvent.actionTouchPoint.screenY = NearEqual(density, 0.0) ? 0.0f :
-        info.GetScreenLocation().GetY() / density;
+    touchEvent.actionTouchPoint.nodeX = info.GetLocalLocation().GetX();
+    touchEvent.actionTouchPoint.nodeY = info.GetLocalLocation().GetY();
+    touchEvent.actionTouchPoint.windowX = info.GetGlobalLocation().GetX();
+    touchEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY();
+    touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
+    touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
     touchEvent.actionTouchPoint.pressure = tempTouchEvent.force;
     ConvertTouchPointsToPoints(info, tempTouchEvent.pointers, points);
     if (tempTouchEvent.pointers.size() > 0) {
