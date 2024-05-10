@@ -90,12 +90,14 @@ void ToggleButtonPattern::OnModifyDone()
     const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
-    if (isOn_.value()) {
-        auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(checkedColor_);
-        renderContext->UpdateBackgroundColor(selectedColor);
-    } else {
-        auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(unCheckedColor_);
-        renderContext->UpdateBackgroundColor(bgColor);
+    if (!UseContentModifier()) {
+        if (isOn_.value()) {
+            auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(checkedColor_);
+            renderContext->UpdateBackgroundColor(selectedColor);
+        } else {
+            auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(unCheckedColor_);
+            renderContext->UpdateBackgroundColor(bgColor);
+        }
     }
 
     if (changed) {
@@ -796,5 +798,24 @@ RefPtr<FrameNode> ToggleButtonPattern::BuildContentModifierNode()
         isSelected = false;
     }
     return (toggleMakeFunc_.value())(ToggleConfiguration(enabled, isSelected));
+}
+
+void ToggleButtonPattern::SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
+{
+    if (toggleMakeFunc == nullptr) {
+        toggleMakeFunc_ = std::nullopt;
+        contentModifierNode_ = nullptr;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        for (auto child : host->GetChildren()) {
+            auto childNode = DynamicCast<FrameNode>(child);
+            if (childNode) {
+                childNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+            }
+        }
+        OnModifyDone();
+        return;
+    }
+    toggleMakeFunc_ = std::move(toggleMakeFunc);
 }
 } // namespace OHOS::Ace::NG

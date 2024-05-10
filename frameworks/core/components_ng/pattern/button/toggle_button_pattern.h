@@ -41,7 +41,7 @@ public:
         return false;
     }
 
-    bool UseContentModifier()
+    bool UseContentModifier() const override
     {
         return contentModifierNode_ != nullptr;
     }
@@ -66,18 +66,9 @@ public:
         return touchListener_;
     }
 
-    void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
-    {
-        if (toggleMakeFunc == nullptr) {
-            toggleMakeFunc_ = std::nullopt;
-            contentModifierNode_ = nullptr;
-            OnModifyDone();
-            return;
-        }
-        toggleMakeFunc_ = std::move(toggleMakeFunc);
-    }
+    void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc);
 
-    int32_t GetBuilderId()
+    int32_t GetBuilderId() const override
     {
         return nodeId_;
     }

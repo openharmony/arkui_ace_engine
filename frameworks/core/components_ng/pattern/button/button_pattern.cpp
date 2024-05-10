@@ -692,4 +692,23 @@ void ButtonPattern::OnColorConfigurationUpdate()
         textNode->MarkDirtyNode();
     }
 }
+
+void ButtonPattern::SetBuilderFunc(ButtonMakeCallback&& makeFunc)
+{
+    if (makeFunc == nullptr) {
+        makeFunc_ = std::nullopt;
+        contentModifierNode_ = nullptr;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        for (auto child : host->GetChildren()) {
+            auto childNode = DynamicCast<FrameNode>(child);
+            if (childNode) {
+                childNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+            }
+        }
+        OnModifyDone();
+        return;
+    }
+    makeFunc_ = std::move(makeFunc);
+}
 } // namespace OHOS::Ace::NG

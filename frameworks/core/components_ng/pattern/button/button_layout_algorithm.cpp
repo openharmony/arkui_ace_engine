@@ -39,6 +39,7 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         std::list<RefPtr<LayoutWrapper>> builderChildList;
         for (const auto& child : childList) {
             if (child->GetHostNode()->GetId() != pattern->GetBuilderId()) {
+                child->GetGeometryNode()->Reset();
                 child->GetGeometryNode()->SetContentSize(SizeF());
             } else {
                 auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();

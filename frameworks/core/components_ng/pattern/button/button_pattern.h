@@ -294,25 +294,16 @@ public:
         return touchListener_;
     }
 
-    void SetBuilderFunc(ButtonMakeCallback&& makeFunc)
-    {
-        if (makeFunc == nullptr) {
-            makeFunc_ = std::nullopt;
-            contentModifierNode_ = nullptr;
-            OnModifyDone();
-            return;
-        }
-        makeFunc_ = std::move(makeFunc);
-    }
+    void SetBuilderFunc(ButtonMakeCallback&& makeFunc);
 
-    int32_t GetBuilderId()
+    virtual int32_t GetBuilderId() const
     {
         return nodeId_;
     }
 
     void SetButtonPress(double xPos, double yPos);
 
-    bool UseContentModifier()
+    virtual bool UseContentModifier() const
     {
         return contentModifierNode_ != nullptr;
     }
