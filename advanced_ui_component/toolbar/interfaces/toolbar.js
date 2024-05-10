@@ -223,8 +223,8 @@ export class ToolBar extends ViewPU {
       Column.create();
       Column.width('100%');
       Column.height('100%');
-      Column.focusable(!(ITEM_DISABLE_STATE === this.toolBarList[e].state));
-      Column.focusOnTouch(!(ITEM_DISABLE_STATE === this.toolBarList[e].state));
+      Column.focusable(!(ITEM_DISABLE_STATE === this.toolBarList[e]?.state));
+      Column.focusOnTouch(!(ITEM_DISABLE_STATE === this.toolBarList[e]?.state));
       Column.padding({ left: 4, right: 4 });
       Column.borderRadius({
         id: -1,
@@ -244,7 +244,7 @@ export class ToolBar extends ViewPU {
         }
       }));
       Column.onHover((t => {
-        this.toolBarItemBackground[e] = t ? ITEM_DISABLE_STATE === this.toolBarList[e].state ? {
+        this.toolBarItemBackground[e] = t ? ITEM_DISABLE_STATE === this.toolBarList[e]?.state ? {
           id: -1,
           type: 10001,
           params: ['sys.color.ohos_id_color_toolbar_bg'],
@@ -266,7 +266,7 @@ export class ToolBar extends ViewPU {
         this.itemBackground = this.toolBarItemBackground[e];
       }));
       ViewStackProcessor.visualState('pressed');
-      Column.backgroundColor(ITEM_DISABLE_STATE === this.toolBarList[e].state ? this.toolBarItemBackground[e] : {
+      Column.backgroundColor(ITEM_DISABLE_STATE === this.toolBarList[e]?.state ? this.toolBarItemBackground[e] : {
         id: -1,
         type: 10001,
         params: ['sys.color.ohos_id_color_click_effect'],
@@ -281,10 +281,10 @@ export class ToolBar extends ViewPU {
     }));
     this.observeComponentCreation(((t, o) => {
       ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Image.create(this.toolBarList[e].icon);
+      Image.create(this.toolBarList[e]?.icon);
       Image.width(IMAGE_SIZE_WIDTH_HEIGHT);
       Image.height(IMAGE_SIZE_WIDTH_HEIGHT);
-      Image.fillColor(this.activateIndex === e && ITEM_DISABLE_STATE !== this.toolBarList[e].state ? {
+      Image.fillColor(this.activateIndex === e && ITEM_DISABLE_STATE !== this.toolBarList[e]?.state ? {
         id: -1,
         type: 10001,
         params: ['sys.color.ohos_id_color_text_primary_activated'],
@@ -297,7 +297,7 @@ export class ToolBar extends ViewPU {
         bundleName: '',
         moduleName: '',
       });
-      Image.opacity(ITEM_DISABLE_STATE === this.toolBarList[e].state ? DISABLE_OPACITY : 1);
+      Image.opacity(ITEM_DISABLE_STATE === this.toolBarList[e]?.state ? DISABLE_OPACITY : 1);
       Image.margin({ top: 8, bottom: 2 });
       Image.objectFit(ImageFit.Contain);
       o || Image.pop();
@@ -305,8 +305,8 @@ export class ToolBar extends ViewPU {
     }));
     this.observeComponentCreation(((t, o) => {
       ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Text.create(this.toolBarList[e].content);
-      Text.fontColor(this.activateIndex === e && ITEM_DISABLE_STATE !== this.toolBarList[e].state ? {
+      Text.create(this.toolBarList[e]?.content);
+      Text.fontColor(this.activateIndex === e && ITEM_DISABLE_STATE !== this.toolBarList[e]?.state ? {
         id: -1,
         type: 10001,
         params: ['sys.color.ohos_id_color_toolbar_text_actived'],
@@ -337,7 +337,7 @@ export class ToolBar extends ViewPU {
       Text.fontWeight(FontWeight.Medium);
       Text.maxLines(TEXT_MAX_LINES);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.opacity(ITEM_DISABLE_STATE === this.toolBarList[e].state ? DISABLE_OPACITY : 1);
+      Text.opacity(ITEM_DISABLE_STATE === this.toolBarList[e]?.state ? DISABLE_OPACITY : 1);
       o || Text.pop();
       ViewStackProcessor.StopGetAccessRecording();
     }));
@@ -429,8 +429,8 @@ export class ToolBar extends ViewPU {
                   this.TabBuilder.call(this, t);
                 }
               });
-              TabContent.enabled(!(ITEM_DISABLE_STATE === this.toolBarList[t].state));
-              TabContent.focusOnTouch(!(ITEM_DISABLE_STATE === this.toolBarList[t].state));
+              TabContent.enabled(!(ITEM_DISABLE_STATE === this.toolBarList[t]?.state));
+              TabContent.focusOnTouch(!(ITEM_DISABLE_STATE === this.toolBarList[t]?.state));
               o || TabContent.pop();
               ViewStackProcessor.StopGetAccessRecording();
             }));
@@ -444,8 +444,8 @@ export class ToolBar extends ViewPU {
                   this.TabBuilder.call(this, t);
                 }
               });
-              TabContent.enabled(!(ITEM_DISABLE_STATE === this.toolBarList[t].state));
-              TabContent.focusOnTouch(!(ITEM_DISABLE_STATE === this.toolBarList[t].state));
+              TabContent.enabled(!(ITEM_DISABLE_STATE === this.toolBarList[t]?.state));
+              TabContent.focusOnTouch(!(ITEM_DISABLE_STATE === this.toolBarList[t]?.state));
               o || TabContent.pop();
               ViewStackProcessor.StopGetAccessRecording();
             }));
