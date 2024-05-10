@@ -34,6 +34,12 @@ std::shared_ptr<Localization> Localization::GetInstance()
     return instance;
 }
 
+bool Localization::GetDateColumnFormatOrder(std::vector<std::string>& outOrder)
+{
+    outOrder.clear();
+    return false;
+}
+
 std::string Localization::FormatDuration(uint32_t duration, const std::string& format)
 {
     return "08:00:00";

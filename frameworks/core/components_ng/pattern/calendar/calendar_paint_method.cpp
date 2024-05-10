@@ -37,6 +37,10 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const char ELLIPSIS[] = "...";
+constexpr int32_t WEEK_START_DAY_OFFSET = 6;
+constexpr int32_t ROW_COUNT_FOUR = 4;
+constexpr int32_t ROW_COUNT_FIVE = 5;
+constexpr int32_t ROW_COUNT_SIX = 6;
 constexpr int32_t TEXT_MAX_LENGTH = 3;
 constexpr int32_t TEXT_END_INDEX = 2;
 constexpr int32_t WEEK_TEXT_END_INDEX = 3;
@@ -123,49 +127,65 @@ void CalendarPaintMethod::PaintContent(RSCanvas& canvas, const RefPtr<CalendarPa
 void CalendarPaintMethod::DrawWeekAndDates(RSCanvas& canvas, Offset offset)
 {
     weekNumbers_ = Localization::GetInstance()->GetWeekdays(true);
-    uint32_t totalWeek = weekNumbers_.size();
     if (!obtainedMonth_.days.empty()) {
         calendarDays_.assign(obtainedMonth_.days.begin(), obtainedMonth_.days.end());
     }
     offset += (isCalendarDialog_ ? Offset(CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx(), 0)
                                  : Offset(touchCircleStrokeWidth_, 0));
     DrawWeek(canvas, offset);
-    if (!calendarDays_.empty()) {
-        int32_t dateNumber = 0;
-        double dailyRowSpace = 0.0;
-        double dayNumberStartY = topPadding_ + weekHeight_ + weekAndDayRowSpace_;
+    if (calendarDays_.empty()) {
+        return;
+    }
+    DrawDates(canvas, offset);
+}
 
-        // Set the rowCount.
-        if (totalWeek != 0) {
-            rowCount_ = (static_cast<int32_t>(calendarDays_.size()) / totalWeek);
-        }
+void CalendarPaintMethod::DrawDates(RSCanvas& canvas, const Offset& offset)
+{
+    uint32_t totalWeek = weekNumbers_.size();
+    int32_t dateNumber = 0;
+    double dailyRowSpace = 0.0;
+    double dayNumberStartY = topPadding_ + weekHeight_ + weekAndDayRowSpace_;
 
-        // Set dailyFourRowSpace_ for four line calendar.
-        // Set dailyFiveRowSpace_ for five line calendar.
-        // Set dailySixRowSpace_ for six line calendar.
-        switch (rowCount_) {
-            case 4: {
-                dailyRowSpace = dailyFourRowSpace_;
-                break;
-            }
-            case 6: {
-                dailyRowSpace = dailySixRowSpace_;
-                break;
-            }
-            case 5:
-            default:
-                dailyRowSpace = dailyFiveRowSpace_;
-                break;
+    // Set the rowCount.
+    if (totalWeek != 0) {
+        rowCount_ = (static_cast<int32_t>(calendarDays_.size()) / totalWeek);
+    }
+
+    // Set dailyFourRowSpace_ for four line calendar.
+    // Set dailyFiveRowSpace_ for five line calendar.
+    // Set dailySixRowSpace_ for six line calendar.
+    switch (rowCount_) {
+        case ROW_COUNT_FOUR: {
+            dailyRowSpace = dailyFourRowSpace_;
+            break;
         }
-        for (int32_t row = 0; row < rowCount_; row++) {
-            double y = row * (dayHeight_ + dailyRowSpace) + dayNumberStartY;
-            for (uint32_t column = 0; column < totalWeek; column++) {
-                const auto& day = calendarDays_[dateNumber++];
-                double x = textDirection_ == TextDirection::LTR ? column * (dayWidth_ + colSpace_)
-                                                                : (totalWeek - column - 1) * (dayWidth_ + colSpace_);
-                auto dayOffset = Offset(x, y);
-                DrawCalendar(canvas, offset, dayOffset, day);
+        case ROW_COUNT_SIX: {
+            dailyRowSpace = dailySixRowSpace_;
+            break;
+        }
+        case ROW_COUNT_FIVE:
+        default:
+            dailyRowSpace = dailyFiveRowSpace_;
+            break;
+    }
+
+    bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto textDirection = textDirection_;
+    if (isRtl) {
+        textDirection = textDirection_ == TextDirection::RTL ? TextDirection::LTR : TextDirection::RTL;
+    }
+
+    for (int32_t row = 0; row < rowCount_; row++) {
+        double y = row * (dayHeight_ + dailyRowSpace) + dayNumberStartY;
+        for (uint32_t column = 0; column < totalWeek; column++) {
+            const auto& day = calendarDays_[dateNumber++];
+            if (day.month.month != currentMonth_.month && isRtl) {
+                continue;
             }
+            double x = textDirection == TextDirection::LTR ? column * (dayWidth_ + colSpace_)
+                                                            : (totalWeek - column - 1) * (dayWidth_ + colSpace_);
+            auto dayOffset = Offset(x, y);
+            DrawCalendar(canvas, offset, dayOffset, day);
         }
     }
 }
@@ -488,8 +508,14 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
     static const int32_t daysOfWeek = 7;
 
     auto startDayOfWeek = startOfWeek_;
+    auto textDirection = textDirection_;
+    bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        startDayOfWeek = startOfWeek_ + WEEK_START_DAY_OFFSET;
+        textDirection = textDirection_ == TextDirection::RTL ? TextDirection::LTR : TextDirection::RTL;
+    }
     for (uint32_t column = 0; column < totalWeek; column++) {
-        double x = textDirection_ == TextDirection::LTR ? column * (weekWidth_ + colSpace_)
+        double x = textDirection == TextDirection::LTR ? column * (weekWidth_ + colSpace_)
                                                         : (totalWeek - column - 1) * (weekWidth_ + colSpace_);
         Offset weekNumberOffset = offset + Offset(x, topPadding_);
         Rect boxRect { weekNumberOffset.GetX(), weekNumberOffset.GetY(), weekWidth_, weekHeight_ };
@@ -500,7 +526,11 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
             newText = StringUtils::ToString(wText);
         }
         DrawCalendarText(&canvas, newText, weekTextStyle, boxRect);
-        ++startDayOfWeek;
+        if (isRtl) {
+            --startDayOfWeek;
+        } else {
+            ++startDayOfWeek;
+        }
     }
 }
 
