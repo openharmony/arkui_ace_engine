@@ -560,6 +560,7 @@ void SliderModelNG::SetValidSlideRange(FrameNode* frameNode, float from, float t
     CHECK_NULL_VOID(paintProperty);
     auto minValue = paintProperty->GetMinValue(0.0f);
     auto maxValue = paintProperty->GetMaxValue(100.0f);
+    auto step = paintProperty->GetStepValue(1.0f);
     float fromValue = minValue;
     float toValue = maxValue;
     if (std::isfinite(from)) {
@@ -568,7 +569,12 @@ void SliderModelNG::SetValidSlideRange(FrameNode* frameNode, float from, float t
     if (std::isfinite(to)) {
         toValue = to;
     }
-    if (GreatOrEqual(fromValue, minValue) && LessOrEqual(toValue, maxValue)) {
+    if (GreatOrEqual(fromValue, minValue) && LessOrEqual(toValue, maxValue) && LessOrEqual(fromValue, toValue) &&
+        GreatNotEqual(step, 0.0f)) {
+        auto toValueCorrection = NearEqual(toValue - step * std::floor(toValue / step), 0) ? 0 : 1;
+        fromValue = LessOrEqual(fromValue, minValue) ? minValue : std::floor(fromValue / step) * step;
+        toValue = GreatOrEqual(toValue, maxValue) ?
+                  maxValue : (std::floor(toValue / step) + toValueCorrection) * step;
         auto sliderValue = std::clamp(paintProperty->GetValueValue(fromValue), fromValue, toValue);
         RefPtr<SliderModel::SliderValidRange> rangeValue =
             AceType::MakeRefPtr<SliderModel::SliderValidRange>(fromValue, toValue);
