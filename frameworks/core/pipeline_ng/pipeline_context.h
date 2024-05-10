@@ -95,8 +95,8 @@ public:
     // handle close keyboard
     RefPtr<FrameNode> HandleFocusNode();
     void IsCloseSCBKeyboard();
-    void IsSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode);
-    void IsNotSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode);
+    void IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
+    void IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
     void SetNeedSoftKeyboard(std::optional<bool> flag)
     {
         needSoftKeyboard_ = flag;
