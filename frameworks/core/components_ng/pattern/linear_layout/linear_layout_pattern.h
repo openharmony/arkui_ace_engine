@@ -36,6 +36,11 @@ public:
         return false;
     }
 
+    bool IsNeedPercent() const override
+    {
+        return true;
+    }
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<LinearLayoutProperty>(isVertical_);
