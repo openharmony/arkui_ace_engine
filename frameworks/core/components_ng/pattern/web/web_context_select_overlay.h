@@ -53,7 +53,7 @@ public:
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override {}
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
-    void OnCloseOverlay(OptionMenuType menuType, CloseReason reason) override;
+    void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
     // override SelectOverlayCallback end
 
