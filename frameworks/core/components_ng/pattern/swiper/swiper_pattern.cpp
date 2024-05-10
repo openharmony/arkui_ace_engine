@@ -2771,9 +2771,10 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
         }
         OffsetF finalOffset =
-            swiper->itemPosition_.empty()
-                ? OffsetF()
-                : swiper->itemPosition_.begin()->second.node->GetRenderContext()->GetTranslateXYProperty();
+            swiper->itemPosition_.empty() ? OffsetF()
+            : swiper->itemPosition_.begin()->second.node
+                ? swiper->itemPosition_.begin()->second.node->GetRenderContext()->GetTranslateXYProperty()
+                : OffsetF();
         TAG_LOGI(AceLogTag::ACE_SWIPER,
             "Swiper finish property translate animation with offsetX: %{public}f, offsetY: %{public}f",
             finalOffset.GetX(), finalOffset.GetY());
@@ -3165,6 +3166,26 @@ void SwiperPattern::PlayFadeAnimation()
         });
 }
 
+void SwiperPattern::CreateSpringProperty()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->CreateAnimatablePropertyFloat(
+        SPRING_PROPERTY_NAME, 0,
+        [weak = AceType::WeakClaim(this)](float position) {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            auto positionDelta = static_cast<float>(position) - swiper->currentIndexOffset_;
+            if (!swiper->isTouchDown_) {
+                swiper->UpdateCurrentOffset(positionDelta);
+                if (LessNotEqual(std::abs(positionDelta), 1) && !NearZero(positionDelta)) {
+                    AceAsyncTraceBegin(0, TRAILING_ANIMATION);
+                }
+            }
+        },
+        PropertyUnit::PIXEL_POSITION);
+}
+
 void SwiperPattern::PlaySpringAnimation(double dragVelocity)
 {
     auto host = GetHost();
@@ -3179,18 +3200,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     auto trailing = currentIndexOffset_ - itemPosition_.begin()->second.startPos;
     ExtentPair extentPair = ExtentPair(leading, trailing);
 
-    host->CreateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, 0, [weak = AceType::WeakClaim(this)](float position) {
-        auto swiper = weak.Upgrade();
-        CHECK_NULL_VOID(swiper);
-        auto positionDelta = static_cast<float>(position) - swiper->currentIndexOffset_;
-        if (!swiper->isTouchDown_) {
-            swiper->UpdateCurrentOffset(positionDelta);
-            if (LessNotEqual(std::abs(positionDelta), 1) && !NearZero(positionDelta)) {
-                AceAsyncTraceBegin(0, TRAILING_ANIMATION);
-            }
-        }
-    }, PropertyUnit::PIXEL_POSITION);
-
+    CreateSpringProperty();
     host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, currentIndexOffset_);
     auto delta = currentIndexOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing();
     if (IsVisibleChildrenSizeLessThanSwiper()) {
