@@ -293,19 +293,11 @@ void ScrollModelNG::SetEnablePaging(bool enablePaging)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->GetEnablePaging() != ScrollPagingStatus::INVALID);
     if (!enablePaging) {
         pattern->SetEnablePaging(ScrollPagingStatus::NONE);
-        if (pattern->GetScrollSnapAlign() != ScrollSnapAlign::NONE) {
-            ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::NONE);
-        }
         return;
     }
     pattern->SetEnablePaging(ScrollPagingStatus::VALID);
-    // Reuse scrollSnap, and set intervalSize after layout.
-    if (pattern->GetScrollSnapAlign() != ScrollSnapAlign::START) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::START);
-    }
     pattern->SetScrollSnapUpdate(true);
 }
 
@@ -370,8 +362,6 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
     pattern->SetIntervalSize(intervalSize);
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
-    CHECK_NULL_VOID(ScrollSnapAlign::NONE != scrollSnapAlign);
-    pattern->SetEnablePaging(ScrollPagingStatus::INVALID);
 }
 
 int32_t ScrollModelNG::GetScrollEnabled(FrameNode* frameNode)
@@ -468,8 +458,6 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
     pattern->SetIntervalSize(intervalSize);
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
-    CHECK_NULL_VOID(ScrollSnapAlign::NONE != scrollSnapAlign);
-    pattern->SetEnablePaging(ScrollPagingStatus::INVALID);
 }
 
 void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
@@ -501,19 +489,11 @@ void ScrollModelNG::SetEnablePaging(FrameNode* frameNode, bool enablePaging)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->GetEnablePaging() != ScrollPagingStatus::INVALID);
     if (!enablePaging) {
         pattern->SetEnablePaging(ScrollPagingStatus::NONE);
-        if (pattern->GetScrollSnapAlign() != ScrollSnapAlign::NONE) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::NONE, frameNode);
-        }
         return;
     }
     pattern->SetEnablePaging(ScrollPagingStatus::VALID);
-    // Reuse scrollSnap, and set intervalSize after layout.
-    if (pattern->GetScrollSnapAlign() != ScrollSnapAlign::START) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::START, frameNode);
-    }
     pattern->SetScrollSnapUpdate(true);
 }
 
