@@ -1087,6 +1087,11 @@ const __creatorMap__ = new Map([
                 return new ArkGridRowComponent(node, type);
             });
         }],
+    ["TextInput", (context) => {
+            return new TypedFrameNode(context, "TextInput", (node, type) => {
+                return new ArkTextInputComponent(node, type);
+            });
+        }],
     ["GridCol", (context) => {
             return new TypedFrameNode(context, "GridCol", (node, type) => {
                 return new ArkGridColComponent(node, type);

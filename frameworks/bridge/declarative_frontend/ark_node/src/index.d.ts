@@ -117,6 +117,7 @@ declare class ArkComponent {
   setNodePtr(noed: NodePtr);
   initialize(...args: Object[]);
 }
+declare class ArkTextInputComponent extends ArkComponent {}
 
 declare class ArkTextComponent extends ArkComponent {}
 

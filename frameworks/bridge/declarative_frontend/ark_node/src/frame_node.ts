@@ -622,6 +622,11 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkGridRowComponent(node, type);
       })
     }],
+    ["TextInput", (context: UIContext) => {
+      return new TypedFrameNode(context, "TextInput", (node: NodePtr, type: ModifierType) => {
+        return new ArkTextInputComponent(node, type);
+      })
+    }],
     ["GridCol", (context: UIContext) => {
       return new TypedFrameNode(context, "GridCol", (node: NodePtr, type: ModifierType) => {
         return new ArkGridColComponent(node, type);
