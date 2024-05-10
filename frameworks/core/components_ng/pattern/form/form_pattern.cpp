@@ -1072,7 +1072,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
-    TAG_LOGI(AceLogTag::ACE_FORM, "VisibleType: %{public}d", static_cast<int32_t>(visible));
+    TAG_LOGI(AceLogTag::ACE_FORM, "Visible:%{public}d, Id:%{public}llu.", static_cast<int32_t>(visible), node->GetId());
     layoutProperty->UpdateVisibility(visible);
 
     isLoaded_ = true;
@@ -1343,6 +1343,7 @@ void FormPattern::OnActionEvent(const std::string& action)
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 auto eventAction = JsonUtil::ParseJsonString(action);
+                TAG_LOGI(AceLogTag::ACE_FORM, "UI task execute begin.");
                 pattern->FireOnRouterEvent(eventAction);
             }, "ArkUIFormFireRouterEvent");
         }
