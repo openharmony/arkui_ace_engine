@@ -84,6 +84,7 @@ public:
     virtual void SetMenuCount(int32_t menuCount) = 0;
     virtual void SetCustomTransition(NavigationTransitionEvent&& animationTransition);
     virtual void SetIsCustomAnimation(bool isCustom);
+    virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

@@ -1812,4 +1812,16 @@ void NavigationModelNG::SetToolbarOptions(NavigationToolbarOptions&& opt)
     CHECK_NULL_VOID(toolBarPattern);
     toolBarPattern->SetToolbarOptions(std::move(opt));
 }
+
+void NavigationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+}
 } // namespace OHOS::Ace::NG

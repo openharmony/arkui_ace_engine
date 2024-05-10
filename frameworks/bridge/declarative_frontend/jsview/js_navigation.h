@@ -59,6 +59,8 @@ public:
         const JSRef<JSObject>& itemObject);
 
     static void SetCustomNavContentTransition(const JSCallbackInfo& info);
+
+    static void SetIgnoreLayoutSafeArea(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

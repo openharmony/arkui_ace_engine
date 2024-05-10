@@ -187,7 +187,7 @@ void NavigationPattern::OnModifyDone()
     auto layoutProperty = hostNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
-    if (opts && opts->Expansive()) {
+    if (opts) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation SafArea expand as %{public}s", opts->ToString().c_str());
 
         navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);

@@ -49,6 +49,7 @@ public:
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetBackgroundColor(const Color& color, bool isVaild = true) override;
+    void SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
