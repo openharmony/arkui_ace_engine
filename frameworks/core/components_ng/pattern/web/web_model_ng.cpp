@@ -1027,6 +1027,7 @@ void WebModelNG::SetOpenAppLinkFunction(std::function<void(const std::shared_ptr
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
+
     webPattern->SetOnOpenAppLinkCallback(std::move(jsCallback));
 }
 
