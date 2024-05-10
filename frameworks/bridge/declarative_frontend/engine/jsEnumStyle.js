@@ -1138,6 +1138,12 @@ var RenderExitReason;
   RenderExitReason[RenderExitReason["ProcessExitUnknown"] = 4] = "ProcessExitUnknown";
 })(RenderExitReason || (RenderExitReason = {}));
 
+var RenderProcessNotRespondingReason;
+(function (RenderProcessNotRespondingReason) {
+  RenderProcessNotRespondingReason[RenderProcessNotRespondingReason["INPUT_TIMEOUT"] = 0] = "INPUT_TIMEOUT";
+  RenderProcessNotRespondingReason[RenderProcessNotRespondingReason["NAVIGATION_COMMIT_TIMEOUT"] = 1] = "NAVIGATION_COMMIT_TIMEOUT";
+})(RenderProcessNotRespondingReason || (RenderProcessNotRespondingReason = {}));
+
 var SslError;
 (function (SslError) {
   SslError[SslError["Invalid"] = 0] = "Invalid";
