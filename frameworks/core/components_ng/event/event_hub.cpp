@@ -350,26 +350,26 @@ void EventHub::ClearJSFrameNodeOnDisappear()
 void EventHub::FireOnAppear()
 {
     if (onAppear_ || onJSFrameNodeAppear_) {
-        auto* host = UnsafeRawPtr(host_);
-        CHECK_NULL_VOID(host);
-        auto* pipeline = host->GetContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
-        pipeline->SetBuildAfterCallback([weak = WeakClaim(this)]() {
-            auto eventHub = weak.Upgrade();
-            CHECK_NULL_VOID(eventHub);
-            if (eventHub->onAppear_) {
-                // callback may be overwritten in its invoke so we copy it first
-                auto onAppear = eventHub->onAppear_;
-                onAppear();
-            }
-            if (eventHub->onJSFrameNodeAppear_) {
-                // callback may be overwritten in its invoke so we copy it first
-                auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
-                onJSFrameNodeAppear();
-            }
-        });
+        taskScheduler->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto eventHub = weak.Upgrade();
+                CHECK_NULL_VOID(eventHub);
+                if (eventHub->onAppear_) {
+                    // callback may be overwritten in its invoke so we copy it first
+                    auto onAppear = eventHub->onAppear_;
+                    onAppear();
+                }
+                if (eventHub->onJSFrameNodeAppear_) {
+                    // callback may be overwritten in its invoke so we copy it first
+                    auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
+                    onJSFrameNodeAppear();
+                }
+            },
+            TaskExecutor::TaskType::UI, "ArkUIFrameNodeAppearEvent");
     }
 }
 
