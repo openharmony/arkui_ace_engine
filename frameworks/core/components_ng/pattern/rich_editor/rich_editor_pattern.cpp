@@ -5676,8 +5676,10 @@ std::vector<RectF> RichEditorPattern::GetTextBoxes()
         res.emplace_back(rect);
     }
     if (!res.empty() && paragraphs_.IsSelectLineHeadAndUseLeadingMargin(textSelector_.GetTextStart())) {
-        // To make drag screenshot include LeadingMarginPlaceholder.
-        res.front().SetLeft(0.0f);
+        // To make drag screenshot include LeadingMarginPlaceholder when not single line
+        if (res.front().GetY() != res.back().GetY()) {
+            res.front().SetLeft(0.0f);
+        }
     }
     return res;
 }
