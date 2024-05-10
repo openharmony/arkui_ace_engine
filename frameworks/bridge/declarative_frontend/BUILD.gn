@@ -520,6 +520,7 @@ template("declarative_js_engine") {
         config.form_components_support) {
       sources += [
         "jsview/js_form.cpp",
+        "jsview/js_form_menu_item.cpp",
         "jsview/models/form_model_impl.cpp",
       ]
     }
