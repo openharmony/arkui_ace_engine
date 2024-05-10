@@ -260,6 +260,8 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         BorderWidthProperty borderWidth;
         Dimension width = dialogTheme_->GetBackgroudBorderWidth();
         borderWidth.SetBorderWidth(width);
+        auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+        layoutProps->UpdateBorderWidth(borderWidth);
         contentRenderContext->UpdateBorderWidth(borderWidth);
     }
     if (props.borderStyle.has_value()) {
