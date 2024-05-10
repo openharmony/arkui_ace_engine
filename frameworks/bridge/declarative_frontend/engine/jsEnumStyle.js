@@ -1065,6 +1065,9 @@ var SourceTool;
   SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
   SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
+  SourceTool[SourceTool["MOUSE"] = 7] = "MOUSE";
+  SourceTool[SourceTool["TOUCHPAD"] = 9] = "TOUCHPAD";
+  SourceTool[SourceTool["JOYSTICK"] = 10] = "JOYSTICK";
 })(SourceTool || (SourceTool = {}));
 
 var KeySource;
