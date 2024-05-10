@@ -32,12 +32,12 @@ class RSRecordingCanvas;
 namespace OHOS::Ace::NG {
 class Pattern;
 
-class RenderingContext2DModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(RenderingContext2DModifier, ContentModifier)
+class CanvasModifier : public ContentModifier {
+    DECLARE_ACE_TYPE(CanvasModifier, ContentModifier)
 
 public:
-    RenderingContext2DModifier();
-    ~RenderingContext2DModifier() override = default;
+    CanvasModifier();
+    ~CanvasModifier() override = default;
     void onDraw(DrawingContext& drawingContext) override;
     std::string GetDumpInfo();
     bool needResetSurface_ = false;
@@ -67,7 +67,7 @@ private:
 #endif
     SizeT<int32_t> recordingCanvasDrawSize_ = {0.0f, 0.0f};
     SizeT<int32_t> drawCmdSize_ = {0.0f, 0.0f};
-    ACE_DISALLOW_COPY_AND_MOVE(RenderingContext2DModifier);
+    ACE_DISALLOW_COPY_AND_MOVE(CanvasModifier);
 };
 } // namespace OHOS::Ace::NG
 

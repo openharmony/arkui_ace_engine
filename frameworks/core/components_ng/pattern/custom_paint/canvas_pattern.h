@@ -19,8 +19,8 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_event_hub.h"
-#include "core/components_ng/pattern/custom_paint/custom_paint_layout_algorithm.h"
+#include "core/components_ng/pattern/custom_paint/canvas_event_hub.h"
+#include "core/components_ng/pattern/custom_paint/canvas_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -32,14 +32,14 @@ class ImageAnalyzerManager;
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
 class OffscreenCanvasPattern;
-class RenderingContext2DModifier;
-// CustomPaintPattern is the base class for custom paint render node to perform paint canvas.
-class ACE_EXPORT CustomPaintPattern : public Pattern {
-    DECLARE_ACE_TYPE(CustomPaintPattern, Pattern);
+class CanvasModifier;
+// CanvasPattern is the base class for custom paint render node to perform paint canvas.
+class ACE_EXPORT CanvasPattern : public Pattern {
+    DECLARE_ACE_TYPE(CanvasPattern, Pattern);
 
 public:
-    CustomPaintPattern() = default;
-    ~CustomPaintPattern() override;
+    CanvasPattern() = default;
+    ~CanvasPattern() override;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
@@ -50,12 +50,12 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<CustomPaintLayoutAlgorithm>();
+        return MakeRefPtr<CanvasLayoutAlgorithm>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
     {
-        return MakeRefPtr<CustomPaintEventHub>();
+        return MakeRefPtr<CanvasEventHub>();
     }
 
     void SetCanvasSize(std::optional<SizeF> canvasSize)
@@ -188,9 +188,9 @@ private:
     bool isEnableAnalyzer_ = false;
     TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
 
-    RefPtr<RenderingContext2DModifier> contentModifier_;
+    RefPtr<CanvasModifier> contentModifier_;
 
-    ACE_DISALLOW_COPY_AND_MOVE(CustomPaintPattern);
+    ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };
 } // namespace OHOS::Ace::NG
 
