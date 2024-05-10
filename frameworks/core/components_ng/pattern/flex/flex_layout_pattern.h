@@ -57,6 +57,11 @@ public:
         return true;
     }
 
+    bool IsNeedPercent() const override
+    {
+        return true;
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
