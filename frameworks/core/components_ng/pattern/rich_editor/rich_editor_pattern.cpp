@@ -7197,6 +7197,7 @@ void RichEditorPattern::GetDeletedSpan(
     info.SetLength(length);
     if (!spans_.empty()) {
         CalcDeleteValueObj(innerPosition, length, info);
+        changeValue.SetRangeBefore({ innerPosition, innerPosition + length });
     }
     const std::list<RichEditorAbstractSpanResult>& resultList = info.GetRichEditorDeleteSpans();
     for (auto& it : resultList) {
@@ -7331,8 +7332,10 @@ bool RichEditorPattern::BeforeAddImage(RichEditorChangeValue& changeValue,
             retInfo.SetBorderRadius(imgAttr.borderRadius.value().ToString());
         }
     }
-    retInfo.SetSpanRangeStart(0);
-    retInfo.SetSpanRangeEnd(1);
+    retInfo.SetOffsetInSpan(0);
+    retInfo.SetEraseLength(1);
+    retInfo.SetSpanRangeStart(insertIndex);
+    retInfo.SetSpanRangeEnd(insertIndex + 1);
     retInfo.SetSpanType(SpanResultType::IMAGE);
     changeValue.SetRichEditorReplacedImageSpans(retInfo);
     CHECK_NULL_RETURN(eventHub->HasOnWillChange(), true);
@@ -7356,7 +7359,7 @@ void RichEditorPattern::FixMoveDownChange(RichEditorChangeValue& changeValue, in
             ++delSpanCount;
         }
     }
-    for (auto& it : const_cast<std::list<RichEditorAbstractSpanResult>&>(changeValue.GetRichEditorReplacedSpans())) {
+    for (auto& it : const_cast<std::vector<RichEditorAbstractSpanResult>&>(changeValue.GetRichEditorReplacedSpans())) {
         if (delSpanCount) {
             it.SetSpanIndex(it.GetSpanIndex() - delSpanCount);
         }

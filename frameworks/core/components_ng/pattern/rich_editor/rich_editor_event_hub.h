@@ -213,16 +213,16 @@ public:
     ~RichEditorChangeValue() = default;
 
     void SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span);
-    const std::list<RichEditorAbstractSpanResult>& GetRichEditorOriginalSpans() const;
+    const std::vector<RichEditorAbstractSpanResult>& GetRichEditorOriginalSpans() const;
 
     void SetRichEditorReplacedSpans(const RichEditorAbstractSpanResult& span);
-    const std::list<RichEditorAbstractSpanResult>& GetRichEditorReplacedSpans() const;
+    const std::vector<RichEditorAbstractSpanResult>& GetRichEditorReplacedSpans() const;
 
     void SetRichEditorReplacedImageSpans(const RichEditorAbstractSpanResult& span);
-    const std::list<RichEditorAbstractSpanResult>& GetRichEditorReplacedImageSpans() const;
+    const std::vector<RichEditorAbstractSpanResult>& GetRichEditorReplacedImageSpans() const;
 
     void SetRichEditorReplacedSymbolSpans(const RichEditorAbstractSpanResult& span);
-    const std::list<RichEditorAbstractSpanResult>& GetRichEditorReplacedSymbolSpans() const;
+    const std::vector<RichEditorAbstractSpanResult>& GetRichEditorReplacedSymbolSpans() const;
 
     void SetRangeBefore(const TextRange& rangeBefore);
     TextRange GetRangeBefore() const;
@@ -230,11 +230,21 @@ public:
     void SetRangeAfter(const TextRange& rangeAfter);
     TextRange GetRangeAfter() const;
 
+    void reset()
+    {
+        originalSpans_.clear();
+        replacedSpans_.clear();
+        replacedImageSpans_.clear();
+        replacedSymbolSpans_.clear();
+        rangeBefore_ = TextRange();
+        rangeAfter_ = TextRange();
+    }
+
 private:
-    std::list<RichEditorAbstractSpanResult> originalSpans_;
-    std::list<RichEditorAbstractSpanResult> replacedSpans_;
-    std::list<RichEditorAbstractSpanResult> replacedImageSpans_;
-    std::list<RichEditorAbstractSpanResult> replacedSymbolSpans_;
+    std::vector<RichEditorAbstractSpanResult> originalSpans_;
+    std::vector<RichEditorAbstractSpanResult> replacedSpans_;
+    std::vector<RichEditorAbstractSpanResult> replacedImageSpans_;
+    std::vector<RichEditorAbstractSpanResult> replacedSymbolSpans_;
     TextRange rangeBefore_;
     TextRange rangeAfter_;
 };
