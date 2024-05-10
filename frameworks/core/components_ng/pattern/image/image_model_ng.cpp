@@ -433,16 +433,6 @@ void ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawable
 
     auto pattern = AceType::DynamicCast<ImagePattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
-    if (!pattern->GetIsAnimation()) {
-        auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
-        CHECK_NULL_VOID(castImageLayoutProperty);
-        castImageLayoutProperty->Reset();
-        auto castImageRenderProperty = frameNode->GetPaintPropertyPtr<ImageRenderProperty>();
-        CHECK_NULL_VOID(castImageRenderProperty);
-        castImageRenderProperty->Reset();
-        pattern->ResetImageAndAlt();
-        pattern->ResetImageProperties();
-    }
 
     pattern->StopAnimation();
     pattern->SetIsAnimation(true);
