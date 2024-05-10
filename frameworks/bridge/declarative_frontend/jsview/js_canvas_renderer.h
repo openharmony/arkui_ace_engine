@@ -49,8 +49,7 @@ public:
     static RefPtr<CanvasPath2D> JsMakePath2D(const JSCallbackInfo& info);
     void SetAntiAlias();
 
-    void ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint8_t>& array);
-    void ParseImageDataAsStr(const JSCallbackInfo& info, ImageData& imageData);
+    void ParseImageData(const JSCallbackInfo& info, ImageData& imageData);
     void JsCloseImageBitmap(const std::string& src);
 
     void JsFillRect(const JSCallbackInfo& info);
