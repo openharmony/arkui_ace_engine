@@ -3084,7 +3084,7 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
         return false;
     }
     if (textSelector_.IsValid()) {
-        DeleteBackward(1, false);
+        DeleteBackward(1);
     }
     TextSpanOptions options;
     options.value = previewTextValue;
@@ -3640,18 +3640,18 @@ void RichEditorPattern::HandleOnDelete(bool backward)
 #if defined(PREVIEW)
         DeleteForward(1);
 #else
-        DeleteBackward(1, true);
+        DeleteBackward(1);
 #endif
     } else {
 #if defined(PREVIEW)
-        DeleteBackward(1, false);
+        DeleteBackward(1);
 #else
         DeleteForward(1);
 #endif
     }
 }
 
-int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward, bool& isSpanSelected)
+int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward)
 {
     int32_t emojiLength = 0;
     auto [isEmojiOnCaretBackward, isEmojiOnCaretForward] = IsEmojiOnCaretPosition(emojiLength, isBackward, length);
@@ -3660,7 +3660,6 @@ int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward
             length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
             if (isBackward) {
                 caretPosition_ = textSelector_.GetTextEnd();
-                isSpanSelected = true;
             } else {
                 caretPosition_ = textSelector_.GetTextStart();
             }
@@ -3686,16 +3685,11 @@ void RichEditorPattern::DeleteBackward(int32_t length)
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "do not handle DeleteBackward on previewTextInputting");
         return;
     }
-    DeleteBackward(length, false);
-}
-
-void RichEditorPattern::DeleteBackward(int32_t length, bool isExternalkeyboard)
-{
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_;
     RichEditorChangeValue changeValue;
     CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::DEL_BACKWARD, length));
-    std::wstring deleteText = DeleteBackwardOperation(length, isExternalkeyboard);
+    std::wstring deleteText = DeleteBackwardOperation(length);
     if (deleteText.length() != 0) {
         ClearRedoOperationRecords();
         record.deleteText = StringUtils::ToString(deleteText);
@@ -3705,17 +3699,23 @@ void RichEditorPattern::DeleteBackward(int32_t length, bool isExternalkeyboard)
     AfterChangeText(changeValue);
 }
 
-std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length, bool isExternalkeyboard)
+std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 {
-    bool isSpanSelected = false;
-    int32_t caretPositionBefore = caretPosition_;
-    length = CalculateDeleteLength(length, true, isSpanSelected);
-    std::wstring deleteText = GetBackwardDeleteText(length);
+    length = CalculateDeleteLength(length, true);
+    std::wstringstream wss;
+    for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
+        wss << StringUtils::ToWstring((*iter)->content);
+    }
+    auto textContent = wss.str();
+    if (static_cast<int32_t>(textContent.length()) != GetTextContentLength()) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "textContent length mismatch, %{public}d vs. %{public}d",
+            static_cast<int32_t>(textContent.length()), GetTextContentLength());
+    }
+    auto start = std::clamp(caretPosition_ - length, 0, static_cast<int32_t>(textContent.length()));
+    std::wstring deleteText =
+        textContent.substr(static_cast<uint32_t>(start), static_cast<uint32_t>(caretPosition_ - start));
     RichEditorDeleteValue info;
     info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
-    if (!isExternalkeyboard && !isSpanSelected) {
-        info.SetKeyboardType(KeyboardType::VIRTUAL_KEYBOARD);
-    }
     if (caretPosition_ == 0) {
         info.SetLength(0);
         ResetFirstNodeStyle();
@@ -3736,25 +3736,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length, bool isE
     if (!caretVisible_) {
         StartTwinkling();
     }
-    if (caretPositionBefore == caretPosition_) {
-        return L"";
-    }
     return deleteText;
-}
-
-std::wstring RichEditorPattern::GetBackwardDeleteText(int32_t length)
-{
-    std::wstringstream wss;
-    for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
-        wss << StringUtils::ToWstring((*iter)->content);
-    }
-    auto textContent = wss.str();
-    if (static_cast<int32_t>(textContent.length()) != GetTextContentLength()) {
-        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "textContent length mismatch, %{public}d vs. %{public}d",
-            static_cast<int32_t>(textContent.length()), GetTextContentLength());
-    }
-    auto start = std::clamp(caretPosition_ - length, 0, static_cast<int32_t>(textContent.length()));
-    return textContent.substr(static_cast<uint32_t>(start), static_cast<uint32_t>(caretPosition_ - start));
 }
 
 void RichEditorPattern::DeleteForward(int32_t length)
@@ -3784,8 +3766,7 @@ void RichEditorPattern::DeleteForward(int32_t length)
 
 std::wstring RichEditorPattern::DeleteForwardOperation(int32_t length)
 {
-    bool isSpanSelected = false;
-    length = CalculateDeleteLength(length, false, isSpanSelected);
+    length = CalculateDeleteLength(length, false);
     std::wstringstream wss;
     for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
         wss << StringUtils::ToWstring((*iter)->content);
@@ -4569,12 +4550,6 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     return eraseLength;
 }
 
-bool RichEditorPattern::DeleteImageBySoftKeyboard(const RichEditorDeleteValue& info)
-{
-    return info.GetKeyboardType() == KeyboardType::VIRTUAL_KEYBOARD &&
-           info.GetRichEditorDeleteDirection() == RichEditorDeleteDirection::BACKWARD;
-}
-
 void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& info)
 {
     auto deleteSpans = info.GetRichEditorDeleteSpans();
@@ -4590,15 +4565,24 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
         caretMoveLength += it.GetEraseLength();
         switch (it.GetType()) {
             case SpanResultType::TEXT: {
-                DeleteTextSpanInfo(host, deleteNodes, it);
+                auto ui_node = host->GetChildAtIndex(it.GetSpanIndex());
+                CHECK_NULL_VOID(ui_node);
+                auto spanNode = DynamicCast<SpanNode>(ui_node);
+                CHECK_NULL_VOID(spanNode);
+                auto spanItem = spanNode->GetSpanItem();
+                CHECK_NULL_VOID(spanItem);
+                auto text = spanItem->content;
+                std::wstring textTemp = StringUtils::ToWstring(text);
+                textTemp.erase(it.OffsetInSpan(), it.GetEraseLength());
+                if (textTemp.size() == 0) {
+                    deleteNodes.emplace(it.GetSpanIndex());
+                }
+                text = StringUtils::ToString(textTemp);
+                spanNode->UpdateContent(text);
+                spanItem->position -= it.GetEraseLength();
                 break;
             }
             case SpanResultType::IMAGE:
-                if (DeleteImageBySoftKeyboard(info)) {
-                    SetSelection(caretPosition_ - 1, caretPosition_);
-                    caretMoveLength--;
-                    return;
-                }
                 deleteNodes.emplace(it.GetSpanIndex());
                 break;
             case SpanResultType::SYMBOL:
@@ -4635,26 +4619,6 @@ RefPtr<GestureEventHub> RichEditorPattern::GetGestureEventHub() {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     return host->GetOrCreateGestureEventHub();
-}
-
-void RichEditorPattern::DeleteTextSpanInfo(const RefPtr<FrameNode>& host,
-    std::set<int32_t, std::greater<int32_t>>& SpanNodes, const RichEditorAbstractSpanResult& spanResult)
-{
-    auto ui_node = host->GetChildAtIndex(spanResult.GetSpanIndex());
-    CHECK_NULL_VOID(ui_node);
-    auto spanNode = DynamicCast<SpanNode>(ui_node);
-    CHECK_NULL_VOID(spanNode);
-    auto spanItem = spanNode->GetSpanItem();
-    CHECK_NULL_VOID(spanItem);
-    auto text = spanItem->content;
-    std::wstring textTemp = StringUtils::ToWstring(text);
-    textTemp.erase(spanResult.OffsetInSpan(), spanResult.GetEraseLength());
-    if (textTemp.size() == 0) {
-        SpanNodes.emplace(spanResult.GetSpanIndex());
-    }
-    text = StringUtils::ToString(textTemp);
-    spanNode->UpdateContent(text);
-    spanItem->position -= spanResult.GetEraseLength();
 }
 
 bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
@@ -5230,7 +5194,7 @@ void RichEditorPattern::HandleOnCut()
 
     caretUpdateType_ = CaretUpdateType::NONE;
     OnCopyOperation();
-    DeleteBackward(1, false);
+    DeleteBackward(1);
 }
 
 std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
@@ -7181,9 +7145,7 @@ void RichEditorPattern::GetDeletedSpan(
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
         innerPosition = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
     } else {
-        bool isSpanSelected = false;
-        int32_t emojiLength =
-            CalculateDeleteLength(length, (direction == RichEditorDeleteDirection::BACKWARD), isSpanSelected);
+        int32_t emojiLength = CalculateDeleteLength(length, (direction == RichEditorDeleteDirection::BACKWARD));
         if (direction == RichEditorDeleteDirection::BACKWARD) {
             innerPosition -= emojiLength;
         }
@@ -7778,7 +7740,7 @@ bool RichEditorPattern::HandleOnDeleteComb(bool backward)
         if (newPos == caretPosition_) {
             return false;
         }
-        DeleteBackward(caretPosition_ - newPos, false);
+        DeleteBackward(caretPosition_ - newPos);
         SetCaretPosition(newPos);
     } else {
         newPos = GetRightWordPosition(caretPosition_);

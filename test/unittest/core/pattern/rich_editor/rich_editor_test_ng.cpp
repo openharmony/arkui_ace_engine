@@ -1216,9 +1216,9 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("a");
+    AddImageSpan();
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
-    richEditorPattern->DeleteBackward(1, false);
+    richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 }
 
@@ -1232,61 +1232,18 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete003, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("h");
+    AddImageSpan();
     richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->DeleteBackward(1, false);
+    richEditorPattern->DeleteBackward(1);
     EXPECT_NE(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 0);
     richEditorPattern->textSelector_ = TextSelector(0, 1);
     richEditorPattern->caretPosition_ = 1;
-    richEditorPattern->DeleteBackward(1, false);
+    richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
     while (!richEditorPattern->spans_.empty()) {
         richEditorPattern->spans_.pop_back();
     }
-    richEditorPattern->DeleteBackward(1, false);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
-}
-
-/**
- * @tc.name: RichEditorDeleteBackwardImage001
- * @tc.desc: test delete image backward by diffKeyBoard
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, RichEditorDeleteBackwardImage001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    /**
-     * @tc.steps: step2. add image
-     */
-    AddImageSpan();
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->RequestFocusImmediately();
-    /**
-     * @tc.steps: step3. delete image by softKeyBoard first
-     */
-    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
-    richEditorPattern->DeleteBackward(1, false);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
-    /**
-     * @tc.steps: step4. delete image by softKeyBoard second
-     */
-    richEditorPattern->DeleteBackward(1, false);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
-    /**
-     * @tc.steps: step5. delete image backward by externalkeyboard
-     */
-    AddImageSpan();
-    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
-    richEditorPattern->HandleOnDelete(true);
+    richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 }
 
@@ -1322,9 +1279,9 @@ HWTEST_F(RichEditorTestNg, RichEditorDeleteBackwardEmoji, TestSize.Level1)
     AddSpan("😄3😄😄");
     richEditorPattern->caretPosition_ = 2;
     richEditorPattern->textSelector_ = TextSelector(2, 5);
-    richEditorPattern->DeleteBackward(1, false);
+    richEditorPattern->DeleteBackward(1);
     ASSERT_EQ(richEditorPattern->caretPosition_, 2);
-    richEditorPattern->DeleteBackward(1, false);
+    richEditorPattern->DeleteBackward(1);
     ASSERT_EQ(richEditorPattern->caretPosition_, 0);
 }
 

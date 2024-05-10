@@ -180,7 +180,6 @@ private:
 };
 
 enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
-enum class KeyboardType { NONE, VIRTUAL_KEYBOARD, EXTERNAL_KEYBOARD };
 
 class RichEditorDeleteValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo)
@@ -195,14 +194,11 @@ public:
     int32_t GetLength() const;
     void SetRichEditorDeleteSpans(const RichEditorAbstractSpanResult& deleteSpan);
     const std::list<RichEditorAbstractSpanResult>& GetRichEditorDeleteSpans() const;
-    void SetKeyboardType(KeyboardType Keyboard);
-    KeyboardType GetKeyboardType() const;
 
 private:
     int32_t offset_ = 0;
     RichEditorDeleteDirection direction_;
     int32_t length_ = 0;
-    KeyboardType Keyboard_ = KeyboardType::NONE;
     std::list<RichEditorAbstractSpanResult> richEditorDeleteSpans_;
 };
 
