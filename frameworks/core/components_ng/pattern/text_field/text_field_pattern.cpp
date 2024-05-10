@@ -2615,9 +2615,12 @@ void TextFieldPattern::ProcessNumberOfLines()
     CHECK_NULL_VOID(layoutProperty && layoutProperty->HasNumberOfLines());
     auto numberOfLines = layoutProperty->GetNumberOfLines().value();
     CHECK_NULL_VOID(numberOfLines > 0);
-    auto lineHeight = PreferredLineHeight(false);
-    auto lineSpacing = layoutProperty->HasLineSpacing() ? layoutProperty->GetLineSpacing().value().ConvertToPx() : 0.f;
-    auto contentHeight = numberOfLines * lineHeight + (numberOfLines - 1) * lineSpacing;
+    auto lineHeight = layoutProperty->GetLineHeight().value_or(0.0_vp).ConvertToPx();
+    if (LessOrEqual(lineHeight, 0.f)) {
+        lineHeight = PreferredLineHeight(false);
+    }
+    auto lineSpacing = layoutProperty->GetLineSpacing().value_or(0.0_vp).ConvertToPx();
+    auto contentHeight = numberOfLines * lineHeight + numberOfLines * lineSpacing;
     auto height = contentHeight + GetVerticalPaddingAndBorderSum();
 
     // get previously user defined ideal width
