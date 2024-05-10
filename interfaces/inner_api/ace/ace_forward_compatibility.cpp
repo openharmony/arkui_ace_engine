@@ -51,8 +51,8 @@ void AceForwardCompatibility::Init(const std::string& bundleName, const uint32_t
 
     isNewPipeline_ = (apiCompatibleVersion >= ARKUI_NEW_PIPELINE_MIN_VERSION) && !deprecated;
     isInited_ = true;
-    LOGI("AceForwardCompatibility [%{public}s] force:%{public}d newpipe:%{public}d",
-         bundleName.c_str(), isForceOldPipeline_, isNewPipeline_);
+    LOGI("AceForwardCompatibility [%{public}s] force:%{public}d newpipe:%{public}d", bundleName.c_str(),
+        isForceOldPipeline_, isNewPipeline_);
 }
 
 bool AceForwardCompatibility::IsForceOldPipeline()
