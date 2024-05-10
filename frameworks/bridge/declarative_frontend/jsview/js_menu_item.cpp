@@ -200,7 +200,7 @@ void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
     }
     MenuItemModel::GetInstance()->SetSelectIcon(isShow);
     MenuItemModel::GetInstance()->SetSelectIconSrc(icon);
-    MenuItemModel::GetInstance()->SetSelectIconSymbol(symbolApply);
+    MenuItemModel::GetInstance()->SetSelectIconSymbol(std::move(symbolApply));
 }
 
 void JSMenuItem::OnChange(const JSCallbackInfo& info)

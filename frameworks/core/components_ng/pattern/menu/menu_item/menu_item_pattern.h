@@ -222,8 +222,8 @@ private:
     void HandleFocusEvent();
     void HandleBlurEvent();
 
-    void CreateSymbolNode();
-    void CreateImageNode();
+    void UpdateSymbolNode(RefPtr<FrameNode>& selectIcon_);
+    void UpdateImageNode(RefPtr<FrameNode>& selectIcon_);
 
     std::list<TouchRegion> hoverRegions_;
 
