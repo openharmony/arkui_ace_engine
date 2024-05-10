@@ -448,6 +448,8 @@ public:
     bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
+    void UpdateOnFocusTextField(bool isFocus);
+    bool OnBackPressed() override;
     bool OnBackPressedForFullScreen() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
