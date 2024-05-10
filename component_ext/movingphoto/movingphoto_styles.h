@@ -28,6 +28,7 @@ struct MovingPhotoStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageSourceInfo, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(VideoSize, SizeF);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ObjectFit, ImageFit);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MovingPhotoUri, std::string);
 };
 
 } // namespace OHOS::Ace::NG
