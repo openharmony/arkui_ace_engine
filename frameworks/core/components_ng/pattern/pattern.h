@@ -480,6 +480,7 @@ public:
     virtual void OnDirectionConfigurationUpdate() {}
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
+    virtual void OnFontConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {

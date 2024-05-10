@@ -116,10 +116,14 @@ public:
     void AddVariationNodeNG(const WeakPtr<NG::UINode>& node);
     void RemoveVariationNodeNG(const WeakPtr<NG::UINode>& node);
     bool IsDefaultFontChanged();
+    bool IsUseAppCustomFont();
+    void SetAppCustomFont(const std::string& familyName);
+    std::string GetAppCustomFont() const;
 
 protected:
     static float fontWeightScale_;
     static bool isDefaultFontChanged_;
+    static std::string appCustomFont_;
 
 private:
     std::list<RefPtr<FontLoader>> fontLoaders_;

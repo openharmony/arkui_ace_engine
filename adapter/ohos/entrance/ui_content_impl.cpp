@@ -1998,6 +1998,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+            parsedConfig.fontFamily = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_FONT);
             parsedConfig.themeTag = config->GetItem("ohos.application.theme");
             parsedConfig.colorModeIsSetByApp =
                 config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);

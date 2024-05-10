@@ -2098,6 +2098,11 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 
 void AceContainer::CheckAndSetFontFamily()
 {
+    auto fontManager = pipelineContext_->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (fontManager->IsUseAppCustomFont()) {
+        return;
+    }
     std::string familyName = "";
     std::string path = "/data/themes/a/app";
     if (!IsFontFileExistInPath(path)) {
@@ -2112,7 +2117,6 @@ void AceContainer::CheckAndSetFontFamily()
         return;
     }
     path = path.append(familyName);
-    auto fontManager = pipelineContext_->GetFontManager();
     fontManager->SetFontFamily(familyName.c_str(), path.c_str());
 }
 
@@ -2260,6 +2264,12 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
             AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
         }
     }
+    if (!parsedConfig.fontFamily.empty()) {
+        auto fontManager = pipelineContext_->GetFontManager();
+        CHECK_NULL_VOID(fontManager);
+        configurationChange.fontUpdate = true;
+        fontManager->SetAppCustomFont(parsedConfig.fontFamily);
+    }
     if (!parsedConfig.direction.empty()) {
         auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
         if (parsedConfig.direction == "horizontal") {
@@ -2276,7 +2286,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     if (!parsedConfig.themeTag.empty()) {
         std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
         int fontUpdate = json->GetInt("fonts");
-        configurationChange.fontUpdate = fontUpdate;
+        configurationChange.fontUpdate = configurationChange.fontUpdate || fontUpdate;
         int iconUpdate = json->GetInt("icons");
         configurationChange.iconUpdate = iconUpdate;
         int skinUpdate = json->GetInt("skin");
