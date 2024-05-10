@@ -114,23 +114,23 @@ SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSiz
     return { width, height };
 }
 
-PaddingPropertyF ConvertToPaddingPropertyF(
-    const std::unique_ptr<PaddingProperty>& padding, const ScaleProperty& scaleProperty, float percentReference)
+PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
+    const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
 {
     if (!padding) {
         return {};
     }
-    return ConvertToPaddingPropertyF(*padding, scaleProperty, percentReference);
+    return ConvertToPaddingPropertyF(*padding, scaleProperty, percentReference, roundPixel);
 }
 
 PaddingPropertyF ConvertToPaddingPropertyF(
-    const PaddingProperty& padding, const ScaleProperty& scaleProperty, float percentReference)
+    const PaddingProperty& padding, const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
 {
     auto left = ConvertToPx(padding.left, scaleProperty, percentReference);
     auto right = ConvertToPx(padding.right, scaleProperty, percentReference);
     auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
     auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (roundPixel && AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (left.has_value()) {
             left = floor(left.value());
         }
@@ -147,35 +147,35 @@ PaddingPropertyF ConvertToPaddingPropertyF(
     return PaddingPropertyF { left, right, top, bottom };
 }
 
-MarginPropertyF ConvertToMarginPropertyF(
-    const std::unique_ptr<MarginProperty>& margin, const ScaleProperty& scaleProperty, float percentReference)
+MarginPropertyF ConvertToMarginPropertyF(const std::unique_ptr<MarginProperty>& margin,
+    const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
 {
-    return ConvertToPaddingPropertyF(margin, scaleProperty, percentReference);
+    return ConvertToPaddingPropertyF(margin, scaleProperty, percentReference, roundPixel);
 }
 
 MarginPropertyF ConvertToMarginPropertyF(
-    const MarginProperty& margin, const ScaleProperty& scaleProperty, float percentReference)
+    const MarginProperty& margin, const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
 {
-    return ConvertToPaddingPropertyF(margin, scaleProperty, percentReference);
+    return ConvertToPaddingPropertyF(margin, scaleProperty, percentReference, roundPixel);
 }
 
-BorderWidthPropertyF ConvertToBorderWidthPropertyF(
-    const std::unique_ptr<BorderWidthProperty>& borderWidth, const ScaleProperty& scaleProperty, float percentReference)
+BorderWidthPropertyF ConvertToBorderWidthPropertyF(const std::unique_ptr<BorderWidthProperty>& borderWidth,
+    const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
 {
     if (!borderWidth) {
         return {};
     }
-    return ConvertToBorderWidthPropertyF(*borderWidth, scaleProperty, percentReference);
+    return ConvertToBorderWidthPropertyF(*borderWidth, scaleProperty, percentReference, roundPixel);
 }
 
 BorderWidthPropertyF ConvertToBorderWidthPropertyF(
-    const BorderWidthProperty& borderWidth, const ScaleProperty& scaleProperty, float percentReference)
+    const BorderWidthProperty& borderWidth, const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
 {
     auto left = ConvertToPx(borderWidth.leftDimen, scaleProperty, percentReference);
     auto right = ConvertToPx(borderWidth.rightDimen, scaleProperty, percentReference);
     auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
     auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (roundPixel && AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (left.has_value()) {
             left = (GreatOrEqual(left.value(), 1.0f) || NearEqual(left.value(), 0.0f)) ? floor(left.value()) : 1.0f;
         }
