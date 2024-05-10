@@ -36,6 +36,7 @@ const int32_t SHOW_DIALOG_BUTTON_NUM_MAX = -1;
 const int32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
 const int32_t CUSTOM_DIALOG_PARAM_NUM = 2;
 const int32_t BG_BLUR_STYLE_MAX_INDEX = 12;
+const int32_t PROMPTACTION_VALID_PRIMARY_BUTTON_NUM = 1;
 constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
@@ -349,22 +350,49 @@ void DeleteContextAndThrowError(
     NapiThrow(env, errorMessage, ERROR_CODE_PARAM_INVALID);
 }
 
-bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, int32_t maxButtonNum)
+int32_t GetButtonArraryLen(napi_env env, std::shared_ptr<PromptAsyncContext>& context,
+    int32_t maxButtonNum)
 {
     uint32_t buttonsLen = 0;
-    bool isPrimaryButtonSet = false;
-    napi_value buttonArray = nullptr;
-    napi_value textNApi = nullptr;
-    napi_value colorNApi = nullptr;
-    napi_value primaryButtonNApi = nullptr;
-    napi_valuetype valueType = napi_undefined;
-    int32_t index = 0;
     napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
     int32_t buttonsLenInt = buttonsLen;
     if (buttonsLenInt > maxButtonNum && maxButtonNum != -1) {
         buttonsLenInt = maxButtonNum;
     }
-    for (index = 0; index < buttonsLenInt; index++) {
+    return buttonsLenInt;
+}
+
+void GetPrimaryButtonNum(napi_env env, std::shared_ptr<PromptAsyncContext>& context,
+    int32_t buttonsLenInt, int32_t& primaryButtonNum)
+{
+    napi_value buttonArray = nullptr;
+    napi_value primaryButtonNApi = nullptr;
+    napi_valuetype valueType = napi_undefined;
+    for (int32_t index = 0; index < buttonsLenInt; index++) {
+        napi_get_element(env, context->buttonsNApi, index, &buttonArray);
+        bool isPrimaryButtonSet = false;
+        napi_get_named_property(env, buttonArray, "primary", &primaryButtonNApi);
+        napi_typeof(env, primaryButtonNApi, &valueType);
+        if (valueType == napi_boolean) {
+            napi_get_value_bool(env, primaryButtonNApi, &isPrimaryButtonSet);
+        }
+        if (isPrimaryButtonSet) {
+            primaryButtonNum++;
+        }
+    }
+}
+
+bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context,
+    int32_t maxButtonNum, int32_t& primaryButtonNum)
+{
+    napi_value buttonArray = nullptr;
+    napi_value textNApi = nullptr;
+    napi_value colorNApi = nullptr;
+    napi_value primaryButtonNApi = nullptr;
+    napi_valuetype valueType = napi_undefined;
+    int32_t buttonsLenInt = GetButtonArraryLen(env, context, maxButtonNum);
+    GetPrimaryButtonNum(env, context, buttonsLenInt, primaryButtonNum);
+    for (int32_t index = 0; index < buttonsLenInt; index++) {
         napi_get_element(env, context->buttonsNApi, index, &buttonArray);
         if (!HasProperty(env, buttonArray, "text")) {
             DeleteContextAndThrowError(env, context, "Required input parameters are missing.");
@@ -391,16 +419,34 @@ bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, in
             }
         }
         ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
-        if (!isPrimaryButtonSet) {
+        if (primaryButtonNum <= PROMPTACTION_VALID_PRIMARY_BUTTON_NUM) {
             napi_get_named_property(env, buttonArray, "primary", &primaryButtonNApi);
             napi_typeof(env, primaryButtonNApi, &valueType);
             if (valueType == napi_boolean) {
                 napi_get_value_bool(env, primaryButtonNApi, &buttonInfo.isPrimary);
             }
-            if (buttonInfo.isPrimary) {
-                isPrimaryButtonSet = true;
-            }
         }
+        context->buttons.emplace_back(buttonInfo);
+    }
+    return true;
+}
+
+bool ParseButtonsPara(napi_env env, std::shared_ptr<PromptAsyncContext>& context,
+    int32_t maxButtonNum, bool isAddCancelButton)
+{
+    bool isBool = false;
+    napi_valuetype valueType = napi_undefined;
+    int32_t primaryButtonNum = 0;
+    napi_is_array(env, context->buttonsNApi, &isBool);
+    napi_typeof(env, context->buttonsNApi, &valueType);
+    if (valueType == napi_object && isBool) {
+        if (!ParseButtons(env, context, SHOW_DIALOG_BUTTON_NUM_MAX, primaryButtonNum)) {
+            return false;
+        }
+    }
+    if (isAddCancelButton) {
+        ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
+            .textColor = "", .isPrimary = primaryButtonNum == 0 ? true : false};
         context->buttons.emplace_back(buttonInfo);
     }
     return true;
@@ -1078,24 +1124,9 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             GetNapiDialogbackgroundBlurStyleProps(env, asyncContext, backgroundBlurStyle);
             backgroundColor = GetColorProps(env, asyncContext->backgroundColorApi);
             shadowProps = GetShadowProps(env, asyncContext);
-            bool isBool = false;
-            napi_is_array(env, asyncContext->buttonsNApi, &isBool);
-            napi_typeof(env, asyncContext->buttonsNApi, &valueType);
-            if (valueType == napi_object && isBool) {
-                if (!ParseButtons(env, asyncContext, SHOW_DIALOG_BUTTON_NUM_MAX)) {
-                    return nullptr;
-                }
+            if (!ParseButtonsPara(env, asyncContext, SHOW_DIALOG_BUTTON_NUM_MAX, true)) {
+                return nullptr;
             }
-            bool isPrimaryButtonSet = false;
-            for (auto btn : asyncContext->buttons) {
-                if (btn.isPrimary) {
-                    isPrimaryButtonSet = true;
-                    break;
-                }
-            }
-            ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
-                .textColor = "", .isPrimary = !isPrimaryButtonSet};
-            asyncContext->buttons.emplace_back(buttonInfo);
             napi_typeof(env, asyncContext->autoCancel, &valueType);
             if (valueType == napi_boolean) {
                 napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);
@@ -1315,14 +1346,14 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             }
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
             bool isBool = false;
+            int32_t primaryButtonNum = 0;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
-            if (valueType == napi_object && isBool) {
-                if (!ParseButtons(env, asyncContext, SHOW_ACTION_MENU_BUTTON_NUM_MAX)) {
-                    return nullptr;
-                }
-            } else {
+            if (valueType != napi_object || !isBool) {
                 DeleteContextAndThrowError(env, asyncContext, "The type of the button parameters is incorrect.");
+                return nullptr;
+            }
+            if (!ParseButtons(env, asyncContext, SHOW_ACTION_MENU_BUTTON_NUM_MAX, primaryButtonNum)) {
                 return nullptr;
             }
             napi_typeof(env, asyncContext->showInSubWindow, &valueType);

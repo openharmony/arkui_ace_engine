@@ -57,6 +57,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM_END };
 const std::vector<DialogButtonDirection> DIALOG_BUTTONS_DIRECTION = { DialogButtonDirection::AUTO,
     DialogButtonDirection::HORIZONTAL, DialogButtonDirection::VERTICAL };
+constexpr int32_t ALERT_DIALOG_VALID_PRIMARY_BUTTON_NUM = 1;
 } // namespace
 
 void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
@@ -68,7 +69,7 @@ void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
 }
 
 void ParseButtonObj(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSVal> jsVal,
-    const std::string& property, bool& isPrimaryButtonSet)
+    const std::string& property, bool isPrimaryButtonValid)
 {
     if (!jsVal->IsObject()) {
         return;
@@ -124,16 +125,14 @@ void ParseButtonObj(const JsiExecutionContext& execContext, DialogProperties& pr
         AlertDialogModel::GetInstance()->SetParseButtonObj(eventFunc, buttonInfo, properties, property);
     }
 
-    if (!buttonInfo.defaultFocus && !isPrimaryButtonSet) {
+    if (!buttonInfo.defaultFocus && isPrimaryButtonValid) {
         if (strcmp(property.c_str(), "confirm") == 0 ||
         strcmp(property.c_str(), "primaryButton") == 0) {
             buttonInfo.isPrimary = true;
-            isPrimaryButtonSet = true;
         } else {
             auto primaryButton = objInner->GetProperty("primary");
             if (primaryButton->IsBoolean()) {
-                buttonInfo.isPrimary = true;
-                isPrimaryButtonSet = true;
+                buttonInfo.isPrimary = primaryButton->ToBoolean();
             }
         }
     }
@@ -144,7 +143,7 @@ void ParseButtonObj(const JsiExecutionContext& execContext, DialogProperties& pr
 }
 
 void ParseButtonArray(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj,
-    const std::string& property, bool& isPrimaryButtonSet)
+    const std::string& property)
 {
     auto jsVal = obj->GetProperty(property.c_str());
     if (!jsVal->IsArray()) {
@@ -155,32 +154,48 @@ void ParseButtonArray(const JsiExecutionContext& execContext, DialogProperties& 
     if (length <= 0) {
         return;
     }
+    int32_t primaryButtonNum = 0;
+    bool isPrimaryButtonValid = true;
     for (size_t i = 0; i < length; i++) {
         JSRef<JSVal> buttonItem = array->GetValueAt(i);
         if (!buttonItem->IsObject()) {
             break;
         }
-        ParseButtonObj(execContext, properties, buttonItem, property + std::to_string(i), isPrimaryButtonSet);
+        auto objInner = JSRef<JSObject>::Cast(buttonItem);
+        auto primaryButton = objInner->GetProperty("primary");
+        if (primaryButton->IsBoolean()) {
+            primaryButtonNum += (primaryButton->ToBoolean() ? ALERT_DIALOG_VALID_PRIMARY_BUTTON_NUM : 0);
+        }
+        if (primaryButtonNum > ALERT_DIALOG_VALID_PRIMARY_BUTTON_NUM) {
+            isPrimaryButtonValid = false;
+            break;
+        }
+    }
+    for (size_t i = 0; i < length; i++) {
+        JSRef<JSVal> buttonItem = array->GetValueAt(i);
+        if (!buttonItem->IsObject()) {
+            break;
+        }
+        ParseButtonObj(execContext, properties, buttonItem, property + std::to_string(i), isPrimaryButtonValid);
     }
 }
 
 void ParseButtons(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj)
 {
     properties.buttons.clear();
-    bool isPrimaryButtonSet = false;
     if (obj->GetProperty("confirm")->IsObject()) {
         // Parse confirm.
         auto objInner = obj->GetProperty("confirm");
-        ParseButtonObj(execContext, properties, objInner, "confirm", isPrimaryButtonSet);
+        ParseButtonObj(execContext, properties, objInner, "confirm", true);
     } else if (obj->GetProperty("buttons")->IsArray()) {
         // Parse buttons array.
-        ParseButtonArray(execContext, properties, obj, "buttons", isPrimaryButtonSet);
+        ParseButtonArray(execContext, properties, obj, "buttons");
     } else {
         // Parse primaryButton and secondaryButton.
         auto objInner = obj->GetProperty("primaryButton");
-        ParseButtonObj(execContext, properties, objInner, "primaryButton", isPrimaryButtonSet);
+        ParseButtonObj(execContext, properties, objInner, "primaryButton", true);
         objInner = obj->GetProperty("secondaryButton");
-        ParseButtonObj(execContext, properties, objInner, "secondaryButton", isPrimaryButtonSet);
+        ParseButtonObj(execContext, properties, objInner, "secondaryButton", true);
     }
 
     // Parse buttons direction.
