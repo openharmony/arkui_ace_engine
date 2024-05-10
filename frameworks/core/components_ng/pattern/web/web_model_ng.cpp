@@ -1019,7 +1019,7 @@ void WebModelNG::SetPermissionClipboard(std::function<void(const std::shared_ptr
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    
+
     webPattern->SetPermissionClipboardCallback(std::move(jsCallback));
 }
 
@@ -1083,5 +1083,14 @@ void WebModelNG::SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOptio
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateSelectionMenuOptions(std::move(webMenuOption));
+}
+
+void WebModelNG::SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnViewportFitChangedEvent(std::move(uiCallback));
 }
 } // namespace OHOS::Ace::NG

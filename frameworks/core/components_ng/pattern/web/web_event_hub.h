@@ -168,6 +168,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnIntelligentTrackingPreventionResult, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessNotResponding, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessResponding, void);
+    ACE_WEB_EVENT_PROPERTY(OnViewportFitChanged, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

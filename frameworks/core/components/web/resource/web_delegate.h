@@ -539,6 +539,16 @@ private:
     bool sendTask_ = false;
 };
 
+class WebAvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
+public:
+    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
+    ~WebAvoidAreaChangedListener() = default;
+
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+};
+
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END
@@ -873,6 +883,11 @@ public:
     std::string GetSelectInfo() const;
 
     void OnOnlineRenderToForeground();
+
+    void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
+    void OnAreaChange(const OHOS::Ace::Rect& area);
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -953,6 +968,10 @@ private:
     void ratioStrToFloat(const std::string& str);
     // Return canonical encoding name according to the encoding alias name.
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
+    void RegisterAvoidAreaChangeListener();
+    void UnregisterAvoidAreaChangeListener();
+    void OnSafeInsetsChange();
+    void InitCacheCutoutEdge();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1014,6 +1033,7 @@ private:
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
     EventCallbackV2 onRenderProcessNotRespondingV2_;
     EventCallbackV2 onRenderProcessRespondingV2_;
+    EventCallbackV2 onViewportFitChangedV2_;
 
     int32_t renderMode_;
     int32_t layoutMode_;
@@ -1060,6 +1080,12 @@ private:
     bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
+    OHOS::Ace::Rect currentArea_;
+    NG::SafeAreaInsets systemSafeArea_;
+    NG::SafeAreaInsets cutoutSafeArea_;
+    NG::SafeAreaInsets navigationIndicatorSafeArea_;
+    uint32_t cacheCutoutEdge_ = 0;
+    sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
 #endif
 };
 
