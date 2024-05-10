@@ -2971,7 +2971,7 @@ void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleRightMousePressEvent(MouseInfo& info)
 {
-    if (IsSelected()) {
+    if (IsSelected() || GetIsPreviewText()) {
         return;
     }
     auto focusHub = GetFocusHub();
@@ -2983,6 +2983,9 @@ void TextFieldPattern::HandleRightMousePressEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleRightMouseReleaseEvent(MouseInfo& info)
 {
+    if (GetIsPreviewText()) {
+        return;
+    }
     auto focusHub = GetFocusHub();
     if (focusHub->IsCurrentFocus()) {
         OffsetF rightClickOffset = OffsetF(
@@ -3014,7 +3017,7 @@ void TextFieldPattern::HandleLeftMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
 {
-    if (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if ((IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) || GetIsPreviewText()) {
         blockPress_ = true;
         return;
     }
