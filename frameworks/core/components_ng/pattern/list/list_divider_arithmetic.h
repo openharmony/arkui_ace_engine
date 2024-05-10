@@ -94,6 +94,9 @@ public:
         }
         DividerMap another = rhs->GetDividerMap();
         DividerMap one = dividermap_;
+        if (another.size() != one.size()) {
+            return false;
+        }
         for (const auto& child : one) {
             auto it = another.find(child.first);
             if (it == another.end() || it->second.offset != child.second.offset ||
@@ -101,7 +104,7 @@ public:
                 return false;
             }
         }
-        return true && !one.empty();
+        return true;
     }
 
     bool IsSurfaceChange(const RefPtr<CustomAnimatableArithmetic>& value) const
