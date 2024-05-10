@@ -997,6 +997,11 @@ public:
         ViewAbstract::SetGroupDefaultFocus(isSet);
     }
 
+    void SetFocusBoxStyle(const NG::FocusBoxStyle& style) override
+    {
+        ViewAbstract::SetFocusBoxStyle(style);
+    }
+
     void SetInspectorId(const std::string& inspectorId) override
     {
         ViewAbstract::SetInspectorId(inspectorId);

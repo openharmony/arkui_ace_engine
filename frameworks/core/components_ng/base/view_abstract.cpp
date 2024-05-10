@@ -1002,6 +1002,13 @@ void ViewAbstract::SetFocusOnTouch(bool isSet)
     focusHub->SetIsFocusOnTouch(isSet);
 }
 
+void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->GetFocusBox().SetStyle(style);
+}
+
 void ViewAbstract::SetDefaultFocus(bool isSet)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();

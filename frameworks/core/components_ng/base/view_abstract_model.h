@@ -33,6 +33,7 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
@@ -277,7 +278,7 @@ public:
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
-    virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
+    virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {}
     virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
@@ -286,6 +287,9 @@ public:
     virtual void SetFocusOnTouch(bool isSet) = 0;
     virtual void SetDefaultFocus(bool isSet) = 0;
     virtual void SetGroupDefaultFocus(bool isSet) = 0;
+    virtual void SetFocusBoxStyle(const NG::FocusBoxStyle& style) {}
+    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) {}
+    virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {}
     virtual void SetInspectorId(const std::string& inspectorId) = 0;
     virtual void SetAutoEventParam(const std::string& param) {}
     virtual void SetRestoreId(int32_t restoreId) = 0;
@@ -297,7 +301,7 @@ public:
         std::function<void()>&& onKeyboardShortcutAction) = 0;
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
     virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
-    virtual void SetDisallowDropForcedly(bool isDisallowDropForcedly) {};
+    virtual void SetDisallowDropForcedly(bool isDisallowDropForcedly) {}
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
     virtual void SetPrivacySensitive(bool flag) = 0;
@@ -363,9 +367,6 @@ public:
     virtual void SetLightIlluminated(const uint32_t value) = 0;
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;
-
-    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) {};
-    virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {};
 
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
