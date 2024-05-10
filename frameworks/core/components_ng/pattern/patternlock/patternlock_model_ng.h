@@ -33,6 +33,9 @@ public:
     void SetCircleRadius(const Dimension& radius) override;
     void SetSideLength(const Dimension& sideLength) override;
     void SetStrokeWidth(const Dimension& lineWidth) override;
+    void SetActiveCircleColor(const Color& activeCircleColor) override;
+    void SetActiveCircleRadius(const Dimension& activeCircleRadius) override;
+    void SetEnableWaveEffect(bool enableWaveEffect) override;
 
     static void SetActiveColor(FrameNode* frameNode, const Color& activeColor);
     static void SetCircleRadius(FrameNode* frameNode, const Dimension& radius);
@@ -42,6 +45,9 @@ public:
     static void SetStrokeWidth(FrameNode* frameNode, const Dimension& lineWidth);
     static void SetRegularColor(FrameNode* frameNode, const Color& color);
     static void SetPathColor(FrameNode* frameNode, const Color& color);
+    static void SetActiveCircleColor(FrameNode* frameNode, const Color& activeCircleColor);
+    static void SetActiveCircleRadius(FrameNode* frameNode, const Dimension& activeCircleRadius);
+    static void SetEnableWaveEffect(FrameNode* frameNode, bool enableWaveEffect);
 };
 
 } // namespace OHOS::Ace::NG
