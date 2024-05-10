@@ -84,6 +84,8 @@ private:
     void OnRebuildFrame() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnWindowHide() override;
+    
+    void RegisterVisibleAreaChange();
 
     void InitEvent();
     void HandleLongPress(GestureEvent& info);
@@ -141,6 +143,7 @@ private:
     bool isMuted_ = false;
     bool isPlayByController_ = false;
     bool isFastKeyUp_ = false;
+    bool hasVisibleChangeRegistered_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
 
     Rect lastBoundsRect_;

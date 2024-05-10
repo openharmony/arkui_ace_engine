@@ -94,6 +94,8 @@ void MovingPhotoPattern::OnAttachToFrameNode()
             pattern->StopPlayback();
         }, "ArkUIMovingPhotoStop");
     });
+
+    RegisterVisibleAreaChange();
 }
 
 void MovingPhotoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -102,6 +104,7 @@ void MovingPhotoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    hasVisibleChangeRegistered_ = false;
 }
 
 void MovingPhotoPattern::OnDetachFromMainTree()
@@ -876,6 +879,28 @@ void MovingPhotoPattern::OnWindowHide()
     CHECK_NULL_VOID(rsContext);
     rsContext->UpdateOpacity(1.0);
     image->MarkModifyDone();
+}
+
+void MovingPhotoPattern::RegisterVisibleAreaChange()
+{
+    if (hasVisibleChangeRegistered_) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!visible) {
+            pattern->StopPlayback();
+        }
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+    hasVisibleChangeRegistered_ = true;
 }
 
 MovingPhotoPattern::~MovingPhotoPattern()
