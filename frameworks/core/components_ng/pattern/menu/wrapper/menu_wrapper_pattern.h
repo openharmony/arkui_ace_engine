@@ -109,6 +109,7 @@ public:
     }
 
     void HideSubMenu();
+    void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
 
     RefPtr<FrameNode> GetMenu() const
     {

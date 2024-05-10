@@ -50,6 +50,13 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+constexpr double VELOCITY = 0.0f;
+constexpr double MASS = 1.0f;
+constexpr double STIFFNESS = 228.0f;
+constexpr double DAMPING = 22.0f;
+constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
+constexpr float OPACITY_EFFECT = 0.99;
+
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
 {
@@ -466,13 +473,25 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
     AddSelfHoverRegion(host);
     auto menuWrapper = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapper);
-    subMenu->MountToParent(menuWrapper);
-    OffsetF offset = GetSubMenuPosition(host);
-    auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuProps);
-    menuProps->UpdateMenuOffset(offset);
-    menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    RegisterWrapperMouseEvent();
+    auto parentMenu = GetMenu();
+    CHECK_NULL_VOID(parentMenu);
+    auto layoutProps = parentMenu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+        expandingMode == SubMenuExpandingMode::STACK) {
+            subMenu->MountToParent(menuWrapper);
+            menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+            menuPattern->SetSubMenuShow();
+    } else {
+        subMenu->MountToParent(menuWrapper);
+        OffsetF offset = GetSubMenuPosition(host);
+        auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuProps);
+        menuProps->UpdateMenuOffset(offset);
+        menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        RegisterWrapperMouseEvent();
+    }
     // select overlay menu no need focus
     if (!isSelectOverlayMenu) {
         menuPattern->FocusViewShow();
@@ -514,10 +533,93 @@ void MenuItemPattern::HideSubMenu()
     }
 }
 
+void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode)
+{
+    CHECK_NULL_VOID(expandableNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(rightRow);
+    auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildAtIndex(0));
+    CHECK_NULL_VOID(imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
+
+    auto expandableAreaContext = expandableNode->GetRenderContext();
+    CHECK_NULL_VOID(expandableAreaContext);
+    auto expandableAreaSize = expandableNode->GetGeometryNode()->GetFrameSize();
+    expandableAreaContext->ClipWithRRect(RectF(0.0f, 0.0f, expandableAreaSize.Width(), 0.0f),
+        RadiusF(EdgeF(0.0f, 0.0f)));
+
+    AnimationOption option = AnimationOption();
+    auto rotateOption = AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
+    option.SetCurve(rotateOption);
+    AnimationUtils::Animate(option, [host, rightRow, expandableNode, expandableAreaContext, imageContext]() {
+        host->AddChildAfter(expandableNode, rightRow);
+        imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, SEMI_CIRCLE_ANGEL, 0.0f));
+        expandableNode->MarkModifyDone();
+        expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushUITasks();
+        auto expandableAreaFrameSize = expandableNode->GetGeometryNode()->GetFrameSize();
+        expandableAreaContext->ClipWithRRect(RectF(0.0f, 0.0f, expandableAreaFrameSize.Width(),
+            expandableAreaFrameSize.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
+    });
+}
+
+void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode)
+{
+    CHECK_NULL_VOID(expandableNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto expandableAreaContext = expandableNode->GetRenderContext();
+    CHECK_NULL_VOID(expandableAreaContext);
+
+    RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
+    expandableAreaContext->UpdateChainedTransition(opacity);
+
+    AnimationOption option = AnimationOption();
+    auto rotateOption = AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
+    option.SetCurve(rotateOption);
+
+    AnimationUtils::Animate(option, [this, host, expandableNode, expandableAreaContext]() {
+        for (auto item : expandableItems_) {
+            expandableNode->RemoveChild(item, true);
+        }
+        expandableNode->MarkModifyDone();
+        expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+
+        auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+        CHECK_NULL_VOID(rightRow);
+        auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildAtIndex(0));
+        CHECK_NULL_VOID(imageNode);
+        auto imageContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(imageContext);
+        imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushUITasks();
+        auto expandableAreaFrameSize = expandableNode->GetGeometryNode()->GetFrameSize();
+        expandableAreaContext->ClipWithRRect(RectF(0.0f, 0.0f, expandableAreaFrameSize.Width(),
+            0.0f), RadiusF(EdgeF(0.0f, 0.0f)));
+    });
+}
+
 void MenuItemPattern::CloseMenu()
 {
     // no need close for selection menu
     if (IsSelectOverlayMenu()) {
+        return;
+    }
+    auto parentMenu = GetMenu();
+    CHECK_NULL_VOID(parentMenu);
+    auto layoutProps = parentMenu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    if (IsSubMenu() && expandingMode == SubMenuExpandingMode::STACK) {
         return;
     }
     auto menuWrapper = GetMenuWrapper();
@@ -929,9 +1031,7 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& column, RefPtr<MenuLayout
     auto iconPath = iconTheme->GetIconPath(
         expandingMode == SubMenuExpandingMode::STACK
             ? InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG
-            : isExpanded_
-                ? InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG
-                : InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
+            : InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     ImageSourceInfo imageSourceInfo(iconPath);
@@ -951,18 +1051,14 @@ void MenuItemPattern::UpdateExpandableArea()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    RefPtr<FrameNode> expandableArea =
+    RefPtr<FrameNode> expandableNode =
         host->GetChildAtIndex(EXPANDABLE_AREA_VIEW_INDEX)
             ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(EXPANDABLE_AREA_VIEW_INDEX))
             : nullptr;
-    CHECK_NULL_VOID(expandableArea);
+    CHECK_NULL_VOID(expandableNode);
 
     if (!isExpanded_) {
-        for (auto item : expandableItems_) {
-            expandableArea->RemoveChild(item);
-        }
-        expandableArea->MarkModifyDone();
-        expandableArea->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        HideEmbeddedExpandMenu(expandableNode);
         return;
     }
 
@@ -977,12 +1073,11 @@ void MenuItemPattern::UpdateExpandableArea()
                 BuildEmbeddedMenuItems(menu);
             }
             for (auto item : expandableItems_) {
-                item->MountToParent(expandableArea);
+                item->MountToParent(expandableNode);
             }
         }
+        ShowEmbeddedExpandMenu(expandableNode);
     }
-    expandableArea->MarkModifyDone();
-    expandableArea->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void MenuItemPattern::BuildEmbeddedMenuItems(RefPtr<UINode>& node, bool needNextLevel)
@@ -1035,7 +1130,7 @@ RefPtr<UINode> MenuItemPattern::BuildStackSubMenu(RefPtr<UINode>& node)
     CHECK_NULL_RETURN(iconTheme, node);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(selectTheme, node);
-    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
+    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetSrc(iconPath);
     imageSourceInfo.SetFillColor(selectTheme->GetMenuIconColor());
@@ -1355,5 +1450,14 @@ void MenuItemPattern::ParseMenuRadius(MenuParam& param)
             param.borderRadius = std::make_optional(borderRadius);
         }
     }
+}
+
+bool MenuItemPattern::IsSubMenu()
+{
+    auto topLevelMenuPattern = GetMenuPattern(true);
+    if (!topLevelMenuPattern) {
+        return false;
+    }
+    return topLevelMenuPattern->IsSubMenu();
 }
 } // namespace OHOS::Ace::NG

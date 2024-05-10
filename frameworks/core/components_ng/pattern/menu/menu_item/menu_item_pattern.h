@@ -208,13 +208,15 @@ private:
     void ShowSubMenu();
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
     void HideSubMenu();
+    void HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
+    void ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
 
     OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& targetNode);
 
     void AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode);
     void SetAccessibilityAction();
     bool IsSelectOverlayMenu();
-
+    bool IsSubMenu();
     void RecordChangeEvent() const;
     void ParseMenuRadius(MenuParam& param);
 
