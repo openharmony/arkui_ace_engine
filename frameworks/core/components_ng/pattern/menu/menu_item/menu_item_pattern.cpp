@@ -528,7 +528,7 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         host->AddChildAfter(expandableNode, rightRow);
         imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, SEMI_CIRCLE_ANGEL, 0.0f));
         expandableNode->MarkModifyDone();
-        expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -559,7 +559,7 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
             expandableNode->RemoveChild(item, true);
         }
         expandableNode->MarkModifyDone();
-        expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 
         auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_VOID(rightRow);
@@ -971,9 +971,7 @@ void MenuItemPattern::AddExpandIcon(RefPtr<FrameNode>& column, RefPtr<MenuLayout
     auto iconPath = iconTheme->GetIconPath(
         expandingMode == SubMenuExpandingMode::STACK
             ? InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG
-            : isExpanded_
-                ? InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG
-                : InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
+            : InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     ImageSourceInfo imageSourceInfo(iconPath);
