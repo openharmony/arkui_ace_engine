@@ -219,24 +219,28 @@ void MenuItemPattern::InitFocusEvent()
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
         if (pattern->content_ && pattern->isTextFadeOut_) {
             auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateTextMarqueeStart(true);
-            pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            if (textLayoutProperty) {
+                textLayoutProperty->UpdateTextMarqueeStart(pattern->isFocused_);
+                pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
         }
-        pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
 
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
         if (pattern->content_ && pattern->isTextFadeOut_) {
             auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateTextMarqueeStart(false);
-            pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            if (textLayoutProperty) {
+                textLayoutProperty->UpdateTextMarqueeStart(pattern->isHovered_);
+                pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
         }
-        pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
 }
@@ -602,6 +606,13 @@ void MenuItemPattern::RegisterOnHover()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnHover(isHover);
+        if (pattern->content_ && pattern->isTextFadeOut_) {
+            auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
+            if (textLayoutProperty) {
+                textLayoutProperty->UpdateTextMarqueeStart(isHover || pattern->isFocused_);
+                pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+        }
     };
     auto onHover = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(onHover);

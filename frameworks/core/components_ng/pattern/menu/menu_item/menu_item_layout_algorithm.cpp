@@ -211,6 +211,8 @@ void MenuItemLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const
             auto contentConstraint = constraint;
             contentConstraint.maxSize.SetWidth(spaceWidth);
             child->Measure(contentConstraint);
+            auto frameNode  = child->GetHostNode();
+            UpdateOverlay(frameNode);
         }
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         spaceWidth -= childSize.Width() + iconContentPadding;
@@ -219,6 +221,20 @@ void MenuItemLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const
     }
     rowWidth -= iconContentPadding;
     row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, rowHeight));
+}
+
+void MenuItemLayoutAlgorithm::UpdateOverlay(RefPtr<FrameNode> frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto overlayNode = frameNode ->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto textFrameSize_ = geometryNode->GetMarginFrameSize();
+    auto overlayGeometryNode = overlayNode->GetGeometryNode();
+    CHECK_NULL_VOID(overlayGeometryNode);
+    overlayGeometryNode->SetFrameSize(textFrameSize_);
+    overlayNode->Layout();
 }
 
 void MenuItemLayoutAlgorithm::MeasureExpandableArea(const RefPtr<LayoutWrapper>& area,
