@@ -2174,6 +2174,22 @@ HWTEST_F(GridLayoutTestNg, AdaptToChildMainSize004, TestSize.Level1)
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_HEIGHT * 2);
 }
 
+/**
+ * @tc.name: AdaptToChildMainSize005
+ * @tc.desc: Test Vertical Grid with maxcount and 0 itemHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptToChildMainSize005, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        ViewAbstract::SetHeight(CalcLength(100));
+        model.SetMaxCount(1);
+        CreateItem(1, 0, 0);
+    });
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, 100);
+}
+
 /*
  * @tc.name: GetResetMode001
  * @tc.desc: Test Reset Function when have bigItem
