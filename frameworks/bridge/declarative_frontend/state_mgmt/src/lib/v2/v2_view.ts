@@ -36,8 +36,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     protected finalizeConstruction(): void {
 
         ProviderConsumerUtilV2.setupConsumeVarsV2(this);
-        ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
+        ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
 
         // Always use ID_REFS in ViewV2
         this[ObserveV2.ID_REFS] = {};

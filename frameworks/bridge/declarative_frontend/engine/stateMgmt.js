@@ -8012,8 +8012,8 @@ function observedV2Internal(BaseClass) {
     return class extends BaseClass {
         constructor(...args) {
             super(...args);
-            AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
             AsyncAddComputedV2.addComputed(this, BaseClass.name);
+            AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
         }
     };
 }
@@ -8331,8 +8331,8 @@ class ViewV2 extends PUV2ViewBase {
     }
     finalizeConstruction() {
         ProviderConsumerUtilV2.setupConsumeVarsV2(this);
-        ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
+        ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         // Always use ID_REFS in ViewV2
         this[ObserveV2.ID_REFS] = {};
     }
