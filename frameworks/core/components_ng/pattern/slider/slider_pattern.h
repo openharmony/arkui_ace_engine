@@ -247,7 +247,6 @@ private:
     SliderModelNG::SliderInteraction sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_AND_CLICK;
     bool allowDragEvents_ = true;
     int32_t fingerId_ = -1;
-    std::optional<Offset> lastTouchLocation_ = std::nullopt;
 
     float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;

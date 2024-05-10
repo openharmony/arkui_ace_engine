@@ -722,13 +722,11 @@ HWTEST_F(SliderTestNg, SliderTestNg010, TestSize.Level1)
      * @tc.desc:  when TouchType is DOWN, SourceType is mouse touch.
      */
     TouchLocationInfo LInfo(0);
-    LInfo.touchType_ = TouchType::UP;
+    LInfo.touchType_ = TouchType::DOWN;
     LInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
     TouchEventInfo info("");
     info.SetSourceDevice(SourceType::MOUSE);
     info.changedTouches_.emplace_back(LInfo);
-    sliderPattern->lastTouchLocation_ = Offset(MIN_LABEL, MAX_LABEL);
-    sliderPattern->fingerId_ = LInfo.GetFingerId();
     sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
     /**
      * @tc.cases: case1. mouse down position is outside the block side, UpdateValueByLocalLocation
@@ -772,13 +770,11 @@ HWTEST_F(SliderTestNg, SliderTestNg011, TestSize.Level1)
      * @tc.desc:  when TouchType is DOWN, SourceType is touch.
      */
     TouchLocationInfo LInfo(0);
-    LInfo.touchType_ = TouchType::UP;
+    LInfo.touchType_ = TouchType::DOWN;
     LInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
     TouchEventInfo info("");
     info.SetSourceDevice(SourceType::TOUCH);
     info.changedTouches_.emplace_back(LInfo);
-    sliderPattern->lastTouchLocation_ = Offset(MIN_LABEL, MAX_LABEL);
-    sliderPattern->fingerId_ = LInfo.GetFingerId();
     sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
     sliderPattern->blockHotSize_ = SizeF(MIN_LABEL, MIN_LABEL);
     /**
@@ -3794,13 +3790,11 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode005, TestSize.Level1)
      * @tc.desc:  when TouchType is DOWN, SourceType is mouse touch.
      */
     TouchLocationInfo LInfo(0);
-    LInfo.touchType_ = TouchType::UP;
+    LInfo.touchType_ = TouchType::DOWN;
     LInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
     TouchEventInfo info("");
     info.SetSourceDevice(SourceType::MOUSE);
     info.changedTouches_.emplace_back(LInfo);
-    sliderPattern->lastTouchLocation_ = Offset(MIN_LABEL, MAX_LABEL);
-    sliderPattern->fingerId_ = LInfo.GetFingerId();
     sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
     /**
      * @tc.cases: case1. mouse down position is outside the block side, UpdateValueByLocalLocation
@@ -3912,13 +3906,11 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode007, TestSize.Level1)
      * @tc.desc:  when TouchType is DOWN, SourceType is touch.
      */
     TouchLocationInfo LInfo(0);
-    LInfo.touchType_ = TouchType::UP;
+    LInfo.touchType_ = TouchType::DOWN;
     LInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
     TouchEventInfo info("");
     info.SetSourceDevice(SourceType::TOUCH);
     info.changedTouches_.emplace_back(LInfo);
-    sliderPattern->lastTouchLocation_ = Offset(MIN_LABEL, MAX_LABEL);
-    sliderPattern->fingerId_ = LInfo.GetFingerId();
     sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
     sliderPattern->blockHotSize_ = SizeF(MIN_LABEL, MIN_LABEL);
     /**
