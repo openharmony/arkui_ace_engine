@@ -32,7 +32,7 @@ void SetCanvasBeginPath(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     canvasPattern->BeginPath();
 }
@@ -43,7 +43,7 @@ void SetCanvasClosePath(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     canvasPattern->ClosePath();
 }
@@ -54,7 +54,7 @@ void SetCanvasFill(ArkUINodeHandle node, const char* value)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     std::string ruleStr(value);
     CanvasFillRule fillRule = CanvasFillRule::NONZERO;
@@ -74,7 +74,7 @@ void SetCanvasMoveTo(ArkUINodeHandle node, float x, float y)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     canvasPattern->MoveTo(x, y);
 }
@@ -88,7 +88,7 @@ void SetCanvasArc(ArkUINodeHandle node, ArkUICanvasArcOptions* options)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     ArcParam param;
     param.x = Dimension(options->x, DimensionUnit::VP).ConvertToPx();
@@ -107,7 +107,7 @@ void SetCanvasLineTo(ArkUINodeHandle node, float x, float y)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     canvasPattern->LineTo(Dimension(x, DimensionUnit::VP).ConvertToPx(), Dimension(y, DimensionUnit::VP).ConvertToPx());
 }
@@ -119,7 +119,7 @@ void SetCanvasStrokeStyle(ArkUINodeHandle node, int color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     canvasPattern->UpdateStrokeColor(Color(color));
 }
@@ -137,7 +137,7 @@ void SetCanvasLineWidth(ArkUINodeHandle node, float width)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     canvasPattern->UpdateLineWidth(Dimension(width, DimensionUnit::VP).ConvertToPx());
 }
@@ -154,7 +154,7 @@ void SetCanvasStroke(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     canvasPattern->Stroke();
 }
@@ -166,7 +166,7 @@ void SetCanvasAntiAlias(ArkUINodeHandle node, ArkUI_Bool antialias)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     canvasPattern->SetAntiAlias(static_cast<bool>(antialias));
 }
@@ -178,7 +178,7 @@ void SetCanvasFillColor(ArkUINodeHandle node, int color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     canvasPattern->UpdateFillColor(Color(color));
 }
@@ -195,7 +195,7 @@ void SetCanvasGlobalAlpha(ArkUINodeHandle node, float alpha)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     canvasPattern->UpdateGlobalAlpha(alpha);
 }
@@ -214,7 +214,7 @@ void SetCanvasFillRect(ArkUINodeHandle node, float x, float y, float w, float h)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     canvasPattern->FillRect(
         { Dimension(x, DimensionUnit::VP).ConvertToPx(), Dimension(y, DimensionUnit::VP).ConvertToPx(),
@@ -229,7 +229,7 @@ void SetCanvasFillText(ArkUINodeHandle node, const char* value, float x, float y
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
-    auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     std::string text(value);
     canvasPattern->FillText(text, Dimension(x, DimensionUnit::VP).ConvertToPx(),

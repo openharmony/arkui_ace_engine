@@ -206,6 +206,7 @@ constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
 constexpr int32_t OUTLINE_TOP_WIDTH_INDEX = 1;
 constexpr int32_t OUTLINE_RIGHT_WIDTH_INDEX = 2;
 constexpr int32_t OUTLINE_BOTTOM_WIDTH_INDEX = 3;
+constexpr uint32_t CONVERT_CONTENT_TYPE = 5;
 const std::string EMPTY_STR = "";
 const std::vector<std::string> ACCESSIBILITY_LEVEL_VECTOR = { "auto", "yes", "no", "no-hide-descendants" };
 std::map<std::string, int32_t> ACCESSIBILITY_LEVEL_MAP = { { "auto", 0 }, { "yes", 1 }, { "no", 2 },
@@ -4042,16 +4043,27 @@ int32_t SetTextInputContentType(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    // The enum values of native_type.h are different from those of text_content_type.h. Convert the enum values.
+    auto value = static_cast<uint32_t>(item->value[0].i32);
+    if (value >= static_cast<uint32_t>(ARKUI_TEXTINPUT_CONTENT_TYPE_NICKNAME)
+        && value <= static_cast<uint32_t>(ARKUI_TEXTINPUT_CONTENT_TYPE_FORMAT_ADDRESS)) {
+        value += CONVERT_CONTENT_TYPE;
+    }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputContentType(
-        node->uiNodeHandle, static_cast<uint32_t>(item->value[0].i32));
+        node->uiNodeHandle, value);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetTextInputContentType(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
-    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputContentType(
+    auto value = fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputContentType(
         node->uiNodeHandle);
+    if (value >= static_cast<uint32_t>(ARKUI_TEXTINPUT_CONTENT_TYPE_FORMAT_ADDRESS) + CONVERT_CONTENT_TYPE
+        && value <= static_cast<uint32_t>(ARKUI_TEXTINPUT_CONTENT_TYPE_FORMAT_ADDRESS) + CONVERT_CONTENT_TYPE) {
+        value -= CONVERT_CONTENT_TYPE;
+    }
+    g_numberValues[0].i32 = value;
     g_attributeItem.size = REQUIRED_ONE_PARAM;
     return &g_attributeItem;
 }

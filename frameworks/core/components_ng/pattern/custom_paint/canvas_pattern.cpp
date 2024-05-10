@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
+#include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
-#include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
+#include "core/components_ng/pattern/custom_paint/canvas_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "base/log/dump_log.h"
 
@@ -33,14 +33,14 @@ namespace {} // namespace
 
 namespace OHOS::Ace::NG {
 class RosenRenderContext;
-CustomPaintPattern::~CustomPaintPattern()
+CanvasPattern::~CanvasPattern()
 {
     if (IsSupportImageAnalyzerFeature()) {
         ReleaseImageAnalyzer();
     }
 }
 
-void CustomPaintPattern::OnAttachToFrameNode()
+void CanvasPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -52,17 +52,17 @@ void CustomPaintPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
 
     if (!contentModifier_) {
-        contentModifier_ = AceType::MakeRefPtr<RenderingContext2DModifier>();
+        contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
     }
     paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context, contentModifier_, host);
 }
 
-RefPtr<NodePaintMethod> CustomPaintPattern::CreateNodePaintMethod()
+RefPtr<NodePaintMethod> CanvasPattern::CreateNodePaintMethod()
 {
     return paintMethod_;
 }
 
-bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+bool CanvasPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     bool pixelGridRoundSizeChange = false;
     auto host = GetHost();
@@ -70,7 +70,6 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     SizeF currentPixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
-    bool isInitInvalid = (currentPixelGridRoundSize == SizeF(0, 0) && dirtyPixelGridRoundSize_ == SizeF(0, 0));
     pixelGridRoundSizeChange = currentPixelGridRoundSize != dirtyPixelGridRoundSize_;
     dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
     lastDirtyPixelGridRoundSize_ = dirtyPixelGridRoundSize_;
@@ -78,8 +77,8 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-    auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
-    CHECK_NULL_RETURN(customPaintEventHub, false);
+    auto canvasEventHub = GetEventHub<CanvasEventHub>();
+    CHECK_NULL_RETURN(canvasEventHub, false);
 
     if ((isCanvasInit_ == true) && (config.frameSizeChange || config.contentSizeChange)) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -99,7 +98,7 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
     }
 
-    if (!isCanvasInit_ && !isInitInvalid) {
+    if (!isCanvasInit_) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         CHECK_NULL_RETURN(contentModifier_, false);
@@ -108,8 +107,8 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
         auto context = PipelineContext::GetCurrentContext();
         if (context) {
-            context->AddAfterLayoutTask([customPaintEventHub]() {
-                    customPaintEventHub->FireReadyEvent();
+            context->AddAfterLayoutTask([canvasEventHub]() {
+                    canvasEventHub->FireReadyEvent();
                 });
         }
         isCanvasInit_ = true;
@@ -118,7 +117,7 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     return false;
 }
 
-void CustomPaintPattern::SetAntiAlias(bool isEnabled)
+void CanvasPattern::SetAntiAlias(bool isEnabled)
 {
     auto task = [isEnabled](CanvasPaintMethod& paintMethod) {
         paintMethod.SetAntiAlias(isEnabled);
@@ -126,7 +125,7 @@ void CustomPaintPattern::SetAntiAlias(bool isEnabled)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::FillRect(const Rect& rect)
+void CanvasPattern::FillRect(const Rect& rect)
 {
 #ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'fillRect(%{public}s)' is being executed.", rect.ToString().c_str());
@@ -140,7 +139,7 @@ void CustomPaintPattern::FillRect(const Rect& rect)
 #endif
 }
 
-void CustomPaintPattern::StrokeRect(const Rect& rect)
+void CanvasPattern::StrokeRect(const Rect& rect)
 {
     auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.StrokeRect(rect);
@@ -148,7 +147,7 @@ void CustomPaintPattern::StrokeRect(const Rect& rect)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::ClearRect(const Rect& rect)
+void CanvasPattern::ClearRect(const Rect& rect)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'clearRect(%{public}s)' is being executed.", rect.ToString().c_str());
     auto task = [rect](CanvasPaintMethod& paintMethod) {
@@ -157,7 +156,7 @@ void CustomPaintPattern::ClearRect(const Rect& rect)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::Fill()
+void CanvasPattern::Fill()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'fill' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod) {
@@ -166,7 +165,7 @@ void CustomPaintPattern::Fill()
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::Fill(const RefPtr<CanvasPath2D>& path)
+void CanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'fill' whit path is pending execution.");
     auto task = [path](CanvasPaintMethod& paintMethod) {
@@ -175,7 +174,7 @@ void CustomPaintPattern::Fill(const RefPtr<CanvasPath2D>& path)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::Stroke()
+void CanvasPattern::Stroke()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'stroke' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod) {
@@ -184,7 +183,7 @@ void CustomPaintPattern::Stroke()
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::Stroke(const RefPtr<CanvasPath2D>& path)
+void CanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'stroke' whit path is pending execution.");
     auto task = [path](CanvasPaintMethod& paintMethod) {
@@ -193,7 +192,7 @@ void CustomPaintPattern::Stroke(const RefPtr<CanvasPath2D>& path)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::Clip()
+void CanvasPattern::Clip()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'clip' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod) {
@@ -202,7 +201,7 @@ void CustomPaintPattern::Clip()
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::Clip(const RefPtr<CanvasPath2D>& path)
+void CanvasPattern::Clip(const RefPtr<CanvasPath2D>& path)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'clip' whit path is pending execution.");
     auto task = [path](CanvasPaintMethod& paintMethod) {
@@ -211,7 +210,7 @@ void CustomPaintPattern::Clip(const RefPtr<CanvasPath2D>& path)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::BeginPath()
+void CanvasPattern::BeginPath()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'beginPath' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod) {
@@ -220,7 +219,7 @@ void CustomPaintPattern::BeginPath()
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::ClosePath()
+void CanvasPattern::ClosePath()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'closePath' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod) {
@@ -229,7 +228,7 @@ void CustomPaintPattern::ClosePath()
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::MoveTo(double x, double y)
+void CanvasPattern::MoveTo(double x, double y)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'moveTo(%{public}lf, %{public}lf)' is pending execution.", x, y);
     auto task = [x, y](CanvasPaintMethod& paintMethod) {
@@ -238,7 +237,7 @@ void CustomPaintPattern::MoveTo(double x, double y)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::LineTo(double x, double y)
+void CanvasPattern::LineTo(double x, double y)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'lineTo(%{public}lf, %{public}lf)' is pending execution.", x, y);
     auto task = [x, y](CanvasPaintMethod& paintMethod) {
@@ -247,7 +246,7 @@ void CustomPaintPattern::LineTo(double x, double y)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::Arc(const ArcParam& param)
+void CanvasPattern::Arc(const ArcParam& param)
 {
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.Arc(param);
@@ -255,7 +254,7 @@ void CustomPaintPattern::Arc(const ArcParam& param)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::ArcTo(const ArcToParam& param)
+void CanvasPattern::ArcTo(const ArcToParam& param)
 {
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.ArcTo(param);
@@ -263,7 +262,7 @@ void CustomPaintPattern::ArcTo(const ArcToParam& param)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::AddRect(const Rect& rect)
+void CanvasPattern::AddRect(const Rect& rect)
 {
     auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.AddRect(rect);
@@ -271,7 +270,7 @@ void CustomPaintPattern::AddRect(const Rect& rect)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::Ellipse(const EllipseParam& param)
+void CanvasPattern::Ellipse(const EllipseParam& param)
 {
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.Ellipse(param);
@@ -279,7 +278,7 @@ void CustomPaintPattern::Ellipse(const EllipseParam& param)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::BezierCurveTo(const BezierCurveParam& param)
+void CanvasPattern::BezierCurveTo(const BezierCurveParam& param)
 {
 #ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'bezierCurveTo' is pending execution.");
@@ -293,7 +292,7 @@ void CustomPaintPattern::BezierCurveTo(const BezierCurveParam& param)
 #endif
 }
 
-void CustomPaintPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
+void CanvasPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
 {
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.QuadraticCurveTo(param);
@@ -301,7 +300,7 @@ void CustomPaintPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
+void CanvasPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
 #ifndef USE_FAST_TASKPOOL
     auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod) {
@@ -314,7 +313,7 @@ void CustomPaintPattern::FillText(const std::string& text, double x, double y, s
 #endif
 }
 
-void CustomPaintPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
+void CanvasPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
     auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod) {
         paintMethod.StrokeText(text, x, y, maxWidth);
@@ -322,22 +321,22 @@ void CustomPaintPattern::StrokeText(const std::string& text, double x, double y,
     paintMethod_->PushTask(task);
 }
 
-double CustomPaintPattern::MeasureText(const std::string& text, const PaintState& state)
+double CanvasPattern::MeasureText(const std::string& text, const PaintState& state)
 {
     return paintMethod_->MeasureText(text, state);
 }
 
-double CustomPaintPattern::MeasureTextHeight(const std::string& text, const PaintState& state)
+double CanvasPattern::MeasureTextHeight(const std::string& text, const PaintState& state)
 {
     return paintMethod_->MeasureTextHeight(text, state);
 }
 
-TextMetrics CustomPaintPattern::MeasureTextMetrics(const std::string& text, const PaintState& state)
+TextMetrics CanvasPattern::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
     return paintMethod_->MeasureTextMetrics(text, state);
 }
 
-void CustomPaintPattern::DrawImage(const Ace::CanvasImage& image, double width, double height)
+void CanvasPattern::DrawImage(const Ace::CanvasImage& image, double width, double height)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'drawImage(%{public}f, %{public}f)' is being executed.", width, height);
     auto task = [image, width, height](CanvasPaintMethod& paintMethod) {
@@ -346,7 +345,7 @@ void CustomPaintPattern::DrawImage(const Ace::CanvasImage& image, double width, 
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::DrawSvgImage(
+void CanvasPattern::DrawSvgImage(
     RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& image, const ImageFit& imageFit)
 {
     auto task = [svgDom, image, imageFit](CanvasPaintMethod& paintMethod) {
@@ -355,7 +354,7 @@ void CustomPaintPattern::DrawSvgImage(
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image)
+void CanvasPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image)
 {
     auto task = [pixelMap, image](CanvasPaintMethod& paintMethod) {
         paintMethod.DrawPixelMap(pixelMap, image);
@@ -363,7 +362,7 @@ void CustomPaintPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canv
     paintMethod_->PushTask(task);
 }
 
-std::unique_ptr<Ace::ImageData> CustomPaintPattern::GetImageData(double left, double top, double width, double height)
+std::unique_ptr<Ace::ImageData> CanvasPattern::GetImageData(double left, double top, double width, double height)
 {
     TAG_LOGD(
         AceLogTag::ACE_CANVAS, "Area: [%{public}lf, %{public}lf, %{public}lf, %{public}lf].", left, top, width, height);
@@ -385,7 +384,7 @@ std::unique_ptr<Ace::ImageData> CustomPaintPattern::GetImageData(double left, do
     return paintMethod_->GetImageData(rosenRenderContext, left, top, width, height);
 }
 
-void CustomPaintPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
+void CanvasPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
 {
     CHECK_NULL_VOID(paintMethod_);
     if (paintMethod_->HasTask()) {
@@ -398,7 +397,7 @@ void CustomPaintPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& ima
     paintMethod_->GetImageData(renderContext, imageData);
 }
 
-void CustomPaintPattern::PutImageData(const Ace::ImageData& imageData)
+void CanvasPattern::PutImageData(const Ace::ImageData& imageData)
 {
     auto task = [imageData](CanvasPaintMethod& paintMethod) {
         paintMethod.PutImageData(imageData);
@@ -406,7 +405,7 @@ void CustomPaintPattern::PutImageData(const Ace::ImageData& imageData)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern)
+void CanvasPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern)
 {
     auto task = [offscreenCanvasPattern](CanvasPaintMethod& paintMethod) {
         paintMethod.TransferFromImageBitmap(offscreenCanvasPattern);
@@ -414,12 +413,12 @@ void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPat
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::CloseImageBitmap(const std::string& src)
+void CanvasPattern::CloseImageBitmap(const std::string& src)
 {
     paintMethod_->CloseImageBitmap(src);
 }
 
-void CustomPaintPattern::UpdateGlobalAlpha(double alpha)
+void CanvasPattern::UpdateGlobalAlpha(double alpha)
 {
     auto task = [alpha](CanvasPaintMethod& paintMethod) {
         paintMethod.SetAlpha(alpha);
@@ -427,7 +426,7 @@ void CustomPaintPattern::UpdateGlobalAlpha(double alpha)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateCompositeOperation(CompositeOperation type)
+void CanvasPattern::UpdateCompositeOperation(CompositeOperation type)
 {
     auto task = [type](CanvasPaintMethod& paintMethod) {
         paintMethod.SetCompositeType(type);
@@ -435,7 +434,7 @@ void CustomPaintPattern::UpdateCompositeOperation(CompositeOperation type)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateSmoothingEnabled(bool enabled)
+void CanvasPattern::UpdateSmoothingEnabled(bool enabled)
 {
     auto task = [enabled](CanvasPaintMethod& paintMethod) {
         paintMethod.SetSmoothingEnabled(enabled);
@@ -443,7 +442,7 @@ void CustomPaintPattern::UpdateSmoothingEnabled(bool enabled)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateSmoothingQuality(const std::string& quality)
+void CanvasPattern::UpdateSmoothingQuality(const std::string& quality)
 {
     auto task = [quality](CanvasPaintMethod& paintMethod) {
         paintMethod.SetSmoothingQuality(quality);
@@ -451,7 +450,7 @@ void CustomPaintPattern::UpdateSmoothingQuality(const std::string& quality)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateLineCap(LineCapStyle cap)
+void CanvasPattern::UpdateLineCap(LineCapStyle cap)
 {
     auto task = [cap](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineCap(cap);
@@ -459,7 +458,7 @@ void CustomPaintPattern::UpdateLineCap(LineCapStyle cap)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateLineDashOffset(double dash)
+void CanvasPattern::UpdateLineDashOffset(double dash)
 {
     auto task = [dash](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineDashOffset(dash);
@@ -467,7 +466,7 @@ void CustomPaintPattern::UpdateLineDashOffset(double dash)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateLineJoin(LineJoinStyle join)
+void CanvasPattern::UpdateLineJoin(LineJoinStyle join)
 {
     auto task = [join](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineJoin(join);
@@ -475,7 +474,7 @@ void CustomPaintPattern::UpdateLineJoin(LineJoinStyle join)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateLineWidth(double width)
+void CanvasPattern::UpdateLineWidth(double width)
 {
     auto task = [width](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineWidth(width);
@@ -483,7 +482,7 @@ void CustomPaintPattern::UpdateLineWidth(double width)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateMiterLimit(double limit)
+void CanvasPattern::UpdateMiterLimit(double limit)
 {
     auto task = [limit](CanvasPaintMethod& paintMethod) {
         paintMethod.SetMiterLimit(limit);
@@ -491,7 +490,7 @@ void CustomPaintPattern::UpdateMiterLimit(double limit)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateShadowBlur(double blur)
+void CanvasPattern::UpdateShadowBlur(double blur)
 {
     auto task = [blur](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowBlur(blur);
@@ -499,7 +498,7 @@ void CustomPaintPattern::UpdateShadowBlur(double blur)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateShadowColor(const Color& color)
+void CanvasPattern::UpdateShadowColor(const Color& color)
 {
     auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowColor(color);
@@ -507,7 +506,7 @@ void CustomPaintPattern::UpdateShadowColor(const Color& color)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateShadowOffsetX(double offsetX)
+void CanvasPattern::UpdateShadowOffsetX(double offsetX)
 {
     auto task = [offsetX](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowOffsetX(offsetX);
@@ -515,7 +514,7 @@ void CustomPaintPattern::UpdateShadowOffsetX(double offsetX)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateShadowOffsetY(double offsetY)
+void CanvasPattern::UpdateShadowOffsetY(double offsetY)
 {
     auto task = [offsetY](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowOffsetY(offsetY);
@@ -523,7 +522,7 @@ void CustomPaintPattern::UpdateShadowOffsetY(double offsetY)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateTextAlign(TextAlign align)
+void CanvasPattern::UpdateTextAlign(TextAlign align)
 {
     auto task = [align](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextAlign(align);
@@ -531,7 +530,7 @@ void CustomPaintPattern::UpdateTextAlign(TextAlign align)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateTextBaseline(TextBaseline baseline)
+void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
 {
     auto task = [baseline](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextBaseline(baseline);
@@ -539,7 +538,7 @@ void CustomPaintPattern::UpdateTextBaseline(TextBaseline baseline)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
+void CanvasPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
     auto task = [pattern](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokePatternNG(pattern);
@@ -547,7 +546,7 @@ void CustomPaintPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& 
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateStrokeColor(const Color& color)
+void CanvasPattern::UpdateStrokeColor(const Color& color)
 {
     auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokeColor(color);
@@ -555,7 +554,7 @@ void CustomPaintPattern::UpdateStrokeColor(const Color& color)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateStrokeGradient(const Ace::Gradient& grad)
+void CanvasPattern::UpdateStrokeGradient(const Ace::Gradient& grad)
 {
     auto task = [grad](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokeGradient(grad);
@@ -563,7 +562,7 @@ void CustomPaintPattern::UpdateStrokeGradient(const Ace::Gradient& grad)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateFontWeight(FontWeight weight)
+void CanvasPattern::UpdateFontWeight(FontWeight weight)
 {
     auto task = [weight](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontWeight(weight);
@@ -571,7 +570,7 @@ void CustomPaintPattern::UpdateFontWeight(FontWeight weight)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateFontStyle(FontStyle style)
+void CanvasPattern::UpdateFontStyle(FontStyle style)
 {
     auto task = [style](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontStyle(style);
@@ -579,7 +578,7 @@ void CustomPaintPattern::UpdateFontStyle(FontStyle style)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateFontFamilies(const std::vector<std::string>& families)
+void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
 {
     auto task = [families](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontFamilies(families);
@@ -587,7 +586,7 @@ void CustomPaintPattern::UpdateFontFamilies(const std::vector<std::string>& fami
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateFontSize(const Dimension& size)
+void CanvasPattern::UpdateFontSize(const Dimension& size)
 {
     auto task = [size](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontSize(size);
@@ -595,7 +594,7 @@ void CustomPaintPattern::UpdateFontSize(const Dimension& size)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateFillColor(const Color& color)
+void CanvasPattern::UpdateFillColor(const Color& color)
 {
     auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillColor(color);
@@ -603,7 +602,7 @@ void CustomPaintPattern::UpdateFillColor(const Color& color)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateFillGradient(const Ace::Gradient& gradient)
+void CanvasPattern::UpdateFillGradient(const Ace::Gradient& gradient)
 {
     auto task = [gradient](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillGradient(gradient);
@@ -611,7 +610,7 @@ void CustomPaintPattern::UpdateFillGradient(const Ace::Gradient& gradient)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
+void CanvasPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
     auto task = [pattern](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillPatternNG(pattern);
@@ -619,7 +618,7 @@ void CustomPaintPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pa
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateFillRuleForPath(const CanvasFillRule rule)
+void CanvasPattern::UpdateFillRuleForPath(const CanvasFillRule rule)
 {
     auto task = [rule](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillRuleForPath(rule);
@@ -627,7 +626,7 @@ void CustomPaintPattern::UpdateFillRuleForPath(const CanvasFillRule rule)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
+void CanvasPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
 {
     auto task = [rule](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillRuleForPath2D(rule);
@@ -635,12 +634,12 @@ void CustomPaintPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
     paintMethod_->PushTask(task);
 }
 
-LineDashParam CustomPaintPattern::GetLineDash() const
+LineDashParam CanvasPattern::GetLineDash() const
 {
     return paintMethod_->GetLineDash();
 }
 
-void CustomPaintPattern::UpdateLineDash(const std::vector<double>& segments)
+void CanvasPattern::UpdateLineDash(const std::vector<double>& segments)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'setLineDash' with %{public}zu parameters is executed.", segments.size());
     auto task = [segments](CanvasPaintMethod& paintMethod) {
@@ -649,7 +648,7 @@ void CustomPaintPattern::UpdateLineDash(const std::vector<double>& segments)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::Save()
+void CanvasPattern::Save()
 {
 #ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'save' is pending execution.");
@@ -664,7 +663,7 @@ void CustomPaintPattern::Save()
     paintMethod_->SaveMatrix();
 }
 
-void CustomPaintPattern::Restore()
+void CanvasPattern::Restore()
 {
 #ifndef USE_FAST_TASKPOOL
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'restore' is pending execution.");
@@ -680,7 +679,7 @@ void CustomPaintPattern::Restore()
     paintMethod_->RestoreMatrix();
 }
 
-void CustomPaintPattern::Scale(double x, double y)
+void CanvasPattern::Scale(double x, double y)
 {
     auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.Scale(x, y);
@@ -689,7 +688,7 @@ void CustomPaintPattern::Scale(double x, double y)
     paintMethod_->ScaleMatrix(x, y);
 }
 
-void CustomPaintPattern::Rotate(double angle)
+void CanvasPattern::Rotate(double angle)
 {
     auto task = [angle](CanvasPaintMethod& paintMethod) {
         paintMethod.Rotate(angle);
@@ -698,7 +697,7 @@ void CustomPaintPattern::Rotate(double angle)
     paintMethod_->RotateMatrix(angle);
 }
 
-void CustomPaintPattern::SetTransform(const TransformParam& param)
+void CanvasPattern::SetTransform(const TransformParam& param)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'setTransform' is pending execution.");
     auto task = [param](CanvasPaintMethod& paintMethod) {
@@ -708,7 +707,7 @@ void CustomPaintPattern::SetTransform(const TransformParam& param)
     paintMethod_->SetTransformMatrix(param);
 }
 
-void CustomPaintPattern::ResetTransform()
+void CanvasPattern::ResetTransform()
 {
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.ResetTransform();
@@ -717,7 +716,7 @@ void CustomPaintPattern::ResetTransform()
     paintMethod_->ResetTransformMatrix();
 }
 
-void CustomPaintPattern::Transform(const TransformParam& param)
+void CanvasPattern::Transform(const TransformParam& param)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'transform' is pending execution.");
     auto task = [param](CanvasPaintMethod& paintMethod) {
@@ -727,7 +726,7 @@ void CustomPaintPattern::Transform(const TransformParam& param)
     paintMethod_->TransformMatrix(param);
 }
 
-void CustomPaintPattern::Translate(double x, double y)
+void CanvasPattern::Translate(double x, double y)
 {
     auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.Translate(x, y);
@@ -736,7 +735,7 @@ void CustomPaintPattern::Translate(double x, double y)
     paintMethod_->TranslateMatrix(x, y);
 }
 
-std::string CustomPaintPattern::ToDataURL(const std::string& args)
+std::string CanvasPattern::ToDataURL(const std::string& args)
 {
     // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and ToDataURL
     if (paintMethod_->HasTask()) {
@@ -750,35 +749,35 @@ std::string CustomPaintPattern::ToDataURL(const std::string& args)
     return paintMethod_->ToDataURL(rosenRenderContext, args);
 }
 
-std::string CustomPaintPattern::GetJsonData(const std::string& path)
+std::string CanvasPattern::GetJsonData(const std::string& path)
 {
     return paintMethod_->GetJsonData(path);
 }
 
-double CustomPaintPattern::GetWidth()
+double CanvasPattern::GetWidth()
 {
     CHECK_NULL_RETURN(canvasSize_, 0.0);
     return canvasSize_->Width();
 }
 
-double CustomPaintPattern::GetHeight()
+double CanvasPattern::GetHeight()
 {
     CHECK_NULL_RETURN(canvasSize_, 0.0);
     return canvasSize_->Height();
 }
 
-void CustomPaintPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
+void CanvasPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
 {
     paintMethod_->SetRSCanvasCallback(callback);
 }
 
-void CustomPaintPattern::SetInvalidate()
+void CanvasPattern::SetInvalidate()
 {
     auto task = [](CanvasPaintMethod& paintMethod) {};
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::SetTextDirection(TextDirection direction)
+void CanvasPattern::SetTextDirection(TextDirection direction)
 {
     currentSetTextDirection_ = direction;
     auto host = GetHost();
@@ -797,7 +796,7 @@ void CustomPaintPattern::SetTextDirection(TextDirection direction)
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::SetFilterParam(const std::string& filterStr)
+void CanvasPattern::SetFilterParam(const std::string& filterStr)
 {
     auto task = [filterStr](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFilterParam(filterStr);
@@ -805,12 +804,12 @@ void CustomPaintPattern::SetFilterParam(const std::string& filterStr)
     paintMethod_->PushTask(task);
 }
 
-TransformParam CustomPaintPattern::GetTransform() const
+TransformParam CanvasPattern::GetTransform() const
 {
     return paintMethod_->GetTransform();
 }
 
-void CustomPaintPattern::SaveLayer()
+void CanvasPattern::SaveLayer()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'SaveLayer' is being executed.");
     auto task = [](CanvasPaintMethod& paintMethod) {
@@ -819,7 +818,7 @@ void CustomPaintPattern::SaveLayer()
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::RestoreLayer()
+void CanvasPattern::RestoreLayer()
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'RestoreLayer' is being executed.");
     auto task = [](CanvasPaintMethod& paintMethod) {
@@ -828,13 +827,13 @@ void CustomPaintPattern::RestoreLayer()
     paintMethod_->PushTask(task);
 }
 
-void CustomPaintPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
+void CanvasPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
 {
     CHECK_NULL_VOID(paintMethod_);
     paintMethod_->UpdateRecordingCanvas(pixelGridRoundSize.Width(), pixelGridRoundSize.Height());
 }
 
-void CustomPaintPattern::EnableAnalyzer(bool enable)
+void CanvasPattern::EnableAnalyzer(bool enable)
 {
     isEnableAnalyzer_ = enable;
     if (!isEnableAnalyzer_) {
@@ -859,7 +858,7 @@ void CustomPaintPattern::EnableAnalyzer(bool enable)
     });
 }
 
-void CustomPaintPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
+void CanvasPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
 {
     if (!IsSupportImageAnalyzerFeature()) {
         CHECK_NULL_VOID(onAnalyzed);
@@ -883,17 +882,17 @@ void CustomPaintPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& on
     }, "ArkUICanvasStartImageAnalyzer");
 }
 
-void CustomPaintPattern::StopImageAnalyzer()
+void CanvasPattern::StopImageAnalyzer()
 {
     DestroyAnalyzerOverlay();
 }
 
-bool CustomPaintPattern::IsSupportImageAnalyzerFeature()
+bool CanvasPattern::IsSupportImageAnalyzerFeature()
 {
     return isEnableAnalyzer_ && imageAnalyzerManager_ && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
 }
 
-void CustomPaintPattern::CreateAnalyzerOverlay()
+void CanvasPattern::CreateAnalyzerOverlay()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -907,7 +906,7 @@ void CustomPaintPattern::CreateAnalyzerOverlay()
     }
 }
 
-void CustomPaintPattern::UpdateAnalyzerOverlay()
+void CanvasPattern::UpdateAnalyzerOverlay()
 {
     auto context = GetHost()->GetRenderContext();
     CHECK_NULL_VOID(context);
@@ -917,19 +916,19 @@ void CustomPaintPattern::UpdateAnalyzerOverlay()
     imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
 }
 
-void CustomPaintPattern::DestroyAnalyzerOverlay()
+void CanvasPattern::DestroyAnalyzerOverlay()
 {
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
 }
 
-void CustomPaintPattern::ReleaseImageAnalyzer()
+void CanvasPattern::ReleaseImageAnalyzer()
 {
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->ReleaseImageAnalyzer();
 }
 
-void CustomPaintPattern::DumpAdvanceInfo()
+void CanvasPattern::DumpAdvanceInfo()
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         DumpLog::GetInstance().AddDesc(
@@ -950,7 +949,7 @@ void CustomPaintPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(contentModifier_->GetDumpInfo());
 }
 
-void CustomPaintPattern::Reset()
+void CanvasPattern::Reset()
 {
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Reset();
@@ -959,17 +958,17 @@ void CustomPaintPattern::Reset()
     paintMethod_->ResetTransformMatrix();
 }
 
-void CustomPaintPattern::OnLanguageConfigurationUpdate()
+void CanvasPattern::OnLanguageConfigurationUpdate()
 {
     UpdateTextDefaultDirection();
 }
 
-void CustomPaintPattern::OnModifyDone()
+void CanvasPattern::OnModifyDone()
 {
     UpdateTextDefaultDirection();
 }
 
-void CustomPaintPattern::UpdateTextDefaultDirection()
+void CanvasPattern::UpdateTextDefaultDirection()
 {
     if (currentSetTextDirection_ != TextDirection::INHERIT) {
         return;

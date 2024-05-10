@@ -69,9 +69,14 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
+    void SyncGeometryPropertiesWithoutAnimation(
+        GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
+
+    void SyncGeometryFrame(const RectF& paintRect);
+
     void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
 
-    void SyncGeometryProperties(const RectF& paintRect) override;
+    void SyncGeometryProperties(const RectF& paintRect, bool isSkipFrameTransition = false) override;
 
     void SetBorderRadius(const BorderRadiusProperty& value) override;
 

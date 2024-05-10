@@ -219,6 +219,42 @@ WebPattern::~WebPattern()
     }
 }
 
+void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
+    TextResponseType responseType, bool handleReverse)
+{
+    if (contextSelectOverlay_) {
+        contextSelectOverlay_->ProcessOverlay({ .animation = true });
+    }
+}
+
+void WebPattern::CloseContextSelectionMenu()
+{
+    if (contextSelectOverlay_ && contextSelectOverlay_->IsCurrentMenuVisibile()) {
+        contextSelectOverlay_->CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
+    }
+}
+
+void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern OnContextMenuShow");
+    auto *eventInfo = TypeInfoHelper::DynamicCast<ContextMenuEvent>(info.get());
+    CHECK_NULL_VOID(eventInfo);
+    if (!contextSelectOverlay_) {
+        contextSelectOverlay_ = AceType::MakeRefPtr<WebContextSelectOverlay>(WeakClaim(this));
+    }
+    contextMenuParam_ = eventInfo->GetParam();
+    CHECK_NULL_VOID(contextMenuParam_);
+    contextMenuResult_ = eventInfo->GetContextMenuResult();
+    CHECK_NULL_VOID(contextMenuResult_);
+    ShowContextSelectOverlay(RectF(), RectF());
+}
+
+void WebPattern::OnContextMenuHide()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern OnContextMenuHide");
+    CloseContextSelectionMenu();
+}
+
 bool WebPattern::NeedSoftKeyboard() const
 {
     if (delegate_) {
@@ -1224,6 +1260,7 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
+    CloseContextSelectionMenu();
 }
 
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
@@ -2401,8 +2438,9 @@ RectF WebPattern::ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32
 
 void WebPattern::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h)
 {
+    selectArea_ = ComputeMouseClippedSelectionBounds(x, y, w, h);
     if (selectOverlayProxy_ && isQuickMenuMouseTrigger_) {
-        selectOverlayProxy_->UpdateSelectArea(ComputeMouseClippedSelectionBounds(x, y, w, h));
+        selectOverlayProxy_->UpdateSelectArea(selectArea_);
     }
 }
 
@@ -2484,6 +2522,9 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     SelectOverlayInfo selectInfo;
     selectInfo.isSingleHandle = (overlayType == INSERT_OVERLAY);
     UpdateRunQuickMenuSelectInfo(selectInfo, params, insertTouchHandle, beginTouchHandle, endTouchHandle);
+    if (isQuickMenuMouseTrigger_) {
+        return false;
+    }
     RegisterSelectOverlayCallback(selectInfo, params, callback);
     RegisterSelectOverlayEvent(selectInfo);
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
@@ -2605,6 +2646,7 @@ void WebPattern::QuickMenuIsNeedNewAvoid(
                                                    params->GetSelectY(),
                                                    params->GetSelectWidth(),
                                                    params->GetSelectXHeight());
+            selectArea_ = selectInfo.selectArea;
         } else {
             selectInfo.selectArea =
                 ComputeClippedSelectionBounds(params, startHandle, endHandle);
@@ -3251,6 +3293,7 @@ void WebPattern::OnWindowHide()
 
     CHECK_NULL_VOID(delegate_);
     delegate_->HideWebView();
+    CloseContextSelectionMenu();
     needOnFocus_ = false;
     isWindowShow_ = false;
 }
@@ -3319,7 +3362,7 @@ void WebPattern::OnResizeNotWork()
     isWaiting_ = false;
 }
 
-bool WebPattern::OnBackPressed() const
+bool WebPattern::OnBackPressedForFullScreen() const
 {
     if (!isFullScreen_) {
         return false;
@@ -3440,7 +3483,7 @@ bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, fl
         float tweak = (velocity > 0.0f) ? 1.0f : -1.0f;
         parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity, to parent scroll velocity=%{public}f", velocity);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity, to parent scroll velocity=%{public}f", velocity);
     if (parent->HandleScrollVelocity(velocity)) {
         return true;
     }
@@ -3643,12 +3686,14 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
     if (((offset > 0) && nestedScroll.backward == NestedScrollMode::PARENT_FIRST) ||
         ((offset < 0) && nestedScroll.forward == NestedScrollMode::PARENT_FIRST)) {
         auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        if (!NearZero(result.remain)) {
+            UpdateFlingReachEdgeState(offset, false);
+        }
+        CHECK_EQUAL_RETURN(isParentReachEdge_ && result.reachEdge, true, false);
         isParentReachEdge_ = result.reachEdge;
         CHECK_NULL_RETURN(delegate_, false);
         expectedScrollAxis_ == Axis::HORIZONTAL ? delegate_->ScrollByRefScreen(-result.remain, 0)
                                                 : delegate_->ScrollByRefScreen(0, -result.remain);
-        CHECK_NULL_RETURN(!NearZero(result.remain), true);
-        UpdateFlingReachEdgeState(offset, false);
         return true;
     } else if (((offset > 0) && nestedScroll.backward == NestedScrollMode::PARALLEL) ||
                ((offset < 0) && nestedScroll.forward == NestedScrollMode::PARALLEL)) {

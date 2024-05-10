@@ -12,21 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_PARTICLE_CONTEXT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_PARTICLE_CONTEXT_H
 
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_BOX_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_BOX_H
+
+#include <optional>
+
+#include "base/geometry/calc_dimension.h"
 #include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/particle/particle_model.h"
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
-class RosenRenderParticle : public AceType {
-public:
-    static void UpdateDisturbance(
-        const RefPtr<FrameNode>& frameNode, const std::vector<ParticleDisturbance>& disturbanceArray);
-    static void updateEmitterPosition(const RefPtr<FrameNode>& frameNode,
-        std::vector<EmitterProperty>& props);
+
+struct FocusBoxStyle {
+    std::optional<Color> strokeColor;
+    std::optional<CalcDimension> strokeWidth;
+    std::optional<CalcDimension> margin;
 };
 
+class ACE_EXPORT FocusBox : public virtual AceType {
+    DECLARE_ACE_TYPE(FocusBox, AceType)
+
+public:
+    friend class FocusHub;
+
+    void SetStyle(const FocusBoxStyle& style);
+    bool HasCustomStyle() const;
+
+private:
+    std::optional<FocusBoxStyle> paintStyle_;
+};
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_PARTICLE_CONTEXT_H
+#endif

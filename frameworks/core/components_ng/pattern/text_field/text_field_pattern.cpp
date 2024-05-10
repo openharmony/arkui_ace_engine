@@ -2572,12 +2572,10 @@ bool TextFieldPattern::IsDisabled()
 
 void TextFieldPattern::ProcessInnerPadding()
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
     BorderWidthProperty currentBorderWidth;
@@ -2617,9 +2615,12 @@ void TextFieldPattern::ProcessNumberOfLines()
     CHECK_NULL_VOID(layoutProperty && layoutProperty->HasNumberOfLines());
     auto numberOfLines = layoutProperty->GetNumberOfLines().value();
     CHECK_NULL_VOID(numberOfLines > 0);
-    auto lineHeight = PreferredLineHeight(false);
-    auto lineSpacing = layoutProperty->HasLineSpacing() ? layoutProperty->GetLineSpacing().value().ConvertToPx() : 0.f;
-    auto contentHeight = numberOfLines * lineHeight + (numberOfLines - 1) * lineSpacing;
+    auto lineHeight = layoutProperty->GetLineHeight().value_or(0.0_vp).ConvertToPx();
+    if (LessOrEqual(lineHeight, 0.f)) {
+        lineHeight = PreferredLineHeight(false);
+    }
+    auto lineSpacing = layoutProperty->GetLineSpacing().value_or(0.0_vp).ConvertToPx();
+    auto contentHeight = numberOfLines * lineHeight + numberOfLines * lineSpacing;
     auto height = contentHeight + GetVerticalPaddingAndBorderSum();
 
     // get previously user defined ideal width
@@ -2970,7 +2971,7 @@ void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleRightMousePressEvent(MouseInfo& info)
 {
-    if (IsSelected()) {
+    if (IsSelected() || GetIsPreviewText()) {
         return;
     }
     auto focusHub = GetFocusHub();
@@ -2982,6 +2983,9 @@ void TextFieldPattern::HandleRightMousePressEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleRightMouseReleaseEvent(MouseInfo& info)
 {
+    if (GetIsPreviewText()) {
+        return;
+    }
     auto focusHub = GetFocusHub();
     if (focusHub->IsCurrentFocus()) {
         OffsetF rightClickOffset = OffsetF(
@@ -3013,7 +3017,7 @@ void TextFieldPattern::HandleLeftMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
 {
-    if (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if ((IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) || GetIsPreviewText()) {
         blockPress_ = true;
         return;
     }
@@ -5346,7 +5350,7 @@ void TextFieldPattern::ProcessInlinePaddingAndMargin()
     }
     MarginProperty margin;
     margin.bottom = CalcLength(userMargin.bottom->GetDimension() + userPadding.bottom->GetDimension());
-    margin.right = CalcLength(userMargin.right->GetDimension() + userPadding.bottom->GetDimension());
+    margin.right = CalcLength(userMargin.right->GetDimension() + userPadding.right->GetDimension());
     margin.left = CalcLength(userMargin.left->GetDimension() + userPadding.left->GetDimension());
     margin.top = CalcLength(userMargin.top->GetDimension() + userPadding.top->GetDimension());
     layoutProperty->UpdateMargin(margin);
@@ -5385,8 +5389,6 @@ void TextFieldPattern::ApplyInlineTheme()
     renderContext->UpdateBorderColor(inlineBorderColor);
     layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) });
     ProcessInnerPadding();
-    textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
-    textRect_.SetTop(GetPaddingTop() + GetBorderTop());
     ProcessInlinePaddingAndMargin();
 }
 

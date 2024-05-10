@@ -74,16 +74,16 @@ export struct ToolBar {
 
   @Builder TabBuilder(index: number) {
     Column() {
-      Image(this.toolBarList[index].icon)
+      Image(this.toolBarList[index]?.icon)
         .width(24)
         .height(24)
-        .fillColor(this.activateIndex === index && !(this.toolBarList[index].state === 2)
+        .fillColor(this.activateIndex === index && !(this.toolBarList[index]?.state === 2)
           ? $r('sys.color.ohos_id_color_text_primary_activated') : $r('sys.color.ohos_id_color_primary'))
-        .opacity((this.toolBarList[index].state === 2) ? 0.4 : 1)
+        .opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1)
         .margin({ top: 8, bottom: 2 })
         .objectFit(ImageFit.Contain)
-      Text(this.toolBarList[index].content)
-        .fontColor(this.activateIndex === index && !(this.toolBarList[index].state === 2)
+      Text(this.toolBarList[index]?.content)
+        .fontColor(this.activateIndex === index && !(this.toolBarList[index]?.state === 2)
           ? $r('sys.color.ohos_id_color_toolbar_text_actived') : $r('sys.color.ohos_id_color_toolbar_text'))
         .fontSize($r('sys.float.ohos_id_text_size_caption'))
         .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
@@ -91,11 +91,11 @@ export struct ToolBar {
         .fontWeight(FontWeight.Medium)
         .maxLines(2)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .opacity((this.toolBarList[index].state === 2) ? 0.4 : 1)
+        .opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1)
     }
     .width('100%').height('100%')
-    .focusable(!(this.toolBarList[index].state === 2))
-    .focusOnTouch(!(this.toolBarList[index].state === 2))
+    .focusable(!(this.toolBarList[index]?.state === 2))
+    .focusOnTouch(!(this.toolBarList[index]?.state === 2))
     .padding({left: 4, right: 4})
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .backgroundColor(this.itemBackground)
@@ -114,7 +114,7 @@ export struct ToolBar {
     })
     .onHover((isHover: boolean) => {
       if (isHover) {
-        this.toolBarItemBackground[index] = (this.toolBarList[index].state === ItemState.DISABLE)
+        this.toolBarItemBackground[index] = (this.toolBarList[index]?.state === ItemState.DISABLE)
           ? $r('sys.color.ohos_id_color_toolbar_bg') : $r('sys.color.ohos_id_color_hover')
       } else {
         this.toolBarItemBackground[index] = $r('sys.color.ohos_id_color_toolbar_bg')
@@ -123,7 +123,7 @@ export struct ToolBar {
     })
     .stateStyles({
       pressed: {
-        .backgroundColor((this.toolBarList[index].state === ItemState.DISABLE) ?
+        .backgroundColor((this.toolBarList[index]?.state === ItemState.DISABLE) ?
         this.toolBarItemBackground[index] : $r('sys.color.ohos_id_color_click_effect'))
       },
       normal: {
@@ -160,13 +160,13 @@ export struct ToolBar {
             if (this.toolBarList.length <= 5) {
               TabContent() {
               }.tabBar(this.TabBuilder(index))
-              .enabled(!(this.toolBarList[index].state === 2))
-              .focusOnTouch(!(this.toolBarList[index].state === 2))
+              .enabled(!(this.toolBarList[index]?.state === 2))
+              .focusOnTouch(!(this.toolBarList[index]?.state === 2))
             } else if (index < 4){
               TabContent() {
               }.tabBar(this.TabBuilder(index))
-              .enabled(!(this.toolBarList[index].state === 2))
-              .focusOnTouch(!(this.toolBarList[index].state === 2))
+              .enabled(!(this.toolBarList[index]?.state === 2))
+              .focusOnTouch(!(this.toolBarList[index]?.state === 2))
             }
           })
           if (this.refreshData() && this.toolBarList.length > 5) {

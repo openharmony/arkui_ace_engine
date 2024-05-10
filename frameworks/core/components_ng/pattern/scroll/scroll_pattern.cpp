@@ -146,7 +146,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     viewPort_ = layoutAlgorithm->GetViewPort();
     viewSize_ = layoutAlgorithm->GetViewSize();
     viewPortExtent_ = layoutAlgorithm->GetViewPortExtent();
-    if (enablePagingStatus_ == ScrollPagingStatus::VALID) {
+    if (IsEnablePagingValid()) {
         SetIntervalSize(Dimension(static_cast<double>(viewPortLength_)));
     }
     if (scrollSnapUpdate_ || !NearEqual(oldMainSize, newMainSize) || !NearEqual(oldExtentMainSize, newExtentMainSize)) {
@@ -749,7 +749,7 @@ std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta, float dra
     std::optional<float> predictSnapOffset;
     CHECK_NULL_RETURN(IsScrollSnap(), predictSnapOffset);
     float finalPosition = currentOffset_ + delta;
-    if (enablePagingStatus_ == ScrollPagingStatus::VALID) {
+    if (IsEnablePagingValid()) {
         finalPosition = GetPagingOffset(delta, dragDistance, velocity);
     }
     if (!IsSnapToInterval()) {
@@ -850,7 +850,7 @@ void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
     if (GreatNotEqual(end, -scrollableDistance_)) {
         snapOffsets_.emplace_back(end);
     }
-    if (enablePagingStatus_ == ScrollPagingStatus::VALID) {
+    if (IsEnablePagingValid()) {
         if (NearEqual(snapOffset + intervalSize, -scrollableDistance_)) {
             lastPageLength_ = 0.f;
             return;
