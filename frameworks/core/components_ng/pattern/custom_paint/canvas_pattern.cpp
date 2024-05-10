@@ -70,7 +70,6 @@ bool CanvasPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     SizeF currentPixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
-    bool isInitInvalid = (currentPixelGridRoundSize == SizeF(0, 0) && dirtyPixelGridRoundSize_ == SizeF(0, 0));
     pixelGridRoundSizeChange = currentPixelGridRoundSize != dirtyPixelGridRoundSize_;
     dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
     lastDirtyPixelGridRoundSize_ = dirtyPixelGridRoundSize_;
@@ -99,7 +98,7 @@ bool CanvasPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
     }
 
-    if (!isCanvasInit_ && !isInitInvalid) {
+    if (!isCanvasInit_) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         CHECK_NULL_RETURN(contentModifier_, false);
