@@ -602,6 +602,8 @@ Offset PanRecognizer::GetRawGlobalLocation(int32_t postEventNodeId)
             rawLastPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
         return Offset(rawLastPoint.GetX(), rawLastPoint.GetY());
     }
+    NGGestureRecognizer::Transform(
+        localPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
     return Offset(localPoint.GetX(), localPoint.GetY());
 }
 
