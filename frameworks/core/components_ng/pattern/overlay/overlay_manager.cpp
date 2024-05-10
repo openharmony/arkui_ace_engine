@@ -2664,6 +2664,7 @@ RefPtr<FrameNode> OverlayManager::GetModalNodeInStack(std::stack<WeakPtr<FrameNo
         return nullptr;
     }
     auto topModalNode = stack.top().Upgrade();
+    CHECK_NULL_RETURN(topModalNode, nullptr);
     if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
         return topModalNode;
     } else {
