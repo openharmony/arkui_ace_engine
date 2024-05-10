@@ -525,6 +525,9 @@ std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(const JSRef<JS
             continue;
         }
         auto type = static_cast<SpanType>(styleKey->ToNumber<int32_t>());
+        if (type == SpanType::Image || type == SpanType::CustomSpan) {
+            continue;
+        }
         auto spanBase = ParseJsSpanBase(start, length, type, JSRef<JSObject>::Cast(styleStringValue));
         if (spanBase) {
             spanBaseVector.emplace_back(spanBase);
