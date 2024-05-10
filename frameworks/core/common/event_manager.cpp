@@ -1004,13 +1004,13 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         handledResults.clear();
         auto container = Container::Current();
         CHECK_NULL_RETURN(container, false);
-        std::optional<RefPtr<MouseEventTarget>> isStopPropagation;
+        bool isStopPropagation = false;
         if (event.button == MouseButton::LEFT_BUTTON) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
                     handledResults.emplace_back(mouseTarget);
                     if (mouseTarget->HandleMouseEvent(event)) {
-                        isStopPropagation = mouseTarget;
+                        isStopPropagation = true;
                         break;
                     }
                 }
@@ -1025,13 +1025,22 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
             DoMouseActionRelease();
         }
         for (const auto& mouseTarget : currMouseTestResults_) {
-            if (isStopPropagation.has_value() && isStopPropagation.value() == mouseTarget) {
-                return true;
+            if (!mouseTarget) {
+                continue;
             }
-            if (mouseTarget &&
-                std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end()) {
-                if (mouseTarget->HandleMouseEvent(event)) {
+            if (!isStopPropagation) {
+                auto ret = std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end();
+                // if pressMouseTestResults doesn't have any isStopPropagation, use default handledResults.
+                if (ret && mouseTarget->HandleMouseEvent(event)) {
                     return true;
+                }
+            } else {
+                if (std::find(pressMouseTestResults_.begin(), pressMouseTestResults_.end(), mouseTarget) ==
+                    pressMouseTestResults_.end()) {
+                    // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
+                    if (mouseTarget->HandleMouseEvent(event)) {
+                        return true;
+                    }
                 }
             }
         }
