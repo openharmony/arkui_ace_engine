@@ -330,7 +330,7 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     if (NearEqual(currentOffset_, tempOffset)) {
         return;
     }
-    auto pageHeight = GetPageHeight();
+    auto pageHeight = GetPageHeightWithoutOffset();
     auto offset = pageHeight - height + currentOffset_;
     if (LessOrEqual(offset, (pageHeight - sheetMaxHeight_))) {
         offset = pageHeight - sheetMaxHeight_;
@@ -447,7 +447,7 @@ bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     currentOffset_ = currentOffset_ + scrollOffset;
-    auto pageHeight = GetPageHeight();
+    auto pageHeight = GetPageHeightWithoutOffset();
     auto offset = pageHeight - height + currentOffset_;
     if (LessOrEqual(offset, pageHeight - sheetMaxHeight_)) {
         offset = pageHeight - sheetMaxHeight_;
@@ -661,7 +661,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto offset = GetPageHeight() - (height_ + sheetHeightUp_);
+    auto offset = GetPageHeightWithoutOffset() - (height_ + sheetHeightUp_);
     if (!isTransitionIn) {
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
