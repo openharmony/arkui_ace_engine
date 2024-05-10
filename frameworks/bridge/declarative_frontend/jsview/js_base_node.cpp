@@ -53,9 +53,7 @@ const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VI
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 {
     auto builder = info[0];
-    if (!builder->IsFunction()) {
-        return;
-    }
+    CHECK_NULL_VOID(builder->IsFunction());
     auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
@@ -89,7 +87,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     viewNode_ = newNode;
     ProccessNode(isSupportExportTexture);
     UpdateEnd(info);
-
+    CHECK_NULL_VOID(viewNode_);
     JSRef<JSObject> thisObj = info.This();
     JSWeak<JSObject> jsObject(thisObj);
     viewNode_->RegisterUpdateJSInstanceCallback([jsObject, vm = info.GetVm()](int32_t id) {
