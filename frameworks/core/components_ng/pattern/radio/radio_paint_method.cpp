@@ -186,7 +186,7 @@ void RadioModifier::UpdateIndicatorAnimation(bool isCheck)
     delayOption.SetCurve(springCurve);
     delayOption.SetDelay(DEFAULT_INDICATOR_ANIMATION_DURATION);
     delayOption.SetDuration(DEFAULT_INDICATOR_ANIMATION_DURATION);
-    if (isOnAnimationFlag_->Get()) {
+    if (isCheck) {
         AnimationUtils::Animate(
             delayOption,
             [&]() {
