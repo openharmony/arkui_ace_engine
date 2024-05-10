@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,7 @@ const char THEME_BLUR_STYLE_COMMON[] = "blur_style_common";
 const char THEME_PATTERN_SHADOW[] = "shadow_pattern";
 const char THEME_PATTERN_LINEAR_LAYOUT[] = "linear_layout_pattern";
 const char THEME_PATTERN_STACK[] = "stack_pattern";
+const char THEME_PATTERN_CONTAINER_MODAL[] = "container_modal_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
