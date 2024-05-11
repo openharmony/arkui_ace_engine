@@ -457,7 +457,7 @@ void TextSelectController::UpdateSecondHandleOffset()
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
 }
 
-void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity)
+void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool moveHandle)
 {
     textAffinity_ = textAffinity;
     if (contentController_->IsEmpty()) {
@@ -476,7 +476,9 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity)
     caretRect.SetSize(SizeF(caretInfo_.rect.Width(),
         LessOrEqual(caretMetrics.height, 0.0) ? textFiled->PreferredLineHeight() : caretMetrics.height));
     caretInfo_.rect = caretRect;
-    MoveHandleToContentRect(caretInfo_.rect, 0.0f);
+    if (moveHandle) {
+        MoveHandleToContentRect(caretInfo_.rect, 0.0f);
+    }
 }
 
 void TextSelectController::UpdateCaretOffset(const OffsetF& offset)
