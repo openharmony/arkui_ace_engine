@@ -6133,7 +6133,7 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
         selectController_->UpdateSecondHandleOffset();
         if (!selectOverlay_->IsSingleHandle()) {
             selectController_->UpdateFirstHandleOffset();
-            selectController_->UpdateCaretOffset();
+            selectController_->UpdateCaretOffset(TextAffinity::DOWNSTREAM, false);
             selectOverlay_->UpdateAllHandlesOffset();
         } else {
             auto carectOffset = selectController_->GetCaretRect().GetOffset() +
