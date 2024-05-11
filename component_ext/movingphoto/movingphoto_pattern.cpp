@@ -53,6 +53,8 @@ void MovingPhotoPattern::OnModifyDone()
         pipelineContext->AddOnAreaChangeNode(host->GetId());
     }
     InitEvent();
+
+    isPlayByController_ = false;
 }
 
 void MovingPhotoPattern::OnAttachToFrameNode()
@@ -202,6 +204,10 @@ void MovingPhotoPattern::UpdateImageNode()
     CHECK_NULL_VOID(image);
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->HasMovingPhotoUri() || layoutProperty->GetMovingPhotoUri().value() == uri_) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto is null or has not changed.");
+        return;
+    }
     if (!layoutProperty->HasImageSourceInfo()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "image info is null.");
         auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
@@ -248,7 +254,12 @@ void MovingPhotoPattern::PrepareMediaPlayer()
 {
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->HasVideoSource() || layoutProperty->GetVideoSource().value() == fd_) {
+    if (!layoutProperty->HasMovingPhotoUri() || layoutProperty->GetMovingPhotoUri().value() == uri_) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto source is null or the source has not changed.");
+        return;
+    }
+    uri_ = layoutProperty->GetMovingPhotoUri().value();
+    if (!layoutProperty->HasVideoSource()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer source is null or the source has not changed.");
         return;
     }
