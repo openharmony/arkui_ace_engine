@@ -66,6 +66,7 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 constexpr double DEFAULT_OPACITY = 0.2;
 const int32_t DEFAULT_ALPHA = 255;
+constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -912,6 +913,8 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
         std::optional<TextDecorationStyle> textDecorationStyle;
         if (styleValue->IsNumber()) {
             textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        } else {
+            textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
         }
         SearchModel::GetInstance()->SetTextDecoration(textDecoration);
         SearchModel::GetInstance()->SetTextDecorationColor(result);

@@ -873,7 +873,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   customKeyboard(value: CustomBuilder): TextAreaAttribute {
     throw new Error('Method not implemented.');
   }
-  decoration(value: { type: TextDecorationType; color?: ResourceColor }): TextAreaAttribute {
+  decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaDecorationModifier.identity, TextAreaDecorationModifier, value);
     return this;
   }
