@@ -1285,4 +1285,38 @@ HWTEST_F(TextFieldUXTest, TextAreaLineSpacing001, TestSize.Level1)
 
     EXPECT_EQ(layoutProperty_->GetLineSpacing(), 2.0_fp);
 }
+
+/**
+ * @tc.name: TextAreaLineBreakStrategy001
+ * @tc.desc: test testArea text lineBreakStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLineBreakStrategy001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set lineBreakStrategy GREEDY
+     */
+    layoutProperty_->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::GREEDY);
+
+    /**
+     * @tc.step: step3. Set lineBreakStrategy HIGH_QUALITY
+     */
+    layoutProperty_->UpdateLineBreakStrategy(LineBreakStrategy::HIGH_QUALITY);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::HIGH_QUALITY);
+
+    /**
+     * @tc.step: step4. Set lineBreakStrategy BALANCED
+     */
+    layoutProperty_->UpdateLineBreakStrategy(LineBreakStrategy::BALANCED);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::BALANCED);
+}
 }
