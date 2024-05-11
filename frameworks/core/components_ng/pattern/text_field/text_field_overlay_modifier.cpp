@@ -311,12 +311,13 @@ void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& contex
 
     RSPen pen;
     pen.SetColor(ToRSColor(previewTextDecorationColor_->Get()));
-    pen.SetWidth(textFieldPattern->GetPreviewUnderlineWidth());
+    auto underlineWidth = textFieldPattern->GetPreviewUnderlineWidth();
+    pen.SetWidth(underlineWidth);
     pen.SetAntiAlias(true);
     canvas.AttachPen(pen);
     for (const auto& drawRect : previewTextRect) {
-        Point leftPoint(drawRect.Left() + offsetX, drawRect.Bottom() + offsetY);
-        Point rightPoint(drawRect.Right() + offsetX, drawRect.Bottom() + offsetY);
+        Point leftPoint(drawRect.Left() + offsetX, drawRect.Bottom() + offsetY - underlineWidth / 2);
+        Point rightPoint(drawRect.Right() + offsetX, drawRect.Bottom() + offsetY - underlineWidth / 2);
         canvas.DrawLine(ToRSPoint(PointF(leftPoint.GetX(), leftPoint.GetY())),
             ToRSPoint(PointF(rightPoint.GetX(), rightPoint.GetY())));
     }

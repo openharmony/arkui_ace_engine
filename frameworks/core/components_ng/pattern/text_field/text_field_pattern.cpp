@@ -1153,6 +1153,9 @@ void TextFieldPattern::HandleBlurEvent()
     isFocusedBeforeClick_ = false;
     magnifierController_->UpdateShowMagnifier();
     CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
+    if (GetIsPreviewText()) {
+        FinishTextPreviewOperation();
+    }
     StopTwinkling();
     if ((customKeyboard_ && isCustomKeyboardAttached_)) {
         CloseKeyboard(true);
@@ -1164,9 +1167,6 @@ void TextFieldPattern::HandleBlurEvent()
     }
 #endif
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
-    if (GetIsPreviewText()) {
-        FinishTextPreview();
-    }
     NotifyOnEditChanged(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -1570,7 +1570,7 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     auto touchOffset = info.GetTouches().front().GetLocalLocation();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
-        float offsetY = IsTextArea() ? GetTextRect().GetX() : contentRect_.GetX();
+        float offsetY = IsTextArea() ? GetTextRect().GetY() : contentRect_.GetY();
         std::vector<RectF> previewTextRects = GetPreviewTextRects();
         if (previewTextRects.empty()) {
             TAG_LOGI(ACE_TEXT_FIELD, "preview text rect error");
@@ -6964,12 +6964,12 @@ void TextFieldPattern::ReceivePreviewTextStyle(const std::string& style)
 void TextFieldPattern::CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR)
 {
     float offsetX = IsTextArea() ? contentRect_.GetX() : GetTextRect().GetX();
-    float offsetY = IsTextArea() ? GetTextRect().GetX() : contentRect_.GetX();
+    float offsetY = IsTextArea() ? GetTextRect().GetY() : contentRect_.GetY();
     std::vector<RectF> previewTextRects = GetPreviewTextRects();
     if (GreatNotEqual(touchOffset.GetY(), previewTextRects.back().Bottom() + offsetY)) {
         limitL = previewTextRects.back().Left() + offsetX + MINIMAL_OFFSET;
         limitR = previewTextRects.back().Right() + offsetX - MINIMAL_OFFSET;
-    } else if (GreatNotEqual(touchOffset.GetY(), previewTextRects.front().Top() + offsetY)) {
+    } else if (LessNotEqual(touchOffset.GetY(), previewTextRects.front().Top() + offsetY)) {
         limitL = previewTextRects.front().Left() + offsetX + MINIMAL_OFFSET;
         limitR = previewTextRects.front().Right() + offsetX - MINIMAL_OFFSET;
     } else {
