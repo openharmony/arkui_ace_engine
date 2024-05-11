@@ -721,7 +721,7 @@ void MovingPhotoPattern::StopAnimation()
     option.SetDuration(ANIMATION_DURATION_300);
     option.SetCurve(Curves::FRICTION);
     option.SetOnFinishEvent([this]() {
-        Seek(0);
+        Seek(1);
     });
     AnimationUtils::Animate(option, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateOpacity(1.0);
