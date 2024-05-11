@@ -184,7 +184,6 @@
 #endif
 #ifdef FORM_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_form_menu_item.h"
 #endif
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
@@ -468,7 +467,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #endif
 #ifdef FORM_SUPPORTED
     JSForm::JSBind(globalObj);
-    JSFormMenuItem::JSBind(globalObj);
 #endif
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     JSPlugin::JSBind(globalObj);

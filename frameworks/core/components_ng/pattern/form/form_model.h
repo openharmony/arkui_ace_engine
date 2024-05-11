@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,6 @@ public:
     virtual void SetVisible(VisibleType visible) = 0;
     virtual void SetVisibility(VisibleType visible) = 0;
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
-    virtual int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want, int64_t& formId) = 0;
 
 private:
     static std::unique_ptr<FormModel> instance_;

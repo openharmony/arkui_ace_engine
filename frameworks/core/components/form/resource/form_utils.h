@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_RESOURCE_FORM_UTILS_H
 
 #include <string>
-#include "want.h"
 
 namespace OHOS::Ace {
 
@@ -28,8 +27,6 @@ public:
 
     virtual int32_t RouterEvent(const int64_t formId, const std::string& action, const int32_t containerId,
         const std::string& defualtbundleName);
-
-    virtual int32_t RequestPublishFormEvent(const AAFwk::Want& want, int64_t& formId);
 
     virtual int32_t BackgroundEvent(const int64_t formId, const std::string& action, const int32_t containerId,
         const std::string& defualtbundleName);

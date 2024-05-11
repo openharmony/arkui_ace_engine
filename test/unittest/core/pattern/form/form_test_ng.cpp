@@ -881,13 +881,6 @@ HWTEST_F(FormTestNg, formModelNG, TestSize.Level1)
     formPattern->isLoaded_ = true;
     formModelNG.SetVisibility(VisibleType::GONE);
     ASSERT_EQ(property->GetVisibility(), VisibleType::GONE);
-
-    /**
-     * @tc.steps: step5. Test RequestPublishFormWithSnapshot in form_model_ng
-     */
-    AAFwk::Want want;
-    int64_t formId;
-    ASSERT_EQ(formModelNG.RequestPublishFormWithSnapshot(want, formId), 1);
 }
 
 /**

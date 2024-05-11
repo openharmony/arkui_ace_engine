@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,6 @@ public:
     void SetVisible(VisibleType visible) override;
     void SetVisibility(VisibleType visible) override;
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override;
-    int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want, int64_t& formId) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_FORM_MODEL_IMPL_H

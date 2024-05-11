@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,6 @@ public:
     static void SetDimension(FrameNode* frameNode, int32_t value);
     static void SetModuleName(FrameNode* frameNode, const std::string& value);
     static void SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height);
-    int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want, int64_t& formId) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H
