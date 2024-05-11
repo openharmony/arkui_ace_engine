@@ -122,7 +122,9 @@ ohos_shared_library("libace_compatible") {
   } else if (use_linux) {
     deps = [ "$ace_root/build:libace_static_linux" ]
   }
-  public_external_deps = external_deps
+  if (!is_arkui_x){
+    public_external_deps = external_deps
+  }
   part_name = ace_engine_part
   subsystem_name = ace_engine_subsystem
 }
@@ -149,7 +151,9 @@ if (!is_asan) {
     } else if (use_linux) {
       deps = [ "$ace_root/build:libace_static_linux" ]
     }
-    public_external_deps = external_deps
+    if (!is_arkui_x){
+      public_external_deps = external_deps
+    }
     part_name = ace_engine_part
     subsystem_name = ace_engine_subsystem
   }

@@ -1718,6 +1718,11 @@ void WebDelegateCross::SetBoundsOrResize(const Size& drawSize, const Offset& off
     CallResRegisterMethod(updateLayoutMethod_, param, nullptr);
 }
 
+void WebDelegateCross::DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width)
+{
+    // cross platform is not support now;
+}
+
 void WebDelegateCross::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     // cross platform is not support now;
