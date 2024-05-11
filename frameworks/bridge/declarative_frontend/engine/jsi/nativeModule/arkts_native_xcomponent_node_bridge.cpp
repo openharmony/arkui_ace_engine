@@ -79,10 +79,7 @@ ArkUINativeModuleValue XComponentNodeBridge::Create(ArkUIRuntimeCallInfo* runtim
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-
-    Framework::XComponentParams params;
-    params = SetXComponentNodeParams(runtimeCallInfo, vm);
-
+    Framework::XComponentParams params = SetXComponentNodeParams(runtimeCallInfo, vm);
     void* jsXComponent = Framework::JSXComponent::Create(params);
     auto nativeModule = panda::NativePointerRef::New(
         vm, reinterpret_cast<void*>(jsXComponent),
