@@ -410,7 +410,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         return;
     }
     auto longPressUpdateValue = [weak = WeakClaim(this)](GestureEvent& info) {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
@@ -563,6 +563,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     if (!longPressRecognizer_->HasThumbnailCallback() && isAllowedDrag) {
         auto callback = [weakPtr = gestureEventHub_, weak = WeakClaim(this)](Offset point) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger 150ms timer Thumbnail callback.");
             auto gestureHub = weakPtr.Upgrade();
             CHECK_NULL_VOID(gestureHub);
             auto frameNode = gestureHub->GetFrameNode();
@@ -1005,10 +1006,7 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
 {
     UpdatePreviewOptionDefaultAttr(frameNode);
     auto modifierOnApply = frameNode->GetDragPreviewOption().onApply;
-    if (modifierOnApply == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_DRAG, "OnApply is null");
-        return;
-    }
+    CHECK_NULL_VOID(modifierOnApply);
 
     // create one temporary frame node for receiving the value from the modifier
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
