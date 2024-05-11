@@ -548,6 +548,7 @@ void ButtonPattern::HandleEnabled()
     auto alpha = theme->GetBgDisabledAlpha();
     auto originalOpacity = renderContext->GetOpacityValue(1.0);
     renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
+    renderContext->UpdateLightIlluminated(theme->GetDefaultLightIlliminated());
 }
 
 void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo,

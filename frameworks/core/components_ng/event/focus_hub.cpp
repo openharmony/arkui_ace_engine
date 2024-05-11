@@ -1393,9 +1393,10 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         }
     }
     if (HasPaintRect()) {
-        renderContext->PaintFocusState(GetPaintRect(), focusPaddingVp, paintColor, paintWidth);
+        renderContext->PaintFocusState(
+            GetPaintRect(), focusPaddingVp, paintColor, paintWidth, { false, IsFocusBoxGlow() });
     } else {
-        renderContext->PaintFocusState(focusPaddingVp, paintColor, paintWidth);
+        renderContext->PaintFocusState(focusPaddingVp, paintColor, paintWidth, IsFocusBoxGlow());
     }
     return true;
 }
