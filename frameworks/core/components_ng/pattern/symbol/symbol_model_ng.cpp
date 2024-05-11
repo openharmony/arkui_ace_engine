@@ -108,4 +108,12 @@ void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& uni
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode}, frameNode);
 }
+
+void SymbolModelNG::SetSymbolEffectOptions(FrameNode* frameNode, SymbolEffectOptions& symbolEffectOptions)
+{
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions, frameNode);
+}
 } // namespace OHOS::Ace::NG

@@ -1177,6 +1177,19 @@ class ArkGeometryTransition {
   }
 }
 
+class ArkSymbolEffect {
+  symbolEffect: SymbolEffect;
+  action: boolean | number | undefined;
+
+  constructor() {
+    this.symbolEffect = undefined;
+    this.action = undefined;
+  }
+  isEqual(another: ArkSymbolEffect): boolean {
+    return (this.symbolEffect === another.symbolEffect) && (this.action === another.action);
+  }
+}
+
 class ArkTextBackGroundStyle {
   color: ResourceColor;
   radius: Dimension | BorderRadiuses;

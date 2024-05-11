@@ -12589,6 +12589,16 @@ class ArkGeometryTransition {
       return (this.id === another.id && this.options === another.options);
   }
 }
+class ArkSymbolEffect {
+  constructor() {
+    this.symbolEffect = undefined;
+    this.action = undefined;
+  }
+  isEqual(another) {
+    return (this.symbolEffect === another.symbolEffect) &&
+      (this.action === another.action);
+  }
+}
 /// <reference path='./import.ts' />
 /// <reference path='./ArkComponent.ts' />
 const FontWeightMap = {
@@ -23935,6 +23945,20 @@ class SymbolContentModifier extends ModifierWithKey {
 }
 SymbolContentModifier.identity = Symbol('symbolContent');
 
+class SymbolEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().symbolGlyph.resetSymbolEffectOptions(node);
+    } else {
+      getUINativeModule().symbolGlyph.setSymbolEffectOptions(node, this.value.symbolEffect, this.value.action);
+    }
+  }
+}
+SymbolEffectModifier.identity = Symbol('symbolEffect');
+
 /// <reference path='./import.ts' />
 class ArkSymbolGlyphComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -23964,6 +23988,13 @@ class ArkSymbolGlyphComponent extends ArkComponent {
   }
   effectStrategy(value) {
     modifierWithKey(this._modifiersWithKeys, EffectStrategyModifier.identity, EffectStrategyModifier, value);
+    return this;
+  }
+  symbolEffect(effect, action) {
+    let symbolEffect = new ArkSymbolEffect();
+    symbolEffect.symbolEffect = effect;
+    symbolEffect.action = action;
+    modifierWithKey(this._modifiersWithKeys, SymbolEffectModifier.identity, SymbolEffectModifier, symbolEffect);
     return this;
   }
 }
