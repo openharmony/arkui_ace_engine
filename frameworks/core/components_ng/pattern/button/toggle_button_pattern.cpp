@@ -566,7 +566,6 @@ void ToggleButtonPattern::InitButtonAndText()
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     if (!textLayoutProperty->HasFontSize()) {
-        layoutProperty->UpdateFontSize(textFontSize_);
         textLayoutProperty->UpdateFontSize(textFontSize_);
     } else {
         layoutProperty->UpdateFontSize(textLayoutProperty->GetFontSizeValue(textFontSize_));

@@ -85,7 +85,8 @@ public:
             theme->borderColorUnchecked_ = togglePattern->GetAttr<Color>(
                 "border_color_status_button_unchecked", Color());
             theme->bgColorFocusChecked_ = togglePattern->GetAttr<Color>(
-                "bg_color_focus_status_button_checked", Color());
+                "bg_color_focus_status_button_checked", Color())
+                .BlendOpacity(togglePattern->GetAttr<double>("bg_color_checked_alpha", 0.0));
             theme->bgColorFocusUnchecked_ = togglePattern->GetAttr<Color>(
                 "bg_color_focus_status_button_unchecked", Color());
             theme->textColorFocus_ = togglePattern->GetAttr<Color>("status_button_text_color_focus", Color());
