@@ -778,7 +778,7 @@ void UIExtensionPattern::DispatchFollowHostDensity(bool densityDpi)
 
 void UIExtensionPattern::OnDpiConfigurationUpdate()
 {
-    if(GetDensityDpi()) {
+    if (GetDensityDpi()) {
         DispatchFollowHostDensity(true);
     }
 }
