@@ -6673,7 +6673,6 @@ void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& eve
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     TextCommonEvent textCommonEvent;
-    eventHub->FireOnPaste(textCommonEvent);
     if (textCommonEvent.IsPreventDefault()) {
         CloseSelectOverlay();
         ResetSelection();
