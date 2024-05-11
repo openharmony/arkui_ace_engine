@@ -1798,6 +1798,11 @@ void JsiDeclarativeEngine::FireExternalEvent(
             nativeXComponentImpl->SetSurface(nativeWindow);
         }
         nativeXComponentImpl->SetXComponentId(componentId);
+#ifdef XCOMPONENT_SUPPORTED
+        xcPattern->SetExpectedRateRangeInit();
+        xcPattern->OnFrameEventInit();
+        xcPattern->UnregisterOnFrameEventInit();
+#endif
         auto* arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
         if (arkNativeEngine == nullptr) {
             return;
