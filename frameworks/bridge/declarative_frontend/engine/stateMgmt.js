@@ -1171,6 +1171,16 @@ class SubscriberManager {
         return SubscriberManager.GetInstance().makeId();
     }
     /**
+     *
+     * @returns a global unique id for state variables.
+     * Unlike MakeId, no need to get id from native side.
+     *
+     * @since 12
+     */
+    static MakeStateVariableId() {
+        return SubscriberManager.nextId_--;
+    }
+    /**
      * Check number of registered Subscriber / registered IDs.
      * @returns number of registered unique ids.
      *
@@ -1292,6 +1302,7 @@ class SubscriberManager {
         return ViewStackProcessor.MakeUniqueId();
     }
 }
+SubscriberManager.nextId_ = 0;
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2734,7 +2745,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
     constructor(subscribeMe, info) {
         super();
         this.subscribers_ = new Set();
-        this.id_ = SubscriberManager.MakeId();
+        this.id_ = SubscriberManager.MakeStateVariableId();
         SubscriberManager.Add(this);
         if (subscribeMe) {
             this.subscribers_.add(subscribeMe.id__());
@@ -4372,15 +4383,13 @@ var _a;
 class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     constructor(subscriber, viewName) {
         super(subscriber, viewName);
-        this.owningView_ = undefined;
         // when owning ViewPU is inActive, delay notifying changes
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
         // install when current value is ObservedObject and the value type is not using compatibility mode
         // note value may change for union type variables when switching an object from one class to another.
         this.shouldInstallTrackedObjectReadCb = false;
         this.dependentElmtIdsByProperty_ = new PropertyDependencies();
-        this.decoratorInfo_ = '';
-        Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false });
+        Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false, value: undefined });
         Object.defineProperty(this, 'subscriberRefs_', { writable: true, enumerable: false, value: new Set() });
         if (subscriber) {
             if (subscriber instanceof ViewPU) {
@@ -5406,21 +5415,21 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 copy = new Set();
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
-                for (const setKey of obj.keys()) {
+                obj.forEach((setKey) => {
                     stack.push({ name: setKey });
                     copy.add(getDeepCopyOfObjectRecursive(setKey));
                     stack.pop();
-                }
+                });
             }
             else if (obj instanceof Map) {
                 copy = new Map();
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
-                for (const mapKey of obj.keys()) {
+                obj.forEach((mapKey) => {
                     stack.push({ name: mapKey });
                     copy.set(mapKey, getDeepCopyOfObjectRecursive(obj.get(mapKey)));
                     stack.pop();
-                }
+                });
             }
             else if (obj instanceof Date) {
                 copy = new Date();
@@ -5433,11 +5442,11 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
             }
-            for (const objKey of Object.keys(obj)) {
+            Object.keys(obj).forEach((objKey) => {
                 stack.push({ name: objKey });
                 Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
                 stack.pop();
-            }
+            });
             return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
         }
     }

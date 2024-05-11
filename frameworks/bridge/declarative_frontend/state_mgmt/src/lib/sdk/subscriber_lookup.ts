@@ -24,6 +24,8 @@ class SubscriberManager {
 
   private static instance_: SubscriberManager;
 
+  private static nextId_: number = 0;
+
   /**
     * check subscriber is known
     * same as ES6 Map.prototype.has()
@@ -84,6 +86,17 @@ class SubscriberManager {
  */
   public static MakeId(): number {
     return SubscriberManager.GetInstance().makeId();
+  }
+
+  /**
+   * 
+   * @returns a global unique id for state variables.
+   * Unlike MakeId, no need to get id from native side.
+   * 
+   * @since 12
+   */
+  public static MakeStateVariableId(): number {
+    return SubscriberManager.nextId_--;
   }
 
   /**

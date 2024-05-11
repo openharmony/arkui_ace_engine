@@ -424,20 +424,20 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         copy = new Set<any>();
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
-        for (const setKey of obj.keys()) {
+        obj.forEach((setKey: any) => {
           stack.push({ name: setKey });
           copy.add(getDeepCopyOfObjectRecursive(setKey));
           stack.pop();
-        }
+        });
       } else if (obj instanceof Map) {
         copy = new Map<any, any>();
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
-        for (const mapKey of obj.keys()) {
+        obj.forEach((mapKey: any) => {
           stack.push({ name: mapKey });
           copy.set(mapKey, getDeepCopyOfObjectRecursive(obj.get(mapKey)));
           stack.pop();
-        }
+        });
       } else if (obj instanceof Date) {
         copy = new Date()
         copy.setTime(obj.getTime());
@@ -448,11 +448,11 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
       }
-      for (const objKey of Object.keys(obj)) {
+      Object.keys(obj).forEach((objKey: any) => {
         stack.push({ name: objKey });
         Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
         stack.pop();
-      }
+      });
       return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
     }
   }
