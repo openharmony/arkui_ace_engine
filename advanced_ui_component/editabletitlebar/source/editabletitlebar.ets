@@ -90,7 +90,7 @@ export struct EditableTitleBar {
   private static readonly titlePadding = getNumberByResource('titlebar_icon_background_space_horizontal');
   @Provide editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
 
-  public onWillApplyTheme(theme: Theme): void {
+  onWillApplyTheme(theme: Theme): void {
     this.editableTitleBarTheme.iconColor = theme.colors.iconPrimary;
     this.editableTitleBarTheme.titleColor = theme.colors.fontPrimary;
     this.editableTitleBarTheme.subTitleColor = theme.colors.fontSecondary;
@@ -379,7 +379,7 @@ struct ImageMenuItem {
     }
   }
 
-  private getBgColor(): ResourceColor {
+  getBgColor(): ResourceColor {
     if (this.isOnClick) {
       return this.editableTitleBarTheme.iconBackgroundPressedColor;
     } else if (this.isOnHover) {
