@@ -872,6 +872,7 @@ public:
     void OnRenderProcessResponding();
     std::string GetSelectInfo() const;
 
+    void OnOnlineRenderToForeground();
 private:
     void InitWebEvent();
     void RegisterWebEvent();

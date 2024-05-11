@@ -2909,7 +2909,7 @@ void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTi
     MarginProperty textMargin;
     CalculateTooltipMargin(textNode, textMargin);
     textLayoutProperty->UpdateMargin(textMargin);
-    
+
     BorderColorProperty borderColor;
     borderColor.SetColor(Color::BLACK);
     textRenderContext->UpdateBorderColor(borderColor);
@@ -3273,6 +3273,10 @@ void WebPattern::UpdateLocale()
 void WebPattern::OnWindowShow()
 {
     delegate_->OnRenderToForeground();
+    if (!isOfflineMode_) {
+        delegate_->OnOnlineRenderToForeground();
+    }
+
     if (isWindowShow_ || !isVisible_) {
         return;
     }
