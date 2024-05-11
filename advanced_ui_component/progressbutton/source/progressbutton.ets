@@ -44,9 +44,9 @@ export struct ProgressButton {
   @State progressColor: ResourceColor = '#330A59F7'
   @State textFontColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary')
   @State containerBorderColor: ResourceColor = '#330A59F7'
-  @State containerBackgroundColor: ResourceColor = $r("sys.color.ohos_id_color_foreground_contrary")
+  @State containerBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_foreground_contrary')
 
-  onWillApplyTheme(theme: Theme)  {
+  onWillApplyTheme(theme: Theme) {
     this.progressColor = theme.colors.compEmphasizeSecondary;
     this.textFontColor = theme.colors.fontPrimary;
     this.containerBorderColor = theme.colors.compEmphasizeSecondary;
