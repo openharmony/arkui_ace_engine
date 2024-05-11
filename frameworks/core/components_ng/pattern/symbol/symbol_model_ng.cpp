@@ -62,7 +62,7 @@ void SymbolModelNG::SetClipEdge()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SymbolModelNG::SetSymbolEffectOptions(SymbolEffectOptions& symbolEffectOptions)
