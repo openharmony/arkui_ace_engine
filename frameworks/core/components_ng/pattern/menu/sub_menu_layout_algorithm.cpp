@@ -48,13 +48,13 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto parentItemProps = parentMenuItem->GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(parentItemProps);
     auto expandingMode = parentItemProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-    OffsetF position = MenuLayoutAvoidAlgorithm(parentMenuItem, size, expandingMode == SubMenuExpandingMode::STACK);
+    OffsetF position = GetSubMenuLayoutOffset(layoutWrapper, parentMenuItem, size,
+        expandingMode == SubMenuExpandingMode::STACK);
     geometryNode->SetMarginFrameOffset(position);
     if (parentMenuItem) {
         auto parentPattern = parentMenuItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(parentPattern);
         auto bottomRightPoint = position + OffsetF(size.Width(), size.Height());
-
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto windowManager = pipelineContext->GetWindowManager();
@@ -75,6 +75,18 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
     child->Layout();
+}
+
+OffsetF SubMenuLayoutAlgorithm::GetSubMenuLayoutOffset(LayoutWrapper* layoutWrapper,
+    const RefPtr<FrameNode>& parentMenuItem, const SizeF& size, bool stacked)
+{
+    OffsetF position;
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    position = MenuLayoutAvoidAlgorithm(parentMenuItem, size, stacked);
+    if (layoutDirection == TextDirection::RTL) {
+        position.SetX(wrapperSize_.Width() - position.GetX() - size.Width());
+    }
+    return position;
 }
 
 OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem,
