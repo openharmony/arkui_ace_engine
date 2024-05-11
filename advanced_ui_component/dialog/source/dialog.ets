@@ -22,7 +22,7 @@ import resourceManager from '@ohos.resourceManager';
 import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
 
 class CustomThemeImpl implements CustomTheme {
-  colors?: CustomColors;
+  public colors?: CustomColors;
 
   constructor(colors: CustomColors) {
     this.colors = colors;
