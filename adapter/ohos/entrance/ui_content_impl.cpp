@@ -1544,9 +1544,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             if (rsUiDirector) {
                 ACE_SCOPED_TRACE("OHOS::Rosen::RSUIDirector::Create()");
                 rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
+                    [taskExecutor = container->GetTaskExecutor(), id](
+                        const std::function<void()>& task, uint32_t delay) {
                         ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask");
+                        taskExecutor->PostDelayedTask(
+                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask");
                     }, id);
                 auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context != nullptr) {

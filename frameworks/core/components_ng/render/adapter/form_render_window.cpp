@@ -98,10 +98,10 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
     rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
 
-    rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task) {
+    rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
         ContainerScope scope(id);
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIFormRenderServiceTask");
+        taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask");
     }, id);
 #else
     taskExecutor_ = nullptr;

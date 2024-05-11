@@ -418,9 +418,10 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             if (rsUiDirector) {
                 rsUiDirector->SetUITaskRunner(
                     [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
-                        const std::function<void()>& task) {
+                        const std::function<void()>& task, uint32_t delay) {
                         ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask");
+                        taskExecutor->PostDelayedTask(
+                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask");
                     }, id);
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
