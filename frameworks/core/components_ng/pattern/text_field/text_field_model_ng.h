@@ -254,6 +254,10 @@ public:
     static void ResetNumberOfLines(FrameNode* frameNode);
     static void SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin);
     static PaddingProperty GetMargin(FrameNode* frameNode);
+    static void SetBorderWidth(FrameNode* frameNode, NG::BorderWidthProperty borderWidth);
+    static void SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius);
+    static void SetBorderColor(FrameNode* frameNode, NG::BorderColorProperty borderColors);
+    static void SetBorderStyle(FrameNode* frameNode, NG::BorderStyleProperty borderStyles);
 
 private:
     void AddDragFrameNodeToManager() const;
