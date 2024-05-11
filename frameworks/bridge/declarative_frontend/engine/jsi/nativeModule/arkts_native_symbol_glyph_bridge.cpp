@@ -209,8 +209,8 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolEffect(ArkUIRuntimeCallInfo* 
     auto symbolEffectObj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
     NG::SymbolEffectOptions symbolEffectOptions;
     Framework::JSSymbol::parseSymbolEffect(symbolEffectObj, symbolEffectOptions);
-    if (info.Length() > 2 && !info[2]->IsUndefined()) {
-        Framework::JSSymbol::parseSymbolSwitch(info[2], symbolEffectOptions);
+    if (info.Length() > NUM_2 && !info[NUM_2]->IsUndefined()) {
+        Framework::JSSymbol::parseSymbolSwitch(info[NUM_2], symbolEffectOptions);
     }
     SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
     return panda::JSValueRef::Undefined(vm);
