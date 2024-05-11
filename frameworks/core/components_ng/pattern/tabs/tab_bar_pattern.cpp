@@ -1805,7 +1805,7 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
 }
 
 void TabBarPattern::UpdateSymbolApply(const RefPtr<NG::FrameNode>& symbolNode,
-    RefPtr<TextLayoutProperty> symbolProperty, int32_t index, std::string type)
+    RefPtr<TextLayoutProperty>& symbolProperty, int32_t index, std::string type)
 {
     auto modifierOnApply = symbolArray_[index].onApply;
     if (type == "selected" && !symbolArray_[index].selectedFlag) {
