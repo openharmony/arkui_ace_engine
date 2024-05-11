@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,8 @@
  */
 
 import display from '@ohos.display';
-import mediaquery from '@ohos.mediaquery'
+import mediaquery from '@ohos.mediaquery';
+import { Theme } from '@ohos.arkui.theme';
 
 interface IconTheme {
   size: SizeOptions;
@@ -87,13 +88,13 @@ export const defaultTheme: PopupTheme = {
     minFontSize: 12,
     fontWeight: FontWeight.Medium,
     fontSize: $r('sys.float.ohos_id_text_size_sub_title2'),
-    fontColor: $r('sys.color.ohos_id_color_text_primary')
+    fontColor: $r('sys.color.font_primary')
   },
   button: {
     margin: { top: 16, bottom: 16, left: 16, right: 16 },
     padding: { top: 4, bottom: 4, left: 4, right: 4 },
     fontSize: $r('sys.float.ohos_id_text_size_button2'),
-    fontColor: $r('sys.color.ohos_id_color_text_primary_activated'),
+    fontColor: $r('sys.color.font_emphasize'),
     textMargin: { top: 8, bottom: 8, left: 8, right: 8 },
     minFontSize: 9,
     fontWeight: FontWeight.Medium,
@@ -102,9 +103,9 @@ export const defaultTheme: PopupTheme = {
   },
   message: {
     fontSize: $r('sys.float.ohos_id_text_size_body2'),
-    fontColor: $r('sys.color.ohos_id_color_text_secondary'),
+    fontColor: $r('sys.color.font_secondary'),
     fontWeight: FontWeight.Regular,
-    plainFontColor: $r('sys.color.ohos_id_color_text_primary')
+    plainFontColor: $r('sys.color.font_primary')
   },
   windows: {
     padding: { top: 12, bottom: 12, left: 12, right: 12 },
@@ -115,7 +116,7 @@ export const defaultTheme: PopupTheme = {
     padding: { top: 2, bottom: 2, left: 2, right: 2 },
     margin: { top: 12, bottom: 12, left: 12, right: 12 },
     image: $r('sys.media.ohos_ic_public_cancel'),
-    fillColor: $r('sys.color.ohos_id_color_secondary'),
+    fillColor: $r('sys.color.icon_secondary'),
     hoverColor: $r('sys.color.ohos_id_color_hover'),
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent')
   },
@@ -180,10 +181,10 @@ export struct PopupComponent {
   @State titleHeight: number = 0;
   @State applyHeight: number = 0;
   @State buttonHeight: number = 0;
-  @State messageMaxWeight: number = 0;
-  @State beforeScreenStatus: boolean = undefined;
+  @State messageMaxWeight: number | undefined = 0;
+  @State beforeScreenStatus: boolean | undefined = undefined;
   @State currentScreenStatus: boolean = true;
-  @State applySizeOptions : ConstraintSizeOptions = undefined;
+  @State applySizeOptions : ConstraintSizeOptions | undefined = undefined;
   @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State secondButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
@@ -312,7 +313,7 @@ export struct PopupComponent {
   }
 
   private getMessageMaxWeight(): number | undefined {
-    let textMaxWeight: number = undefined
+    let textMaxWeight: number | undefined = undefined;
     let defaultDisplaySync: display.Display = display.getDefaultDisplaySync()
     if (this.showClose || this.showClose === void (0)) {
       if (px2vp(defaultDisplaySync.width) > 400) {
@@ -397,6 +398,14 @@ export struct PopupComponent {
     }
   }
 
+  onWillApplyTheme(theme: Theme): void {
+    this.theme.title.fontColor = theme.colors.fontPrimary;
+    this.theme.button.fontColor = theme.colors.fontEmphasize;
+    this.theme.message.fontColor = theme.colors.fontSecondary;
+    this.theme.message.plainFontColor = theme.colors.fontPrimary;
+    this.theme.closeButton.fillColor = theme.colors.iconSecondary;
+  }
+
   aboutToAppear() {
     this.listener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
       this.currentScreenStatus = mediaQueryResult.matches
@@ -407,8 +416,8 @@ export struct PopupComponent {
     this.listener.off("change")
   }
 
-  getScrollMaxHeight(): number {
-    let scrollMaxHeight: number = undefined
+  getScrollMaxHeight(): number | undefined {
+    let scrollMaxHeight: number | undefined = undefined;
     if (this.currentScreenStatus !== this.beforeScreenStatus) {
       this.applySizeOptions = this.getApplyMaxSize();
       this.beforeScreenStatus = this.currentScreenStatus
@@ -443,9 +452,9 @@ export struct PopupComponent {
   }
 
   private getApplyMaxSize(): ConstraintSizeOptions {
-    let applyMaxWidth: number = undefined
-    let applyMaxHeight: number = undefined
-    let applyMaxSize: ConstraintSizeOptions = undefined
+    let applyMaxWidth: number | undefined = undefined;
+    let applyMaxHeight: number | undefined = undefined;
+    let applyMaxSize: ConstraintSizeOptions | undefined = undefined;
     let defaultDisplaySync: display.Display = display.getDefaultDisplaySync()
     if (px2vp(defaultDisplaySync.width) > 400) {
       applyMaxWidth = 400
