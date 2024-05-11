@@ -142,6 +142,7 @@ private:
     void InitProgressColumn();
     bool HasLoadingText();
     void UpdateLoadingTextOpacity(float opacity);
+    void DumpInfo() override;
 
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
