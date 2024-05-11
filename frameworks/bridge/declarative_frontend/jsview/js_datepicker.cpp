@@ -39,6 +39,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_date_picker_theme.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_time_picker_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -686,7 +688,9 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
         }
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
-    SetDefaultAttributes();
+    if (!JSDatePickerTheme::ApplyTheme()) {
+        SetDefaultAttributes();
+    }
 }
 
 void JSDatePicker::SetDefaultAttributes()
@@ -1403,7 +1407,9 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
             TimePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
         }
     }
-    SetDefaultAttributes();
+    if (!JSTimePickerTheme::ApplyTheme()) {
+        SetDefaultAttributes();
+    }
 }
 
 void JSTimePicker::SetDefaultAttributes()

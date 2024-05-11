@@ -68,11 +68,11 @@ class ArkThemeScopeManager {
      * @param componentName component name
      * @param elmtId component elmtId
      * @param isFirstRender component render state
-     * @param ownerComponentId CustomComponent elmtId which defines component
+     * @param ownerComponent CustomComponent which defines component
      */
-    onComponentCreateEnter(componentName: string, elmtId: number, isFirstRender: boolean, ownerComponentId: number) {
+    onComponentCreateEnter(componentName: string, elmtId: number, isFirstRender: boolean, ownerComponent: ViewPuInternal) {
         this.handledIsFirstRender = isFirstRender
-        this.handledOwnerComponentId = ownerComponentId
+        this.handledOwnerComponentId = ownerComponent.id__()
 
         // no need to handle render for WithTheme container
         if (this.themeScopes.length === 0 || componentName === 'WithTheme') {
@@ -87,12 +87,12 @@ class ArkThemeScopeManager {
             if (scopesLength > 0) {
                 // keep component to the top of constructed scopes
                 scope = this.localThemeScopes[scopesLength - 1]
-                scope.addComponentToScope(elmtId, ownerComponentId)
+                scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName)
             } else {
                 // keep component to the same scope as is used by CustomComponen that defines component
-                const parentScope = this.scopeForElmtId(ownerComponentId)
+                const parentScope = ownerComponent.themeScope_
                 if (parentScope) {
-                    parentScope.addComponentToScope(elmtId, ownerComponentId)
+                    parentScope.addComponentToScope(elmtId, ownerComponent.id__(), componentName)
                     scope = parentScope
                 }
             }
@@ -168,6 +168,7 @@ class ArkThemeScopeManager {
      */
     onViewPUCreate(ownerComponent: ViewPuInternal) {
         this.subscribeListener(ownerComponent)
+        ownerComponent.themeScope_ = this.scopeForElmtId(ownerComponent.id__())
     }
 
     /**
@@ -363,9 +364,25 @@ class ArkThemeScopeManager {
         this.listeners.forEach((listener) => {
             const listenerId = listener.id__()
             if (listenerId === item.owner) {
-                listener.forceRerenderNode(item.elmtId)
+                if (scope.isColorModeChanged()) {
+                    // we need to redraw all nodes if developer set new local colorMode
+                    listener.forceRerenderNode(item.elmtId)
+                } else {
+                    // take whitelist info from cache item
+                    let isInWhiteList = item.isInWhiteList
+                    if (isInWhiteList === undefined) {
+                        // if whitelist info is undefined we have check whitelist directly
+                        isInWhiteList = ArkThemeWhiteList.isInWhiteList(item.name)
+                        // keep result in cache item for the next checks
+                        item.isInWhiteList = isInWhiteList
+                    }
+                    if (isInWhiteList === true) {
+                        // redraw node only if component within whitelist
+                        listener.forceRerenderNode(item.elmtId)
+                    }
+                }
             } else if (listenerId === item.elmtId) {
-                listener.willApplyTheme(scope?.getTheme() ?? this.defaultTheme ?? ArkThemeScopeManager.SystemTheme)
+                listener.onWillApplyTheme(scope?.getTheme() ?? this.defaultTheme ?? ArkThemeScopeManager.SystemTheme)
             }
         })
     }
@@ -421,6 +438,7 @@ class ArkThemeScopeManager {
     static getInstance() : ArkThemeScopeManager {
         if (!ArkThemeScopeManager.instance) {
             ArkThemeScopeManager.instance = new ArkThemeScopeManager()
+            PUV2ViewBase.setArkThemeScopeManager(ArkThemeScopeManager.instance);
         }
         return ArkThemeScopeManager.instance;
     }

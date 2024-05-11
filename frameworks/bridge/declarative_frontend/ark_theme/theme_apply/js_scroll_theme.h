@@ -17,10 +17,10 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_INDEXER_THEME_H
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
-#include "core/components_ng/pattern/indexer/indexer_model.h"
+#include "core/components_ng/pattern/scroll/scroll_model.h"
 
 namespace OHOS::Ace::Framework {
-class JSIndexerTheme {
+class JSScrollTheme {
 public:
     static void ApplyTheme()
     {
@@ -30,12 +30,7 @@ public:
             return;
         }
 
-        IndexerModel::GetInstance()->SetColor(themeColors->FontSecondary());
-        IndexerModel::GetInstance()->SetSelectedColor(themeColors->FontEmphasize());
-        IndexerModel::GetInstance()->SetPopupColor(themeColors->FontEmphasize());
-        IndexerModel::GetInstance()->SetPopupUnselectedColor(themeColors->FontPrimary());
-        IndexerModel::GetInstance()->SetPopupTitleBackground(themeColors->CompBackgroundTertiary());
-        IndexerModel::GetInstance()->SetSelectedBackgroundColor(themeColors->CompEmphasizeSecondary());
+        ScrollModel::GetInstance()->SetScrollBarColor(themeColors->CompFocusedTertiary());
     }
 };
 } // namespace OHOS::Ace::Framework

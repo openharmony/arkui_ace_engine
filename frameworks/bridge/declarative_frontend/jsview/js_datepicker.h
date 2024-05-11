@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "frameworks/base/i18n/time_format.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 
 namespace OHOS::Ace::Framework {
 class JSDatePicker : public JSViewAbstract {

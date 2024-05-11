@@ -16,6 +16,8 @@
 class ArkThemeScopeItem {
     elmtId: number
     owner: number
+    name: string
+    isInWhiteList?: boolean = undefined
 }
 
 class ArkThemeScopeArray extends Array<ArkThemeScopeItem> {
@@ -57,6 +59,11 @@ class ArkThemeScope {
     private withThemeOptions: WithThemeOptions
 
     /**
+     * Previous scope color mode before option change
+     */
+    private prevColorMode: ThemeColorMode
+
+    /**
      * elmtIds of the components that are in this theme scope
      */
     private components: ArkThemeScopeArray
@@ -79,6 +86,7 @@ class ArkThemeScope {
         this.withThemeId = withThemeId
         this.withThemeOptions = withThemeOptions
         this.theme = theme
+        this.prevColorMode = this.colorMode()
     }
 
     /**
@@ -103,15 +111,17 @@ class ArkThemeScope {
      * Add component to the current theme scope by elmtId
      *
      * @param elmtId elmtId as number
+     * @param owner component owner id
+     * @param componentName component name
      */
-    addComponentToScope(elmtId: number, owner: number) {
+    addComponentToScope(elmtId: number, owner: number, componentName: string) {
         if (this.isComponentInScope(elmtId)) {
             return
         }
         if (!this.components) {
             this.components = new ArkThemeScopeArray()
         }
-        this.components.push({ elmtId: elmtId, owner: owner })
+        this.components.push({ elmtId: elmtId, owner: owner, name: componentName })
     }
 
     /**
@@ -190,7 +200,17 @@ class ArkThemeScope {
      * @param theme Theme instance associated with this Theme Scope
      */
     updateWithThemeOptions(options: WithThemeOptions, theme: ThemeInternal) {
+        this.prevColorMode = this.colorMode()
         this.withThemeOptions = options
         this.theme = theme
+    }
+
+    /**
+     * Check whether scope color mode changed in last update
+     *
+     * @returns true if color mode changed, otherwise false
+     */
+    isColorModeChanged() {
+        return this.prevColorMode !== this.colorMode()
     }
 }

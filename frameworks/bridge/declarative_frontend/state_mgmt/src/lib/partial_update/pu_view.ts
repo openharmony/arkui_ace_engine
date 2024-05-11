@@ -152,6 +152,8 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = undefined;
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
+    PUV2ViewBase.arkThemeScopeManager?.onViewPUCreate(this)
+
     if (localStorage) {
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry or view instance creation.`);
@@ -161,6 +163,16 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
+  onGlobalThemeChanged(): void {
+    this.onWillApplyThemeInternally();
+    this.forceCompleteRerender(false)
+    this.childrenWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild.deref();
+      if (child) {
+        child.onGlobalThemeChanged();
+      }
+    });
+  }
 
   // inform the subscribed property
   // that the View and thereby all properties
@@ -171,6 +183,14 @@ abstract class ViewPU extends PUV2ViewBase
 
   aboutToRecycle(): void { }
 
+  private onWillApplyThemeInternally(): void {
+    const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this.id__())
+    if (theme) {
+        this.onWillApplyTheme(theme)
+    }
+  }
+
+  onWillApplyTheme(theme: Theme): void {}
   // super class will call this function from
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
@@ -222,6 +242,7 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.getParent()) {
       this.getParent().removeChild(this);
     }
+    PUV2ViewBase.arkThemeScopeManager?.onViewPUDelete(this);
     this.localStoragebackStore_ = undefined;
   }
 
@@ -313,6 +334,7 @@ abstract class ViewPU extends PUV2ViewBase
 
   public initialRenderView(): void {
     stateMgmtProfiler.begin('ViewPU.initialRenderView');
+    this.onWillApplyThemeInternally();
     this.obtainOwnObservedProperties();
     this.isRenderInProgress = true;
     this.initialRender();
@@ -669,6 +691,8 @@ abstract class ViewPU extends PUV2ViewBase
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV3 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
+      PUV2ViewBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
+
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
 
       if (!this.isViewV3) {
@@ -702,6 +726,8 @@ abstract class ViewPU extends PUV2ViewBase
         this.currentlyRenderedElmtIdStack_.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
+
+      PUV2ViewBase.arkThemeScopeManager?.onComponentCreateExit(elmtId)
 
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
       this.restoreInstanceId();

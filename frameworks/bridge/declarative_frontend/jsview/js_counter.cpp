@@ -22,6 +22,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_counter_theme.h"
 #include "frameworks/core/components/counter/counter_theme.h"
 
 namespace OHOS::Ace {
@@ -216,6 +217,7 @@ void JSCounter::JsBackgroundColor(const JSCallbackInfo& args)
 void JSCounter::Create()
 {
     CounterModel::GetInstance()->Create();
+    JSCounterTheme::ApplyTheme();
 }
 
 } // namespace OHOS::Ace::Framework

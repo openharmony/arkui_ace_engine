@@ -21,6 +21,7 @@ base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
 abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
 abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
 jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
+arkTheme_obj_path = base_output_path + "/abc_ark_theme.o"
 arkcomponent_obj_path = base_output_path + "/abc_ark_component.o"
 
 es2abc_gen_abc("gen_stateMgmt_abc") {
@@ -41,6 +42,16 @@ es2abc_gen_abc("gen_jsEnumStyle_abc") {
 
   in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js" ]
   out_puts = [ base_output_path + "/jsEnumStyle.abc" ]
+}
+
+es2abc_gen_abc("gen_arkTheme_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkTheme.js")
+  dst_file = rebase_path(base_output_path + "/arkTheme.abc")
+
+  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkTheme.js" ]
+  out_puts = [ base_output_path + "/arkTheme.abc" ]
 }
 
 es2abc_gen_abc("gen_arkComponent_abc") {
@@ -84,6 +95,15 @@ gen_obj("abc_enum_style") {
   }
   output = abcenumstyle_obj_path
   snapshot_dep = [ ":gen_jsEnumStyle_abc" ]
+}
+
+gen_obj("abc_ark_theme") {
+  input = base_output_path + "/arkTheme.abc"
+  if (use_mac || use_mingw_win || use_ios || use_linux) {
+    arkTheme_obj_path = base_output_path + "/arkTheme.c"
+  }
+  output = arkTheme_obj_path
+  snapshot_dep = [ ":gen_arkTheme_abc" ]
 }
 
 gen_obj("abc_ark_component") {
@@ -349,6 +369,7 @@ template("declarative_js_engine_ark") {
 
     deps += [
       ":gen_obj_src_abc_ark_component",
+      ":gen_obj_src_abc_ark_theme",
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
     ]

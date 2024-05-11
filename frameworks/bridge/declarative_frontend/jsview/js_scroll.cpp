@@ -25,6 +25,7 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_scroll_theme.h"
 
 namespace OHOS::Ace {
 
@@ -114,6 +115,7 @@ void JSScroll::Create(const JSCallbackInfo& info)
     std::pair<bool, Dimension> barWidth;
     barWidth.first = false;
     ScrollModel::GetInstance()->InitScrollBar(GetTheme<ScrollBarTheme>(), barColor, barWidth, EdgeEffect::NONE);
+    JSScrollTheme::ApplyTheme();
 }
 
 void JSScroll::SetScrollable(int32_t value)

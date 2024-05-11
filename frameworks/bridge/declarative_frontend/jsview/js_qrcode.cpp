@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/qrcode_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_qrcode_theme.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/qrcode/qrcode_theme.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -54,6 +55,7 @@ namespace OHOS::Ace::Framework {
 void JSQRCode::Create(const std::string& value)
 {
     QRCodeModel::GetInstance()->Create(value);
+    JSQRCodeTheme::ApplyTheme();
 }
 
 void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
@@ -62,7 +64,7 @@ void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
         return;
     }
     Color qrcodeColor;
-    if (!ParseJsColor(info[0], qrcodeColor)) {
+    if (!ParseJsColor(info[0], qrcodeColor) && !JSQRCodeTheme::ObtainQRCodeColor(qrcodeColor)) {
         RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
         CHECK_NULL_VOID(qrcodeTheme);
         qrcodeColor = qrcodeTheme->GetQrcodeColor();
@@ -76,7 +78,7 @@ void JSQRCode::SetBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     Color backgroundColor;
-    if (!ParseJsColor(info[0], backgroundColor)) {
+    if (!ParseJsColor(info[0], backgroundColor) && !JSQRCodeTheme::ObtainBackgroundColor(backgroundColor)) {
         RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
         CHECK_NULL_VOID(qrcodeTheme);
         backgroundColor = qrcodeTheme->GetBackgroundColor();

@@ -34,6 +34,16 @@ public:
         SearchModel::GetInstance()->SetTextColor(themeColors.value().FontPrimary());
         SearchModel::GetInstance()->SetPlaceholderColor(themeColors.value().FontSecondary());
         SearchModel::GetInstance()->SetSearchIconColor(themeColors.value().IconSecondary());
+        SearchModel::GetInstance()->SetCaretColor(themeColors.value().Brand());
+        SearchModel::GetInstance()->SetCancelIconColor(themeColors.value().IconSecondary());
+        SearchModel::GetInstance()->SetSearchButtonFontColor(themeColors.value().FontEmphasize());
+        Color selectedColor = themeColors.value().Brand();
+        // Alpha = 255 means opaque
+        if (selectedColor.GetAlpha() == JSThemeUtils::DEFAULT_ALPHA) {
+            // Default setting of 20% opacity
+            selectedColor = selectedColor.ChangeOpacity(JSThemeUtils::DEFAULT_OPACITY);
+        }
+        SearchModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
         ViewAbstractModel::GetInstance()->SetBackgroundColor(themeColors.value().CompBackgroundTertiary());
     }
 };

@@ -59,4 +59,5 @@ interface IView {
     debugInfoUpdateFuncByElmtIdInternal(counter: ProfileRecursionCounter, depth: number, recursive: boolean): string;
     debugInfoDirtDescendantElementIdsInternal(depth: number, recursive: boolean, counter: ProfileRecursionCounter): string;
 
+    onGlobalThemeChanged(): void;
 }
