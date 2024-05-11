@@ -27,76 +27,71 @@ const BUTTON_BORDER_RADIUS = 14;
 const TEXT_ENABLE = 1.0;
 const PROGRESS_BUTTON_PROGRESS_KEY = 'progress_button_progress_key';
 const PROGRESS_BUTTON_PRIMARY_FONT_KEY = 'progress_button_primary_font_key';
-const PROGRESS_BUTTON_CONTAINER_EMPHASIZE_SECONDARY_BACKGROUND_KEY = 'progress_button_container_emphasiza_secondary_background_key';
+const PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY = 'progress_button_container_background_color_key';
 const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasize_secondary_button_key';
 export class ProgressButton extends ViewPU {
-  constructor(g1, h1, i1, j1 = -1, k1 = undefined, l1) {
-    super(g1, i1, j1, l1);
-    if (typeof k1 === "function") {
-      this.paramsGenerator_ = k1;
+  constructor(f1, g1, h1, i1 = -1, j1 = undefined, k1) {
+    super(f1, h1, i1, k1);
+    if (typeof j1 === "function") {
+      this.paramsGenerator_ = j1;
     }
-    this.__progress = new SynchedPropertySimpleOneWayPU(h1.progress, this, "progress");
+    this.__progress = new SynchedPropertySimpleOneWayPU(g1.progress, this, "progress");
     this.__textProgress = new ObservedPropertySimplePU(EMPTY_STRING, this, "textProgress");
-    this.__content = new SynchedPropertySimpleOneWayPU(h1.content, this, "content");
+    this.__content = new SynchedPropertySimpleOneWayPU(g1.content, this, "content");
     this.__isLoading = new ObservedPropertySimplePU(false, this, "isLoading");
     this.progressButtonWidth = BUTTON_NORMARL_WIDTH;
     this.clickCallback = () => { };
-    this.__enable = new SynchedPropertySimpleOneWayPU(h1.enable, this, "enable");
+    this.__enable = new SynchedPropertySimpleOneWayPU(g1.enable, this, "enable");
     this.__progressColor = new ObservedPropertyObjectPU('#330A59F7', this, "progressColor");
-    this.__textFontColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "textFontColor");
     this.__containerBorderColor = new ObservedPropertyObjectPU('#330A59F7', this, "containerBorderColor");
-    this.__containerBackgroundColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ["sys.color.ohos_id_color_foreground_contrary"], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "containerBackgroundColor");
-    this.setInitiallyProvidedValue(h1);
+    this.__containerBackgroundColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_foreground_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "containerBackgroundColor");
+    this.setInitiallyProvidedValue(g1);
     this.declareWatch("progress", this.getProgressContext);
     this.finalizeConstruction();
   }
-  setInitiallyProvidedValue(f1) {
-    if (f1.textProgress !== undefined) {
-      this.textProgress = f1.textProgress;
+  setInitiallyProvidedValue(e1) {
+    if (e1.textProgress !== undefined) {
+      this.textProgress = e1.textProgress;
     }
-    if (f1.content === undefined) {
+    if (e1.content === undefined) {
       this.__content.set(EMPTY_STRING);
     }
-    if (f1.isLoading !== undefined) {
-      this.isLoading = f1.isLoading;
+    if (e1.isLoading !== undefined) {
+      this.isLoading = e1.isLoading;
     }
-    if (f1.progressButtonWidth !== undefined) {
-      this.progressButtonWidth = f1.progressButtonWidth;
+    if (e1.progressButtonWidth !== undefined) {
+      this.progressButtonWidth = e1.progressButtonWidth;
     }
-    if (f1.clickCallback !== undefined) {
-      this.clickCallback = f1.clickCallback;
+    if (e1.clickCallback !== undefined) {
+      this.clickCallback = e1.clickCallback;
     }
-    if (f1.enable === undefined) {
+    if (e1.enable === undefined) {
       this.__enable.set(true);
     }
-    if (f1.progressColor !== undefined) {
-      this.progressColor = f1.progressColor;
+    if (e1.progressColor !== undefined) {
+      this.progressColor = e1.progressColor;
     }
-    if (f1.textFontColor !== undefined) {
-      this.textFontColor = f1.textFontColor;
+    if (e1.containerBorderColor !== undefined) {
+      this.containerBorderColor = e1.containerBorderColor;
     }
-    if (f1.containerBorderColor !== undefined) {
-      this.containerBorderColor = f1.containerBorderColor;
-    }
-    if (f1.containerBackgroundColor !== undefined) {
-      this.containerBackgroundColor = f1.containerBackgroundColor;
+    if (e1.containerBackgroundColor !== undefined) {
+      this.containerBackgroundColor = e1.containerBackgroundColor;
     }
   }
-  updateStateVars(e1) {
-    this.__progress.reset(e1.progress);
-    this.__content.reset(e1.content);
-    this.__enable.reset(e1.enable);
+  updateStateVars(d1) {
+    this.__progress.reset(d1.progress);
+    this.__content.reset(d1.content);
+    this.__enable.reset(d1.enable);
   }
-  purgeVariableDependenciesOnElmtId(d1) {
-    this.__progress.purgeDependencyOnElmtId(d1);
-    this.__textProgress.purgeDependencyOnElmtId(d1);
-    this.__content.purgeDependencyOnElmtId(d1);
-    this.__isLoading.purgeDependencyOnElmtId(d1);
-    this.__enable.purgeDependencyOnElmtId(d1);
-    this.__progressColor.purgeDependencyOnElmtId(d1);
-    this.__textFontColor.purgeDependencyOnElmtId(d1);
-    this.__containerBorderColor.purgeDependencyOnElmtId(d1);
-    this.__containerBackgroundColor.purgeDependencyOnElmtId(d1);
+  purgeVariableDependenciesOnElmtId(c1) {
+    this.__progress.purgeDependencyOnElmtId(c1);
+    this.__textProgress.purgeDependencyOnElmtId(c1);
+    this.__content.purgeDependencyOnElmtId(c1);
+    this.__isLoading.purgeDependencyOnElmtId(c1);
+    this.__enable.purgeDependencyOnElmtId(c1);
+    this.__progressColor.purgeDependencyOnElmtId(c1);
+    this.__containerBorderColor.purgeDependencyOnElmtId(c1);
+    this.__containerBackgroundColor.purgeDependencyOnElmtId(c1);
   }
   aboutToBeDeleted() {
     this.__progress.aboutToBeDeleted();
@@ -105,7 +100,6 @@ export class ProgressButton extends ViewPU {
     this.__isLoading.aboutToBeDeleted();
     this.__enable.aboutToBeDeleted();
     this.__progressColor.aboutToBeDeleted();
-    this.__textFontColor.aboutToBeDeleted();
     this.__containerBorderColor.aboutToBeDeleted();
     this.__containerBackgroundColor.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
@@ -114,44 +108,38 @@ export class ProgressButton extends ViewPU {
   get progress() {
     return this.__progress.get();
   }
-  set progress(c1) {
-    this.__progress.set(c1);
+  set progress(b1) {
+    this.__progress.set(b1);
   }
   get textProgress() {
     return this.__textProgress.get();
   }
-  set textProgress(b1) {
-    this.__textProgress.set(b1);
+  set textProgress(a1) {
+    this.__textProgress.set(a1);
   }
   get content() {
     return this.__content.get();
   }
-  set content(a1) {
-    this.__content.set(a1);
+  set content(z) {
+    this.__content.set(z);
   }
   get isLoading() {
     return this.__isLoading.get();
   }
-  set isLoading(z) {
-    this.__isLoading.set(z);
+  set isLoading(y) {
+    this.__isLoading.set(y);
   }
   get enable() {
     return this.__enable.get();
   }
-  set enable(y) {
-    this.__enable.set(y);
+  set enable(x) {
+    this.__enable.set(x);
   }
   get progressColor() {
     return this.__progressColor.get();
   }
-  set progressColor(x) {
-    this.__progressColor.set(x);
-  }
-  get textFontColor() {
-    return this.__textFontColor.get();
-  }
-  set textFontColor(w) {
-    this.__textFontColor.set(w);
+  set progressColor(w) {
+    this.__progressColor.set(w);
   }
   get containerBorderColor() {
     return this.__containerBorderColor.get();
@@ -167,7 +155,6 @@ export class ProgressButton extends ViewPU {
   }
   onWillApplyTheme(t) {
     this.progressColor = t.colors.compEmphasizeSecondary;
-    this.textFontColor = t.colors.fontPrimary;
     this.containerBorderColor = t.colors.compEmphasizeSecondary;
     this.containerBackgroundColor = t.colors.iconOnFourth;
   }
@@ -239,7 +226,6 @@ export class ProgressButton extends ViewPU {
       Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
       Text.fontWeight(FontWeight.Medium);
       Text.key(PROGRESS_BUTTON_PRIMARY_FONT_KEY);
-      Text.fontColor(ObservedObject.GetRawObject(this.textFontColor));
       Text.maxLines(1);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.padding({ left: 8, right: 8 });
@@ -249,7 +235,7 @@ export class ProgressButton extends ViewPU {
     Row.pop();
     this.observeComponentCreation2((g, h) => {
       Row.create();
-      Row.key(PROGRESS_BUTTON_CONTAINER_EMPHASIZE_SECONDARY_BACKGROUND_KEY);
+      Row.key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY);
       Row.backgroundColor(Color.Transparent);
       Row.border({ width: 1, color: this.containerBorderColor });
       Row.height(BUTTON_NORMARL_HEIGHT);

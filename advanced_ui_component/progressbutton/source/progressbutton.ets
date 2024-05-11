@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-import { Theme } from '@ohos.arkui.theme'
+import { Theme } from '@ohos.arkui.theme';
 
-const EMPTY_STRING: string = ''
-const MAX_PROGRESS: number = 100
-const MAX_PERCENTAGE: string = '100%'
-const MIN_PERCENTAGE: string = '0%'
-const TEXT_OPACITY = 0.4;
-const BUTTON_NORMARL_WIDTH = 44;
-const BUTTON_NORMARL_HEIGHT = 28;
-const BUTTON_BORDER_RADIUS = 14;
-const TEXT_ENABLE = 1.0
+const EMPTY_STRING: string = '';
+const MAX_PROGRESS: number = 100;
+const MAX_PERCENTAGE: string = '100%';
+const MIN_PERCENTAGE: string = '0%';
+const TEXT_OPACITY: number = 0.4;
+const BUTTON_NORMARL_WIDTH: number = 44;
+const BUTTON_NORMARL_HEIGHT: number = 28;
+const BUTTON_BORDER_RADIUS: number = 14;
+const TEXT_ENABLE: number = 1.0;
 
 
 // Set the key value for the basic component of skin changing corresponding to progressButton
 const PROGRESS_BUTTON_PROGRESS_KEY = 'progress_button_progress_key';
 const PROGRESS_BUTTON_PRIMARY_FONT_KEY = 'progress_button_primary_font_key';
-const PROGRESS_BUTTON_CONTAINER_EMPHASIZE_SECONDARY_BACKGROUND_KEY = 'progress_button_container_emphasiza_secondary_background_key';
+const PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY = 'progress_button_container_background_color_key';
 const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasize_secondary_button_key';
 @Component
 export struct ProgressButton {
@@ -42,13 +42,11 @@ export struct ProgressButton {
   @Prop enable: boolean = true
 
   @State progressColor: ResourceColor = '#330A59F7'
-  @State textFontColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary')
   @State containerBorderColor: ResourceColor = '#330A59F7'
   @State containerBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_foreground_contrary')
 
   onWillApplyTheme(theme: Theme) {
     this.progressColor = theme.colors.compEmphasizeSecondary;
-    this.textFontColor = theme.colors.fontPrimary;
     this.containerBorderColor = theme.colors.compEmphasizeSecondary;
     this.containerBackgroundColor = theme.colors.iconOnFourth;
   }
@@ -93,14 +91,13 @@ export struct ProgressButton {
             .fontSize($r('sys.float.ohos_id_text_size_button3'))
             .fontWeight(FontWeight.Medium)
             .key(PROGRESS_BUTTON_PRIMARY_FONT_KEY)
-            .fontColor(this.textFontColor)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .padding({left: 8, right: 8})
             .opacity(this.enable? TEXT_ENABLE : TEXT_OPACITY)
         }
         Row()
-          .key(PROGRESS_BUTTON_CONTAINER_EMPHASIZE_SECONDARY_BACKGROUND_KEY)
+          .key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY)
           .backgroundColor(Color.Transparent)
           .border({ width: 1, color: this.containerBorderColor})
           .height(BUTTON_NORMARL_HEIGHT)
