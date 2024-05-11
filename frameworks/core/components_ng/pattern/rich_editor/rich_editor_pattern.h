@@ -870,6 +870,8 @@ private:
     float MoveTextRect(float offset);
     void MoveCaretToContentRect(bool downStreamFirst = true);
     void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
+    void MoveCaretToContentRect(float offset, int32_t source);
+    bool IsCaretInContentArea();
     bool IsTextArea() const override
     {
         return true;
@@ -1005,6 +1007,8 @@ private:
     int32_t richEditorInstanceId_ = -1;
     bool contentChange_ = false;
     PreviewTextRecord previewTextRecord_;
+    float lastFontScale_ = -1;
+    bool isCaretInContentArea_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -2050,6 +2050,7 @@ void RichEditorPattern::HandleBlurEvent()
     if (reason != BlurReason::WINDOW_BLUR) {
         lastSelectionRange_.reset();
     }
+    isCaretInContentArea_ = reason == BlurReason::WINDOW_BLUR && IsCaretInContentArea();
     HandleOnEditChanged(false);
     FinishTextPreview();
 }
@@ -2065,6 +2066,16 @@ void RichEditorPattern::HandleFocusEvent()
     UseHostToUpdateTextFieldManager();
     if (textSelector_.SelectNothing()) {
         StartTwinkling();
+    }
+    bool isFontScaleChanged = false;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    if (pipelineContext) {
+        auto currentFontScale = pipelineContext->GetFontScale() * pipelineContext->GetDipScale();
+        isFontScaleChanged = !NearEqual(lastFontScale_, currentFontScale);
+        lastFontScale_ = currentFontScale;
+    }
+    if (isCaretInContentArea_ && isFontScaleChanged) {
+        MoveCaretToContentRect(CARET_BOTTOM_DISTANCE.ConvertToPx(), SCROLL_FROM_NONE);
     }
     if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Handle Focus Event, Request keyboard.");
@@ -5860,6 +5871,26 @@ void RichEditorPattern::MoveCaretToContentRect(const OffsetF& caretOffset, float
             CARET_BOTTOM_DISTANCE.ConvertToPx();
         OnScrollCallback(distance, SCROLL_FROM_NONE);
     }
+}
+
+void RichEditorPattern::MoveCaretToContentRect(float offset, int32_t source)
+{
+    float caretHeight = 0.0f;
+    auto caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+    auto keyboardOffset = GetCrossOverHeight();
+    auto contentRect = GetTextContentRect();
+    auto distance = contentRect.Bottom() - keyboardOffset - caretOffset.GetY() - caretHeight - offset;
+    OnScrollCallback(distance, source);
+}
+
+bool RichEditorPattern::IsCaretInContentArea()
+{
+    float caretHeight = 0.0f;
+    auto caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+    auto keyboardOffset = GetCrossOverHeight();
+    auto contentRect = GetTextContentRect();
+    return GreatNotEqual(caretOffset.GetY() + caretHeight, contentRect.GetY())
+        && LessNotEqual(caretOffset.GetY(), contentRect.Bottom() - keyboardOffset);
 }
 
 void RichEditorPattern::UpdateScrollBarOffset()
