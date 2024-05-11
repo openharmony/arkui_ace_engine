@@ -23,6 +23,7 @@
 #include <sstream>
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/utils.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
@@ -729,6 +730,14 @@ void WebDelegate::UnRegisterScreenLockFunction()
     }
 }
 
+void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
+    const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+{
+    if (auto delegate = webDelegate_.Upgrade()) {
+        delegate->OnAvoidAreaChanged(avoidArea, type);
+    }
+}
+
 WebDelegate::~WebDelegate()
 {
     OnNativeEmbedAllDestory();
@@ -740,6 +749,7 @@ WebDelegate::~WebDelegate()
         nweb_->OnDestroy();
     }
     UnregisterSurfacePositionChangedCallback();
+    UnregisterAvoidAreaChangeListener();
 }
 
 void WebDelegate::ReleasePlatformResource()
@@ -1806,7 +1816,10 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                                 Create(webCom->GetRenderProcessNotRespondingId(), oldContext);
         onRenderProcessRespondingV2_ = useNewPipe ? eventHub->GetOnRenderProcessRespondingEvent()
                                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::
-													Create(webCom->GetRenderProcessRespondingId(), oldContext);
+                                                Create(webCom->GetRenderProcessRespondingId(), oldContext);
+        onViewportFitChangedV2_ = useNewPipe ? eventHub->GetOnViewportFitChangedEvent()
+                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                           webCom->GetViewportFitChangedId(), oldContext);
     }
     return true;
 }
@@ -2695,6 +2708,47 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     }
 }
 
+void WebDelegate::RegisterAvoidAreaChangeListener()
+{
+    constexpr static int32_t PLATFORM_VERSION_TEN = 10;
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
+        (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow())) {
+        if (avoidAreaChangedListener_) return;
+
+        systemSafeArea_ = container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM);
+        cutoutSafeArea_ = container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT);
+        navigationIndicatorSafeArea_ =
+            container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+        InitCacheCutoutEdge();
+
+        avoidAreaChangedListener_ = new WebAvoidAreaChangedListener(AceType::WeakClaim(this));
+        OHOS::Rosen::WMError regCode = container->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
+        TAG_LOGI(AceLogTag::ACE_WEB, "RegisterAvoidAreaChangeListener result:%{public}d", (int) regCode);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "CANNOT RegisterAvoidAreaChangeListener");
+    }
+}
+
+void WebDelegate::UnregisterAvoidAreaChangeListener()
+{
+    constexpr static int32_t PLATFORM_VERSION_TEN = 10;
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
+        (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow())) {
+        if (!avoidAreaChangedListener_) return;
+        OHOS::Rosen::WMError regCode = container->UnregisterAvoidAreaChangeListener(avoidAreaChangedListener_);
+        TAG_LOGI(AceLogTag::ACE_WEB, "UnregisterAvoidAreaChangeListener result:%{public}d", (int) regCode);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "CANNOT UnregisterAvoidAreaChangeListener %{public}d %{public}d %{public}d",
+            pipeline->GetMinPlatformVersion(), pipeline->GetIsAppWindow(), container->IsUIExtensionWindow());
+    }
+}
+
 void WebDelegate::InitWebViewWithSurface()
 {
     auto context = context_.Upgrade();
@@ -2788,6 +2842,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetWindowId(window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
+            delegate->RegisterAvoidAreaChangeListener();
             delegate->nweb_->SetDrawMode(renderMode);
             delegate->nweb_->SetDrawMode(layoutMode);
         },
@@ -6543,4 +6598,116 @@ void WebDelegate::OnHideAutofillPopup()
     CHECK_NULL_VOID(webPattern);
     webPattern->OnHideAutofillPopup();
 }
+
+void WebDelegate::InitCacheCutoutEdge()
+{
+    if (cacheCutoutEdge_ > 0) {
+        return;
+    }
+    if (cutoutSafeArea_.top_.start > 0) {
+        cacheCutoutEdge_ = cutoutSafeArea_.top_.start;
+    } else if (cutoutSafeArea_.left_.start > 0) {
+        cacheCutoutEdge_ = cutoutSafeArea_.left_.start;
+    }
+}
+
+void WebDelegate::OnAreaChange(const OHOS::Ace::Rect& area)
+{
+    if (currentArea_ == area) {
+        return;
+    }
+    currentArea_ = area;
+    OnSafeInsetsChange();
+}
+
+void WebDelegate::OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), viewportFit]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onViewportFitChangedV2 = delegate->onViewportFitChangedV2_;
+            if (onViewportFitChangedV2) {
+                onViewportFitChangedV2(std::make_shared<ViewportFitChangedEvent>(static_cast<int32_t>(viewportFit)));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebViewportFitChanged");
+}
+
+void WebDelegate::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+{
+    bool changed = false;
+    auto safeArea = ConvertAvoidArea(avoidArea);
+
+    if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
+        changed = (systemSafeArea_ != safeArea);
+        systemSafeArea_ = safeArea;
+    } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
+        changed = (cutoutSafeArea_ != safeArea);
+        cutoutSafeArea_ = safeArea;
+        InitCacheCutoutEdge();
+    } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+        changed = (navigationIndicatorSafeArea_ != safeArea);
+        navigationIndicatorSafeArea_ = safeArea;
+    }
+
+    if (changed) {
+        OnSafeInsetsChange();
+    }
+}
+
+void WebDelegate::OnSafeInsetsChange()
+{
+    NG::SafeAreaInsets resultSafeArea({0, 0}, {0, 0}, {0, 0}, {0, 0});
+    resultSafeArea = resultSafeArea.Combine(systemSafeArea_);
+    resultSafeArea = resultSafeArea.Combine(cutoutSafeArea_);
+    resultSafeArea = resultSafeArea.Combine(navigationIndicatorSafeArea_);
+
+    int left = 0;
+    if (resultSafeArea.left_.IsValid() && resultSafeArea.left_.end > currentArea_.Left()) {
+        left = resultSafeArea.left_.end;
+    }
+    int top = 0;
+    if (resultSafeArea.top_.IsValid() && resultSafeArea.top_.end > currentArea_.Top()) {
+        top = resultSafeArea.top_.end - resultSafeArea.top_.start;
+    }
+    int right = 0;
+    if (resultSafeArea.right_.IsValid() && resultSafeArea.right_.start < currentArea_.Right()) {
+        right = resultSafeArea.right_.end - resultSafeArea.right_.start + cacheCutoutEdge_;
+    }
+    int bottom = 0;
+    if (resultSafeArea.bottom_.IsValid() && resultSafeArea.bottom_.start < currentArea_.Bottom()) {
+        bottom = resultSafeArea.bottom_.end - resultSafeArea.bottom_.start;
+    }
+
+    if (left < 0 || bottom < 0 || right < 0 || top < 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::OnSafeInsetsChange occur errors "
+                "ltrb:%{public}d,%{public}d,%{public}d,%{public}d", left, top, right, bottom);
+        return;
+    }
+
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebDelegate::OnSafeInsetsChange left:%{public}d top:%{public}d right:%{public}d bottom:%{public}d "
+        "systemSafeArea:%{public}s cutoutSafeArea:%{public}s navigationIndicatorSafeArea:%{public}s "
+        "resultSafeArea:%{public}s currentArea:%{public}s", left, top, right, bottom,
+        systemSafeArea_.ToString().c_str(), cutoutSafeArea_.ToString().c_str(),
+        navigationIndicatorSafeArea_.ToString().c_str(), resultSafeArea.ToString().c_str(),
+        currentArea_.ToString().c_str());
+
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), left, top, right, bottom]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_ && !delegate->window_) {
+                delegate->nweb_->OnSafeInsetsChange(left, top, right, bottom);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSafeInsetsChange");
+}
+
 } // namespace OHOS::Ace

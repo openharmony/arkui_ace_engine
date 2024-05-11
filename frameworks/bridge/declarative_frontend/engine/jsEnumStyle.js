@@ -3068,3 +3068,10 @@ var SubMenuExpandingMode;
   SubMenuExpandingMode[SubMenuExpandingMode["EMBEDDED_EXPAND"] = 1] = "EMBEDDED";
   SubMenuExpandingMode[SubMenuExpandingMode["STACK_EXPAND"] = 2] = "STACK";
 })(SubMenuExpandingMode || (SubMenuExpandingMode = {}));
+
+var ViewportFit;
+(function (ViewportFit) {
+  ViewportFit[ViewportFit["AUTO"] = 0] = "AUTO";
+  ViewportFit[ViewportFit["CONTAINS"] = 1] = "CONTAINS";
+  ViewportFit[ViewportFit["COVER"] = 2] = "COVER";
+})(ViewportFit || (ViewportFit = {}));

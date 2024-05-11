@@ -1408,12 +1408,16 @@ void WebPattern::OnAreaChangedInner()
 {
     auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     auto resizeOffset = Offset(offset.GetX(), offset.GetY());
+
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    Size webSize = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+
+    delegate_->OnAreaChange({resizeOffset.GetX(), resizeOffset.GetY(), webSize.Width(), webSize.Height()});
     if (CheckSafeAreaIsExpand()) {
-        auto frameNode = GetHost();
-        CHECK_NULL_VOID(frameNode);
-        auto geometryNode = frameNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        drawSize_ = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+        drawSize_ = webSize;
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     }
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {

@@ -19892,6 +19892,9 @@ class ArkWebComponent extends ArkComponent {
   onRenderProcessResponding(callback) {
     throw new Error('Method not implemented.');
   }
+  onViewportFitChanged(callback) {
+    throw new Error('Method not implemented.');
+  }
 }
 // @ts-ignore
 if (globalThis.Web !== undefined) {
