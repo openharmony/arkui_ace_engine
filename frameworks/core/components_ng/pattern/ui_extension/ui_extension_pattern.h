@@ -240,7 +240,6 @@ private:
     bool isAsyncModalBinding_ = false;
     bool isShowPlaceholder_ = false;
     bool densityDpi_ = false;
-    int32_t uiExtensionId_ = 0;
     int32_t callbackId_ = 0;
     RectF displayArea_;
     bool isKeyAsync_ = false;
