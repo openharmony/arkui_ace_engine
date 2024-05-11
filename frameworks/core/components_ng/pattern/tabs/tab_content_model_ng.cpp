@@ -271,6 +271,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             columnNode->ReplaceChild(AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back()), builderNode);
         }
         auto oldIcon = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+        CHECK_NULL_VOID(oldIcon);
         if (tabBarParam.GetSymbol().has_value() && oldIcon->GetTag() != V2::SYMBOL_ETS_TAG) {
             auto icon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
