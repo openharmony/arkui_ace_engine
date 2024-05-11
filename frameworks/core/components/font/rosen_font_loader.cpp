@@ -73,12 +73,36 @@ void RosenFontLoader::LoadFromNetwork(const RefPtr<PipelineBase>& context)
             if (!fontLoader || !context) {
                 return;
             }
-            std::vector<uint8_t> fontData;
             TAG_LOGI(AceLogTag::ACE_FONT, "begin to load font from network.");
-            if (!DownloadManager::GetInstance()->Download(fontLoader->familySrc_, fontData) || fontData.empty()) {
+            DownloadCallback downloadCallback;
+            downloadCallback.successCallback = [weak, weakContext](
+                                                   const std::string&& imageData, bool async, int32_t instanceId) {
+                ContainerScope scope(instanceId);
+                auto context = weakContext.Upgrade();
+                CHECK_NULL_VOID(context);
+                context->GetTaskExecutor()->PostTask(
+                    [imageData, weak] {
+                        auto fontLoader = weak.Upgrade();
+                        CHECK_NULL_VOID(fontLoader);
+                        // Load font.
+                        RosenFontCollection::GetInstance().LoadFontFromList(
+                            reinterpret_cast<const uint8_t*>(imageData.c_str()), imageData.size(),
+                            fontLoader->familyName_);
+                        fontLoader->isLoaded_ = true;
+                        // When font is already loaded, notify all which used this font.
+                        fontLoader->NotifyCallbacks();
+                    },
+                    TaskExecutor::TaskType::UI, "ArkUIFontLoadFromList");
+            };
+            downloadCallback.failCallback = [](std::string errorMessage, bool async, int32_t instanceId) {
+                TAG_LOGW(
+                    AceLogTag::ACE_FONT, "Sync Download font Failed,errorMessage is %{public}s", errorMessage.c_str());
+            };
+            downloadCallback.cancelCallback = downloadCallback.failCallback;
+            if (!DownloadManager::GetInstance()->DownloadSync(
+                    std::move(downloadCallback), fontLoader->familySrc_, context->GetInstanceId())) {
                 return;
             }
-            fontLoader->PostLoadFontTask(std::move(fontData), context);
         },
         TaskExecutor::TaskType::BACKGROUND, "ArkUIFontLoadFromNetwork");
 }
