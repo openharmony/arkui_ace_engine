@@ -2281,6 +2281,8 @@ HWTEST_F(TextFieldModifyTest, HandleOnDragStatusCallback, TestSize.Level1)
     /**
      * @tc.steps: step2. set handle cursor on drag moved
      */
+    auto focushHub = pattern_->GetFocusHub();
+    focushHub->currentFocus_ = false;
     pattern_->HandleOnDragStatusCallback(dragEventType[0], notifyDragEvent);
     EXPECT_TRUE(pattern_->isCursorAlwaysDisplayed_);
     pattern_->HandleOnDragStatusCallback(dragEventType[0], notifyDragEvent);
