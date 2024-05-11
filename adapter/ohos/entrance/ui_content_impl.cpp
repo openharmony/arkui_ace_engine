@@ -329,16 +329,21 @@ public:
             systemSafeArea_ = ConvertAvoidArea(avoidArea);
         } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
             navigationBar_ = ConvertAvoidArea(avoidArea);
+        } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
+            cutoutSafeArea_ = ConvertAvoidArea(avoidArea);
         }
         auto safeArea = systemSafeArea_;
         auto navSafeArea = navigationBar_;
+        auto cutoutSafeArea = cutoutSafeArea_;
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, safeArea, navSafeArea, type, avoidArea] {
+            [pipeline, safeArea, navSafeArea, cutoutSafeArea, type, avoidArea] {
                 if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
                     pipeline->UpdateSystemSafeArea(safeArea);
                 } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea);
+                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT && pipeline->GetUseCutout()) {
+                    pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
                 }
                 // for ui extension component
                 pipeline->UpdateOriginAvoidArea(avoidArea, static_cast<uint32_t>(type));
@@ -349,6 +354,7 @@ public:
 private:
     NG::SafeAreaInsets systemSafeArea_;
     NG::SafeAreaInsets navigationBar_;
+    NG::SafeAreaInsets cutoutSafeArea_;
     int32_t instanceId_ = -1;
 };
 
@@ -1578,6 +1584,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
     pipeline->SetHalfLeading(halfLeading);
+    // Use metadata to control whether the cutout safeArea takes effect.
+    bool useCutout = std::any_of(metaData.begin(), metaData.end(),
+        [](const auto& metaDataItem) { return metaDataItem.name == "avoid_cutout" && metaDataItem.value == "true"; });
+    pipeline->SetUseCutout(useCutout);
     container->CheckAndSetFontFamily();
     SetFontScaleAndWeightScale(container, instanceId_);
     if (pipeline) {
@@ -1635,7 +1645,9 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
         avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
         window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
-        pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+        if (pipeline->GetUseCutout()) {
+            pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+        }
         pipeline->UpdateNavSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
     }
 }
