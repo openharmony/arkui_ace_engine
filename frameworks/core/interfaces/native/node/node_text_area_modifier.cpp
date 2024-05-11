@@ -1102,6 +1102,55 @@ void ResetTextAreaLineBreakStrategy(ArkUINodeHandle node)
     // 0 is the default value of LineBreakStrategy::GREEDY
     TextFieldModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[0]);
 }
+
+void SetTextAreaMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
+    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcLength topDimen;
+    CalcLength rightDimen;
+    CalcLength bottomDimen;
+    CalcLength leftDimen;
+    if (top->string != nullptr) {
+        topDimen = CalcLength(top->string);
+    } else {
+        topDimen = CalcLength(top->value, static_cast<DimensionUnit>(top->unit));
+    }
+    if (right->string != nullptr) {
+        rightDimen = CalcLength(right->string);
+    } else {
+        rightDimen = CalcLength(right->value, static_cast<DimensionUnit>(right->unit));
+    }
+    if (bottom->string != nullptr) {
+        bottomDimen = CalcLength(bottom->string);
+    } else {
+        bottomDimen = CalcLength(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+    }
+    if (left->string != nullptr) {
+        leftDimen = CalcLength(left->string);
+    } else {
+        leftDimen = CalcLength(left->value, static_cast<DimensionUnit>(left->unit));
+    }
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(topDimen);
+    paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    paddings.left = std::optional<CalcLength>(leftDimen);
+    paddings.right = std::optional<CalcLength>(rightDimen);
+    TextFieldModelNG::SetMargin(frameNode, paddings);
+}
+
+void ResetTextAreaMargin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::PaddingProperty paddings;
+    paddings.top = NG::CalcLength(0.0);
+    paddings.bottom = NG::CalcLength(0.0);
+    paddings.left = NG::CalcLength(0.0);
+    paddings.right = NG::CalcLength(0.0);
+    TextFieldModelNG::SetMargin(frameNode, paddings);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1138,7 +1187,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaOnContentScroll, ResetTextAreaOnContentScroll,
         SetTextAreaOnEditChange, ResetTextAreaOnEditChange, SetTextAreaOnCopy, ResetTextAreaOnCopy,
         SetTextAreaOnCut, ResetTextAreaOnCut, SetTextAreaOnPaste, ResetTextAreaOnPaste,
-        SetTextAreaLineBreakStrategy, ResetTextAreaLineBreakStrategy };
+        SetTextAreaLineBreakStrategy, ResetTextAreaLineBreakStrategy,
+        SetTextAreaMargin, ResetTextAreaMargin };
     return &modifier;
 }
 

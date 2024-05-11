@@ -1457,4 +1457,19 @@ bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsVa
     symbolId = symbol;
     return true;
 }
+
+ArkUISizeType ArkTSUtils::ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg)
+{
+    ArkUISizeType size = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    CalcDimension dimen(0, DimensionUnit::VP);
+    if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimen)) {
+        size.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            size.string = dimen.CalcValue().c_str();
+        } else {
+            size.value = dimen.Value();
+        }
+    }
+    return size;
+}
 } // namespace OHOS::Ace::NG
