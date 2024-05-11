@@ -152,12 +152,21 @@ public:
     {
         focusPadding = padding;
     }
+    void SetFocusBoxGlow(bool focusBoxGlow)
+    {
+        focusBoxGlow_ = focusBoxGlow;
+    }
+    bool IsFocusBoxGlow() const
+    {
+        return focusBoxGlow_;
+    }
 
 private:
     std::optional<RoundRect> paintRect;
     std::optional<Color> paintColor;
     std::optional<Dimension> paintWidth;
     std::optional<Dimension> focusPadding;
+    bool focusBoxGlow_ = false;
 };
 
 class ACE_EXPORT FocusPattern : public virtual AceType {
@@ -187,6 +196,7 @@ public:
         if (paintParams.HasFocusPadding()) {
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
+        paintParams_->SetFocusBoxGlow(paintParams.IsFocusBoxGlow());
     }
     FocusPattern(const FocusPattern& focusPattern)
     {
@@ -248,6 +258,7 @@ public:
         if (paintParams.HasFocusPadding()) {
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
+        paintParams_->SetFocusBoxGlow(paintParams.IsFocusBoxGlow());
     }
 
     bool GetIsFocusActiveWhenFocused() const
@@ -372,6 +383,7 @@ public:
         if (paramsPtr->HasFocusPadding()) {
             focusPaintParamsPtr_->SetFocusPadding(paramsPtr->GetFocusPadding());
         }
+        focusPaintParamsPtr_->SetFocusBoxGlow(paramsPtr->IsFocusBoxGlow());
     }
 
     bool HasPaintRect() const
@@ -402,6 +414,12 @@ public:
     {
         CHECK_NULL_RETURN(focusPaintParamsPtr_, Dimension());
         return focusPaintParamsPtr_->GetPaintWidth();
+    }
+
+    bool IsFocusBoxGlow() const
+    {
+        CHECK_NULL_RETURN(focusPaintParamsPtr_, false);
+        return focusPaintParamsPtr_->IsFocusBoxGlow();
     }
 
     bool HasFocusPadding() const
@@ -461,6 +479,14 @@ public:
             focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
         }
         focusPaintParamsPtr_->SetFocusPadding(padding);
+    }
+
+    void SetFocusBoxGlow(bool isFocusBoxGlow)
+    {
+        if (!focusPaintParamsPtr_) {
+            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+        }
+        focusPaintParamsPtr_->SetFocusBoxGlow(isFocusBoxGlow);
     }
 
     RefPtr<FocusManager> GetFocusManager() const;

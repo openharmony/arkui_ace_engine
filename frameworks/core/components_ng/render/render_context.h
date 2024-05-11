@@ -56,6 +56,16 @@ class FrameNode;
 class InspectorFilter;
 class Modifier;
 
+struct PaintFocusExtraInfo final {
+    PaintFocusExtraInfo() = default;
+    PaintFocusExtraInfo(bool isAccessibilityFocus, bool isFocusBoxGlow)
+        : isAccessibilityFocus(isAccessibilityFocus), isFocusBoxGlow(isFocusBoxGlow)
+    {}
+    ~PaintFocusExtraInfo() = default;
+    bool isAccessibilityFocus { false };
+    bool isFocusBoxGlow { false };
+};
+
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
@@ -181,14 +191,15 @@ public:
 
     // Paint focus state by component's setting. It will paint along the paintRect
     virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
-        bool isAccessibilityFocus = false)
+        bool isAccessibilityFocus = false, bool isFocusBoxGlow = false)
     {}
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth, bool isAccessibilityFocus = false)
+        const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo)
     {}
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
-    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth,
+        bool isFocusBoxGlow = false)
     {}
 
     virtual void ClearFocusState() {}

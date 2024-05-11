@@ -2165,7 +2165,7 @@ void RosenRenderContext::PaintAccessibilityFocus()
             localRect.Width() - (2 * lineWidth), localRect.Height() - (2 * lineWidth));
         frameRect.SetRect(globalRect);
     }
-    PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
+    PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, { true, false });
 }
 
 void RosenRenderContext::ClearAccessibilityFocus()
@@ -3123,8 +3123,8 @@ void RosenRenderContext::BlendBorderColor(const Color& color)
     RequestNextFrame();
 }
 
-void RosenRenderContext::PaintFocusState(
-    const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth, bool isAccessibilityFocus)
+void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color& paintColor,
+    const Dimension& paintWidth, bool isAccessibilityFocus, bool isFocusBoxGlow)
 {
     TAG_LOGD(AceLogTag::ACE_FOCUS,
         "PaintFocusState rect is (%{public}f, %{public}f, %{public}f, %{public}f). Color is %{public}s, PainWidth is "
@@ -3134,73 +3134,78 @@ void RosenRenderContext::PaintFocusState(
     CHECK_NULL_VOID(paintRect.GetRect().IsValid());
     CHECK_NULL_VOID(rsNode_);
     auto borderWidthPx = static_cast<float>(paintWidth.ConvertToPx());
-    auto frameNode = GetHost();
-    auto paintTask = [paintColor, borderWidthPx, weak = WeakClaim(AceType::RawPtr(frameNode))]
-    (const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
-        RSPen pen;
-        pen.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(paintColor));
-        pen.SetWidth(borderWidthPx);
-        rsCanvas.AttachPen(pen);
-        auto delegatePtr = weak.Upgrade();
-        CHECK_NULL_VOID(delegatePtr);
-        if (!delegatePtr->GetCheckboxFlag()) {
-            rsCanvas.DrawRoundRect(rrect);
-        } else {
-            auto paintProperty = delegatePtr->GetPaintProperty<CheckBoxPaintProperty>();
-            CHECK_NULL_VOID(paintProperty);
-            CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
-            } else {
-                checkboxStyle = CheckBoxStyle::SQUARE_STYLE;
-            }
-            if (paintProperty->HasCheckBoxSelectedStyle()) {
-                checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
-            }
-            RSScalar halfDenominator = 2.0f;
-            RSScalar radius = 0.0f;
-            RSRect rect = rrect.GetRect();
-            RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
-            RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
-            RSPoint centerPt(x, y);
-            if (rect.GetWidth() > rect.GetHeight()) {
-                radius = rect.GetHeight() / halfDenominator;
-            } else {
-                radius = rect.GetWidth() / halfDenominator;
-            }
-            if (CheckBoxStyle::SQUARE_STYLE == checkboxStyle) {
-                rsCanvas.DrawRoundRect(rrect);
-            } else {
-                rsCanvas.DrawCircle(centerPt, radius);
-            }
-        }
-        rsCanvas.DetachPen();
-    };
-    std::shared_ptr<FocusStateModifier> modifier;
+    isFocusBoxGlow_ = isFocusBoxGlow;
     if (isAccessibilityFocus) {
-        if (!accessibilityFocusStateModifier_) {
-            accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
-        }
-        modifier = accessibilityFocusStateModifier_;
-        modifier->SetRoundRect(paintRect, borderWidthPx);
-        UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
-    } else {
-        if (!focusStateModifier_) {
-            // TODO: Add property data
-            focusStateModifier_ = std::make_shared<FocusStateModifier>();
-        }
-        modifier = focusStateModifier_;
-        modifier->SetRoundRect(paintRect, borderWidthPx);
-        UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
+        InitAccessibilityFocusModidifer(paintRect, paintColor, borderWidthPx);
+        UpdateDrawRegion(
+            DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, accessibilityFocusStateModifier_->GetOverlayRect());
+        rsNode_->AddModifier(accessibilityFocusStateModifier_);
+        RequestNextFrame();
+        return;
     }
-    modifier->SetPaintTask(std::move(paintTask));
-    rsNode_->AddModifier(modifier);
+    if (!isFocusBoxGlow_) {
+        InitFocusStateModidifer(paintRect, paintColor, borderWidthPx);
+        UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusStateModifier_->GetOverlayRect());
+        rsNode_->AddModifier(focusStateModifier_);
+    } else {
+        InitFocusAnimationModidifer(paintRect, paintColor, borderWidthPx);
+        UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusAnimationModifier_->GetOverlayRect());
+        auto modifierAdapter =
+            std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(focusAnimationModifier_));
+        rsNode_->AddModifier(modifierAdapter);
+        modifierAdapter->AttachProperties();
+        focusAnimationModifier_->StartFocusAnimation();
+    }
     RequestNextFrame();
 }
 
+void RosenRenderContext::InitAccessibilityFocusModidifer(
+    const RoundRect& paintRect, const Color& paintColor, float borderWidthPx)
+{
+    auto frameNode = GetHost();
+    if (!accessibilityFocusStateModifier_) {
+        accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
+    }
+    accessibilityFocusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
+    accessibilityFocusStateModifier_->SetPaintColor(paintColor);
+    accessibilityFocusStateModifier_->SetFrameNode(frameNode);
+}
+
+void RosenRenderContext::InitFocusStateModidifer(
+    const RoundRect& paintRect, const Color& paintColor, float borderWidthPx)
+{
+    auto frameNode = GetHost();
+    if (!focusStateModifier_) {
+        focusStateModifier_ = std::make_shared<FocusStateModifier>();
+    }
+    focusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
+    focusStateModifier_->SetPaintColor(paintColor);
+    focusStateModifier_->SetFrameNode(frameNode);
+}
+
+void RosenRenderContext::InitFocusAnimationModidifer(
+    const RoundRect& paintRect, const Color& paintColor, float borderWidthPx)
+{
+    auto frameNode = GetHost();
+    if (!focusAnimationModifier_) {
+        focusAnimationModifier_ = AceType::MakeRefPtr<FocusAnimationModifier>();
+    }
+    auto onPointLightPosUpdate = [this](float x, float y, float z) {
+        this->OnLightPositionUpdate(TranslateOptions { x, y, z });
+    };
+    auto onPointLightUpdate = [this](uint32_t lightIlluminated, float lighgIntensity) {
+        this->OnLightIntensityUpdate(lighgIntensity);
+        this->OnLightIlluminatedUpdate(lightIlluminated);
+    };
+    focusAnimationModifier_->SetPointLightPosUpdateTask(onPointLightPosUpdate);
+    focusAnimationModifier_->SetPointLightUpdateTask(onPointLightUpdate);
+    focusAnimationModifier_->SetRoundRect(paintRect, borderWidthPx);
+    focusAnimationModifier_->SetPaintColor(paintColor);
+    focusAnimationModifier_->SetFrameNode(frameNode);
+}
+
 void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp,
-    const Color& paintColor, const Dimension& paintWidth, bool isAccessibilityFocus)
+    const Color& paintColor, const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo)
 {
     auto paintWidthPx = static_cast<float>(paintWidth.ConvertToPx());
     auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
@@ -3226,11 +3231,12 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Dimen
     focusPaintRect.SetCornerRadius(
         RoundRect::CornerPos::BOTTOM_RIGHT_POS, focusPaintCornerBottomRight.x, focusPaintCornerBottomRight.y);
 
-    PaintFocusState(focusPaintRect, paintColor, paintWidth, isAccessibilityFocus);
+    PaintFocusState(focusPaintRect, paintColor, paintWidth, paintFocusExtraInfo.isAccessibilityFocus,
+        paintFocusExtraInfo.isFocusBoxGlow);
 }
 
 void RosenRenderContext::PaintFocusState(
-    const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+    const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth, bool isFocusBoxGlow)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
@@ -3243,7 +3249,7 @@ void RosenRenderContext::PaintFocusState(
     frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radius.z_, radius.z_);
     frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radius.w_, radius.w_);
 
-    PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth);
+    PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, { false, isFocusBoxGlow });
 }
 
 void RosenRenderContext::ClearFocusState()
@@ -3252,10 +3258,19 @@ void RosenRenderContext::ClearFocusState()
     CHECK_NULL_VOID(rsNode_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    CHECK_NULL_VOID(focusStateModifier_);
-
-    UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusStateModifier_->GetOverlayRect());
-    rsNode_->RemoveModifier(focusStateModifier_);
+    if (!isFocusBoxGlow_) {
+        CHECK_NULL_VOID(focusStateModifier_);
+        UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusStateModifier_->GetOverlayRect());
+        rsNode_->RemoveModifier(focusStateModifier_);
+        RequestNextFrame();
+        return;
+    }
+    CHECK_NULL_VOID(focusAnimationModifier_);
+    focusAnimationModifier_->StopFocusAnimation();
+    UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, focusAnimationModifier_->GetOverlayRect());
+    auto modifierAdapter =
+        std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(focusAnimationModifier_));
+    rsNode_->RemoveModifier(modifierAdapter);
     RequestNextFrame();
 }
 
