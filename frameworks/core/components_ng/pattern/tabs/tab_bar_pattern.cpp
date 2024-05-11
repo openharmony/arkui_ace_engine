@@ -1719,9 +1719,6 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
     if (tabBarPattern->IsContainsBuilder()) {
         return;
     }
-    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator));
-    CHECK_NULL_VOID(columnNode);
-    auto selectedColumnId = columnNode->GetId();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
@@ -1732,18 +1729,22 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         CHECK_NULL_VOID(imageNode);
         if (imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
+            if (indicator == index) {
+                UpdateSymbolStats(index, -1);
+            } else {
+                UpdateSymbolStats(-1, index);
+            }
             index++;
             continue;
         }
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
-        auto isSelected = columnNode->GetId() == selectedColumnId;
         auto imagePaintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
         CHECK_NULL_VOID(imagePaintProperty);
         ImageSourceInfo info;
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
         if (index >= 0 && index < static_cast<int32_t>(iconStyles_.size())) {
-            if (isSelected) {
+            if (indicator == index) {
                 imagePaintProperty->UpdateSvgFillColor(iconStyles_[index].selectedColor.has_value() ?
                     iconStyles_[index].selectedColor.value() : tabTheme->GetBottomTabIconOn());
             } else {
@@ -1774,6 +1775,9 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
     }
     std::vector<int32_t> indexes = {index, preIndex};
     for (uint32_t i = 0; i < indexes.size(); i++) {
+        if (indexes[i] < 0 || indexes[i] >= static_cast<int32_t>(symbolArray_.size())) {
+            continue;
+        }
         auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indexes[i]));
         CHECK_NULL_VOID(columnNode);
         auto symbolNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
@@ -1785,26 +1789,31 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
         CHECK_NULL_VOID(symbolLayoutProperty);
         TabContentModelNG::UpdateDefaultSymbol(tabTheme, symbolLayoutProperty);
         if (i == 0) {
-            auto symbolEffectOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-            symbolEffectOptions.SetIsTxtActive(true);
-            symbolEffectOptions.SetIsTxtActiveSource(0);
-            symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
             symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOn()});
             auto modifierOnApply = symbolArray_[indexes[i]].onApply;
-            if (symbolArray_[indexes[i]].selectedFlag && modifierOnApply != nullptr) {
-                modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)),
-                    "selected");
+            UpdateSymbolApply(symbolNode, symbolLayoutProperty, indexes[i], "selected");
+            if (preIndex != -1) {
+                TabContentModelNG::UpdateSymbolEffect(symbolLayoutProperty, true);
             }
         } else {
-            symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOff()});
-            auto modifierOnApply = symbolArray_[indexes[i]].onApply;
-            if (modifierOnApply != nullptr) {
-                modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)),
-                    "normal");
-            }
+            symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOff()});
+            UpdateSymbolApply(symbolNode, symbolLayoutProperty, indexes[i], "normal");
         }
         symbolNode->MarkModifyDone();
         symbolNode->MarkDirtyNode();
+    }
+}
+
+void TabBarPattern::UpdateSymbolApply(const RefPtr<NG::FrameNode>& symbolNode,
+    RefPtr<TextLayoutProperty> symbolProperty, int32_t index, std::string type)
+{
+    auto modifierOnApply = symbolArray_[index].onApply;
+    if (type == "selected" && !symbolArray_[index].selectedFlag) {
+        return;
+    }
+    if (modifierOnApply != nullptr) {
+        modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)), type);
+        TabContentModelNG::UpdateSymbolEffect(symbolProperty, false);
     }
 }
 

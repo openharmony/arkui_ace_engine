@@ -270,6 +270,17 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             auto builderNode = tabContentPattern->FireCustomStyleNode();
             columnNode->ReplaceChild(AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back()), builderNode);
         }
+        auto oldIcon = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+        if (tabBarParam.GetSymbol().has_value() && oldIcon->GetTag() != V2::SYMBOL_ETS_TAG) {
+            auto icon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+            columnNode->ReplaceChild(oldIcon, icon);
+                isFirstCreate = true;
+        } else if (!tabBarParam.GetIcon().empty() && oldIcon->GetTag() != V2::IMAGE_ETS_TAG) {
+            auto icon = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+            columnNode->ReplaceChild(oldIcon, icon);
+        }
         iconNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         textNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
     }
@@ -358,11 +369,13 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             if (modifierOnApply != nullptr && tabBarParam.GetSymbol().value().selectedFlag) {
                 modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)),
                     "selected");
+                UpdateSymbolEffect(symbolProperty, false);
             }
         } else {
-            symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOff()});
+            symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOff()});
             if (modifierOnApply != nullptr) {
                 modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)), "normal");
+                UpdateSymbolEffect(symbolProperty, false);
             }
         }
     } else {
@@ -551,8 +564,13 @@ void TabContentModelNG::UpdateDefaultSymbol(RefPtr<TabTheme>& tabTheme, RefPtr<T
 {
     symbolProperty->UpdateFontSize(tabTheme->GetBottomTabImageSize());
     symbolProperty->UpdateSymbolRenderingStrategy(DEFAULT_RENDERING_STRATEGY);
+    UpdateSymbolEffect(symbolProperty, false);
+}
+void TabContentModelNG::UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive)
+{
     auto symbolEffectOptions = SymbolEffectOptions(SymbolEffectType::BOUNCE);
-    symbolEffectOptions.SetIsTxtActive(false);
+    symbolEffectOptions.SetIsTxtActive(isActive);
+    symbolEffectOptions.SetIsTxtActiveSource(0);
     symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
 }
 
