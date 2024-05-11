@@ -3196,6 +3196,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
     };
+    pipeline->RequestFrame();
     pipeline->AddAnimationClosure(bindSheetTask);
 }
 
