@@ -69,6 +69,15 @@ constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
+constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
+constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
+constexpr uint32_t SAFE_AREA_EDGE_SYSTEM = 0;
+constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
+constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
+constexpr int32_t PARAMETER_LENGTH_ONE  = 1;
+constexpr int32_t PARAMETER_LENGTH_TWO  = 2;
+constexpr int32_t FIRST_INDEX  = 0;
+constexpr int32_t SECOND_INDEX  = 1;
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
@@ -325,6 +334,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSNavigation>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavigation>::StaticMethod("customNavContentTransition", &JSNavigation::SetCustomNavContentTransition);
+    JSClass<JSNavigation>::StaticMethod("ignoreLayoutSafeArea", &JSNavigation::SetIgnoreLayoutSafeArea);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -823,5 +833,43 @@ void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
     };
     NavigationModel::GetInstance()->SetIsCustomAnimation(true);
     NavigationModel::GetInstance()->SetCustomTransition(onNavigationAnimation);
+}
+
+void JSNavigation::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
+{
+    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL};
+    if (info.Length() >= PARAMETER_LENGTH_ONE && info[FIRST_INDEX]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[0]);
+        uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            auto value = paramArray->GetValueAt(i);
+            if (!value->IsNumber() ||
+                value->ToNumber<uint32_t>() >= SAFE_AREA_TYPE_LIMIT ||
+                value->ToNumber<uint32_t>() == SAFE_AREA_EDGE_SYSTEM) {
+                safeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
+                break;
+            }
+        }
+        opts.type = safeAreaType;
+    }
+
+    if (info.Length() >= PARAMETER_LENGTH_TWO && info[SECOND_INDEX]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[1]);
+        uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            auto value = paramArray->GetValueAt(i);
+            if (!value->IsNumber() ||
+                value->ToNumber<uint32_t>() >= SAFE_AREA_EDGE_LIMIT) {
+                safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
+                break;
+            }
+            if (value->ToNumber<uint32_t>() == SAFE_AREA_EDGE_TOP ||
+                value->ToNumber<uint32_t>() == SAFE_AREA_EDGE_BOTTOM) {
+                    safeAreaEdge |= (1 << value->ToNumber<uint32_t>());
+                }
+        }
+        opts.edges = safeAreaEdge;
+    }
+    NavigationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
 }
 } // namespace OHOS::Ace::Framework

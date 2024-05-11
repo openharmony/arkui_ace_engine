@@ -290,7 +290,7 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
         titleBarNode->SetJSViewActive(true);
 
         auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts && opts->Expansive()) {
+        if (opts) {
             titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }
     }
@@ -319,7 +319,7 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
         toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 
         auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts && opts->Expansive()) {
+        if (opts) {
             toolBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }
     }
@@ -483,7 +483,7 @@ void NavBarPattern::OnModifyDone()
 
     auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
     auto navBarContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarContentNode());
-    if (opts && opts->Expansive() && navBarContentNode) {
+    if (opts && navBarContentNode) {
         navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
         navBarContentNode->MarkModifyDone();
     }

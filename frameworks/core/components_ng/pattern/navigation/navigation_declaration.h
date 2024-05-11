@@ -215,5 +215,10 @@ struct NavContentInfo {
     NavDestinationMode mode;
 };
 
+struct NavSafeArea {
+    float top = 0.0f;
+    float bottom = 0.0f;
+};
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

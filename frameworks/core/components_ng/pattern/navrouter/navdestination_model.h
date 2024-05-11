@@ -61,6 +61,8 @@ public:
         return false;
     }
 
+    virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
+
 private:
     static std::unique_ptr<NavDestinationModel> instance_;
     static std::mutex mutex_;

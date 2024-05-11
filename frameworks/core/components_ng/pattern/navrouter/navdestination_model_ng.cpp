@@ -576,4 +576,14 @@ void NavDestinationModelNG::SetOnWillDisAppear(std::function<void()>&& willDisAp
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
 }
+
+void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+
+    auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
+    navdestinationLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+}
 } // namespace OHOS::Ace::NG

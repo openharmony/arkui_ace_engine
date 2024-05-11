@@ -802,15 +802,15 @@ HWTEST_F(NavrouterPatternTestNg, MeasureContentChild001, TestSize.Level1)
     EXPECT_FALSE(NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty));
     algorithm->Measure(layoutWrapper);
 
-    // Make IsAutoHeight true
+    // Make IsAutoHeight false
     navDestinationLayoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
     auto& calcLayoutConstraint = navDestinationLayoutProperty->GetCalcLayoutConstraint();
     ASSERT_NE(calcLayoutConstraint, nullptr);
     auto calcSize = CalcSize();
-    calcSize.height_ = CalcLength("auto");
+    calcSize.height_ = CalcLength(200);
     calcLayoutConstraint->selfIdealSize = calcSize;
-    // Make sure IsAutoHeight is true
-    EXPECT_TRUE(NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty));
+    // Make sure IsAutoHeight is false
+    EXPECT_FALSE(NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty));
     algorithm->Measure(layoutWrapper);
 }
 
