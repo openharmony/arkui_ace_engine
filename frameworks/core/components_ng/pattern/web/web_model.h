@@ -166,6 +166,7 @@ public:
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
 
     virtual void SetCopyOptionMode(CopyOptions mode) {};
+    virtual void SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetOpenAppLinkFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetIntelligentTrackingPreventionResultId(

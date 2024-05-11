@@ -4927,6 +4927,21 @@ bool WebDelegate::OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info)
         CHECK_NULL_VOID(webCom);
         result = webCom->OnFileSelectorShow(info.get());
     }, "ArkUIWebFileSelectorShow");
+
+    if (!result) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "default file selector show handled");
+        auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+        jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto fileSelectCallback = webPattern->GetDefaultFileSelectorShowCallback();
+            CHECK_NULL_VOID(fileSelectCallback);
+            fileSelectCallback(info);
+            result = true;
+            }, "ArkUIWebDefaultFileSelectorShow");
+    }
     return result;
 }
 
