@@ -112,7 +112,7 @@ export class ToolBar extends ViewPU {
       bundleName: '',
       moduleName: '',
     }, this, 'fontActivatedPrimaryColor');
-    this.setInitiallyProvidedValue(t);
+    this.setInitiallyProvidedValue(e3);
     this.finalizeConstruction();
   }
 
