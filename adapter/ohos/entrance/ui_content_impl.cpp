@@ -2016,7 +2016,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             pipelineContext->CheckAndUpdateKeyboardInset();
         }
     };
-    if (container->IsUseStageModel() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
+    if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
         task();
     } else {
         taskExecutor->PostTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
