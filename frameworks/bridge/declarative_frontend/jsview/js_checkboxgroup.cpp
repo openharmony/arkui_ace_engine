@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/checkboxgroup_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_checkboxgroup_theme.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -101,6 +102,8 @@ void JSCheckboxGroup::Create(const JSCallbackInfo& info)
     }
 
     CheckBoxGroupModel::GetInstance()->Create(checkboxGroupName);
+
+    JSCheckBoxGroupTheme::ApplyTheme();
 }
 
 void ParseSelectAllObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)

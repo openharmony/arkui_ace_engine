@@ -48,6 +48,24 @@ class BlankHeightModifier extends ModifierWithKey<Length> {
   }
 }
 
+
+class BlankMinModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('blankMin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().blank.resetBlankMin(node);
+    } else {
+      getUINativeModule().blank.setBlankMin(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -58,6 +76,13 @@ class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttrib
   }
   height(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, BlankHeightModifier.identity, BlankHeightModifier, value);
+    return this;
+  }
+
+  initialize(value : Object[]): BlankAttribute{
+    if (value[0] !== undefined){
+      modifierWithKey(this._modifiersWithKeys, BlankMinModifier.identity, BlankMinModifier, value[0]);
+    }
     return this;
   }
 }

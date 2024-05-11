@@ -134,7 +134,7 @@ void JSView::RenderJSExecution()
 
 void JSView::SyncInstanceId()
 {
-    restoreInstanceIdStack_.push(Container::CurrentId());
+    restoreInstanceIdStack_.emplace_back(Container::CurrentId());
     ContainerScope::UpdateCurrent(instanceId_);
 }
 
@@ -144,8 +144,8 @@ void JSView::RestoreInstanceId()
         ContainerScope::UpdateCurrent(-1);
         return;
     }
-    ContainerScope::UpdateCurrent(restoreInstanceIdStack_.top());
-    restoreInstanceIdStack_.pop();
+    ContainerScope::UpdateCurrent(restoreInstanceIdStack_.back());
+    restoreInstanceIdStack_.pop_back();
 }
 
 void JSView::GetInstanceId(const JSCallbackInfo& info)
@@ -729,7 +729,9 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
     if (!jsViewExtraInfo->IsUndefined()) {
         JSRef<JSVal> jsPage = jsViewExtraInfo->GetProperty("page");
         JSRef<JSVal> jsLine = jsViewExtraInfo->GetProperty("line");
-        info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>()};
+        JSRef<JSVal> jsColumn = jsViewExtraInfo->GetProperty("col");
+        info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>(),
+            .col = jsColumn->ToNumber<int32_t>()};
     }
     
     if (isTitleNode) {
@@ -979,17 +981,26 @@ void JSViewPartialUpdate::JSGetUniqueId(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(nodeId)));
 }
 
+void JSViewPartialUpdate::JSGetStateProfilerStatus(const JSCallbackInfo& info)
+{
+    ContainerScope scope(GetInstanceId());
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(pipeline->GetStateProfilerStatus())));
+}
+
 void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
 {
 #if defined(PREVIEW)
     return;
 #else
-    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", stateInfo.c_str());
-    auto pipeline = NG::PipelineContext::GetContextByContainerId(GetInstanceId());
+    ContainerScope scope(GetInstanceId());
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (!pipeline->getProfilerStatus()) {
+    if (!pipeline->GetStateProfilerStatus()) {
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", stateInfo.c_str());
     auto info = JsonUtil::ParseJsonString(stateInfo);
     info->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
     info->Put("ProcessID", getpid());
@@ -1027,6 +1038,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "queryRouterPageInfo", &JSViewPartialUpdate::JSGetRouterPageInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "getStateProfilerStatus", &JSViewPartialUpdate::JSGetStateProfilerStatus);
     JSClass<JSViewPartialUpdate>::Method("sendStateInfo", &JSViewPartialUpdate::JSSendStateInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);

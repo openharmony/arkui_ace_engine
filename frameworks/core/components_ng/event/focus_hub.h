@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_event.h"
@@ -970,6 +971,11 @@ public:
         return focusScopeId_;
     }
 
+    FocusBox& GetFocusBox()
+    {
+        return box_;
+    }
+
     FocusPriority GetFocusPriority() const
     {
         return focusPriority_;
@@ -1033,6 +1039,8 @@ private:
     bool IsNestingFocusGroup();
     void SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId);
 
+    void RaiseZIndex(); // Recover z-index in ClearFocusState
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
@@ -1060,11 +1068,13 @@ private:
     bool hasForwardMovement_ { false };
     bool hasBackwardMovement_ { false };
     bool isFocusActiveWhenFocused_ { false };
+    bool isRaisedZIndex_ { false };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
     std::unique_ptr<FocusPaintParam> focusPaintParamsPtr_;
     std::function<void(RoundRect&)> getInnerFocusRectFunc_;
+    FocusBox box_;
 
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;

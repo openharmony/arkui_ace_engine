@@ -89,6 +89,11 @@ public:
         return false;
     }
 
+    virtual bool IsNeedPercent() const
+    {
+        return false;
+    }
+
     virtual bool IsSupportDrawModifier() const
     {
         return true;

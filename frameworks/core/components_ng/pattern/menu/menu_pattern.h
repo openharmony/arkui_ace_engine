@@ -30,29 +30,12 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 constexpr uint32_t MAX_SEARCH_DEPTH = 5;
 namespace OHOS::Ace::NG {
-enum class MenuType {
-    // ----- Menu Containers ------
-    MENU,         // corresponds to .bindMenu attribute
-    CONTEXT_MENU, // corresponds to .bindContextMenu attribute, lives in a SubWindow
-    SUB_MENU,     // secondary menu container in a multi-level menu
-
-    // ----- innerMenu Node, corersponds to <Menu> tag in the frontend ------
-    MULTI_MENU,   // called multi because it's a multi-leveled menu, its MenuItems can trigger subMenus
-    DESKTOP_MENU, // menu specialized for desktop UI, enabled when multiple sibiling <Menu> nodes are present
-
-    // ----- special menu used in other components ------
-    NAVIGATION_MENU,               // menu used in a Navigation component
-    SELECT_OVERLAY_EXTENSION_MENU, // menu used in SelectOverlay Extension of text component,skip menu layout algorithm
-    SELECT_OVERLAY_CUSTOM_MENU,    // menu used in SelectOverlay for custom menu
-                                   // click menu item whill not trigger close menu
-    SELECT_OVERLAY_SUB_MENU,       // menu type used for select overlay sub menu
-    SELECT_OVERLAY_RIGHT_CLICK_MENU, // menu type used for select overlay menu triggered by right-click
-};
 
 struct SelectProperties {
     std::string value;
@@ -268,7 +251,11 @@ public:
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
 
-    void HideMenu(bool isMenuOnTouch = false) const;
+    void HideMenu(bool isMenuOnTouch = false, OffsetF position = OffsetF()) const;
+
+    bool HideStackExpandMenu(const OffsetF& position) const;
+
+    void HideStackMenu() const;
 
     void MountOption(const RefPtr<FrameNode>& option);
 
@@ -284,17 +271,17 @@ public:
     {
         return showedSubMenu_;
     }
-    
+
     void SetIsWidthModifiedBySelect(bool isModified)
     {
         isWidthModifiedBySelect_ = isModified;
     }
-    
+
     bool IsWidthModifiedBySelect() const
     {
         return isWidthModifiedBySelect_;
     }
-    
+
     float GetSelectMenuWidth();
     void HideSubMenu();
     void OnModifyDone() override;
@@ -328,6 +315,21 @@ public:
         return endOffset_;
     }
 
+    void SetSelectOverlayExtensionMenuShow()
+    {
+        isExtensionMenuShow_ = true;
+    }
+
+    void SetSubMenuShow()
+    {
+        isSubMenuShow_ = true;
+    }
+
+    void SetMenuShow()
+    {
+        isMenuShow_ = true;
+    }
+
     void SetPreviewOriginOffset(const OffsetF& offset)
     {
         previewOriginOffset_ = offset;
@@ -357,12 +359,12 @@ public:
     {
         return targetSize_;
     }
-	
+
     void SetIsHeightModifiedBySelect(bool isModified)
     {
         isHeightModifiedBySelect_ = isModified;
     }
-    
+
     bool IsHeightModifiedBySelect() const
     {
         return isHeightModifiedBySelect_;
@@ -373,11 +375,15 @@ public:
         return expandDisplay_;
     }
 
+    void ShowMenuDisappearAnimation();
+    void ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& menuNode,
+        const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
+
     void SetBuilderFunc(SelectMakeCallback&& makeFunc)
     {
         makeFunc_ = std::move(makeFunc);
     }
-    
+
     void ResetBuilderFunc()
     {
         makeFunc_ = std::nullopt;
@@ -442,6 +448,10 @@ private:
 
     Offset GetTransformCenter() const;
     void ShowPreviewMenuAnimation();
+    void ShowMenuAppearAnimation();
+    void ShowStackExpandMenu();
+    void ShowArrowRotateAnimation() const;
+    RefPtr<FrameNode> GetImageNode(const RefPtr<FrameNode>& host) const;
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
@@ -466,9 +476,14 @@ private:
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions_;
     bool isFirstShow_ = false;
+    bool isExtensionMenuShow_ = false;
+    bool isSubMenuShow_ = false;
+    bool isMenuShow_ = false;
+
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
+
     WeakPtr<FrameNode> builderNode_;
     bool isWidthModifiedBySelect_ = false;
     bool isHeightModifiedBySelect_ = false;

@@ -124,7 +124,6 @@ private:
     void DrawHighLight(RSCanvas& canvas, RenderRingInfo& data, float drawStartDegree);
     void CalculateStartAndSweepDegree(RefPtr<GaugePaintProperty>& paintProperty, RenderRingInfo& data);
     float GetOffsetDegree(RenderRingInfo& data, float oppositeSide);
-    float GetValueRatio(RefPtr<GaugePaintProperty>& paintProperty);
     void CreateDefaultColor(std::vector<RSColorQuad>& colors, std::vector<float>& pos);
     void CreateDefaultTrianglePath(float pathStartVertexX, float pathStartVertexY, float radius, RSPath& path);
     WeakPtr<Pattern> pattern_;

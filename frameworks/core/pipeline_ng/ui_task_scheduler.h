@@ -88,7 +88,6 @@ public:
     void FlushAfterLayoutTask();
     void FlushAfterRenderTask();
     void FlushPersistAfterLayoutTask();
-    void RestoreGeoState();
     void ExpandSafeArea();
 
     void FlushDelayJsActive();

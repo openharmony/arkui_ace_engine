@@ -1583,11 +1583,10 @@ void JSTextField::SetFontFeature(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
-    if (!jsValue->IsString()) {
-        return;
+    std::string fontFeatureSettings = "";
+    if (jsValue->IsString()) {
+        fontFeatureSettings = jsValue->ToString();
     }
-
-    std::string fontFeatureSettings = jsValue->ToString();
     TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 

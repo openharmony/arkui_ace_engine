@@ -461,6 +461,18 @@ var ScrollState;
   ScrollState[ScrollState["Fling"] = 2] = "Fling";
 })(ScrollState || (ScrollState = {}));
 
+var ScrollSource;
+(function (ScrollSource) {
+  ScrollSource[ScrollSource["DRAG"] = 0] = "DRAG";
+  ScrollSource[ScrollSource["FLING"] = 1] = "FLING";
+  ScrollSource[ScrollSource["EDGE_EFFECT"] = 2] = "EDGE_EFFECT";
+  ScrollSource[ScrollSource["OHTER_USER_INPUT"] = 3] = "OHTER_USER_INPUT";
+  ScrollSource[ScrollSource["SCROLL_BAR"] = 4] = "SCROLL_BAR";
+  ScrollSource[ScrollSource["SCROLL_BAR_FLING"] = 5] = "SCROLL_BAR_FLING";
+  ScrollSource[ScrollSource["SCROLLER"] = 6] = "SCROLLER";
+  ScrollSource[ScrollSource["SCROLLER_ANIMATION"] = 7] = "SCROLLER_ANIMATION";
+})(ScrollSource || (ScrollSource = {}));
+
 var TouchType;
 (function (TouchType) {
   TouchType[TouchType["Down"] = 0] = "Down";
@@ -832,6 +844,8 @@ var IndexerAlign;
 (function (IndexerAlign) {
   IndexerAlign[IndexerAlign["Left"] = 0] = "Left";
   IndexerAlign[IndexerAlign["Right"] = 1] = "Right";
+  IndexerAlign[IndexerAlign["START"] = 2] = "START";
+  IndexerAlign[IndexerAlign["END"] = 3] = "END";
 })(IndexerAlign || (IndexerAlign = {}));
 
 var DialogAlignment;
@@ -1069,6 +1083,9 @@ var SourceTool;
   SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
   SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
+  SourceTool[SourceTool["MOUSE"] = 7] = "MOUSE";
+  SourceTool[SourceTool["TOUCHPAD"] = 9] = "TOUCHPAD";
+  SourceTool[SourceTool["JOYSTICK"] = 10] = "JOYSTICK";
 })(SourceTool || (SourceTool = {}));
 
 var KeySource;
@@ -1155,6 +1172,12 @@ var RenderExitReason;
   RenderExitReason[RenderExitReason["ProcessOom"] = 3] = "ProcessOom";
   RenderExitReason[RenderExitReason["ProcessExitUnknown"] = 4] = "ProcessExitUnknown";
 })(RenderExitReason || (RenderExitReason = {}));
+
+var RenderProcessNotRespondingReason;
+(function (RenderProcessNotRespondingReason) {
+  RenderProcessNotRespondingReason[RenderProcessNotRespondingReason["INPUT_TIMEOUT"] = 0] = "INPUT_TIMEOUT";
+  RenderProcessNotRespondingReason[RenderProcessNotRespondingReason["NAVIGATION_COMMIT_TIMEOUT"] = 1] = "NAVIGATION_COMMIT_TIMEOUT";
+})(RenderProcessNotRespondingReason || (RenderProcessNotRespondingReason = {}));
 
 var SslError;
 (function (SslError) {

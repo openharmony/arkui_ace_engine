@@ -50,6 +50,11 @@ public:
     {
         return "";
     }
+
+    virtual bool IsEqual(const RefPtr<Curve>& curve) const
+    {
+        return false;
+    }
 };
 
 // The reverse curve is used to convert the direction of motion.
@@ -72,7 +77,6 @@ public:
         }
         return curve_->MoveInternal(1.0f - time);
     }
-
 private:
     const RefPtr<Curve> curve_;
 };
@@ -95,7 +99,6 @@ public:
         }
         return 1.0f - curve_->MoveInternal(time);
     }
-
 private:
     const RefPtr<Curve> curve_;
 };
@@ -107,6 +110,11 @@ public:
     float MoveInternal(float time) override
     {
         return 1.0f - std::pow(1.0f - time, SQUARE);
+    }
+
+    bool IsEqual(const RefPtr<Curve>& curve) const override
+    {
+        return AceType::InstanceOf<DecelerationCurve>(curve);
     }
 };
 
@@ -129,6 +137,11 @@ public:
         return curveString;
     }
 
+    bool IsEqual(const RefPtr<Curve>& curve) const override
+    {
+        return AceType::InstanceOf<LinearCurve>(curve);
+    }
+
 private:
     float fractionMin = 0.0f;
     float fractionMax = 1.0f;
@@ -143,6 +156,12 @@ public:
         static constexpr float PI = 3.14f;
         return std::sin(PI * time / 2.0f); // half period
     }
+
+    bool IsEqual(const RefPtr<Curve>& curve) const override
+    {
+        return AceType::InstanceOf<SineCurve>(curve);
+    }
+
 };
 
 class ElasticsCurve final : public Curve {
@@ -157,6 +176,19 @@ public:
         return para * para * ((tension_ + 1.0f) * para + tension_) + 1.0f;
     }
 
+    float GetTension() const
+    {
+        return tension_;
+    }
+
+    bool IsEqual(const RefPtr<Curve>& curve) const override
+    {
+        auto other = AceType::DynamicCast<ElasticsCurve>(curve);
+        if (!other) {
+            return false;
+        }
+        return NearEqual(other->GetTension(), tension_);
+    }
 private:
     float tension_ = 2.0f; // Default Elastics tension.
 };
@@ -201,6 +233,25 @@ public:
         return curveString;
     }
 
+    bool IsEqual(const RefPtr<Curve>& curve) const override
+    {
+        auto other = AceType::DynamicCast<StepsCurve>(curve);
+        if (other) {
+            return false;
+        }
+        return other->GetSteps() == steps_ && other->GetStepsCurvePosition() == position_;
+    }
+
+    int32_t GetSteps() const
+    {
+        return steps_;
+    }
+
+    StepsCurvePosition GetStepsCurvePosition() const
+    {
+        return position_;
+    }
+
 private:
     int32_t steps_;
     const StepsCurvePosition position_;
@@ -224,7 +275,6 @@ public:
     {
         return "customCallback";
     }
-
 private:
     std::function<float(float)> interpolateFunc_;
 
@@ -252,6 +302,15 @@ public:
         curveString.append(std::string("(") + std::to_string(response_) + comma + std::to_string(dampingRatio_) +
                            comma + std::to_string(blendDuration_) + std::string(")"));
         return curveString;
+    }
+    bool IsEqual(const RefPtr<Curve>& curve) const override
+    {
+        auto other = AceType::DynamicCast<ResponsiveSpringMotion>(curve);
+        if (!other) {
+            return false;
+        }
+        return NearEqual(other->GetResponse(), response_) && NearEqual(other->GetDampingRatio(), dampingRatio_) &&
+               NearEqual(other->GetBlendDuration(), blendDuration_);
     }
     float GetResponse() const
     {
@@ -299,6 +358,16 @@ public:
         curveString.append(std::string("(") + std::to_string(velocity_) + comma + std::to_string(mass_) + comma +
                            std::to_string(stiffness_) + comma + std::to_string(damping_) + std::string(")"));
         return curveString;
+    }
+
+    bool IsEqual(const RefPtr<Curve>& curve) const override
+    {
+        auto other = AceType::DynamicCast<InterpolatingSpring>(curve);
+        if (!other) {
+            return false;
+        }
+        return NearEqual(other->GetVelocity(), velocity_) && NearEqual(other->GetMass(), mass_) &&
+               NearEqual(other->GetStiffness(), stiffness_) && NearEqual(other->GetDamping(), damping_);
     }
 
     float GetVelocity() const

@@ -538,10 +538,10 @@ void UINode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
     }
 }
 
-void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
+void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
     for (const auto& child : GetChildren()) {
-        child->MarkDirtyNode(extraFlag, childExpansiveAndMark);
+        child->MarkDirtyNode(extraFlag);
     }
 }
 
@@ -1159,6 +1159,8 @@ std::string UINode::GetCurrentCustomNodeInfo()
                     .append(child.page)
                     .append(":")
                     .append(std::to_string(child.line))
+                    .append(":")
+                    .append(std::to_string(child.col))
                     .append(")\n");
             }
             break;

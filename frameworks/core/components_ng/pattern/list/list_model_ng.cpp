@@ -458,6 +458,12 @@ DisplayMode ListModelNG::GetDisplayMode() const
     return list->GetDefaultScrollBarDisplayMode();
 }
 
+
+void ListModelNG::SetInitialIndex(FrameNode* frameNode, int32_t initialIndex)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex, frameNode);
+}
+
 void ListModelNG::SetEditMode(FrameNode* frameNode, bool editMode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, EditMode, editMode, frameNode);

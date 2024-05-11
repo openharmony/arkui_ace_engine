@@ -2139,12 +2139,14 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     std::vector<OptionParam> param;
     ViewAbstract::BindMenuWithItems(std::move(param), targetNode, OFFSETF, menuParam);
     menuParam.type = MenuType::MULTI_MENU;
-    ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, OFFSETF, menuParam);
+    ViewAbstract::BindMenuWithCustomNode(std::move(buildFunc), targetNode, OFFSETF, menuParam,
+        std::move(previewBuildFunc));
     EXPECT_FALSE(mouseInfo.IsStopPropagation());
     param.push_back(OptionParam());
     ViewAbstract::BindMenuWithItems(std::move(param), targetNode, OFFSETF, menuParam);
     menuParam.type = MenuType::CONTEXT_MENU;
-    ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, OFFSETF, menuParam);
+    ViewAbstract::BindMenuWithCustomNode(std::move(buildFunc), targetNode, OFFSETF, menuParam,
+        std::move(previewBuildFunc));
     EXPECT_FALSE(mouseInfo.IsStopPropagation());
 }
 

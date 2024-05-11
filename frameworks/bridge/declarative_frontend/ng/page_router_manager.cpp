@@ -49,6 +49,10 @@ constexpr int32_t BUNDLE_START_POS = 8;
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
+constexpr char ETS_PATH[] = "/src/main/ets/";
+constexpr char DEBUG_PATH[] = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/";
+constexpr char TS_SUFFIX[] = ".ts";
+constexpr char ETS_SUFFIX[] = ".ets";
 
 void ExitToDesktop()
 {
@@ -541,7 +545,7 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
         url = pagePath;
     }
     auto pos = url.rfind(".js");
-    if (pos == url.length() - 3) {
+    if (pos == url.length() - JS_FILE_EXTENSION_LENGTH) {
         url = url.substr(0, pos);
     }
     pos = url.rfind("/");
@@ -617,7 +621,7 @@ void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::S
             stateInfo.params = pageInfo->GetPageParams();
             stateInfo.index = counter;
             auto pos = url.rfind(".js");
-            if (pos == url.length() - 3) {
+            if (pos == url.length() - JS_FILE_EXTENSION_LENGTH) {
                 tempUrl = url.substr(0, pos);
             }
             tempUrl = url;
@@ -745,10 +749,11 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
         auto moduleName = container->GetModuleName();
         std::string judgePath = "";
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            judgePath = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/" + moduleName +
-                        "/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ts";
+            judgePath = DEBUG_PATH + moduleName + ETS_PATH +
+                        pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + TS_SUFFIX;
         } else {
-            judgePath = moduleName + "/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ets";
+            judgePath = moduleName + ETS_PATH +
+                        pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + ETS_SUFFIX;
         }
         if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
             auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
@@ -1269,8 +1274,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     auto last = pageRouterStack_.erase(iter);
     // push pageNode to top.
     pageRouterStack_.emplace_back(pageNode);
-    std::string tempParam;
-    tempParam = pageInfo->ReplacePageParams(target.params);
+    std::string tempParam = pageInfo->ReplacePageParams(target.params);
     if (!stageManager->MovePageToFront(pageNode, needHideLast, needTransition)) {
         // restore position and param.
         pageRouterStack_.pop_back();

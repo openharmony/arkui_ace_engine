@@ -267,6 +267,10 @@ class AttributeUpdater {
   initializeModifier(instance: ArkComponent): void {}
 
   updateConstructorParams(...args: Object[]): void {
-    this._attribute.initialize(args);
+    if (!this.attribute) {
+      ArkLogConsole.info("AttributeUpdater has not been initialized before updateConstructorParams.");
+      return;
+    }
+    this.attribute.initialize(args);
   }
 }

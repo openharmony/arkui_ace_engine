@@ -784,7 +784,8 @@ void AceContainer::InitializeCallback()
             touchTask();
             return;
         }
-        context->GetTaskExecutor()->PostTask(touchTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerTouchEvent");
+        context->GetTaskExecutor()->PostTask(
+            touchTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerTouchEvent", PriorityType::VIP);
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
@@ -806,7 +807,8 @@ void AceContainer::InitializeCallback()
             mouseTask();
             return;
         }
-        context->GetTaskExecutor()->PostTask(mouseTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerMouseEvent");
+        context->GetTaskExecutor()->PostTask(
+            mouseTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerMouseEvent", PriorityType::VIP);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
@@ -828,7 +830,8 @@ void AceContainer::InitializeCallback()
             axisTask();
             return;
         }
-        context->GetTaskExecutor()->PostTask(axisTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent");
+        context->GetTaskExecutor()->PostTask(
+            axisTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent", PriorityType::VIP);
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
@@ -1658,7 +1661,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
                 CHECK_NULL_VOID(container);
                 container->OnFinish();
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIFinishEventHandler");
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleFinishEvent");
     };
     pipelineContext_->SetFinishEventHandler(finishEventHandler);
 
@@ -1674,7 +1677,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
                 CHECK_NULL_VOID(container);
                 container->OnStartAbility(address);
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIStartAbilityHandler");
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleStartAbility");
     };
     pipelineContext_->SetStartAbilityHandler(startAbilityHandler);
 

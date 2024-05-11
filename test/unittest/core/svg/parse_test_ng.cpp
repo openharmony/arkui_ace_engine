@@ -305,7 +305,7 @@ const std::string FE_GAUSSIAN_BLUR =
 "</svg>";
 
 constexpr uint32_t RED_COLOR = 0xffff0000;
-constexpr uint32_t GREEN_COLOR = 0xff00ff00;
+constexpr uint32_t GREEN_COLOR = 0xff008000;
 
 const std::string FE_FLOOD_AND_COMPOSITE =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" >"

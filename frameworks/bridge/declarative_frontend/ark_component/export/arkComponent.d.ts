@@ -20,6 +20,13 @@ declare enum ModifierType {
     FRAME_NODE = 2,
     EXPOSE_MODIFIER = 3,
 }
+declare class ArkLogConsole {
+  public static log(...args: Object[]): void;
+  public static debug(...args: Object[]): void;
+  public static info(...args: Object[]): void;
+  public static warn(...args: Object[]): void;
+  public static error(...args: Object[]): void;
+}
 declare class JsPointerClass {
     invalid(): boolean;
 }
@@ -296,6 +303,7 @@ declare class ArkGridComponent extends ArkComponent implements GridAttribute {
         offsetRemain: number;
     }): this;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
+    flingSpeedLimit(value: number): this;
 }
 declare class ArkGridColComponent extends ArkComponent implements GridColAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1812,6 +1820,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     divider(value: DividerStyle | null): TabsAttribute;
     barOverlap(value: boolean): TabsAttribute;
     barBackgroundColor(value: ResourceColor): TabsAttribute;
+    barBackgroundBlurStyle(value: BlurStyle): TabsAttribute;
     barGridAlign(value: BarGridColumnOptions): TabsAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
 }

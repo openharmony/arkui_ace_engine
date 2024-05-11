@@ -1082,7 +1082,7 @@ bool WebDelegate::LoadDataWithRichText()
                 return;
             }
             if (delegate->nweb_) {
-                delegate->nweb_->LoadWithDataAndBaseUrl("", data, "", "", "");
+                delegate->nweb_->LoadWithDataAndBaseUrl("resource://rawfile", data, "", "", "");
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadDataWithRichText");
@@ -1105,7 +1105,7 @@ bool WebDelegate::LoadDataWithRichText()
                     return;
                 }
                 if (delegate->nweb_) {
-                    delegate->nweb_->LoadWithDataAndBaseUrl("", data, "", "", "");
+                    delegate->nweb_->LoadWithDataAndBaseUrl("resource://rawfile", data, "", "", "");
                 }
             },
             TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadDataWithRichText");
@@ -1125,7 +1125,7 @@ bool WebDelegate::LoadDataWithRichText()
                 return;
             }
             if (delegate->nweb_) {
-                delegate->nweb_->LoadWithDataAndBaseUrl("", data, "", "", "");
+                delegate->nweb_->LoadWithDataAndBaseUrl("resource://rawfile", data, "", "", "");
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadDataWithRichText");
@@ -2991,7 +2991,7 @@ void WebDelegate::UpdateLoadsImagesAutomatically(const bool& isImageAccessEnable
                 setting->PutImageLoadingAllowed(isImageAccessEnabled);
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateLoadsImagesAutomatically");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateLoadImageAccessEnabled");
 }
 
 void WebDelegate::UpdateMixedContentMode(const MixedModeContent& mixedMode)
@@ -3894,6 +3894,28 @@ void WebDelegate::OnRenderToBackground()
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebOnRenderToBackground");
 }
+
+void WebDelegate::OnOnlineRenderToForeground()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnOnlineRenderToForeground");
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                TAG_LOGD(AceLogTag::ACE_WEB, "delegate->nweb_->OnOnlineRenderToForeground");
+                delegate->nweb_->OnOnlineRenderToForeground();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebOnOnlineRenderToForeground");
+}
+
 void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
 {
     auto context = context_.Upgrade();
@@ -4905,6 +4927,21 @@ bool WebDelegate::OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info)
         CHECK_NULL_VOID(webCom);
         result = webCom->OnFileSelectorShow(info.get());
     }, "ArkUIWebFileSelectorShow");
+
+    if (!result) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "default file selector show handled");
+        auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+        jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto fileSelectCallback = webPattern->GetDefaultFileSelectorShowCallback();
+            CHECK_NULL_VOID(fileSelectCallback);
+            fileSelectCallback(info);
+            result = true;
+            }, "ArkUIWebDefaultFileSelectorShow");
+    }
     return result;
 }
 
@@ -4920,6 +4957,10 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
 #ifdef NG_BUILD
         auto webPattern = delegate->webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
+        if (delegate->richtextData_) {
+            webPattern->OnContextMenuShow(info);
+            result = true;
+        }
         auto webEventHub = webPattern->GetWebEventHub();
         CHECK_NULL_VOID(webEventHub);
         auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
@@ -4930,6 +4971,10 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         if (Container::IsCurrentUseNewPipeline()) {
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
+            if (delegate->richtextData_) {
+                webPattern->OnContextMenuShow(info);
+                result = true;
+            }
             auto webEventHub = webPattern->GetWebEventHub();
             CHECK_NULL_VOID(webEventHub);
             auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
@@ -4956,6 +5001,9 @@ void WebDelegate::OnContextMenuHide(const std::string& info)
         if (Container::IsCurrentUseNewPipeline()) {
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
+            if (delegate->richtextData_) {
+                webPattern->OnContextMenuHide();
+            }
             auto webEventHub = webPattern->GetWebEventHub();
             CHECK_NULL_VOID(webEventHub);
             auto propOnContextMenuHideEvent = webEventHub->GetOnContextMenuHideEvent();
@@ -5059,7 +5107,7 @@ void WebDelegate::OnScroll(double xOffset, double yOffset)
                 onScrollV2(std::make_shared<WebOnScrollEvent>(xOffset, yOffset));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIWebScrollV2");
+        TaskExecutor::TaskType::JS, "ArkUIWebScroll");
 }
 
 void WebDelegate::OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting)
@@ -5189,7 +5237,7 @@ void WebDelegate::OnWindowExit()
                 onWindowExitV2(std::make_shared<WebWindowExitEvent>());
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIWebWindowExitV2");
+        TaskExecutor::TaskType::JS, "ArkUIWebWindowExit");
 }
 
 void WebDelegate::OnPageVisible(const std::string& url)
@@ -5989,7 +6037,7 @@ void WebDelegate::OnOverScroll(float xOffset, float yOffset)
                 onOverScrollV2(std::make_shared<WebOnOverScrollEvent>(xOffset, yOffset));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIWebOverScrollV2");
+        TaskExecutor::TaskType::JS, "ArkUIWebOverScroll");
 }
 
 void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
@@ -6066,7 +6114,7 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
                 embedInfo->GetHeight(), embedInfo->GetX(), embedInfo->GetY(),
                 embedInfo->GetParams()};
         }
-		
+
         if (status == OHOS::Ace::NativeEmbedStatus::CREATE || status == OHOS::Ace::NativeEmbedStatus::UPDATE) {
             embedDataInfo_.insert_or_assign(embedId, dataInfo);
         } else if (status == OHOS::Ace::NativeEmbedStatus::DESTROY) {
@@ -6467,6 +6515,12 @@ void WebDelegate::OnRenderProcessResponding()
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebHandleRenderProcessResponding");
+}
+
+std::string WebDelegate::GetSelectInfo() const
+{
+    CHECK_NULL_RETURN(nweb_, std::string());
+    return nweb_->GetSelectInfo();
 }
 
 void WebDelegate::OnShowAutofillPopup(

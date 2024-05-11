@@ -216,40 +216,9 @@ RefPtr<InputEvent> TextPickerColumnPattern::CreateMouseHoverEventListener(RefPtr
     return hoverEventListener;
 }
 
-void TextPickerColumnPattern::InitMouseAndPressEvent()
+void TextPickerColumnPattern::ParseTouchListener()
 {
-    if (mouseEvent_ || touchListener_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto columnEventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(columnEventHub);
-    RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
-    CHECK_NULL_VOID(touchListener);
-    auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(columnGesture);
-    columnGesture->AddTouchEvent(touchListener);
-    CHECK_NULL_VOID(GetToss());
-    auto toss = GetToss();
-    auto childSize = static_cast<int32_t>(host->GetChildren().size());
-    RefPtr<FrameNode> middleChild = nullptr;
-    auto midSize = childSize / 2;
-    middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
-    CHECK_NULL_VOID(middleChild);
-    auto eventHub = middleChild->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
-    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleMouseEvent(isHover);
-    };
-    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnHoverEvent(mouseEvent_);
-    auto gesture = middleChild->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this), toss](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
@@ -270,6 +239,45 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+}
+
+void TextPickerColumnPattern::ParseMouseEvent()
+{
+    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(isHover);
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+}
+
+void TextPickerColumnPattern::InitMouseAndPressEvent()
+{
+    if (mouseEvent_ || touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto columnEventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(columnEventHub);
+    RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
+    CHECK_NULL_VOID(touchListener);
+    auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(columnGesture);
+    columnGesture->AddTouchEvent(touchListener);
+    auto childSize = static_cast<int32_t>(host->GetChildren().size());
+    RefPtr<FrameNode> middleChild = nullptr;
+    auto midSize = childSize / 2;
+    middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
+    CHECK_NULL_VOID(middleChild);
+    auto eventHub = middleChild->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ParseMouseEvent();
+    inputHub->AddOnHoverEvent(mouseEvent_);
+    auto gesture = middleChild->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    ParseTouchListener();
     gesture->AddTouchEvent(touchListener_);
     int32_t i = 0;
     for (const auto& child : host->GetChildren()) {

@@ -240,14 +240,14 @@ void SpanNode::DumpInfo()
 }
 
 int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-    PlaceholderStyle /*placeholderStyle*/)
+    bool isSpanStringMode, PlaceholderStyle /*placeholderStyle*/)
 {
     CHECK_NULL_RETURN(builder, -1);
     std::optional<TextStyle> textStyle;
     if (fontStyle || textLineStyle) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, -1);
-        auto newTextStyle = InheritParentProperties(frameNode);
+        auto newTextStyle = InheritParentProperties(frameNode, isSpanStringMode);
         UseSelfStyle(fontStyle, textLineStyle, newTextStyle);
         if (frameNode) {
             FontRegisterCallback(frameNode, newTextStyle);
@@ -592,7 +592,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
         }                                                                         \
     } while (false)
 
-TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode)
+TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode)
 {
     TextStyle textStyle;
     auto context = PipelineContext::GetCurrentContext();
@@ -600,6 +600,7 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode)
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, textStyle);
     textStyle = theme->GetTextStyle();
+    CHECK_NULL_RETURN(isSpanStringMode, textStyle);
     auto textLayoutProp = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProp, textStyle);
     INHERIT_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
@@ -720,7 +721,7 @@ void ImageSpanNode::DumpInfo()
 }
 
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
-    PlaceholderStyle placeholderStyle)
+    bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle)
 {
     CHECK_NULL_RETURN(builder, -1);
     PlaceholderRun run;
@@ -817,7 +818,7 @@ void SpanItem::GetIndex(int32_t& start, int32_t& end) const
 }
 
 int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
-    PlaceholderStyle placeholderStyle)
+    bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle)
 {
     CHECK_NULL_RETURN(builder, -1);
     textStyle = TextStyle();
@@ -856,7 +857,7 @@ void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
 std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
 {
     std::set<PropertyInfo> inheritPropertyInfo;
-    const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
+    static const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
         PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
         PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::BASELINE_OFFSET, PropertyInfo::LINEHEIGHT,
         PropertyInfo::TEXT_ALIGN, PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,

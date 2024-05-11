@@ -308,22 +308,12 @@ const std::list<RichEditorAbstractSpanResult>& RichEditorDeleteValue::GetRichEdi
     return richEditorDeleteSpans_;
 }
 
-void RichEditorDeleteValue::SetKeyboardType(KeyboardType Keyboard)
-{
-    Keyboard_ = Keyboard;
-}
-
-KeyboardType RichEditorDeleteValue::GetKeyboardType() const
-{
-    return Keyboard_;
-}
-
 void RichEditorChangeValue::SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span)
 {
     originalSpans_.emplace_back(span);
 }
 
-const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorOriginalSpans() const
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorOriginalSpans() const
 {
     return originalSpans_;
 }
@@ -333,7 +323,7 @@ void RichEditorChangeValue::SetRichEditorReplacedSpans(const RichEditorAbstractS
     replacedSpans_.emplace_back(span);
 }
 
-const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSpans() const
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSpans() const
 {
     return replacedSpans_;
 }
@@ -343,7 +333,7 @@ void RichEditorChangeValue::SetRichEditorReplacedImageSpans(const RichEditorAbst
     replacedImageSpans_.emplace_back(span);
 }
 
-const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedImageSpans() const
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedImageSpans() const
 {
     return replacedImageSpans_;
 }
@@ -353,7 +343,7 @@ void RichEditorChangeValue::SetRichEditorReplacedSymbolSpans(const RichEditorAbs
     replacedSymbolSpans_.emplace_back(span);
 }
 
-const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSymbolSpans() const
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSymbolSpans() const
 {
     return replacedSymbolSpans_;
 }

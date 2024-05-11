@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 
+#include "base/i18n/localization.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -25,10 +26,15 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t YEAR_NODE_INDEX = 0;
 constexpr int32_t MONTH_NODE_INDEX = 2;
 constexpr int32_t DAY_NODE_INDEX = 4;
+constexpr int32_t DATE_NODE_COUNT = 3;
 constexpr int32_t ONE_DIGIT_BOUNDARY = 10;
 constexpr float DEFAULT_HINT_RADIUS = 16.0f;
+static int32_t yearNodeIndex_ = 0;
+static int32_t monthNodeIndex_ = 2;
+static int32_t dayNodeIndex_ = 4;
 void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -153,7 +159,6 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateCalendarNodeChild(
         V2::ROW_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_RETURN(contentNode, nullptr);
 
-    PickerDate date = settingData.selectedDate;
     auto linearLayoutProperty = contentNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(linearLayoutProperty, nullptr);
 
@@ -173,31 +178,62 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateCalendarNodeChild(
     padding.right = CalcLength(theme->GetEntryDateLeftRightMargin());
     padding.bottom = CalcLength(theme->GetEntryDateTopBottomMargin());
     linearLayoutProperty->UpdatePadding(padding);
-
-    auto yearNode = CreateDateTextNode(std::to_string(date.GetYear()));
-    CHECK_NULL_RETURN(yearNode, nullptr);
-    yearNode->MountToParent(contentNode);
-
-    auto textNode1 = CreateDateTextNode("/");
-    CHECK_NULL_RETURN(textNode1, nullptr);
-    textNode1->MountToParent(contentNode);
-
-    auto monthString = (date.GetMonth() < 10 ? "0" : "") + std::to_string(date.GetMonth());
-    auto monthNode = CreateDateTextNode(monthString);
-    CHECK_NULL_RETURN(monthNode, nullptr);
-    monthNode->MountToParent(contentNode);
-
-    auto textNode2 = CreateDateTextNode("/");
-    CHECK_NULL_RETURN(textNode2, nullptr);
-    textNode2->MountToParent(contentNode);
-
-    auto dayString = (date.GetDay() < 10 ? "0" : "") + std::to_string(date.GetDay());
-    auto dayNode = CreateDateTextNode(dayString);
-    CHECK_NULL_RETURN(dayNode, nullptr);
-    dayNode->MountToParent(contentNode);
-
+	
+    CreateDateNode(contentId, settingData);
     contentNode->MarkModifyDone();
     return contentNode;
+}
+
+void CalendarPickerModelNG::CreateDateNode(int32_t contentId, const CalendarSettingData& settingData)
+{
+    auto contentNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    CHECK_NULL_VOID(contentNode);
+    PickerDate date = settingData.selectedDate;
+    std::vector<std::string> outOrder;
+    bool result = Localization::GetInstance()->GetDateColumnFormatOrder(outOrder);
+    std::map<std::size_t, std::string> order;
+    if (!result || outOrder.size() < DATE_NODE_COUNT) {
+        yearNodeIndex_ = YEAR_NODE_INDEX;
+        monthNodeIndex_ = MONTH_NODE_INDEX;
+        dayNodeIndex_ = DAY_NODE_INDEX;
+        auto num = 0;
+        order[num++] = std::to_string(date.GetYear());
+        order[num++] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
+        order[num] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
+    } else {
+        int32_t index = 0;
+        for (size_t i = 0; i < outOrder.size(); ++i) {
+            if (outOrder[i] == "year") {
+                yearNodeIndex_ = i + index;
+                order[i] = std::to_string(date.GetYear());
+            }
+            if (outOrder[i] == "month") {
+                monthNodeIndex_ = i + index;
+                order[i] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
+            }
+            if (outOrder[i] == "day") {
+                dayNodeIndex_ = i + index;
+                order[i] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
+            }
+            index++;
+        }
+    }
+    auto firstDateNode = CreateDateTextNode(order[0]);
+    CHECK_NULL_VOID(firstDateNode);
+    firstDateNode->MountToParent(contentNode);
+    auto textNode1 = CreateDateTextNode("/");
+    CHECK_NULL_VOID(textNode1);
+    textNode1->MountToParent(contentNode);
+    auto secondDateNode = CreateDateTextNode(order[1]);
+    CHECK_NULL_VOID(secondDateNode);
+    secondDateNode->MountToParent(contentNode);
+    auto textNode2 = CreateDateTextNode("/");
+    CHECK_NULL_VOID(textNode2);
+    textNode2->MountToParent(contentNode);
+    auto thirdDateNode = CreateDateTextNode(order[2]);
+    CHECK_NULL_VOID(thirdDateNode);
+    thirdDateNode->MountToParent(contentNode);
 }
 
 RefPtr<FrameNode> CalendarPickerModelNG::CreateDateTextNode(const std::string& textContent)
@@ -454,7 +490,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::GetYearNode(FrameNode* calendarPickerNo
     CHECK_NULL_RETURN(calendarPickerNode, nullptr);
     auto feedbackNode = calendarPickerNode->GetFirstChild();
     CHECK_NULL_RETURN(feedbackNode, nullptr);
-    return AceType::DynamicCast<FrameNode>(feedbackNode->GetFirstChild());
+    return AceType::DynamicCast<FrameNode>(feedbackNode->GetChildAtIndex(yearNodeIndex_));
 }
 
 RefPtr<FrameNode> CalendarPickerModelNG::GetMonthNode(FrameNode* calendarPickerNode)
@@ -462,7 +498,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::GetMonthNode(FrameNode* calendarPickerN
     CHECK_NULL_RETURN(calendarPickerNode, nullptr);
     auto feedbackNode = calendarPickerNode->GetFirstChild();
     CHECK_NULL_RETURN(feedbackNode, nullptr);
-    return AceType::DynamicCast<FrameNode>(feedbackNode->GetChildAtIndex(MONTH_NODE_INDEX));
+    return AceType::DynamicCast<FrameNode>(feedbackNode->GetChildAtIndex(monthNodeIndex_));
 }
 
 RefPtr<FrameNode> CalendarPickerModelNG::GetDayNode(FrameNode* calendarPickerNode)
@@ -470,7 +506,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::GetDayNode(FrameNode* calendarPickerNod
     CHECK_NULL_RETURN(calendarPickerNode, nullptr);
     auto feedbackNode = calendarPickerNode->GetFirstChild();
     CHECK_NULL_RETURN(feedbackNode, nullptr);
-    return AceType::DynamicCast<FrameNode>(feedbackNode->GetChildAtIndex(DAY_NODE_INDEX));
+    return AceType::DynamicCast<FrameNode>(feedbackNode->GetChildAtIndex(dayNodeIndex_));
 }
 
 Dimension CalendarPickerModelNG::GetHintRadius(FrameNode* frameNode)

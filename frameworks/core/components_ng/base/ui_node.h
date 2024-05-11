@@ -42,6 +42,7 @@ namespace OHOS::Ace::NG {
 struct ExtraInfo {
     std::string page;
     int32_t line = 0;
+    int32_t col = 0;
 };
 
 enum class NodeStatus : char {
@@ -290,8 +291,7 @@ public:
 
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
-    virtual void MarkDirtyNode(
-        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
+    virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     virtual void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
@@ -620,6 +620,24 @@ public:
         return instanceId_;
     }
 
+    bool GetIsGeometryTransitionIn() const
+    {
+        return isGeometryTransitionIn_;
+    }
+
+    void SetIsGeometryTransitionIn(bool isGeometryTransitionIn)
+    {
+        isGeometryTransitionIn_ = isGeometryTransitionIn;
+    }
+
+    virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
+    {
+        SetIsGeometryTransitionIn(isGeometryTransitionIn);
+        for (const auto& child : GetChildren()) {
+            child->SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+        }
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -703,6 +721,7 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
+    bool isGeometryTransitionIn_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;

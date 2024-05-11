@@ -94,9 +94,6 @@ public:
         // Some servers don't like requests that are made without a user-agent field, so we provide one
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_USERAGENT, "libcurl-agent/1.0");
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_URL, url.c_str());
-#if !defined(PREVIEW)
-        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_CAINFO, "/etc/ssl/certs/cacert.pem");
-#endif
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_VERBOSE, 1L);
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_ERRORBUFFER, errorStr.data());
 
@@ -167,6 +164,13 @@ public:
                                    ", msg from netStack: " + error.GetErrorMessage();
             failCallback(errorMsg, true, instanceId);
         });
+        if (downloadCallback.onProgressCallback) {
+            task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
+                const NetStackRequest& request,
+                u_long dlTotal, u_long dlNow, u_long ulTotal, u_long ulNow) {
+                onProgressCallback(dlTotal, dlNow, true, instanceId);
+            });
+        }
         auto result = task->Start();
         LOGI("Task of netstack with src [%{private}s] [%{public}s]", url.c_str(),
             result ? " started on another thread successfully"
@@ -222,6 +226,13 @@ public:
             }
             downloadCondition->cv.notify_all();
         });
+        if (downloadCallback.onProgressCallback) {
+            task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
+                const NetStackRequest& request,
+                u_long dlTotal, u_long dlNow, u_long ulTotal, u_long ulNow) {
+                onProgressCallback(dlTotal, dlNow, false, instanceId);
+            });
+        }
         auto result = task->Start();
         return HandleDownloadResult(result, std::move(downloadCallback), downloadCondition, instanceId, url);
     }

@@ -1376,7 +1376,7 @@ export class ChipComponent extends ViewPU {
                     this.observeComponentCreation((p, q) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(p);
                         SymbolGlyph.create({
-                            "id": -1,
+                            "id": 125831487,
                             "type": 40000,
                             params: ['sys.symbol.xmark'],
                             "bundleName": "__harDefaultBundleName__",

@@ -60,6 +60,16 @@ public:
         ResetPixelMap();
     }
 
+    const std::function<void(WeakPtr<NG::FrameNode>)>& GetBackIconSymbol() const
+    {
+        return backIconSymbol_;
+    }
+
+    void SetBackIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& backIconSymbol)
+    {
+        backIconSymbol_ = backIconSymbol;
+    }
+
 private:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
@@ -69,6 +79,7 @@ private:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSource, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PixelMap, RefPtr<PixelMap>, PROPERTY_UPDATE_MEASURE);
+    std::function<void(WeakPtr<NG::FrameNode>)> backIconSymbol_;
 };
 
 } // namespace OHOS::Ace::NG

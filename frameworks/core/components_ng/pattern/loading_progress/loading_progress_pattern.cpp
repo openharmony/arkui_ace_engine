@@ -138,6 +138,8 @@ void LoadingProgressPattern::FireBuilder()
     CHECK_NULL_VOID(host);
     if (!makeFunc_.has_value()) {
         host->RemoveChildAtIndex(0);
+        host->GetRenderContext()->SetClipToFrame(true);
+        host->GetRenderContext()->SetClipToBounds(true);
         host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
@@ -145,9 +147,8 @@ void LoadingProgressPattern::FireBuilder()
     if (contentModifierNode_ == node) {
         return;
     }
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    host->GetRenderContext()->SetClipToFrame(false);
+    host->GetRenderContext()->SetClipToBounds(false);
     host->RemoveChildAndReturnIndex(contentModifierNode_);
     contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);

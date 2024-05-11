@@ -54,9 +54,9 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(
     for (const FingerInfo& fingerInfo : fingerList) {
         JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
-            fingerArr->SetValueAt(fingerInfo.originalId_, element);
-            if (fingerInfo.originalId_ > maxFingerId) {
-                maxFingerId = fingerInfo.originalId_;
+            fingerArr->SetValueAt(fingerInfo.fingerId_, element);
+            if (fingerInfo.fingerId_ > maxFingerId) {
+                maxFingerId = fingerInfo.fingerId_;
             }
         } else {
             notTouchFingerList.emplace_back(fingerInfo);
@@ -88,7 +88,7 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateFingerInfo(const FingerInfo& finge
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
-    fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.originalId_);
+    fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.fingerId_);
     fingerInfoObj->SetProperty<double>("globalX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
     fingerInfoObj->SetProperty<double>("globalY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
     fingerInfoObj->SetProperty<double>("localX", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));

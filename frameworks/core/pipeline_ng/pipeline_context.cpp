@@ -886,11 +886,13 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 void PipelineContext::FlushFrameRate()
 {
     frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate());
-    if (frameRateManager_->IsRateChanged()) {
+    bool currAnimationStatus = scheduleTasks_.empty() ? true : false;
+    if (frameRateManager_->IsRateChanged() || currAnimationStatus != lastAnimationStatus_) {
         auto rate = frameRateManager_->GetExpectedRate();
         ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d", rate);
-        window_->FlushFrameRate(rate);
+        window_->FlushFrameRate(rate, currAnimationStatus);
         frameRateManager_->SetIsRateChanged(false);
+        lastAnimationStatus_ = currAnimationStatus;
     }
 }
 
@@ -1927,10 +1929,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "TouchEvent Process in ace_container: "
+            "InputTracking id:%{public}d, touchEvent Process in ace_container: "
             "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
             "type=%{public}d",
-            scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
+            scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
     }
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type != TouchType::MOVE && historyPointsById_.find(scalePoint.id) != historyPointsById_.end()) {
@@ -2063,6 +2065,14 @@ bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEve
                 lastMoveEvent = movePoint;
                 iter = touchEvents_.erase(iter);
             } else {
+                auto& pointers = iter->pointers;
+                for (auto pointerIter = pointers.begin(); pointerIter != pointers.end();) {
+                    if (pointerIter->id == event.id) {
+                        pointerIter = pointers.erase(pointerIter);
+                    } else {
+                        ++pointerIter;
+                    }
+                }
                 ++iter;
             }
         }

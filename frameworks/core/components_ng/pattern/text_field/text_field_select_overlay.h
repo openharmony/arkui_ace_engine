@@ -54,7 +54,7 @@ public:
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnAfterSelectOverlayShow(bool isCreate) override;
-    void OnCloseOverlay(OptionMenuType menuType, CloseReason reason) override;
+    void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
 
     void HandleOnShowMenu();

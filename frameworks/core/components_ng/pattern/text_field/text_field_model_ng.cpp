@@ -109,6 +109,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     if (!isTextArea) {
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+        pattern->SetTextInputFlag(true);
     } else {
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(Infinity<uint32_t>());
     }
@@ -901,7 +902,15 @@ void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& valu
 
 void TextFieldModelNG::SetInputStyle(FrameNode* frameNode, InputStyle value)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, InputStyle, value, frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    if (pattern->GetTextInputFlag() && value == InputStyle::DEFAULT) {
+        auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(textFieldLayoutProperty);
+        textFieldLayoutProperty->UpdateMaxLines(1);
+        textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+    }
 }
 
 void TextFieldModelNG::RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest)
@@ -1097,6 +1106,9 @@ void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, TextInputAction val
 {
     auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
+    if (value == TextInputAction::UNSPECIFIED) {
+        value = pattern->IsTextArea() ? TextInputAction::NEW_LINE : TextInputAction::DONE;
+    }
     pattern->UpdateTextInputAction(value);
 }
 
@@ -1795,4 +1807,27 @@ bool TextFieldModelNG::GetShowKeyBoardOnFocus(FrameNode* frameNode)
     CHECK_NULL_RETURN(pattern, true);
     return pattern->GetShowKeyBoardOnFocus();
 }
+
+void TextFieldModelNG::SetNumberOfLines(FrameNode* frameNode, int32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NumberOfLines, value, frameNode);
+}
+
+int32_t TextFieldModelNG::GetNumberOfLines(FrameNode* frameNode)
+{
+    uint32_t value = -1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, NumberOfLines, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::ResetNumberOfLines(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    if (textFieldLayoutProperty) {
+        textFieldLayoutProperty->ResetNumberOfLines();
+    }
+}
+
 } // namespace OHOS::Ace::NG

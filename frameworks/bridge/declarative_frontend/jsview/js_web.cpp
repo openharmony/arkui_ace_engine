@@ -1833,6 +1833,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("enableNativeMediaPlayer", &JSWeb::EnableNativeVideoPlayer);
     JSClass<JSWeb>::StaticMethod("onRenderProcessNotResponding", &JSWeb::OnRenderProcessNotResponding);
     JSClass<JSWeb>::StaticMethod("onRenderProcessResponding", &JSWeb::OnRenderProcessResponding);
+    JSClass<JSWeb>::StaticMethod("selectionMenuOptions", &JSWeb::SelectionMenuOptions);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2203,6 +2204,30 @@ void JSWeb::Create(const JSCallbackInfo& info)
             };
         }
         
+        auto fileSelectorShowFromUserFunction = controller->GetProperty("fileSelectorShowFromUserWeb");
+        std::function<void(const std::shared_ptr<BaseEventInfo>&)> fileSelectorShowFromUserCallback = nullptr;
+        if (fileSelectorShowFromUserFunction->IsFunction()) {
+            fileSelectorShowFromUserCallback = [webviewController = controller,
+                func = JSRef<JSFunc>::Cast(fileSelectorShowFromUserFunction)]
+                (const std::shared_ptr<BaseEventInfo>& info) {
+                    auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info.get());
+                    JSRef<JSObject> obj = JSRef<JSObject>::New();
+                    JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
+                    auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
+                    fileSelectorParam->SetParam(*eventInfo);
+                    obj->SetPropertyObject("fileparam", paramObj);
+
+                    JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
+                    auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
+
+                    fileSelectorResult->SetResult(*eventInfo);
+
+                    obj->SetPropertyObject("fileresult", resultObj);
+                    JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
+                    auto result = func->Call(webviewController, 1, argv);
+                };
+        }
+
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
         WebModel::GetInstance()->Create(
@@ -2212,6 +2237,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
+        WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
         if (!cmdLine.empty()) {
@@ -4678,4 +4704,53 @@ void JSWeb::OnRenderProcessResponding(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetRenderProcessRespondingId(jsCallback);
 }
 
+void JSWeb::SelectionMenuOptions(const JSCallbackInfo& args)
+{
+    if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto instanceId = Container::CurrentId();
+    auto menuItamArray = JSRef<JSArray>::Cast(args[0]);
+    WebMenuOptionsParam optionParam;
+    NG::MenuOptionsParam menuOption;
+    for (size_t i = 0; i < menuItamArray->Length(); i++) {
+        auto menuItem = menuItamArray->GetValueAt(i);
+        if (!menuItem->IsObject()) {
+            return;
+        }
+        auto menuItemObject = JSRef<JSObject>::Cast(menuItem);
+        auto jsContent = menuItemObject->GetProperty("content");
+        auto jsStartIcon = menuItemObject->GetProperty("startIcon");
+        std::string content;
+        if (!ParseJsMedia(jsContent, content)) {
+            return;
+        }
+        menuOption.content = content;
+        std::string icon;
+        menuOption.icon.reset();
+        if (ParseJsMedia(jsStartIcon, icon)) {
+            menuOption.icon = icon;
+        }
+        auto jsAction = menuItemObject->GetProperty("action");
+        if (jsAction.IsEmpty() || !jsAction->IsFunction()) {
+            return;
+        }
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsAction));
+        auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc),
+                            instanceId, node = frameNode](const std::string selectInfo) {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
+            pipelineContext->SetCallBackNode(node);
+            auto newSelectInfo = JSRef<JSVal>::Make(ToJSValue(selectInfo));
+            func->ExecuteJS(1, &newSelectInfo);
+        };
+        menuOption.action = std::move(jsCallback);
+        optionParam.menuOption.push_back(menuOption);
+    }
+    WebModel::GetInstance()->SetSelectionMenuOptions(std::move(optionParam));
+}
 } // namespace OHOS::Ace::Framework

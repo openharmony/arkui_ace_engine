@@ -38,7 +38,7 @@ public:
     explicit FocusManager(const WeakPtr<PipelineContext>& pipeline) : pipeline_(pipeline) {}
     ~FocusManager() override = default;
 
-    void FocusViewShow(const RefPtr<FocusView>& focusView);
+    void FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByStep = false);
     void FocusViewHide(const RefPtr<FocusView>& focusView);
     void FocusViewClose(const RefPtr<FocusView>& focusView);
 

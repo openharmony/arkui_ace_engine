@@ -707,6 +707,44 @@ HWTEST_F(TabsAttrTestNg, TabContentModel001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabContentModel002
+ * @tc.desc: test TabsModel
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModel002, TestSize.Level1)
+{
+    Create([](TabsModelNG model) {
+        auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
+        TabContentModelNG tabContentModel;
+        tabContentModel.Create();
+        TabBarSymbol tabBarSymbol;
+        tabContentModel.SetTabBar("", "", tabBarSymbol, nullptr, true);
+        tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+        auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+        tabContentNode->UpdateRecycleElmtId(0); // for AddChildToGroup
+        tabContentNode->GetTabBarItemId();           // for AddTabBarItem
+        tabContentNode->SetParent(weakTab);          // for AddTabBarItem
+        tabContentModel.AddTabBarItem(tabContentFrameNode, 0, true);
+        ViewStackProcessor::GetInstance()->PopContainer();
+    });
+    auto colNode = GetChildFrameNode(tabBarNode_, 0);
+    EXPECT_EQ(colNode->GetTag(), V2::COLUMN_ETS_TAG);
+    EXPECT_EQ(colNode->GetTotalChildCount(), 2);
+    
+    auto symbolNode = GetChildFrameNode(colNode, 0);
+    EXPECT_EQ(symbolNode->GetTag(), V2::SYMBOL_ETS_TAG);
+
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto defaultColorOn = tabTheme->GetBottomTabIconOn();
+    EXPECT_EQ(symbolProperty->GetSymbolColorListValue({})[0], defaultColorOn);
+}
+/**
  * @tc.name: TabsModelSetBarOverlap001
  * @tc.desc: test SetBarOverlap
  * @tc.type: FUNC

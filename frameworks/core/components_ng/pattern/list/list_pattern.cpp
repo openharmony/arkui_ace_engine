@@ -21,16 +21,14 @@
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
-#include "base/perfmonitor/perf_constants.h"
-#include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/utils.h"
 #include "core/animation/bilateral_spring_node.h"
 #include "core/animation/spring_model.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/list/list_theme.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -39,10 +37,9 @@
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components/list/list_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -99,12 +96,27 @@ void ListPattern::OnModifyDone()
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
     }
+    ReadThemeToFadingEdge();
+}
+
+void ListPattern::ReadThemeToFadingEdge()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
     auto conlist = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(conlist);
     auto listTheme = conlist->GetTheme<ListTheme>();
     CHECK_NULL_VOID(listTheme);
     auto listThemeFadingEdge = listTheme->GetFadingEdge();
-    isFadingEdge_ = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
+    if (listLayoutProperty->GetFadingEdge().has_value()) {
+        isFadingEdge_ = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
+    } else if (GetAxis() == Axis::HORIZONTAL) {
+        isFadingEdge_ = false;
+    } else {
+        isFadingEdge_ = listThemeFadingEdge;
+    }
     auto overlayNode = host->GetOverlayNode();
     if (!overlayNode && isFadingEdge_) {
         CreateAnalyzerOverlay(host);
@@ -372,8 +384,14 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     if (!listContentModifier_) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, paint);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, paint);
         const auto& geometryNode = host->GetGeometryNode();
-        auto size = geometryNode->GetPaddingSize();
+        auto size = renderContext->GetPaintRectWithoutTransform().GetSize();
+        auto& padding = geometryNode->GetPadding();
+        if (padding) {
+            size.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
+        }
         OffsetF offset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
         listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>(offset, size);
     }
@@ -387,7 +405,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
 
 void ListPattern::UpdateFadingEdge(const RefPtr<ListPaintMethod> paint)
 {
-    if (!isFadingEdge_ || LIST_START_MAIN_POS == contentMainSize_) {
+    if (LIST_START_MAIN_POS == contentMainSize_) {
         return;
     }
     auto host = GetHost();
@@ -396,14 +414,22 @@ void ListPattern::UpdateFadingEdge(const RefPtr<ListPaintMethod> paint)
     CHECK_NULL_VOID(overlayNode);
     auto overlayRenderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(overlayRenderContext);
+    if (!isFadingEdge_) {
+        paint->SetOverlayRenderContext(overlayRenderContext);
+        paint->SetFadingInfo(false, false);
+        isTopEdgeFading_ = false;
+        isLowerEdgeFading_ = false;
+        return;
+    }
     auto isFadingTop = LessNotEqual(startMainPos_, LIST_START_MAIN_POS - LIST_FADE_ERROR_RANGE);
     auto isFadingBottom = GreatNotEqual(endMainPos_, contentMainSize_ + LIST_FADE_ERROR_RANGE);
     if (isFadingTop || isFadingBottom) {
         auto isTopEdgeFadingUpdate = isTopEdgeFading_ != isFadingTop;
         auto isLowerEdgeFadingUpdate = isLowerEdgeFading_ != isFadingBottom;
-        if (isTopEdgeFadingUpdate || isLowerEdgeFadingUpdate) {
+        if (isTopEdgeFadingUpdate || isLowerEdgeFadingUpdate || (fadingAxis_ != GetAxis())) {
             paint->SetOverlayRenderContext(overlayRenderContext);
             UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
+            fadingAxis_ = GetAxis();
         }
     } else if (isTopEdgeFading_ || isLowerEdgeFading_) {
         paint->SetOverlayRenderContext(overlayRenderContext);
@@ -877,9 +903,8 @@ float ListPattern::GetEndOverScrollOffset(float offset) const
 
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
-    if (itemPosition_.empty()) {
-        return false;
-    }
+    CHECK_NULL_RETURN(!itemPosition_.empty(), false);
+
     // check edgeEffect is not springEffect
     if (!jumpIndex_.has_value() && !targetIndex_.has_value() && !HandleEdgeEffect(offset, source, GetContentSize())) {
         if (IsOutOfBoundary(false)) {
@@ -899,7 +924,8 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         MarkDirtyNodeSelf();
     }
     if (!IsOutOfBoundary() || !isScrollable_) {
-        FireOnWillScroll(currentDelta_ - lastDelta);
+        auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+        currentDelta_ = lastDelta + userOffset;
         return true;
     }
 
@@ -928,7 +954,9 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
         currentDelta_ = currentDelta_ * friction;
     }
-    FireOnWillScroll(currentDelta_ - lastDelta);
+
+    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+    currentDelta_ = lastDelta + userOffset;
     return true;
 }
 
@@ -955,7 +983,14 @@ SizeF ListPattern::GetContentSize() const
     CHECK_NULL_RETURN(host, SizeF());
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, SizeF());
-    return geometryNode->GetPaddingSize();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, SizeF());
+    auto size = renderContext->GetPaintRectWithoutTransform().GetSize();
+    auto& padding = geometryNode->GetPadding();
+    if (padding) {
+        size.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
+    }
+    return size;
 }
 
 bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)

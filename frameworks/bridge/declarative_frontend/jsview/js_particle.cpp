@@ -829,13 +829,13 @@ void JSParticle::JsDisturbanceFields(const JSCallbackInfo& args)
 }
 
 void JSParticle::ParseEmitterProperty(
-    std::vector<OHOS::Ace::EmitterProperty>& data, const JSRef<JSObject>& paramObj, const int length)
+    std::vector<OHOS::Ace::EmitterProperty>& data, const JSRef<JSObject>& paramObj)
 {
     EmitterProperty emitterProperty;
     uint32_t index = 0u;
-    uint32_t indexJsValue = paramObj->GetProperty("index")->ToNumber<uint32_t>();
-    if (indexJsValue > 0 && indexJsValue < length) {
-        index = indexJsValue;
+    if (paramObj->GetProperty("index")->IsNumber()) {
+        uint32_t indexJsValue = paramObj->GetProperty("index")->ToNumber<uint32_t>();
+        index = indexJsValue > 0 ? indexJsValue : 0;
     }
     emitterProperty.index = index;
 
@@ -876,7 +876,7 @@ void JSParticle::JsEmitter(const JSCallbackInfo& args)
     for (size_t i = 0; i < length; i++) {
         if (dataJsArray->GetValueAt(i)->IsObject()) {
             auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
-            ParseEmitterProperty(dataArray, jsObject, length);
+            ParseEmitterProperty(dataArray, jsObject);
         }
     }
     ParticleModel::GetInstance()->updateEmitter(dataArray);

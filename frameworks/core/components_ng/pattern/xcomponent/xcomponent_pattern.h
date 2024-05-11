@@ -42,6 +42,7 @@
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
+#include "core/gestures/velocity.h"
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
@@ -116,9 +117,6 @@ public:
         CHECK_NULL_VOID(nativeXComponent_);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        SetExpectedRateRangeInit();
-        OnFrameEventInit();
-        UnregisterOnFrameEventInit();
         auto width = initSize_.Width();
         auto height = initSize_.Height();
         nativeXComponentImpl_->SetXComponentWidth(static_cast<uint32_t>(width));
@@ -337,6 +335,11 @@ private:
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
     void SetRotation();
+#ifdef OHOS_PLATFORM
+    float GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo, OH_NativeXComponent_TouchEvent upEventInfo);
+    int GetFlingDuration(float velocity);
+    void ReportSlideToRss();
+#endif
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -392,6 +395,9 @@ private:
     Rotation rotation_ = Rotation::ROTATION_0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
+    OH_NativeXComponent_TouchEvent lastTouchInfo_;
+    std::atomic<int32_t> slideCount_ {0};
+    double physicalCoeff_ = 0.0;
 #endif
 };
 } // namespace OHOS::Ace::NG

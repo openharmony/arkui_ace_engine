@@ -246,10 +246,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
 
         if (info.GetSourceDevice() == SourceType::MOUSE) {
-            // For the drag initiacating from mouse, there is no chance to execute the modifier in the floating
-            // pharse, so need to update here to make sure the preview option is available to pass through to drag
-            // framwork later.
-            actuator->UpdatePreviewOptionFromModifier(frameNode);
             frameNode->MarkModifyDone();
             dragDropManager->SetIsShowBadgeAnimation(true);
             auto pattern = frameNode->GetPattern<TextBase>();
@@ -266,6 +262,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 } else if (!gestureHub->GetIsTextDraggable()) {
                     gestureHub->SetPixelMap(nullptr);
                 }
+            } else {
+                // For the drag initiacating from mouse, there is no chance to execute the modifier in the floating
+                // pharse, so need to update here to make sure the preview option is available to pass through to drag
+                // framwork later.
+                actuator->UpdatePreviewOptionFromModifier(frameNode);
             }
         }
 
@@ -428,10 +429,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
-        // For the drag initiacating from long press gesture, the preview option set by the modifier
-        // should also be applied in floating pharse, so we need to update the preview option here.
-        actuator->UpdatePreviewOptionFromModifier(frameNode);
         if (!gestureHub->GetTextDraggable()) {
+            // For the drag initiacating from long press gesture, the preview option set by the modifier
+            // should also be applied in floating pharse, so we need to update the preview option here.
+            actuator->UpdatePreviewOptionFromModifier(frameNode);
             DragEventActuator::ExecutePreDragAction(PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION, frameNode);
         }
     };
@@ -568,6 +569,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             CHECK_NULL_VOID(frameNode);
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
+            auto actuator = weak.Upgrade();
+            CHECK_NULL_VOID(actuator);
             auto dragPreviewInfo = frameNode->GetDragPreview();
             if (dragPreviewInfo.inspectorId != "") {
                 auto previewPixelMap = GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
@@ -602,13 +605,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 imageNodes.clear();
 #endif
             } else {
-                auto context = frameNode->GetRenderContext();
-                CHECK_NULL_VOID(context);
-                auto pixelMap = context->GetThumbnailPixelMap(true);
-                gestureHub->SetPixelMap(pixelMap);
+                actuator->GetThumbnailPixelMapAsync(gestureHub);
             }
-            auto actuator = weak.Upgrade();
-            CHECK_NULL_VOID(actuator);
             auto longPressRecognizer = actuator->longPressRecognizer_;
             if (longPressRecognizer && longPressRecognizer->GetGestureDisposal() != GestureDisposal::REJECT) {
                 CreateGatherNode(actuator);
@@ -766,8 +764,7 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     auto frameTag = frameNode->GetTag();
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable() &&
-        gestureHub->GetIsTextDraggable()) {
+    if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable()) {
         return;
     }
     CHECK_NULL_VOID(imageNode);
@@ -1344,7 +1341,6 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
         return;
     }
     auto isHandlesShow = pattern->IsHandlesShow();
-    pattern->CloseHandleAndSelect();
     auto dragNode = pattern->MoveDragNode();
     CHECK_NULL_VOID(dragNode);
     dragNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
@@ -1360,12 +1356,11 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     CHECK_NULL_VOID(modifier);
     modifier->UpdateHandlesShowFlag(isHandlesShow);
     auto renderContext = dragNode->GetRenderContext();
-    auto dragPreviewOption = dragNode->GetDragPreviewOption();
     if (renderContext) {
         textPixelMap_ = renderContext->GetThumbnailPixelMap();
-        renderContext->UpdateOpacity(dragPreviewOption.options.opacity);
     }
     modifier->StartFloatingAnimate();
+    pattern->CloseHandleAndSelect();
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set text animation success.");
 }
 
@@ -1433,7 +1428,6 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateTransformScale(VectorF(1.0f, 1.0f));
-    modifier->StartFloatingCancelAnimate();
     AnimationUtils::Animate(
         option,
         [context, startDrag, globalX, globalY, frameWidth, frameHeight, scale]() {
@@ -2078,5 +2072,31 @@ RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
     textNode->CreateLayoutTask();
     FlushSyncGeometryNodeTasks();
     return textNode;
+}
+
+void DragEventActuator::GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID(gestureHub);
+    auto callback = [id = Container::CurrentId(), gestureHub](const RefPtr<PixelMap>& pixelMap) {
+        ContainerScope scope(id);
+        if (pixelMap != nullptr) {
+            auto taskScheduler = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskScheduler);
+            taskScheduler->PostTask(
+                [gestureHub, pixelMap]() {
+                    CHECK_NULL_VOID(gestureHub);
+                    gestureHub->SetPixelMap(pixelMap);
+                    TAG_LOGI(AceLogTag::ACE_DRAG, "Set thumbnail pixelMap async success.");
+                },
+                TaskExecutor::TaskType::UI, "ArkUIDragSetPixelMap");
+        }
+    };
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    if (!context->CreateThumbnailPixelMapAsyncTask(true, std::move(callback))) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Create thumbnail pixelMap async task failed!");
+    }
 }
 } // namespace OHOS::Ace::NG

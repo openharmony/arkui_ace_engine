@@ -17,12 +17,15 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_SHEET_PRESENTATION_LAYOUT_ALGORITHM_H
 
 #include <cstdint>
+#include <functional>
 #include <optional>
+#include <unordered_map>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
@@ -37,7 +40,15 @@ public:
     SheetPresentationLayoutAlgorithm() = default;
     SheetPresentationLayoutAlgorithm(int32_t id, const std::string& tag, SheetType sheetType)
         : targetNodeId_(id), targetTag_(tag), sheetType_(sheetType)
-    {}
+    {
+        directionCheckFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::CheckDirectionBottom;
+        placementCheckFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::CheckPlacementBottom;
+        placementCheckFunc_[Placement::BOTTOM_LEFT] = &SheetPresentationLayoutAlgorithm::CheckPlacementBottomLeft;
+        placementCheckFunc_[Placement::BOTTOM_RIGHT] = &SheetPresentationLayoutAlgorithm::CheckPlacementBottomRight;
+        getOffsetFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottom;
+        getOffsetFunc_[Placement::BOTTOM_LEFT] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottomLeft;
+        getOffsetFunc_[Placement::BOTTOM_RIGHT] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottomRight;
+    }
     ~SheetPresentationLayoutAlgorithm() override = default;
 
     void OnReset() override {}
@@ -68,14 +79,30 @@ public:
         return sheetOffsetY_;
     }
 
+    float GetArrowOffsetX() const
+    {
+        return arrowOffsetX_;
+    }
 private:
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
     OffsetF GetPopupStyleSheetOffset();
+    OffsetF GetOffsetInAvoidanceRule(const SizeF& targetSize, const OffsetF& targetOffset);
+    Placement AvoidanceRuleOfPlacement(
+        const Placement& currentPlacement, const SizeF& targetSize, const OffsetF& targetOffset);
+    bool CheckDirectionBottom(const SizeF&, const OffsetF&);
+    bool CheckPlacementBottom(const SizeF&, const OffsetF&);
+    bool CheckPlacementBottomLeft(const SizeF&, const OffsetF&);
+    bool CheckPlacementBottomRight(const SizeF&, const OffsetF&);
+    OffsetF GetOffsetWithBottom(const SizeF&, const OffsetF&);
+    OffsetF GetOffsetWithBottomLeft(const SizeF&, const OffsetF&);
+    OffsetF GetOffsetWithBottomRight(const SizeF&, const OffsetF&);
+
     float GetWidthByScreenSizeType(const SizeF& maxSize) const;
     float GetHeightByScreenSizeType(const SizeF& maxSize) const;
     float GetHeightBySheetStyle() const;
     LayoutConstraintF CreateSheetChildConstraint(RefPtr<SheetPresentationProperty> layoutprop);
+    float arrowOffsetX_ = 0.0f; // reletive to SheetOffsetX
     float sheetHeight_ = 0.0f;
     float sheetWidth_ = 0.0f;
     float sheetMaxHeight_ = 0.0f;
@@ -84,6 +111,12 @@ private:
     float sheetOffsetY_ = 0.0f;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
     SheetStyle sheetStyle_;
+    using DirectionCheckFunc = bool (SheetPresentationLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
+    std::unordered_map<Placement, DirectionCheckFunc> directionCheckFunc_;
+    using PlacementCheckFunc = bool (SheetPresentationLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
+    std::unordered_map<Placement, PlacementCheckFunc> placementCheckFunc_;
+    using OffsetGetFunc = OffsetF (SheetPresentationLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
+    std::unordered_map<Placement, OffsetGetFunc> getOffsetFunc_;
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

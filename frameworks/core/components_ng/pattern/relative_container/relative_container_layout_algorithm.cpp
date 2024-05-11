@@ -88,12 +88,14 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
     bool idealHeightValid = layoutConstraint.value().selfIdealSize.Height().has_value();
     auto idealSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     if (!idealWidthValid) {
-        idealSize.SetWidth(std::min(idealSize.Width().value(), layoutConstraint.value().maxSize.Width()));
-        idealSize.SetWidth(std::max(idealSize.Width().value(), layoutConstraint.value().minSize.Width()));
+        idealSize.SetWidth(std::min(idealSize.Width().value_or(Infinity<float>()),
+            layoutConstraint.value().maxSize.Width()));
+        idealSize.SetWidth(std::max(idealSize.Width().value_or(0.0f), layoutConstraint.value().minSize.Width()));
     }
     if (!idealHeightValid) {
-        idealSize.SetHeight(std::min(idealSize.Height().value(), layoutConstraint.value().maxSize.Height()));
-        idealSize.SetHeight(std::max(idealSize.Height().value(), layoutConstraint.value().minSize.Height()));
+        idealSize.SetHeight(std::min(idealSize.Height().value_or(Infinity<float>()),
+            layoutConstraint.value().maxSize.Height()));
+        idealSize.SetHeight(std::max(idealSize.Height().value_or(0.0f), layoutConstraint.value().minSize.Height()));
     }
     containerSizeWithoutPaddingBorder_ = idealSize.ConvertToSizeT();
     layoutWrapper->GetGeometryNode()->SetFrameSize(containerSizeWithoutPaddingBorder_);

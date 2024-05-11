@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -117,8 +118,8 @@ void UIExtensionModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::DYNAMIC_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+        V2::DYNAMIC_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -129,7 +130,7 @@ void UIExtensionModelNG::Create()
 void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
     const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->InitializeDynamicComponent(hapPath, abcPath, entryPoint, runtime);
 }
@@ -137,7 +138,7 @@ void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& fra
 void UIExtensionModelNG::SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnSizeChangedCallback(std::move(onSizeChanged));
 }

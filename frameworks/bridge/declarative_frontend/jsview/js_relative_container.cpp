@@ -75,6 +75,9 @@ void JSRelativeContainer::Create(const JSCallbackInfo& info)
 
 void JSRelativeContainer::ParseBarrierInfo(const JSRef<JSVal>& args, BarrierInfo& barrierInfoItem)
 {
+    if (!args->IsObject()) {
+        return;
+    }
     JSRef<JSObject> barrierInfoObj = JSRef<JSObject>::Cast(args);
     JSRef<JSVal> idVal = barrierInfoObj->GetProperty("id");
     JSRef<JSVal> directionVal = barrierInfoObj->GetProperty("direction");
@@ -127,6 +130,9 @@ void JSRelativeContainer::JsBarrier(const JSCallbackInfo& info)
 
 void JSRelativeContainer::ParseGuideline(const JSRef<JSVal>& args, GuidelineInfo& guidelineInfoItem)
 {
+    if (!args->IsObject()) {
+        return;
+    }
     JSRef<JSObject> guildLineInfoObj = JSRef<JSObject>::Cast(args);
     JSRef<JSVal> idVal = guildLineInfoObj->GetProperty("id");
     JSRef<JSVal> directionVal = guildLineInfoObj->GetProperty("direction");

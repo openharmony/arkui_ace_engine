@@ -78,7 +78,10 @@ class BuilderNode {
         return this._JSBuilderNode.getFrameNodeWithoutCheck();
     }
     postTouchEvent(touchEvent) {
-        return this._JSBuilderNode.postTouchEvent(touchEvent);
+        __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+        let ret = this._JSBuilderNode.postTouchEvent(touchEvent);
+        __JSScopeUtil__.restoreInstanceId();
+        return ret;
     }
     dispose() {
         this._JSBuilderNode.dispose();
@@ -114,6 +117,7 @@ class JSBuilderNode extends BaseNode {
             return;
         }
         child.updateStateVars(params);
+        child.updateDirtyElements();
     }
     createOrGetNode(elmtId, builder) {
         const entry = this.updateFuncByElmtId.get(elmtId);
@@ -140,7 +144,7 @@ class JSBuilderNode extends BaseNode {
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
         }
-        this.frameNode_.setNodePtr(this._nativeRef);
+        this.frameNode_.setNodePtr(this._nativeRef, this.nodePtr_);
         this.frameNode_.setRenderNode(this._nativeRef);
         this.frameNode_.setBaseNode(this);
         __JSScopeUtil__.restoreInstanceId();
@@ -343,6 +347,135 @@ class JSBuilderNode extends BaseNode {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+class NodeAdapter {
+    constructor() {
+        this.nodeRefs_ = new Array();
+        this.count_ = 0;
+        this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
+        this.nativePtr_ = this.nativeRef_.getNativeHandle();
+        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
+    }
+    dispose() {
+        let hostNode = this.attachedNodeRef_.deref();
+        if (hostNode !== undefined) {
+            NodeAdapter.detachNodeAdapter(hostNode);
+        }
+        this.nativeRef_.dispose();
+        this.nativePtr_ = null;
+    }
+    set totalNodeCount(count) {
+        getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, count);
+        this.count_ = count;
+    }
+    get totalNodeCount() {
+        return this.count_;
+    }
+    reloadAllItems() {
+        getUINativeModule().nodeAdapter.notifyItemReloaded(this.nativePtr_);
+    }
+    reloadItem(start, count) {
+        getUINativeModule().nodeAdapter.notifyItemChanged(this.nativePtr_, start, count);
+    }
+    removeItem(start, count) {
+        getUINativeModule().nodeAdapter.notifyItemRemoved(this.nativePtr_, start, count);
+    }
+    insertItem(start, count) {
+        getUINativeModule().nodeAdapter.notifyItemInserted(this.nativePtr_, start, count);
+    }
+    moveItem(from, to) {
+        getUINativeModule().nodeAdapter.notifyItemMoved(this.nativePtr_, from, to);
+    }
+    getAllAvailableItems() {
+        let result = new Array();
+        let nodes = getUINativeModule().nodeAdapter.getAllItems(this.nativePtr_);
+        if (nodes !== undefined) {
+            nodes.forEach(node => {
+                let nodeId = node.nodeId;
+                if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+                    let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+                    result.push(frameNode);
+                }
+            });
+        }
+        return result;
+    }
+    onAttachToNodePtr(target) {
+        let nodeId = target.nodeId;
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            if (frameNode === undefined) {
+                return;
+            }
+            frameNode.setAdapterRef(this);
+            this.attachedNodeRef_ = new WeakRef(frameNode);
+            if (this.onAttachToNode !== undefined) {
+                this.onAttachToNode(frameNode);
+            }
+        }
+    }
+    onDetachFromNodePtr() {
+        if (this.onDetachFromNode !== undefined) {
+            this.onDetachFromNode();
+        }
+        let attachedNode = this.attachedNodeRef_.deref();
+        if (attachedNode !== undefined) {
+            attachedNode.setAdapterRef(undefined);
+        }
+        this.nodeRefs_.splice(0, this.nodeRefs_.length);
+    }
+    onCreateNewNodePtr(index) {
+        if (this.onCreateNewChild !== undefined) {
+            let node = this.onCreateNewChild(index);
+            if (!this.nodeRefs_.includes(node)) {
+                this.nodeRefs_.push(node);
+            }
+            return node.getNodePtr();
+        }
+        return null;
+    }
+    onDisposeNodePtr(id, node) {
+        let nodeId = node.nodeId;
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            if (this.onDisposeChild !== undefined && frameNode !== undefined) {
+                this.onDisposeChild(id, frameNode);
+                let index = this.nodeRefs_.indexOf(frameNode);
+                if (index > -1) {
+                    this.nodeRefs_.splice(index, 1);
+                }
+            }
+        }
+    }
+    onUpdateNodePtr(id, node) {
+        let nodeId = node.nodeId;
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            if (this.onUpdateChild !== undefined && frameNode !== undefined) {
+                this.onUpdateChild(id, frameNode);
+            }
+        }
+    }
+    static attachNodeAdapter(adapter, node) {
+        getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
+    }
+    static detachNodeAdapter(node) {
+        getUINativeModule().nodeAdapter.detachNodeAdapter(node.getNodePtr());
+    }
+}
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 class BuilderNodeFinalizationRegisterProxy {
     constructor() {
         this.finalizationRegistry_ = new FinalizationRegistry((heldValue) => {
@@ -486,13 +619,10 @@ class FrameNode {
         }
         return null;
     }
-    setNodePtr(nativeRef) {
+    setNodePtr(nativeRef, nodePtr) {
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nativeRef = nativeRef;
-        if (nativeRef === null || nativeRef === undefined) {
-            this.resetNodePtr();
-            return;
-        }
-        this.nodePtr_ = this._nativeRef.getNativeHandle();
+        this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
         this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
         if (this._nodeId === -1) {
             return;
@@ -511,6 +641,9 @@ class FrameNode {
         this.baseNode_ = baseNode;
         this.renderNode_?.setBaseNode(baseNode);
     }
+    setAdapterRef(adapter) {
+        this.nodeAdapterRef_ = adapter;
+    }
     getNodePtr() {
         return this.nodePtr_;
     }
@@ -520,6 +653,26 @@ class FrameNode {
         this._nodeId = -1;
         this._nativeRef = null;
         this.nodePtr_ = null;
+    }
+    static disposeTreeRecursively(node) {
+        if (node === null) {
+            return;
+        }
+        let child = node.getFirstChild();
+        FrameNode.disposeTreeRecursively(child);
+        let sibling = node.getNextSibling();
+        FrameNode.disposeTreeRecursively(sibling);
+        node.dispose();
+    }
+    disposeTree() {
+        let parent = this.getParent();
+        if (parent?.getNodeType() == "NodeContainer") {
+            getUINativeModule().nodeContainer.clean(parent?.getNodePtr());
+        }
+        else {
+            parent?.removeChild(this);
+        }
+        FrameNode.disposeTreeRecursively(this);
     }
     checkType() {
         if (!this.isModifiable()) {
@@ -765,8 +918,7 @@ class FrameNode {
         return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
     }
     setMeasuredSize(size) {
-        getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), Math.max(size.width, 0),
-            Math.max(size.height, 0));
+        getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), Math.max(size.width, 0), Math.max(size.height, 0));
     }
     setLayoutPosition(position) {
         getUINativeModule().frameNode.setLayoutPosition(this.getNodePtr(), position.x, position.y);
@@ -775,8 +927,7 @@ class FrameNode {
         const minSize = constraint.minSize;
         const maxSize = constraint.maxSize;
         const percentReference = constraint.percentReference;
-        getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
-            maxSize.height, percentReference.width, percentReference.height);
+        getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width, maxSize.height, percentReference.width, percentReference.height);
     }
     layout(position) {
         getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
@@ -941,6 +1092,41 @@ const __creatorMap__ = new Map([
                 return new ArkGridColComponent(node, type);
             });
         }],
+    ["Blank", (context) => {
+            return new TypedFrameNode(context, "Blank", (node, type) => {
+                return new ArkBlankComponent(node, type);
+            });
+        }],
+    ["Image", (context) => {
+            return new TypedFrameNode(context, "Image", (node, type) => {
+                return new ArkImageComponent(node, type);
+            });
+        }],
+    ["Flex", (context) => {
+            return new TypedFrameNode(context, "Flex", (node, type) => {
+                return new ArkFlexComponent(node, type);
+            });
+        }],
+    ["Swiper", (context) => {
+            return new TypedFrameNode(context, "Swiper", (node, type) => {
+                return new ArkSwiperComponent(node, type);
+            });
+        }],
+    ["Progress", (context) => {
+            return new TypedFrameNode(context, "Progress", (node, type) => {
+                return new ArkProgressComponent(node, type);
+            });
+        }],
+    ["List", (context) => {
+            return new TypedFrameNode(context, "List", (node, type) => {
+                return new ArkListComponent(node, type);
+            });
+        }],
+    ["ListItem", (context) => {
+            return new TypedFrameNode(context, "ListItem", (node, type) => {
+                return new ArkListItemComponent(node, type);
+            });
+        }],
 ]);
 class TypedNode {
     static createNode(context, type) {
@@ -1036,11 +1222,6 @@ class ColorMetrics {
     }
     static rgba(red, green, blue, alpha = MAX_ALPHA_VALUE) {
         return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
-    }
-    static isRGBOrRGBA(format) {
-        const rgbPattern = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
-        const rgbaPattern = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(\.\d+)?)\s*\)$/i;
-        return rgbPattern.test(format) || rgbaPattern.test(format);
     }
     static rgbOrRGBA(format) {
         const rgbPattern = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
@@ -1649,7 +1830,7 @@ class XComponentNode extends FrameNode {
         this.xcomponentNode_.registerOnCreateCallback(this.nativeModule_, this.onCreate);
         this.xcomponentNode_.registerOnDestroyCallback(this.nativeModule_, this.onDestroy);
         this.nodePtr_ = this.xcomponentNode_.getFrameNode(this.nativeModule_);
-        this.setNodePtr(getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_));
+        this.setNodePtr(getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_), this.nodePtr_);
     }
     onCreate(event) { }
     onDestroy() { }
@@ -1759,5 +1940,6 @@ class NodeContent extends Content {
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask,
-    edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent, TypedNode
+    edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
+    TypedNode, NodeAdapter
 };

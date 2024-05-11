@@ -35,16 +35,9 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<WaterFlowLayoutProperty>();
-    if (layoutProperty->IsReverse()) {
-        if (source != SCROLL_FROM_ANIMATION_SPRING && source != SCROLL_FROM_ANIMATION_CONTROLLER &&
-            source != SCROLL_FROM_JUMP) {
-            delta = -delta;
-        }
-    }
 
     // check edgeEffect is not springEffect
-    if (!HandleEdgeEffect(delta, source, GetContentSize(), layoutProperty->IsReverse())) {
+    if (!HandleEdgeEffect(delta, source, GetContentSize())) {
         if (IsOutOfBoundary()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
@@ -76,9 +69,9 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
             delta = std::min(delta, -layoutInfo_.currentOffset_);
         }
     }
-    FireOnWillScroll(-delta);
+    auto userOffset = FireOnWillScroll(-delta);
     layoutInfo_.prevOffset_ = layoutInfo_.currentOffset_;
-    layoutInfo_.currentOffset_ += delta;
+    layoutInfo_.currentOffset_ -= userOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 };

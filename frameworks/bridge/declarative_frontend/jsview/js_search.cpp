@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 
 namespace OHOS::Ace {
 
@@ -199,7 +200,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
             src = icon;
         }
         auto controllerObj = param->GetProperty("controller");
-        if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+        if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
@@ -212,6 +213,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSearchValueObject(info, changeEventVal);
     }
+    JSSeacrhTheme::ApplyTheme();
 }
 
 void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)

@@ -152,7 +152,7 @@ public:
         if (itemPosition_.empty()) {
             return 0.0f;
         }
-        if (GetStartIndex() == 0) {
+        if (GetStartIndex() == 0 && !isLoop_) {
             return itemPosition_.begin()->second.startPos;
         }
         return itemPosition_.begin()->second.startPos - spaceWidth_;
@@ -163,7 +163,7 @@ public:
         if (itemPosition_.empty()) {
             return 0.0f;
         }
-        if (GetEndIndex() == totalItemCount_ - 1) {
+        if (GetEndIndex() == totalItemCount_ - 1 && !isLoop_) {
             return itemPosition_.rbegin()->second.endPos;
         }
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
@@ -284,6 +284,11 @@ public:
         isMeasureOneMoreItem_ = isMeasureOneMoreItem;
     }
 
+    void SetIsFrameAnimation(bool isFrameAnimation)
+    {
+        isFrameAnimation_ = isFrameAnimation;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
@@ -313,6 +318,8 @@ private:
     bool CheckIsSingleCase(const RefPtr<SwiperLayoutProperty>& property);
     void UpdateLayoutInfoBeforeMeasureSwiper(const RefPtr<SwiperLayoutProperty>& property);
     void IndicatorAndArrowMeasure(LayoutWrapper* layoutWrapper, const OptionalSizeF& parentIdealSize);
+    float GetChildMainAxisSize(
+        const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty, Axis axis);
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -360,6 +367,8 @@ private:
     bool isCaptureReverse_ = false;
     bool isNeedUpdateCapture_ = false;
     bool isMeasureOneMoreItem_ = false;
+    bool isFrameAnimation_ = false;
+    std::set<int32_t> measuredItems_;
 };
 
 } // namespace OHOS::Ace::NG

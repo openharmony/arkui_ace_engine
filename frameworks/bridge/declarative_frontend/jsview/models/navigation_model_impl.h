@@ -32,8 +32,9 @@ public:
     void SetSubtitle(const std::string& subtitle) override;
     void SetHideTitleBar(bool hideTitleBar) override;
     void SetHideNavBar(bool hideNavBar) override;
-    void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
-        const std::string& bundleName, const std::string& moduleName) override;
+    void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar) override;
     void SetCustomToolBar(const RefPtr<AceType>& customToolBar) override;
@@ -60,6 +61,7 @@ public:
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& modeChange) override;
     void SetIsCustomAnimation(bool isCustom) override;
     void SetCustomTransition(NavigationTransitionEvent&& animationTransition) override;
+    void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_NAVIGATION_MODEL_IMPL_H

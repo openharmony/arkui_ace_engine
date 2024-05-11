@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 
-void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView)
+void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByStep)
 {
     CHECK_NULL_VOID(focusView);
     if (!focusView->HasParentFocusHub()) {
@@ -50,13 +50,16 @@ void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView)
     focusViewStack_.emplace_back(focusViewWeak);
     lastFocusView_ = focusViewWeak;
 
-    lastFocusView = lastFocusView_.Upgrade();
-    if (!lastFocusView) {
-        return;
-    }
-    auto lastFocusViewHub = lastFocusView->GetFocusHub();
-    if (lastFocusViewHub) {
-        lastFocusViewHub->SetLastWeakFocusToPreviousInFocusView();
+    // do not set LastWeakFocus to Previous node/scope in focusView when FocusViewShow trigger by FocusStep
+    if (!isTriggerByStep) {
+        lastFocusView = lastFocusView_.Upgrade();
+        if (!lastFocusView) {
+            return;
+        }
+        auto lastFocusViewHub = lastFocusView->GetFocusHub();
+        if (lastFocusViewHub) {
+            lastFocusViewHub->SetLastWeakFocusToPreviousInFocusView();
+        }
     }
 }
 

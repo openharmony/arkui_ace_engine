@@ -140,8 +140,10 @@ void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
         auto width = static_cast<float>(calcLayoutConstraint->maxSize->Width()->GetDimension().Value());
         auto height = static_cast<float>(calcLayoutConstraint->maxSize->Height()->GetDimension().Value());
         rootSRNode->SetBounds(0, 0, width, height);
+        CHECK_NULL_VOID(rsUIDirector_);
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
     }
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
 #endif
 }

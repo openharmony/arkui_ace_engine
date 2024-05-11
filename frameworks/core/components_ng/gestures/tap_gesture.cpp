@@ -29,6 +29,7 @@ RefPtr<NGGestureRecognizer> TapGesture::CreateRecognizer()
     clickRecognizer->SetPriority(priority_);
     clickRecognizer->SetPriorityMask(gestureMask_);
     clickRecognizer->SetGestureInfo(gestureInfo_);
+    clickRecognizer->SetUserData(userData_);
     return clickRecognizer;
 }
 

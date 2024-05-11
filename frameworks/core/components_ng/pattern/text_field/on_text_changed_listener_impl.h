@@ -24,7 +24,12 @@ namespace OHOS::Ace::NG {
 
 class OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
 public:
-    explicit OnTextChangedListenerImpl(const WeakPtr<TextInputClient>& pattern) : pattern_(pattern) {}
+    explicit OnTextChangedListenerImpl(const WeakPtr<TextInputClient>& pattern) : pattern_(pattern)
+    {
+        auto client = pattern_.Upgrade();
+        CHECK_NULL_VOID(client);
+        patternInstanceId_ = client->GetInstanceId();
+    }
     ~OnTextChangedListenerImpl() override = default;
 
     void InsertText(const std::u16string& text) override;
@@ -57,6 +62,7 @@ private:
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
 
     WeakPtr<TextInputClient> pattern_;
+    int32_t patternInstanceId_;
 };
 
 } // namespace OHOS::Ace::NG

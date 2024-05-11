@@ -1027,8 +1027,15 @@ void WebModelNG::SetOpenAppLinkFunction(std::function<void(const std::shared_ptr
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    
+
     webPattern->SetOnOpenAppLinkCallback(std::move(jsCallback));
+}
+
+void WebModelNG::SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetDefaultFileSelectorShowCallback(std::move(jsCallback));
 }
 
 void WebModelNG::SetTextAutosizing(bool isTextAutosizing)
@@ -1069,5 +1076,12 @@ void WebModelNG::SetRenderProcessRespondingId(std::function<void(const BaseEvent
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnRenderProcessRespondingEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateSelectionMenuOptions(std::move(webMenuOption));
 }
 } // namespace OHOS::Ace::NG

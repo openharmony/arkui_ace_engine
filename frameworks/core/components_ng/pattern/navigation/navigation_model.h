@@ -54,8 +54,9 @@ public:
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar) = 0;
     virtual void SetHideNavBar(bool hideNavBar) = 0;
-    virtual void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
-        const std::string& bundleName, const std::string& moduleName) = 0;
+    virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList);
     virtual void SetHideBackButton(bool hideBackButton) = 0;
     virtual void SetHideToolBar(bool hideToolBar) = 0;
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
@@ -83,6 +84,7 @@ public:
     virtual void SetMenuCount(int32_t menuCount) = 0;
     virtual void SetCustomTransition(NavigationTransitionEvent&& animationTransition);
     virtual void SetIsCustomAnimation(bool isCustom);
+    virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

@@ -109,7 +109,7 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(RefPtr<AceType>& canvasPatte
         context->jsCanvasVal_ = JSRef<JSVal>::Cast(jsCanvasVal);
     };
     std::function<void(RSCanvas*, double, double)> callback = func;
-    auto customPaintPattern = AceType::DynamicCast<NG::CustomPaintPattern>(canvasPattern);
+    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
     if (customPaintPattern) {
         customPaintPattern->SetRSCanvasCallback(callback);
     }
@@ -117,7 +117,7 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(RefPtr<AceType>& canvasPatte
 
 void JSDrawingRenderingContext::SetInvalidate(const JSCallbackInfo& info)
 {
-    auto customPaintPattern = AceType::DynamicCast<NG::CustomPaintPattern>(canvasPattern_);
+    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_);
     CHECK_NULL_VOID(customPaintPattern);
     customPaintPattern->SetInvalidate();
 }

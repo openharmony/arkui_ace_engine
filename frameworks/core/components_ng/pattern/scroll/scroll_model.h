@@ -40,7 +40,7 @@ public:
     virtual void SetOnScrollBegin(OnScrollBeginEvent&& event) = 0;
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event) = 0;
     virtual void SetOnScroll(NG::ScrollEvent&& event) = 0;
-    virtual void SetOnWillScroll(NG::ScrollEventWithState&& event) {};
+    virtual void SetOnWillScroll(NG::ScrollEventWithReturn&& event) {};
     virtual void SetOnDidScroll(NG::ScrollEventWithState&& event) {};
     virtual void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) = 0;
     virtual void SetOnScrollEnd(NG::ScrollEndEvent&& event) = 0;

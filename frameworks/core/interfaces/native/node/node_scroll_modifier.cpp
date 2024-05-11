@@ -559,7 +559,8 @@ void SetScrollOnWillScroll(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
     auto onWillScroll = [nodeId, node, extraParam](const Dimension& xOffset, const Dimension& yOffset,
-        const ScrollState& state) -> void {
+        const ScrollState& state, ScrollSource source) -> TwoDimensionScrollResult {
+        TwoDimensionScrollResult scrollRes { .xOffset = xOffset, .yOffset = yOffset };
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -567,7 +568,11 @@ void SetScrollOnWillScroll(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(xOffset.Value());
         event.componentAsyncEvent.data[1].f32 = static_cast<float>(yOffset.Value());
         event.componentAsyncEvent.data[2].i32 = static_cast<int>(state);
+        event.componentAsyncEvent.data[3].i32 = static_cast<int>(source);
         SendArkUIAsyncEvent(&event);
+        scrollRes.xOffset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
+        scrollRes.yOffset = Dimension(event.componentAsyncEvent.data[1].f32, DimensionUnit::VP);
+        return scrollRes;
     };
     ScrollModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
 }

@@ -5353,4 +5353,223 @@ HWTEST_F(TextInputCursorTest, CheckPreviewTextValidate001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
 }
+
+/**
+ * @tc.name: NeedDrawPreviewText001
+ * @tc.desc: Test NeedDrawPreviewText before set preview text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, NeedDrawPreviewText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    EXPECT_EQ(pattern_->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size()));
+
+    /**
+     * @tc.expected: call NeedDrawPreviewText and check return false
+     */
+    EXPECT_FALSE(pattern_->NeedDrawPreviewText());
+
+    /**
+     * @tc.steps:Set caretPosition and call NeedDrawPreviewText001
+     * @tc.expected: check return true
+     */
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(5);
+    pattern_->SetPreviewTextOperation(PREVIEW_ONE);
+    EXPECT_TRUE(pattern_->NeedDrawPreviewText());
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: FinishTextPreview001
+ * @tc.desc: Test FinishTextPreview after set preview text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, FinishTextPreview001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    EXPECT_EQ(pattern_->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size()));
+
+    /**
+     * @tc.steps:Set caretPosition and call SetPreviewTextOperation
+     * @tc.expected: check GetIsPreviewText return true
+     */
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(5);
+    pattern_->SetPreviewTextOperation(PREVIEW_ONE);
+    EXPECT_TRUE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: call InitEditingValueText value is ""
+     * @tc.expected: check GetIsPreviewText return false
+     */
+    pattern_->InitEditingValueText("");
+    EXPECT_FALSE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: FinishTextPreview002
+ * @tc.desc: Test FinishTextPreview after set preview text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, FinishTextPreview002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    EXPECT_EQ(pattern_->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size()));
+
+    /**
+     * @tc.steps:Set caretPosition and call SetPreviewTextOperation
+     * @tc.expected: check GetIsPreviewText return true
+     */
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(5);
+    pattern_->SetPreviewTextOperation(PREVIEW_ONE);
+    EXPECT_TRUE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: call HandleBlurEvent
+     * @tc.expected: check GetIsPreviewText return false
+     */
+    pattern_->HandleBlurEvent();
+    EXPECT_TRUE(pattern_->inputOperations_.front() == InputOperation::SET_PREVIEW_FINISH);
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: FinishTextPreview003
+ * @tc.desc: Test FinishTextPreview after set preview text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, FinishTextPreview003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    EXPECT_EQ(pattern_->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size()));
+
+    /**
+     * @tc.steps:Set caretPosition and call SetPreviewTextOperation
+     * @tc.expected: check GetIsPreviewText return true
+     */
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(5);
+    pattern_->SetPreviewTextOperation(PREVIEW_ONE);
+    EXPECT_TRUE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: call InsertValueOperation
+     * @tc.expected: check GetIsPreviewText return false
+     */
+    pattern_->InsertValueOperation(HELLO_TEXT);
+    EXPECT_TRUE(pattern_->inputOperations_.front() == InputOperation::SET_PREVIEW_FINISH);
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: FinishTextPreviewOperation001
+ * @tc.desc: Test FinishTextPreview after set preview text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, FinishTextPreviewOperation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    EXPECT_EQ(pattern_->GetCaretIndex(), static_cast<int>(DEFAULT_TEXT.size()));
+
+    /**
+     * @tc.steps:Set caretPosition and call SetPreviewTextOperation
+     * @tc.expected: check GetIsPreviewText return true
+     */
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(5);
+    pattern_->SetPreviewTextOperation(PREVIEW_ONE);
+    EXPECT_TRUE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: call FinishTextPreviewOperation
+     * @tc.expected: check GetIsPreviewText return false
+     */
+    pattern_->FinishTextPreviewOperation();
+    EXPECT_FALSE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: TextInputLineBreakStrategy001
+ * @tc.desc: test testInput text lineBreakStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, TextInputLineBreakStrategy001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set lineBreakStrategy GREEDY
+     */
+    layoutProperty_->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::GREEDY);
+
+    /**
+     * @tc.step: step3. Set lineBreakStrategy HIGH_QUALITY
+     */
+    layoutProperty_->UpdateLineBreakStrategy(LineBreakStrategy::HIGH_QUALITY);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::HIGH_QUALITY);
+
+    /**
+     * @tc.step: step4. Set lineBreakStrategy BALANCED
+     */
+    layoutProperty_->UpdateLineBreakStrategy(LineBreakStrategy::BALANCED);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::BALANCED);
+}
 } // namespace OHOS::Ace::NG

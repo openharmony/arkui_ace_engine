@@ -524,7 +524,7 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
         auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterLayoutTask([textRect, eventHub]() {
-            eventHub->FireOnContentSizeChange(textRect.Width(), textRect.Height());
+            eventHub->FireOnContentSizeChange(std::max(0.0f, textRect.Width()), textRect.Height());
         });
     }
 }
@@ -855,21 +855,23 @@ void TextFieldPattern::ClearFocusStyle()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
 
+    if (isOnHover_) {
+        RestoreDefaultMouseState();
+    }
+
     if (isFocusBGColorSet_) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
         isFocusBGColorSet_ = false;
     }
 
     if (isFocusTextColorSet_) {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
         isFocusTextColorSet_ = false;
     }
@@ -1116,6 +1118,7 @@ void TextFieldPattern::ProcNormalInlineStateInBlurEvent()
             layoutProperty->UpdateMaxLines(1);
             layoutProperty->UpdatePlaceholderMaxLines(1);
         }
+        layoutProperty->ResetTextOverflowMaxLines();
         inlineSelectAllFlag_ = false;
         inlineFocusState_ = false;
         RestorePreInlineStates();
@@ -1161,6 +1164,9 @@ void TextFieldPattern::HandleBlurEvent()
     }
 #endif
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+    if (GetIsPreviewText()) {
+        FinishTextPreview();
+    }
     NotifyOnEditChanged(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -1169,6 +1175,7 @@ void TextFieldPattern::HandleBlurEvent()
         context->RemoveOnAreaChangeNode(host->GetId());
     }
     ClearFocusStyle();
+    isCursorAlwaysDisplayed_ = false;
 }
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
@@ -2374,6 +2381,7 @@ void TextFieldPattern::OnModifyDone()
     ApplyUnderlineTheme();
     ApplyInlineTheme();
     ProcessInnerPadding();
+    ProcessNumberOfLines();
 
     InitClickEvent();
     InitLongPressEvent();
@@ -2515,7 +2523,9 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
-    eventHub->FireOnChange(contentController_->GetTextValue());
+    if (!GetIsPreviewText()) {
+        eventHub->FireOnChange(contentController_->GetTextValue());
+    }
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
@@ -2562,12 +2572,10 @@ bool TextFieldPattern::IsDisabled()
 
 void TextFieldPattern::ProcessInnerPadding()
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
     BorderWidthProperty currentBorderWidth;
@@ -2597,6 +2605,31 @@ void TextFieldPattern::ProcessInnerPadding()
     paddings.left = NG::CalcLength(left);
     paddings.right = NG::CalcLength(right);
     layoutProperty->UpdatePadding(paddings);
+}
+
+void TextFieldPattern::ProcessNumberOfLines()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty && layoutProperty->HasNumberOfLines());
+    auto numberOfLines = layoutProperty->GetNumberOfLines().value();
+    CHECK_NULL_VOID(numberOfLines > 0);
+    auto lineHeight = layoutProperty->GetLineHeight().value_or(0.0_vp).ConvertToPx();
+    if (LessOrEqual(lineHeight, 0.f)) {
+        lineHeight = PreferredLineHeight(false);
+    }
+    auto lineSpacing = layoutProperty->GetLineSpacing().value_or(0.0_vp).ConvertToPx();
+    auto contentHeight = numberOfLines * lineHeight + numberOfLines * lineSpacing;
+    auto height = contentHeight + GetVerticalPaddingAndBorderSum();
+
+    // get previously user defined ideal width
+    std::optional<CalcLength> width = std::nullopt;
+    auto &&layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        width = layoutConstraint->selfIdealSize->Width();
+    }
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, CalcLength(height)));
 }
 
 void TextFieldPattern::InitLongPressEvent()
@@ -2802,6 +2835,38 @@ void TextFieldPattern::InitMouseEvent()
     };
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
     inputHub->AddOnHoverEvent(hoverEvent_);
+    InitPanEvent();
+}
+
+void TextFieldPattern::InitPanEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (!boxSelectPanEvent_) {
+        auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
+        auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
+        auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
+        GestureEventNoParameter actionCancelTask;
+        boxSelectPanEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
+            std::move(actionEndTask), std::move(actionCancelTask));
+    }
+    PanDirection panDirection = { .type = PanDirection::ALL };
+    gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetPanEventType(GestureTypeName::TEXTFIELD_BOXSELECT);
+    gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
+                                                 const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
+            gestureInfo->GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+            return GestureJudgeResult::REJECT;
+        }
+        if (gestureInfo->GetType() == GestureTypeName::TEXTFIELD_BOXSELECT &&
+            gestureInfo->GetInputEventType() != InputEventType::MOUSE_BUTTON) {
+            return GestureJudgeResult::REJECT;
+        }
+        return GestureJudgeResult::CONTINUE;
+    });
 }
 
 void TextFieldPattern::OnHover(bool isHover)
@@ -2917,7 +2982,7 @@ void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleRightMousePressEvent(MouseInfo& info)
 {
-    if (IsSelected()) {
+    if (IsSelected() || GetIsPreviewText()) {
         return;
     }
     auto focusHub = GetFocusHub();
@@ -2929,6 +2994,9 @@ void TextFieldPattern::HandleRightMousePressEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleRightMouseReleaseEvent(MouseInfo& info)
 {
+    if (GetIsPreviewText()) {
+        return;
+    }
     auto focusHub = GetFocusHub();
     if (focusHub->IsCurrentFocus()) {
         OffsetF rightClickOffset = OffsetF(
@@ -2960,7 +3028,7 @@ void TextFieldPattern::HandleLeftMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
 {
-    if (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if ((IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) || GetIsPreviewText()) {
         blockPress_ = true;
         return;
     }
@@ -3342,6 +3410,7 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
         };
         SetPreviewTextOperation(info);
         FinishTextPreview();
+        return;
     }
 
     auto start = selectController_->GetStartIndex();
@@ -4511,6 +4580,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
+    UpdateCaretInfoToController();
     if (HasFocus() && !magnifierController_->GetShowMagnifier()) {
         StartTwinkling();
     }
@@ -4523,7 +4593,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 void TextFieldPattern::SetSelectionFlag(
     int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
 {
-    if (!HasFocus()) {
+    if (!HasFocus() || GetIsPreviewText()) {
         return;
     }
     isTouchCaret_ = false;
@@ -5291,13 +5361,16 @@ void TextFieldPattern::ProcessInlinePaddingAndMargin()
     }
     MarginProperty margin;
     margin.bottom = CalcLength(userMargin.bottom->GetDimension() + userPadding.bottom->GetDimension());
-    margin.right = CalcLength(userMargin.right->GetDimension() + userPadding.bottom->GetDimension());
+    margin.right = CalcLength(userMargin.right->GetDimension() + userPadding.right->GetDimension());
     margin.left = CalcLength(userMargin.left->GetDimension() + userPadding.left->GetDimension());
     margin.top = CalcLength(userMargin.top->GetDimension() + userPadding.top->GetDimension());
     layoutProperty->UpdateMargin(margin);
     if (!IsTextArea()) {
         layoutProperty->UpdatePlaceholderMaxLines(layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
         layoutProperty->ResetMaxLines();
+    }
+    if (layoutProperty->HasTextOverflow()) {
+        layoutProperty->UpdateTextOverflowMaxLines(layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE));
     }
 }
 
@@ -5327,8 +5400,6 @@ void TextFieldPattern::ApplyInlineTheme()
     renderContext->UpdateBorderColor(inlineBorderColor);
     layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) });
     ProcessInnerPadding();
-    textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
-    textRect_.SetTop(GetPaddingTop() + GetBorderTop());
     ProcessInlinePaddingAndMargin();
 }
 
@@ -6416,6 +6487,7 @@ void TextFieldPattern::UnitResponseKeyEvent()
     auto unitArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
     CHECK_NULL_VOID(unitArea);
     auto frameNode = unitArea->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
         auto selectPattern = frameNode->GetPattern<SelectPattern>();
         CHECK_NULL_VOID(selectPattern);
@@ -6439,7 +6511,7 @@ void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& no
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (isCursorAlwaysDisplayed_) {
+    if (HasFocus()) {
         if (SystemProperties::GetDebugEnabled()) {
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
                 "In OnDragMoved, the cursor has always Displayed in the textField, id:%{public}d", host->GetId());

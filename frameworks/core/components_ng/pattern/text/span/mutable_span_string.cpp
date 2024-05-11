@@ -78,7 +78,7 @@ void MutableSpanString::RemoveSpecialSpans(int32_t start, int32_t length)
         [](const RefPtr<SpanBase>& a, const RefPtr<SpanBase>& b) { return a->GetStartIndex() < b->GetStartIndex(); });
     for (const auto& span : spanBaseList) {
         auto index = span->GetStartIndex();
-        RemoveSpan(index, index + 1, span->GetSpanType());
+        RemoveSpan(index, 1, span->GetSpanType());
     }
 }
 
@@ -265,6 +265,7 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
     auto isAround = IsInsertAroundSpecialNode(start);
     if (isAround != AroundSpecialNode::NONE) {
         InsertStringAroundSpecialNode(start, other, isAround);
+        NotifySpanWatcher();
         return;
     }
     bool useFrontStyle = InsertUseFrontStyle(start);
@@ -279,6 +280,7 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
         spanItem->content = other;
         spanItem->interval = { 0, otherLength };
         spans_.emplace_back(spanItem);
+        NotifySpanWatcher();
         return;
     }
     for (auto& span : spans_) {

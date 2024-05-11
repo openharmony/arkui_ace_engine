@@ -209,6 +209,7 @@ sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& s
 std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
 #endif
 {
+    ACE_LAYOUT_SCOPED_TRACE("QueryImageDataFromImageCache[%s]", sourceInfo.ToString().c_str());
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto imageCache = pipelineCtx->GetImageCache();
@@ -496,19 +497,28 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "Download network image, uri=%{public}s", uri.c_str());
     }
-    std::vector<uint8_t> imageData;
-    if (!DownloadManager::GetInstance()->Download(uri, imageData) || imageData.empty()) {
+    std::string result;
+    DownloadCallback downloadCallback;
+    downloadCallback.successCallback = [result](const std::string&& imageData, bool async, int32_t instanceId) mutable {
+        result = imageData;
+    };
+    downloadCallback.failCallback = [](std::string errorMessage, bool async, int32_t instanceId) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Download network image %{public}s failed!", errorMessage.c_str());
+    };
+    downloadCallback.cancelCallback = downloadCallback.failCallback;
+    if (!DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback), uri, Container::CurrentId()) ||
+        result.empty()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Download network image %{private}s failed!", uri.c_str());
         return nullptr;
     }
 #ifndef USE_ROSEN_DRAWING
-    sk_sp<SkData> data = SkData::MakeWithCopy(imageData.data(), imageData.size());
+    sk_sp<SkData> data = SkData::MakeWithCopy(result.data(), result.length());
 #else
     auto data = std::make_shared<RSData>();
-    data->BuildWithCopy(imageData.data(), imageData.size());
+    data->BuildWithCopy(result.data(), result.length());
 #endif
     // 3. write it into file cache.
-    WriteCacheToFile(uri, imageData);
+    WriteCacheToFile(uri, result);
     return data;
 }
 

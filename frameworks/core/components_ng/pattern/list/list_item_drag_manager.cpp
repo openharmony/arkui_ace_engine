@@ -126,8 +126,16 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    prevScale_ = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
-    prevShadow_ = renderContext->GetBackShadowValue(ShadowConfig::NoneShadow);
+    if (renderContext->HasTransformScale()) {
+        prevScale_ = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
+    } else {
+        renderContext->UpdateTransformScale({ 1.0f, 1.0f });
+    }
+    if (renderContext->HasBackShadow()) {
+        prevShadow_ = renderContext->GetBackShadowValue(ShadowConfig::NoneShadow);
+    } else {
+        renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+    }
     prevZIndex_ = renderContext->GetZIndexValue(0);
 
     AnimationOption option;

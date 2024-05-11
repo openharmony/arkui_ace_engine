@@ -1322,10 +1322,10 @@ ArkUINativeModuleValue TextInputBridge::SetCancelButton(ArkUIRuntimeCallInfo* ru
     if (!sizeArg->IsUndefined() && !sizeArg->IsNull() &&
         ArkTSUtils::ParseJsDimensionVpNG(vm, sizeArg, iconSize, false)) {
         if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
-            iconSize = theme->GetCancelButtonIconHeight();
+            iconSize = theme->GetIconSize();
         }
     } else {
-        iconSize = theme->GetCancelButtonIconHeight();
+        iconSize = theme->GetIconSize();
     }
 
     Color value;
@@ -1822,6 +1822,33 @@ ArkUINativeModuleValue TextInputBridge::ResetPadding(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputPadding(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetContentType(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    if (secondArg->IsNumber()) {
+        uint32_t value = secondArg->Uint32Value(vm);
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputContentType(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputContentType(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetContentType(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputContentType(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

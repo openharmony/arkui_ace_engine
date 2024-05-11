@@ -42,7 +42,6 @@ public:
         innerHandleColor_ = AceType::MakeRefPtr<PropertyColor>(Color::BLACK);
         handleOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
         selectedColor_ = AceType::MakeRefPtr<PropertyInt>(0);
-        backgroundOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
         shadowOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
         AttachProperty(firstHandle_);
         AttachProperty(secondHandle_);
@@ -52,7 +51,6 @@ public:
         AttachProperty(innerHandleColor_);
         AttachProperty(handleOpacity_);
         AttachProperty(selectedColor_);
-        AttachProperty(backgroundOpacity_);
         AttachProperty(shadowOpacity_);
     }
 
@@ -61,8 +59,6 @@ public:
     void onDraw(DrawingContext& context) override;
     void StartFloatingAnimate() override;
     void StartFloatingSelBackgroundAnimate();
-    void StartFloatingCancelAnimate() override;
-    void StartSelBackgroundCancelAnimate();
 
     void SetFirstHandle(const RectF& handle)
     {
@@ -112,12 +108,6 @@ public:
         selectedColor_->Set(static_cast<int32_t>(selectedColor));
     }
 
-    void SetBackgroundOpacity(float opacity)
-    {
-        CHECK_NULL_VOID(backgroundOpacity_);
-        backgroundOpacity_->Set(opacity);
-    }
-
     void SetShadowOpacity(float opacity)
     {
         CHECK_NULL_VOID(shadowOpacity_);
@@ -146,7 +136,6 @@ private:
     RefPtr<PropertyFloat> innerHandleRadius_;
     RefPtr<PropertyColor> innerHandleColor_;
     RefPtr<AnimatablePropertyFloat> handleOpacity_;
-    RefPtr<AnimatablePropertyFloat> backgroundOpacity_;
     RefPtr<AnimatablePropertyFloat> shadowOpacity_;
     RefPtr<PropertyInt> selectedColor_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragOverlayModifier);

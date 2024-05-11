@@ -35,7 +35,7 @@ class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
     CanvasPaintMethod() = default;
-    CanvasPaintMethod(const WeakPtr<PipelineBase> context, RefPtr<RenderingContext2DModifier> contentModifier,
+    CanvasPaintMethod(const WeakPtr<PipelineBase> context, RefPtr<CanvasModifier> contentModifier,
         const WeakPtr<FrameNode>& frameNode)
         : frameNode_(frameNode)
     {
@@ -110,7 +110,7 @@ private:
     std::list<TaskFunc> tasks_;
     bool needMarkDirty_ = true;
 #else
-    friend class CustomPaintPattern;
+    friend class CanvasPattern;
     std::unique_ptr<CanvasPaintOp> fastTaskPool_ = std::make_unique<CanvasPaintOp>();
 #endif
 

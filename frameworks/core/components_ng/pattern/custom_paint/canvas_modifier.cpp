@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
+#include "core/components_ng/pattern/custom_paint/canvas_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -23,15 +23,15 @@
 #endif
 
 namespace OHOS::Ace::NG {
-RenderingContext2DModifier::RenderingContext2DModifier()
+CanvasModifier::CanvasModifier()
 {
     needRender_ = AceType::MakeRefPtr<PropertyBool>(true);
     AttachProperty(needRender_);
 }
 
-void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
+void CanvasModifier::onDraw(DrawingContext& drawingContext)
 {
-    ACE_SCOPED_TRACE("RenderingContext2DModifier::onDraw");
+    ACE_SCOPED_TRACE("CanvasModifier::onDraw");
 #ifndef USE_ROSEN_DRAWING
     auto skCanvas = drawingContext.canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
 
@@ -103,7 +103,7 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
 #endif
 }
 
-std::string RenderingContext2DModifier::GetDumpInfo()
+std::string CanvasModifier::GetDumpInfo()
 {
     return std::string("recordingCanvas size: ")
         .append(recordingCanvasDrawSize_.ToString())

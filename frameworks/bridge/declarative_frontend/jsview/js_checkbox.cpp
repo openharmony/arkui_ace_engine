@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/checkbox_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_checkbox_theme.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/checkable/checkable_component.h"
@@ -94,6 +95,8 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
     if (customBuilderFunc.has_value()) {
         CheckBoxModel::GetInstance()->SetBuilder(customBuilderFunc);
     }
+
+    JSCheckBoxTheme::ApplyTheme();
 }
 
 void JSCheckbox::JSBind(BindingTarget globalObj)

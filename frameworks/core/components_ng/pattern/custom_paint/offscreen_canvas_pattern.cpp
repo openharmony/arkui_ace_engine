@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,7 +62,7 @@ void OffscreenCanvasPattern::ClearRect(const Rect& rect)
 
 void OffscreenCanvasPattern::Fill()
 {
-    offscreenPaintMethod_->Fill(nullptr);
+    offscreenPaintMethod_->Fill();
 }
 
 void OffscreenCanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
@@ -72,7 +72,7 @@ void OffscreenCanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
 
 void OffscreenCanvasPattern::Stroke()
 {
-    offscreenPaintMethod_->Stroke(nullptr);
+    offscreenPaintMethod_->Stroke();
 }
 
 void OffscreenCanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)
@@ -143,12 +143,14 @@ void OffscreenCanvasPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
 void OffscreenCanvasPattern::FillText(
     const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
 {
+    UpdateTextDefaultDirection();
     offscreenPaintMethod_->FillText(text, x, y, maxWidth, state);
 }
 
 void OffscreenCanvasPattern::StrokeText(
     const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state)
 {
+    UpdateTextDefaultDirection();
     offscreenPaintMethod_->StrokeText(text, x, y, maxWidth, state);
 }
 
@@ -242,6 +244,7 @@ void OffscreenCanvasPattern::SetLineDash(const std::vector<double>& segments)
 
 void OffscreenCanvasPattern::SetTextDirection(TextDirection direction)
 {
+    currentSetTextDirection_ = direction;
     if (direction == TextDirection::INHERIT) {
         direction = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
@@ -442,5 +445,14 @@ size_t OffscreenCanvasPattern::GetBitmapSize()
 void OffscreenCanvasPattern::Reset()
 {
     offscreenPaintMethod_->Reset();
+}
+
+void OffscreenCanvasPattern::UpdateTextDefaultDirection()
+{
+    if (currentSetTextDirection_ != TextDirection::INHERIT) {
+        return;
+    }
+    offscreenPaintMethod_->SetTextDirection(
+        AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
 }
 } // namespace OHOS::Ace::NG

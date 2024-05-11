@@ -79,20 +79,27 @@ void JSListItem::Create(const JSCallbackInfo& args)
 
 void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
 {
-    if (args.Length() < 2 || !args[0]->IsFunction()) {
+    const int32_t ARGS_LENGTH = 2;
+    auto len = args.Length();
+    if (len < ARGS_LENGTH) {
         ListItemModel::GetInstance()->Create();
         return;
     }
-    RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
-
-    if (!args[1]->IsBoolean()) {
+    JSRef<JSVal> arg0 = args[0];
+    if (!arg0->IsFunction()) {
+        ListItemModel::GetInstance()->Create();
         return;
     }
-    const bool isLazy = args[1]->ToBoolean();
+
+    JSRef<JSVal> arg1 = args[1];
+    if (!arg1->IsBoolean()) {
+        return;
+    }
+    const bool isLazy = arg1->ToBoolean();
 
     V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE;
-    if (args[2]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[2]);
+    if (len > ARGS_LENGTH && args[ARGS_LENGTH]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[ARGS_LENGTH]);
         JSRef<JSVal> styleObj = obj->GetProperty("style");
         listItemStyle = styleObj->IsNumber() ? static_cast<V2::ListItemStyle>(styleObj->ToNumber<int32_t>())
                                              : V2::ListItemStyle::NONE;
@@ -101,7 +108,7 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
     if (!isLazy) {
         ListItemModel::GetInstance()->Create();
     } else {
-        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
+        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(arg0));
         auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
                                           jsDeepRenderFunc = std::move(jsDeepRender)](int32_t nodeId) {
             ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
@@ -114,7 +121,6 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
         ListItemModel::GetInstance()->Create(std::move(listItemDeepRenderFunc), listItemStyle);
         ListItemModel::GetInstance()->SetIsLazyCreating(isLazy);
     }
-    args.ReturnSelf();
 }
 
 void JSListItem::SetSticky(int32_t sticky)
@@ -368,7 +374,7 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
 void JSListItem::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListItem>::Declare("ListItem");
-    JSClass<JSListItem>::StaticMethod("create", &JSListItem::Create);
+    JSClass<JSListItem>::StaticMethod("createInternal", &JSListItem::Create);
 
     JSClass<JSListItem>::StaticMethod("sticky", &JSListItem::SetSticky);
     JSClass<JSListItem>::StaticMethod("editable", &JSListItem::SetEditable);

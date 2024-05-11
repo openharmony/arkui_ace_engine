@@ -44,6 +44,9 @@ void ImageLoadingContext::OnLoadFail() {}
 
 void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj) {}
 
+void ImageLoadingContext::SetOnProgressCallback(
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress) {}
+
 void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& image)
 {
     canvasImage_ = image;

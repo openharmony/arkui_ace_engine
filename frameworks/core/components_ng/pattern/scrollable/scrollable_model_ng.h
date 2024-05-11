@@ -31,7 +31,7 @@ public:
     static void SetScrollBarWidth(const std::string& value);
 
     static void SetOnScroll(OnScrollEvent&& onScroll);
-    static void SetOnWillScroll(OnScrollEvent&& onScroll);
+    static void SetOnWillScroll(OnWillScrollEvent&& onScroll);
     static void SetOnDidScroll(OnScrollEvent&& onScroll);
     static void SetOnScrollStart(OnScrollStartEvent&& onScrollStart);
     static void SetOnScrollStop(OnScrollStopEvent&& onScrollStop);
@@ -44,7 +44,7 @@ public:
     static void SetScrollBarWidth(FrameNode* frameNode, const std::string& value);
     static void SetScrollBarColor(FrameNode* frameNode, const std::string& value);
     static void SetMaxFlingSpeed(double max);
-    static void SetOnWillScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
+    static void SetOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onScroll);
     static void SetOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static int32_t GetAlwaysEnabled(FrameNode* frameNode);
@@ -54,6 +54,7 @@ public:
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin);
+    static void SetMaxFlingSpeed(FrameNode* frameNode, double max);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

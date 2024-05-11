@@ -26,9 +26,7 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
-#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
-#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -96,6 +94,7 @@ void ScrollablePattern::SetAxis(Axis axis)
         return;
     }
     axis_ = axis;
+    SetParentScrollable();
     if (scrollBar_) {
         auto positionMode = GetPositionMode();
         scrollBar_->SetPositionMode(positionMode);
@@ -411,6 +410,12 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->HandleOverScroll(!pattern->IsReverse() ? velocity : -velocity);
     });
 
+    scrollable->SetIsReverseCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->IsReverse();
+    });
+
     auto scrollStart = [weak = WeakClaim(this)](float position) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -576,7 +581,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     scrollable->SetEdgeEffect(edgeEffect);
 }
 
-bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size, bool reverse)
+bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     bool isAtTop = IsAtTop();
     bool isAtBottom = IsAtBottom();
@@ -586,7 +591,7 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
         (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION)) { // handle edge effect
         if ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset))) {
             auto isScrollFromUpdate = source == SCROLL_FROM_UPDATE;
-            scrollEffect_->HandleOverScroll(GetAxis(), !reverse ? -offset : offset,
+            scrollEffect_->HandleOverScroll(GetAxis(), -offset,
                 size, isScrollFromUpdate, isNotPositiveScrollableDistance);
         }
     }
@@ -1679,6 +1684,28 @@ ScrollState ScrollablePattern::GetScrollState(int32_t scrollSource)
     return ScrollState::IDLE;
 }
 
+ScrollSource ScrollablePattern::ConvertScrollSource(int32_t source)
+{
+    // static linear map must be sorted by key.
+    static const LinearEnumMapNode<int32_t, ScrollSource> scrollSourceMap[] = {
+        { SCROLL_FROM_UPDATE, ScrollSource::DRAG },
+        { SCROLL_FROM_ANIMATION, ScrollSource::FLING },
+        { SCROLL_FROM_JUMP, ScrollSource::SCROLLER },
+        { SCROLL_FROM_ANIMATION_SPRING, ScrollSource::EDGE_EFFECT },
+        { SCROLL_FROM_BAR, ScrollSource::SCROLL_BAR },
+        { SCROLL_FROM_FOCUS_JUMP, ScrollSource::OTHER_USER_INPUT },
+        { SCROLL_FROM_AXIS, ScrollSource::OTHER_USER_INPUT },
+        { SCROLL_FROM_ANIMATION_CONTROLLER, ScrollSource::SCROLLER_ANIMATION },
+        { SCROLL_FROM_BAR_FLING, ScrollSource::SCROLL_BAR_FLING },
+    };
+    ScrollSource sourceType = ScrollSource::OTHER_USER_INPUT;
+    int64_t idx = BinarySearchFindIndex(scrollSourceMap, ArraySize(scrollSourceMap), source);
+    if (idx >= 0) {
+        sourceType = scrollSourceMap[idx].value;
+    }
+    return sourceType;
+}
+
 ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t source, NestedState state)
 {
     auto parent = GetNestedScrollParent();
@@ -2028,6 +2055,13 @@ void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velo
 
 void ScrollablePattern::FireOnScrollStart()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(hub);
+    if (scrollStop_ && !GetScrollAbort()) {
+        OnScrollStop(hub->GetOnScrollStop());
+    }
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
         ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
@@ -2039,10 +2073,6 @@ void ScrollablePattern::FireOnScrollStart()
         scrollBar->PlayScrollBarAppearAnimation();
     }
     StopScrollBarAnimatorByProxy();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollableEventHub>();
-    CHECK_NULL_VOID(hub);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
@@ -2098,15 +2128,18 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
     }
 }
 
-void ScrollablePattern::FireOnWillScroll(float offset) const
+float ScrollablePattern::FireOnWillScroll(float offset) const
 {
     auto eventHub = GetEventHub<ScrollableEventHub>();
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_RETURN(eventHub, offset);
     auto onScroll = eventHub->GetOnWillScroll();
-    CHECK_NULL_VOID(onScroll);
+    CHECK_NULL_RETURN(onScroll, offset);
     auto offsetPX = Dimension(offset);
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-    onScroll(offsetVP, GetScrollState());
+    auto scrollRes = onScroll(offsetVP, GetScrollState(), ConvertScrollSource(scrollSource_));
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, offset);
+    return context->NormalizeToPx(scrollRes.offset);
 }
 
 /**
@@ -2521,7 +2554,7 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
             if (pattern->IsReverse()) {
                 offset = -offset;
             }
-            pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
+            pattern->UpdateCurrentOffset(offset, SCROLL_FROM_ANIMATION_CONTROLLER);
         });
         fixedVelocityMotion_->SetVelocity(velocity);
     } else {

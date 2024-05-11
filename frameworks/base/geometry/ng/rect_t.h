@@ -237,6 +237,24 @@ public:
         return *this;
     }
 
+    RectT& operator+=(const RectT<T>& rect)
+    {
+        x_ += rect.x_;
+        y_ += rect.y_;
+        width_ += rect.Width();
+        height_ += rect.Height();
+        return *this;
+    }
+
+    RectT& operator-=(const RectT<T>& rect)
+    {
+        x_ -= rect.x_;
+        y_ -= rect.y_;
+        width_ -= rect.Width();
+        height_ -= rect.Height();
+        return *this;
+    }
+
     RectT& operator-=(const SizeT<T>& size)
     {
         width_ -= size.Width();
@@ -257,6 +275,16 @@ public:
     RectT operator+(const SizeT<T>& size) const
     {
         return RectT(x_, y_, width_ + size.Width(), height_ + size.Height());
+    }
+
+    RectT operator+(const RectT<T>& rect) const
+    {
+        return RectT(x_ + rect.x_, y_ + rect.y_, width_ + rect.Width(), height_ + rect.Height());
+    }
+
+    RectT operator-(const RectT<T>& rect) const
+    {
+        return RectT(x_ - rect.x_, y_ - rect.y_, width_ - rect.Width(), height_ - rect.Height());
     }
 
     RectT operator-(const SizeT<T>& size) const

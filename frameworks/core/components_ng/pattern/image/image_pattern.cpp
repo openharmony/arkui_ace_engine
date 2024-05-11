@@ -155,6 +155,7 @@ void ImagePattern::OnCompleteInDataReady()
     CHECK_NULL_VOID(geometryNode);
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
+    CHECK_NULL_VOID(loadingCtx_);
     LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 0,
         geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height(),
@@ -171,7 +172,7 @@ void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     SetOnFinishCallback(image);
     SetRedrawCallback(image);
     // GIF images are not played by default, but depend on OnVisibleAreaChange callback.
-    image->ControlAnimation(false);
+    image->ControlAnimation(gifAnimation_);
 }
 
 void ImagePattern::SetOnFinishCallback(const RefPtr<CanvasImage>& image)
@@ -242,7 +243,11 @@ void ImagePattern::CalAndUpdateSelectOverlay()
     CHECK_NULL_VOID(host);
     auto rect = host->GetTransformRectRelativeToWindow();
     SelectOverlayInfo info;
-    SizeF handleSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), info.singleLineHeight };
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    SizeF handleSize = {
+        SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(),
+        geometryNode->GetContentSize().Height() };
     info.firstHandle.paintRect = RectF(rect.GetOffset(), handleSize);
     CheckHandles(info.firstHandle);
     OffsetF offset(rect.Width() - handleSize.Width(), rect.Height() - handleSize.Height());
@@ -343,11 +348,10 @@ void ImagePattern::OnImageLoadSuccess()
     altImage_ = nullptr;
     altDstRect_.reset();
     altSrcRect_.reset();
-    if (!IsSupportImageAnalyzerFeature()) {
-        DestroyAnalyzerOverlay();
-    }
-    UpdateAnalyzerOverlay();
 
+    if (isPixelMapChanged_) {
+        UpdateAnalyzerOverlay();
+    }
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -357,6 +361,7 @@ void ImagePattern::OnImageLoadSuccess()
         ContainerScope scope(pattern->GetHostInstanceId());
         pattern->CreateAnalyzerOverlay();
     }, "ArkUIImageCreateAnalyzerOverlay");
+    ACE_LAYOUT_SCOPED_TRACE("OnImageLoadSuccess[self:%d]", host->GetId());
     host->MarkNeedRenderOnly();
 }
 
@@ -490,7 +495,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!isLayouted_ && isAnimation_) {
+    if (!isLayouted_ && GetIsAnimation()) {
         isLayouted_ = true;
         if (images_.size()) {
             int32_t nextIndex = GetNextIndex(nowImageIndex_);
@@ -559,6 +564,9 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
+    if (onProgressCallback_) {
+        loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
+    }
     loadingCtx_->LoadImageData();
 }
 
@@ -579,6 +587,12 @@ void ImagePattern::LoadImageDataIfNeed()
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
+    if (loadingCtx_) {
+        auto srcPixelMap = src.GetPixmap();
+        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
+        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
+                                                              loadPixelMap->GetRawPixelMapPtr();
+    }
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
         LoadImage(src);
     } else {
@@ -634,10 +648,15 @@ void ImagePattern::UpdateGestureAndDragWhenModify()
 
 void ImagePattern::OnModifyDone()
 {
-    if (isAnimation_) {
-        OnAnimatedModifyDone();
-    } else {
-        OnImageModifyDone();
+    switch (imageType_) {
+        case ImageType::BASE:
+            OnImageModifyDone();
+            break;
+        case ImageType::ANIMATION:
+            OnAnimatedModifyDone();
+            break;
+        default:
+            break;
     }
 }
 
@@ -645,7 +664,6 @@ void ImagePattern::OnAnimatedModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    ChangeRenderContextProperties();
     Pattern::OnModifyDone();
     auto size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
@@ -671,6 +689,9 @@ void ImagePattern::OnAnimatedModifyDone()
     }
     UpdateFormDurationByRemainder();
     SetObscured();
+    if (isSrcUndefined_) {
+        return;
+    }
     ControlAnimation(index);
 }
 
@@ -708,7 +729,6 @@ void ImagePattern::ControlAnimation(int32_t index)
 
 void ImagePattern::OnImageModifyDone()
 {
-    ChangeRenderContextProperties();
     Pattern::OnModifyDone();
     LoadImageDataIfNeed();
     UpdateGestureAndDragWhenModify();
@@ -926,13 +946,14 @@ void ImagePattern::OnVisibleAreaChange(bool visible)
         CloseSelectOverlay();
     }
     // control pixelMap List
-    if (isAnimation_ && !animator_->IsStopped()) {
+    if (GetIsAnimation() && !animator_->IsStopped()) {
         if (visible) {
             animator_->Forward();
         } else {
             animator_->Pause();
         }
     }
+    gifAnimation_ = visible;
     // control svg / gif animation
     if (image_) {
         image_->ControlAnimation(visible);
@@ -947,15 +968,19 @@ void ImagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderCtx = host->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
-    renderCtx->SetClipToBounds(false);
-    renderCtx->SetUsingContentRectForRenderFrame(true);
+    if (GetIsAnimation()) {
+        renderCtx->SetClipToFrame(true);
+    } else {
+        renderCtx->SetClipToBounds(false);
+        renderCtx->SetUsingContentRectForRenderFrame(true);
 
-    // register image frame node to pipeline context to receive memory level notification and window state change
-    // notification
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
-    pipeline->AddWindowStateChangedCallback(host->GetId());
+        // register image frame node to pipeline context to receive memory level notification and window state change
+        // notification
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+        pipeline->AddWindowStateChangedCallback(host->GetId());
+    }
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1045,9 +1070,13 @@ void ImagePattern::OpenSelectOverlay()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     auto rect = host->GetTransformRectRelativeToWindow();
     SelectOverlayInfo info;
-    SizeF handleSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), info.singleLineHeight };
+    SizeF handleSize = {
+        SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(),
+        geometryNode->GetContentSize().Height() };
     info.firstHandle.paintRect = RectF(rect.GetOffset(), handleSize);
     OffsetF offset(rect.Width() - handleSize.Width(), rect.Height() - handleSize.Height());
     info.secondHandle.paintRect = RectF(rect.GetOffset() + offset, handleSize);
@@ -1818,7 +1847,7 @@ void ImagePattern::ResetFormAnimationFlag()
 void ImagePattern::SetIteration(int32_t iteration)
 {
     if (iteration < -1) {
-        iteration = DEFAULT_ITERATIONS;
+        return;
     }
     if (IsFormRender()) {
         iteration = DEFAULT_ITERATIONS;
@@ -1828,14 +1857,8 @@ void ImagePattern::SetIteration(int32_t iteration)
 
 void ImagePattern::SetDuration(int32_t duration)
 {
-    if (duration <= 0) {
+    if (duration < 0) {
         return;
-    }
-    if (durationTotal_ == 0) {
-        for (int i = 0; i < images_.size(); i++) {
-            images_[i].duration = duration / images_.size();
-            durationTotal_ += images_[i].duration;
-        }
     }
     int32_t finalDuration = durationTotal_ > 0 ? durationTotal_ : duration;
     if (IsFormRender()) {
@@ -1857,6 +1880,12 @@ void ImagePattern::SetDuration(int32_t duration)
         CHECK_NULL_VOID(imageAnimator);
         imageAnimator->animator_->SetDuration(finalDuration);
     });
+}
+
+void ImagePattern::SetOnProgressCallback(
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress)
+{
+    onProgressCallback_ = onProgress;
 }
 
 void ImagePattern::OnSensitiveStyleChange(bool isSensitive)
@@ -1953,23 +1982,6 @@ void ImagePattern::SetImageFit(const RefPtr<FrameNode>& imageFrameNode)
     if (layoutProperty->HasImageFit()) {
         imageLayoutProperty->UpdateImageFit(layoutProperty->GetImageFit().value());
     }
-}
-
-void ImagePattern::ChangeRenderContextProperties()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderCtx = host->GetRenderContext();
-    CHECK_NULL_VOID(renderCtx);
-
-    if (isAnimation_) {
-        renderCtx->SetClipToBounds(true);
-        renderCtx->SetUsingContentRectForRenderFrame(false);
-    } else {
-        renderCtx->SetClipToBounds(false);
-        renderCtx->SetUsingContentRectForRenderFrame(true);
-    }
-    renderCtx->SyncGeometryProperties(nullptr);
 }
 
 void ImagePattern::SetObscured()

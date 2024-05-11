@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/data_panel_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_data_panel_theme.h"
 #include "core/components/data_panel/data_panel_theme.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 
@@ -120,6 +121,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         dataPanelType = 1;
     }
     DataPanelModel::GetInstance()->Create(dateValues, max, dataPanelType);
+    JSDataPanelTheme::ApplyTheme();
 }
 
 void JSDataPanel::CloseEffect(const JSCallbackInfo& info)

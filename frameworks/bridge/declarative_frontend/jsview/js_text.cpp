@@ -46,6 +46,7 @@
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_theme.h"
 
 namespace OHOS::Ace {
 
@@ -596,6 +597,9 @@ void JSText::Create(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     if (args->IsObject() && JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>()) {
         auto *spanString = JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>();
+        if (spanString == nullptr) {
+            return;
+        }
         auto spanStringController = spanString->GetController();
         if (spanStringController) {
             TextModel::GetInstance()->Create(spanStringController);
@@ -607,6 +611,7 @@ void JSText::Create(const JSCallbackInfo& info)
         TextModel::GetInstance()->Create(data);
     }
 
+    JSTextTheme::ApplyTheme();
     if (info.Length() <= 1 || !info[1]->IsObject()) {
         return;
     }
@@ -614,7 +619,7 @@ void JSText::Create(const JSCallbackInfo& info)
     JSTextController* jsController = nullptr;
     auto paramObject = JSRef<JSObject>::Cast(info[1]);
     auto controllerObj = paramObject->GetProperty("controller");
-    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
         jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextController>();
     }
 

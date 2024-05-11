@@ -112,6 +112,11 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     TextSelectOverlay::OnHandleMove(handleRect, isFirst);
     auto parentGlobalOffset = pattern->GetParentGlobalOffset();
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset;
+    auto contentRect = pattern->GetContentRect();
+    auto caretRect = pattern->GetCaretRect();
+    float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
+    float y = std::clamp(localOffset.GetY(), contentRect.Top(), contentRect.Bottom() - caretRect.Height());
+    localOffset = OffsetF(x, y);
     pattern->magnifierController_->SetLocalOffset(localOffset);
     if (isFirst) {
         pattern->textSelector_.firstHandle.SetOffset(localOffset);
@@ -299,7 +304,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     }
 }
 
-void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
+void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     TAG_LOGD(AceLogTag::ACE_TEXT, "menuType=%{public}d, closeReason=%{public}d", menuType, reason);
     auto pattern = GetPattern<RichEditorPattern>();

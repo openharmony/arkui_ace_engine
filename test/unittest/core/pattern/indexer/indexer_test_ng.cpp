@@ -50,6 +50,7 @@ std::vector<std::string> CREATE_ARRAY = { "A", "B", "C", "D", "E", "F", "G", "H"
     "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 std::vector<std::string> CREATE_ARRAY_1 = { "A", "B", "C", "D", "E", "F", "G", "H", "I"};
 std::vector<std::string> CREATE_ARRAY_2 = { "#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"};
+const float INDEXERWIDTH = 40.0f;
 std::vector<std::string> GetPopupData(int32_t)
 {
     return { "白", "别" };
@@ -1469,6 +1470,97 @@ HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm001, TestSize.Level1)
     ASSERT_NE(indexerLayoutProperty4, nullptr);
     offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty4, 40);
     EXPECT_EQ(offset, OffsetT<Dimension>(Dimension(50), Dimension(-20)));
+}
+
+/**
+ * @tc.name: IndexerLayoutAlgorithm002
+ * @tc.desc: Test indexer layoutAlgorithm GetPositionOfPopupNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm002, TestSize.Level1)
+{
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
+
+    auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(indexerLayoutAlgorithm, nullptr);
+    auto indexerLayoutProperty1 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty1, nullptr);
+    auto userDefinePositionX = Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP).ConvertToPx();
+    auto userDefinePositionRightX = userDefinePositionX + INDEXERWIDTH / 2;
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto userDefinePositionLeftX = -userDefinePositionX + INDEXERWIDTH / 2 - bubbleSize;
+
+    /**
+     * case: case1: popup position is left.
+     */
+    indexerLayoutProperty1->UpdateAlignStyle(NG::AlignStyle::LEFT);
+    auto offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
+    EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionRightX));
+
+    /**
+     * case: case2: popup position is right.
+     */
+    indexerLayoutProperty1->UpdateAlignStyle(NG::AlignStyle::RIGHT);
+    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
+    EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionLeftX));
+}
+
+/**
+ * @tc.name: IndexerLayoutAlgorithm003
+ * @tc.desc: Test indexer layoutAlgorithm GetPositionOfPopupNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm003, TestSize.Level1)
+{
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
+
+    auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(indexerLayoutAlgorithm, nullptr);
+    auto indexerLayoutProperty1 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty1, nullptr);
+    auto userDefinePositionX = Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP).ConvertToPx();
+    auto userDefinePositionRightX = userDefinePositionX + INDEXERWIDTH / 2;
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto userDefinePositionLeftX = -userDefinePositionX + INDEXERWIDTH / 2 - bubbleSize;
+    
+    /**
+     * case: case1: popup position is default(END) and layoutDirection is RTL
+     */
+    indexerLayoutProperty1->UpdateLayoutDirection(TextDirection::RTL);
+    auto offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
+    EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionRightX));
+
+    /**
+     * case: case2: popup position is default(END) and layoutDirection is LTR
+     */
+    indexerLayoutProperty1->UpdateLayoutDirection(TextDirection::LTR);
+    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
+    EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionLeftX));
+
+    /**
+     * case: case3: popup position is START and layoutDirection is RTL
+     */
+    indexerLayoutProperty1->UpdateAlignStyle(NG::AlignStyle::START);
+    indexerLayoutProperty1->UpdateLayoutDirection(TextDirection::RTL);
+    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
+    EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionLeftX));
+
+    /**
+     * case: case4: popup position is START and layoutDirection is LTR
+     */
+    indexerLayoutProperty1->UpdateLayoutDirection(TextDirection::LTR);
+    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
+    EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionRightX));
 }
 
 /**
