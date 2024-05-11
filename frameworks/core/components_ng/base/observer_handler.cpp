@@ -59,9 +59,10 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     std::string id = host->GetInspectorId().value_or("");
+    std::string uniqueId = std::to_string(host->GetId());
     float offset = pattern->GetTotalOffset();
     CHECK_NULL_VOID(scrollEventHandleFunc_);
-    scrollEventHandleFunc_(id, eventType, offset);
+    scrollEventHandleFunc_(id, uniqueId, eventType, offset);
 }
 
 void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
@@ -158,11 +159,13 @@ std::shared_ptr<ScrollEventInfo> UIObserverHandler::GetScrollEventState(const Re
     CHECK_NULL_RETURN(current, nullptr);
     auto nav = AceType::DynamicCast<FrameNode>(current);
     CHECK_NULL_RETURN(nav, nullptr);
-    std::string id = std::to_string(nav->GetId());
+    std::string id = nav->GetInspectorId().value_or("");
+    std::string uniqueId = std::to_string(nav->GetId());
     auto pattern = nav->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return std::make_shared<ScrollEventInfo>(
         id,
+        uniqueId,
         ScrollEventType::SCROLL_START,
         pattern->GetTotalOffset());
 }

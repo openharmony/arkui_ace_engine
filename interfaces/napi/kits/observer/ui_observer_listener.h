@@ -37,7 +37,7 @@ public:
     }
     void OnNavigationStateChange(const NG::NavDestinationInfo& info);
     void OnScrollEventStateChange(
-        const std::string& id, NG::ScrollEventType eventType, float offset);
+        const std::string& id, const std::string& uniqueId, NG::ScrollEventType eventType, float offset);
     void OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo);
     void OnDensityChange(double density);
     void OnWillClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,

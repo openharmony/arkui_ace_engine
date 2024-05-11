@@ -215,10 +215,11 @@ void UIObserver::UnRegisterScrollEventCallback(const std::string& id, napi_value
     );
 }
 
-void UIObserver::HandleScrollEventStateChange(const std::string& id, NG::ScrollEventType eventType, float offset)
+void UIObserver::HandleScrollEventStateChange(const std::string& id, const std::string& uniqueId,
+    NG::ScrollEventType eventType, float offset)
 {
     for (const auto& listener : scrollEventListeners_) {
-        listener->OnScrollEventStateChange(id, eventType, offset);
+        listener->OnScrollEventStateChange(id, uniqueId, eventType, offset);
     }
 
     auto iter = specifiedScrollEventListeners_.find(id);
@@ -229,7 +230,7 @@ void UIObserver::HandleScrollEventStateChange(const std::string& id, NG::ScrollE
     auto& holder = iter->second;
 
     for (const auto& listener : holder) {
-        listener->OnScrollEventStateChange(id, eventType, offset);
+        listener->OnScrollEventStateChange(id, uniqueId, eventType, offset);
     }
 }
 

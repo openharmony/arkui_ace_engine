@@ -65,11 +65,12 @@ enum class ScrollEventType {
 
 struct ScrollEventInfo {
     std::string id;
+    std::string uniqueId;
     ScrollEventType scrollEvent;
     float offset;
 
-    ScrollEventInfo(std::string id, ScrollEventType scrollEvent, float offset)
-        : id(std::move(id)), scrollEvent(scrollEvent), offset(offset)
+    ScrollEventInfo(std::string id, std::string uniqueId, ScrollEventType scrollEvent, float offset)
+        : id(std::move(id)), uniqueId(std::move(uniqueId)), scrollEvent(scrollEvent), offset(offset)
     {}
 };
 
@@ -132,7 +133,7 @@ public:
     void NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
         std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
-    using ScrollEventHandleFunc = void (*)(const std::string&, ScrollEventType, float);
+    using ScrollEventHandleFunc = void (*)(const std::string&, const std::string&, ScrollEventType, float);
     using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();
