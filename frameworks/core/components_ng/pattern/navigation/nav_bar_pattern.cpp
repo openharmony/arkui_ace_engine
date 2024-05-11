@@ -38,6 +38,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+// titlebar ZINDEX
+constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
 void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
     const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode)
 {
@@ -468,6 +470,12 @@ void NavBarPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarRenderContext = titleBarNode->GetRenderContext();
+    CHECK_NULL_VOID(titleBarRenderContext);
+    // set the titlebar to float on the top
+    titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     MountTitleBar(hostNode);
     MountToolBar(hostNode);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();

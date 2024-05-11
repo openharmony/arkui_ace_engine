@@ -27,6 +27,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+    // titlebar ZINDEX
+    constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
     std::atomic<uint64_t> navDestinationPatternNextAutoGenId = 0;
 }
 
@@ -72,7 +74,12 @@ void NavDestinationPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarRenderContext = titleBarNode->GetRenderContext();
+    CHECK_NULL_VOID(titleBarRenderContext);
+    // set the titlebar to float on the top
+    titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
     if (opts && opts->Expansive() && navDestinationContentNode) {

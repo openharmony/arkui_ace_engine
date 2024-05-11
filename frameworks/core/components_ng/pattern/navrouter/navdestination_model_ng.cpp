@@ -147,7 +147,13 @@ void NavDestinationModelNG::Create()
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-
+    if (!navDestinationNode->GetTitleBarNode()) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            CreateImageButton(navDestinationNode);
+        } else {
+            CreateBackButton(navDestinationNode);
+        }
+    }
     // content node
     if (!navDestinationNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -156,14 +162,6 @@ void NavDestinationModelNG::Create()
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navDestinationNode->AddChild(contentNode);
         navDestinationNode->SetContentNode(contentNode);
-    }
-
-    if (!navDestinationNode->GetTitleBarNode()) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            CreateImageButton(navDestinationNode);
-        } else {
-            CreateBackButton(navDestinationNode);
-        }
     }
 
     stack->Push(navDestinationNode);
@@ -291,6 +289,13 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
             pattern->SetNavDestinationContext(context);
             return pattern;
         });
+    if (!navDestinationNode->GetTitleBarNode()) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            CreateImageButton(navDestinationNode);
+        } else {
+            CreateBackButton(navDestinationNode);
+        }
+    }
     // content node
     if (!navDestinationNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -306,13 +311,6 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
         }
     }
 
-    if (!navDestinationNode->GetTitleBarNode()) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            CreateImageButton(navDestinationNode);
-        } else {
-            CreateBackButton(navDestinationNode);
-        }
-    }
     stack->Push(navDestinationNode);
 }
 
