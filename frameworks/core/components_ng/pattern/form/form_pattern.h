@@ -87,6 +87,8 @@ public:
         formLinkInfos_ = infos;
     }
 
+    void GetRectRelativeToWindow(int32_t &top, int32_t &left);
+
     bool IsJsCard() const
     {
         return isJsCard_;
@@ -96,6 +98,12 @@ public:
     {
         isFormObscured_ = isObscured;
     }
+
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
+
+    void OnAccessibilityChildTreeDeregister();
+
+    void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 
 private:
     void OnAttachToFrameNode() override;

@@ -2369,6 +2369,47 @@ void UIContentImpl::SetFormLinkInfoUpdateHandler(std::function<void(const std::v
     pipelineContext->SetFormLinkInfoUpdateHandler(std::move(callback));
 }
 
+void UIContentImpl::RegisterAccessibilityChildTree(
+    uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    auto accessibilityManager = front->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->RegisterInteractionOperationAsChildTree(parentWindowId, parentTreeId, parentElementId);
+}
+
+void UIContentImpl::SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    auto accessibilityManager = front->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SetAccessibilityGetParentRectHandler(std::move(callback));
+}
+
+void UIContentImpl::DeregisterAccessibilityChildTree()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    auto accessibilityManager = front->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterInteractionOperationAsChildTree();
+}
+
+void UIContentImpl::AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->Dump(params, info);
+}
+
 void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback)
 {
     CHECK_NULL_VOID(errorCallback);
