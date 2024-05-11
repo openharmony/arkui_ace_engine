@@ -73,18 +73,18 @@ constexpr float NO_OPACITY = 0.0f;
 constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
 constexpr int8_t HALF_OF_WIDTH = 2;
 
-constexpr double BIG_FONT_SIZE_SCALE = 1.75f;
-constexpr double LARGE_FONT_SIZE_SCALE = 2.0f;
-constexpr double MAX_FONT_SIZE_SCALE = 3.2f;
-constexpr double BIG_DIALOG_WIDTH = 216.0f;
-constexpr double MAX_DIALOG_WIDTH = 256.0f;
+constexpr float BIG_FONT_SIZE_SCALE = 1.75f;
+constexpr float LARGE_FONT_SIZE_SCALE = 2.0f;
+constexpr float MAX_FONT_SIZE_SCALE = 3.2f;
+constexpr double BIG_DIALOG_WIDTH = 216.0;
+constexpr double MAX_DIALOG_WIDTH = 256.0;
 constexpr int8_t GRIDCOUNT = 2;
 constexpr int8_t MAXLINES = 6;
 constexpr float MAX_FLING_VELOCITY = 4200.0f;
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 } // namespace
 
-void findTextAndImageNode(
+void FindTextAndImageNode(
     const RefPtr<FrameNode>& columnNode, RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& imageNode)
 {
     if (columnNode->GetTag() == V2::TEXT_ETS_TAG) {
@@ -94,7 +94,7 @@ void findTextAndImageNode(
     } else {
         std::list<RefPtr<UINode>> children = columnNode->GetChildren();
         for (auto child : children) {
-            findTextAndImageNode(AceType::DynamicCast<FrameNode>(child), textNode, imageNode);
+            FindTextAndImageNode(AceType::DynamicCast<FrameNode>(child), textNode, imageNode);
         }
     }
 }
@@ -250,7 +250,7 @@ void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
             }
 
             if (tabBar->moveIndex_ != index) {
-                tabBar->CloseDialog(tabBar->dialogNode_);
+                tabBar->CloseDialog();
                 tabBar->moveIndex_ = index;
                 tabBar->ShowDialogWithNode(index);
             }
@@ -721,18 +721,6 @@ void TabBarPattern::OnModifyDone()
     InitTurnPageRateEvent();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    float scale = pipelineContext->GetFontScale();
-    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE) {
-        if (scale >= BIG_FONT_SIZE_SCALE) {
-            InitLongPressEvent(gestureHub);
-            InitDragEvent(gestureHub);
-        } else {
-            gestureHub->RemoveDragEvent();
-            gestureHub->SetLongPressEvent(nullptr);
-            longPressEvent_ = nullptr;
-            dragEvent_ = nullptr;
-        }
-    }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto tabBarPaintProperty = host->GetPaintProperty<TabBarPaintProperty>();
         CHECK_NULL_VOID(tabBarPaintProperty);
@@ -903,6 +891,28 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return false;
 }
 
+void TabBarPattern::InitLongPressAndDragEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    float scale = pipelineContext->GetFontScale();
+    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE && scale >= BIG_FONT_SIZE_SCALE) {
+        InitLongPressEvent(gestureHub);
+        InitDragEvent(gestureHub);
+    } else {
+        gestureHub->RemoveDragEvent();
+        gestureHub->SetLongPressEvent(nullptr);
+        longPressEvent_ = nullptr;
+        dragEvent_ = nullptr;
+    }
+}
+
 void TabBarPattern::HandleLongPressEvent(const GestureEvent& info)
 {
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
@@ -918,7 +928,7 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     CHECK_NULL_VOID(columnNode);
     RefPtr<FrameNode> imageNode = nullptr;
     RefPtr<FrameNode> textNode = nullptr;
-    findTextAndImageNode(columnNode, textNode, imageNode);
+    FindTextAndImageNode(columnNode, textNode, imageNode);
     CHECK_NULL_VOID(imageNode);
     CHECK_NULL_VOID(textNode);
 
@@ -956,7 +966,7 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     dialogNode_ = overlayManager->ShowDialogWithNode(dialogProperties, dialogColumnNode, false);
 }
 
-void TabBarPattern::CloseDialog(int32_t index)
+void TabBarPattern::CloseDialog()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -1399,7 +1409,7 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
     if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && dialogNode_) {
         TabBarClickEvent(index);
         ClickTo(host, index);
-        CloseDialog(index);
+        CloseDialog();
     }
 
     if (IsContainsBuilder()) {
