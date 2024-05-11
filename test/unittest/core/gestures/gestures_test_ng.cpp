@@ -77,6 +77,7 @@ constexpr Dimension DEFAULT_PAN_DISTANCE = 5.0_vp;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 100.0;
 constexpr double PAN_DISTANCE = 1.0;
+constexpr int32_t TEST_EVENT_ID = 11;
 } // namespace
 
 class GesturesTestNg : public testing::Test {
@@ -3864,6 +3865,94 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest017, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PanRecognizerTest018
+ * @tc.desc: Test PanRecognizer function: HandleTouchDownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PanRecognizerTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    ASSERT_NE(panRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step2. test with HandleTouchDownEvent(AxisEvent).
+     * @tc.expect: panRecognizer->lastAxisEvent_ is equal to axisEvent
+     * @tc.expect: panRecognizer->touchPoints_[axisEvent.id].originalId is equal to axisEvent.originalId
+     * @tc.expect: panRecognizer->touchPoints_[axisEvent.id].screenX is equal to axisEvent.screenX
+     * @tc.expect: panRecognizer->touchPoints_[axisEvent.id].screenY is equal to axisEvent.screenY
+     */
+    AxisEvent axisEvent;
+    axisEvent.id = TEST_EVENT_ID;
+    axisEvent.originalId = TEST_EVENT_ID;
+    axisEvent.isRotationEvent = false;
+    panRecognizer->refereeState_ = RefereeState::SUCCEED;
+    panRecognizer->fingers_ = SINGLE_FINGER_NUMBER;
+    panRecognizer->direction_.type = PanDirection::HORIZONTAL;
+    panRecognizer->HandleTouchDownEvent(axisEvent);
+    EXPECT_EQ(panRecognizer->lastAxisEvent_.id, axisEvent.id);
+    EXPECT_EQ(panRecognizer->touchPoints_[axisEvent.id].originalId, axisEvent.originalId);
+    EXPECT_EQ(panRecognizer->touchPoints_[axisEvent.id].screenX, axisEvent.screenX);
+    EXPECT_EQ(panRecognizer->touchPoints_[axisEvent.id].screenY, axisEvent.screenY);
+}
+
+/**
+ * @tc.name: PanRecognizerTest019
+ * @tc.desc: Test PanRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PanRecognizerTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    ASSERT_NE(panRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step2. test with HandleTouchUpEvent(AxisEvent).
+     * @tc.expect: panRecognizer->lastAxisEvent_ is equal to axisEvent
+     */
+    AxisEvent axisEvent;
+    axisEvent.id = TEST_EVENT_ID;
+    axisEvent.isRotationEvent = false;
+    panRecognizer->refereeState_ = RefereeState::SUCCEED;
+    panRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(panRecognizer->lastAxisEvent_.id, axisEvent.id);
+}
+
+/**
+ * @tc.name: PanRecognizerTest020
+ * @tc.desc: Test PanRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PanRecognizerTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    ASSERT_NE(panRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step2. test with HandleTouchMoveEvent(AxisEvent).
+     * @tc.expect: panRecognizer->lastAxisEvent_ is equal to axisEvent
+     */
+    AxisEvent axisEvent;
+    axisEvent.id = TEST_EVENT_ID;
+    axisEvent.isRotationEvent = false;
+    panRecognizer->refereeState_ = RefereeState::SUCCEED;
+    panRecognizer->fingers_ = SINGLE_FINGER_NUMBER;
+    panRecognizer->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(panRecognizer->lastAxisEvent_.id, axisEvent.id);
+}
+
+/**
  * @tc.name: ParallelRecognizerTest001
  * @tc.desc: Test ParallelRecognizer function: OnAccepted OnRejected OnPending OnBlock
  * @tc.type: FUNC
@@ -5990,6 +6079,99 @@ HWTEST_F(GesturesTestNg, RotationRecognizerTest007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RotationRecognizerTest008
+ * @tc.desc: Test RotationRecognizer function: HandleTouchDownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rotationRecognizer.
+     */
+    auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    ASSERT_NE(rotationRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step2. test with HandleTouchDownEvent(AxisEvent).
+     * @tc.expect: rotationRecognizer.lastAxisEvent_ is equal to axisEvent
+     * @tc.expect: rotationRecognizer.touchPoints_[axisEvent.id].originalId is equal to axisEvent.originalId
+     * @tc.expect: rotationRecognizer.touchPoints_[axisEvent.id].screenX is equal to axisEvent.screenX
+     * @tc.expect: rotationRecognizer.touchPoints_[axisEvent.id].screenY is equal to axisEvent.screenY
+     */
+    AxisEvent axisEvent;
+    axisEvent.id = TEST_EVENT_ID;
+    axisEvent.originalId = TEST_EVENT_ID;
+    axisEvent.isRotationEvent = true;
+
+    rotationRecognizer->refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer->currentFingers_ = rotationRecognizer->fingers_;
+    rotationRecognizer->HandleTouchDownEvent(axisEvent);
+    EXPECT_EQ(rotationRecognizer->lastAxisEvent_.id, axisEvent.id);
+    EXPECT_EQ(rotationRecognizer->touchPoints_[axisEvent.id].originalId, axisEvent.originalId);
+    EXPECT_EQ(rotationRecognizer->touchPoints_[axisEvent.id].screenX, axisEvent.screenX);
+    EXPECT_EQ(rotationRecognizer->touchPoints_[axisEvent.id].screenY, axisEvent.screenY);
+}
+
+/**
+ * @tc.name: RotationRecognizerTest009
+ * @tc.desc: Test RotationRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rotationRecognizer.
+     */
+    auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    ASSERT_NE(rotationRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step2. test with HandleTouchUpEvent(AxisEvent).
+     * @tc.expect: rotationRecognizer->lastAxisEvent_ is equal to axisEvent
+     */
+    AxisEvent axisEvent;
+    axisEvent.isRotationEvent = true;
+    axisEvent.id = TEST_EVENT_ID;
+    rotationRecognizer->refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer->currentFingers_ = rotationRecognizer->fingers_;
+    rotationRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(rotationRecognizer->lastAxisEvent_.id, axisEvent.id);
+}
+
+/**
+ * @tc.name: RotationRecognizerTest010
+ * @tc.desc: Test RotationRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rotationRecognizer.
+     */
+    auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    ASSERT_NE(rotationRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step2. test with HandleTouchMoveEvent(AxisEvent).
+     * @tc.expect: rotationRecognizer->lastAxisEvent_ is equal to axisEvent
+     * @tc.expect: rotationRecognizer->touchPoints_[axisEvent.id].originalId is equal to axisEvent.originalId
+     * @tc.expect: rotationRecognizer->touchPoints_[axisEvent.id].screenX is equal to axisEvent.screenX
+     * @tc.expect: rotationRecognizer->touchPoints_[axisEvent.id].screenY is equal to axisEvent.screenY
+     */
+    AxisEvent axisEvent;
+    axisEvent.id = TEST_EVENT_ID;
+    axisEvent.originalId = TEST_EVENT_ID;
+    axisEvent.isRotationEvent = true;
+    rotationRecognizer->refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer->currentFingers_ = rotationRecognizer->fingers_;
+    rotationRecognizer->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(rotationRecognizer->lastAxisEvent_.id, axisEvent.id);
+    EXPECT_EQ(rotationRecognizer->touchPoints_[axisEvent.id].originalId, axisEvent.originalId);
+    EXPECT_EQ(rotationRecognizer->touchPoints_[axisEvent.id].screenX, axisEvent.screenX);
+    EXPECT_EQ(rotationRecognizer->touchPoints_[axisEvent.id].screenY, axisEvent.screenY);
+}
+
+/**
  * @tc.name: SequencedRecognizerTest001
  * @tc.desc: Test SequencedRecognizer function: OnAccepted
  * @tc.type: FUNC
@@ -7551,6 +7733,67 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerTest009, TestSize.Level1)
     swipeRecognizer.prevAngle_ = std::make_optional(0);
     swipeRecognizer.SendCallbackMsg(onAction);
     EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTest010
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchDownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+        swipeDirection, SWIPE_SPEED);
+    ASSERT_NE(swipeRecognizer, nullptr);
+    /**
+     * @tc.steps: step3. test with HandleTouchDownEvent(AxisEvent).
+     * @tc.expect: swipeRecognizer->lastAxisEvent_ is equal to axisEvent
+     * @tc.expect: swipeRecognizer->touchPoints_[axisEvent.id].originalId is equal to axisEvent.originalId
+     * @tc.expect: swipeRecognizer->touchPoints_[axisEvent.id].screenX is equal to axisEvent.screenX
+     * @tc.expect: swipeRecognizer->touchPoints_[axisEvent.id].screenY is equal to axisEvent.screenY
+     */
+    AxisEvent axisEvent;
+    axisEvent.id = TEST_EVENT_ID;
+    axisEvent.originalId = TEST_EVENT_ID;
+
+    swipeRecognizer->refereeState_ = RefereeState::SUCCEED;
+    swipeRecognizer->fingers_ = FINGER_NUMBER;
+    swipeRecognizer->direction_.type = SwipeDirection::HORIZONTAL;
+    swipeRecognizer->HandleTouchDownEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->lastAxisEvent_.id, axisEvent.id);
+    EXPECT_EQ(swipeRecognizer->touchPoints_[axisEvent.id].originalId, axisEvent.originalId);
+    EXPECT_EQ(swipeRecognizer->touchPoints_[axisEvent.id].screenX, axisEvent.screenX);
+    EXPECT_EQ(swipeRecognizer->touchPoints_[axisEvent.id].screenY, axisEvent.screenY);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTest011
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+        swipeDirection, SWIPE_SPEED);
+    ASSERT_NE(swipeRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step3. test with HandleTouchUpEvent(AxisEvent).
+     * @tc.expect: swipeRecognizer->lastAxisEvent_ is equal to axisEvent
+     */
+    AxisEvent axisEvent;
+    axisEvent.id = TEST_EVENT_ID;
+    swipeRecognizer->refereeState_ = RefereeState::SUCCEED;
+    swipeRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->lastAxisEvent_.id, axisEvent.id);
 }
 
 /**
@@ -10117,6 +10360,97 @@ HWTEST_F(GesturesTestNg, PinchRecognizerTest010, TestSize.Level1)
     pinchRecognizer->refereeState_ = RefereeState::SUCCEED;
     pinchRecognizer->HandleTouchUpEvent(axisEvent);
     EXPECT_EQ(pinchRecognizer->isPinchEnd_, true);
+}
+
+/**
+ * @tc.name: PinchRecognizerTest012
+ * @tc.desc: Test PinchRecognizer function: HandleTouchDownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PinchRecognizerTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchRecognizer.
+     */
+    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
+                                                                                   PINCH_GESTURE_DISTANCE);
+    ASSERT_NE(pinchRecognizer, nullptr);
+    /**
+     * @tc.steps: step2. test with HandleTouchDownEvent(AxisEvent).
+     * @tc.expect: pinchRecognizer->lastAxisEvent_ is equal to axisEvent
+     * @tc.expect: pinchRecognizer->touchPoints_[axisEvent.id].originalId is equal to axisEvent.originalId
+     * @tc.expect: pinchRecognizer->touchPoints_[axisEvent.id].screenX is equal to axisEvent.screenX
+     * @tc.expect: pinchRecognizer->touchPoints_[axisEvent.id].screenY is equal to axisEvent.screenY
+     */
+    AxisEvent axisEvent;
+    axisEvent.id = TEST_EVENT_ID;
+    axisEvent.originalId = TEST_EVENT_ID;
+    pinchRecognizer->fingers_ = FINGER_NUMBER_OVER_MAX;
+    pinchRecognizer->refereeState_ = RefereeState::READY;
+    pinchRecognizer->HandleTouchDownEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer->lastAxisEvent_.id, axisEvent.id);
+    EXPECT_EQ(pinchRecognizer->touchPoints_[axisEvent.id].originalId, axisEvent.originalId);
+    EXPECT_EQ(pinchRecognizer->touchPoints_[axisEvent.id].screenX, axisEvent.screenX);
+    EXPECT_EQ(pinchRecognizer->touchPoints_[axisEvent.id].screenY, axisEvent.screenY);
+}
+
+/**
+ * @tc.name: PinchRecognizerTest012
+ * @tc.desc: Test PinchRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PinchRecognizerTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchRecognizer.
+     */
+    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
+                                                                                   PINCH_GESTURE_DISTANCE);
+    ASSERT_NE(pinchRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step2. test with HandleTouchUpEvent(AxisEvent).
+     * @tc.expect: pinchRecognizer->lastAxisEvent_ is equal to axisEvent
+     */
+    AxisEvent axisEvent;
+    axisEvent.id = TEST_EVENT_ID;
+    pinchRecognizer->fingers_ = FINGER_NUMBER_OVER_MAX;
+    pinchRecognizer->refereeState_ = RefereeState::READY;
+    pinchRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer->lastAxisEvent_.id, axisEvent.id);
+}
+
+/**
+ * @tc.name: PinchRecognizerTest012
+ * @tc.desc: Test PinchRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PinchRecognizerTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchRecognizer.
+     */
+    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
+                                                                                   PINCH_GESTURE_DISTANCE);
+    ASSERT_NE(pinchRecognizer, nullptr);
+    /**
+     * @tc.steps: step2. test with HandleTouchMoveEvent(AxisEvent).
+     * @tc.expect: pinchRecognizer->lastAxisEvent_ is equal to axisEvent
+     * @tc.expect: pinchRecognizer->touchPoints_[axisEvent.id].originalId is equal to axisEvent.originalId
+     * @tc.expect: pinchRecognizer->touchPoints_[axisEvent.id].screenX is equal to axisEvent.screenX
+     * @tc.expect: pinchRecognizer->touchPoints_[axisEvent.id].screenY is equal to axisEvent.screenY
+     */
+    AxisEvent axisEvent;
+    axisEvent.id = TEST_EVENT_ID;
+    axisEvent.originalId = TEST_EVENT_ID;
+    pinchRecognizer->fingers_ = FINGER_NUMBER_OVER_MAX;
+    pinchRecognizer->refereeState_ = RefereeState::READY;
+    pinchRecognizer->HandleTouchMoveEvent(axisEvent);
+
+    EXPECT_EQ(pinchRecognizer->lastAxisEvent_.id, axisEvent.id);
+    EXPECT_EQ(pinchRecognizer->touchPoints_[axisEvent.id].originalId, axisEvent.originalId);
+    EXPECT_EQ(pinchRecognizer->touchPoints_[axisEvent.id].screenX, axisEvent.screenX);
+    EXPECT_EQ(pinchRecognizer->touchPoints_[axisEvent.id].screenY, axisEvent.screenY);
 }
 
 /**
