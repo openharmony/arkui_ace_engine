@@ -137,8 +137,8 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<MovingPhotoController> controller_;
 
-    // video related params
     int32_t fd_ = -1;
+    std::string uri_ = "";
     bool isPrepared_ = false;
     bool isMuted_ = false;
     bool isPlayByController_ = false;
