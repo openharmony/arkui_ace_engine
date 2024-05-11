@@ -919,7 +919,6 @@ bool RenderSwiper::SpringItems(const DragEndInfo& info)
     if (edgeEffect == EdgeEffect::SPRING) {
         int32_t toIndex = 0;
         toIndex = GreatNotEqual(scrollOffset_, 0.0) ? GetPrevIndex() : GetNextIndex();
-
         if (currentIndex_ == toIndex) {
             double minLeading = 0.0;
             double maxTrainling = 0.0;
@@ -934,6 +933,7 @@ bool RenderSwiper::SpringItems(const DragEndInfo& info)
                 maxTrainling = needReverse_ ? (GreatNotEqual(scrollOffset_, 0.0) ?
                     -(swiperWidth_ - std::abs(prevItemOffset_)) : (swiperWidth_ - std::abs(prevItemOffset_))) : 0.0;
             }
+
             double friction = CalculateFriction(std::abs(dragOffset_) /
                  (axis_ == Axis::VERTICAL ? swiperHeight_ : swiperWidth_));
             StartSpringMotion(scrollOffset_, info.GetMainVelocity() * friction,
@@ -3428,7 +3428,7 @@ void RenderSwiper::OnChildRemoved(const RefPtr<RenderNode>& child)
 
 void RenderSwiper::OnSurfaceChanged()
 {
-    if(isIndicatorAnimationStart_ && !needRestore_) {
+    if (isIndicatorAnimationStart_ && !needRestore_) {
         FinishAllSwipeAnimation(true, true);
     }
 }

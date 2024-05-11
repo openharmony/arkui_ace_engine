@@ -470,6 +470,7 @@ void RenderTabBar::HandleClickedEvent(const ClickInfo& info)
             }
         }
     }
+
     auto pos = std::lower_bound(tabItemOffsets_.begin(), tabItemOffsets_.end(), local,
         [weakBar = AceType::WeakClaim(this)](const Offset& a, const Offset& b) {
             auto tabBar = weakBar.Upgrade();
@@ -480,7 +481,6 @@ void RenderTabBar::HandleClickedEvent(const ClickInfo& info)
                 return false;
             }
         });
-
     if (pos != tabItemOffsets_.end()) {
         int32_t index = IsRightToLeft() ? std::distance(tabItemOffsets_.begin(), pos)
                                         : std::distance(tabItemOffsets_.begin(), pos) - 1;
@@ -722,7 +722,6 @@ void RenderTabBar::ApplyGradientColor()
 
         double viewWidth = GetLayoutSize().Width();
         double gradientWidthPx = NormalizeToPx(gradientWidth_);
-
         // only box's width is big enough will add gradient
         if (viewWidth > DOUBLE_FACTOR * gradientWidthPx && !isVertical_) {
             auto frontDecoration = box->GetFrontDecoration();

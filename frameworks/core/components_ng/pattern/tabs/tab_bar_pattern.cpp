@@ -560,7 +560,6 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
-
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
                               ? KeyCode::KEY_DPAD_LEFT
                               : KeyCode::KEY_DPAD_UP) ||
@@ -1455,13 +1454,13 @@ int32_t TabBarPattern::CalculateSelectedIndex(const Offset& info)
             }
         }
     }
+
     auto pos = std::lower_bound(tabItemOffsets_.begin(), tabItemOffsets_.end(), local,
         [axis, isRTL = isRTL_](const OffsetF& a, const OffsetF& b) {
             return isRTL
                        ? GreatNotEqual(a.GetX(), b.GetX())
                        : (axis == Axis::VERTICAL ? LessNotEqual(a.GetY(), b.GetY()) : LessNotEqual(a.GetX(), b.GetX()));
         });
-
     if (pos == tabItemOffsets_.end()) {
         return -1;
     }

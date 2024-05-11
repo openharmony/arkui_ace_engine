@@ -183,7 +183,6 @@ public:
         } else {
             refreshDistance_ = Dimension(0.0, DimensionUnit::VP);
         }
-
     }
 
     const Dimension& GetProgressDistance() const

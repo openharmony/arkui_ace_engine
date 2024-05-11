@@ -218,7 +218,6 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (!mainSizeIsDefined_ && isSingleCase) {
         auto childMaxMainSize = GetChildMaxSize(layoutWrapper, axis, true);
-
         if (childMaxMainSize != contentMainSize_) {
             contentMainSize_ = childMaxMainSize;
             // CheckInactive

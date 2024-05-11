@@ -420,9 +420,9 @@ void DOMChart::CallSpecializedMethod(const std::string& method, const std::strin
     if (!dataValue || !dataValue->IsArray()) {
         return;
     }
+
     int32_t arraySize = dataValue->GetArraySize();
     auto chartDatas = chartChild_->GetMainCharts();
-
     if (seriesNum_ < 0 || (static_cast<size_t>(seriesNum_) >= chartDatas.size())) {
         LOGW("series number is greater or equal to the size of chart");
         return;
