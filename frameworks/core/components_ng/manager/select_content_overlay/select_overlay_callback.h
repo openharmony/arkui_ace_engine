@@ -50,6 +50,20 @@ struct TouchPointInfo {
     }
 };
 
+struct OverlayInfo : public virtual AceType {
+    DECLARE_ACE_TYPE(OverlayInfo, AceType);
+
+public:
+    bool isSingleHandle = false;
+    bool isShowMenu = false;
+    bool isHiddenHandle = false;
+
+    bool CanBackPressed()
+    {
+        return isSingleHandle && !isShowMenu && isHiddenHandle;
+    }
+};
+
 class ACE_EXPORT SelectOverlayCallback : public virtual AceType {
     DECLARE_ACE_TYPE(SelectOverlayCallback, AceType);
 
@@ -75,7 +89,7 @@ public:
     {
         return true;
     }
-    virtual void OnCloseOverlay(OptionMenuType menuType, CloseReason reason) {}
+    virtual void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) {}
     virtual bool CheckTouchInHostNode(const PointF& touchPoint) = 0;
     virtual void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) {};
     virtual void OnHandleGlobalEvent(const PointF& touchPoint, const TouchEvent& event)

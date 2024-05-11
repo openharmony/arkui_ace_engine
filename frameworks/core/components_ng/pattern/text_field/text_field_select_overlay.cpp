@@ -98,11 +98,16 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     latestReqeust_.reset();
 }
 
-void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
+void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     CloseMagnifier();
     if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
         OnResetTextSelection();
+        if (info && info->CanBackPressed()) {
+            pattern->OnBackPressed();
+        }
     }
 }
 

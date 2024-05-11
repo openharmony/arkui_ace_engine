@@ -139,7 +139,7 @@ void WebContextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     pattern->SetSelectOverlayDragging(false);
 }
 
-void WebContextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
+void WebContextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
