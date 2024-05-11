@@ -33,7 +33,7 @@ public:
     void SetOnScrollBegin(OnScrollBeginEvent&& event) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event) override;
     void SetOnScroll(NG::ScrollEvent&& event) override;
-    void SetOnWillScroll(NG::ScrollEventWithState&& event) override;
+    void SetOnWillScroll(NG::ScrollEventWithReturn&& event) override;
     void SetOnDidScroll(NG::ScrollEventWithState&& event) override;
     void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) override;
     void SetOnScrollEnd(NG::ScrollEndEvent&& event) override;
@@ -91,7 +91,7 @@ public:
     static void SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& event);
     static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
     static ScrollEdgeType GetOnScrollEdge(FrameNode* frameNode);
-    static void SetOnWillScroll(FrameNode* frameNode, NG::ScrollEventWithState&& event);
+    static void SetOnWillScroll(FrameNode* frameNode, NG::ScrollEventWithReturn&& event);
     static void SetOnDidScroll(FrameNode* frameNode, NG::ScrollEventWithState&& event);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);

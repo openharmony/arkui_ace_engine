@@ -2158,9 +2158,12 @@ HWTEST_F(ListScrollerTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1)
     bool isDidTrigger = false;
     Dimension willOffset;
     Dimension didOffset;
-    auto willTriggerEvent = [&isWillTrigger, &willOffset](Dimension offset, ScrollState state) {
+    auto willTriggerEvent = [&isWillTrigger, &willOffset](Dimension offset, ScrollState state, ScrollSource source) {
         isWillTrigger = true;
         willOffset = offset;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     auto didTriggerEvent = [&isDidTrigger, &didOffset](Dimension offset, ScrollState state) {
         isDidTrigger = true;
@@ -2247,9 +2250,12 @@ HWTEST_F(ListScrollerTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1)
     bool isDidTrigger = false;
     Dimension willOffset;
     Dimension didOffset;
-    auto willTriggerEvent = [&isWillTrigger, &willOffset](Dimension offset, ScrollState state) {
+    auto willTriggerEvent = [&isWillTrigger, &willOffset](Dimension offset, ScrollState state, ScrollSource source) {
         isWillTrigger = true;
         willOffset = offset;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     auto didTriggerEvent = [&isDidTrigger, &didOffset](Dimension offset, ScrollState state) {
         isDidTrigger = true;

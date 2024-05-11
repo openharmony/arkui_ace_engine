@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -567,14 +567,19 @@ void SetOnWillScroll(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onWillScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) -> void {
+    auto onWillScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state,
+                            ScrollSource source) -> ScrollFrameResult {
+        ScrollFrameResult scrollRes { .offset = offset };
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_WILL_SCROLL;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
+        event.componentAsyncEvent.data[2].i32 = static_cast<int>(source);
         SendArkUIAsyncEvent(&event);
+        scrollRes.offset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
+        return scrollRes;
     };
     ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
 }

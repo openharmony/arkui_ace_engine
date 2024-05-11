@@ -24,7 +24,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/scroll_model.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
 namespace OHOS::Ace {
@@ -210,10 +209,30 @@ void JSScroll::OnWillScrollCallback(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsFunction()) {
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                            const Dimension& xOffset, const Dimension& yOffset, const ScrollState& scrollState) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(xOffset, yOffset, scrollState);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
+                            const Dimension& xOffset, const Dimension& yOffset, const ScrollState& scrollState,
+                            ScrollSource scrollSource) {
+            auto params = ConvertToJSValues(xOffset, yOffset, scrollState, scrollSource);
+            NG::TwoDimensionScrollResult scrollRes { .xOffset = xOffset, .yOffset = yOffset };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                return scrollRes;
+            }
+
+            if (!result->IsObject()) {
+                return scrollRes;
+            }
+
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("xOffset");
+            if (dxRemainValue->IsNumber()) {
+                scrollRes.xOffset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            auto dyRemainValue = resObj->GetProperty("yOffset");
+            if (dyRemainValue->IsNumber()) {
+                scrollRes.yOffset = Dimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollRes;
         };
         ScrollModel::GetInstance()->SetOnWillScroll(std::move(onScroll));
     }

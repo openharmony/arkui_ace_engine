@@ -356,7 +356,7 @@ private:
     void ValidateOffset(int32_t source);
     float ValidateOffset(int32_t source, float willScrollOffset);
     void HandleScrollPosition(float scroll);
-    void FireOnWillScroll(float scroll);
+    float FireTwoDimensionOnWillScroll(float scroll);
     void FireOnDidScroll(float scroll);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;

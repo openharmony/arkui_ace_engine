@@ -2033,10 +2033,13 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll001, TestSize.Level1)
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState = ScrollState::IDLE;
@@ -2088,10 +2091,13 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll002, TestSize.Level1)
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState = ScrollState::IDLE;
