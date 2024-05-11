@@ -35,6 +35,10 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
       LoadingProgressForegroundColorModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<LoadingProgressConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<LoadingProgressConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().loadingProgress.setContentModifierBuilder(this.nativePtr, false);
