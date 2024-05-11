@@ -1438,6 +1438,7 @@ bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsVa
         return false;
     }
     auto jsObj = jsValue->ToObject(vm);
+    CompleteResourceObject(vm, jsObj);
     auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
     if (resId->IsNull() || !resId->IsNumber()) {
         return false;
@@ -1450,6 +1451,25 @@ bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsVa
     if (!resourceWrapper) {
         return false;
     }
+    auto resIdNum = resId->Int32Value(vm);
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(vm, jsObj)) {
+            return false;
+        }
+        auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+        if (!args->IsArray(vm)) {
+            return false;
+        }
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+        auto symbol = resourceWrapper->GetSymbolByName(param->ToString(vm)->ToString().c_str());
+        if (!symbol) {
+            return false;
+        }
+        symbolId = symbol;
+        return true;
+    }
+ 
     auto symbol = resourceWrapper->GetSymbolById(resId->Uint32Value(vm));
     if (!symbol) {
         return false;
