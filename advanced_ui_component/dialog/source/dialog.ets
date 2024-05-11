@@ -19,6 +19,15 @@ import display from '@ohos.display';
 import hilog from '@ohos.hilog';
 import measure from '@ohos.measure';
 import resourceManager from '@ohos.resourceManager';
+import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
+
+class CustomThemeImpl implements CustomTheme {
+  colors?: CustomColors;
+
+  constructor(colors: CustomColors) {
+    this.colors = colors;
+  }
+}
 
 const TITLE_MAX_LINES: number = 2;
 const HORIZON_BUTTON_MAX_COUNT: number = 2;
@@ -66,6 +75,8 @@ export struct TipsDialog {
   buttonHeight: number = 0;
   // the controller of content area scroll
   contentScroller: Scroller = new Scroller();
+  @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+  theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   build() {
     CustomDialogComponent({
@@ -74,6 +85,7 @@ export struct TipsDialog {
         this.contentBuilder();
       },
       buttons: this.buttons,
+      theme: this.theme,
     })
   }
 
@@ -112,7 +124,7 @@ export struct TipsDialog {
       Text(content)
         .fontSize($r('sys.float.Body_M'))
         .fontWeight(FontWeight.Regular)
-        .fontColor($r('sys.color.font_primary'))
+        .fontColor(this.fontColorWithTheme)
         .maxLines(CONTENT_MAX_LINES)
         .layoutWeight(1)
         .focusable(false)
@@ -164,7 +176,7 @@ export struct TipsDialog {
             Text(this.title)
               .fontSize($r('sys.float.Title_S'))
               .fontWeight(FontWeight.Medium)
-              .fontColor($r('sys.color.font_primary'))
+              .fontColor(this.fontColorWithTheme)
               .textAlign(TextAlign.Center)
               .maxLines(CONTENT_MAX_LINES)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -181,7 +193,7 @@ export struct TipsDialog {
               .defaultFocus(!(this.primaryButton || this.secondaryButton))
               .fontSize($r('sys.float.Body_L'))
               .fontWeight(FontWeight.Medium)
-              .fontColor($r('sys.color.font_primary'))
+              .fontColor(this.fontColorWithTheme)
               .textAlign(this.textAlignment)
               .width('100%')
               .onKeyEvent((event: KeyEvent) => {
@@ -201,6 +213,8 @@ export struct TipsDialog {
   }
 
   aboutToAppear() {
+    this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+      this.theme.colors.fontPrimary : $r('sys.color.font_primary');
     this.initButtons();
     this.initMargin();
   }
@@ -265,6 +279,10 @@ export struct SelectDialog{
   buttons?: ButtonOptions[] = [];
   contentPadding ?: Padding;
   @BuilderParam contentBuilder: () => void = this.buildContent;
+  @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+  @State dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');
+  theme?: Theme | CustomTheme = new CustomThemeImpl({});
+
   controller: CustomDialogController = new CustomDialogController({
     builder: CustomContentDialog({
       primaryTitle: this.title,
@@ -301,7 +319,7 @@ export struct SelectDialog{
             Text(this.content)
               .fontSize($r('sys.float.Body_M'))
               .fontWeight(FontWeight.Regular)
-              .fontColor($r('sys.color.font_primary'))
+              .fontColor(this.fontColorWithTheme)
               .textOverflow({overflow: TextOverflow.Ellipsis})
           }.paddingContentStyle().width('100%')
         }
@@ -314,7 +332,7 @@ export struct SelectDialog{
                     Text(item.title)
                       .fontSize($r('sys.float.Body_L'))
                       .fontWeight(FontWeight.Medium)
-                      .fontColor($r('sys.color.font_primary'))
+                      .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
@@ -336,8 +354,8 @@ export struct SelectDialog{
                   item.action && item.action();
                   this.controller.close();
                 })
-                if (index < this.radioContent.length - 1) {
-                  Divider().color($r('sys.color.comp_divider')).paddingStyle()
+                if (index && index < this.radioContent.length - 1) {
+                  Divider().color(this.dividerColorWithTheme).paddingStyle();
                 }
               }.paddingStyle()
             }
@@ -362,11 +380,16 @@ export struct SelectDialog{
         this.contentBuilder();
       },
       buttons: this.buttons,
-      contentAreaPadding: this.contentPadding
+      contentAreaPadding: this.contentPadding,
+      theme: this.theme,
     })
   }
 
   aboutToAppear(): void {
+    this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+      this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+    this.dividerColorWithTheme = this.theme?.colors?.compDivider ?
+      this.theme.colors.compDivider : $r('sys.color.comp_divider');
     this.initContentPadding();
     this.initButtons();
   }
@@ -413,6 +436,9 @@ export struct ConfirmDialog{
   @State isChecked?: boolean = false
   primaryButton?: ButtonOptions = {value: ""}
   secondaryButton?: ButtonOptions = {value: ""}
+  @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+  @State buttonFontColorWithTheme: ResourceColor = $r('sys.color.font_emphasize');
+  theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   build() {
       Column() {
@@ -422,12 +448,12 @@ export struct ConfirmDialog{
             .fontWeight(FontWeight.Medium)
             .maxLines(CONTENT_MAX_LINES)
             .minFontSize(15)
-            .textOverflow({ overflow: TextOverflow.Ellipsis})
-            .fontColor($r('sys.color.ohos_id_color_text_primary'))
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .fontColor(this.fontColorWithTheme)
             .textAlign(TextAlign.Start)
             .width('100%')
         }.padding({ left: 24, right: 24, top: 24 })
-        .constraintSize({minHeight: 56})
+        .constraintSize({ minHeight: 56 })
         if (this.content) {
           Row() {
             Text(this.content)
@@ -435,23 +461,24 @@ export struct ConfirmDialog{
               .defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value))
               .fontSize($r('sys.float.ohos_id_text_size_body1'))
               .fontWeight(FontWeight.Medium)
-              .fontColor($r('sys.color.ohos_id_color_text_primary'))
+              .fontColor(this.fontColorWithTheme)
               .maxLines(CONTENT_MAX_LINES)
-              .textOverflow({ overflow: TextOverflow.Ellipsis})
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
               .minFontSize($r('sys.float.ohos_id_text_size_body3'))
           }.padding({ left: 24, right: 24, top: 8, bottom: 8 })
           .width('100%')
-          .constraintSize({minHeight: 36})
+          .constraintSize({ minHeight: 36 })
         }
         Row() {
           Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
             .onChange((checked: boolean) => {
               this.isChecked = checked
             })
-            .margin({ left: 0, right: 8})
-          Text(this.checkTips).fontSize($r('sys.float.ohos_id_text_size_body2'))
+            .margin({ left: 0, right: 8 })
+          Text(this.checkTips)
+            .fontSize($r('sys.float.ohos_id_text_size_body2'))
             .fontWeight(FontWeight.Medium)
-            .fontColor($r('sys.color.ohos_id_color_text_primary'))
+            .fontColor(this.fontColorWithTheme)
             .maxLines(CONTENT_MAX_LINES)
             .layoutWeight(1)
             .focusable(false)
@@ -459,39 +486,42 @@ export struct ConfirmDialog{
             .onClick(() => {
               this.isChecked = !this.isChecked
             })
-        }.height(CHECKBOX_CONTAINER_HEIGHT).width('100%').padding({ left: 24, right: 24 , top: 8, bottom: 8 })
+        }.height(CHECKBOX_CONTAINER_HEIGHT).width('100%').padding({ left: 24, right: 24, top: 8, bottom: 8 })
 
         Row() {
-          if (this.primaryButton.value) {
+          if (this.primaryButton?.value) {
             Button(this.primaryButton.value)
               .fontSize($r('sys.float.ohos_id_text_size_button1'))
               .fontWeight(FontWeight.Medium)
               .layoutWeight(1)
               .defaultFocus(true)
-              .backgroundColor(this.primaryButton.background? this.primaryButton.background: $r('sys.color.ohos_id_color_background_transparent'))
-              .fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor: $r('sys.color.ohos_id_color_text_primary_activated'))
+              .backgroundColor(this.primaryButton.background ? this.primaryButton.background :
+                $r('sys.color.ohos_id_color_background_transparent'))
+              .fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor : this.buttonFontColorWithTheme)
               .onClick(() => {
-                if (this.primaryButton.action) this.primaryButton.action()
+                if (this.primaryButton?.action) this.primaryButton.action()
                 this.controller.close()
               })
           }
-          if (this.secondaryButton.value && this.primaryButton.value) {
+          if (this.secondaryButton?.value && this.primaryButton?.value) {
             Column() {
               if (!this.secondaryButton.background) {
                 Divider().width(DIVIDER_WIDTH).height(DIVIDER_HEIGHT).color($r('sys.color.ohos_id_color_list_separator')).vertical(true)
               }
             }.width(DIVIDER_CONTAINER_WIDTH).alignItems(HorizontalAlign.Center)
           }
-          if (this.secondaryButton.value) {
+          if (this.secondaryButton?.value) {
             Button(this.secondaryButton.value)
               .fontSize($r('sys.float.ohos_id_text_size_button1'))
               .fontWeight(FontWeight.Medium)
               .layoutWeight(1)
               .defaultFocus(true)
-              .backgroundColor(this.secondaryButton.background? this.secondaryButton.background: $r('sys.color.ohos_id_color_background_transparent'))
-              .fontColor(this.secondaryButton.fontColor ? this.secondaryButton.fontColor: $r('sys.color.ohos_id_color_text_primary_activated'))
+              .backgroundColor(this.secondaryButton.background ? this.secondaryButton.background :
+                $r('sys.color.ohos_id_color_background_transparent'))
+              .fontColor(this.secondaryButton.fontColor ?
+                this.secondaryButton.fontColor : this.buttonFontColorWithTheme)
               .onClick(() => {
-                if (this.secondaryButton.action) this.secondaryButton.action()
+                if (this.secondaryButton?.action) this.secondaryButton.action()
                 this.controller.close()
               })
           }
@@ -507,6 +537,13 @@ export struct ConfirmDialog{
       // 1.backgroundcolor use in blur enable mod mast set this color: colorDialogBgBlur. but now it is not found
       .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
   }
+
+  aboutToAppear(): void {
+    this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+      this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+    this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
+      this.theme.colors.fontEmphasize : $r('sys.color.font_emphasize');
+  }
 }
 
 @CustomDialog
@@ -521,6 +558,8 @@ export struct AlertDialog {
   @State textAlign: TextAlign = TextAlign.Start;
   // the controller of content area
   contentScroller: Scroller = new Scroller();
+  @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+  theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   build() {
     CustomDialogComponent({
@@ -531,6 +570,7 @@ export struct AlertDialog {
         this.AlertDialogContentBuilder();
       },
       buttons: this.buttons,
+      theme: this.theme,
     })
   }
 
@@ -543,7 +583,7 @@ export struct AlertDialog {
           .defaultFocus(!(this.primaryButton || this.secondaryButton))
           .fontSize($r('sys.float.Body_L'))
           .fontWeight(this.getFontWeight())
-          .fontColor($r('sys.color.font_primary'))
+          .fontColor(this.fontColorWithTheme)
           .margin({ right: $r('sys.float.padding_level8'), })
           .width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`)
           .textAlign(this.textAlign)
@@ -562,6 +602,8 @@ export struct AlertDialog {
   }
 
   aboutToAppear(): void {
+    this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+      this.theme.colors.fontPrimary : $r('sys.color.font_primary');
     this.initButtons();
   }
 
@@ -621,6 +663,7 @@ export struct CustomContentDialog {
   @BuilderParam contentBuilder: () => void;
   contentAreaPadding?: Padding;
   buttons?: ButtonOptions[];
+  theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   build() {
     CustomDialogContentComponent({
@@ -632,6 +675,7 @@ export struct CustomContentDialog {
       },
       contentAreaPadding: this.contentAreaPadding,
       buttons: this.buttons,
+      theme: this.theme,
     });
   }
 }
@@ -645,6 +689,11 @@ struct CustomDialogContentComponent {
   buttons?: ButtonOptions[];
   contentAreaPadding?: Padding;
   keyIndex: number = 0;
+  @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+  @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
+  @State buttonFontColorWithTheme: ResourceColor = '';
+  @State errorButtonFontColorWithTheme: ResourceColor = '';
+  theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   @Builder
   defaultContentBuilder(): void {
@@ -654,21 +703,23 @@ struct CustomDialogContentComponent {
   @State contentMaxHeight: string = '';
 
   build() {
-    Column() {
-      // title area
-      this.buildTitles();
-
-      // content area
+    WithTheme({ theme: this.theme }) {
       Column() {
-        this.contentBuilder();
-      }
-      .padding(this.getContentPadding())
-      .constraintSize({ maxHeight: this.contentMaxHeight, })
+        // title area
+        this.buildTitles();
 
-      // operation area
-      this.buildButtons();
+        // content area
+        Column() {
+          this.contentBuilder();
+        }
+        .padding(this.getContentPadding())
+        .constraintSize({ maxHeight: this.contentMaxHeight })
+
+        // operation area
+        this.buildButtons();
+      }
+      .width('100%')
     }
-    .width('100%')
   }
 
   @Builder
@@ -677,7 +728,7 @@ struct CustomDialogContentComponent {
       Row() {
         Text(this.primaryTitle)
           .fontWeight(FontWeight.Bold)
-          .fontColor($r('sys.color.font_primary'))
+          .fontColor(this.primaryTitleFontColorWithTheme)
           .textAlign(this.getTitleTextAlign())
           .maxFontSize($r('sys.float.Title_S'))
           .minFontSize($r('sys.float.Body_L'))
@@ -697,7 +748,7 @@ struct CustomDialogContentComponent {
       Row() {
         Text(this.secondaryTitle)
           .fontWeight(FontWeight.Regular)
-          .fontColor($r('sys.color.font_secondary'))
+          .fontColor(this.secondaryTitleFontColorWithTheme)
           .textAlign(this.getTitleTextAlign())
           .maxFontSize($r('sys.float.Subtitle_S'))
           .minFontSize($r('sys.float.Body_S'))
@@ -747,6 +798,13 @@ struct CustomDialogContentComponent {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .backgroundColor(buttonOptions.background)
+        .key(`advanced_dialog_button_${this.keyIndex++}`)
+    } else if (buttonOptions.background !== undefined && buttonOptions.fontColor === undefined || '') {
+      Button(buttonOptions.value)
+        .setButtonProperties(buttonOptions, this.controller)
+        .backgroundColor(buttonOptions.background)
+        .fontColor(buttonOptions.role === ButtonRole.ERROR ?
+          this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
     } else {
       Button(buttonOptions.value)
@@ -811,6 +869,14 @@ struct CustomDialogContentComponent {
       this.titleHeight = getNumberByResource('alert_title_secondary_height');
     }
     this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
+    this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
+      this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+    this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
+      this.theme.colors.fontSecondary : $r('sys.color.font_secondary');
+    this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
+      this.theme.colors.fontEmphasize : '';
+    this.errorButtonFontColorWithTheme = this.theme?.colors?.warning ?
+      this.theme.colors.warning : '';
   }
 
   /**
@@ -1019,6 +1085,7 @@ export struct CustomDialogComponent {
   screenWidth: number = 0;
   @State columnModifier: ColumnModifier = new ColumnModifier();
   isFirstInit: boolean = true;
+  theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   build() {
     Column() {
@@ -1032,6 +1099,7 @@ export struct CustomDialogComponent {
           },
           buttons: this.buttons,
           contentAreaPadding: this.contentAreaPadding,
+          theme: this.theme,
         })
       }
       .attributeModifier(this.columnModifier)
@@ -1152,6 +1220,9 @@ function resolveKeyEvent(event: KeyEvent, controller: Scroller) {
 export struct LoadingDialog {
   controller: CustomDialogController;
   content?: ResourceStr = '';
+  @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+  @State loadingProgressIconColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
+  theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   build() {
     Column() {
@@ -1160,6 +1231,7 @@ export struct LoadingDialog {
         contentBuilder: () => {
           this.contentBuilder();
         },
+        theme: this.theme,
       })
     }
   }
@@ -1171,19 +1243,26 @@ export struct LoadingDialog {
         Text(this.content)
           .fontSize($r('sys.float.Body_L'))
           .fontWeight(FontWeight.Regular)
-          .fontColor($r('sys.color.font_primary'))
+          .fontColor(this.fontColorWithTheme)
           .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)
           .maxLines(LOADING_MAX_LINES)
           .focusable(true)
           .defaultFocus(true)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
         LoadingProgress()
-          .color($r('sys.color.icon_secondary'))
+          .color(this.loadingProgressIconColorWithTheme)
           .width(LOADING_PROGRESS_WIDTH)
           .height(LOADING_PROGRESS_HEIGHT)
           .margin({ left: LOADING_TEXT_MARGIN_LEFT })
       }
       .constraintSize({ minHeight: LOADING_MIN_HEIGHT })
     }
+  }
+
+  aboutToAppear(): void {
+    this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
+      this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+    this.loadingProgressIconColorWithTheme = this.theme?.colors?.iconSecondary ?
+      this.theme.colors.iconSecondary : $r('sys.color.icon_secondary');
   }
 }
