@@ -501,6 +501,7 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     void Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
+    void CloseKeyboard();
 
 private:
     friend class WebContextSelectOverlay;
@@ -810,6 +811,7 @@ private:
     std::queue<TouchEventInfo> touchEventQueue_;
     std::unordered_map<int32_t, bool> naitve_map_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
+    bool embedNeedKeyboard_ = false;
 };
 } // namespace OHOS::Ace::NG
 

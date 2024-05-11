@@ -103,7 +103,7 @@ const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
 const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
-static bool g_isNativeType = false;
+constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -719,6 +719,7 @@ void GestureEventResultOhos::SetGestureEventResult(bool result)
     if (result_) {
         result_->SetGestureEventResult(result);
         SetSendTask();
+        eventResult_ = result;
     }
 }
 
@@ -5322,7 +5323,6 @@ void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const doub
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        IsNativeType(x, y);
         ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
         nweb_->OnTouchPress(id, x, y, from_overlay);
     }
@@ -5394,9 +5394,6 @@ void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, c
 void WebDelegate::OnFocus()
 {
     ACE_DCHECK(nweb_ != nullptr);
-    if (g_isNativeType) {
-        return;
-    }
     if (nweb_) {
         nweb_->OnFocus(OHOS::NWeb::FocusReason::EVENT_REQUEST);
     }
@@ -5413,39 +5410,8 @@ bool WebDelegate::NeedSoftKeyboard()
 void WebDelegate::OnBlur()
 {
     ACE_DCHECK(nweb_ != nullptr);
-    if (g_isNativeType) {
-        return;
-    }
     if (nweb_) {
         nweb_->OnBlur(blurReason_);
-    }
-}
-
-void WebDelegate::IsNativeType(const double& x, const double& y)
-{
-    g_isNativeType = false;
-    if (!isEmbedModeEnabled_) {
-        return;
-    }
-    auto iter = embedDataInfo_.begin();
-    for (; iter != embedDataInfo_.end(); iter++) {
-        EmbedInfo info;
-        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo  = iter->second;
-        if (dataInfo == nullptr) {
-            continue;
-        }
-
-        auto embedInfo = dataInfo->GetNativeEmbedInfo();
-        if (embedInfo) {
-            double width = embedInfo->GetWidth();
-            double height = embedInfo->GetHeight();
-            double embedX = embedInfo->GetX();
-            double embedY = embedInfo->GetY();
-            if (embedX <= x && x <= (embedX + width) && embedY <= y && y <= (embedY + height)) {
-                g_isNativeType = true;
-                break;
-            }
-        }
     }
 }
 
@@ -6104,6 +6070,14 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
 }
 void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> event)
 {
+    if (event->GetId() == NO_NATIVE_FINGER_TYPE) {
+        if (!NeedSoftKeyboard() && event->GetType() == OHOS::NWeb::TouchType::DOWN) {
+            auto webPattern = webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->CloseKeyboard();
+        }
+        return;
+    }
     auto context = context_.Upgrade();
     TouchEventInfo touchEventInfo("touchEvent");
     auto embedId = event ? event->GetEmbedId() : "";
@@ -6111,8 +6085,9 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
     CHECK_NULL_VOID(context);
     TAG_LOGD(AceLogTag::ACE_WEB, "hit Emebed gusture event notify");
     auto param = AceType::MakeRefPtr<GestureEventResultOhos>(event->GetResult());
+    auto type = event->GetType();
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), embedId, touchEventInfo, param]() {
+        [weak = WeakClaim(this), embedId, touchEventInfo, param, type]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto OnNativeEmbedGestureEventV2_ = delegate->OnNativeEmbedGestureEventV2_;
@@ -6121,6 +6096,11 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
                     std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param));
                 if (!param->HasSendTask()) {
                     param->SetGestureEventResult(true);
+                }
+                if (!param->GetEventResult() && type == OHOS::NWeb::TouchType::DOWN) {
+                    auto webPattern = delegate->webPattern_.Upgrade();
+                    CHECK_NULL_VOID(webPattern);
+                    webPattern->CloseKeyboard();
                 }
             }
         },
