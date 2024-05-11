@@ -258,10 +258,17 @@ public:
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
     void InsertValueInStyledString(const std::string& insertValue);
+    RefPtr<SpanString> CreateStyledStringByTextStyle(
+        const std::string& insertValue, const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle);
+    RefPtr<FontSpan> CreateFontSpanByTextStyle(
+        const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle, int32_t length);
+    RefPtr<DecorationSpan> CreateDecorationSpanByTextStyle(
+        const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle, int32_t length);
     void DeleteBackwardInStyledString(int32_t length);
     void DeleteForwardInStyledString(int32_t length, bool isIME = true);
 
     bool BeforeStyledStringChange(int32_t start, int32_t length, const std::string& string);
+    bool BeforeStyledStringChange(int32_t start, int32_t length, const RefPtr<SpanString>& styledString);
     void AfterStyledStringChange(int32_t start, int32_t length, const std::string& string);
 
     void ResetBeforePaste();
