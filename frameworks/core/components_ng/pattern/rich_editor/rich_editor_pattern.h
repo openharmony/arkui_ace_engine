@@ -109,6 +109,7 @@ public:
         int32_t endOffset = INVALID_VALUE;
         int32_t spanIndex = INVALID_VALUE;
         int32_t currentClickedPosition = INVALID_VALUE;
+        bool isPreviewTextInputting = false;
         RefPtr<SpanItem> previewTextSpan;
 
         std::string ToString() const
@@ -117,6 +118,7 @@ public:
             if (previewTextSpan) {
                 JSON_STRING_PUT_STRING(jsonValue, previewTextSpan->content);
             }
+            JSON_STRING_PUT_BOOL(jsonValue, isPreviewTextInputting);
             JSON_STRING_PUT_INT(jsonValue, startOffset);
             JSON_STRING_PUT_INT(jsonValue, endOffset);
             JSON_STRING_PUT_INT(jsonValue, spanIndex);
@@ -131,6 +133,7 @@ public:
             endOffset = INVALID_VALUE;
             spanIndex = INVALID_VALUE;
             currentClickedPosition = INVALID_VALUE;
+            isPreviewTextInputting = false;
             previewTextSpan = nullptr;
         }
 
