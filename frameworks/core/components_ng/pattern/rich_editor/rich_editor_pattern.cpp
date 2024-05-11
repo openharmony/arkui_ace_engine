@@ -6019,7 +6019,7 @@ void RichEditorPattern::CheckScrollable()
     auto gestureHub = GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     scrollable_ = GetTextContentLength() > 0 && GreatNotEqual(richTextRect_.Height(), contentRect_.Height());
-    SetScrollEnable(scrollable_);
+    SetScrollEnabled(scrollable_);
 }
 
 void RichEditorPattern::UpdateChildrenOffset()
