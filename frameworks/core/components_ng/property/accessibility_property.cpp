@@ -80,7 +80,7 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
         return;
     }
     auto level = GetAccessibilityLevel();
-    if (level == Level::AUTO || level == Level::YES) {
+    if (level == Level::AUTO_STR || level == Level::YES_STR) {
         auto nodeText = GetText();
         if (!text.empty() && !nodeText.empty()) {
             text += ", ";
@@ -262,7 +262,7 @@ std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<Fram
             bool hasGroupOrVirtualNode = accessibilityProperty->IsAccessibilityGroup() ||
                 accessibilityProperty->HasAccessibilityVirtualNode();
             bool hasAccessibilityText = accessibilityProperty->HasAccessibilityTextOrDescription();
-            if (level == AccessibilityProperty::Level::YES) {
+            if (level == AccessibilityProperty::Level::YES_STR) {
                 if (hasGroupOrVirtualNode) {
                     shouldSearchChildren = false;
                 }
@@ -272,7 +272,7 @@ std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<Fram
                 shouldSearchChildren = false;
                 break;
             } else {
-                if (level == AccessibilityProperty::Level::NO) {
+                if (level == AccessibilityProperty::Level::NO_STR) {
                     shouldSearchSelf = false;
                 } else {
                     // shouldSearchSelf is true here
@@ -370,11 +370,11 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty != nullptr) {
             auto level = accessibilityProperty->GetAccessibilityLevel();
-            if (level == AccessibilityProperty::Level::YES) {
+            if (level == AccessibilityProperty::Level::YES_STR) {
                 focusable = true;
                 break;
             }
-            if (level == AccessibilityProperty::Level::NO) {
+            if (level == AccessibilityProperty::Level::NO_STR) {
                 break;
             }
             if (accessibilityProperty->IsAccessibilityGroup() ||
