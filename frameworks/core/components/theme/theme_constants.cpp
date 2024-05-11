@@ -413,7 +413,6 @@ ResValueWrapper ThemeConstants::GetValue(uint32_t key) const
     }
     // Find resource at prebuilt maps.
     const auto platformConstants = ThemeConstants::GetPlatformConstants(key);
-
     if (platformConstants == nullptr) {
         return ERROR_VALUE;
     }

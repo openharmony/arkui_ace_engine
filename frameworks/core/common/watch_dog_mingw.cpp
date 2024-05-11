@@ -186,7 +186,6 @@ void ThreadWatcher::DetonatedBomb()
 
     uint64_t currentTime = GetMilliseconds();
     uint64_t bombId = inputTaskIds_.front();
-
     if (currentTime - bombId > ANR_INPUT_FREEZE_TIME) {
         LOGE("Detonated the Bomb, which bombId is %{public}s and currentTime is %{public}s",
             std::to_string(bombId).c_str(), std::to_string(currentTime).c_str());

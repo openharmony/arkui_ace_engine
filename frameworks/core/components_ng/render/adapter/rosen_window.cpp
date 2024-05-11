@@ -86,11 +86,12 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     }
     rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
     rsUIDirector_->Init();
-    rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
-        ContainerScope scope(id);
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRosenWindowRenderServiceTask");
-    }, id);
+    rsUIDirector_->SetUITaskRunner(
+        [taskExecutor, id](const std::function<void()>& task) {
+            ContainerScope scope(id);
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRosenWindowRenderServiceTask");
+        }, id);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
         CHECK_NULL_VOID(self);
@@ -125,7 +126,7 @@ void RosenWindow::RequestFrame()
         isRequestVsync_ = true;
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = GetSysTimestamp();
-    #ifdef VSYNC_TIMEOUT_CHECK
+#ifdef VSYNC_TIMEOUT_CHECK
         if (taskExecutor) {
             auto windowId = rsWindow_->GetWindowId();
             auto instanceId = Container::CurrentIdSafely();
@@ -135,9 +136,9 @@ void RosenWindow::RequestFrame()
             };
             onVsyncEventCheckTimer_.Reset(task);
             taskExecutor->PostDelayedTask(onVsyncEventCheckTimer_, TaskExecutor::TaskType::JS,
-                                          VSYNC_TASK_DELAY_MILLISECOND, "ArkUIVsyncTimeoutCheck");
+                VSYNC_TASK_DELAY_MILLISECOND, "ArkUIVsyncTimeoutCheck");
         }
-    #endif
+#endif
     }
     if (taskExecutor) {
         taskExecutor->PostDelayedTask(
