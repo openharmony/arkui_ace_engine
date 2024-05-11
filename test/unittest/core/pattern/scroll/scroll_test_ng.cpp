@@ -907,6 +907,61 @@ HWTEST_F(ScrollTestNg, ScrollTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollTest006
+ * @tc.desc: When setting a fixed length and width, verify the related functions in the scroll pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollTest006, TestSize.Level1)
+{
+    double touchPosX = 150.0;
+    double touchPosY = 500.0;
+    float offset = 10.0f;
+    float velocity = 1200.0f;
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetAxis(Axis::HORIZONTAL);
+        model.SetDisplayMode(static_cast<int>(DisplayMode::OFF));
+        auto scrollProxy = model.CreateScrollBarProxy();
+        model.SetScrollBarProxy(scrollProxy);
+    });
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+
+    GestureEvent info;
+    info.SetMainVelocity(velocity);
+    info.SetGlobalPoint(Point(touchPosX, touchPosY));
+    info.SetGlobalLocation(Offset(touchPosX, touchPosY));
+    info.SetSourceTool(SourceTool::FINGER);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    pattern_->scrollableEvent_->GetScrollable()->HandleDragStart(info);
+
+    // Update 1 finger position.
+    info.SetGlobalLocation(Offset(touchPosX, touchPosY + offset));
+    info.SetGlobalPoint(Point(touchPosX, touchPosY + offset));
+    info.SetMainVelocity(velocity);
+    info.SetMainDelta(offset);
+    pattern_->scrollableEvent_->GetScrollable()->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -10.0f);
+
+    // Update 2 finger position.
+    info.SetGlobalLocation(Offset(touchPosX, touchPosY + offset));
+    info.SetGlobalPoint(Point(touchPosX, touchPosY + offset));
+    info.SetMainVelocity(velocity);
+    info.SetMainDelta(offset);
+    pattern_->scrollableEvent_->GetScrollable()->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -20.0f);
+
+    // Lift finger and end List sliding.
+    info.SetMainVelocity(0.0);
+    info.SetMainDelta(0.0);
+    pattern_->scrollableEvent_->GetScrollable()->HandleDragEnd(info);
+    pattern_->scrollableEvent_->GetScrollable()->isDragging_ = false;
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -20.0f);
+}
+
+/**
  * @tc.name: ScrollSetFrictionTest001
  * @tc.desc: Test SetFriction
  * @tc.type: FUNC
