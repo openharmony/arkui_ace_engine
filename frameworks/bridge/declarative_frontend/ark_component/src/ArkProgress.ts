@@ -57,6 +57,10 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
     modifierWithKey(this._modifiersWithKeys, ProgressBackgroundColorModifier.identity, ProgressBackgroundColorModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<ProgressConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<ProgressConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().progress.setContentModifierBuilder(this.nativePtr, false);

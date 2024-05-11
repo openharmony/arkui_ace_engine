@@ -12660,6 +12660,10 @@ class ArkButtonComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ButtonSizeModifier.identity, ButtonSizeModifier, value);
     return this;
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().button.setContentModifierBuilder(this.nativePtr, false);
@@ -13111,6 +13115,10 @@ class ArkLoadingProgressComponent extends ArkComponent {
   foregroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, LoadingProgressForegroundColorModifier.identity,
       LoadingProgressForegroundColorModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
@@ -13605,6 +13613,10 @@ class ArkToggleComponent extends ArkComponent {
   }
   switchStyle(value) {
     modifierWithKey(this._modifiersWithKeys, ToggleSwitchStyleModifier.identity, ToggleSwitchStyleModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
@@ -14379,6 +14391,10 @@ class ArkRadioComponent extends ArkComponent {
   }
   responseRegion(value) {
     modifierWithKey(this._modifiersWithKeys, RadioResponseRegionModifier.identity, RadioResponseRegionModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
@@ -15191,6 +15207,10 @@ class ArkSliderComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, StepSizeModifier.identity, StepSizeModifier, value);
     return this;
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, false);
@@ -15551,6 +15571,10 @@ class ArkRatingComponent extends ArkComponent {
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, false);
@@ -15656,6 +15680,10 @@ class ArkCheckboxComponent extends ArkComponent {
   }
   responseRegion(value) {
     modifierWithKey(this._modifiersWithKeys, CheckBoxResponseRegionModifier.identity, CheckBoxResponseRegionModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
@@ -17670,6 +17698,10 @@ class ArkDataPanelComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, DataPanelTrackShadowModifier.identity, DataPanelTrackShadowModifier, value);
     return this;
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, false);
@@ -18145,6 +18177,10 @@ class ArkGaugeComponent extends ArkComponent {
   }
   indicator(value) {
     modifierWithKey(this._modifiersWithKeys, GaugeIndicatorModifier.identity, GaugeIndicatorModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
@@ -18890,6 +18926,10 @@ class ArkProgressComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ProgressBackgroundColorModifier.identity, ProgressBackgroundColorModifier, value);
     return this;
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().progress.setContentModifierBuilder(this.nativePtr, false);
@@ -19268,6 +19308,10 @@ class ArkTextClockComponent extends ArkComponent {
   fontFeature(value) {
     throw new Error('Method not implemented.');
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().textClock.setContentModifierBuilder(this.nativePtr, false);
@@ -19434,6 +19478,10 @@ class ArkTextTimerComponent extends ArkComponent {
   }
   format(value) {
     modifierWithKey(this._modifiersWithKeys, TextTimerFormatModifier.identity, TextTimerFormatModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
