@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -1909,5 +1910,25 @@ void IndexerPattern::UpdateChildBoundary(RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(pattern);
     auto isMeasureBoundary = layoutProperty->GetPropertyChangeFlag() ==  PROPERTY_UPDATE_NORMAL;
     pattern->SetIsMeasureBoundary(isMeasureBoundary);
+}
+
+void IndexerPattern::DumpInfo()
+{
+    auto layoutProperty = GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    DumpLog::GetInstance().AddDesc(
+        std::string("AlignStyle: ")
+            .append(std::to_string(static_cast<int32_t>(layoutProperty->GetAlignStyleValue(AlignStyle::END)))));
+    auto offset = layoutProperty->GetPopupHorizontalSpace();
+    DumpLog::GetInstance().AddDesc(
+        std::string("Offset: ").append(offset.has_value() ? offset.value().ToString() : "undefined"));
+    DumpLog::GetInstance().AddDesc(
+        std::string("PopupPositionX: ")
+            .append(layoutProperty->GetPopupPositionXValue(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP))
+                        .ToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("PopupPositionY: ")
+            .append(layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP))
+                        .ToString()));
 }
 } // namespace OHOS::Ace::NG
