@@ -721,7 +721,12 @@ void SetTextAreaHeightAdaptivePolicy(ArkUINodeHandle node, ArkUI_Int32 value)
     TextFieldModelNG::SetHeightAdaptivePolicy(frameNode, static_cast<Ace::TextHeightAdaptivePolicy>(value));
 }
 
-void ResetTextAreaHeightAdaptivePolicy(ArkUINodeHandle node) {}
+void ResetTextAreaHeightAdaptivePolicy(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetHeightAdaptivePolicy(frameNode, TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+}
 
 ArkUI_Bool GetTextAreaSelectionMenuHidden(ArkUINodeHandle node)
 {

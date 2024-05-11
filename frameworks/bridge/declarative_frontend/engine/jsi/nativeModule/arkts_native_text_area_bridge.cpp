@@ -828,7 +828,7 @@ ArkUINativeModuleValue TextAreaBridge::SetHeightAdaptivePolicy(ArkUIRuntimeCallI
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     int32_t value = valueArg->ToNumber(vm)->Value();
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        return panda::JSValueRef::Undefined(vm);
+        value = 0;
     }
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaHeightAdaptivePolicy(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
