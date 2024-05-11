@@ -1258,7 +1258,7 @@ void ListLayoutAlgorithm::LayoutItem(RefPtr<LayoutWrapper>& wrapper, int32_t ind
     auto layoutDirection = wrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     if (layoutDirection == TextDirection::RTL) {
         if (axis_ == Axis::VERTICAL) {
-            auto size = wrapper->GetGeometryNode()->GetFrameSize();
+            auto size = wrapper->GetGeometryNode()->GetMarginFrameSize();
             offset = offset + OffsetF(crossSize - crossOffset - size.Width(), pos.startPos + chainOffset);
         } else {
             offset = offset + OffsetF(contentMainSize_ - pos.endPos - chainOffset, crossOffset);
