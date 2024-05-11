@@ -67,6 +67,7 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
             return;
         }
     }
+    ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, MovingPhotoUri, value);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
