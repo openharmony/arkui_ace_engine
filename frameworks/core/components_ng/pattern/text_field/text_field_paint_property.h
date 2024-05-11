@@ -58,6 +58,7 @@ public:
         ResetBorderRadiusFlagByUser();
         ResetBorderColorFlagByUser();
         ResetBorderWidthFlagByUser();
+        ResetBorderStyleFlagByUser();
         ResetPaddingByUser();
         ResetMarginByUser();
     }
@@ -69,6 +70,7 @@ public:
         ResetBorderRadiusFlagByUser();
         ResetBorderColorFlagByUser();
         ResetBorderWidthFlagByUser();
+        ResetBorderStyleFlagByUser();
         ResetPaddingByUser();
         ResetMarginByUser();
     }
@@ -91,6 +93,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadiusFlagByUser, BorderRadiusProperty, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderColorFlagByUser, BorderColorProperty, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderWidthFlagByUser, BorderWidthProperty, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderStyleFlagByUser, BorderStyleProperty, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PaddingByUser, PaddingProperty, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MarginByUser, MarginProperty, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreviewTextStart, int32_t, PROPERTY_UPDATE_RENDER);

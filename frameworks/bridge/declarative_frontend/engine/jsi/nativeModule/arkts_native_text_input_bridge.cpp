@@ -1528,12 +1528,11 @@ ArkUINativeModuleValue TextInputBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtim
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        auto eventObject = panda::ObjectRef::New(vm);
+        const char* keys[] = { "text", "keepEditableState" };
+        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetText().c_str()),
+            panda::FunctionRef::New(vm, Framework::JSTextField::JsKeepEditableState) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, 1);
-        eventObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"),
-            panda::StringRef::NewFromUtf8(vm, event.GetText().c_str()));
-        eventObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "keepEditableState"),
-            panda::FunctionRef::New(vm, Framework::JSTextField::JsKeepEditableState));
         eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
             panda::IntegerRef::New(vm, key), eventObject };

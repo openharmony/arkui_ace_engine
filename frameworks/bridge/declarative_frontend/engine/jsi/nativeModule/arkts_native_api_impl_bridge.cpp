@@ -1435,6 +1435,38 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOnPaste));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPaste"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOnPaste));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSubmit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOnSubmit));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSubmit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOnSubmit));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetContentType));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetContentType));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAutoFill"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetEnableAutoFill));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoFill"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetEnableAutoFill));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBorder));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBorder));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBorderWidth));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBorderWidth));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBorderColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBorderColor));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBorderStyle));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBorderStyle));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBorderRadius));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBorderRadius));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 
     auto video = panda::ObjectRef::New(vm);
@@ -1789,6 +1821,26 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetContentType));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetContentType));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBorder));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBorder));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBorderWidth));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBorderWidth));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBorderColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBorderColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBorderStyle));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBorderStyle));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetBorderRadius));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetBorderRadius));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);

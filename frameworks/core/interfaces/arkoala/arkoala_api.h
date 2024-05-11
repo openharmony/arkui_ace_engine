@@ -2410,6 +2410,26 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaOnPaste)(ArkUINodeHandle node);
     void (*setTextAreaLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
     void (*resetTextAreaLineBreakStrategy)(ArkUINodeHandle node);
+    void (*setTextAreaOnSubmitWithEvent)(ArkUINodeHandle node, void* callback);
+    void (*resetTextAreaOnSubmitWithEvent)(ArkUINodeHandle node);
+    void (*setTextAreaContentType)(ArkUINodeHandle node, ArkUI_Uint32 contentType);
+    void (*resetTextAreaContentType)(ArkUINodeHandle node);
+    void (*setTextAreaEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
+    void (*resetTextAreaEnableAutoFill)(ArkUINodeHandle node);
+    void (*setTextAreaBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
+        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
+    void (*resetTextAreaBorder)(ArkUINodeHandle node);
+    void (*setTextAreaBorderWidth)(
+        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetTextAreaBorderWidth)(ArkUINodeHandle node);
+    void (*setTextAreaBorderColor)(ArkUINodeHandle node, ArkUI_Uint32 leftColorInt,
+        ArkUI_Uint32 rightColorInt, ArkUI_Uint32 topColorInt, ArkUI_Uint32 bottomColorInt);
+    void (*resetTextAreaBorderColor)(ArkUINodeHandle node);
+    void (*setTextAreaBorderStyle)(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length);
+    void (*resetTextAreaBorderStyle)(ArkUINodeHandle node);
+    void (*setTextAreaBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetTextAreaBorderRadius)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
