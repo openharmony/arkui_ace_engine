@@ -807,7 +807,7 @@ public:
     std::string GetShowPasswordIconString() const;
     int32_t GetNakedCharPosition() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd,
-        const std::optional<SelectionOptions>& options = std::nullopt);
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
     void HandleBlurEvent();
     void HandleFocusEvent();
     void SetFocusStyle();
