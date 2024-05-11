@@ -68,6 +68,10 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            theme->leftSymbolId_ = themeConstants->GetSymbolByName("chevron_left");
+            theme->rightSymbolId_ = themeConstants->GetSymbolByName("chevron_right");
+            theme->upSymbolId_ = themeConstants->GetSymbolByName("chevron_up");
+            theme->downSymbolId_ = themeConstants->GetSymbolByName("chevron_down");
             ParsePattern(themeConstants, theme);
             return theme;
         }
@@ -383,6 +387,26 @@ public:
         return indicatorPaddingDot_;
     }
 
+    uint32_t GetLeftSymbolId() const
+    {
+        return leftSymbolId_;
+    }
+
+    uint32_t GetRightSymbolId() const
+    {
+        return rightSymbolId_;
+    }
+
+    uint32_t GetUpSymbolId() const
+    {
+        return upSymbolId_;
+    }
+
+    uint32_t GetDownSymbolId() const
+    {
+        return downSymbolId_;
+    }
+
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -435,6 +459,10 @@ private:
     Dimension indicatorDigitHeight_;
     Dimension indicatorDotItemSpace_;
     Dimension indicatorPaddingDot_;
+    uint32_t leftSymbolId_;
+    uint32_t rightSymbolId_;
+    uint32_t upSymbolId_;
+    uint32_t downSymbolId_;
 };
 
 } // namespace OHOS::Ace
