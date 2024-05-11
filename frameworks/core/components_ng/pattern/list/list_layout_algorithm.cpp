@@ -622,7 +622,7 @@ void ListLayoutAlgorithm::UpdateSnapCenterContentOffset(LayoutWrapper* layoutWra
 void ListLayoutAlgorithm::UpdateSnapAlignContentOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty)
 {
     auto scrollSnapAlign = listLayoutProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
-    if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
+    if (scrollSnapAlign == V2::ScrollSnapAlign::START && !itemPosition_.empty()) {
         if ((GetEndIndex() == totalItemCount_ - 1) &&
            LessOrEqual(GetEndPosition() - currentDelta_, contentMainSize_ - prevContentEndOffset_)) {
             currentDelta_ = currentDelta_ + contentEndOffset_ - prevContentEndOffset_;
@@ -630,7 +630,7 @@ void ListLayoutAlgorithm::UpdateSnapAlignContentOffset(const RefPtr<ListLayoutPr
             currentDelta_ = currentDelta_ - contentStartOffset_ + prevContentStartOffset_;
         }
     }
-    if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
+    if (scrollSnapAlign == V2::ScrollSnapAlign::END && !itemPosition_.empty()) {
         if ((GetStartIndex() == 0) && NonNegative(GetStartPosition() - currentDelta_ - prevContentStartOffset_)) {
             currentDelta_ = currentDelta_ - contentStartOffset_ + prevContentStartOffset_;
         } else {
