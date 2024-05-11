@@ -34,66 +34,97 @@ config("drawable_config") {
     ]
   }
 }
-
-ohos_shared_library("drawable_descriptor") {
-  if (current_os == "ohos") {
-    sanitize = {
-      integer_overflow = true
-      boundary_sanitize = true
-      debug = ace_sanitize_debug
-    }
-  }
-  public_configs = [ ":drawable_config" ]
-
-  configs = [
-    "$ace_root:ace_config",
-    "$ace_root:ace_coverage_config",
-  ]
-
-  sources = [
-    "drawable_descriptor.cpp",
-    "image_converter.cpp",
-    "js_drawable_descriptor.cpp",
-  ]
-
-  deps = [
-    "$cjson_root:cjson",
-    "$skia_root_new:skia_ohos",
-  ]
-  defines = []
-  external_deps = [
-    "graphic_2d:librender_service_client",
-    "hilog:libhilog",
-    "napi:ace_napi",
-  ]
-
-  if (current_os == "ohos") {
-    external_deps += [
-      "graphic_2d:2d_graphics",
-      "graphic_2d:color_manager",
-      "image_framework:image",
-      "image_framework:image_native",
-      "resource_management:global_resmgr",
+if (is_arkui_x) {
+  import("//foundation/multimedia/image_framework/ide/image_decode_config.gni")
+  import("//plugins/drawable_descriptor/drawable_descriptor.gni")
+  ohos_source_set("native_drawabledescriptor_static") {
+    configs = [
+      "$ace_root:ace_config",
+      "$ace_root:ace_coverage_config",
     ]
-  } else {
-    defines += [ "PREVIEW" ]
-    if (use_mingw_win) {
-      defines += [ "WINDOWS_PLATFORM" ]
-      external_deps += [ "resource_management:win_resmgr" ]
-    }
+    include_dirs = [
+      "${ace_root}/interfaces/napi/kits/utils",
+      "${ace_root}/interfaces/inner_api/drawable_descriptor",
+      "${ace_root}/interfaces/napi/kits/drawabledescriptor",
+      "${graphic_2d_path}/utils/color_manager/export",
+      "${ace_root}/frameworks/core/interfaces/native/svg",
+    ]
 
-    if (use_mac) {
-      defines += [ "MAC_PLATFORM" ]
-      external_deps += [ "resource_management:mac_resmgr" ]
-    }
+    include_dirs += drawable_native_include
 
-    if (use_linux) {
-      defines += [ "LINUX_PLATFORM" ]
-      external_deps += [ "resource_management:linux_resmgr" ]
+    sources = [
+      "drawable_descriptor.cpp",
+      "image_converter.cpp",
+      "js_drawable_descriptor.cpp",
+    ]
+    if (use_clang_android) {
+      defines = image_decode_android_defines
+    }
+    if (use_clang_ios) {
+      defines = image_decode_ios_defines
     }
   }
+} else {
+  ohos_shared_library("drawable_descriptor") {
+    if (current_os == "ohos") {
+      sanitize = {
+        integer_overflow = true
+        boundary_sanitize = true
+        debug = ace_sanitize_debug
+      }
+    }
+    public_configs = [ ":drawable_config" ]
 
-  subsystem_name = ace_engine_subsystem
-  innerapi_tags = [ "platformsdk" ]
-  part_name = ace_engine_part
+    configs = [
+      "$ace_root:ace_config",
+      "$ace_root:ace_coverage_config",
+    ]
+
+    sources = [
+      "drawable_descriptor.cpp",
+      "image_converter.cpp",
+      "js_drawable_descriptor.cpp",
+    ]
+
+    deps = [
+      "$cjson_root:cjson",
+      "$skia_root_new:skia_ohos",
+    ]
+    defines = []
+    external_deps = [
+      "graphic_2d:librender_service_client",
+      "hilog:libhilog",
+      "napi:ace_napi",
+    ]
+
+    if (current_os == "ohos") {
+      external_deps += [
+        "graphic_2d:2d_graphics",
+        "graphic_2d:color_manager",
+        "image_framework:image",
+        "image_framework:image_native",
+        "resource_management:global_resmgr",
+      ]
+    } else {
+      defines += [ "PREVIEW" ]
+      if (use_mingw_win) {
+        defines += [ "WINDOWS_PLATFORM" ]
+        external_deps += [ "resource_management:win_resmgr" ]
+      }
+
+      if (use_mac) {
+        defines += [ "MAC_PLATFORM" ]
+        external_deps += [ "resource_management:mac_resmgr" ]
+      }
+
+      if (use_linux) {
+        defines += [ "LINUX_PLATFORM" ]
+        external_deps += [ "resource_management:linux_resmgr" ]
+      }
+    }
+
+    subsystem_name = ace_engine_subsystem
+    innerapi_tags = [ "platformsdk" ]
+    part_name = ace_engine_part
+  }
 }
