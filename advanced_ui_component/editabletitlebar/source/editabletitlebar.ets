@@ -52,13 +52,13 @@ const PUBLIC_OK = $r('sys.media.ohos_ic_public_ok');
 const PUBLIC_BACK = $r('sys.media.ohos_ic_compnent_titlebar_back');
 
 class EditableTitleBarTheme {
-  iconColor: ResourceColor = $r('sys.color.titlebar_icon_color');
-  iconBackgroundColor: ResourceColor = $r('sys.color.titlebar_icon_background_color');
-  iconBackgroundPressedColor: ResourceColor = $r('sys.color.titlebar_icon_background_pressed_color');
-  iconBackgroundHoverColor: ResourceColor = $r('sys.color.titlebar_icon_background_hover_color');
-  iconBackgroundFocusOutlineColor: ResourceColor = $r('sys.color.titlebar_icon_background_focus_outline_color');
-  titleColor: ResourceColor = $r('sys.color.titlebar_title_tertiary_color');
-  subTitleColor: ResourceColor = $r('sys.color.titlebar_subheader_color');
+  public iconColor: ResourceColor = $r('sys.color.titlebar_icon_color');
+  public iconBackgroundColor: ResourceColor = $r('sys.color.titlebar_icon_background_color');
+  public iconBackgroundPressedColor: ResourceColor = $r('sys.color.titlebar_icon_background_pressed_color');
+  public iconBackgroundHoverColor: ResourceColor = $r('sys.color.titlebar_icon_background_hover_color');
+  public iconBackgroundFocusOutlineColor: ResourceColor = $r('sys.color.titlebar_icon_background_focus_outline_color');
+  public titleColor: ResourceColor = $r('sys.color.titlebar_title_tertiary_color');
+  public subTitleColor: ResourceColor = $r('sys.color.titlebar_subheader_color');
 }
 
 @Component
@@ -90,7 +90,7 @@ export struct EditableTitleBar {
   private static readonly titlePadding = getNumberByResource('titlebar_icon_background_space_horizontal');
   @Provide editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
 
-  onWillApplyTheme(theme: Theme): void {
+  public onWillApplyTheme(theme: Theme): void {
     this.editableTitleBarTheme.iconColor = theme.colors.iconPrimary;
     this.editableTitleBarTheme.titleColor = theme.colors.fontPrimary;
     this.editableTitleBarTheme.subTitleColor = theme.colors.fontSecondary;
@@ -379,7 +379,7 @@ struct ImageMenuItem {
     }
   }
 
-  getBgColor(): ResourceColor {
+  private getBgColor(): ResourceColor {
     if (this.isOnClick) {
       return this.editableTitleBarTheme.iconBackgroundPressedColor;
     } else if (this.isOnHover) {
