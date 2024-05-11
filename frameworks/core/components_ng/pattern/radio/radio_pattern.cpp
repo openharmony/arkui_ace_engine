@@ -96,12 +96,19 @@ void RadioPattern::UpdateIndicatorType()
     } else {
         ImageNodeCreate();
     }
-    if (radioPaintProperty->HasRadioCheck()) {
-        if (!radioPaintProperty->GetRadioCheckValue()) {
-            SetBuilderState();
-        }
-    } else {
+    CHECK_NULL_VOID(builderChildNode_);
+    auto renderContext = builderChildNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformScale({ INDICATOR_MAX_SCALE, INDICATOR_MAX_SCALE });
+    renderContext->UpdateOpacity(1);
+    if (!radioModifier_) {
+        radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
+    }
+    if (!radioPaintProperty->HasRadioCheck()) {
         radioPaintProperty->UpdateRadioCheck(false);
+    }
+    if (!radioPaintProperty->GetRadioCheckValue()) {
+        radioModifier_->InitOpacityScale(false);
         SetBuilderState();
     }
 }
