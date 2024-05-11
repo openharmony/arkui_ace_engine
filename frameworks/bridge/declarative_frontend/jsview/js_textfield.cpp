@@ -1568,7 +1568,7 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
 void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseLengthMetricsToDimension(info[0], value)) {
+    if (!ParseLengthMetricsToPositiveDimension(info[0], value)) {
         value.Reset();
     }
     if (value.IsNegative()) {

@@ -380,7 +380,7 @@ void JSText::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    if (!ParseLengthMetricsToDimension(args, value)) {
+    if (!ParseLengthMetricsToPositiveDimension(args, value)) {
         value.Reset();
     }
     if (value.IsNegative()) {

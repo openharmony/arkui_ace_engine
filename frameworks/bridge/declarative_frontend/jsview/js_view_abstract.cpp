@@ -1524,6 +1524,26 @@ void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimensi
     }
     ParseEdgeWidthsProps(object, commonCalcDimension);
 }
+
+bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::FP);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        return StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::FP);
+    }
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        double value = jsObj->GetProperty("value")->ToNumber<double>();
+        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        result = CalcDimension(value, unit);
+        return true;
+    }
+    return false;
+}
 } // namespace
 
 RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
@@ -4906,27 +4926,9 @@ bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color
     return false;
 }
 
-bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
-    if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::FP);
-        return true;
-    }
-    if (jsValue->IsString()) {
-        auto value = jsValue->ToString();
-        return StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::FP);
-    }
-    if (jsValue->IsObject()) {
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        double value = jsObj->GetProperty("value")->ToNumber<double>();
-        if (LessNotEqual(value, 0.0f)) {
-            return false;
-        }
-        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
-        result = CalcDimension(value, unit);
-        return true;
-    }
-    return false;
+    return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
 }
 
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
@@ -6748,7 +6750,7 @@ void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
         style.margin = margin;
     }
     CalcDimension strokeWidth;
-    if (ParseLengthMetricsToDimension(obj->GetProperty("strokeWidth"), strokeWidth)) {
+    if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), strokeWidth)) {
         style.strokeWidth = strokeWidth;
     }
     Color strokeColor;
