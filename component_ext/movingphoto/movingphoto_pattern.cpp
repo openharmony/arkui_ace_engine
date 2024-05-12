@@ -917,7 +917,6 @@ void MovingPhotoPattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     std::vector<double> ratioList = {0.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
-    pipeline->AddWindowStateChangedCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
 }
 
