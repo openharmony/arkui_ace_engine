@@ -405,7 +405,7 @@ void MutableSpanString::ApplyInsertSpanStringToSpans(int32_t start, const RefPtr
             newSpanItem->interval.first = start + offset;
             newSpanItem->interval.second = spanItemEnd;
             auto wStr = StringUtils::ToWstring((*it)->content);
-            newSpanItem->content = StringUtils::ToString(GetWideStringSubstr(wStr, start));
+            newSpanItem->content = StringUtils::ToString(GetWideStringSubstr(wStr, start - spanItemStart));
             (*it)->interval.second = start;
             (*it)->content = StringUtils::ToString(GetWideStringSubstr(wStr, 0, start - spanItemStart));
             ++it;
@@ -480,6 +480,7 @@ void MutableSpanString::InsertSpanString(int32_t start, const RefPtr<SpanString>
     }
     ApplyInsertSpanStringToSpanBase(start, spanString);
     KeepSpansOrder();
+    NotifySpanWatcher();
 }
 
 void MutableSpanString::AppendSpanString(const RefPtr<SpanString>& spanString)
