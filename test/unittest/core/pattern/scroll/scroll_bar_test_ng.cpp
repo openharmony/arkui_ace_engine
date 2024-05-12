@@ -162,6 +162,24 @@ HWTEST_F(ScrolleBarTestNg, OnCollectTouchTarget001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDragUpdate001
+ * @tc.desc: Test HandleDragUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrolleBarTestNg, HandleDragUpdate001, TestSize.Level1)
+{
+    CreateWithBar();
+    GestureEvent info;
+    info.SetMainDelta(10);
+    scrollBar_->SetReverse(false);
+    scrollBar_->HandleDragUpdate(info);
+    EXPECT_EQ(info.GetMainDelta(), 10);
+    scrollBar_->SetReverse(true);
+    scrollBar_->HandleDragUpdate(info);
+    EXPECT_NE(info.GetMainDelta(), -100);
+}
+
+/**
  * @tc.name: ScrollBarAnimation001
  * @tc.desc: Test ScrollBar Hover Animation
  * @tc.type: FUNC

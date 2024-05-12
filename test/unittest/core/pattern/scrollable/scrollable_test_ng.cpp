@@ -1025,6 +1025,42 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsReverse001
+ * @tc.desc: Test nested IsReverse for IsAtBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, IsReverse001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer
+     * @tc.expected: Pointer is not nullptr.
+     */
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    scrollPn->parent_ = mockPn;
+
+    /**
+     * @tc.steps: step2. Set the parameter scrollable to be nullptr
+     * @tc.expected: Scrollable is nullptr
+     */
+    EXPECT_CALL(*scrollPn, IsAtBottom).WillRepeatedly(Return(false));
+    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    auto scrollable =
+        AceType::MakeRefPtr<Scrollable>([](double, int32_t source) -> bool { return true; }, Axis::VERTICAL);
+    scrollPn->scrollableEvent_->SetScrollable(scrollable);
+    EXPECT_NE(scrollPn->scrollableEvent_->GetScrollable(), nullptr);
+
+    /**
+     * @tc.steps: step3. Call the IsReverse method
+     * @tc.expected: The result is false
+     */
+    bool res = scrollPn->IsReverse();
+    EXPECT_NE(res, true);
+}
+
+/**
  * @tc.name: GetCanOverScroll001
  * @tc.desc: Test nested GetCanOverScroll
  * @tc.type: FUNC
