@@ -125,7 +125,6 @@ const RefPtr<Curve> HIDE_CUSTOM_KEYBOARD_ANIMATION_CURVE =
 
 const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 22.0f);
-constexpr Dimension ORIGINAL_BLUR_RADIUS = 20.0_px;
 constexpr double MENU_ORIGINAL_SCALE = 0.6f;
 constexpr int32_t DUMP_LOG_DEPTH_1 = 1;
 constexpr int32_t DUMP_LOG_DEPTH_2 = 2;
@@ -295,7 +294,7 @@ void ShowContextMenuDisappearAnimation(
         option.GetOnFinishEvent());
 }
 
-void ShowMenuDisappearAnimation(AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
+void FireMenuDisappear(AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
 {
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuNode = menuWrapperPattern->GetMenu();
@@ -311,7 +310,6 @@ void ShowMenuDisappearAnimation(AnimationOption& option, const RefPtr<MenuWrappe
             menuRenderContext->UpdatePosition(
                 OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
             menuRenderContext->UpdateTransformScale(VectorF(MENU_ORIGINAL_SCALE, MENU_ORIGINAL_SCALE));
-            menuRenderContext->UpdateFrontBlurRadius(ORIGINAL_BLUR_RADIUS);
             menuRenderContext->UpdateOpacity(0.0f);
         }
     }, option.GetOnFinishEvent());
@@ -842,6 +840,11 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, Anima
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
+    auto outterMenu = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(outterMenu);
+    auto outterMenuPattern = outterMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(outterMenuPattern);
+    bool isShow = outterMenuPattern->HasDisappearAnimation();
     if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         if (!showPreviewAnimation) {
             CleanPreviewInSubWindow();
@@ -849,8 +852,8 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, Anima
             ShowPreviewDisappearAnimation(menuWrapperPattern);
         }
         ShowContextMenuDisappearAnimation(option, menuWrapperPattern, startDrag);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ShowMenuDisappearAnimation(option, menuWrapperPattern);
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isShow) {
+        FireMenuDisappear(option, menuWrapperPattern);
     } else {
         AnimationUtils::Animate(
             option,
