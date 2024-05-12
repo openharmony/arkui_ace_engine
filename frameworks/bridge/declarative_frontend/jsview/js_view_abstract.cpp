@@ -5168,20 +5168,41 @@ bool JSViewAbstract::ParseJsSymbolId(
         return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    CompleteResourceObject(jsObj);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (resId->IsNull() || !resId->IsNumber()) {
         return false;
     }
     auto resourceObject = GetResourceObject(jsObj);
-    symbolResourceObject = resourceObject;
-    if (!resourceObject) {
-        return false;
-    }
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    symbolResourceObject = resourceObject;
     if (!resourceWrapper) {
         return false;
     }
-    auto symbol = resourceWrapper->GetSymbolById(resId->ToNumber<uint32_t>());
+    if (!resourceObject) {
+        return false;
+    }
+ 
+    auto resIdNum = resId->ToNumber<int32_t>();
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(jsObj)) {
+            return false;
+        }
+        JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+        auto param = params->GetValueAt(0);
+        auto symbol = resourceWrapper->GetSymbolByName(param->ToString().c_str());
+        if (!symbol) {
+            return false;
+        }
+        symbolId = symbol;
+        return true;
+    }
+ 
+    auto symbol = resourceWrapper->GetSymbolById(resIdNum);
     if (!symbol) {
         return false;
     }

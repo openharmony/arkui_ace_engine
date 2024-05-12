@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.h"
-
+#include "bridge/declarative_frontend/jsview/js_symbol.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -194,4 +196,36 @@ ArkUINativeModuleValue SymbolGlyphBridge::ResetEffectStrategy(ArkUIRuntimeCallIn
     GetArkUINodeModifiers()->getSymbolGlyphModifier()->resetEffectStrategy(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto symbolEffectObj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
+    NG::SymbolEffectOptions symbolEffectOptions;
+    Framework::JSSymbol::parseSymbolEffect(symbolEffectObj, symbolEffectOptions);
+    if (info.Length() > NUM_2 && !info[NUM_2]->IsUndefined()) {
+        Framework::JSSymbol::parseSymbolSwitch(info[NUM_2], symbolEffectOptions);
+    }
+    SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SymbolGlyphBridge::ResetSymbolEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    NG::SymbolEffectOptions symbolEffectOptions;
+    SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 } // namespace OHOS::Ace::NG

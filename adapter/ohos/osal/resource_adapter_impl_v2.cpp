@@ -747,9 +747,14 @@ uint32_t ResourceAdapterImplV2::GetResourceLimitKeys() const
 uint32_t ResourceAdapterImplV2::GetSymbolByName(const char* resName) const
 {
     uint32_t result = 0;
+    auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, -1);
-    manager->GetSymbolByName(resName, result);
+    auto state = manager->GetSymbolByName(actualResName.c_str(), result);
+    if (state != Global::Resource::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get symbol by name error, name=%{public}s, errorCode=%{public}d",
+            resName, state);
+    }
     return result;
 }
 

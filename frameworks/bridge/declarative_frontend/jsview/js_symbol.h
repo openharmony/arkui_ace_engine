@@ -33,8 +33,6 @@ public:
     static void SetSymbolEffect(const JSCallbackInfo& info);
     static void JsClip(const JSCallbackInfo& info);
     static void SetSymbolEffectOptions(const JSCallbackInfo& info);
-
-private:
     static void parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::SymbolEffectOptions& symbolEffectOptions);
     static void parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptions& symbolEffectOptions);
 };
