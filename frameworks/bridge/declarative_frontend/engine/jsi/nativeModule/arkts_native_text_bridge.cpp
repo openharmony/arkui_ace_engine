@@ -28,6 +28,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -576,18 +577,43 @@ ArkUINativeModuleValue TextBridge::SetContent(ArkUIRuntimeCallInfo* runtimeCallI
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
 
-    Framework::JSRef<Framework::JSVal> args = info[0];
+    Framework::JSRef<Framework::JSVal> args = info[1];
     if (args->IsObject() && Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSSpanString>()) {
         auto* spanString = Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSSpanString>();
         auto spanStringController = spanString->GetController();
         if (spanStringController) {
-            TextModelNG::InitTextController(reinterpret_cast<FrameNode*>(nativeNode), spanStringController);
+            TextModelNG::InitSpanStringController(reinterpret_cast<FrameNode*>(nativeNode), spanStringController);
         }
         return panda::JSValueRef::Undefined(vm);
     }
     std::string content;
     if (ArkTSUtils::ParseJsString(vm, secondArg, content)) {
         GetArkUINodeModifiers()->getTextModifier()->setContent(nativeNode, content.c_str());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::SetTextController(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    Framework::JSRef<Framework::JSVal> args = info[1];
+    if (args->IsObject()) {
+        auto paramObject = Framework::JSRef<Framework::JSObject>::Cast(args);
+        auto controllerObj = paramObject->GetProperty("controller");
+        Framework::JSTextController* jsController = nullptr;
+        if (controllerObj->IsObject()) {
+            jsController =
+                Framework::JSRef<Framework::JSObject>::Cast(controllerObj)->Unwrap<Framework::JSTextController>();
+        }
+        RefPtr<TextControllerBase> controller =
+            TextModelNG::InitTextController(reinterpret_cast<FrameNode*>(nativeNode));
+        if (jsController) {
+            jsController->SetController(controller);
+        }
     }
     return panda::JSValueRef::Undefined(vm);
 }
