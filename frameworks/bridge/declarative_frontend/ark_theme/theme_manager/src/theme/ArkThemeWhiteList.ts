@@ -36,7 +36,7 @@ class ArkThemeWhiteList {
         'Progress',
         'QRCode',
         'Radio',
-        "Scroll",
+        'Scroll',
         'Search',
         'Select',
         'Slider',
@@ -47,7 +47,7 @@ class ArkThemeWhiteList {
         'TextInput',
         'TimePicker',
         'Toggle',
-    ]
+    ];
 
     /**
      * Check whether component is in whitelist

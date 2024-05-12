@@ -16,13 +16,13 @@
 /// <reference path='../import.ts' />
 
 class ArkThemeImpl implements ThemeInternal {
-    colors: Colors
-    shapes: Shapes
-    typography: Typography
+    colors: Colors;
+    shapes: Shapes;
+    typography: Typography;
 
     constructor(baselineTheme: ThemeInternal, colors?: CustomColors, shapes?: CustomShapes, typography?: CustomTypography) {
-      this.colors = new ArkColorsImpl(colors, baselineTheme.colors)
-      this.shapes = new ArkShapesImpl(shapes, baselineTheme.shapes)
-      this.typography = new ArkTypographyImpl(typography, baselineTheme.typography)
+      this.colors = new ArkColorsImpl(colors, baselineTheme.colors);
+      this.shapes = new ArkShapesImpl(shapes, baselineTheme.shapes);
+      this.typography = new ArkTypographyImpl(typography, baselineTheme.typography);
     }
 }

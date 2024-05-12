@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 /// <reference path="../../../export/ark_theme_scope_manager.d.ts" />
-type CustomTheme = any
+type CustomTheme = any;
 
 class ThemeControl {
     /**
@@ -21,8 +21,8 @@ class ThemeControl {
      * @param customTheme - the Theme for settings
      */
     static setDefaultTheme(customTheme: CustomTheme): void {
-        ArkThemeScopeManager.getInstance().setDefaultTheme(customTheme)
+        ArkThemeScopeManager.getInstance().setDefaultTheme(customTheme);
     }
 }
 
-export default { ThemeControl }
+export default { ThemeControl };
