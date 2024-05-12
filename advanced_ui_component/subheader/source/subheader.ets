@@ -480,8 +480,8 @@ export struct SubHeader {
                 alignment: Alignment.End,
               })
               .margin({
-                right: $r('sys.float.padding_level2'),
-                top: PADDING_LEVEL_2 + ARROW_ICON_WIDTH,
+                right: PADDING_LEVEL_2 + ARROW_ICON_WIDTH,
+                top: $r('sys.float.padding_level4'),
                 bottom: $r('sys.float.padding_level4'),
               })
               .focusable(true)
