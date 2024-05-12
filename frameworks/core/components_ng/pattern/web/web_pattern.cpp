@@ -2599,43 +2599,26 @@ RectF WebPattern::ComputeClippedSelectionBounds(
         return RectF();
     }
     auto offset = GetCoordinatePoint().value_or(OffsetF());
-    int32_t startY = static_cast<int32_t>(
-        (startHandle->GetY() - startHandle->GetViewPortY()) / pipeline->GetDipScale());
-    int32_t endY = static_cast<int32_t>(
-        (endHandle->GetY() - endHandle->GetViewPortY()) / pipeline->GetDipScale());
-    int32_t startEdgeHeight = static_cast<int32_t>(startHandle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
-    int32_t endEdgeHeight = static_cast<int32_t>(endHandle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
-    float selectX = 0;
-    float selectY = 0;
-    float selectWidth = params->GetSelectWidth();
-    float selectHeight = static_cast<float>((startHandle->GetEdgeHeight() + endHandle->GetEdgeHeight()) / 2);
+    float selectX = params->GetSelectX();
+    float selectY = params->GetSelectY();
     float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX()) / 2);
     float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY()) / 2);
-    if (endY < endEdgeHeight) {
-        selectY -= selectHeight;
-    } else if (startY >= startEdgeHeight &&
-        LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), startHandle->GetY())) {
-        selectY += GetHostFrameSize().value_or(SizeF()).Height();
-    } else if (startY < startEdgeHeight &&
-        GreatNotEqual(endHandle->GetY(), GetHostFrameSize().value_or(SizeF()).Height())) {
-        selectY -= selectHeight;
-    } else {
-        return RectF(static_cast<float>(viewPortX + offset.GetX() + params->GetSelectX()),
-            static_cast<float>(viewPortY + offset.GetY() + params->GetSelectY()),
-            params->GetSelectWidth(), params->GetSelectXHeight());
+    if (LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), selectY)) {
+        selectY = GetHostFrameSize().value_or(SizeF()).Height();
+    } else if (LessOrEqual(static_cast<float>(selectY + params->GetSelectXHeight()), 0)) {
+        selectY = 0;
     }
+
     if (viewPortX) {
         selectX += viewPortX;
     }
     if (viewPortY) {
         selectY += viewPortY;
     }
-    selectX = selectX + offset.GetX() + params->GetSelectX();
+    selectX += offset.GetX();
     selectY += offset.GetY();
-    TAG_LOGI(AceLogTag::ACE_WEB,
-        "SelectionBounds selectX:%{public}f, selectY:%{public}f, selectWidth:%{public}f, selectHeight:%{public}f",
-        selectX, selectY, selectWidth, selectHeight);
-    return RectF(selectX, selectY, selectWidth, selectHeight);
+    TAG_LOGI(AceLogTag::ACE_WEB, "SelectionBounds selectX:%{public}f, selectY:%{public}f", selectX, selectY);
+    return RectF(selectX, selectY, 0, 0);
 }
 
 void WebPattern::QuickMenuIsNeedNewAvoid(
@@ -3266,6 +3249,9 @@ void WebPattern::UpdateTouchHandleForOverlay()
         firstHandleInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
         secondHandleInfo.isShow = IsTouchHandleShow(endSelectionHandle_);
         secondHandleInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+        if (firstHandleInfo.isShow || secondHandleInfo.isShow) {
+            selectOverlayProxy_->SetIsNewAvoid(false);
+        }
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
         selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
         selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);

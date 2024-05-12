@@ -168,6 +168,8 @@ public:
     void StartHiddenHandleTask(bool isDelay = true);
     void UpdateSelectArea(const RectF& selectArea);
 
+    void SetIsNewAvoid(bool isNewAvoid);
+
 protected:
     virtual void CheckHandleReverse();
     virtual void UpdateHandleHotZone();

@@ -187,4 +187,11 @@ void SelectOverlayProxy::UpdateSelectArea(const RectF& selectArea)
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
+
+void SelectOverlayProxy::SetIsNewAvoid(bool isNewAvoid)
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsNewAvoid(isNewAvoid); 
+}
 } // namespace OHOS::Ace::NG
