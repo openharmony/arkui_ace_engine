@@ -53,8 +53,6 @@ void MovingPhotoPattern::OnModifyDone()
         pipelineContext->AddOnAreaChangeNode(host->GetId());
     }
     InitEvent();
-
-    isPlayByController_ = false;
 }
 
 void MovingPhotoPattern::OnAttachToFrameNode()
@@ -403,6 +401,13 @@ void MovingPhotoPattern::FireMediaPlayerStop()
     eventHub->FireStopEvent();
 }
 
+void MovingPhotoPattern::FireMediaPlayerPause()
+{
+    auto eventHub = GetEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FirePauseEvent();
+}
+
 void MovingPhotoPattern::FireMediaPlayerFinish()
 {
     auto eventHub = GetEventHub<MovingPhotoEventHub>();
@@ -572,6 +577,7 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
             break;
         case PlaybackStatus::PAUSED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is PAUSED.");
+            FireMediaPlayerPause();
             break;
         case PlaybackStatus::STOPPED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is STOPPED.");
@@ -615,6 +621,7 @@ void MovingPhotoPattern::OnMediaPlayerPrepared()
 
 void MovingPhotoPattern::OnMediaPlayerStoped()
 {
+    isPlayByController_ = false;
     FireMediaPlayerStop();
 }
 
@@ -910,7 +917,6 @@ void MovingPhotoPattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     std::vector<double> ratioList = {0.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
-    pipeline->AddWindowStateChangedCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
 }
 

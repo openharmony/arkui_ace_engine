@@ -36,6 +36,10 @@ class MovingPhotoView extends JSViewAbstract {
         __MovingPhotoView__.onStop(value);
     }
 
+    static onPause(value) {
+        __MovingPhotoView__.onPause(value);
+    }
+
     static onFinish(value) {
         __MovingPhotoView__.onFinish(value);
     }
