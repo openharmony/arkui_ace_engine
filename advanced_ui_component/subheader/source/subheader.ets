@@ -38,7 +38,6 @@ const SINGLE_ICON_ZONE_SIZE: number = 32;
 const RIGHT_SINGLE_ICON_SIZE: number = 24;
 const LOADING_SIZE: number = 24;
 const PADDING_LEVEL_2: number = 4;
-const PADDING_LEVEL_4: number = 8;
 const MAX_RIGHT_WIDTH: Length = '34%';
 
 export enum OperationType {
@@ -482,18 +481,11 @@ export struct SubHeader {
               })
               .margin({
                 right: $r('sys.float.padding_level2'),
-                top: $r('sys.float.padding_level4'),
+                top: PADDING_LEVEL_2 + ARROW_ICON_WIDTH,
                 bottom: $r('sys.float.padding_level4'),
               })
               .focusable(true)
-              .constraintSize({ maxWidth: this.getMaxArrowTextWidth() })
           }
-          Image($r('sys.media.ohos_ic_public_arrow_right'))
-            .fillColor($r('sys.color.ohos_id_color_tertiary'))
-            .width(ARROW_ICON_WIDTH)
-            .height(ARROW_ICON_HEIGHT)
-            .focusable(true)
-            .draggable(false)
         }
         .alignItems(VerticalAlign.Center)
         .borderRadius($r('sys.float.corner_radius_level4'))
@@ -510,83 +502,82 @@ export struct SubHeader {
           left: $r('sys.float.padding_level2'),
           right: $r('sys.float.padding_level4'),
         })
-        .onHover((isHover: boolean) => {
-          if (isHover) {
-            this.textArrowBgColor = $r('sys.color.interactive_hover');
-          } else {
-            this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-          }
-        })
-        .onTouch((event) => {
-          if (event.type === TouchType.Down) {
-            this.textArrowBgColor = $r('sys.color.interactive_pressed');
-          }
-          if (event.type === TouchType.Up) {
-            this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-          }
-        })
-        .onKeyEvent((event) => {
-          if (event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_SPACE) {
-            if (textArrow.action) {
-              textArrow.action();
-            }
-          }
-        })
-        .onClick((event) => {
-          if (textArrow.action) {
-            textArrow.action();
-          }
-        })
         .onAreaChange((oldValue: Area, newValue: Area) => {
           this.textArrowStyleWidth = Number(newValue.width);
           this.textArrowStyleHeight = Number(newValue.height);
         })
 
-        Row()
-          .height(this.textArrowStyleHeight)
-          .width(this.textArrowStyleWidth)
-          .hitTestBehavior(HitTestMode.None)
-          .border({
-            radius: $r('sys.float.corner_radius_level4'),
-            width: $r('sys.float.outline_extra_larger'),
-            color: $r('sys.color.interactive_focus'),
-          })
-          .stateStyles({
-            focused: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                width: $r('sys.float.outline_extra_larger'),
-                color: $r('sys.color.interactive_focus'),
-              })
-              .backgroundColor($r('sys.color.interactive_focus'))
-            },
-            pressed: pressedStyle,
-            disabled: disabledStyle,
-            normal: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                width: $r('sys.float.border_none'),
-                color: $r('sys.color.ohos_id_color_focused_outline_transparent'),
-              })
-            }
-          })
+        Row() {
+          Image($r('sys.media.ohos_ic_public_arrow_right'))
+            .fillColor($r('sys.color.ohos_id_color_tertiary'))
+            .width(ARROW_ICON_WIDTH)
+            .height(ARROW_ICON_HEIGHT)
+            .focusable(true)
+            .draggable(false)
+        }
+        .justifyContent(FlexAlign.End)
+        .height(this.textArrowStyleHeight)
+        .width(this.textArrowStyleWidth)
+        .hitTestBehavior(HitTestMode.None)
+        .padding({ right: $r('sys.float.padding_level4') })
+        .border({
+          radius: $r('sys.float.corner_radius_level4'),
+          width: $r('sys.float.outline_extra_larger'),
+          color: $r('sys.color.interactive_focus'),
+        })
+        .stateStyles({
+          focused: {
+            .border({
+              radius: $r('sys.float.corner_radius_level4'),
+              width: $r('sys.float.outline_extra_larger'),
+              color: $r('sys.color.interactive_focus'),
+            })
+          },
+          pressed: pressedStyle,
+          disabled: disabledStyle,
+          normal: {
+            .border({
+              radius: $r('sys.float.corner_radius_level4'),
+              width: $r('sys.float.border_none'),
+              color: $r('sys.color.ohos_id_color_focused_outline_transparent'),
+            })
+          }
+        })
       }
     }
+    .onHover((isHover: boolean) => {
+      if (isHover) {
+        this.textArrowBgColor = $r('sys.color.interactive_hover');
+      } else {
+        this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+      }
+    })
+    .onTouch((event) => {
+      if (event.type === TouchType.Down) {
+        this.textArrowBgColor = $r('sys.color.interactive_pressed');
+      }
+      if (event.type === TouchType.Up) {
+        this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+      }
+    })
+    .onKeyEvent((event) => {
+      if (event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_SPACE) {
+        if (textArrow.action) {
+          textArrow.action();
+        }
+      }
+    })
+    .onClick((event) => {
+      if (textArrow.action) {
+        textArrow.action();
+      }
+    })
     .focusable(true)
     .justifyContent(FlexAlign.End)
     .margin({
       left: $r('sys.float.padding_level4'),
       right: this.contentMargin?.right ?? $r('sys.float.padding_level4'),
     })
-  }
-
-  /**
-   * OperationType.TEXT_ARROW,文字最大宽度 = 整体宽度 减去 箭头宽度和间距
-   * @returns 文字最大宽度
-   */
-  private getMaxArrowTextWidth(): number {
-    return this.textArrowStyleWidth - PADDING_LEVEL_2 * 2 - PADDING_LEVEL_4 -
-      ARROW_ICON_WIDTH;
   }
 
   @Builder
@@ -712,7 +703,6 @@ struct SingleIconStyle {
             color: $r('sys.color.interactive_focus'),
             style: BorderStyle.Solid,
           })
-          .backgroundColor($r('sys.color.interactive_focus'))
         },
         pressed: pressedStyle,
         disabled: disabledStyle,
