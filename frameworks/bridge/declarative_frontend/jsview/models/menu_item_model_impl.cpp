@@ -24,7 +24,7 @@ void MenuItemModelImpl::SetSelected(bool isSelected) {}
 
 void MenuItemModelImpl::SetSelectIcon(bool isShow) {}
 
-void MenuItemModelImpl::SetSelectIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& menuSymbol) {}
+void MenuItemModelImpl::SetSelectIconSymbol(std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply) {}
 
 void MenuItemModelImpl::SetSelectIconSrc(const std::string& src) {}
 

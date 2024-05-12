@@ -178,7 +178,7 @@ void MenuItemModelNG::SetSelectIconSrc(const std::string& src)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, src);
 }
 
-void MenuItemModelNG::SetSelectIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply)
+void MenuItemModelNG::SetSelectIconSymbol(std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply)
 {
     if (symbolApply != nullptr) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -355,4 +355,13 @@ void MenuItemModelNG::SetSelectIconSrc(FrameNode* frameNode, const std::string& 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, src, frameNode);
 }
 
+void MenuItemModelNG::SetSelectIconSymbol(FrameNode* frameNode,
+    std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply)
+{
+    if (symbolApply != nullptr) {
+        auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+        CHECK_NULL_VOID(menuProperty);
+        menuProperty->SetSelectSymbol(symbolApply);
+    }
+}
 } // namespace OHOS::Ace::NG
