@@ -869,8 +869,8 @@ export class SubHeader extends ViewPU {
               alignment: Alignment.End,
             });
             Text.margin({
-              right: { "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              top: PADDING_LEVEL_2 + ARROW_ICON_WIDTH,
+              right: PADDING_LEVEL_2 + ARROW_ICON_WIDTH,
+              top: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
               bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
             });
             Text.focusable(true);
