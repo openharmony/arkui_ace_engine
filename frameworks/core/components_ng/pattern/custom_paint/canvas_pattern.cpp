@@ -956,6 +956,7 @@ void CanvasPattern::Reset()
     };
     paintMethod_->PushTask(task);
     paintMethod_->ResetTransformMatrix();
+    currentSetTextDirection_ = TextDirection::INHERIT;
 }
 
 void CanvasPattern::OnLanguageConfigurationUpdate()
