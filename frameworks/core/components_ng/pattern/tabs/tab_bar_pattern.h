@@ -232,6 +232,7 @@ public:
     void SetTabBarStyle(TabBarStyle tabBarStyle)
     {
         tabBarStyle_ = tabBarStyle;
+        InitLongPressAndDragEvent();
     }
 
     TabBarStyle GetTabBarStyle() const
@@ -451,7 +452,8 @@ private:
     bool OnKeyEventWithoutClick(const RefPtr<FrameNode>& host, const KeyEvent& event);
     void HandleLongPressEvent(const GestureEvent& info);
     void ShowDialogWithNode(int32_t index);
-    void CloseDialog(int32_t index);
+    void CloseDialog();
+    void InitLongPressAndDragEvent();
     void HandleClick(const GestureEvent& info);
     void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(const TouchLocationInfo& info);
