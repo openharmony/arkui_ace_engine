@@ -67,6 +67,7 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
             return;
         }
     }
+    ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, MovingPhotoUri, value);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -111,6 +112,15 @@ void MovingPhotoModelNG::SetOnStop(MovingPhotoEventFunc&& onStop)
     auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStop(std::move(onStop));
+}
+
+void MovingPhotoModelNG::SetOnPause(MovingPhotoEventFunc&& onPause)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPause(std::move(onPause));
 }
 
 void MovingPhotoModelNG::SetOnFinish(MovingPhotoEventFunc&& onFinish)

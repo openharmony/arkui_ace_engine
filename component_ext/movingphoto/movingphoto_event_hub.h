@@ -48,6 +48,19 @@ public:
         }
     }
 
+    void SetOnPause(MovingPhotoEventFunc&& onPause)
+    {
+        onPause_ = std ::move(onPause);
+    }
+
+    void FirePauseEvent()
+    {
+        if (onPause_) {
+            auto onPause = onPause_;
+            onPause();
+        }
+    }
+
     void SetOnStop(MovingPhotoEventFunc&& onStop)
     {
         onStop_ = std ::move(onStop);
@@ -90,6 +103,7 @@ public:
 private:
     MovingPhotoEventFunc onStart_;
     MovingPhotoEventFunc onStop_;
+    MovingPhotoEventFunc onPause_;
     MovingPhotoEventFunc onFinish_;
     MovingPhotoEventFunc onError_;
 };
