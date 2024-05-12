@@ -2064,5 +2064,4 @@ void VideoElement::OnTextureRefresh()
         context->MarkForcedRefresh();
     }
 }
-
 } // namespace OHOS::Ace

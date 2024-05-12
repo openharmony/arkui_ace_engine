@@ -62,7 +62,6 @@ PlaybackStatus ConvertToPlaybackStatus(int32_t status)
 } // namespace
 
 struct MediaPlayerCallback : public Media::PlayerCallback {
-
 public:
     using PositionUpdatedEvent = std::function<void(uint32_t)>;
     using StateChangedEvent = std::function<void(PlaybackStatus)>;

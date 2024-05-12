@@ -56,7 +56,8 @@ void ForEachModelImpl::Create(const std::string& compilerGenId, const OHOS::Ace:
     }
 }
 
-void ForEachModelImpl::Create() {
+void ForEachModelImpl::Create()
+{
     LOGE("Create (no params) unsupported by ForEachModelImpl");
 }
 

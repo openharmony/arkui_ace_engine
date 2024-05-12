@@ -49,7 +49,7 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
     if (!resultForGeo.second) {
         return;
     }
-    // TODO: remove the original property of padding&margin
+    // remove the original property of padding&margin
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto calcRootWidth = CalcLength(rootWidth);
@@ -82,7 +82,7 @@ void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(parent);
     auto slot = iterOfParent->second.second;
 
-    // TODO: recover the original property of padding&margin
+    // recover the original property of padding&margin
     auto originGeometryNode = iterOfGeometryNode->second;
     auto originFrameOffset = originGeometryNode->GetMarginFrameOffset();
     auto originParentGlobalOffset = originGeometryNode->GetParentGlobalOffset();
@@ -90,7 +90,7 @@ void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
     frameNode->GetGeometryNode()->SetParentGlobalOffset(originParentGlobalOffset);
     originalParent_.erase(iterOfParent);
     originGeometryNode_.erase(iterOfGeometryNode);
-    // TODO: need to reserve the value set by developers
+    // need to reserve the value set by developers
     frameNode->MountToParent(parent, slot);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     parent->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);

@@ -1828,7 +1828,6 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     std::shared_ptr<OHOS::Media::PixelMap> sharedPixelmap(pixelmap.release());
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, sharedPixelmap);
-
     if (!napiValue) {
         LOGE("napiValue is null");
         return runtime->NewUndefined();

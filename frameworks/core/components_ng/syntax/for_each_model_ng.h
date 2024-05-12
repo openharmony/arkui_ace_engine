@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ForEachModelNG : public ForEachModel{
+class ACE_EXPORT ForEachModelNG : public ForEachModel {
 public:
     virtual ~ForEachModelNG() override = default;
     void Pop() override;
