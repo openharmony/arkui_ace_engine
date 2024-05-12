@@ -192,6 +192,6 @@ void SelectOverlayProxy::SetIsNewAvoid(bool isNewAvoid)
 {
     auto pattern = GetSelectOverlayPattern(selectOverlayId_);
     CHECK_NULL_VOID(pattern);
-    pattern->SetIsNewAvoid(isNewAvoid); 
+    pattern->SetIsNewAvoid(isNewAvoid);
 }
 } // namespace OHOS::Ace::NG
