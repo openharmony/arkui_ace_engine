@@ -167,7 +167,6 @@ public:
         const RefPtr<TabContentItemComponent>& tabContentItemComponent)
     {
         auto tabsElement = FindTabsElement(host);
-
         if (!tabsElement) {
             LOGE("TabsElement is null");
             return;

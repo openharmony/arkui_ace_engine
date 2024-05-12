@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 
 export class SplitLayout extends ViewPU {
   constructor(e, t, o, r = -1) {
@@ -296,7 +298,7 @@ export class SplitLayout extends ViewPU {
               this.observeComponentCreation(((e, t) => {
                   ViewStackProcessor.StartGetAccessRecordingFor(e);
                   Image.create(this.mainImage);
-                  Image.margin({ left: 96, right: 36 });
+                  Image.margin({ start: LengthMetrics.vp(96), end: LengthMetrics.vp(36) });
                   Image.height("60%");
                   Image.width("20%");
                   t || Image.pop();
@@ -307,7 +309,7 @@ export class SplitLayout extends ViewPU {
                   Column.create();
                   Column.width("42%");
                   Column.alignItems(HorizontalAlign.Start);
-                  Column.margin({ right: 96 });
+                  Column.margin({ end: LengthMetrics.vp(96) });
                   t || Column.pop();
                   ViewStackProcessor.StopGetAccessRecording()
               }));

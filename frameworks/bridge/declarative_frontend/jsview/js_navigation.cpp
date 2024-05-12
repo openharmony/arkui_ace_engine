@@ -67,7 +67,6 @@ constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
-constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
 constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
@@ -688,6 +687,11 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        NavigationModel::GetInstance()->SetMinNavBarWidth(NG::DEFAULT_MIN_NAV_BAR_WIDTH);
+        NavigationModel::GetInstance()->SetMaxNavBarWidth(NG::DEFAULT_MAX_NAV_BAR_WIDTH);
+        return;
+    }
     if (!info[0]->IsArray()) {
         return;
     }
@@ -696,18 +700,18 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
     JSRef<JSVal> max = rangeArray->GetValueAt(1);
 
     CalcDimension minNavBarWidth;
-
     CalcDimension maxNavBarWidth;
-    ParseJsDimensionVp(max, maxNavBarWidth);
-
-    if (!ParseJsDimensionVp(min, minNavBarWidth)) {
-        minNavBarWidth.SetValue(DEFAULT_MIN_NAV_BAR_WIDTH.Value());
+    if (min->IsNull() || min->IsUndefined() || !ParseJsDimensionVp(min, minNavBarWidth)) {
+        minNavBarWidth = NG::DEFAULT_MIN_NAV_BAR_WIDTH;
     }
     if (LessNotEqual(minNavBarWidth.Value(), 0.0)) {
         minNavBarWidth.SetValue(0);
     }
     NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
 
+    if (max->IsNull() || max->IsUndefined() || !ParseJsDimensionVp(max, maxNavBarWidth)) {
+        maxNavBarWidth = NG::DEFAULT_MAX_NAV_BAR_WIDTH;
+    }
     if (LessNotEqual(maxNavBarWidth.Value(), 0.0)) {
         maxNavBarWidth.SetValue(0);
     }

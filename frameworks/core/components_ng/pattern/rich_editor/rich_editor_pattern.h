@@ -109,6 +109,7 @@ public:
         int32_t endOffset = INVALID_VALUE;
         int32_t spanIndex = INVALID_VALUE;
         int32_t currentClickedPosition = INVALID_VALUE;
+        bool isPreviewTextInputting = false;
         RefPtr<SpanItem> previewTextSpan;
 
         std::string ToString() const
@@ -117,6 +118,7 @@ public:
             if (previewTextSpan) {
                 JSON_STRING_PUT_STRING(jsonValue, previewTextSpan->content);
             }
+            JSON_STRING_PUT_BOOL(jsonValue, isPreviewTextInputting);
             JSON_STRING_PUT_INT(jsonValue, startOffset);
             JSON_STRING_PUT_INT(jsonValue, endOffset);
             JSON_STRING_PUT_INT(jsonValue, spanIndex);
@@ -131,6 +133,7 @@ public:
             endOffset = INVALID_VALUE;
             spanIndex = INVALID_VALUE;
             currentClickedPosition = INVALID_VALUE;
+            isPreviewTextInputting = false;
             previewTextSpan = nullptr;
         }
 
@@ -258,10 +261,17 @@ public:
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
     void InsertValueInStyledString(const std::string& insertValue);
+    RefPtr<SpanString> CreateStyledStringByTextStyle(
+        const std::string& insertValue, const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle);
+    RefPtr<FontSpan> CreateFontSpanByTextStyle(
+        const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle, int32_t length);
+    RefPtr<DecorationSpan> CreateDecorationSpanByTextStyle(
+        const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle, int32_t length);
     void DeleteBackwardInStyledString(int32_t length);
     void DeleteForwardInStyledString(int32_t length, bool isIME = true);
 
     bool BeforeStyledStringChange(int32_t start, int32_t length, const std::string& string);
+    bool BeforeStyledStringChange(int32_t start, int32_t length, const RefPtr<SpanString>& styledString);
     void AfterStyledStringChange(int32_t start, int32_t length, const std::string& string);
 
     void ResetBeforePaste();

@@ -484,11 +484,31 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
     CHECK_NULL_RETURN(curRootNode, nullptr);
     auto rootFocusHub = curRootNode->GetFocusHub();
     CHECK_NULL_RETURN(rootFocusHub, nullptr);
-    auto tmpFocusNode = rootFocusHub->GetLastWeakFocusNode().Upgrade();
-    auto lastFocusNode = rootFocusHub;
-    while (tmpFocusNode && tmpFocusNode->IsCurrentFocus()) {
-        lastFocusNode = tmpFocusNode;
-        tmpFocusNode = tmpFocusNode->GetLastWeakFocusNode().Upgrade();
+    RefPtr<FocusHub> lastFocusNode;
+    std::list<RefPtr<FocusHub>> focusNodes = rootFocusHub->GetChildren();
+    for (const auto& item : focusNodes) {
+        if (item->IsCurrentFocus()) {
+            lastFocusNode = item;
+        }
+    }
+    while (lastFocusNode) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curLastFocusNodeTAG:(%{public}s).", lastFocusNode->GetFrameName().c_str());
+        if (!lastFocusNode->IsCurrentFocus() || !lastFocusNode->IsFocusableNode()) {
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Is not CurrentFocus Or not FocusableNode.");
+            break;
+        }
+        std::list<RefPtr<FocusHub>> focusNodesInner = lastFocusNode->GetChildren();
+        auto openBreak = false;
+        for (const auto& item : focusNodesInner) {
+            if (item->IsCurrentFocus()) {
+                lastFocusNode = item;
+                openBreak = true;
+            }
+        }
+        if (!openBreak) {
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Is LastFocusNode, break.");
+            break;
+        }
     }
     if (lastFocusNode == nullptr) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "lastFocusNode is null.");
@@ -504,7 +524,7 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
-void PipelineContext::IsSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode)
+void PipelineContext::IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
 {
     // Frame other window to SCB window Or inSCB window changes,hide keyboard.
     if ((windowFocus_.has_value() && windowFocus_.value()) ||
@@ -516,14 +536,14 @@ void PipelineContext::IsSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode)
         return;
     }
     // In windowscene, focus change, need close keyboard.
-    auto pattern = curFrameNode->GetPattern();
-    if (pattern && !pattern->NeedSoftKeyboard()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB WindowPage ready to close keyboard.");
+    if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB WindowscenePage ready to close keyboard.");
         WindowSceneHelper::IsCloseKeyboard(curFrameNode);
+        needSoftKeyboard_ = std::nullopt;
     }
 }
 
-void PipelineContext::IsNotSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode)
+void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
 {
     if ((windowFocus_.has_value() && windowFocus_.value()) ||
         (windowShow_.has_value() && windowShow_.value())) {
@@ -536,10 +556,16 @@ void PipelineContext::IsNotSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNo
         return;
     }
 
-    auto pattern = curFrameNode->GetPattern();
-    if (pattern && !pattern->NeedSoftKeyboard()) {
+    if (preNodeId_ != -1 && preNodeId_ == curFrameNode->GetId()) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FocusNode not change.");
+        return;
+    }
+    preNodeId_ = -1;
+
+    if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal WindowPage ready to close keyboard.");
         FocusHub::IsCloseKeyboard(curFrameNode);
+        needSoftKeyboard_ = std::nullopt;
     }
 }
 #endif
@@ -1606,6 +1632,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         manager->ScrollTextFieldToSafeArea();
         FlushUITasks();
     };
+    FlushUITasks();
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
     Animate(option, option.GetCurve(), func);
 }
@@ -1659,6 +1686,7 @@ void PipelineContext::OriginalAvoidanceLogic(
         manager->ScrollTextFieldToSafeArea();
         FlushUITasks();
     };
+    FlushUITasks();
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
     Animate(option, option.GetCurve(), func);
 }
@@ -1733,6 +1761,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         manager->ScrollTextFieldToSafeArea();
         context->FlushUITasks();
     };
+    FlushUITasks();
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
     SetIsLayouting(true);
     Animate(option, option.GetCurve(), func);

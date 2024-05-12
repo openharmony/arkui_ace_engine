@@ -2717,6 +2717,22 @@ void AceContainer::TerminateUIExtension()
     uiExtensionContext->TerminateSelf();
 }
 
+Rosen::WMError AceContainer::RegisterAvoidAreaChangeListener(sptr<Rosen::IAvoidAreaChangedListener>& listener)
+{
+    if (!uiWindow_) {
+        return Rosen::WMError::WM_DO_NOTHING;
+    }
+    return uiWindow_->RegisterAvoidAreaChangeListener(listener);
+}
+
+Rosen::WMError AceContainer::UnregisterAvoidAreaChangeListener(sptr<Rosen::IAvoidAreaChangedListener>& listener)
+{
+    if (!uiWindow_) {
+        return Rosen::WMError::WM_DO_NOTHING;
+    }
+    return uiWindow_->UnregisterAvoidAreaChangeListener(listener);
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {

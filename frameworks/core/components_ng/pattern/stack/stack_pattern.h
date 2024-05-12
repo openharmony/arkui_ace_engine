@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
+#include "core/components_ng/pattern/stack/stack_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -46,7 +47,17 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::SCOPE, true };
+        FocusPattern focusPattern(FocusType::SCOPE, true);
+        auto pipline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipline, focusPattern);
+        auto theme = pipline->GetTheme<StackTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+        focusPattern.SetFocusPaintParams(focusPaintParam);
+        return focusPattern;
     }
 
     bool IsNeedInitClickEventRecorder() const override

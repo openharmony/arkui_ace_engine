@@ -207,6 +207,15 @@ void AceAbility::InitEnv()
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
+    RefPtr<Context> context =
+        Context::CreateContext(runArgs_.projectModel == ProjectModel::STAGE, runArgs_.appResourcesPath);
+    auto stageContext = AceType::DynamicCast<StageContext>(context);
+    CHECK_NULL_VOID(stageContext);
+    auto pkgcontextinfo = stageContext->GetPkgContextInfo();
+    CHECK_NULL_VOID(pkgcontextinfo);
+    pkgcontextinfo->SetPkgNameList(runArgs_.packageNameList);
+    pkgcontextinfo->SetPkgContextInfoAndAliasMap(runArgs_.pkgContextInfoJsonStringMap);
+    container->SetPkgContextInfo(pkgcontextinfo);
     if (runArgs_.projectModel == ProjectModel::STAGE) {
         if (runArgs_.formsEnabled) {
             container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);

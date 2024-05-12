@@ -372,7 +372,7 @@ struct SelectItem {
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
         .shadow(ShadowStyle.OUTER_DEFAULT_XS)
         .pixelRound({
-          top:PixelRoundCalcPolicy.FORCE_FLOOR
+          top: PixelRoundCalcPolicy.FORCE_FLOOR
         })
     }
   }
@@ -427,6 +427,8 @@ struct MultiSelectItemArray {
 
 @Component
 struct SegmentButtonItem {
+  @Link selectedIndexes: number[]
+  @Link focusIndex: number
   @ObjectLink itemOptions: SegmentButtonItemOptions
   @ObjectLink options: SegmentButtonOptions;
   @ObjectLink property: ItemProperty
@@ -454,6 +456,18 @@ struct SegmentButtonItem {
           .textAlign(TextAlign.Center)
           .focusable(this.index == 0 && !this.options.showIcon)
           .padding(this.options.textPadding ?? 0)
+          .gesture(TapGesture().onAction(() => {
+            this.focusIndex = -1
+            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+              if (this.selectedIndexes.indexOf(this.index) === -1) {
+                this.selectedIndexes.push(this.index)
+              } else {
+                this.selectedIndexes.splice(this.selectedIndexes.indexOf(this.index), 1)
+              }
+            } else {
+              this.selectedIndexes[0] = this.index
+            }
+          }))
       }
     }
     .justifyContent(FlexAlign.Center)
@@ -669,6 +683,8 @@ struct SegmentButtonItemArrayComponent {
                 press: this.pressArray[index]
               })
               SegmentButtonItem({
+                selectedIndexes: $selectedIndexes,
+                focusIndex: this.focusIndex,
                 index: index,
                 itemOptions: item,
                 options: this.options,
@@ -981,7 +997,7 @@ export struct SegmentButton {
         }
       }
     })
-    .gesture(
+    .priorityGesture(
       GestureGroup(GestureMode.Parallel,
         TapGesture()
           .onAction((event: GestureEvent) => {

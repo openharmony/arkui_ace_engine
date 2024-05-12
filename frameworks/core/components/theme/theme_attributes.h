@@ -83,6 +83,8 @@ extern const char THEME_PATTERN_GAUGE[];
 extern const char THEME_PATTERN_SHEET[];
 extern const char THEME_BLUR_STYLE_COMMON[];
 extern const char THEME_PATTERN_SHADOW[];
+extern const char THEME_PATTERN_LINEAR_LAYOUT[];
+extern const char THEME_PATTERN_STACK[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];

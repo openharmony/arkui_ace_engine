@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 98
+#define ARKUI_FULL_API_VERSION 99
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 98
+#define ARKUI_NODE_API_VERSION 99
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2783,6 +2783,8 @@ struct ArkUIMenuItemModifier {
     void (*resetSelectIcon)(ArkUINodeHandle node);
     void (*setSelectIconSrc)(ArkUINodeHandle node, ArkUI_CharPtr iconSrc);
     void (*resetSelectIconSrc)(ArkUINodeHandle node);
+    void (*setSelectIconSymbol)(ArkUINodeHandle node, void* symbolFunction);
+    void (*resetSelectIconSymbol)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemGroupModifier {
@@ -3456,6 +3458,12 @@ struct ArkUIPatternLockModifier {
     void (*resetPatternLockRegularColor)(ArkUINodeHandle node);
     void (*setPatternLockPathColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetPatternLockPathColor)(ArkUINodeHandle node);
+    void (*setPatternLockActiveCircleColor)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPatternLockActiveCircleColor)(ArkUINodeHandle node);
+    void (*setPatternLockActiveCircleRadius)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit);
+    void (*resetPatternLockActiveCircleRadius)(ArkUINodeHandle node);
+    void (*setPatternLockEnableWaveEffect)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPatternLockEnableWaveEffect)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnSplitModifier {

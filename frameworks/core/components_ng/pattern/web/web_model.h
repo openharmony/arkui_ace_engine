@@ -179,6 +179,7 @@ public:
     virtual void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) {};
+    virtual void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
 
 private:
     static std::unique_ptr<WebModel> instance_;

@@ -133,7 +133,6 @@ void RosenRenderSwiper::PaintShadow(RSCanvas* canvas, const Offset& offset)
             centerY = height / 2;
         }
         radius = sqrt(pow(centerX, 2) + pow(centerY, 2));
-
     } else {
         fadeTranslate = fadeTranslate > -FADE_MAX_TRANSLATE ? fadeTranslate : -FADE_MAX_TRANSLATE;
         if (isVertical) {

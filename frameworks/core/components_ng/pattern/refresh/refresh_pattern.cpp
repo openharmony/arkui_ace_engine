@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
@@ -1185,5 +1186,11 @@ void RefreshPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     if (parent && nestedScroll.NeedParent()) {
         parent->OnScrollEndRecursive(velocity);
     }
+}
+
+void RefreshPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(
+        std::string("RefreshStatus: ").append(std::to_string(static_cast<int32_t>(refreshStatus_))));
 }
 } // namespace OHOS::Ace::NG

@@ -39,7 +39,7 @@ void OH_ArkUI_GuidelineOption_Dispose(ArkUI_GuidelineOption* guideline)
 
 void OH_ArkUI_GuidelineOption_SetId(ArkUI_GuidelineOption* guideline, const char* value, int32_t index)
 {
-    if (guideline == nullptr || index < 0 || index >= guideline->styles.size()) {
+    if (guideline == nullptr || index < 0 || index >= static_cast<int32_t>(guideline->styles.size())) {
         return;
     }
     guideline->styles[index].id = value;
@@ -47,7 +47,7 @@ void OH_ArkUI_GuidelineOption_SetId(ArkUI_GuidelineOption* guideline, const char
 
 void OH_ArkUI_GuidelineOption_SetDirection(ArkUI_GuidelineOption* guideline, ArkUI_Axis value, int32_t index)
 {
-    if (guideline == nullptr || index < 0 || index >= guideline->styles.size()) {
+    if (guideline == nullptr || index < 0 || index >= static_cast<int32_t>(guideline->styles.size())) {
         return;
     }
     guideline->styles[index].direction = value;
@@ -55,7 +55,7 @@ void OH_ArkUI_GuidelineOption_SetDirection(ArkUI_GuidelineOption* guideline, Ark
 
 void OH_ArkUI_GuidelineOption_SetPositionStart(ArkUI_GuidelineOption* guideline, float value, int32_t index)
 {
-    if (guideline == nullptr || index < 0 || index >= guideline->styles.size()) {
+    if (guideline == nullptr || index < 0 || index >= static_cast<int32_t>(guideline->styles.size())) {
         return;
     }
     guideline->styles[index].start = value;
@@ -63,7 +63,7 @@ void OH_ArkUI_GuidelineOption_SetPositionStart(ArkUI_GuidelineOption* guideline,
 
 void OH_ArkUI_GuidelineOption_SetPositionEnd(ArkUI_GuidelineOption* guideline, float value, int32_t index)
 {
-    if (guideline == nullptr || index < 0 || index >= guideline->styles.size()) {
+    if (guideline == nullptr || index < 0 || index >= static_cast<int32_t>(guideline->styles.size())) {
         return;
     }
     guideline->styles[index].end = value;
@@ -71,7 +71,7 @@ void OH_ArkUI_GuidelineOption_SetPositionEnd(ArkUI_GuidelineOption* guideline, f
 
 const char* OH_ArkUI_GuidelineOption_GetId(ArkUI_GuidelineOption* guideline, int32_t index)
 {
-    if (guideline == nullptr || index < 0 || index >= guideline->styles.size()) {
+    if (guideline == nullptr || index < 0 || index >= static_cast<int32_t>(guideline->styles.size())) {
         return nullptr;
     }
     return guideline->styles[index].id.c_str();
@@ -79,7 +79,7 @@ const char* OH_ArkUI_GuidelineOption_GetId(ArkUI_GuidelineOption* guideline, int
 
 ArkUI_Axis OH_ArkUI_GuidelineOption_GetDirection(ArkUI_GuidelineOption* guideline, int32_t index)
 {
-    if (guideline == nullptr || index < 0 || index >= guideline->styles.size()) {
+    if (guideline == nullptr || index < 0 || index >= static_cast<int32_t>(guideline->styles.size())) {
         return static_cast<ArkUI_Axis>(-1);
     }
     return guideline->styles[index].direction;
@@ -87,7 +87,7 @@ ArkUI_Axis OH_ArkUI_GuidelineOption_GetDirection(ArkUI_GuidelineOption* guidelin
 
 float OH_ArkUI_GuidelineOption_GetPositionStart(ArkUI_GuidelineOption* guideline, int32_t index)
 {
-    if (guideline == nullptr || index < 0 || index >= guideline->styles.size()) {
+    if (guideline == nullptr || index < 0 || index >= static_cast<int32_t>(guideline->styles.size())) {
         return 0.0f;
     }
     return guideline->styles[index].start;
@@ -95,7 +95,7 @@ float OH_ArkUI_GuidelineOption_GetPositionStart(ArkUI_GuidelineOption* guideline
 
 float OH_ArkUI_GuidelineOption_GetPositionEnd(ArkUI_GuidelineOption* guideline, int32_t index)
 {
-    if (guideline == nullptr || index < 0 || index >= guideline->styles.size()) {
+    if (guideline == nullptr || index < 0 || index >= static_cast<int32_t>(guideline->styles.size())) {
         return 0.0f;
     }
     return guideline->styles[index].end;
@@ -118,7 +118,7 @@ void OH_ArkUI_BarrierOption_Dispose(ArkUI_BarrierOption* barrierStyle)
 
 void OH_ArkUI_BarrierOption_SetId(ArkUI_BarrierOption* barrierStyle, const char* value, int32_t index)
 {
-    if (barrierStyle == nullptr || index < 0 || index >= barrierStyle->styles.size()) {
+    if (barrierStyle == nullptr || index < 0 || index >= static_cast<int32_t>(barrierStyle->styles.size())) {
         return;
     }
     barrierStyle->styles[index].id = value;
@@ -126,7 +126,7 @@ void OH_ArkUI_BarrierOption_SetId(ArkUI_BarrierOption* barrierStyle, const char*
 
 void OH_ArkUI_BarrierOption_SetDirection(ArkUI_BarrierOption* barrierStyle, ArkUI_BarrierDirection value, int32_t index)
 {
-    if (barrierStyle == nullptr || index < 0 || index >= barrierStyle->styles.size()) {
+    if (barrierStyle == nullptr || index < 0 || index >= static_cast<int32_t>(barrierStyle->styles.size())) {
         return;
     }
     barrierStyle->styles[index].direction = value;
@@ -134,7 +134,7 @@ void OH_ArkUI_BarrierOption_SetDirection(ArkUI_BarrierOption* barrierStyle, ArkU
 
 void OH_ArkUI_BarrierOption_SetReferencedId(ArkUI_BarrierOption* barrierStyle, const char* value, int32_t index)
 {
-    if (barrierStyle == nullptr || index < 0 || index >= barrierStyle->styles.size()) {
+    if (barrierStyle == nullptr || index < 0 || index >= static_cast<int32_t>(barrierStyle->styles.size())) {
         return;
     }
     barrierStyle->styles[index].referencedId.push_back(value);
@@ -142,7 +142,7 @@ void OH_ArkUI_BarrierOption_SetReferencedId(ArkUI_BarrierOption* barrierStyle, c
 
 const char* OH_ArkUI_BarrierOption_GetId(ArkUI_BarrierOption* barrierStyle, int32_t index)
 {
-    if (barrierStyle == nullptr || index < 0 || index >= barrierStyle->styles.size()) {
+    if (barrierStyle == nullptr || index < 0 || index >= static_cast<int32_t>(barrierStyle->styles.size())) {
         return nullptr;
     }
     return barrierStyle->styles[index].id.c_str();
@@ -150,7 +150,7 @@ const char* OH_ArkUI_BarrierOption_GetId(ArkUI_BarrierOption* barrierStyle, int3
 
 ArkUI_BarrierDirection OH_ArkUI_BarrierOption_GetDirection(ArkUI_BarrierOption* barrierStyle, int32_t index)
 {
-    if (barrierStyle == nullptr || index < 0 || index >= barrierStyle->styles.size()) {
+    if (barrierStyle == nullptr || index < 0 || index >= static_cast<int32_t>(barrierStyle->styles.size())) {
         return ARKUI_BARRIER_DIRECTION_TOP; // or any default value
     }
     return barrierStyle->styles[index].direction;
@@ -159,8 +159,9 @@ ArkUI_BarrierDirection OH_ArkUI_BarrierOption_GetDirection(ArkUI_BarrierOption* 
 const char* OH_ArkUI_BarrierOption_GetReferencedId(
     ArkUI_BarrierOption* barrierStyle, int32_t index, int32_t referencedIndex)
 {
-    if (barrierStyle == nullptr || index < 0 || index >= barrierStyle->styles.size() || referencedIndex < 0 ||
-        referencedIndex >= barrierStyle->styles[index].referencedId.size()) {
+    if (barrierStyle == nullptr || index < 0 || index >= static_cast<int32_t>(barrierStyle->styles.size()) ||
+        referencedIndex < 0 ||
+        referencedIndex >= static_cast<int32_t>(barrierStyle->styles[index].referencedId.size())) {
         return nullptr;
     }
     return barrierStyle->styles[index].referencedId[referencedIndex].c_str();
@@ -168,7 +169,7 @@ const char* OH_ArkUI_BarrierOption_GetReferencedId(
 
 int32_t OH_ArkUI_BarrierOption_GetReferencedIdSize(ArkUI_BarrierOption* barrierStyle, int32_t index)
 {
-    if (barrierStyle == nullptr || index < 0 || index >= barrierStyle->styles.size()) {
+    if (barrierStyle == nullptr || index < 0 || index >= static_cast<int32_t>(barrierStyle->styles.size())) {
         return 0;
     }
     return static_cast<int32_t>(barrierStyle->styles[index].referencedId.size());

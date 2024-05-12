@@ -1158,9 +1158,9 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
     if (itemPosition_.empty()) {
         return;
     }
+
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
-
     if (LessNotEqual(predictEndPos, itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f)) {
         if (isSpringEffect_) {
             return;
@@ -1531,7 +1531,7 @@ int32_t ListLayoutAlgorithm::GetMidIndex(LayoutWrapper* layoutWrapper, bool useP
         (GetStartIndex() != 0 || !NearEqual(GetStartPosition(), startMainPos_))) {
         midPos = GetEndPosition() - contentSize / 2.0f + contentEndOffset_;
     }
-    for (auto & pos : itemPosition_) {
+    for (auto& pos : itemPosition_) {
         if (midPos <= pos.second.endPos + spaceWidth_ / 2) { /* 2:half */
             return pos.first;
         }

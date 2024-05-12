@@ -254,6 +254,7 @@ public:
         const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason) override;
     void OnRenderProcessResponding() override;
 
+    void OnViewportFitChange(NWeb::ViewportFit viewportFit) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

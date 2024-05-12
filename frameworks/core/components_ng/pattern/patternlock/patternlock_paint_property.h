@@ -41,6 +41,9 @@ public:
         paintProperty->propPathColor_ = ClonePathColor();
         paintProperty->propPathStrokeWidth_ = ClonePathStrokeWidth();
         paintProperty->propAutoReset_ = CloneAutoReset();
+        paintProperty->propActiveCircleColor_ = CloneActiveCircleColor();
+        paintProperty->propActiveCircleRadius_ = CloneActiveCircleRadius();
+        paintProperty->propEnableWaveEffect_ = CloneEnableWaveEffect();
         return paintProperty;
     }
 
@@ -54,6 +57,9 @@ public:
         ResetPathColor();
         ResetPathStrokeWidth();
         ResetAutoReset();
+        ResetActiveCircleColor();
+        ResetActiveCircleRadius();
+        ResetEnableWaveEffect();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -76,6 +82,11 @@ public:
         json->PutExtAttr("pathStrokeWidth",
             GetPathStrokeWidth().value_or(patternLockTheme->GetPathStrokeWidth()).ToString().c_str(), filter);
         json->PutExtAttr("autoReset", GetAutoReset().value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("activeCircleColor",
+            GetActiveCircleColor().value_or(patternLockTheme->GetPathColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("activeCircleRadius",
+            GetActiveCircleRadius().value_or(Dimension(0.0f, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("enableWaveEffect", GetEnableWaveEffect().value_or(true) ? "true" : "false", filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CircleRadius, Dimension, PROPERTY_UPDATE_RENDER);
@@ -85,6 +96,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PathColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PathStrokeWidth, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoReset, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ActiveCircleColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ActiveCircleRadius, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableWaveEffect, bool, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

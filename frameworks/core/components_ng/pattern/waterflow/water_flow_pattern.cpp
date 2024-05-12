@@ -295,9 +295,9 @@ void WaterFlowPattern::CheckScrollable()
 {
     auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    SetScrollEnable(IsScrollable());
+    SetScrollEnabled(IsScrollable());
     if (!layoutProperty->GetScrollEnabled().value_or(IsScrollable())) {
-        SetScrollEnable(false);
+        SetScrollEnabled(false);
     }
 }
 
@@ -439,7 +439,7 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t childUpdateIdx = host->GetChildrenUpdated();
-    if (childUpdateIdx > -1 && layoutInfo_.GetSegment(childUpdateIdx) == start && sections_->IsSpecialUpdate()) {
+    if (childUpdateIdx > -1 && layoutInfo_.GetSegment(childUpdateIdx - 1) == start && sections_->IsSpecialUpdate()) {
         // optimize adding or removing children in the last section. Prevent complete reset of that section.
         ++start;
     }

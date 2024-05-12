@@ -55,7 +55,6 @@ enum class ThemeConstantsType {
 };
 
 struct ResValueWrapper {
-
     template<typename T>
     std::pair<bool, T> GetValue(const T& errorValue) const
     {

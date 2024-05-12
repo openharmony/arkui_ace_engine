@@ -1535,7 +1535,7 @@ void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
 void JSTextField::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        return;
+        value = 0;
     }
     TextFieldModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }

@@ -219,7 +219,7 @@ ArkUINativeModuleValue MenuItemBridge::SetSelectIcon(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> inputArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-
+    std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
     bool isShow = false;
     std::string icon;
     if (inputArg->IsBoolean()) {
@@ -229,9 +229,15 @@ ArkUINativeModuleValue MenuItemBridge::SetSelectIcon(ArkUIRuntimeCallInfo* runti
         isShow = true;
     } else if (ArkTSUtils::ParseJsMedia(vm, inputArg, icon)) {
         isShow = true;
+    } else if (inputArg->IsObject()) {
+        isShow = true;
+        Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+        Framework::JSViewAbstract::SetSymbolOptionApply(runtimeCallInfo, symbolApply, info[1]);
     }
     GetArkUINodeModifiers()->getMenuItemModifier()->setSelectIcon(nativeNode, isShow);
     GetArkUINodeModifiers()->getMenuItemModifier()->setSelectIconSrc(nativeNode, icon.c_str());
+    GetArkUINodeModifiers()->getMenuItemModifier()->setSelectIconSymbol(
+        nativeNode, reinterpret_cast<void*>(&symbolApply));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -243,6 +249,7 @@ ArkUINativeModuleValue MenuItemBridge::ResetSelectIcon(ArkUIRuntimeCallInfo* run
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getMenuItemModifier()->resetSelectIcon(nativeNode);
     GetArkUINodeModifiers()->getMenuItemModifier()->resetSelectIconSrc(nativeNode);
+    GetArkUINodeModifiers()->getMenuItemModifier()->resetSelectIconSymbol(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

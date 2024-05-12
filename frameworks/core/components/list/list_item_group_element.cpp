@@ -47,7 +47,6 @@ RefPtr<RenderNode> ListItemGroupElement::CreateRenderNode()
                     groupElement->Rebuild();
                 }
             });
-
     }
     return node;
 }

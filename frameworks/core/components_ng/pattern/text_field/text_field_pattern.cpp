@@ -1565,7 +1565,7 @@ void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
 void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
 {
     scrollable_ = false;
-    SetScrollEnable(scrollable_);
+    SetScrollEnabled(scrollable_);
     // limit move when preview text is shown
     auto touchOffset = info.GetTouches().front().GetLocalLocation();
     if (GetIsPreviewText()) {
@@ -2311,7 +2311,7 @@ void TextFieldPattern::ProcessScroll()
         SetScrollBar(DisplayMode::OFF);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
-            SetScrollEnable(false);
+            SetScrollEnabled(false);
         }
     }
 }
@@ -5034,9 +5034,9 @@ void TextFieldPattern::CheckScrollable()
         } else {
             scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());
         }
-        SetScrollEnable(scrollable_);
+        SetScrollEnabled(scrollable_);
     } else {
-        SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
+        SetScrollEnabled(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
     }
 }
 
@@ -6133,7 +6133,7 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
         selectController_->UpdateSecondHandleOffset();
         if (!selectOverlay_->IsSingleHandle()) {
             selectController_->UpdateFirstHandleOffset();
-            selectController_->UpdateCaretOffset();
+            selectController_->UpdateCaretOffset(TextAffinity::DOWNSTREAM, false);
             selectOverlay_->UpdateAllHandlesOffset();
         } else {
             auto carectOffset = selectController_->GetCaretRect().GetOffset() +

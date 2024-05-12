@@ -21,6 +21,7 @@
 #include "display_manager.h"
 #include "file_uri.h"
 #include "image_source.h"
+#include "input_method_controller.h"
 #include "parameters.h"
 
 #include "base/geometry/ng/offset_t.h"
@@ -45,6 +46,7 @@
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -1408,12 +1410,16 @@ void WebPattern::OnAreaChangedInner()
 {
     auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     auto resizeOffset = Offset(offset.GetX(), offset.GetY());
+
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    Size webSize = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+
+    delegate_->OnAreaChange({resizeOffset.GetX(), resizeOffset.GetY(), webSize.Width(), webSize.Height()});
     if (CheckSafeAreaIsExpand()) {
-        auto frameNode = GetHost();
-        CHECK_NULL_VOID(frameNode);
-        auto geometryNode = frameNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        drawSize_ = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+        drawSize_ = webSize;
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     }
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
@@ -2044,6 +2050,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
             drawSize_.SetSize(drawSizeCache_);
             UpdateWebLayoutSize(width, height, false);
+            UpdateOnFocusTextField(false);
             isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         }
         return false;
@@ -2054,6 +2061,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         }
         drawSize_.SetSize(drawSizeCache_);
         UpdateWebLayoutSize(width, height, false);
+        UpdateOnFocusTextField(false);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         drawSizeCache_.SetSize(drawSize_);
@@ -2065,6 +2073,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
             return true;
         }
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        UpdateOnFocusTextField(true);
         auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, false);
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -3364,6 +3373,36 @@ void WebPattern::OnResizeNotWork()
 
     ACE_SCOPED_TRACE("WebPattern::OnResizeNotWork");
     isWaiting_ = false;
+}
+
+void WebPattern::UpdateOnFocusTextField(bool isFocus)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    isFocus ? textFieldManager->SetOnFocusTextField(WeakClaim(this))
+            : textFieldManager->ClearOnFocusTextField(host->GetId());
+}
+
+bool WebPattern::OnBackPressed()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web %{public}d receives back press event", host->GetId());
+    if (IsVirtualKeyBoardShow()) {
+        CloseSelectOverlay();
+        SelectCancel();
+        TAG_LOGI(AceLogTag::ACE_WEB, "Request close soft keyboard.");
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        CHECK_NULL_RETURN(inputMethod, false);
+        inputMethod->HideTextInput();
+        inputMethod->Close();
+        return true;
+    }
+    return false;
 }
 
 bool WebPattern::OnBackPressedForFullScreen() const

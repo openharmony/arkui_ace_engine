@@ -229,7 +229,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         AceEngine::InitJsDumpHeadSignal();
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
-    // TODO: now choose pipeline using param set as package name, later enable for all.
+    // now choose pipeline using param set as package name, later enable for all.
     auto apiCompatibleVersion = abilityContext->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = abilityContext->GetApplicationInfo()->apiReleaseType;
     auto apiTargetVersion = abilityContext->GetApplicationInfo()->apiTargetVersion;

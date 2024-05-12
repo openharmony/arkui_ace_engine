@@ -73,18 +73,18 @@ constexpr float NO_OPACITY = 0.0f;
 constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
 constexpr int8_t HALF_OF_WIDTH = 2;
 
-constexpr double BIG_FONT_SIZE_SCALE = 1.75f;
-constexpr double LARGE_FONT_SIZE_SCALE = 2.0f;
-constexpr double MAX_FONT_SIZE_SCALE = 3.2f;
-constexpr double BIG_DIALOG_WIDTH = 216.0f;
-constexpr double MAX_DIALOG_WIDTH = 256.0f;
+constexpr float BIG_FONT_SIZE_SCALE = 1.75f;
+constexpr float LARGE_FONT_SIZE_SCALE = 2.0f;
+constexpr float MAX_FONT_SIZE_SCALE = 3.2f;
+constexpr double BIG_DIALOG_WIDTH = 216.0;
+constexpr double MAX_DIALOG_WIDTH = 256.0;
 constexpr int8_t GRIDCOUNT = 2;
 constexpr int8_t MAXLINES = 6;
 constexpr float MAX_FLING_VELOCITY = 4200.0f;
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 } // namespace
 
-void findTextAndImageNode(
+void FindTextAndImageNode(
     const RefPtr<FrameNode>& columnNode, RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& imageNode)
 {
     if (columnNode->GetTag() == V2::TEXT_ETS_TAG) {
@@ -94,7 +94,7 @@ void findTextAndImageNode(
     } else {
         std::list<RefPtr<UINode>> children = columnNode->GetChildren();
         for (auto child : children) {
-            findTextAndImageNode(AceType::DynamicCast<FrameNode>(child), textNode, imageNode);
+            FindTextAndImageNode(AceType::DynamicCast<FrameNode>(child), textNode, imageNode);
         }
     }
 }
@@ -250,7 +250,7 @@ void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
             }
 
             if (tabBar->moveIndex_ != index) {
-                tabBar->CloseDialog(tabBar->dialogNode_);
+                tabBar->CloseDialog();
                 tabBar->moveIndex_ = index;
                 tabBar->ShowDialogWithNode(index);
             }
@@ -560,7 +560,6 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
-
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
                               ? KeyCode::KEY_DPAD_LEFT
                               : KeyCode::KEY_DPAD_UP) ||
@@ -721,18 +720,6 @@ void TabBarPattern::OnModifyDone()
     InitTurnPageRateEvent();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    float scale = pipelineContext->GetFontScale();
-    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE) {
-        if (scale >= BIG_FONT_SIZE_SCALE) {
-            InitLongPressEvent(gestureHub);
-            InitDragEvent(gestureHub);
-        } else {
-            gestureHub->RemoveDragEvent();
-            gestureHub->SetLongPressEvent(nullptr);
-            longPressEvent_ = nullptr;
-            dragEvent_ = nullptr;
-        }
-    }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto tabBarPaintProperty = host->GetPaintProperty<TabBarPaintProperty>();
         CHECK_NULL_VOID(tabBarPaintProperty);
@@ -903,6 +890,28 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return false;
 }
 
+void TabBarPattern::InitLongPressAndDragEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    float scale = pipelineContext->GetFontScale();
+    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE && scale >= BIG_FONT_SIZE_SCALE) {
+        InitLongPressEvent(gestureHub);
+        InitDragEvent(gestureHub);
+    } else {
+        gestureHub->RemoveDragEvent();
+        gestureHub->SetLongPressEvent(nullptr);
+        longPressEvent_ = nullptr;
+        dragEvent_ = nullptr;
+    }
+}
+
 void TabBarPattern::HandleLongPressEvent(const GestureEvent& info)
 {
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
@@ -918,7 +927,7 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     CHECK_NULL_VOID(columnNode);
     RefPtr<FrameNode> imageNode = nullptr;
     RefPtr<FrameNode> textNode = nullptr;
-    findTextAndImageNode(columnNode, textNode, imageNode);
+    FindTextAndImageNode(columnNode, textNode, imageNode);
     CHECK_NULL_VOID(imageNode);
     CHECK_NULL_VOID(textNode);
 
@@ -956,7 +965,7 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     dialogNode_ = overlayManager->ShowDialogWithNode(dialogProperties, dialogColumnNode, false);
 }
 
-void TabBarPattern::CloseDialog(int32_t index)
+void TabBarPattern::CloseDialog()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -1399,7 +1408,7 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
     if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && dialogNode_) {
         TabBarClickEvent(index);
         ClickTo(host, index);
-        CloseDialog(index);
+        CloseDialog();
     }
 
     if (IsContainsBuilder()) {
@@ -1455,13 +1464,13 @@ int32_t TabBarPattern::CalculateSelectedIndex(const Offset& info)
             }
         }
     }
+
     auto pos = std::lower_bound(tabItemOffsets_.begin(), tabItemOffsets_.end(), local,
         [axis, isRTL = isRTL_](const OffsetF& a, const OffsetF& b) {
             return isRTL
                        ? GreatNotEqual(a.GetX(), b.GetX())
                        : (axis == Axis::VERTICAL ? LessNotEqual(a.GetY(), b.GetY()) : LessNotEqual(a.GetX(), b.GetX()));
         });
-
     if (pos == tabItemOffsets_.end()) {
         return -1;
     }
@@ -1719,9 +1728,6 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
     if (tabBarPattern->IsContainsBuilder()) {
         return;
     }
-    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator));
-    CHECK_NULL_VOID(columnNode);
-    auto selectedColumnId = columnNode->GetId();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
@@ -1732,18 +1738,22 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         CHECK_NULL_VOID(imageNode);
         if (imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
+            if (indicator == index) {
+                UpdateSymbolStats(index, -1);
+            } else {
+                UpdateSymbolStats(-1, index);
+            }
             index++;
             continue;
         }
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
-        auto isSelected = columnNode->GetId() == selectedColumnId;
         auto imagePaintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
         CHECK_NULL_VOID(imagePaintProperty);
         ImageSourceInfo info;
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
         if (index >= 0 && index < static_cast<int32_t>(iconStyles_.size())) {
-            if (isSelected) {
+            if (indicator == index) {
                 imagePaintProperty->UpdateSvgFillColor(iconStyles_[index].selectedColor.has_value() ?
                     iconStyles_[index].selectedColor.value() : tabTheme->GetBottomTabIconOn());
             } else {
@@ -1774,6 +1784,9 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
     }
     std::vector<int32_t> indexes = {index, preIndex};
     for (uint32_t i = 0; i < indexes.size(); i++) {
+        if (indexes[i] < 0 || indexes[i] >= static_cast<int32_t>(symbolArray_.size())) {
+            continue;
+        }
         auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indexes[i]));
         CHECK_NULL_VOID(columnNode);
         auto symbolNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
@@ -1785,26 +1798,31 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
         CHECK_NULL_VOID(symbolLayoutProperty);
         TabContentModelNG::UpdateDefaultSymbol(tabTheme, symbolLayoutProperty);
         if (i == 0) {
-            auto symbolEffectOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-            symbolEffectOptions.SetIsTxtActive(true);
-            symbolEffectOptions.SetIsTxtActiveSource(0);
-            symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
             symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOn()});
             auto modifierOnApply = symbolArray_[indexes[i]].onApply;
-            if (symbolArray_[indexes[i]].selectedFlag && modifierOnApply != nullptr) {
-                modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)),
-                    "selected");
+            UpdateSymbolApply(symbolNode, symbolLayoutProperty, indexes[i], "selected");
+            if (preIndex != -1) {
+                TabContentModelNG::UpdateSymbolEffect(symbolLayoutProperty, true);
             }
         } else {
-            symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOff()});
-            auto modifierOnApply = symbolArray_[indexes[i]].onApply;
-            if (modifierOnApply != nullptr) {
-                modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)),
-                    "normal");
-            }
+            symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOff()});
+            UpdateSymbolApply(symbolNode, symbolLayoutProperty, indexes[i], "normal");
         }
         symbolNode->MarkModifyDone();
         symbolNode->MarkDirtyNode();
+    }
+}
+
+void TabBarPattern::UpdateSymbolApply(const RefPtr<NG::FrameNode>& symbolNode,
+    RefPtr<TextLayoutProperty>& symbolProperty, int32_t index, std::string type)
+{
+    auto modifierOnApply = symbolArray_[index].onApply;
+    if (type == "selected" && !symbolArray_[index].selectedFlag) {
+        return;
+    }
+    if (modifierOnApply != nullptr) {
+        modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)), type);
+        TabContentModelNG::UpdateSymbolEffect(symbolProperty, false);
     }
 }
 

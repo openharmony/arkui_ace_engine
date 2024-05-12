@@ -37,7 +37,13 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     selectedColor_ = paintProperty->GetSelectedColor().value_or(selectedColor_);
     activeColor_ = paintProperty->GetActiveColor().value_or(activeColor_);
     pathColor_ = paintProperty->GetPathColor().value_or(pathColor_);
+    activeCircleColor_ = paintProperty->GetActiveCircleColor().value_or(pathColor_);
+    if (activeCircleColor_ == Color::TRANSPARENT) {
+        activeCircleColor_ = paintProperty->GetPathColor().value_or(pathColor_);
+    }
     pathStrokeWidth_ = paintProperty->GetPathStrokeWidth().value_or(pathStrokeWidth_);
+    backgroundCircleRadius_ = paintProperty->GetActiveCircleRadius().value_or(Dimension(0.0f, DimensionUnit::VP));
+    enableWaveEffect_ = paintProperty->GetEnableWaveEffect().value_or(true);
 
     patternlockModifier_->SetRegularColor(regularColor_);
     patternlockModifier_->SetSelectColor(selectedColor_);
@@ -58,6 +64,9 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     patternlockModifier_->SetSideLength(sideLength_);
     patternlockModifier_->SetCircleRadius(circleRadius_.ConvertToPxWithSize(sideLength_));
     patternlockModifier_->SetPathStrokeWidth(pathStrokeWidth_.ConvertToPxWithSize(sideLength_));
+    patternlockModifier_->SetActiveCircleColor(LinearColor(activeCircleColor_));
+    patternlockModifier_->SetActiveBackgroundRadius(backgroundCircleRadius_.ConvertToPxWithSize(sideLength_));
+    patternlockModifier_->SetEnableWaveEffect(enableWaveEffect_);
     patternlockModifier_->UpdateBoundsRect();
 }
 
