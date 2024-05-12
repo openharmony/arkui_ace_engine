@@ -6223,10 +6223,14 @@ void WebDelegate::SetToken()
 {
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_VOID(container);
-    auto token = container->GetToken();
-    if (nweb_) {
-        nweb_->SetToken(static_cast<void*>(token));
-    }
+    int32_t instanceId = container->GetInstanceId();
+    auto window = Platform::AceContainer::GetUIWindow(instanceId);
+    CHECK_NULL_VOID(window);
+    auto uiContent = window->GetUIContent();
+    CHECK_NULL_VOID(nweb_);
+    CHECK_NULL_VOID(uiContent);
+    nweb_->SetToken(static_cast<void*>(uiContent));
+    TAG_LOGD(AceLogTag::ACE_WEB, "setToken success");
 }
 
 void WebDelegate::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
