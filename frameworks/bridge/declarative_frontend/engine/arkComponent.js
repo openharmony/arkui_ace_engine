@@ -15677,7 +15677,8 @@ class ArkCheckboxComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   shape(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, CheckBoxShapeModifier.identity, CheckBoxShapeModifier, value);
+    return this;
   }
   width(value) {
     modifierWithKey(this._modifiersWithKeys, CheckboxWidthModifier.identity, CheckboxWidthModifier, value);
@@ -15823,6 +15824,23 @@ class CheckBoxResponseRegionModifier extends ModifierWithKey {
   }
 }
 CheckBoxResponseRegionModifier.identity = Symbol('responseRegion');
+class CheckBoxShapeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().checkbox.resetCheckboxShape(node);
+    } else {
+      getUINativeModule().checkbox.setCheckboxShape(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CheckBoxShapeModifier.identity = Symbol('checkboxShape');
 class CheckBoxSizeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
