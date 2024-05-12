@@ -113,6 +113,7 @@ private:
     void OnPlayPositionChanged(uint32_t pos) {};
     void FireMediaPlayerStart();
     void FireMediaPlayerStop();
+    void FireMediaPlayerPause();
     void FireMediaPlayerFinish();
     void FireMediaPlayerError();
     void OnResolutionChange();

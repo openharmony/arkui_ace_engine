@@ -114,6 +114,15 @@ void MovingPhotoModelNG::SetOnStop(MovingPhotoEventFunc&& onStop)
     eventHub->SetOnStop(std::move(onStop));
 }
 
+void MovingPhotoModelNG::SetOnPause(MovingPhotoEventFunc&& onPause)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPause(std::move(onPause));
+}
+
 void MovingPhotoModelNG::SetOnFinish(MovingPhotoEventFunc&& onFinish)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
