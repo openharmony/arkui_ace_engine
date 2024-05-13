@@ -13526,9 +13526,29 @@ class ScrollClipModifier extends ModifierWithKey {
   }
 }
 ScrollClipModifier.identity = Symbol('scrollClip');
+class ScrollInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollInitialize(node);
+    }
+    else {
+      getUINativeModule().scroll.setScrollInitialize(node, this.value);
+    }
+  }
+}
+ScrollInitializeModifier.identity = Symbol('scrollInitialize');
 class ArkScrollComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ScrollInitializeModifier.identity, ScrollInitializeModifier, value[0]);
+    }
+    return this;
   }
   scrollable(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollScrollableModifier.identity, ScrollScrollableModifier, value);
@@ -21612,6 +21632,9 @@ if (globalThis.ListItemGroup !== undefined) {
 class ArkRelativeContainerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    return this;
   }
 }
 // @ts-ignore

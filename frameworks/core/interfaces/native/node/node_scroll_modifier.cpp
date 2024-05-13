@@ -463,6 +463,23 @@ void SetScrollBy(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y)
     CHECK_NULL_VOID(controller);
     controller->ScrollBy(x, y, false);
 }
+
+ArkUINodeHandle GetScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto controller = ScrollModelNG::GetOrCreateController(frameNode);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(controller));
+}
+
+void SetScrollBarProxy(ArkUINodeHandle node, ArkUINodeHandle proxy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto scrollProxy = AceType::Claim(reinterpret_cast<ScrollProxy*>(proxy));
+    CHECK_NULL_VOID(scrollProxy);
+    ScrollModelNG::SetScrollBarProxy(frameNode, scrollProxy);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -511,6 +528,8 @@ const ArkUIScrollModifier* GetScrollModifier()
         GetScrollEdge,
         SetScrollPage,
         SetScrollBy,
+        GetScroll,
+        SetScrollBarProxy,
     };
     /* clang-format on */
     return &modifier;
