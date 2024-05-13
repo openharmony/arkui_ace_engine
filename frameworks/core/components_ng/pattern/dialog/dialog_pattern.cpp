@@ -123,6 +123,13 @@ void DialogPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     InitHostWindowRect();
+    auto foldModeChangeCallback =  [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isFoldStatusChanged_ = true;
+    };
+    auto callbackId = pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
+    UpdateFoldDisplayModeChangedCallbackId(callbackId);
 }
 
 void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -130,6 +137,9 @@ void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    if (HasFoldDisplayModeChangedCallbackId()) {
+        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
 }
 
 void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1311,11 +1321,12 @@ void DialogPattern::DumpObjectProperty()
 }
 void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
+    if (isFoldStatusChanged_ || type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         InitHostWindowRect();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        isFoldStatusChanged_ = false;
     }
 }
 
