@@ -427,7 +427,7 @@ private:
     void SetObscured();
 
     CopyOptions copyOption_ = CopyOptions::None;
-    ImageInterpolation interpolation_ = ImageInterpolation::NONE;
+    ImageInterpolation interpolation_ = ImageInterpolation::LOW;
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;
