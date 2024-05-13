@@ -705,6 +705,7 @@ void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason di
             if (HasSheetSpringBack()) {
                 CallSheetSpringBack();
             } else {
+                isDismissProcess_ = false;
                 SheetTransition(true);
             }
         }
@@ -717,6 +718,7 @@ void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason di
 
 void SheetPresentationPattern::DismissTransition(bool isTransitionIn, float dragVelocity)
 {
+    isDismissProcess_ = true;
     const auto& overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->ModalPageLostFocus(GetHost());

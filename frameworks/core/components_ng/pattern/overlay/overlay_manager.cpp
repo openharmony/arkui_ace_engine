@@ -3237,7 +3237,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             pipeline->FlushUITasks();
             ComputeSheetOffset(sheetStyle, topModalNode);
             auto sheetType = topModalNodePattern->GetSheetType();
-            if (sheetType != SheetType::SHEET_POPUP && !topModalNodePattern->GetAnimationProcess()) {
+            if (sheetType != SheetType::SHEET_POPUP && !topModalNodePattern->GetDismissProcess()) {
                 PlaySheetTransition(topModalNode, true, false, false);
             }
             return;
@@ -3396,6 +3396,7 @@ void OverlayManager::CloseSheet(int32_t targetId)
     } else {
         PlaySheetTransition(sheetNode, false);
     }
+    sheetNode->GetPattern<SheetPresentationPattern>()->SetDismissProcess(true);
     sheetMap_.erase(targetId);
     RemoveSheetNode(sheetNode);
     FireModalPageHide();
