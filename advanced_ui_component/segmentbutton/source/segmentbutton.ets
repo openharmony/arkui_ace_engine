@@ -439,7 +439,7 @@ struct SegmentButtonItem {
       if (this.options.showIcon) {
         Image(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon)
           .size(this.options.imageSize ?? { width: 24, height: 24 })
-          .focusable(this.index == 0)
+          .focusable(!this.options.showText)
           .draggable(false)
           .fillColor(this.property.isSelected ? (this.options.selectedFontColor ?? SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) :
             (this.options.fontColor ?? SegmentButtonTheme.FONT_COLOR))
@@ -454,7 +454,7 @@ struct SegmentButtonItem {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(1)
           .textAlign(TextAlign.Center)
-          .focusable(this.index == 0 && !this.options.showIcon)
+          .focusable(true)
           .padding(this.options.textPadding ?? 0)
           .gesture(TapGesture().onAction(() => {
             this.focusIndex = -1
@@ -616,21 +616,19 @@ struct SegmentButtonItemArrayComponent {
   @Builder
   focusStack(index: number) {
     Stack() {
-      if (index === this.focusIndex) {
-        Stack()
-          .borderRadius({
-            topLeft: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].topLeft as number + 4 : this.buttonBorderRadius[index].topLeft,
-            topRight: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].topRight as number + 4 : this.buttonBorderRadius[index].topRight,
-            bottomLeft: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].bottomLeft as number + 4 : this.buttonBorderRadius[index].bottomLeft,
-            bottomRight: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].bottomRight as number + 4 : this.buttonBorderRadius[index].bottomRight
-          })
-          .size({
-            width: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonWidth[index] + 8 : this.buttonWidth[index],
-            height: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonHeight[index] + 8 : this.buttonHeight[index]
-          })
-          .borderColor(SegmentButtonTheme.FOCUS_BORDER_COLOR)
-          .borderWidth(2)
-      }
+      Stack()
+        .borderRadius({
+          topLeft: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].topLeft as number + 4 : this.buttonBorderRadius[index].topLeft,
+          topRight: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].topRight as number + 4 : this.buttonBorderRadius[index].topRight,
+          bottomLeft: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].bottomLeft as number + 4 : this.buttonBorderRadius[index].bottomLeft,
+          bottomRight: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonBorderRadius[index].bottomRight as number + 4 : this.buttonBorderRadius[index].bottomRight
+        })
+        .size({
+          width: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonWidth[index] + 8 : this.buttonWidth[index],
+          height: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ? this.buttonHeight[index] + 8 : this.buttonHeight[index]
+        })
+        .borderColor(SegmentButtonTheme.FOCUS_BORDER_COLOR)
+        .borderWidth(2)
     }
     .size({ width: 1, height: 1 })
     .align(Alignment.Center)
@@ -716,8 +714,18 @@ struct SegmentButtonItemArrayComponent {
                 }
               }
             })
-            .overlay(this.focusStack(index), {
-              align: Alignment.Center
+            .stateStyles({
+              normal: {
+                .overlay(undefined)
+              },
+              focused: {
+                .overlay(this.focusStack(index), {
+                  align: Alignment.Center
+                })
+              }
+            })
+            .onFocus(() => {
+              this.focusIndex = index
             })
             .onTouch((event: TouchEvent) => {
               if (event.source !== SourceType.TouchScreen) {
@@ -951,20 +959,6 @@ export struct SegmentButton {
         })
       }
     }
-    .onFocus(() => {
-      if (this.options === void 0) {
-        return
-      }
-      if (this.selectedIndexes === void 0 || this.selectedIndexes.length === 0) {
-        this.focusIndex = 0
-        return
-      }
-      if (this.options.type === 'tab' || !(this.options.multiply ?? false)) {
-        this.focusIndex = this.selectedIndexes[0]
-      } else {
-        this.focusIndex = Math.min(...this.selectedIndexes)
-      }
-    })
     .onBlur(() => {
       this.focusIndex = -1
     })
@@ -973,14 +967,6 @@ export struct SegmentButton {
         return
       }
       if (event.type === KeyType.Down) {
-        if ((event.keyCode === KeyCode.KEYCODE_DPAD_DOWN || event.keyCode === KeyCode.KEYCODE_DPAD_RIGHT) && this.focusIndex < (Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1)) {
-          // Move to next
-          this.focusIndex = this.focusIndex + 1
-        }
-        if ((event.keyCode === KeyCode.KEYCODE_DPAD_UP || event.keyCode === KeyCode.KEYCODE_DPAD_LEFT) && this.focusIndex > 0) {
-          // Move to previous
-          this.focusIndex = this.focusIndex - 1
-        }
         if (event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_NUMPAD_ENTER) {
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
             if (this.selectedIndexes.indexOf(this.focusIndex) === -1) {
