@@ -1202,7 +1202,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   customKeyboard(event: () => void): TextInputAttribute {
     throw new Error('Method not implemented.');
   }
-  decoration(value: { type: TextDecorationType; color?: ResourceColor }): TextInputAttribute {
+  decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputDecorationModifier.identity, TextInputDecorationModifier, value);
     return this;
   }
