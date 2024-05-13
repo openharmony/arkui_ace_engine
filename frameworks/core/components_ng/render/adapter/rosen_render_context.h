@@ -166,6 +166,9 @@ public:
         rsNode_->SetVisible(visible);
     }
 
+    template<typename ModifierName, typename T>
+    void SetAnimatableProperty(std::shared_ptr<ModifierName>& modifier, const T& value);
+
     void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
 
     void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) override;
@@ -634,10 +637,14 @@ private:
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
+    // translate and scale modifier for developer
+    std::shared_ptr<Rosen::RSTranslateModifier> translateXYUserModifier_;
+    std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;
+    std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
     RefPtr<FocusAnimationModifier> focusAnimationModifier_;
 
-    // translate modifiers for developer
+    // translate modifiers for interruption
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
 
     std::optional<OffsetF> frameOffset_;
