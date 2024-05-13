@@ -139,6 +139,11 @@ void PanRecognizer::OnAccepted()
     ReportSlideOn();
     SendCallbackMsg(onActionStart_);
     SendCallbackMsg(onActionUpdate_);
+    // if gesture is blocked by double click, recognizer will receive up before onAccepted
+    // in this case, recognizer need to send onActionEnd when onAccepted
+    if (fingersId_.empty()) {
+        SendCallbackMsg(onActionEnd_);
+    }
 }
 
 void PanRecognizer::OnRejected()
