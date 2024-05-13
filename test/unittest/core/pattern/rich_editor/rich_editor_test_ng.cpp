@@ -3548,6 +3548,7 @@ HWTEST_F(RichEditorTestNg, NeedSoftKeyboard001, TestSize.Level1)
      */
     EXPECT_TRUE(richEditorPattern->NeedSoftKeyboard());
 }
+
 /*
  * @tc.name: DoubleHandleClickEvent001
  * @tc.desc: test double click
@@ -3586,24 +3587,41 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
 
 /*
  * @tc.name: DoubleHandleClickEvent002
- * @tc.desc: test Double click to AdjustWordSelection
+ * @tc.desc: test Mouse Double Click
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent002, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->caretPosition_ = 0;
-    GestureEvent info;
-    info.SetSourceDevice(SourceType::MOUSE);
-    info.SetGlobalLocation(Offset(0, 0));
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
+    AddSpan(TEST_INSERT_VALUE);
 
+    TestParagraphRect paragraphRect = { .start = 0, .end = 1, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 1,
+        .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
+        .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    GestureEvent info;
     richEditorPattern->isMousePressed_ = true;
-    richEditorPattern->caretUpdateType_= CaretUpdateType::LONG_PRESSED;
+    info.SetSourceDevice(SourceType::MOUSE);
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = -1;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
+    richEditorPattern->caretPosition_ = 0;
+    info.localLocation_ = Offset(0, 0);
+    richEditorPattern->isMouseSelect_ = false;
+    richEditorPattern->caretVisible_ = true;
+    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
     richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = -1;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
 }
 
 /*
