@@ -16,7 +16,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_filter.h"
 
 #include "base/utils/utils.h"
-#include "frameworks/core/components/declaration/svg/svg_filter_declaration.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/components_ng/svg/parse/svg_fe.h"
 
 namespace OHOS::Ace::NG {
@@ -104,19 +104,19 @@ void SvgFilter::OnAsPaint()
 bool SvgFilter::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgFilterAttribute&)> attrs[] = {
-        { DOM_SVG_HEIGHT,
+        { SVG_HEIGHT,
             [](const std::string& val, SvgFilterAttribute& attr) {
                 attr.height = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_WIDTH,
+        { SVG_WIDTH,
             [](const std::string& val, SvgFilterAttribute& attr) {
                 attr.width = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_X,
+        { SVG_X,
             [](const std::string& val, SvgFilterAttribute& attr) {
                 attr.x = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_Y,
+        { SVG_Y,
             [](const std::string& val, SvgFilterAttribute& attr) {
                 attr.y = SvgAttributesParser::ParseDimension(val);
             } },

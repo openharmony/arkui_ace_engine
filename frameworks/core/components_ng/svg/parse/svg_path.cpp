@@ -18,7 +18,7 @@
 #include "include/utils/SkParsePath.h"
 
 #include "base/utils/utils.h"
-#include "frameworks/core/components/declaration/svg/svg_path_declaration.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 
 namespace OHOS::Ace::NG {
@@ -32,7 +32,7 @@ RefPtr<SvgNode> SvgPath::Create()
 
 bool SvgPath::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
-    if (name == DOM_SVG_D) {
+    if (name == SVG_D) {
         d_ = value;
         return true;
     }
