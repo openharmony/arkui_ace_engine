@@ -521,6 +521,7 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto radio = height / 2.0;
     auto offsetX = offset_.GetX() - focusPaintPadding;
     auto offsetY = offset_.GetY() - focusPaintPadding;
+    CHECK_NULL_VOID(switchModifier_);
     auto trackRadius = switchModifier_->GetTrackRadius();
     auto pointRadius = switchModifier_->GetPointRadius();
     if (pointRadius * NUMBER_TWO > height_) {
