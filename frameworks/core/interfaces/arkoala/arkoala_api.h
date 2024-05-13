@@ -2071,6 +2071,8 @@ struct ArkUIScrollModifier {
     ArkUI_Int32 (*getScrollEdge)(ArkUINodeHandle node);
     void (*setScrollPage)(ArkUINodeHandle node, ArkUI_Int32 next, ArkUI_Int32 animation);
     void (*setScrollBy)(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y);
+    ArkUINodeHandle (*getScroll)(ArkUINodeHandle node);
+    void (*setScrollBarProxy)(ArkUINodeHandle node, ArkUINodeHandle proxy);
 };
 
 struct ArkUIListItemModifier {

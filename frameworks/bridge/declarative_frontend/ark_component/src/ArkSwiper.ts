@@ -22,7 +22,7 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     if (value[0] !== undefined) {
       modifierWithKey(this._modifiersWithKeys, SwiperInitializeModifier.identity, SwiperInitializeModifier, value[0]);
     }
-    return this
+    return this;
   }
   index(value: number): this {
     modifierWithKey(this._modifiersWithKeys, SwiperIndexModifier.identity, SwiperIndexModifier, value);

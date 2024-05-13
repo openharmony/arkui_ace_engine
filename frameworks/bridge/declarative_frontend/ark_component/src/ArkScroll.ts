@@ -214,10 +214,29 @@ class ScrollClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class ScrollInitializeModifier extends ModifierWithKey<Scroller> {
+  constructor(value: Scroller) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollInitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollInitialize(node);
+    } else {
+      getUINativeModule().scroll.setScrollInitialize(node, this.value);
+    }
+  }
+}
 
 class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): ScrollAttribute {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ScrollInitializeModifier.identity, ScrollInitializeModifier, value[0]);
+    }
+    return this;
   }
   scrollable(value: ScrollDirection): this {
     modifierWithKey(this._modifiersWithKeys, ScrollScrollableModifier.identity, ScrollScrollableModifier, value);
