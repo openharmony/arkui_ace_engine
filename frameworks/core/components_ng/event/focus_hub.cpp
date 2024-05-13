@@ -1697,9 +1697,9 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
 
 bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const
 {
-    auto childGeometryNode = childNode->GetGeometryNode();
-    CHECK_NULL_RETURN(childGeometryNode, false);
-    rect = childGeometryNode->GetFrameRect();
+    auto frameNode = childNode->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    rect = frameNode->GetPaintRectWithTransform();
     return true;
 }
 
