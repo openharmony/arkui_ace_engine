@@ -1502,6 +1502,10 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
+    auto subwindowMgr = SubwindowManager::GetInstance();
+    for (auto child: rootNode->GetChildren()) {
+        subwindowMgr->DeleteHotAreas(Container::CurrentId(), child->GetId());
+    }
     rootNode->Clean();
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
