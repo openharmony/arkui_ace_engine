@@ -144,6 +144,8 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
     CHECK_NULL_VOID(value);
     CHECK_NULL_VOID(styledString_);
+    CloseSelectOverlay();
+    ResetSelection();
     auto length = styledString_->GetLength();
     bool isPreventChange = !BeforeStyledStringChange(0, length, value);
     CHECK_NULL_VOID(!isPreventChange);
@@ -407,6 +409,10 @@ bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, 
         auto lastStyles = styledString_->GetSpans(changeStart - 1, 1);
         for (auto && style : lastStyles) {
             if (!style) {
+                continue;
+            }
+            auto spanType = style->GetSpanType();
+            if (spanType == SpanType::Image || spanType == SpanType::CustomSpan) {
                 continue;
             }
             style->UpdateStartIndex(0);
@@ -5259,6 +5265,7 @@ void RichEditorPattern::ResetAfterPaste()
 void RichEditorPattern::InsertValueByPaste(const std::string& pasteStr)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "InsertValueByPaste");
+    CHECK_NULL_VOID(!isSpanStringMode_);
     InsertValue(pasteStr, false);
 }
 
