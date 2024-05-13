@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <stdint.h>
+#include <string>
 
 namespace OHOS::Ace {
 class AnrThread {
@@ -26,7 +27,7 @@ public:
     static void Start();
     static void Stop();
     using Task = std::function<void()>;
-    static bool PostTaskToTaskRunner(Task&& task, uint32_t delayTime, const std::string name);
+    static bool PostTaskToTaskRunner(Task&& task, uint32_t delayTime, const std::string& name);
 };
 } // namespace OHOS::Ace
 #endif

@@ -18,6 +18,8 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "core/components/common/layout/grid_container_info.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/badge_model_impl.h"
@@ -64,6 +66,8 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         return badgeParameters;
     }
 
+    auto themeColors = JSThemeUtils::GetThemeColors();
+
     auto badgeTheme = GetTheme<BadgeTheme>();
     CHECK_NULL_RETURN(badgeTheme, BadgeParameters());
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -109,6 +113,10 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         Color colorVal;
         if (ParseJsColor(colorValue, colorVal)) {
             badgeParameters.badgeTextColor = colorVal;
+        } else {
+            if (themeColors) {
+                badgeParameters.badgeTextColor = themeColors->FontOnPrimary();
+            }
         }
 
         CalcDimension fontSize;
@@ -138,6 +146,10 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         Color color;
         if (ParseJsColor(badgeColorValue, color)) {
             badgeParameters.badgeColor = color;
+        } else {
+            if (themeColors) {
+                badgeParameters.badgeColor = themeColors->Warning();
+            }
         }
 
         CalcDimension borderWidth;
@@ -155,7 +167,7 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         if (ParseJsColor(borderColorValue, borderColor)) {
             badgeParameters.badgeBorderColor = borderColor;
         } else {
-            badgeParameters.badgeBorderColor = badgeTheme->GetBadgeBorderColor();
+            badgeParameters.badgeBorderColor = themeColors ? themeColors->Warning() : badgeTheme->GetBadgeBorderColor();
         }
 
         std::string fontWeight;

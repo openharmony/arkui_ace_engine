@@ -244,7 +244,8 @@ public:
         }
     }
 
-    void RecordHitEmptyMessage(const TouchEvent& touchPoint, const std::string& resultInfo);
+    void RecordHitEmptyMessage(
+        const TouchEvent& touchPoint, const std::string& resultInfo, const RefPtr<NG::FrameNode>& frameNode);
 
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
@@ -252,7 +253,9 @@ private:
     void GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std::string>& touchTestIds,
         bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     void CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
-    void LogTouchTestResultRecognizers(const TouchTestResult& result);
+    void LogTouchTestResultRecognizers(const TouchTestResult& result, int32_t touchEventId);
+    void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
+        bool sendOnTouch);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;

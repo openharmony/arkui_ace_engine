@@ -150,6 +150,7 @@ public:
         return AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(2));
     }
 
+    void UpdateGestureRowVisible();
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
     int32_t GetContainerModalTitleHeight();

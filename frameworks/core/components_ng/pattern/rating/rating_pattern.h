@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "core/components/rating/rating_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rating/rating_accessibility_property.h"
 #include "core/components_ng/pattern/rating/rating_event_hub.h"
@@ -32,17 +33,6 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-#define ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(name, type)     \
-    static std::optional<type> Get##name##FromTheme()             \
-    {                                                             \
-        do {                                                      \
-            auto pipeline = PipelineBase::GetCurrentContext();    \
-            CHECK_NULL_RETURN(pipeline, std::nullopt);            \
-            auto ratingTheme = pipeline->GetTheme<RatingTheme>(); \
-            CHECK_NULL_RETURN(ratingTheme, std::nullopt);         \
-            return ratingTheme->Get##name();                      \
-        } while (false);                                          \
-    }
 
 class RatingPattern : public Pattern {
     DECLARE_ACE_TYPE(RatingPattern, Pattern);
@@ -82,21 +72,10 @@ public:
     // Called on main thread to check if need rerender of the content.
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(RatingScore, double);
-    ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(StepSize, double);
-    ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(StarNum, int32_t);
-
     FocusPattern GetFocusPattern() const override
     {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, FocusPattern());
-        auto ratingTheme = pipeline->GetTheme<RatingTheme>();
-        CHECK_NULL_RETURN(ratingTheme, FocusPattern());
-        auto focusWidth = ratingTheme->GetFocusBorderWidth();
-
         FocusPaintParam focusPaintParams;
-        focusPaintParams.SetPaintWidth(focusWidth);
-
+        focusPaintParams.SetPaintWidth(themeBorderWidth_);
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
@@ -118,15 +97,19 @@ public:
 
     void SetRatingScore(double value);
 
+    void InitDefaultParams();
+
 private:
     void UpdateRatingScore(double ratingScore);
     void MarkDirtyNode(const PropertyChangeFlag& flag);
-    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
-    void ConstrainsRatingScore();
-    void LoadForeground();
-    void LoadSecondary();
-    void LoadBackground();
+    void ConstrainsRatingScore(const RefPtr<RatingLayoutProperty>& layoutProperty);
+    void LoadForeground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
+        const RefPtr<IconTheme>& iconTheme);
+    void LoadSecondary(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
+        const RefPtr<IconTheme>& iconTheme);
+    void LoadBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
+        const RefPtr<IconTheme>& iconTheme);
     void UpdatePaintConfig();
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
@@ -134,7 +117,6 @@ private:
     void OnImageLoadSuccess(int32_t imageFlag);
     void CheckImageInfoHasChangedOrNot(
         int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag);
-    static ImageSourceInfo GetImageSourceInfoFromTheme(int32_t imageFlag);
 
     // Init pan recognizer to update render when drag updates, fire change event when drag ends.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -165,7 +147,6 @@ private:
     void FireChangeEvent();
     void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX, bool isDrag);
     bool IsIndicator();
-    void UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag);
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
 
@@ -201,6 +182,10 @@ private:
     double lastRatingScore_ = 0.0;
     RatingModifier::RatingAnimationType state_;
     float singleStarWidth_ = .0f;
+    int32_t themeStarNum_ = OHOS::Ace::DEFAULT_RATING_STAR_NUM;
+    double themeStepSize_ = OHOS::Ace::DEFAULT_RATING_STEP_SIZE;
+    double themeRatingScore_ = OHOS::Ace::DEFAULT_RATING_SCORE;
+    Dimension themeBorderWidth_ = 0.0_vp;
 
     bool isForegroundImageInfoFromTheme_ = false;
     bool isSecondaryImageInfoFromTheme_ = false;

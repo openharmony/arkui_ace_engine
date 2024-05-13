@@ -283,4 +283,18 @@ void PixelMapOhos::SavePixelMapToFile(const std::string& dst) const
     TAG_LOGI(AceLogTag::ACE_IMAGE, "write success, path=%{public}s", path.c_str());
 }
 
+RefPtr<PixelMap> PixelMapOhos::GetCropPixelMap(const Rect& srcRect)
+{
+    Media::InitializationOptions options;
+    options.size.width = static_cast<int32_t>(srcRect.Width());
+    options.size.height = static_cast<int32_t>(srcRect.Height());
+    options.pixelFormat = Media::PixelFormat::RGBA_8888;
+    options.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    options.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+
+    Media::Rect rect {srcRect.Left(), srcRect.Top(), srcRect.Width(), srcRect.Height()};
+    auto resPixelmap = OHOS::Media::PixelMap::Create(*pixmap_, rect, options);
+    return AceType::MakeRefPtr<PixelMapOhos>(std::move(resPixelmap));
+}
+
 } // namespace OHOS::Ace

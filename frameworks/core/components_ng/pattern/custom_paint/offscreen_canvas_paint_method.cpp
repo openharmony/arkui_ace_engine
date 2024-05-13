@@ -95,6 +95,7 @@ void OffscreenCanvasPaintMethod::InitBitmap()
 
 void OffscreenCanvasPaintMethod::Reset()
 {
+    matrix_.reset();
     ResetStates();
     InitBitmap();
 }

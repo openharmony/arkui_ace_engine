@@ -1,5 +1,6 @@
 {
     "files": [
+        "src/ArkLog.ts",
         "src/ArkComponent.ts",
         "src/ArkBlank.ts",
         "src/ArkColumn.ts",

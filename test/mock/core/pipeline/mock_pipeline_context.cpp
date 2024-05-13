@@ -46,7 +46,10 @@ void MockPipelineContext::SetUp()
 
 void MockPipelineContext::TearDown()
 {
-    pipeline_ = nullptr;
+    if (pipeline_) {
+        pipeline_->Destroy();
+        pipeline_ = nullptr;
+    }
 }
 
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
@@ -124,7 +127,7 @@ void PipelineContext::SetupRootElement()
     auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
     rootFocusHub->SetFocusType(FocusType::SCOPE);
     rootFocusHub->SetFocusable(true);
-    rootNode_->AttachToMainTree();
+    rootNode_->AttachToMainTree(false, this);
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
     rootNode_->AddChild(stageNode);
@@ -155,7 +158,11 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
 
 void PipelineContext::OnIdle(int64_t deadline) {}
 
-void PipelineContext::Destroy() {}
+void PipelineContext::Destroy()
+{
+    dragDropManager_.Reset();
+    rootNode_.Reset();
+}
 
 void PipelineContext::OnShow() {}
 
@@ -212,6 +219,8 @@ void PipelineContext::FlushMessages() {}
 void PipelineContext::FlushModifier() {}
 
 void PipelineContext::FlushUITasks() {}
+
+void PipelineContext::DetachNode(RefPtr<UINode>) {}
 
 void PipelineContext::Finish(bool autoFinish) const {}
 
@@ -535,6 +544,8 @@ void PipelineContext::SetIsDragging(bool isDragging) {}
 void PipelineContext::ResetDragging() {}
 
 void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
+
+void PipelineContext::CheckAndUpdateKeyboardInset() {}
 
 bool PipelineContext::PrintVsyncInfoIfNeed() const
 {

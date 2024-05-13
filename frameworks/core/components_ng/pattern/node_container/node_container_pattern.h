@@ -43,6 +43,8 @@ public:
 
     void RemakeNode();
 
+    void CleanChild();
+
     void BindController(std::function<void()>&& resetFunc)
     {
         resetFunc_ = std::move(resetFunc);

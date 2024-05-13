@@ -26,6 +26,8 @@ public:
     ~TextAreaLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
+    void ConstraintHeight(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize,
+        float contentHeight);
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;

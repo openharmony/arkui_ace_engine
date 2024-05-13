@@ -186,6 +186,179 @@ ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context)
     return intSize;
 }
 
+ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType indicatorType)
+{
+    if (indicatorType != ARKUI_SWIPER_INDICATOR_TYPE_DOT &&
+        indicatorType != ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
+        return nullptr;
+    }
+    ArkUI_SwiperIndicator* indicator = new ArkUI_SwiperIndicator;
+    indicator->type = indicatorType;
+    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
+    if (indicatorType == ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
+        indicator->itemWidth = ArkUI_OptionalFloat { 0, 0.0f };
+        indicator->itemHeight = ArkUI_OptionalFloat { 0, 0.0f };
+        indicator->selectedItemWidth = ArkUI_OptionalFloat { 0, 0.0f };
+        indicator->selectedItemHeight = ArkUI_OptionalFloat { 0, 0.0f };
+        indicator->maskValue = ArkUI_OptionalInt { 0, 0};
+        indicator->colorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
+        indicator->selectedColorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
+    } else {
+        return nullptr;
+    }
+    return indicator;
+}
+
+void OH_ArkUI_SwiperIndicator_Dispose(ArkUI_SwiperIndicator* indicator)
+{
+    delete indicator;
+}
+
+void OH_ArkUI_SwiperIndicator_SetLeftPosition(ArkUI_SwiperIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimLeft.isSet = 1;
+    indicator->dimLeft.value = value;
+}
+
+float OH_ArkUI_SwiperIndicator_GetLeftPosition(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimLeft.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetTopPosition(ArkUI_SwiperIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimTop.isSet = 1;
+    indicator->dimTop.value = value;
+}
+
+float OH_ArkUI_SwiperIndicator_GetTopPosition(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimTop.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetRightPosition(ArkUI_SwiperIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimRight.isSet = 1;
+    indicator->dimRight.value = value;
+}
+
+float OH_ArkUI_SwiperIndicator_GetRightPosition(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimRight.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetBottomPosition(ArkUI_SwiperIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimBottom.isSet = 1;
+    indicator->dimBottom.value = value;
+}
+
+float OH_ArkUI_SwiperIndicator_GetBottomPosition(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimBottom.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetItemWidth(ArkUI_SwiperIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->itemWidth.isSet = 1;
+    indicator->itemWidth.value = value;
+}
+
+float OH_ArkUI_SwiperIndicator_GetItemWidth(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->itemWidth.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetItemHeight(ArkUI_SwiperIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->itemHeight.isSet = 1;
+    indicator->itemHeight.value = value;
+}
+
+float OH_ArkUI_SwiperIndicator_GetItemHeight(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->itemHeight.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetSelectedItemWidth(ArkUI_SwiperIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->selectedItemWidth.isSet = 1;
+    indicator->selectedItemWidth.value = value;
+}
+
+float OH_ArkUI_SwiperIndicator_GetSelectedItemWidth(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->selectedItemWidth.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetSelectedItemHeight(ArkUI_SwiperIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->selectedItemHeight.isSet = 1;
+    indicator->selectedItemHeight.value = value;
+}
+
+float OH_ArkUI_SwiperIndicator_GetSelectedItemHeight(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->selectedItemHeight.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetMask(ArkUI_SwiperIndicator* indicator, int32_t mask)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->maskValue.isSet = 1;
+    indicator->maskValue.value = mask;
+}
+
+int32_t OH_ArkUI_SwiperIndicator_GetMask(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0);
+    return indicator->maskValue.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetColor(ArkUI_SwiperIndicator* indicator, uint32_t color)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->colorValue.isSet = 1;
+    indicator->colorValue.value = color;
+}
+
+uint32_t OH_ArkUI_SwiperIndicator_GetColor(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0);
+    return indicator->colorValue.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetSelectedColor(ArkUI_SwiperIndicator* indicator, uint32_t selectedColor)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->selectedColorValue.isSet = 1;
+    indicator->selectedColorValue.value = selectedColor;
+}
+
+uint32_t OH_ArkUI_SwiperIndicator_GetSelectedColor(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0);
+    return indicator->selectedColorValue.value;
+}
 #ifdef __cplusplus
 };
 #endif

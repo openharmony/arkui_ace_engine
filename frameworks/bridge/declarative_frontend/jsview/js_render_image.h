@@ -45,7 +45,9 @@ public:
     static napi_value JsGetHeight(napi_env env, napi_callback_info info);
 
     double GetWidth();
+    void SetWidth(double width);
     double GetHeight();
+    void SetHeight(double height);
     std::string GetSrc();
     void SetCloseCallback(std::function<void()>&& callback);
     RefPtr<PixelMap> GetPixelMap()
@@ -93,6 +95,21 @@ public:
         return contextId_;
     }
 
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
+    double GetDensity()
+    {
+        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderImage);
 private:
     napi_value OnClose();
@@ -122,6 +139,7 @@ private:
     double height_ = 0;
     int32_t instanceId_ = 0;
     uint32_t contextId_ = 0;
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 
 } // namespace OHOS::Ace::Framework

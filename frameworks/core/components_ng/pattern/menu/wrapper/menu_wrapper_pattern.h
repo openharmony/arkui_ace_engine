@@ -109,6 +109,7 @@ public:
     }
 
     void HideSubMenu();
+    void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
 
     RefPtr<FrameNode> GetMenu() const
     {
@@ -153,6 +154,8 @@ public:
     {
         isFirstShow_ = true;
     }
+
+    void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
 
     void RegisterMenuAppearCallback(const std::function<void()>& onAppear)
     {
@@ -244,6 +247,8 @@ public:
         hasTransitionEffect_ = hasTransitionEffect;
     }
 
+    void SetMenuTransitionEffect(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
+
     bool HasPreviewTransitionEffect() const
     {
         return hasPreviewTransitionEffect_;
@@ -263,7 +268,7 @@ public:
     {
         return filterColumnNode_;
     }
-    
+
     void DumpInfo() override;
 
     MenuDumpInfo GetDumpInfo() const
@@ -313,6 +318,8 @@ private:
         return false;
     }
     bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+    void OnModifyDone() override;
+    void InitFocusEvent();
     void OnAttachToFrameNode() override;
     void RegisterOnTouch();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

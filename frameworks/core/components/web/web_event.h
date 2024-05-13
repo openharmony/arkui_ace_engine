@@ -44,6 +44,17 @@ enum class NavigationType {
     NAVIGATION_TYPE_AUTO_SUBFRAME = 5,
 };
 
+enum class RenderProcessNotRespondingReason {
+    INPUT_TIMEOUT,
+    NAVIGATION_COMMIT_TIMEOUT,
+};
+
+enum class ViewportFit {
+    AUTO,
+    CONTAINS,
+    COVER,
+};
+
 class WebConsoleLog : public AceType {
     DECLARE_ACE_TYPE(WebConsoleLog, AceType)
 public:
@@ -129,6 +140,7 @@ enum class WebResponseDataType : int32_t {
     STRING_TYPE,
     FILE_TYPE,
     RESOURCE_URL_TYPE,
+    BUFFER_TYPE,
 };
 
 class WebResponseAsyncHandle : public AceType {
@@ -221,6 +233,23 @@ public:
         fd_ = 0;
     }
 
+    void SetBuffer(char* buffer, size_t size)
+    {
+        buffer_ = buffer;
+        dataType_ = WebResponseDataType::BUFFER_TYPE;
+        bufferSize_ = size;
+    }
+
+    char* GetBuffer() const
+    {
+        return buffer_;
+    }
+
+    size_t GetBufferSize() const
+    {
+        return bufferSize_;
+    }
+
     void SetFileHandle(int32_t fd)
     {
         fd_ = fd;
@@ -301,6 +330,8 @@ private:
     int32_t statusCode_;
     bool isReady_ = true;
     std::shared_ptr<WebResponseAsyncHandle> handle_;
+    char* buffer_ = nullptr;
+    uint64_t bufferSize_ = 0;
 };
 
 class ACE_EXPORT WebRequest : public AceType {
@@ -1795,6 +1826,61 @@ private:
     std::string surfaceId_ = "";
     std::string embedId_ = "";
     EmbedInfo embedInfo_;
+};
+
+class ACE_EXPORT RenderProcessNotRespondingEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(RenderProcessNotRespondingEvent, BaseEventInfo);
+
+public:
+    RenderProcessNotRespondingEvent(const std::string& jsStack, int pid, int reason)
+        : BaseEventInfo("RenderProcessNotRespondingEvent"), jsStack_(jsStack), pid_(pid), reason_(reason)
+    {}
+    ~RenderProcessNotRespondingEvent() = default;
+
+    const std::string& GetJsStack() const
+    {
+        return jsStack_;
+    }
+
+    int GetPid() const
+    {
+        return pid_;
+    }
+
+    int GetReason() const
+    {
+        return reason_;
+    }
+
+private:
+    std::string jsStack_;
+    int pid_;
+    int reason_;
+};
+
+class ACE_EXPORT RenderProcessRespondingEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(RenderProcessRespondingEvent, BaseEventInfo);
+
+public:
+    RenderProcessRespondingEvent() : BaseEventInfo("RenderProcessRespondingEvent") {}
+    ~RenderProcessRespondingEvent() = default;
+};
+
+class ACE_EXPORT ViewportFitChangedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ViewportFitChangedEvent, BaseEventInfo);
+
+public:
+    ViewportFitChangedEvent(int32_t viewportFit)
+        : BaseEventInfo("ViewportFitChangedEvent"), viewportFit_(viewportFit) {}
+    ~ViewportFitChangedEvent() = default;
+
+    int32_t GetViewportFit() const
+    {
+        return viewportFit_;
+    }
+
+private:
+    int32_t viewportFit_;
 };
 
 } // namespace OHOS::Ace

@@ -21,6 +21,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
 // SpanBase
@@ -664,5 +665,159 @@ std::string CustomSpan::ToString() const
 bool CustomSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 {
     return false;
+}
+
+// ParagraphStyleSpan
+ParagraphStyleSpan::ParagraphStyleSpan(SpanParagraphStyle paragraphStyle)
+    : SpanBase(0, 0), paragraphStyle_(std::move(paragraphStyle))
+{}
+
+ParagraphStyleSpan::ParagraphStyleSpan(SpanParagraphStyle paragraphStyle, int32_t start, int32_t end)
+    : SpanBase(start, end), paragraphStyle_(std::move(paragraphStyle))
+{}
+
+void ParagraphStyleSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddParagraphStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveParagraphStyle(spanItem);
+    }
+}
+
+void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    if (paragraphStyle_.align.has_value()) {
+        spanItem->textLineStyle->UpdateTextAlign(paragraphStyle_.align.value());
+    }
+
+    if (paragraphStyle_.maxLines.has_value()) {
+        spanItem->textLineStyle->UpdateMaxLines(paragraphStyle_.maxLines.value());
+    }
+
+    if (paragraphStyle_.textOverflow.has_value()) {
+        spanItem->textLineStyle->UpdateTextOverflow(paragraphStyle_.textOverflow.value());
+    }
+
+    if (paragraphStyle_.leadingMargin.has_value()) {
+        spanItem->textLineStyle->UpdateLeadingMargin(paragraphStyle_.leadingMargin.value());
+    }
+
+    if (paragraphStyle_.wordBreak.has_value()) {
+        spanItem->textLineStyle->UpdateWordBreak(paragraphStyle_.wordBreak.value());
+    }
+
+    if (paragraphStyle_.textIndent.has_value()) {
+        spanItem->textLineStyle->UpdateTextIndent(paragraphStyle_.textIndent.value());
+    }
+}
+
+void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    spanItem->textLineStyle->ResetTextAlign();
+    spanItem->textLineStyle->ResetMaxLines();
+    spanItem->textLineStyle->ResetTextOverflow();
+    spanItem->textLineStyle->ResetLeadingMargin();
+    spanItem->textLineStyle->ResetWordBreak();
+    spanItem->textLineStyle->ResetTextIndent();
+}
+
+bool ParagraphStyleSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto paragraphSpan = DynamicCast<ParagraphStyleSpan>(other);
+    if (!paragraphSpan) {
+        return false;
+    }
+    auto paragraphStyle = paragraphSpan->GetParagraphStyle();
+    return paragraphStyle_.Equal(paragraphStyle);
+}
+
+SpanParagraphStyle ParagraphStyleSpan::GetParagraphStyle() const
+{
+    return paragraphStyle_;
+}
+
+SpanType ParagraphStyleSpan::GetSpanType() const
+{
+    return SpanType::ParagraphStyle;
+}
+
+std::string ParagraphStyleSpan::ToString() const
+{
+    return "";
+}
+
+RefPtr<SpanBase> ParagraphStyleSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<ParagraphStyleSpan>(paragraphStyle_, start, end);
+    return spanBase;
+}
+
+// LineHeightSpan
+LineHeightSpan::LineHeightSpan(Dimension lineHeight) : SpanBase(0, 0), lineHeight_(lineHeight) {}
+
+LineHeightSpan::LineHeightSpan(Dimension lineHeight, int32_t start, int32_t end)
+    : SpanBase(start, end), lineHeight_(lineHeight)
+{}
+
+void LineHeightSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddLineHeightStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveLineHeightStyle(spanItem);
+    }
+}
+
+RefPtr<SpanBase> LineHeightSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<LineHeightSpan>(GetLineHeight(), start, end);
+    return spanBase;
+}
+
+void LineHeightSpan::AddLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    spanItem->textLineStyle->UpdateLineHeight(lineHeight_);
+}
+
+void LineHeightSpan::RemoveLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    spanItem->textLineStyle->ResetLineHeight();
+}
+
+Dimension LineHeightSpan::GetLineHeight() const
+{
+    return lineHeight_;
+}
+
+SpanType LineHeightSpan::GetSpanType() const
+{
+    return SpanType::LineHeight;
+}
+
+std::string LineHeightSpan::ToString() const
+{
+    std::stringstream str;
+    str << "LineHeightSpan ( start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    std::string output = str.str();
+    return output;
+}
+
+bool LineHeightSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto lineHeightSpan = DynamicCast<LineHeightSpan>(other);
+    if (!lineHeightSpan) {
+        return false;
+    }
+    auto lineHeight = lineHeightSpan->GetLineHeight();
+    return lineHeight_ == lineHeight;
 }
 } // namespace OHOS::Ace

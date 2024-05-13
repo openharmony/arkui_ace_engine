@@ -75,6 +75,8 @@
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_theme.h"
+#include "core/components_ng/pattern/stack/stack_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -144,7 +146,9 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::GaugeTheme::TypeId(), &ThemeBuildFunc<NG::GaugeTheme::Builder> },
     { NG::SheetTheme::TypeId(), &ThemeBuildFunc<NG::SheetTheme::Builder> },
     { BlurStyleTheme::TypeId(), &ThemeBuildFunc<BlurStyleTheme::Builder> },
-    { ShadowTheme::TypeId(), &ThemeBuildFunc<ShadowTheme::Builder> }
+    { ShadowTheme::TypeId(), &ThemeBuildFunc<ShadowTheme::Builder> },
+    { NG::LinearLayoutTheme::TypeId(), &ThemeBuildFunc<NG::LinearLayoutTheme::Builder> },
+    { NG::StackTheme::TypeId(), &ThemeBuildFunc<NG::StackTheme::Builder> },
 };
 } // namespace
 

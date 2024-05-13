@@ -22,6 +22,7 @@ namespace OHOS::Ace {
 
 // theme attributes
 extern const char THEME_ATTR_BG_COLOR[];
+extern const char THEME_ATTR_HOVER_COLOR[];
 
 // component patterns
 extern const char THEME_PATTERN_BUTTON[];
@@ -82,6 +83,8 @@ extern const char THEME_PATTERN_GAUGE[];
 extern const char THEME_PATTERN_SHEET[];
 extern const char THEME_BLUR_STYLE_COMMON[];
 extern const char THEME_PATTERN_SHADOW[];
+extern const char THEME_PATTERN_LINEAR_LAYOUT[];
+extern const char THEME_PATTERN_STACK[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
@@ -234,6 +237,8 @@ extern const char INLINE_BORDER_COLOR[];
 extern const char DISABLE_UNDERLINE_ALPHA[];
 extern const char DEFAULT_COUNTER_COLOR[];
 extern const char OVER_COUNTER_COLOR[];
+extern const char PREVIEW_UNDERLINE_COLOR[];
+extern const char PREVIEW_BOARD_COLOR[];
 
 // linear split attributes
 extern const char LINEAR_SPLIT_CHILD_MIN_SIZE[];

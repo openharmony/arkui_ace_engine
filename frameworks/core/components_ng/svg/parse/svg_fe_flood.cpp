@@ -28,23 +28,16 @@ RefPtr<SvgNode> SvgFeFlood::Create()
     return AceType::MakeRefPtr<SvgFeFlood>();
 }
 
-SvgFeFlood::SvgFeFlood() : SvgFe()
-{
-    declaration_ = AceType::MakeRefPtr<SvgFeFloodDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgFeFlood::SvgFeFlood() : SvgFe() {}
 
-void SvgFeFlood::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-    ColorInterpolationType& currentColor,
+void SvgFeFlood::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
+    const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
-    auto declaration = AceType::DynamicCast<SvgFeFloodDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
+    imageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
 
-    auto floodColor = declaration->GetFloodColor();
-    auto floodOpacity = declaration->GetFloodOpacity();
+    auto floodColor = feFloodAttr_.floodColor;
+    auto floodOpacity = feFloodAttr_.floodOpacity;
 
     floodColor = floodColor.ChangeOpacity(floodOpacity);
     auto shaderFilter = RSRecordingShaderEffect::CreateColorShader(floodColor.GetValue());
@@ -55,7 +48,27 @@ void SvgFeFlood::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, co
         { effectFilterArea.Left(), effectFilterArea.Top(), effectFilterArea.Right(), effectFilterArea.Bottom() });
 
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
-    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
+    RegisterResult(feAttr_.result, imageFilter, resultHash);
+}
+
+bool SvgFeFlood::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgFeFloodAttribute&)> attrs[] = {
+        { DOM_SVG_FE_FLOOD_COLOR,
+            [](const std::string& val, SvgFeFloodAttribute& attr) {
+                attr.floodColor = SvgAttributesParser::GetColor(val);
+            } },
+        { DOM_SVG_FE_FLOOD_OPACITY,
+            [](const std::string& val, SvgFeFloodAttribute& attr) {
+                attr.floodOpacity = SvgAttributesParser::ParseDouble(val);
+            } },
+    };
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), name.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, feFloodAttr_);
+        return true;
+    }
+    return SvgFe::ParseAndSetSpecializedAttr(name, value);
 }
 
 } // namespace OHOS::Ace::NG

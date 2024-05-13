@@ -40,12 +40,12 @@ namespace OHOS::Ace::NG {
 
 typedef struct OperationInfo {
     OperationInfo():node(nullptr) {}
-    int32_t changeCount;
+    int32_t changeCount = 0;
     std::string key;
     RefPtr<UINode> node;
-    bool isDeleting;
-    bool isChanged;
-    bool moveIn;
+    bool isDeleting = false;
+    bool isChanged = false;
+    bool moveIn = false;
     std::vector<std::string> extraKey;
 } OperationInfo;
 
@@ -286,7 +286,7 @@ public:
         ProcessOffscreenNode(itemInfo.second, false);
         ViewStackProcessor::GetInstance()->SetPredict(itemInfo.second);
         itemInfo.second->Build(nullptr);
-        auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false));
+        auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false, true));
         if (frameNode && frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
             frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
         }
@@ -410,7 +410,10 @@ public:
     void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         std::set<int32_t>& idleIndexes)
     {
-        for (auto& [key, node] : expiringItem_) {
+        auto expiringIter = expiringItem_.begin();
+        while (expiringIter != expiringItem_.end()) {
+            const auto& key = expiringIter->first;
+            const auto& node = expiringIter->second;
             auto iter = idleIndexes.find(node.first);
             if (iter != idleIndexes.end() && node.second) {
                 ProcessOffscreenNode(node.second, false);
@@ -421,10 +424,12 @@ public:
                     cachedItems_.try_emplace(node.first, LazyForEachChild(key, nullptr));
                     idleIndexes.erase(iter);
                 }
+                expiringIter++;
             } else {
                 NotifyDataDeleted(node.second, static_cast<size_t>(node.first), true);
                 ProcessOffscreenNode(node.second, true);
                 NotifyItemDeleted(RawPtr(node.second), key);
+                expiringIter = expiringItem_.erase(expiringIter);
             }
         }
     }

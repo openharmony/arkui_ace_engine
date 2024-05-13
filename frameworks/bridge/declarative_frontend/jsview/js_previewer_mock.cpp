@@ -303,6 +303,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("onSslErrorEventReceive", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("onClientAuthenticationRequest", &JSWeb::Mock);
+    JSClass<JSWeb>::StaticMethod("onRenderProcessNotResponding", &JSWeb::Mock);
+    JSClass<JSWeb>::StaticMethod("onRenderProcessResponding", &JSWeb::Mock);
+    JSClass<JSWeb>::StaticMethod("onViewportFitChanged", &JSWeb::Mock);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
 
     JSWebDialog::JSBind(globalObj);

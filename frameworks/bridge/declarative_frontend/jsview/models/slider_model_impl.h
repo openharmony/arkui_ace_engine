@@ -60,6 +60,7 @@ public:
     void ResetStepSize() override {};
     void ResetSliderInteractionMode() override {};
     void ResetMinResponsiveDistance() override {};
+    void ResetValidSlideRange() override {};
 };
 
 } // namespace OHOS::Ace::Framework

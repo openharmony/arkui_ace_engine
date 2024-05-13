@@ -55,8 +55,12 @@ public:
     static bool ParseCommonTitle(const JSRef<JSObject>& jsObj);
     static void ParseToolbarItemsConfiguration(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
+    static void ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
+        const JSRef<JSObject>& itemObject);
 
     static void SetCustomNavContentTransition(const JSCallbackInfo& info);
+
+    static void SetIgnoreLayoutSafeArea(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

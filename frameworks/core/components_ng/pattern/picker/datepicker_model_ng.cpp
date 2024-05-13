@@ -579,11 +579,7 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     dialogLifeCycleEvent["willDisappearId"] = pickerDialogEvent.onWillDisappear;
     DialogProperties properties;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-            properties.alignment = DialogAlignment::BOTTOM;
-        } else {
-            properties.alignment = DialogAlignment::CENTER;
-        }
+        properties.alignment = theme->GetAlignment();
     }
     if (pickerDialog.alignment.has_value()) {
         properties.alignment = pickerDialog.alignment.value();
@@ -623,12 +619,12 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+        [properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowDateDialog(
-                properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+                properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowDatePicker");
 }

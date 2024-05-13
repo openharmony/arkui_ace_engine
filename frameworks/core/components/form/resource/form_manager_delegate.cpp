@@ -207,7 +207,11 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         return;
     }
 
-    onFormSurfaceNodeCallback_(rsSurfaceNode, formInfo.isDynamic);
+    bool isRecoverFormToHandleClickEvent =
+        want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
+    bool isRecover = recycleStatus_ == RecycleStatus::RECYCLED || isRecoverFormToHandleClickEvent;
+
+    onFormSurfaceNodeCallback_(rsSurfaceNode, formInfo.isDynamic, isRecover);
     if (!formRendererDispatcher_) {
         sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
@@ -218,8 +222,6 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
     }
 
-    bool isRecoverFormToHandleClickEvent = want.GetBoolParam(
-        OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
     if (isDynamic_ && isRecoverFormToHandleClickEvent) {
         HandleCachedClickEvents();
     }
@@ -521,10 +523,10 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     };
     renderDelegate_->SetErrorEventHandler(std::move(onErrorEventHandler));
 
-    auto&& onSurfaceChangeHandler = [weak = WeakClaim(this)](float width, float height) {
+    auto&& onSurfaceChangeHandler = [weak = WeakClaim(this)](float width, float height, float borderWidth) {
         auto formManagerDelegate = weak.Upgrade();
         CHECK_NULL_VOID(formManagerDelegate);
-        formManagerDelegate->OnFormSurfaceChange(width, height);
+        formManagerDelegate->OnFormSurfaceChange(width, height, borderWidth);
     };
     renderDelegate_->SetSurfaceChangeEventHandler(std::move(onSurfaceChangeHandler));
 
@@ -652,18 +654,18 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
     formRendererDispatcher_->SetAllowUpdate(allowUpdate);
 }
 
-void FormManagerDelegate::NotifySurfaceChange(float width, float height)
+void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
 {
     if (formRendererDispatcher_ == nullptr) {
         return;
     }
-    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height);
+    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
 }
 
-void FormManagerDelegate::OnFormSurfaceChange(float width, float height)
+void FormManagerDelegate::OnFormSurfaceChange(float width, float height, float borderWidth)
 {
     if (onFormSurfaceChangeCallback_) {
-        onFormSurfaceChangeCallback_(width, height);
+        onFormSurfaceChangeCallback_(width, height, borderWidth);
     }
 }
 

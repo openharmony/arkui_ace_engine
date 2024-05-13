@@ -18,8 +18,15 @@
 #include "jsnapi_expo.h"
 
 #include "base/memory/ace_type.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
+constexpr uint32_t MAX_COLOR_ARRAY_COUNT = 4;
+constexpr uint32_t ARRAY_INDEX_RED = 0;
+constexpr uint32_t ARRAY_INDEX_GREEN = 1;
+constexpr uint32_t ARRAY_INDEX_BLUE = 2;
+constexpr uint32_t ARRAY_INDEX_ALPHA = 3;
+
 ArkUINativeModuleValue NativeUtilsBridge::CreateNativeWeakRef(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -122,5 +129,49 @@ ArkUINativeModuleValue NativeUtilsBridge::Dispose(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NativeUtilsBridge::ParseResourceColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg.IsEmpty() || !firstArg->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Color color;
+    if (!ArkTSUtils::ParseJsColorFromResource(vm, firstArg, color)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<panda::ArrayRef> chanels = panda::ArrayRef::New(vm, MAX_COLOR_ARRAY_COUNT);
+    panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_RED, panda::NumberRef::New(vm, color.GetRed()));
+    panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_GREEN, panda::NumberRef::New(vm, color.GetGreen()));
+    panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_BLUE, panda::NumberRef::New(vm, color.GetBlue()));
+    panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_ALPHA, panda::NumberRef::New(vm, color.GetAlpha()));
+    return chanels;
+}
+
+ArkUINativeModuleValue NativeUtilsBridge::BlendColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+ 
+    if (firstArg.IsEmpty() || !firstArg->IsNumber() || secondArg.IsEmpty() || !secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Color color;
+    Color overlayColor;
+    if (!ArkTSUtils::ParseJsColor(vm, firstArg, color) || !ArkTSUtils::ParseJsColor(vm, secondArg, overlayColor)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto blendColor = color.BlendColor(overlayColor);
+    Local<panda::ArrayRef> chanels = panda::ArrayRef::New(vm, MAX_COLOR_ARRAY_COUNT);
+    panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_RED, panda::NumberRef::New(vm, blendColor.GetRed()));
+    panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_GREEN, panda::NumberRef::New(vm, blendColor.GetGreen()));
+    panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_BLUE, panda::NumberRef::New(vm, blendColor.GetBlue()));
+    panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_ALPHA, panda::NumberRef::New(vm, blendColor.GetAlpha()));
+    return chanels;
 }
 } // namespace OHOS::Ace::NG

@@ -210,6 +210,17 @@ bool GestureScope::CheckGestureScopeState()
     return true;
 }
 
+bool GestureScope::HasFailRecognizer()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer && recognizer->GetRefereeState() == RefereeState::FAIL) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void GestureScope::ForceCleanGestureScope()
 {
     for (const auto& weak : recognizers_) {
@@ -323,6 +334,19 @@ bool GestureReferee::CheckGestureRefereeState()
         }
     }
     return true;
+}
+
+bool GestureReferee::HasFailRecognizer(int32_t touchId)
+{
+    const auto& iter = gestureScopes_.find(touchId);
+    if (iter == gestureScopes_.end()) {
+        return false;
+    }
+
+    const auto& scope = iter->second;
+    CHECK_NULL_RETURN(scope, false);
+
+    return scope->HasFailRecognizer();
 }
 
 void GestureReferee::ForceCleanGestureReferee()

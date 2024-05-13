@@ -142,6 +142,10 @@ public:
         gridLayoutInfo_.irregularItemsPosition_.clear();
     }
 
+    void SetIrregular(bool value) {
+        irregular_ = value;
+    }
+
     void ResetPositionFlags()
     {
         gridLayoutInfo_.ResetPositionFlags();
@@ -192,9 +196,16 @@ public:
         return ScrollAlign::AUTO;
     }
 
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
+
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO) override;
     void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
     bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+    /**
+     * @brief irregular layout has items that occupy multiple rows, so Align::CENTER needs special treatment.
+     * @return target position to animateTo
+     */
+    float IrregularAnimateToCenter(float mainGap) const;
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
     int32_t GetChildrenCount() const;
@@ -284,9 +295,6 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
 
-    float prevHeight_ = 0;
-    float currentHeight_ = 0;
-
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
 
@@ -300,6 +308,7 @@ private:
     bool isLeftEndStep_ = false;
     bool isRightEndStep_ = false;
     bool isSmoothScrolling_ = false;
+    bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;

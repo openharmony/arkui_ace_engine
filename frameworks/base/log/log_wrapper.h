@@ -187,6 +187,7 @@ enum AceLogTag : uint8_t {
     ACE_CANVAS_COMPONENT,     // C0394A
     ACE_SCROLL_BAR,           // C0394B
     ACE_MOVING_PHOTO,         // C0394C
+    ACE_ARK_COMPONENT,        // C0394D
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use
@@ -272,6 +273,7 @@ private:
     static LogLevel level_;
 };
 
+bool LogBacktrace(size_t maxFrameNums = 256);
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_LOG_WRAPPER_H

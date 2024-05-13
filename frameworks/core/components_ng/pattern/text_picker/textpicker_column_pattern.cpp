@@ -216,40 +216,9 @@ RefPtr<InputEvent> TextPickerColumnPattern::CreateMouseHoverEventListener(RefPtr
     return hoverEventListener;
 }
 
-void TextPickerColumnPattern::InitMouseAndPressEvent()
+void TextPickerColumnPattern::ParseTouchListener()
 {
-    if (mouseEvent_ || touchListener_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto columnEventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(columnEventHub);
-    RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
-    CHECK_NULL_VOID(touchListener);
-    auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(columnGesture);
-    columnGesture->AddTouchEvent(touchListener);
-    CHECK_NULL_VOID(GetToss());
-    auto toss = GetToss();
-    auto childSize = static_cast<int32_t>(host->GetChildren().size());
-    RefPtr<FrameNode> middleChild = nullptr;
-    auto midSize = childSize / 2;
-    middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
-    CHECK_NULL_VOID(middleChild);
-    auto eventHub = middleChild->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
-    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleMouseEvent(isHover);
-    };
-    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnHoverEvent(mouseEvent_);
-    auto gesture = middleChild->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this), toss](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
@@ -270,6 +239,45 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+}
+
+void TextPickerColumnPattern::ParseMouseEvent()
+{
+    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(isHover);
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+}
+
+void TextPickerColumnPattern::InitMouseAndPressEvent()
+{
+    if (mouseEvent_ || touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto columnEventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(columnEventHub);
+    RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
+    CHECK_NULL_VOID(touchListener);
+    auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(columnGesture);
+    columnGesture->AddTouchEvent(touchListener);
+    auto childSize = static_cast<int32_t>(host->GetChildren().size());
+    RefPtr<FrameNode> middleChild = nullptr;
+    auto midSize = childSize / 2;
+    middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
+    CHECK_NULL_VOID(middleChild);
+    auto eventHub = middleChild->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ParseMouseEvent();
+    inputHub->AddOnHoverEvent(mouseEvent_);
+    auto gesture = middleChild->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    ParseTouchListener();
     gesture->AddTouchEvent(touchListener_);
     int32_t i = 0;
     for (const auto& child : host->GetChildren()) {
@@ -616,7 +624,7 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
                 animationProperties_[i - 1].currentColor = animationProperties_[i].currentColor;
                 animationProperties_[i - 1].downColor = animationProperties_[i].downColor;
             }
-            if (i == (animationProperties_.size() - 1)) {
+            if (i + 1 == animationProperties_.size()) {
                 animationProperties_[i].upFontSize = animationProperties_[i].fontSize;
                 animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
                 animationProperties_[i].downFontSize = Dimension();
@@ -629,7 +637,7 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
             }
         }
     } else {
-        for (size_t i = animationProperties_.size() - 1;; i--) {
+        for (size_t i = animationProperties_.size() ? animationProperties_.size() - 1 : 0;; i--) {
             if (i == 0) {
                 animationProperties_[i].upFontSize = Dimension();
                 animationProperties_[i].downFontSize = animationProperties_[i].fontSize;
@@ -805,7 +813,7 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLay
     uint32_t idx, uint32_t showCount, bool isDown, double scaleSize)
 {
     auto deltaIdx = GetOverScrollDeltaIndex();
-    auto index = idx + (scrollDelta_ > 0.0 ? 1 : -1) * deltaIdx;
+    auto index = static_cast<int32_t>(idx) + (scrollDelta_ > 0.0 ? 1 : -1) * deltaIdx;
     auto percent = distancePercent_ - deltaIdx;
     auto scale = scaleSize - deltaIdx;
 
@@ -984,6 +992,7 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
     if (NotLoopOptions() && reboundAnimation_) {
         AnimationUtils::StopAnimation(reboundAnimation_);
         isReboundInProgress_ = false;
+        overscroller_.ResetVelocity();
         overscroller_.SetOverScroll(scrollDelta_);
     }
 }
@@ -1418,7 +1427,8 @@ bool TextPickerColumnPattern::InnerHandleScroll(
     if (isDown) {
         currentIndex = (totalOptionCount + currentIndex + 1) % totalOptionCount; // index add one
     } else {
-        currentIndex = (totalOptionCount + currentIndex - 1) % totalOptionCount; // index reduce one
+        auto totalCountAndIndex = totalOptionCount + currentIndex;
+        currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
     FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
@@ -1452,7 +1462,8 @@ bool TextPickerColumnPattern::HandleDirectionKey(KeyCode code)
         return false;
     }
     if (code == KeyCode::KEY_DPAD_UP) {
-        SetCurrentIndex((totalOptionCount + currernIndex - 1) % totalOptionCount);
+        auto totalCountAndIndex = totalOptionCount + currernIndex;
+        SetCurrentIndex((totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount);
         FlushCurrentOptions();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
@@ -1504,7 +1515,7 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
     int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
     int32_t step = param->itemIndex - middleIndex;
     auto overFirst = currentIndex_ == 0 && step < 0;
-    auto overLast = currentIndex_ == GetOptionCount() -1 && step > 0;
+    auto overLast = currentIndex_ == (GetOptionCount() ? GetOptionCount() - 1 : 0) && step > 0;
     if (NotLoopOptions() && (overscroller_.IsOverScroll() || overFirst || overLast)) {
         return;
     }
@@ -1545,5 +1556,26 @@ void TextPickerColumnPattern::PlayResetAnimation()
     }
 
     CreateAnimation(scrollDelta_, 0.0);
+}
+
+void TextPickerColumnPattern::SetCanLoop(bool isLoop)
+{
+    if (isLoop_ == isLoop) {
+        return;
+    }
+
+    isLoop_ = isLoop;
+    if (overscroller_.IsOverScroll()) {
+        overscroller_.Reset();
+        isReboundInProgress_ = false;
+        yOffset_ = 0.0;
+        ScrollOption(0.0);
+    }
+
+    if (!isLoop && isTossStatus_) {
+        auto toss = GetToss();
+        CHECK_NULL_VOID(toss);
+        overscroller_.SetLoopTossOffset(toss->GetTossOffset());
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -165,7 +165,7 @@ void SwitchPattern::UpdateSwitchLayoutProperty()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    direction_ = layoutProperty->GetLayoutDirection();
+    direction_ = layoutProperty->GetNonAutoLayoutDirection();
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
@@ -653,6 +653,9 @@ void SwitchPattern::FireBuilder()
     if (contentModifierNode_ == node) {
         return;
     }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     host->RemoveChildAndReturnIndex(contentModifierNode_);
     contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);

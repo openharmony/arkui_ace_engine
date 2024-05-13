@@ -88,12 +88,14 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
     bool idealHeightValid = layoutConstraint.value().selfIdealSize.Height().has_value();
     auto idealSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     if (!idealWidthValid) {
-        idealSize.SetWidth(std::min(idealSize.Width().value(), layoutConstraint.value().maxSize.Width()));
-        idealSize.SetWidth(std::max(idealSize.Width().value(), layoutConstraint.value().minSize.Width()));
+        idealSize.SetWidth(std::min(idealSize.Width().value_or(Infinity<float>()),
+            layoutConstraint.value().maxSize.Width()));
+        idealSize.SetWidth(std::max(idealSize.Width().value_or(0.0f), layoutConstraint.value().minSize.Width()));
     }
     if (!idealHeightValid) {
-        idealSize.SetHeight(std::min(idealSize.Height().value(), layoutConstraint.value().maxSize.Height()));
-        idealSize.SetHeight(std::max(idealSize.Height().value(), layoutConstraint.value().minSize.Height()));
+        idealSize.SetHeight(std::min(idealSize.Height().value_or(Infinity<float>()),
+            layoutConstraint.value().maxSize.Height()));
+        idealSize.SetHeight(std::max(idealSize.Height().value_or(0.0f), layoutConstraint.value().minSize.Height()));
     }
     containerSizeWithoutPaddingBorder_ = idealSize.ConvertToSizeT();
     layoutWrapper->GetGeometryNode()->SetFrameSize(containerSizeWithoutPaddingBorder_);
@@ -1049,11 +1051,14 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
             if (it == idNodeMap_.end()) {
                 continue;
             }
-            auto anchorChildWrapper = it->second.layoutWrapper;
-            auto anchorChildLayoutProp = anchorChildWrapper->GetLayoutProperty();
-            auto anchorChildVisibility = anchorChildLayoutProp->GetVisibility();
-            if (anchorChildVisibility == VisibleType::GONE) {
-                childWrapper->SetActive(false);
+
+            if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                auto anchorChildWrapper = it->second.layoutWrapper;
+                auto anchorChildLayoutProp = anchorChildWrapper->GetLayoutProperty();
+                auto anchorChildVisibility = anchorChildLayoutProp->GetVisibility();
+                if (anchorChildVisibility == VisibleType::GONE) {
+                    childWrapper->SetActive(false);
+                }
             }
             // if a is the anchor of b, then reliedOnMap should place <a, [b]> for the first appearance
             // of key a. Otherwise b will be inserted into the existing value list

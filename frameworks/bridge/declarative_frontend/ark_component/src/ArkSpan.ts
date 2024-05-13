@@ -282,6 +282,21 @@ class SpanFontWeightModifier extends ModifierWithKey<string> {
   }
 }
 
+class SpanInputModifier extends ModifierWithKey<ResourceStr> {
+  constructor(value: ResourceStr) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('spanInput');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().span.setSpanSrc(node, "");
+    }
+    else {
+      getUINativeModule().span.setSpanSrc(node, this.value);
+    }
+  }
+}
+
 class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
@@ -300,7 +315,12 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     }
     this._nativePtrChanged = false;
   }
-
+  initialize(value: Object[]) {
+    if (value[0] != undefined) {
+      modifierWithKey(this._modifiersWithKeys, SpanInputModifier.identity, SpanInputModifier, value[0]);
+    }
+    return this;
+  }
   cleanStageValue(): void {
     if (!this._modifiersWithKeys) {
       return;

@@ -49,6 +49,7 @@ public:
         Dimension hotZoneVerticalPadding;
         Dimension shadowWidth;
         UIStatus uiStatus;
+        Dimension defaultPaddingSize;
         CheckBoxGroupPaintProperty::SelectStatus status;
     };
 
@@ -262,6 +263,7 @@ private:
     Dimension shadowWidth_;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
+    Dimension defaultPaddingSize_;
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupModifier);
 };
 } // namespace OHOS::Ace::NG

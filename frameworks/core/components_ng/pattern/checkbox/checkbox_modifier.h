@@ -212,6 +212,11 @@ public:
         hasBuilder_ = hasBuilder;
     }
 
+    void SetHasUnselectedColor(bool hasUnselectedColor)
+    {
+        hasUnselectedColor_ = hasUnselectedColor;
+    }
+
 private:
     void DrawRectOrCircle(RSCanvas& canvas, const RSRoundRect& rrect) const;
 
@@ -240,6 +245,7 @@ private:
     float touchDuration_ = 0.0f;
     float colorAnimationDuration_ = 0.0f;
     bool hasBuilder_ = false;
+    bool hasUnselectedColor_ = false;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;

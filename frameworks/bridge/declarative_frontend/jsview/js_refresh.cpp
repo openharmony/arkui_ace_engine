@@ -156,10 +156,12 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 
     if (refreshing->IsBoolean()) {
         RefreshModel::GetInstance()->SetRefreshing(refreshing->ToBoolean());
-    } else {
+    } else if (refreshing->IsObject()) {
         JSRef<JSObject> refreshingObj = JSRef<JSObject>::Cast(refreshing);
         ParseRefreshingObject(info, refreshingObj);
         RefreshModel::GetInstance()->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
+    } else {
+        RefreshModel::GetInstance()->SetRefreshing(false);
     }
     CalcDimension offset;
     if (ParseJsDimensionVp(jsOffset, offset)) {
@@ -189,7 +191,7 @@ bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
     if (builder->IsFunction()) {
         {
             NG::ScopedViewStackProcessor builderViewStackProcessor;
-            JsFunction Jsfunc(info.This(), JSRef<JSObject>::Cast(builder));
+            JsFunction Jsfunc(info.This(), JSRef<JSFunc>::Cast(builder));
             Jsfunc.Execute();
             customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }

@@ -121,6 +121,11 @@ const double TIME_PLUS_LARGE = 10 * 1000.0;
 constexpr double DISTANCE = 20.0;
 const OffsetF CHILD_OFFSET(0.0f, 10.0f);
 const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 10.0f };
+constexpr double OVER_SCROLL_OFFSET1 = 40.0;
+constexpr double OVER_SCROLL_OFFSET2 = 60.0;
+constexpr double OVER_SCROLL_DELTA = 10.0;
+constexpr uint32_t OVER_SCROLL_ITEMS = 20;
+const SizeF COLUMN_SIZE { 100.0f, 200.0f };
 } // namespace
 
 class TextPickerTestNg : public testing::Test {
@@ -1058,8 +1063,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternFlushCurrentOptions015, TestSi
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    ASSERT_TRUE(textLayoutProperty->HasFontWeight());
-    EXPECT_EQ(Ace::FontWeight::BOLD, textLayoutProperty->GetFontWeight().value());
+    ASSERT_FALSE(textLayoutProperty->HasFontWeight());
 }
 
 void InnerHandleScrollUp003Init()
@@ -1175,9 +1179,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp004, TestSi
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    ASSERT_TRUE(textLayoutProperty->HasFontSize());
-    double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    EXPECT_EQ(FONT_SIZE_5, fontSize);
+    ASSERT_FALSE(textLayoutProperty->HasFontSize());
 }
 
 /**
@@ -1237,9 +1239,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown003, Test
     ASSERT_NE(textLayoutProperty, nullptr);
     std::string content = textLayoutProperty->GetContent().value_or("");
     EXPECT_EQ("test1", content);
-    ASSERT_TRUE(textLayoutProperty->HasFontSize());
-    double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    EXPECT_EQ(FONT_SIZE_5, fontSize);
+    ASSERT_FALSE(textLayoutProperty->HasFontSize());
 }
 
 /**
@@ -6533,5 +6533,125 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow0012, TestSize.Level1)
     auto frameNode =
         TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: TextPickerOverscroller001
+ * @tc.desc: Test TextPickerColumnPattern OverScroller, move down.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerOverscroller001, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    ASSERT_NE(frameNode_, nullptr);
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+    pickerNodeLayout->UpdateCanLoop(false);
+
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(textPickerColumnPattern_, nullptr);
+    columnNode_->GetGeometryNode()->SetFrameSize(COLUMN_SIZE);
+    textPickerColumnPattern_->SetCurrentIndex(0);
+
+    // init overscroller
+    TextPickerOverscroller overscroller;
+    overscroller.SetColumn(textPickerColumnPattern_);
+    EXPECT_EQ(overscroller.GetOverScroll(), 0);
+
+    // overScroll to OVER_SCROLL_OFFSET1
+    overscroller.ApplyCurrentOffset(0.0, OVER_SCROLL_OFFSET1, TOSS_DELTA);
+    EXPECT_TRUE(overscroller.IsOverScroll());
+    EXPECT_GT(overscroller.GetOverScroll(), DISTANCE);
+    EXPECT_FALSE(overscroller.IsBackOverScroll());
+    EXPECT_EQ(overscroller.GetBackScroll(), 0);
+
+    // overScroll to max
+    overscroller.SetOverScroll(OVER_SCROLL_OFFSET2);
+    auto yLast = OVER_SCROLL_OFFSET1;
+    auto offsetY = OVER_SCROLL_OFFSET1 + OVER_SCROLL_DELTA;
+    for (auto i = 0; i < OVER_SCROLL_ITEMS; i++) {
+        overscroller.ApplyCurrentOffset(yLast, offsetY, TOSS_DELTA);
+        yLast = offsetY;
+        offsetY = yLast + OVER_SCROLL_DELTA;
+    }
+
+    EXPECT_TRUE(overscroller.InMaxOverScroll());
+    EXPECT_TRUE(overscroller.ShouldStartRebound());
+
+    // reset overscroller
+    overscroller.Reset();
+    EXPECT_EQ(overscroller.GetOverScroll(), 0);
+    EXPECT_FALSE(overscroller.IsOverScroll());
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonDefaultFocus001
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewUpdateButtonDefaultFocus001, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    info1.isAcceptButton = true;
+    buttonInfos.push_back(info1);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    TextPickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonDefaultFocus002
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewUpdateButtonDefaultFocus002, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    buttonInfos.push_back(info1);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    TextPickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, false);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonDefaultFocus003
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewUpdateButtonDefaultFocus003, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    info1.isAcceptButton = true;
+    buttonInfos.push_back(info1);
+
+    ButtonInfo info2;
+    buttonInfos.push_back(info2);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    TextPickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
 }
 } // namespace OHOS::Ace::NG

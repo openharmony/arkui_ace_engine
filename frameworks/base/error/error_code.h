@@ -50,6 +50,8 @@ constexpr int32_t ERROR_CODE_UIEXTENSION_EXITED_ABNORMALLY = 100014;
 constexpr int32_t ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT = 100015;
 // The uiextension ability has timed out processing the key event.
 constexpr int32_t ERROR_CODE_UIEXTENSION_EVENT_TIMEOUT = 100016;
+// The component not supported prevent function.
+constexpr int32_t ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION = 100017;
 
 // C-API errors
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND = 106101;

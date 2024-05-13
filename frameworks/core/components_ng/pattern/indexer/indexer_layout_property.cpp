@@ -37,8 +37,8 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     json->PutExtAttr("usingPopup", propUsingPopup_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("itemSize",
         propItemSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
-    json->PutExtAttr("alignStyle", propAlignStyle_.value_or(AlignStyle::LEFT) == AlignStyle::LEFT ?
-        "IndexerAlign.Left" : "IndexerAlign.Right", filter);
+    std::string alignStyle = AlignStyleToString(propAlignStyle_.value_or(AlignStyle::END));
+    json->PutExtAttr("alignStyle", alignStyle.c_str(), filter);
     auto PopupPositionJsonObject = JsonUtil::Create(true);
     PopupPositionJsonObject->Put("popupPositionX", propPopupPositionX_.value_or(Dimension()).ToString().c_str());
     PopupPositionJsonObject->Put("popupPositionY", propPopupPositionY_.value_or(Dimension()).ToString().c_str());
@@ -97,5 +97,28 @@ std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextSt
     fontJsonObject->Put("fontFamily", fontFamily.c_str());
     return fontJsonObject;
 }
+
+std::string IndexerLayoutProperty::AlignStyleToString(const AlignStyle& alignStyle)
+{
+    std::string alignStyleStr;
+    switch (alignStyle) {
+        case AlignStyle::LEFT:
+            alignStyleStr = "IndexerAlign.Left";
+            break;
+        case AlignStyle::RIGHT:
+            alignStyleStr = "IndexerAlign.Right";
+            break;
+        case AlignStyle::START:
+            alignStyleStr = "IndexerAlign.Start";
+            break;
+        case AlignStyle::END:
+            alignStyleStr = "IndexerAlign.End";
+            break;
+        default:
+            break;
+    }
+    return alignStyleStr;
+}
+
 
 } // namespace OHOS::Ace::NG

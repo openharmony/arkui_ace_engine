@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
 #include <iterator>
+#include <ostream>
 
 #include "base/utils/utils.h"
 
@@ -27,6 +28,72 @@ float ParagraphManager::GetHeight() const
         res += info.paragraph->GetHeight();
     }
     return res;
+}
+
+float ParagraphManager::GetMaxIntrinsicWidth() const
+{
+    float res = 0.0f;
+    for (auto && info : paragraphs_) {
+        res = std::max(res, info.paragraph->GetMaxIntrinsicWidth());
+    }
+    return res;
+}
+bool ParagraphManager::DidExceedMaxLines() const
+{
+    bool res = false;
+    for (auto && info : paragraphs_) {
+        res |= info.paragraph->DidExceedMaxLines();
+    }
+    return res;
+}
+float ParagraphManager::GetLongestLine() const
+{
+    float res = 0.0f;
+    for (auto && info : paragraphs_) {
+        res = std::max(res, info.paragraph->GetLongestLine());
+    }
+    return res;
+}
+float ParagraphManager::GetMaxWidth() const
+{
+    float res = 0.0f;
+    for (auto && info : paragraphs_) {
+        res = std::max(res, info.paragraph->GetMaxWidth());
+    }
+    return res;
+}
+float ParagraphManager::GetTextWidth() const
+{
+    float res = 0.0f;
+    for (auto && info : paragraphs_) {
+        res = std::max(res, info.paragraph->GetTextWidth());
+    }
+    return res;
+}
+
+float ParagraphManager::GetTextWidthIncludeIndent() const
+{
+    float res = 0.0f;
+    for (auto && info : paragraphs_) {
+        auto width = info.paragraph->GetTextWidth();
+        if (info.paragraph->GetLineCount() == 1) {
+            width += static_cast<float>(info.paragraphStyle.indent.ConvertToPx());
+        }
+        if (info.paragraphStyle.leadingMargin.has_value()) {
+            width += static_cast<float>(info.paragraphStyle.leadingMargin->size.Width().ConvertToPx());
+        }
+        res = std::max(res, width);
+    }
+    return res;
+}
+
+size_t ParagraphManager::GetLineCount() const
+{
+    size_t count = 0;
+    for (auto && info : paragraphs_) {
+        count += info.paragraph->GetLineCount();
+    }
+    return count;
 }
 
 int32_t ParagraphManager::GetIndex(Offset offset, bool clamp) const
@@ -48,6 +115,88 @@ int32_t ParagraphManager::GetIndex(Offset offset, bool clamp) const
     return paragraphs_.back().end;
 }
 
+int32_t ParagraphManager::GetGlyphIndexByCoordinate(Offset offset, bool isSelectionPos) const
+{
+    CHECK_NULL_RETURN(!paragraphs_.empty(), 0);
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it) {
+        auto && info = *it;
+        if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight())) {
+            return info.paragraph->GetGlyphIndexByCoordinate(offset, isSelectionPos) + info.start;
+        }
+        // get offset relative to each paragraph
+        offset.SetY(offset.GetY() - info.paragraph->GetHeight());
+    }
+    return paragraphs_.back().end;
+}
+
+bool ParagraphManager::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) const
+{
+    CHECK_NULL_RETURN(!paragraphs_.empty(), false);
+    auto offsetIndex = offset;
+    auto startIndex = 0;
+    auto endIndex = 0;
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it) {
+        auto && info = *it;
+        if (LessNotEqual(offset, info.end)) {
+            auto flag = info.paragraph->GetWordBoundary(offsetIndex, start, end);
+            start += startIndex;
+            end += endIndex;
+            return flag;
+        }
+        // get offset relative to each paragraph
+        offsetIndex = offset - info.end;
+        startIndex = info.end;
+        endIndex = info.end;
+    }
+    return false;
+}
+
+bool ParagraphManager::CalcCaretMetricsByPosition(
+    int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) const
+{
+    CHECK_NULL_RETURN(!paragraphs_.empty(), false);
+    auto offsetIndex = extent;
+    auto offsetY = 0.0f;
+    auto result = false;
+    for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it) {
+        auto && info = *it;
+        if (textAffinity == TextAffinity::UPSTREAM || std::next(it) == paragraphs_.end()) {
+            if (LessOrEqual(extent, info.end)) {
+                result = info.paragraph->CalcCaretMetricsByPosition(offsetIndex, caretCaretMetric, textAffinity);
+                break;
+            }
+        } else {
+            if (LessNotEqual(extent, info.end)) {
+                result = info.paragraph->CalcCaretMetricsByPosition(offsetIndex, caretCaretMetric, textAffinity);
+                break;
+            }
+        }
+        // get offset relative to each paragraph
+        offsetIndex = extent - info.end;
+        offsetY += info.paragraph->GetHeight();
+    }
+    caretCaretMetric.offset += OffsetF(0.0f, offsetY);
+    return result;
+}
+
+LineMetrics ParagraphManager::GetLineMetricsByRectF(RectF rect, int32_t paragraphIndex) const
+{
+    auto index = 0;
+    float height = 0;
+    auto iter = paragraphs_.begin();
+    while (index < paragraphIndex) {
+        auto paragraphInfo = *iter;
+        height += paragraphInfo.paragraph->GetHeight();
+        iter++;
+        index++;
+    }
+    auto paragraphInfo = *iter;
+    rect.SetTop(rect.GetY() - height);
+    auto lineMetrics = paragraphInfo.paragraph->GetLineMetricsByRectF(rect);
+    lineMetrics.y += height;
+    return lineMetrics;
+}
+
 std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const
 {
     std::vector<RectF> res;
@@ -60,7 +209,6 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const
         if (info.end > start) {
             auto relativeStart = (start < info.start) ? 0 : start - info.start;
             info.paragraph->GetRectsForRange(relativeStart, end - info.start, rects);
-
             for (auto&& rect : rects) {
                 rect.SetTop(rect.Top() + y);
             }
@@ -135,10 +283,10 @@ OffsetF ParagraphManager::ComputeCursorOffset(
     auto computeSuccess = false;
     if (downStreamFirst) {
         computeSuccess = paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics, needLineHighest) ||
-                          paragraph->ComputeOffsetForCaretUpstream(relativeIndex, metrics, needLineHighest);
+                         paragraph->ComputeOffsetForCaretUpstream(relativeIndex, metrics, needLineHighest);
     } else {
         computeSuccess = paragraph->ComputeOffsetForCaretUpstream(relativeIndex, metrics, needLineHighest) ||
-                          paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics, needLineHighest);
+                         paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics, needLineHighest);
     }
     CHECK_NULL_RETURN(computeSuccess, OffsetF(0.0f, y));
     selectLineHeight = metrics.height;
@@ -176,7 +324,7 @@ OffsetF ParagraphManager::ComputeCursorInfoByClick(
     paragraph->CalcCaretMetricsByPosition(relativeIndex, caretCaretMetric, touchOffsetInCurrentParagraph, textAffinity);
     selectLineHeight = caretCaretMetric.height;
     return { static_cast<float>(caretCaretMetric.offset.GetX()),
-            static_cast<float>(caretCaretMetric.offset.GetY() + y) };
+        static_cast<float>(caretCaretMetric.offset.GetY() + y) };
 }
 
 void ParagraphManager::Reset()

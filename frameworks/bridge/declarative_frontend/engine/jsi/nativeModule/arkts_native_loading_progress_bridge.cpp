@@ -125,7 +125,7 @@ ArkUINativeModuleValue LoadingProgressBridge::SetContentModifierBuilder(ArkUIRun
             ContainerScope scope(containerId);
             auto context = ArkTSUtils::GetContext(vm);
             CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
-            const char* keysOfLoadingprogress[] = { "enableloading", "enabled"};
+            const char* keysOfLoadingprogress[] = { "enableLoading", "enabled"};
             Local<JSValueRef> valuesOfLoadingprogress[] = { panda::BooleanRef::New(vm, config.enableloading_),
                 panda::BooleanRef::New(vm, config.enabled_)};
             auto loadingprogress = panda::ObjectRef::NewWithNamedProperties(vm,

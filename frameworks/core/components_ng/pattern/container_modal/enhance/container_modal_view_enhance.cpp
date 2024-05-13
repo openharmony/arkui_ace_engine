@@ -338,10 +338,9 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
     if ((!subWindowManger->GetSubwindow(Container::CurrentId()) ||
             !subWindowManger->GetSubwindow(Container::CurrentId())->GetShown())) {
         ACE_SCOPED_TRACE("ContainerModalViewEnhance::ShowMaxMenu");
-        MenuParam menu {};
-        menu.isAboveApps = true;
-        menu.type = MenuType::CONTEXT_MENU;
-        ViewAbstract::BindMenuWithCustomNode(menuList, targetNode, menuPosition, menu);
+        MenuParam menuParam {};
+        menuParam.type = MenuType::CONTEXT_MENU;
+        SubwindowManager::GetInstance()->ShowMenuNG(menuList, menuParam, targetNode, menuPosition);
     }
     ResetHoverTimer();
     return menuList;

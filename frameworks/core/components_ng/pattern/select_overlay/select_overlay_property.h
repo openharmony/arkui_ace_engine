@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
+#include "frameworks/core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -216,6 +217,7 @@ struct CallerFrameNodeInfo {
 };
 
 struct SelectOverlayInfo {
+    WeakPtr<Pattern> pattern;
     bool isUsingMouse = false;
     bool isSingleHandle = false;
     // when handleReverse is true, The first one is on the right side of the second.

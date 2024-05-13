@@ -178,6 +178,22 @@ class TextWordBreakModifier extends ModifierWithKey<WordBreak> {
   }
 }
 
+class TextLineBreakStrategyModifier extends ModifierWithKey<LineBreakStrategy> {
+  constructor(value: LineBreakStrategy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textLineBreakStrategy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetLineBreakStrategy(node);
+    } else {
+      getUINativeModule().text.setLineBreakStrategy(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 class TextEllipsisModeModifier extends ModifierWithKey<EllipsisMode> {
   constructor(value: EllipsisMode) {
     super(value);
@@ -686,6 +702,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   wordBreak(value: WordBreak): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextWordBreakModifier.identity, TextWordBreakModifier, value);
+    return this;
+  }
+  lineBreakStrategy(value: LineBreakStrategy): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextLineBreakStrategyModifier.identity,
+      TextLineBreakStrategyModifier, value);
     return this;
   }
   onCopy(callback: (value: string) => void): TextAttribute {

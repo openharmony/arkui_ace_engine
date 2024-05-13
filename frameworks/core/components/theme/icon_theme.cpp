@@ -110,7 +110,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG, "ic_bottomsheet_close" },
     { InternalResource::ResourceId::IC_CANCEL_SVG, "ic_public_cancel" },
     { InternalResource::ResourceId::RADIO_TICK_SVG, "radio_tick_svg" },
-    { InternalResource::ResourceId::RADIO_DOT_SVG, "radio_dot_svg" }
+    { InternalResource::ResourceId::RADIO_DOT_SVG, "radio_dot_svg" },
+    { InternalResource::ResourceId::IC_TAKEPHOTO_SVG, "ic_public_camera" }
 };
 }
 

@@ -49,7 +49,6 @@ public:
     }
 
     void FireSelectEvent();
-    void UpdateRecordCaretIndex(int32_t index) const;
 
     void UpdateHandleIndex(int32_t handleIndex)
     {
@@ -191,12 +190,12 @@ public:
     void MoveSecondHandleByKeyBoard(int32_t index);
     void UpdateSelectByOffset(const Offset& localOffset);
     std::pair<int32_t, int32_t> GetSelectRangeByOffset(const Offset& localOffset);
-    void UpdateCaretOffset(TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
+    void UpdateCaretOffset(TextAffinity textAffinity = TextAffinity::DOWNSTREAM, bool moveHandle = true);
     void UpdateCaretOffset(const OffsetF& offset);
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();
-    void MoveFirstHandleToContentRect(int32_t index);
-    void MoveSecondHandleToContentRect(int32_t index);
+    void MoveFirstHandleToContentRect(int32_t index, bool moveHandle = true);
+    void MoveSecondHandleToContentRect(int32_t index, bool moveHandle = true);
     void MoveCaretToContentRect(
         int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM, bool isEditorValueChanged = true);
     void MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment = 0.0f) const;

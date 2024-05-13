@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,12 +64,14 @@ class PipelineContext;
 class Pattern;
 class StateModifyTask;
 class UITask;
-class FrameProxy;
 struct DirtySwapConfig;
 
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
+
+private:
+    class FrameProxy;
 
 public:
     // create a new child element with new element tree.
@@ -141,11 +143,10 @@ public:
 
     virtual void MarkModifyDone();
 
-    void MarkDirtyNode(
-        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false) override;
+    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
-    void MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary,
-        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     void ProcessPropertyDiff()
     {
@@ -213,6 +214,8 @@ public:
     void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
+
+    void AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& callback);
 
     void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
@@ -382,6 +385,14 @@ public:
     void OnReuse() override;
 
     OffsetF GetOffsetRelativeToWindow() const;
+
+    OffsetF GetPositionToScreen();
+
+    OffsetF GetPositionToParentWithTransform() const;
+
+    OffsetF GetPositionToScreenWithTransform();
+
+    OffsetF GetPositionToWindowWithTransform() const;
 
     OffsetF GetTransformRelativeOffset() const;
 
@@ -674,7 +685,7 @@ public:
      */
     int32_t GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const;
     uint32_t GetChildTrueTotalCount() const;
-    const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
+    ChildrenListWithGuard GetAllChildrenWithBuild(bool addToRenderTree = true) override;
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
@@ -690,14 +701,6 @@ public:
     bool SelfOrParentExpansive();
     bool SelfExpansive();
     bool ParentExpansive();
-    void SetNeedRestoreSafeArea(bool needRestore)
-    {
-        needRestoreSafeArea_ = needRestore;
-    }
-    bool NeedRestoreSafeArea()
-    {
-        return needRestoreSafeArea_;
-    }
 
     bool IsActive() const override
     {
@@ -722,7 +725,8 @@ public:
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
     void SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config);
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
+    RefPtr<UINode> GetFrameChildByIndex(
+        uint32_t index, bool needBuild, bool isCache = false, bool addToRenderTree = false) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
@@ -774,6 +778,7 @@ public:
     OffsetF GetOffsetInScreen();
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
+    RefPtr<FrameNode> GetFirstAutoFillContainerNode();
     RefPtr<FrameNode> GetNodeContainer();
     RefPtr<ContentModifier> GetContentModifier();
 
@@ -789,7 +794,7 @@ public:
     }
 
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
-    void NotifyFillRequestFailed(int32_t errCode);
+    void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "");
 
     int32_t GetUiExtensionId();
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId);
@@ -818,6 +823,11 @@ public:
         isWindowBoundary_ = isWindowBoundary;
     }
 
+    void SetIsMeasureBoundary(bool isMeasureBoundary)
+    {
+        isMeasureBoundary_ = isMeasureBoundary;
+    }
+
     void InitLastArea();
 
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
@@ -825,6 +835,22 @@ public:
     void PaintDebugBoundary(bool flag) override;
     RectF GetRectWithRender();
     bool CheckAncestorPageShow();
+
+    void SetRemoveCustomProperties(std::function<void()> func)
+    {
+        if (!removeCustomProperties_) {
+            removeCustomProperties_ = func;
+        }
+    }
+
+    void AttachContext(PipelineContext* context, bool recursive = false) override;
+    void DetachContext(bool recursive = false) override;
+
+    void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
+    {
+        SetSkipSyncGeometryNode();
+        UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+    }
 
 protected:
     void DumpInfo() override;
@@ -842,7 +868,7 @@ private:
      *
      * @return true if Parent is successfully marked dirty.
      */
-    virtual bool RequestParentDirty(bool childExpansiveAndMark = false);
+    virtual bool RequestParentDirty();
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
@@ -940,6 +966,7 @@ private:
     std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
     const static std::set<std::string> layoutTags_;
+    std::function<void()> removeCustomProperties_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -988,14 +1015,13 @@ private:
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
-    bool needRestoreSafeArea_ = true;
     bool isDisallowDropForcedly_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { DragPreviewMode::AUTO, false, false, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

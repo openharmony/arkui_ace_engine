@@ -112,6 +112,12 @@ ClickInfo ClickRecognizer::GetClickInfo()
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }
@@ -182,9 +188,10 @@ void ClickRecognizer::OnRejected()
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
+        "InputTracking id:%{public}d, click recognizer receives %{public}d touch down event, begin to detect click "
+        "event, current finger info: "
         "%{public}d, %{public}d",
-        event.id, equalsToFingers_, currentTouchPointsNum_);
+        event.touchEventId, event.id, equalsToFingers_, currentTouchPointsNum_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -244,6 +251,8 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, click recognizer receives %{public}d touch up event",
+        event.touchEventId, event.id);
     auto pipeline = PipelineBase::GetCurrentContext();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
@@ -331,6 +340,9 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, click recognizer receives %{public}d touch cancel event", event.touchEventId,
+        event.id);
     if (IsRefereeFinished()) {
         return;
     }
@@ -412,6 +424,13 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
+    
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }
@@ -423,7 +442,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDisplayX(touchPoint.screenX);
     info.SetDisplayY(touchPoint.screenY);
 #endif
-    info.SetPointerEvent(touchPoint.pointerEvent);
+    info.SetPointerEvent(lastPointEvent_);
     return info;
 }
 

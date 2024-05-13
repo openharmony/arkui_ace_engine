@@ -1,0 +1,20 @@
+{
+    "files": [
+        "src/theme/ArkThemeControl.ts",
+    ],
+    "compilerOptions": {
+        "moduleResolution": "Node",
+        "module": "es2020",
+        "target": "ES2016",
+        "outDir": "./out/",
+        // "outFile": "./out/theme/ArkThemeControl.js",
+        "rootDir": "./src/",
+        "declaration": false,
+        "noEmitOnError": true,
+        "experimentalDecorators": true,
+        "removeComments": true,
+        "lib": [
+            "ES2016"
+        ],
+    }
+}

@@ -97,8 +97,8 @@ void NavigationModelImpl::SetHideNavBar(bool hideNavBar)
     return;
 }
 
-void NavigationModelImpl::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
-    const std::string& bundleName, const std::string& moduleName)
+void NavigationModelImpl::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList)
 {
     return;
 }
@@ -276,4 +276,6 @@ void NavigationModelImpl::SetMenuCount(int32_t menuCount)
 void NavigationModelImpl::SetCustomTransition(NavigationTransitionEvent&& animationTransition) {}
 
 void NavigationModelImpl::SetIsCustomAnimation(bool isCustom) {}
+
+void NavigationModelImpl::SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {}
 } // namespace OHOS::Ace::Framework

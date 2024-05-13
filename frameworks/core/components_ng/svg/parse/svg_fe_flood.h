@@ -29,9 +29,13 @@ public:
     ~SvgFeFlood() override = default;
     static RefPtr<SvgNode> Create();
 
-    void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-        ColorInterpolationType& currentColor,
+    void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const SvgColorInterpolationType& srcColor,
+        SvgColorInterpolationType& currentColor,
         std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const override;
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+
+private:
+    SvgFeFloodAttribute feFloodAttr_;
 };
 
 } // namespace OHOS::Ace::NG

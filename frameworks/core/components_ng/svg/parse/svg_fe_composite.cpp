@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,35 +21,68 @@
 #include "core/components/common/properties/blend_mode.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool ConvertStrToSvgFeInType(const std::string& val, SvgFeInType& type)
+{
+    static const LinearMapNode<SvgFeInType> IN_TABLE[] = {
+        { "BackgroundAlpha", SvgFeInType::BACKGROUND_ALPHA },
+        { "BackgroundImage", SvgFeInType::BACKGROUND_IMAGE },
+        { "FillPaint", SvgFeInType::FILL_PAINT },
+        { "SourceAlpha", SvgFeInType::SOURCE_ALPHA },
+        { "SourceGraphic", SvgFeInType::SOURCE_GRAPHIC },
+        { "StrokePaint", SvgFeInType::STROKE_PAINT },
+    };
+    int64_t inIndex = BinarySearchFindIndex(IN_TABLE, ArraySize(IN_TABLE), val.c_str());
+    if (inIndex != -1) {
+        type = IN_TABLE[inIndex].value;
+        return true;
+    }
+    return false;
+}
+
+bool ConvertStrToSvgFeOperatorType(const std::string& val, SvgFeOperatorType& type)
+{
+    static const LinearMapNode<SvgFeOperatorType> FE_OPERATOR_TABLE[] = {
+        { "arithmetic", SvgFeOperatorType::FE_ARITHMETIC },
+        { "atop", SvgFeOperatorType::FE_ATOP },
+        { "in", SvgFeOperatorType::FE_IN },
+        { "lighter", SvgFeOperatorType::FE_LIGHTER },
+        { "out", SvgFeOperatorType::FE_OUT },
+        { "over", SvgFeOperatorType::FE_OVER },
+        { "xor", SvgFeOperatorType::FE_XOR },
+    };
+    int64_t inIndex = BinarySearchFindIndex(FE_OPERATOR_TABLE, ArraySize(FE_OPERATOR_TABLE), val.c_str());
+    if (inIndex != -1) {
+        type = FE_OPERATOR_TABLE[inIndex].value;
+        return true;
+    }
+    return false;
+}
+}
 
 RefPtr<SvgNode> SvgFeComposite::Create()
 {
     return AceType::MakeRefPtr<SvgFeComposite>();
 }
 
-SvgFeComposite::SvgFeComposite() : SvgFe()
-{
-    declaration_ = AceType::MakeRefPtr<SvgFeCompositeDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgFeComposite::SvgFeComposite() : SvgFe() {}
 
-RSBlendMode SvgFeComposite::BlendModeForOperator(FeOperatorType op) const
+RSBlendMode SvgFeComposite::BlendModeForOperator(SvgFeOperatorType op) const
 {
     switch (op) {
-        case FeOperatorType::FE_ATOP:
+        case SvgFeOperatorType::FE_ATOP:
             return RSBlendMode::SRC_ATOP;
-        case FeOperatorType::FE_IN:
+        case SvgFeOperatorType::FE_IN:
             return RSBlendMode::SRC_IN;
-        case FeOperatorType::FE_LIGHTER:
+        case SvgFeOperatorType::FE_LIGHTER:
             return RSBlendMode::LIGHTEN;
-        case FeOperatorType::FE_OUT:
+        case SvgFeOperatorType::FE_OUT:
             return RSBlendMode::SRC_OUT;
-        case FeOperatorType::FE_OVER:
+        case SvgFeOperatorType::FE_OVER:
             return RSBlendMode::SRC_OVER;
-        case FeOperatorType::FE_XOR:
+        case SvgFeOperatorType::FE_XOR:
             return RSBlendMode::XOR;
-        case FeOperatorType::FE_ARITHMETIC:
+        case SvgFeOperatorType::FE_ARITHMETIC:
             return RSBlendMode::SRC_OVER;
         default:
             return RSBlendMode::SRC_IN;
@@ -57,28 +90,72 @@ RSBlendMode SvgFeComposite::BlendModeForOperator(FeOperatorType op) const
 }
 
 void SvgFeComposite::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
-    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor,
+    const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
-    auto declaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    auto mode = declaration->GetOperatorType();
-    auto foreImageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
-    auto backImageFilter = MakeImageFilter(declaration->GetIn2(), imageFilter, resultHash);
+    auto mode = feCompositeAttr_.operatorType;
+    auto foreImageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
+    auto backImageFilter = MakeImageFilter(feCompositeAttr_.in2, imageFilter, resultHash);
     ConverImageFilterColor(foreImageFilter, srcColor, currentColor);
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
-    if (mode != FeOperatorType::FE_ARITHMETIC) {
+    if (mode != SvgFeOperatorType::FE_ARITHMETIC) {
         imageFilter = RSRecordingImageFilter::CreateBlendImageFilter(
             BlendModeForOperator(mode), backImageFilter, foreImageFilter);
         ConverImageFilterColor(imageFilter, srcColor, currentColor);
         return;
     }
-    std::vector<RSScalar> coefficients = { declaration->GetK1(), declaration->GetK2(), declaration->GetK3(),
-        declaration->GetK4() };
+    std::vector<RSScalar> coefficients = { feCompositeAttr_.k1, feCompositeAttr_.k2, feCompositeAttr_.k3,
+        feCompositeAttr_.k4 };
     imageFilter =
         RSRecordingImageFilter::CreateArithmeticImageFilter(coefficients, true, backImageFilter, foreImageFilter);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
-    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
+    RegisterResult(feAttr_.result, imageFilter, resultHash);
+}
+
+bool SvgFeComposite::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgFeCompositeAttribute&)> attrs[] = {
+        { DOM_SVG_FE_IN2,
+            [](const std::string& val, SvgFeCompositeAttribute& attribute) {
+                SvgFeInType type = SvgFeInType::PRIMITIVE;
+                bool res = ConvertStrToSvgFeInType(val, type);
+                if (res) {
+                    attribute.in2.in = type;
+                } else {
+                    attribute.in2.id = val;
+                }
+            } },
+        { DOM_SVG_FE_K1,
+            [](const std::string& val, SvgFeCompositeAttribute& attr) {
+                attr.k1 = SvgAttributesParser::ParseDouble(val);
+            } },
+        { DOM_SVG_FE_K2,
+            [](const std::string& val, SvgFeCompositeAttribute& attr) {
+                attr.k2 = SvgAttributesParser::ParseDouble(val);
+            } },
+        { DOM_SVG_FE_K3,
+            [](const std::string& val, SvgFeCompositeAttribute& attr) {
+                attr.k3 = SvgAttributesParser::ParseDouble(val);
+            } },
+        { DOM_SVG_FE_K4,
+            [](const std::string& val, SvgFeCompositeAttribute& attr) {
+                attr.k4 = SvgAttributesParser::ParseDouble(val);
+            } },
+        { DOM_SVG_FE_OPERATOR_TYPE,
+            [](const std::string& val, SvgFeCompositeAttribute& attr) {
+                SvgFeOperatorType type = SvgFeOperatorType::FE_OVER;
+                bool res = ConvertStrToSvgFeOperatorType(val, type);
+                if (res) {
+                    attr.operatorType = type;
+                }
+            } },
+    };
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), name.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, feCompositeAttr_);
+        return true;
+    }
+    return SvgFe::ParseAndSetSpecializedAttr(name, value);
 }
 
 } // namespace OHOS::Ace::NG

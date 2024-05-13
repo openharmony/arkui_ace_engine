@@ -20,6 +20,13 @@ declare enum ModifierType {
     FRAME_NODE = 2,
     EXPOSE_MODIFIER = 3,
 }
+declare class ArkLogConsole {
+  public static log(...args: Object[]): void;
+  public static debug(...args: Object[]): void;
+  public static info(...args: Object[]): void;
+  public static warn(...args: Object[]): void;
+  public static error(...args: Object[]): void;
+}
 declare class JsPointerClass {
     invalid(): boolean;
 }
@@ -296,6 +303,7 @@ declare class ArkGridComponent extends ArkComponent implements GridAttribute {
         offsetRemain: number;
     }): this;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
+    flingSpeedLimit(value: number): this;
 }
 declare class ArkGridColComponent extends ArkComponent implements GridColAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -702,6 +710,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextAttribute;
     textIndent(value: Length): TextAttribute;
     wordBreak(value: WordBreak): TextAttribute;
+    lineBreakStrategy(value: LineBreakStrategy): TextAttribute;
     onCopy(callback: (value: string) => void): TextAttribute;
     selection(selectionStart: number, selectionEnd: number): TextAttribute;
     ellipsisMode(value: EllipsisMode): TextAttribute;
@@ -1490,6 +1499,13 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     javaScriptOnDocumentStart(scripts: ScriptItem[]): this;
     layoutMode(mode: WebLayoutMode): this;
     nestedScroll(value: NestedScrollOptions): this;
+    onRenderProcessNotResponding(callback: (event: {
+        data: RenderProcessNotRespondingData;
+    }) => void): this;
+    onRenderProcessResponding(callback: () => void): this;
+    onViewportFitChanged(callback: (event: {
+        viewportFit: ViewportFit;
+    }) => void): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
@@ -1807,6 +1823,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     divider(value: DividerStyle | null): TabsAttribute;
     barOverlap(value: boolean): TabsAttribute;
     barBackgroundColor(value: ResourceColor): TabsAttribute;
+    barBackgroundBlurStyle(value: BlurStyle): TabsAttribute;
     barGridAlign(value: BarGridColumnOptions): TabsAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
 }
@@ -1942,5 +1959,5 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
 
 declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    emitter(fields: Array<EmitterProps>): ParticleAttribute;
+    emitter(fields: Array<EmitterProperty>): ParticleAttribute;
 }

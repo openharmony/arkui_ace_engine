@@ -30,7 +30,7 @@ class XComponentNode extends FrameNode {
     this.xcomponentNode_.registerOnCreateCallback(this.nativeModule_, this.onCreate);
     this.xcomponentNode_.registerOnDestroyCallback(this.nativeModule_, this.onDestroy);
     this.nodePtr_ = this.xcomponentNode_.getFrameNode(this.nativeModule_);
-    this.setNodePtr(getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_));
+    this.setNodePtr(getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_), this.nodePtr_);
   }
 
   onCreate(event?: object): void { }

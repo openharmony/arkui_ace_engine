@@ -177,6 +177,8 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         json->PutExtAttr("backgroundImagePosition", jsonValue, filter);
     }
     json->PutExtAttr("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx(), filter);
+    json->PutExtAttr("backgroundImageResizable",
+        propBackgroundImageResizableSlice.value_or(ImageResizableSlice()).ToString().c_str(), filter);
 }
 
 void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -198,7 +200,7 @@ void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("foregroundEffect", jsonOption, filter);
     if (propMotionBlur.has_value()) {
         auto motionBlur = JsonUtil::Create(true);
-        motionBlur->Put("radius", propMotionBlur->radius.Value());
+        motionBlur->Put("radius", propMotionBlur->radius);
         auto motionBlurAnchor = JsonUtil::Create(true);
         motionBlurAnchor->Put("x", propMotionBlur->anchor.x);
         motionBlurAnchor->Put("y", propMotionBlur->anchor.y);

@@ -19,6 +19,7 @@ namespace OHOS::Ace {
 
 // theme attributes
 const char THEME_ATTR_BG_COLOR[] = "bg_color";
+const char THEME_ATTR_HOVER_COLOR[] = "hover_color";
 
 // component patterns
 const char THEME_PATTERN_BUTTON[] = "button_pattern";
@@ -80,6 +81,8 @@ const char THEME_PATTERN_SHEET[] = "sheet_pattern";
 
 const char THEME_BLUR_STYLE_COMMON[] = "blur_style_common";
 const char THEME_PATTERN_SHADOW[] = "shadow_pattern";
+const char THEME_PATTERN_LINEAR_LAYOUT[] = "linear_layout_pattern";
+const char THEME_PATTERN_STACK[] = "stack_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
@@ -232,6 +235,9 @@ const char DISABLE_UNDERLINE_ALPHA[] = "disable_underline_alpha";
 
 const char DEFAULT_COUNTER_COLOR[] = "default_counter_color";
 const char OVER_COUNTER_COLOR[] = "over_counter_color";
+
+const char PREVIEW_UNDERLINE_COLOR[] = "preview_underline_color";
+const char PREVIEW_BOARD_COLOR[] = "preview_board_color";
 
 // linear split attributes
 const char LINEAR_SPLIT_CHILD_MIN_SIZE[] = "linear_split_child_min_size";

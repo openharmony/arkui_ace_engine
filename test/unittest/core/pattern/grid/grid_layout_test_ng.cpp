@@ -535,6 +535,7 @@ HWTEST_F(GridLayoutTestNg, GridScrollWithOptions003, TestSize.Level1)
     pattern_->UpdateStartIndex(3);
     FlushLayoutTask(frameNode_);
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto layoutAlgorithm =
@@ -569,6 +570,7 @@ HWTEST_F(GridLayoutTestNg, GridScrollWithOptions004, TestSize.Level1)
     pattern_->UpdateStartIndex(3);
     FlushLayoutTask(frameNode_);
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr 1fr");
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto layoutAlgorithm =
@@ -951,21 +953,21 @@ HWTEST_F(GridLayoutTestNg, ItemAboveViewport001, TestSize.Level1)
     info.endIndex_ = 5;
 
     info.currentOffset_ = 0.0f;
-    EXPECT_FALSE(info.ItemAboveViewport(1, 5.0f));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(0, 5.0f)));
 
     info.currentOffset_ = -50.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
 
     info.currentOffset_ = -200.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
-    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
 
     // adding gap length
     info.currentOffset_ = -205.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(1, 5.0f));
-    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
 
-    EXPECT_TRUE(info.ItemAboveViewport(2, 0.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(1, 0.0f)));
 
     info.startMainLineIndex_ = 1;
     info.endMainLineIndex_ = 1;
@@ -973,10 +975,10 @@ HWTEST_F(GridLayoutTestNg, ItemAboveViewport001, TestSize.Level1)
     info.endIndex_ = 3;
 
     info.currentOffset_ = 0.0f;
-    EXPECT_FALSE(info.ItemAboveViewport(2, 5.0f));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
 
     info.currentOffset_ = -1.0f;
-    EXPECT_TRUE(info.ItemAboveViewport(3, 5.0f));
+    EXPECT_TRUE(Negative(info.GetItemTopPos(1, 5.0f)));
 }
 
 /**
@@ -1001,22 +1003,22 @@ HWTEST_F(GridLayoutTestNg, ItemBelowViewport001, TestSize.Level1)
     info.endIndex_ = 4;
 
     info.currentOffset_ = 0.0f;
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 100.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 700.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 705.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 710.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 1005.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1010.0f, 5.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 100.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 700.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 705.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 710.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1005.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1010.0f));
 
     info.currentOffset_ = -50.0f;
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 100.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 700.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 705.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 710.0f, 5.0f));
-    EXPECT_TRUE(info.ItemBelowViewport(3, 2, 955.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 960.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1005.0f, 5.0f));
-    EXPECT_FALSE(info.ItemBelowViewport(3, 2, 1010.0f, 5.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 100.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 700.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 705.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 710.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 955.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 960.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1005.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1010.0f));
 }
 
 /**
@@ -1755,7 +1757,7 @@ HWTEST_F(GridLayoutTestNg, TestChildrenUpdate001, TestSize.Level1)
     });
     auto& info = pattern_->gridLayoutInfo_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
-
+    EXPECT_FALSE(pattern_->irregular_);
     for (int i = 0; i < 2; ++i) {
         frameNode_->ChildrenUpdatedFrom(i);
         frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1794,6 +1796,7 @@ HWTEST_F(GridLayoutTestNg, GetVisibleSelectedItems001, TestSize.Level1)
     });
     GetChildPattern<GridItemPattern>(frameNode_, 1)->SetSelected(true);
     EXPECT_EQ(pattern_->GetVisibleSelectedItems().size(), 1);
+    EXPECT_FALSE(pattern_->irregular_);
 }
 
 /**
@@ -1936,5 +1939,288 @@ HWTEST_F(GridLayoutTestNg, GridLayoutTest001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetGridLayoutInfo().endMainLineIndex_, 1);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 0);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().endIndex_, 3);
+}
+
+/**
+ * @tc.name: LayoutRTL001
+ * @tc.desc: Test property ayout with Direction RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, LayoutRTL001, TestSize.Level1)
+{
+    float itemWidth = 120.f;
+    Create([itemWidth](GridModelNG model) {
+        model.SetIsRTL(TextDirection::RTL);
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        CreateItem(12, itemWidth, ITEM_HEIGHT);
+    });
+
+    int32_t colsNumber = 4; // 4 * 120(itemWidth) = 480(gridWidth)
+    for (int32_t index = 0; index < 10; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = GRID_WIDTH - index % colsNumber * itemWidth - itemWidth;
+        float offsetY = floor(index / colsNumber) * ITEM_HEIGHT;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
+
+/**
+ * @tc.name: AdaptiveLayoutRTL001
+ * @tc.desc: Test property AdaptiveLayout with GridDirection Row and Direction RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL001, TestSize.Level1)
+{
+    float itemWidth = 100.f;
+    Create([itemWidth](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::ROW);
+        model.SetEditable(true);
+        model.SetCellLength(ITEM_HEIGHT);
+        model.SetMinCount(4);
+        model.SetMaxCount(2);
+        model.SetIsRTL(TextDirection::RTL);
+        CreateItem(10, itemWidth, ITEM_HEIGHT);
+    });
+
+    /**
+     * @tc.steps: step1. While the before set minCount > maxCount
+     * @tc.expected: would let minCount = 1, maxCount = Infinity;
+     */
+    int32_t colsNumber = 4; // 4 * 100(itemWidth) < 480(gridWidth)
+    for (int32_t index = 0; index < 10; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = GRID_WIDTH - index % colsNumber * itemWidth - itemWidth;
+        float offsetY = floor(index / colsNumber) * ITEM_HEIGHT;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
+
+/**
+ * @tc.name: AdaptiveLayoutRTL002
+ * @tc.desc: Test property AdaptiveLayout with GridDirection Column and Direction RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL002, TestSize.Level1)
+{
+    float itemWidth = 100.f;
+    Create([itemWidth](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::COLUMN);
+        model.SetEditable(true);
+        model.SetCellLength(ITEM_HEIGHT);
+        model.SetMinCount(4);
+        model.SetMaxCount(2);
+        model.SetIsRTL(TextDirection::RTL);
+        CreateItem(10, itemWidth, ITEM_HEIGHT);
+    });
+
+    /**
+     * @tc.steps: step1. While the before set minCount > maxCount
+     * @tc.expected: would let minCount = 1, maxCount = Infinity;
+     */
+    int32_t colsNumber = 4; // 4 * 100(itemWidth) < 480(gridWidth)
+    int32_t rowsNumber = 4;
+    for (int32_t index = 0; index < 8; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = GRID_WIDTH - floor(index / rowsNumber) * itemWidth * 2 - itemWidth;
+        float offsetY = index % colsNumber * ITEM_HEIGHT;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
+
+/**
+ * @tc.name: AdaptiveLayoutRTL003
+ * @tc.desc: Test property AdaptiveLayout with GridDirection RowReverse and Direction RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL003, TestSize.Level1)
+{
+    float itemWidth = 100.f;
+    Create([itemWidth](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::ROW_REVERSE);
+        model.SetEditable(true);
+        model.SetCellLength(ITEM_HEIGHT);
+        model.SetMinCount(4);
+        model.SetMaxCount(2);
+        model.SetIsRTL(TextDirection::RTL);
+        CreateItem(10, itemWidth, ITEM_HEIGHT);
+    });
+
+    /**
+     * @tc.steps: step1. While the before set minCount > maxCount
+     * @tc.expected: would let minCount = 1, maxCount = Infinity;
+     */
+    int32_t colsNumber = 4; // 4 * 100(itemWidth) < 480(gridWidth)
+    for (int32_t index = 0; index < 10; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = index % colsNumber * itemWidth + (GRID_WIDTH - colsNumber * itemWidth);
+        float offsetY = floor(index / colsNumber) * ITEM_HEIGHT;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
+
+/**
+ * @tc.name: AdaptiveLayoutRTL004
+ * @tc.desc: Test property AdaptiveLayout with GridDirection ColumnReverse and Direction RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL004, TestSize.Level1)
+{
+    float itemWidth = 100.f;
+    Create([itemWidth](GridModelNG model) {
+        model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
+        model.SetEditable(true);
+        model.SetCellLength(ITEM_HEIGHT);
+        model.SetMinCount(4);
+        model.SetMaxCount(2);
+        model.SetIsRTL(TextDirection::RTL);
+        CreateItem(10, itemWidth, ITEM_HEIGHT);
+    });
+
+    /**
+     * @tc.steps: step1. While the before set minCount > maxCount
+     * @tc.expected: would let minCount = 1, maxCount = Infinity;
+     */
+    int32_t colsNumber = 4; // 4 * 100(itemWidth) < 480(gridWidth)
+    int32_t rowsNumber = 4;
+    for (int32_t index = 0; index < 8; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = GRID_WIDTH - floor(index / rowsNumber) * itemWidth * 2 - itemWidth;
+        float offsetY = GRID_HEIGHT - index % colsNumber * ITEM_HEIGHT - ITEM_HEIGHT;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
+
+/**
+ * @tc.name: ScrollLayoutRTL001
+ * @tc.desc: Test Vertical Grid with Direction RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, ScrollLayoutRTL001, TestSize.Level1)
+{
+    float itemWidth = 120.0f;
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetIsRTL(TextDirection::RTL);
+        CreateFixedItem(18);
+    });
+
+    int32_t colsNumber = 4;
+    for (int32_t index = 0; index < 8; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = GRID_WIDTH - index % colsNumber * itemWidth - itemWidth;
+        float offsetY = floor(index / colsNumber) * ITEM_HEIGHT;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
+
+/**
+ * @tc.name: ScrollLayoutRTL002
+ * @tc.desc: Test Horizontal Grid with Direction RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, ScrollLayoutRTL002, TestSize.Level1)
+{
+    float itemWidth = 120.0f;
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetIsRTL(TextDirection::RTL);
+        CreateFixedItem(18);
+    });
+
+    int32_t rowsNumber = 4;
+    for (int32_t index = 0; index < 8; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = GRID_WIDTH - floor(index / rowsNumber) * itemWidth - itemWidth;
+        float offsetY = index % rowsNumber * ITEM_HEIGHT;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_HEIGHT);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
+
+/**
+ * @tc.name: AdaptToChildMainSize003
+ * @tc.desc: Test Horizontal Grid with Infinity mainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptToChildMainSize003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+        CreateFixedItem(8);
+    });
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_WIDTH * 2);
+}
+
+/**
+ * @tc.name: AdaptToChildMainSize004
+ * @tc.desc: Test Vertical Grid with Infinity mainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptToChildMainSize004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        ViewAbstract::SetHeight(CalcLength(Infinity<int32_t>()));
+        CreateFixedItem(8);
+    });
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_HEIGHT * 2);
+}
+
+/**
+ * @tc.name: AdaptToChildMainSize005
+ * @tc.desc: Test Vertical Grid with maxcount and 0 itemHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptToChildMainSize005, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        ViewAbstract::SetHeight(CalcLength(100));
+        model.SetMaxCount(1);
+        CreateItem(1, 0, 0);
+    });
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, 100);
+}
+
+/*
+ * @tc.name: GetResetMode001
+ * @tc.desc: Test Reset Function when have bigItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GetResetMode001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateFixedItem(40);
+    });
+
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto layoutAlgorithm =
+        AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(-1), std::make_pair(false, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(1), std::make_pair(true, false));
+
+    pattern_->ScrollToIndex(30, false, ScrollAlign::START);
+    layoutAlgorithm->gridLayoutInfo_.startIndex_ = 30;
+    frameNode_->childrenUpdatedFrom_ = 20;
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(0), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(10), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(25), std::make_pair(true, false));
+
+    layoutAlgorithm->gridLayoutInfo_.hasBigItem_ = true;
+
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(0), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(10), std::make_pair(true, false));
+    EXPECT_EQ(layoutAlgorithm->GetResetMode(25), std::make_pair(false, true));
 }
 } // namespace OHOS::Ace::NG

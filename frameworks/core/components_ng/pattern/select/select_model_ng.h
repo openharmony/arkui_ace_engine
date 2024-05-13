@@ -81,6 +81,8 @@ public:
     static void SetChangeValue(FrameNode* frameNode, int index, const std::string& value);
     ControlSize GetControlSize() override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params);
     static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
     static ControlSize GetControlSize(FrameNode* frameNode);
     static void SetArrowPosition(FrameNode* frameNode, const ArrowPosition value);
@@ -109,6 +111,9 @@ public:
     static void SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth);
     static void SetOptionHeight(FrameNode* frameNode, const Dimension& value);
     static void SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTrigger);
+    static void SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect);
+    static void SetMenuBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H

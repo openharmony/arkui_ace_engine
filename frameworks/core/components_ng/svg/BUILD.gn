@@ -17,6 +17,7 @@ import(
 build_component_ng("svg_ng") {
   sources = [
     "parse/svg_animation.cpp",
+    "parse/svg_attributes_parser.cpp",
     "parse/svg_circle.cpp",
     "parse/svg_clip_path.cpp",
     "parse/svg_ellipse.cpp",

@@ -28,11 +28,13 @@ class ParagraphManager : public virtual AceType {
 public:
     struct ParagraphInfo {
         RefPtr<Paragraph> paragraph;
+        ParagraphStyle paragraphStyle;
         int32_t start = 0;
         int32_t end = 0;
 
         std::string ToString() const;
     };
+    ParagraphManager() = default;
     std::optional<double> minParagraphFontSize = std::nullopt;
 
     int32_t GetIndex(Offset offset, bool clamp = false) const;
@@ -55,6 +57,24 @@ public:
     {
         paragraphs_.emplace_back(std::move(info));
     }
+
+    void SetParagraphs(const std::list<ParagraphInfo>& paragraphs)
+    {
+        paragraphs_ = paragraphs;
+    }
+
+    // add for text
+    int32_t GetGlyphIndexByCoordinate(Offset offset, bool isSelectionPos = false) const;
+    bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) const;
+    bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) const;
+    float GetMaxIntrinsicWidth() const;
+    bool DidExceedMaxLines() const;
+    float GetLongestLine() const;
+    float GetMaxWidth() const;
+    float GetTextWidth() const;
+    float GetTextWidthIncludeIndent() const;
+    size_t GetLineCount() const;
+    LineMetrics GetLineMetricsByRectF(RectF rect, int32_t paragraphIndex) const;
 
 private:
     std::list<ParagraphInfo> paragraphs_;

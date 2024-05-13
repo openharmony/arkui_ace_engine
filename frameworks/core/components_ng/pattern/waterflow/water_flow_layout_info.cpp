@@ -260,7 +260,7 @@ int32_t WaterFlowLayoutInfo::GetMainCount() const
 
 void WaterFlowLayoutInfo::ClearCacheAfterIndex(int32_t currentIndex)
 {
-    size_t segment = GetSegment(currentIndex);
+    size_t segment = static_cast<size_t>(GetSegment(currentIndex));
     for (auto& crossItems : items_[segment]) {
         if (crossItems.second.empty()) {
             continue;
@@ -371,7 +371,7 @@ void WaterFlowLayoutInfo::RecordItem(int32_t idx, const FlowItemPosition& pos, f
 
 void WaterFlowLayoutInfo::SetNextSegmentStartPos(int32_t itemIdx)
 {
-    size_t segment = GetSegment(itemIdx);
+    size_t segment = static_cast<size_t>(GetSegment(itemIdx));
     if (segmentStartPos_.size() > segment + 1) {
         return;
     }
@@ -436,7 +436,7 @@ void WaterFlowLayoutInfo::InitSegments(const std::vector<WaterFlowSections::Sect
         [](int32_t index, const std::pair<float, int32_t>& pos) { return index < pos.second; });
     endPosArray_.erase(it, endPosArray_.end());
     items_.resize(n);
-    for (size_t i = start; i < n; ++i) {
+    for (size_t i = static_cast<size_t>(start); i < n; ++i) {
         items_[i].clear();
         for (int32_t j = 0; j < sections[i].crossCount; ++j) {
             items_[i][j] = {};
@@ -460,9 +460,9 @@ void WaterFlowLayoutInfo::InitMargins(
     if (segmentStartPos_.size() <= 1) {
         ResetSegmentStartPos();
     }
-    int32_t lastItem = itemInfos_.size() - 1;
+    int32_t lastItem = static_cast<int32_t>(itemInfos_.size()) - 1;
     if (segmentTails_[GetSegment(lastItem)] == lastItem) {
-        SetNextSegmentStartPos(itemInfos_.size() - 1);
+        SetNextSegmentStartPos(static_cast<int32_t>(itemInfos_.size()) - 1);
     }
 }
 

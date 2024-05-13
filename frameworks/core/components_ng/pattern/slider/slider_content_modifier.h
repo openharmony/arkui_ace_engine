@@ -264,6 +264,13 @@ public:
 
     void UpdateContentDirtyRect(const SizeF& frameSize);
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
@@ -326,6 +333,7 @@ private:
     RefPtr<PropertyInt> sliderInteractionMode_;
     RefPtr<PropertyFloat> minResponse_;
     RefPtr<PropertyInt> blockType_;
+    RefPtr<PropertyBool> useContentModifier_;
 
     // others
     struct MarkerPenAndPath {

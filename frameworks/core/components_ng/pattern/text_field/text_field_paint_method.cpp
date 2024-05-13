@@ -178,6 +178,10 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textSelectController->FireSelectEvent();
 
     textFieldOverlayModifier_->SetTextRect(textFieldPattern->GetTextRect());
+    textFieldOverlayModifier_->SetShowPreviewTextDecoration(textFieldPattern->GetIsPreviewText());
+    textFieldOverlayModifier_->SetPreviewTextRects(textFieldPattern->NeedDrawPreviewText());
+    textFieldOverlayModifier_->SetPreviewTextDecorationColor(textFieldPattern->GetPreviewDecorationColor());
+    textFieldOverlayModifier_->SetPreviewTextStyle(textFieldPattern->GetPreviewTextStyle());
     UpdateScrollBar();
 }
 

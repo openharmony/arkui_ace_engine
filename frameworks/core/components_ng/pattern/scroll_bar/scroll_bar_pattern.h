@@ -115,14 +115,14 @@ public:
         controlDistance_ = controlDistance;
     }
 
-    float GetScrollOffset() const
+    float GetScrollableNodeOffset() const
     {
-        return scrollOffset_;
+        return scrollableNodeOffset_;
     }
 
-    void SetScrollOffset(float scrollOffset)
+    void SetScrollableNodeOffset(float scrollableNodeOffset)
     {
-        scrollOffset_ = scrollOffset;
+        scrollableNodeOffset_ = scrollableNodeOffset;
     }
 
     bool IsAtTop() const;
@@ -198,12 +198,13 @@ public:
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
     void SetScrollBar(DisplayMode displayMode);
-    void SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     void UpdateScrollBarOffset();
     void HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent);
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
     void RegisterScrollBarEventTask();
     bool UpdateScrollBarDisplay();
+    bool IsReverse() const;
+    void SetReverse(bool reverse);
 
     RefPtr<GestureEventHub> GetGestureHub()
     {
@@ -288,7 +289,7 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void ValidateOffset(int32_t source);
+    void ValidateOffset();
     void SetAccessibilityAction();
     void InitPanRecognizer();
     void HandleDragStart(const GestureEvent& info);
@@ -308,7 +309,7 @@ private:
     bool  controlDistanceChanged_ = false;
     bool hasChild_ = false;
     bool preFrameChildState_ = false;
-    float scrollOffset_ = 0.0f;
+    float scrollableNodeOffset_  = 0.0f;
     float friction_ = BAR_FRICTION;
     float frictionPosition_ = 0.0;
     float dragStartPosition_ = 0.0f;
@@ -317,7 +318,7 @@ private:
     RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     RefPtr<ScrollBar> scrollBar_;
 
-    float childOffset_ = 0.0f;
+    float childOffset_ = 0.0f;  // main size of child
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<FrictionMotion> frictionMotion_;
     RefPtr<Animator> frictionController_;
@@ -335,6 +336,7 @@ private:
     //Determine whether the current scroll direction is scrolling upwards or downwards
     bool scrollingUp_ = false;
     bool scrollingDown_ = false;
+    bool isReverse_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -131,7 +131,9 @@ std::string TextTimerComposedElement::ConvertFontFamily(const std::vector<std::s
         result += item;
         result += ",";
     }
-    result = result.substr(0, result.size() - 1);
+    if (!result.empty()) {
+        result = result.substr(0, result.size() - 1);
+    }
     return result;
 }
 

@@ -114,6 +114,8 @@ public:
         return realArrowHeight_;
     }
 
+    void UpdateMarginByWidth();
+
 protected:
     OffsetF positionOffset_;
     SizeF wrapperSize_;
@@ -183,6 +185,7 @@ private:
     void BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
         RefPtr<FrameNode> bubbleNode, bool showInSubWindow);
     void SetArrowOffsetsFromClip(const int16_t index, const float offsetX, const float offsetY);
+    void SetHotAreas(bool showInSubWindow, bool isBlock, RefPtr<FrameNode> frameNode, int32_t containerId);
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
@@ -206,6 +209,7 @@ private:
     OffsetF targetOffsetForPaint_;
     SizeF childSize_;
     OffsetF childOffset_;
+    // Offset from upper left corner of the screen
     OffsetF childOffsetForPaint_;
     OffsetF arrowPosition_;
     OffsetF arrowPositionForPaint_;
@@ -251,6 +255,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutAlgorithm);
     std::vector<std::vector<float>> arrowOffsetsFromClip_
         = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
+    bool isGreatWrapperWidth_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H

@@ -267,6 +267,11 @@ public:
 
     void SetTitlebarOptions(NavigationTitlebarOptions&& opt);
 
+    NavigationTitlebarOptions GetTitleBarOptions() const
+    {
+        return options_;
+    }
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 

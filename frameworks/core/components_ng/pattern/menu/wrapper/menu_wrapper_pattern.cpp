@@ -37,6 +37,25 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
     CallMenuStateChangeCallback("false");
 }
 
+void MenuWrapperPattern::OnModifyDone()
+{
+    InitFocusEvent();
+}
+
+void MenuWrapperPattern::InitFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HideMenu();
+    };
+    focusHub->SetOnBlurInternal(std::move(blurTask));
+}
+
 void MenuWrapperPattern::OnAttachToFrameNode()
 {
     RegisterOnTouch();
@@ -107,7 +126,7 @@ void MenuWrapperPattern::HideSubMenu()
             menuPattern->FocusViewShow();
         }
     }
-    host->RemoveChild(subMenu);
+
     auto menuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
     if (menuPattern) {
         menuPattern->RemoveParentHoverStyle();
@@ -118,7 +137,52 @@ void MenuWrapperPattern::HideSubMenu()
             menuItem->SetIsSubMenuShowed(false);
         }
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    auto scroll = focusMenu->GetFirstChild();
+    CHECK_NULL_VOID(scroll);
+    auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+    CHECK_NULL_VOID(innerMenu);
+    auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(innerMenuPattern);
+    auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && menuPattern->IsSubMenu()) ||
+        menuPattern->IsSelectOverlaySubMenu()) {
+        host->RemoveChild(subMenu);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    } else if (expandingMode == SubMenuExpandingMode::STACK && menuPattern->IsSubMenu()) {
+        HideStackExpandMenu(subMenu);
+    }
+}
+
+void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menuNode = host->GetFirstChild();
+    CHECK_NULL_VOID(menuNode);
+    AnimationOption option;
+    option.SetOnFinishEvent(
+        [weak = WeakClaim(RawPtr(host)), subMenuWk = WeakClaim(RawPtr(subMenu))] {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto taskExecutor = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [weak, subMenuWk]() {
+                    auto subMenuNode = subMenuWk.Upgrade();
+                    CHECK_NULL_VOID(subMenuNode);
+                    auto menuWrapper = weak.Upgrade();
+                    CHECK_NULL_VOID(menuWrapper);
+                    menuWrapper->RemoveChild(subMenuNode);
+                    menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+                },
+                TaskExecutor::TaskType::UI, "HideStackExpandMenu");
+    });
+    auto menuNodePattern = DynamicCast<FrameNode>(menuNode)->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuNodePattern);
+    menuNodePattern->ShowStackExpandDisappearAnimation(DynamicCast<FrameNode>(menuNode),
+        DynamicCast<FrameNode>(subMenu), option);
 }
 
 void MenuWrapperPattern::RegisterOnTouch()
@@ -158,21 +222,23 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
     position -= host->GetPaintRectOffset();
     auto children = host->GetChildren();
     for (auto child = children.rbegin(); child != children.rend(); ++child) {
-        // get menu frame node (child of menu wrapper)
-        auto menuNode = DynamicCast<FrameNode>(*child);
-        CHECK_NULL_VOID(menuNode);
-        // get menuNode's touch region
-        auto menuZone = menuNode->GetGeometryNode()->GetFrameRect();
-        if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+        // get child frame node of menu wrapper
+        auto menuWrapperChildNode = DynamicCast<FrameNode>(*child);
+        CHECK_NULL_VOID(menuWrapperChildNode);
+        // get menuWrapperChildNode's touch region
+        auto menuWrapperChildZone = menuWrapperChildNode->GetGeometryNode()->GetFrameRect();
+        if (menuWrapperChildZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
             return;
         }
         // if DOWN-touched outside the menu region, then hide menu
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
+        auto menuPattern = menuWrapperChildNode->GetPattern<MenuPattern>();
+        if (!menuPattern) {
+            continue;
+        }
         if (menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu()) {
             HideSubMenu();
         } else {
-            HideMenu(menuNode);
+            HideMenu(menuWrapperChildNode);
         }
     }
 }
@@ -238,6 +304,15 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
             frameRect.Height());
 
         rects.emplace_back(rect);
+    }
+    // If container is UIExtensionWindow, set hotArea size equals to subwindow's filterColumnNode's size
+    if (IsContextMenu() && GetPreviewMode() != MenuPreviewMode::NONE) {
+        auto filterNode = GetFilterColumnNode();
+        if (filterNode) {
+            auto frameRect = filterNode->GetGeometryNode()->GetFrameRect();
+            auto rect = Rect(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
+            rects.emplace_back(rect);
+        }
     }
     SubwindowManager::GetInstance()->SetHotAreas(rects, GetHost()->GetId(), GetContainerId());
 }
@@ -314,6 +389,43 @@ bool MenuWrapperPattern::IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, false);
     return menuPattern->IsSelectOverlayCustomMenu();
+}
+
+void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "register menu enter");
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RegisterMenuAppearCallback(menuParam.onAppear);
+    pattern->RegisterMenuDisappearCallback(menuParam.onDisappear);
+    pattern->RegisterMenuAboutToAppearCallback(menuParam.aboutToAppear);
+    pattern->RegisterMenuAboutToDisappearCallback(menuParam.aboutToDisappear);
+    pattern->RegisterMenuStateChangeCallback(menuParam.onStateChange);
+}
+
+void MenuWrapperPattern::SetMenuTransitionEffect(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "set menu transition effect");
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasTransitionEffect(menuParam.hasTransitionEffect);
+    if (menuParam.hasTransitionEffect) {
+        auto renderContext = menuWrapperNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CHECK_NULL_VOID(menuParam.transition);
+        renderContext->UpdateChainedTransition(menuParam.transition);
+    }
+    pattern->SetHasPreviewTransitionEffect(menuParam.hasPreviewTransitionEffect);
+    if (menuParam.hasPreviewTransitionEffect) {
+        auto previewChild = pattern->GetPreview();
+        CHECK_NULL_VOID(previewChild);
+        auto renderContext = previewChild->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CHECK_NULL_VOID(menuParam.previewTransition);
+        renderContext->UpdateChainedTransition(menuParam.previewTransition);
+    }
 }
 
 void MenuWrapperPattern::DumpInfo()

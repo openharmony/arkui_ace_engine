@@ -498,10 +498,13 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithoutAnimation00
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1462,10 +1465,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset * 2;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1524,10 +1530,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset * 2;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1588,10 +1597,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll003, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset * 2;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1652,10 +1664,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll004, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1716,10 +1731,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll005, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1780,10 +1798,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll006, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;

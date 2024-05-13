@@ -128,7 +128,7 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
     svgSize_ = svg->GetSize();
     viewBox_ = svg->GetViewBox();
     svgContext_->SetRootViewBox(viewBox_);
-    root_->InitStyle(nullptr);
+    root_->InitStyle(SvgBaseAttribute());
     return true;
 }
 
@@ -139,8 +139,6 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
         CHECK_NULL_RETURN(parent, nullptr);
         if (AceType::InstanceOf<SvgStyle>(parent)) {
             SvgStyle::ParseCssStyle(element, attrCallback_);
-        } else {
-            parent->SetText(element);
         }
     }
 

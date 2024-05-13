@@ -162,10 +162,6 @@ void TxtParagraph::Build()
 #else
     paragraph_ = builder_->CreateTypography();
 #endif
-
-    if (paraStyle_.leadingMargin) {
-        SetIndents({ paraStyle_.leadingMargin->size.Width().ConvertToPx() });
-    }
 }
 
 uint32_t TxtParagraph::destructCount = 0;
@@ -295,11 +291,20 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
     paragraph_->Paint(&canvas, x, y);
 #endif
     if (paraStyle_.leadingMargin && paraStyle_.leadingMargin->pixmap) {
+        auto size = paraStyle_.leadingMargin->size;
+        CaretMetricsF metrics;
+        auto flag = ComputeOffsetForCaretUpstream(0, metrics) || ComputeOffsetForCaretDownstream(0, metrics);
+        if (flag) {
+            x += metrics.offset.GetX() - size.Width().ConvertToPx();
+            auto sizeRect = SizeF(size.Width().ConvertToPx(), size.Height().ConvertToPx());
+            y += Alignment::GetAlignPosition(
+                SizeF(sizeRect.Width(), metrics.height), sizeRect, paraStyle_.leadingMarginAlign)
+                    .GetY();
+        }
         auto canvasImage = PixelMapImage::Create(paraStyle_.leadingMargin->pixmap);
         auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
         CHECK_NULL_VOID(pixelMapImage);
         auto& rsCanvas = const_cast<RSCanvas&>(canvas);
-        auto size = paraStyle_.leadingMargin->size;
         auto width = size.Width().ConvertToPx();
         auto height = size.Height().ConvertToPx();
         pixelMapImage->DrawRect(rsCanvas, ToRSRect(RectF(x, y, width, height)));
@@ -323,39 +328,63 @@ int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset, bool isSel
     int32_t index;
 #ifndef USE_GRAPHIC_TEXT_GINE
     index = static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
-    auto boxes = paragraph_->GetRectsForRange(
-        index, index + 1, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
     index = static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
-    auto boxes = paragraph_->GetTextRectsByBoundary(
-        index, index + 1, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (isSelectionPos) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        auto boxes = paragraph_->GetRectsForRange(
-            index, index + 1, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
-#else
-        auto boxes = paragraph_->GetTextRectsByBoundary(
-            index, index + 1, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
-#endif
-        if (boxes.empty()) {
-            return --index;
-        }
-        for (const auto& textBox : boxes) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            auto left = textBox.rect.fLeft;
-            auto right = textBox.rect.fRight;
-#else
-            auto left = textBox.rect.GetLeft();
-            auto right = textBox.rect.GetRight();
-#endif
-            if (left != right) {
-                return index;
-            }
-        }
-        return --index;
+        AdjustIndexForward(offset, true, index);
     }
     return index;
+}
+
+void TxtParagraph::AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index)
+{
+    if (index < 0) {
+        index = 0;
+        return;
+    }
+    auto totalLen = static_cast<size_t>(placeholderCnt_) + text_.length();
+    if (static_cast<unsigned int>(index) == totalLen) {
+        --index;
+        AdjustIndexForward(offset, false, index);
+        return;
+    }
+    auto next = index + 1;
+    auto start = 0;
+    auto end = 0;
+    if (IsIndexInEmoji(index, start, end)) {
+        index = start;
+        next = end;
+    }
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto boxes = paragraph_->GetRectsForRange(
+        index, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+#else
+    auto boxes = paragraph_->GetTextRectsByBoundary(
+        index, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+#endif
+    if (boxes.empty()) {
+        --index;
+        AdjustIndexForward(offset, false, index);
+        return;
+    }
+    const auto& textBox = *boxes.begin();
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto left = textBox.rect.fLeft;
+    auto right = textBox.rect.fRight;
+    auto top = textBox.rect.fTop;
+#else
+    auto left = textBox.rect.GetLeft();
+    auto right = textBox.rect.GetRight();
+    auto top = textBox.rect.GetTop();
+#endif
+    if (compareOffset && (LessNotEqual(offset.GetY(), top) || LessNotEqual(offset.GetX(), left))) {
+        --index;
+        AdjustIndexForward(offset, false, index);
+    } else if (NearEqual(left, right)) {
+        --index;
+        AdjustIndexForward(offset, false, index);
+    }
 }
 
 bool TxtParagraph::CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent)
@@ -382,6 +411,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         extent = GetParagraphLength();
     }
 
+    extent = AdjustIndexForEmoji(extent);
     char16_t prevChar = 0;
     if (static_cast<size_t>(extent) <= text_.length()) {
         prevChar = text_[std::max(0, extent - 1)];
@@ -492,30 +522,30 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
     }
 
     result.Reset();
-    int32_t graphemeClusterLength = 1;
-    int32_t next = extent + graphemeClusterLength;
 #ifndef USE_GRAPHIC_TEXT_GINE
-    auto boxes = paragraph_->GetRectsForRange(
-        extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
-#else
-    auto boxes = paragraph_->GetTextRectsByBoundary(extent, next,
-        needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
-        Rosen::TextRectWidthStyle::TIGHT);
-#endif
-
-    if (boxes.empty() && !text_.empty()) {
-        graphemeClusterLength = LENGTH_INCREMENT;
-        next = extent + graphemeClusterLength;
-#ifndef USE_GRAPHIC_TEXT_GINE
-        boxes = paragraph_->GetRectsForRange(
+    auto getTextRects = [parapraph = &paragraph_](int32_t extent, int32_t next) {
+        return (*parapraph)->GetRectsForRange(
             extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+    };
 #else
-        boxes = paragraph_->GetTextRectsByBoundary(extent, next,
+    auto getTextRects = [parapraph = &paragraph_, needLineHighest](int32_t extent, int32_t next) {
+        return (*parapraph)->GetTextRectsByBoundary(extent, next,
             needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
             Rosen::TextRectWidthStyle::TIGHT);
+    };
 #endif
-    }
+    extent = AdjustIndexForEmoji(extent);
+    auto boxes = getTextRects(extent, extent + 1);
+    if (boxes.empty() && !text_.empty()) {
+        boxes = getTextRects(extent, extent + LENGTH_INCREMENT);
 
+        int32_t start = 0;
+        int32_t end = 0;
+        // it could be emoji.
+        if (boxes.empty() && GetWordBoundary(extent, start, end)) {
+            boxes = getTextRects(extent, end);
+        }
+    }
     if (boxes.empty()) {
         return false;
     }
@@ -544,6 +574,13 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
 
 void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects)
 {
+    auto adjustStart = AdjustIndexForEmoji(start);
+    auto adjustEnd = AdjustIndexForEmoji(end);
+    GetRectsForRangeInner(adjustStart, adjustEnd, selectedRects);
+}
+
+void TxtParagraph::GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects)
+{
     CHECK_NULL_VOID(paragraph_);
 #ifndef USE_GRAPHIC_TEXT_GINE
     const auto& boxes = paragraph_->GetRectsForRange(
@@ -561,6 +598,36 @@ void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect
             static_cast<float>(rect.Width()), static_cast<float>(rect.Height()));
         selectedRects.emplace_back(selectionRect);
     }
+}
+
+int32_t TxtParagraph::AdjustIndexForEmoji(int32_t index)
+{
+    int32_t start = 0;
+    int32_t end = 0;
+    if (IsIndexInEmoji(index, start, end)) {
+        return end;
+    }
+    return index;
+}
+
+bool TxtParagraph::IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& emojiEnd)
+{
+    CHECK_NULL_RETURN(paragraph_, false);
+    int32_t start = 0;
+    int32_t end = 0;
+    if (!GetWordBoundary(index, start, end)) {
+        return false;
+    }
+    std::vector<RectF> selectedRects;
+    // if index in emoji or the first or the last, selectedRects is empty and
+    // 'end' will be emoji's end index or 0 or the max index.
+    GetRectsForRangeInner(index, end, selectedRects);
+    if (selectedRects.empty()) {
+        emojiStart = start;
+        emojiEnd = end;
+        return true;
+    }
+    return false;
 }
 
 void TxtParagraph::GetRectsForPlaceholders(std::vector<RectF>& selectedRects)
@@ -712,9 +779,11 @@ LineMetrics TxtParagraph::GetLineMetricsByRectF(RectF& rect)
     if (metrics.empty()) {
         return lineMetrics;
     }
+    auto top = std::floor(rect.Top() + 0.5);
+    auto bottom = std::floor(rect.Bottom() + 0.5);
     auto res = metrics.size() - 1;
     for (size_t index = 0; index < metrics.size() - 1; index++) {
-        if (metrics[index].y <= rect.Top() && metrics[index + 1].y >= rect.Bottom()) {
+        if (metrics[index].y <= top && metrics[index + 1].y >= bottom) {
             res = index;
             break;
         }

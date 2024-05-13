@@ -21,6 +21,8 @@
 namespace OHOS::Ace::NG {
 class SwiperBridge {
 public:
+    static ArkUINativeModuleValue SetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSwiperNextMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSwiperNextMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSwiperPrevMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);

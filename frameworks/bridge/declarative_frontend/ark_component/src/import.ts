@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./ArkViewStackProcessor.ts" />
+/// <reference path="./ArkClassMock.ts" />
 
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/ability_component.d.ts" />
 /// <reference path="../../../../../../../../out/sdk/ohos-sdk/windows/ets/component/action_sheet.d.ts" />

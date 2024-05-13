@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
@@ -133,7 +134,9 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragStart(true, static_cast<float>(info.GetMainVelocity()));
+        auto speed = static_cast<float>(info.GetMainVelocity());
+        pattern->UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, speed, SceneStatus::START);
+        pattern->HandleDragStart(true, speed);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -143,7 +146,9 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragEnd(info.GetMainVelocity());
+        auto speed = static_cast<float>(info.GetMainVelocity());
+        pattern->UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, speed, SceneStatus::END);
+        pattern->HandleDragEnd(speed);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -248,6 +253,8 @@ void RefreshPattern::InitProgressColumn()
     auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
+    loadingTextLayoutProperty->UpdateMaxLines(1);
+    loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<RefreshTheme>();
@@ -395,7 +402,6 @@ bool RefreshPattern::OnKeyEvent(const KeyEvent& event)
 
 void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 {
-    UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::START);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         isSourceFromAnimation_ = !isDrag;
         ResetAnimation();
@@ -407,23 +413,20 @@ void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 
 ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 {
-    auto remain = 0.f;
     UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::RUNNING);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         // If dragging does not expand the refresh, there is no need to continue executing the code
         if (NearZero(scrollOffset_) && NonPositive(delta)) {
             return { delta, true };
         }
-        auto lastScrollOffset = scrollOffset_;
         auto pullDownRatio = CalculatePullDownRatio();
         scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, MAX_OFFSET);
-        remain = NearZero(pullDownRatio) ? delta : delta - (scrollOffset_ - lastScrollOffset) / pullDownRatio;
         if (!isSourceFromAnimation_) {
             FireOnOffsetChange(scrollOffset_);
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
                 UpdateFirstChildPlacement();
-                return { remain, true };
+                return { 0.f, true };
             }
             UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
             if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx())) || !pullToRefresh_) {
@@ -436,12 +439,11 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
     } else {
         HandleDragUpdateLowVersion(delta);
     }
-    return { remain, true };
+    return { 0.f, true };
 }
 
 void RefreshPattern::HandleDragEnd(float speed)
 {
-    UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, speed, SceneStatus::END);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SpeedTriggerAnimation(speed);
     } else {
@@ -1178,13 +1180,17 @@ bool RefreshPattern::HandleScrollVelocity(float velocity)
 
 void RefreshPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
-    if (Positive(scrollOffset_)) {
-        HandleDragEnd(velocity.value_or(0.f));
-    }
+    HandleDragEnd(velocity.value_or(0.f));
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
     if (parent && nestedScroll.NeedParent()) {
         parent->OnScrollEndRecursive(velocity);
     }
+}
+
+void RefreshPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(
+        std::string("RefreshStatus: ").append(std::to_string(static_cast<int32_t>(refreshStatus_))));
 }
 } // namespace OHOS::Ace::NG

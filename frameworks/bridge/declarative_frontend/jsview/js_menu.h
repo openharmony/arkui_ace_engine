@@ -19,6 +19,13 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 namespace OHOS::Ace::Framework {
+
+enum class SubMenuExpandingMode {
+    SIDE = 0,
+    EMBEDDED,
+    STACK
+};
+
 class JSMenu : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
@@ -28,6 +35,7 @@ public:
     static void FontColor(const JSCallbackInfo& info);
     static void SetWidth(const JSCallbackInfo& info);
     static void SetRadius(const JSCallbackInfo& info);
+    static void SetExpandingMode(const JSCallbackInfo& info);
 
 private:
     static void HandleDifferentRadius(const JSRef<JSVal>& args);

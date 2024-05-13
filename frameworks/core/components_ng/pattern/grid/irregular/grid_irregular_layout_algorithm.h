@@ -82,10 +82,8 @@ private:
 
     /**
      * @brief Check if layout states (matrix, height map) need to be reset during Init.
-     *
-     * @param lastCrossCount crossCount from the previous layout. For comparing against the current crossCount
      */
-    void CheckForReset(int32_t lastCrossCount);
+    void CheckForReset();
 
     /**
      * @brief Performs the layout of the children based on the main offset.

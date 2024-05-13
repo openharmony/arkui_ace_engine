@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,18 +17,12 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
-
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components/declaration/svg/svg_mask_declaration.h"
 
 namespace OHOS::Ace::NG {
 
-SvgMask::SvgMask() : SvgQuote()
-{
-    declaration_ = AceType::MakeRefPtr<SvgMaskDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgMask::SvgMask() : SvgQuote() {}
 
 RefPtr<SvgNode> SvgMask::Create()
 {
@@ -86,14 +80,12 @@ void SvgMask::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const
 
 void SvgMask::OnInitStyle()
 {
-    auto declaration = Ace::AceType::DynamicCast<SvgMaskDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    isDefaultMaskUnits_ = (declaration->GetMaskUnits() == "objectBoundingBox");
-    isDefaultMaskContentUnits_ = (declaration->GetMaskContentUnits() == "userSpaceOnUse");
-    x_ = declaration->GetX();
-    y_ = declaration->GetY();
-    height_ = declaration->GetHeight();
-    width_ = declaration->GetWidth();
+    isDefaultMaskUnits_ = (maskAttr_.maskUnits == "objectBoundingBox");
+    isDefaultMaskContentUnits_ = (maskAttr_.maskContentUnits == "userSpaceOnUse");
+    x_ = maskAttr_.x;
+    y_ = maskAttr_.y;
+    height_ = maskAttr_.height;
+    width_ = maskAttr_.width;
 }
 
 double SvgMask::ParseUnitsAttr(const Dimension& attr, double value)
@@ -111,4 +103,43 @@ double SvgMask::ParseUnitsAttr(const Dimension& attr, double value)
     }
     return attr.Value();
 }
+
+bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgMaskAttribute&)> attrs[] = {
+        { DOM_SVG_HEIGHT,
+            [](const std::string& val, SvgMaskAttribute& attr) {
+                attr.height = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_MASK_CONTENT_UNITS,
+            [](const std::string& val, SvgMaskAttribute& attr) {
+                attr.maskContentUnits = val;
+            } },
+        { DOM_SVG_MASK_UNITS,
+            [](const std::string& val, SvgMaskAttribute& attr) {
+                attr.maskUnits = val;
+            } },
+        { DOM_SVG_WIDTH,
+            [](const std::string& val, SvgMaskAttribute& attr) {
+                attr.width = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_X,
+            [](const std::string& val, SvgMaskAttribute& attr) {
+                attr.x = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_Y,
+            [](const std::string& val, SvgMaskAttribute& attr) {
+                attr.y = SvgAttributesParser::ParseDimension(val);
+            } },
+    };
+    std::string key = name;
+    StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, maskAttr_);
+        return true;
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

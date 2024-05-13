@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,27 +22,71 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+static const LinearMapNode<void (*)(const std::string&, SvgFeCommonAttribute&)> FE_ATTRS[] = {
+    { DOM_SVG_FE_COLOR_INTERPOLATION_FILTERS,
+        [](const std::string& val, SvgFeCommonAttribute& attr) {
+            static const LinearMapNode<SvgColorInterpolationType> COLOR_INTERPOLATION_TYPE_TABLE[] = {
+                { "auto", SvgColorInterpolationType::AUTO },
+                { "linearRGB", SvgColorInterpolationType::LINEAR_RGB },
+                { "sRGB", SvgColorInterpolationType::SRGB },
+            };
+            int64_t inIndex = BinarySearchFindIndex(
+                COLOR_INTERPOLATION_TYPE_TABLE, ArraySize(COLOR_INTERPOLATION_TYPE_TABLE), val.c_str());
+            if (inIndex != -1) {
+                attr.colorInterpolationType = COLOR_INTERPOLATION_TYPE_TABLE[inIndex].value;
+            }
+        } },
+    { DOM_SVG_HEIGHT,
+        [](const std::string& val, SvgFeCommonAttribute& attr) {
+            attr.height = SvgAttributesParser::ParseDimension(val);
+        } },
+    { DOM_SVG_FE_IN,
+        [](const std::string& val, SvgFeCommonAttribute& attr) {
+            static const LinearMapNode<SvgFeInType> IN_TABLE[] = {
+                { "BackgroundAlpha", SvgFeInType::BACKGROUND_ALPHA },
+                { "BackgroundImage", SvgFeInType::BACKGROUND_IMAGE },
+                { "FillPaint", SvgFeInType::FILL_PAINT },
+                { "SourceAlpha", SvgFeInType::SOURCE_ALPHA },
+                { "SourceGraphic", SvgFeInType::SOURCE_GRAPHIC },
+                { "StrokePaint", SvgFeInType::STROKE_PAINT },
+            };
+            int64_t inIndex = BinarySearchFindIndex(IN_TABLE, ArraySize(IN_TABLE), val.c_str());
+            if (inIndex != -1) {
+                attr.in.in = IN_TABLE[inIndex].value;
+            } else {
+                attr.in.id = val;
+            }
+        } },
+    { DOM_SVG_FE_RESULT,
+        [](const std::string& val, SvgFeCommonAttribute& attr) {
+            attr.result = val;
+        } },
+    { DOM_SVG_WIDTH,
+        [](const std::string& val, SvgFeCommonAttribute& attr) {
+            attr.width = SvgAttributesParser::ParseDimension(val);
+        } },
+    { DOM_SVG_X,
+        [](const std::string& val, SvgFeCommonAttribute& attr) {
+            attr.x = SvgAttributesParser::ParseDimension(val);
+        } },
+    { DOM_SVG_Y,
+        [](const std::string& val, SvgFeCommonAttribute& attr) {
+            attr.y = SvgAttributesParser::ParseDimension(val);
+        } },
+};
+}
 
-void InitFilterColor(const RefPtr<SvgFeDeclaration>& fe, ColorInterpolationType& currentColor)
+void InitFilterColor(const SvgFeCommonAttribute& fe, SvgColorInterpolationType& currentColor)
 {
-    CHECK_NULL_VOID(fe);
-
-    if (fe->GetIn().in == FeInType::SOURCE_GRAPHIC) {
-        currentColor = ColorInterpolationType::SRGB;
+    if (fe.in.in == SvgFeInType::SOURCE_GRAPHIC) {
+        currentColor = SvgColorInterpolationType::SRGB;
     } else {
-        currentColor = fe->GetColorInterpolationType();
+        currentColor = fe.colorInterpolationType;
     }
 }
 
-void SvgFe::OnInitStyle()
-{
-    auto declaration = Ace::AceType::DynamicCast<SvgFeDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    x_ = declaration->GetX();
-    y_ = declaration->GetY();
-    height_ = declaration->GetHeight();
-    width_ = declaration->GetWidth();
-}
+void SvgFe::OnInitStyle() {}
 
 void SvgFe::RegisterResult(const std::string& id, std::shared_ptr<RSImageFilter>& imageFilter,
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
@@ -57,63 +101,63 @@ SvgFe::SvgFe() : SvgNode()
     InitNoneFlag();
 }
 
-void SvgFe::GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, ColorInterpolationType& currentColor,
+void SvgFe::GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, SvgColorInterpolationType& currentColor,
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash,
     const Rect& effectFilterArea)
 {
-    ColorInterpolationType srcColor = currentColor;
+    SvgColorInterpolationType srcColor = currentColor;
     OnInitStyle();
-    InitFilterColor(AceType::DynamicCast<SvgFeDeclaration>(declaration_), currentColor);
+    InitFilterColor(feAttr_, currentColor);
     Rect effectFeArea = effectFilterArea;
-    if (x_.Unit() != DimensionUnit::PERCENT) {
-        effectFeArea.SetLeft(x_.Value());
+    if (feAttr_.x.Unit() != DimensionUnit::PERCENT) {
+        effectFeArea.SetLeft(feAttr_.x.Value());
     }
-    if (y_.Unit() != DimensionUnit::PERCENT) {
-        effectFeArea.SetTop(x_.Value());
+    if (feAttr_.y.Unit() != DimensionUnit::PERCENT) {
+        effectFeArea.SetTop(feAttr_.y.Value());
     }
-    effectFeArea.SetWidth(width_.ConvertToPxWithSize(effectFilterArea.Width()));
-    effectFeArea.SetHeight(height_.ConvertToPxWithSize(effectFilterArea.Height()));
+    effectFeArea.SetWidth(feAttr_.width.ConvertToPxWithSize(effectFilterArea.Width()));
+    effectFeArea.SetHeight(feAttr_.height.ConvertToPxWithSize(effectFilterArea.Height()));
     effectFilterArea_ = effectFilterArea.IntersectRect(effectFeArea);
     OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
     currentColor = srcColor;
 }
 
-void SvgFe::ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-    const ColorInterpolationType& dst)
+void SvgFe::ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter,
+    const SvgColorInterpolationType& srcColor, const SvgColorInterpolationType& dst)
 {
-    if (dst == ColorInterpolationType::LINEAR_RGB && srcColor == ColorInterpolationType::SRGB) {
+    if (dst == SvgColorInterpolationType::LINEAR_RGB && srcColor == SvgColorInterpolationType::SRGB) {
         auto colorFilter = RSRecordingColorFilter::CreateSrgbGammaToLinear();
         CHECK_NULL_VOID(colorFilter);
         imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
-    } else if (dst == ColorInterpolationType::SRGB && srcColor == ColorInterpolationType::LINEAR_RGB) {
+    } else if (dst == SvgColorInterpolationType::SRGB && srcColor == SvgColorInterpolationType::LINEAR_RGB) {
         auto colorFilter = RSRecordingColorFilter::CreateLinearToSrgbGamma();
         CHECK_NULL_VOID(colorFilter);
         imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
     }
 }
 
-std::shared_ptr<RSImageFilter> SvgFe::MakeImageFilter(const FeIn& in, std::shared_ptr<RSImageFilter>& imageFilter,
+std::shared_ptr<RSImageFilter> SvgFe::MakeImageFilter(const SvgFeIn& in, std::shared_ptr<RSImageFilter>& imageFilter,
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash)
 {
     switch (in.in) {
-        case FeInType::SOURCE_GRAPHIC:
+        case SvgFeInType::SOURCE_GRAPHIC:
             return nullptr;
-        case FeInType::SOURCE_ALPHA: {
+        case SvgFeInType::SOURCE_ALPHA: {
             RSColorMatrix m;
             m.SetScale(0, 0, 0, 1.0f);
             auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(m);
             CHECK_NULL_RETURN(colorFilter, nullptr);
             return RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, nullptr);
         }
-        case FeInType::BACKGROUND_IMAGE:
+        case SvgFeInType::BACKGROUND_IMAGE:
             break;
-        case FeInType::BACKGROUND_ALPHA:
+        case SvgFeInType::BACKGROUND_ALPHA:
             break;
-        case FeInType::FILL_PAINT:
+        case SvgFeInType::FILL_PAINT:
             break;
-        case FeInType::STROKE_PAINT:
+        case SvgFeInType::STROKE_PAINT:
             break;
-        case FeInType::PRIMITIVE:
+        case SvgFeInType::PRIMITIVE:
             if (!in.id.empty()) {
                 auto it = resultHash.find(in.id);
                 if (it != resultHash.end()) {
@@ -125,6 +169,18 @@ std::shared_ptr<RSImageFilter> SvgFe::MakeImageFilter(const FeIn& in, std::share
             break;
     }
     return imageFilter;
+}
+
+bool SvgFe::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    std::string key = name;
+    StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
+    auto attrIter = BinarySearchFindIndex(FE_ATTRS, ArraySize(FE_ATTRS), key.c_str());
+    if (attrIter != -1) {
+        FE_ATTRS[attrIter].value(value, feAttr_);
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

@@ -35,16 +35,9 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<WaterFlowLayoutProperty>();
-    if (layoutProperty->IsReverse()) {
-        if (source != SCROLL_FROM_ANIMATION_SPRING && source != SCROLL_FROM_ANIMATION_CONTROLLER &&
-            source != SCROLL_FROM_JUMP) {
-            delta = -delta;
-        }
-    }
 
     // check edgeEffect is not springEffect
-    if (!HandleEdgeEffect(delta, source, GetContentSize(), layoutProperty->IsReverse())) {
+    if (!HandleEdgeEffect(delta, source, GetContentSize())) {
         if (IsOutOfBoundary()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
@@ -76,9 +69,9 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
             delta = std::min(delta, -layoutInfo_.currentOffset_);
         }
     }
-    FireOnWillScroll(-delta);
+    auto userOffset = FireOnWillScroll(-delta);
     layoutInfo_.prevOffset_ = layoutInfo_.currentOffset_;
-    layoutInfo_.currentOffset_ += delta;
+    layoutInfo_.currentOffset_ -= userOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 };
@@ -219,6 +212,11 @@ void WaterFlowPattern::OnModifyDone()
     Register2DragDropManager();
 }
 
+void WaterFlowPattern::TriggerModifyDone()
+{
+    OnModifyDone();
+}
+
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -297,9 +295,9 @@ void WaterFlowPattern::CheckScrollable()
 {
     auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    SetScrollEnable(IsScrollable());
+    SetScrollEnabled(IsScrollable());
     if (!layoutProperty->GetScrollEnabled().value_or(IsScrollable())) {
-        SetScrollEnable(false);
+        SetScrollEnabled(false);
     }
 }
 
@@ -441,7 +439,7 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t childUpdateIdx = host->GetChildrenUpdated();
-    if (childUpdateIdx > -1 && layoutInfo_.GetSegment(childUpdateIdx) == start && sections_->IsSpecialUpdate()) {
+    if (childUpdateIdx > -1 && layoutInfo_.GetSegment(childUpdateIdx - 1) == start && sections_->IsSpecialUpdate()) {
         // optimize adding or removing children in the last section. Prevent complete reset of that section.
         ++start;
     }

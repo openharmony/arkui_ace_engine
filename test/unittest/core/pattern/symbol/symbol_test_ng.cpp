@@ -28,15 +28,18 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/symbol/constants.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "core/components_ng/pattern/symbol/symbol_model_ng.h"
+#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
-#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #undef private
 #undef protected
 
@@ -49,6 +52,8 @@ const std::uint32_t CREATE_VALUE = 983041;
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 std::uint32_t RENDER_STRATEGY = 1;
 std::uint32_t EFFECT_STRATEGY = 1;
+SymbolEffectOptions SYMBOL_EFFECT_OPTIONS =
+    SymbolEffectOptions(OHOS::Ace::SymbolEffectType::BOUNCE, OHOS::Ace::ScopeType::WHOLE, OHOS::Ace::CommonSubType::UP);
 std::vector<Color> SYMBOL_COLOR_LIST = { Color::FromRGB(255, 100, 100), Color::FromRGB(255, 255, 100) };
 
 struct TestProperty {
@@ -323,5 +328,42 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest005, TestSize.Level1)
     ASSERT_NE(symbolStyle, nullptr);
     auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
     EXPECT_EQ(textStyle.GetEffectStrategy(), EFFECT_STRATEGY);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest006
+ * @tc.desc: test symbol symbolEffect property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetSymbolEffectOptions(SYMBOL_EFFECT_OPTIONS);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get symbolEffect property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    auto symbolOptions = textStyle.GetSymbolEffectOptions().value_or(SymbolEffectOptions());
+    EXPECT_EQ(symbolOptions.GetEffectType(), OHOS::Ace::SymbolEffectType::BOUNCE);
+    EXPECT_EQ(symbolOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
+    EXPECT_EQ(symbolOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
 }
 } // namespace OHOS::Ace::NG

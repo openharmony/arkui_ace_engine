@@ -392,7 +392,6 @@ void RenderIndexerCircle::UpdateCurrentSectionItem(int32_t curSection)
     int32_t index = GetPositionItemIndex(curSection);
     double offsetAngle = -(index + 1 - collapseItemCount_) * perItemExtent_;
     offsetAngle = std::min(offsetAngle, 0.0);
-
     // make indicator box visible and item background color disabled
     if (LessNotEqual(offsetAngle, 0.0)) {
         if (focusController_ && focusController_->IsRunning()) {

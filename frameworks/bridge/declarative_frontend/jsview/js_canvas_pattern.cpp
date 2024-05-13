@@ -60,7 +60,9 @@ void JSCanvasPattern::JSSetTransform(const JSCallbackInfo& info)
 
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     TransformParam param = JSMatrix2d::GetTransformInfo(jsObj);
-
+    double density = GetDensity();
+    param.translateX *= density;
+    param.translateY *= density;
     auto canvasRenderer = canvasRenderWeak_.Upgrade();
     if (canvasRenderer) {
         canvasRenderer->SetTransform(GetId(), param);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-SvgCircle::SvgCircle() : SvgGraphic()
-{
-    declaration_ = AceType::MakeRefPtr<SvgCircleDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgCircle::SvgCircle() : SvgGraphic() {}
 
 RefPtr<SvgNode> SvgCircle::Create()
 {
@@ -37,39 +32,58 @@ RefPtr<SvgNode> SvgCircle::Create()
 SkPath SvgCircle::AsPath(const Size& viewPort) const
 {
     SkPath path;
-    auto declaration = AceType::DynamicCast<SvgCircleDeclaration>(declaration_);
-    CHECK_NULL_RETURN(declaration, path);
-    path.addCircle(ConvertDimensionToPx(declaration->GetCx(), viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(declaration->GetCy(), viewPort, SvgLengthType::VERTICAL),
-        ConvertDimensionToPx(declaration->GetR(), viewPort, SvgLengthType::OTHER));
+    path.addCircle(ConvertDimensionToPx(circleAttr_.cx, viewPort, SvgLengthType::HORIZONTAL),
+        ConvertDimensionToPx(circleAttr_.cy, viewPort, SvgLengthType::VERTICAL),
+        ConvertDimensionToPx(circleAttr_.r, viewPort, SvgLengthType::OTHER));
     return path;
 }
 #else
 RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
-    auto declaration = AceType::DynamicCast<SvgCircleDeclaration>(declaration_);
-    CHECK_NULL_RETURN(declaration, path);
-    path.AddCircle(ConvertDimensionToPx(declaration->GetCx(), viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(declaration->GetCy(), viewPort, SvgLengthType::VERTICAL),
-        ConvertDimensionToPx(declaration->GetR(), viewPort, SvgLengthType::OTHER));
+    path.AddCircle(ConvertDimensionToPx(circleAttr_.cx, viewPort, SvgLengthType::HORIZONTAL),
+        ConvertDimensionToPx(circleAttr_.cy, viewPort, SvgLengthType::VERTICAL),
+        ConvertDimensionToPx(circleAttr_.r, viewPort, SvgLengthType::OTHER));
     return path;
 }
 #endif
 
 void SvgCircle::PrepareAnimation(const RefPtr<SvgAnimation>& animate)
 {
-    auto declaration = AceType::DynamicCast<SvgCircleDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
     auto attr = animate->GetAttributeName();
     if (attr == DOM_SVG_CX) {
-        AnimateOnAttribute(animate, declaration->GetCx());
+        AnimateOnAttribute(animate, circleAttr_.cx);
     } else if (attr == DOM_SVG_CY) {
-        AnimateOnAttribute(animate, declaration->GetCy());
+        AnimateOnAttribute(animate, circleAttr_.cy);
     } else if (attr == DOM_SVG_R) {
-        AnimateOnAttribute(animate, declaration->GetR());
+        AnimateOnAttribute(animate, circleAttr_.r);
     } else {
         SvgNode::PrepareAnimation(animate);
     }
 }
+
+bool SvgCircle::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgCircleAttribute&)> attrs[] = {
+        { DOM_SVG_CX,
+            [](const std::string& val, SvgCircleAttribute& attr) {
+                attr.cx = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_CY,
+            [](const std::string& val, SvgCircleAttribute& attr) {
+                attr.cy = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_R,
+            [](const std::string& val, SvgCircleAttribute& attr) {
+                attr.r = SvgAttributesParser::ParseDimension(val);
+            } },
+    };
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), name.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, circleAttr_);
+        return true;
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

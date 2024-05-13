@@ -525,6 +525,8 @@ inline GradientDirection StrToGradientDirection(const std::string& direction)
     return index < 0 ? GradientDirection::BOTTOM : gradientDirectionTable[index].value;
 }
 
+std::string CurveIntToString(int curve);
+
 bool ParseBackgroundImagePosition(const std::string& value, BackgroundImagePosition& backgroundImagePosition);
 
 bool ParseBackgroundImageSize(const std::string& value, BackgroundImageSize& backgroundImageSize);

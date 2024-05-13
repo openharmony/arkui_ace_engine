@@ -34,6 +34,7 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
 public:                                                                      \
@@ -151,6 +152,23 @@ struct PlaceholderStyle {
     VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
     TextBaseline baseline = TextBaseline::ALPHABETIC;
 };
+
+struct CustomSpanPlaceholderInfo {
+    int32_t customSpanIndex = -1;
+    int32_t paragraphIndex = -1;
+    std::function<void(NG::DrawingContext&, CustomSpanOptions)> onDraw;
+
+    std::string ToString()
+    {
+        std::string result = "CustomPlaceholderInfo: [";
+        result += "customSpanIndex: " + std::to_string(customSpanIndex);
+        result += ", paragraphIndex: " + std::to_string(paragraphIndex);
+        result += ", onDraw: ";
+        result += !onDraw ? "nullptr" : "true";
+        result += "]";
+        return result;
+    }
+};
 struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
 
@@ -188,14 +206,14 @@ public:
     int32_t selectedEnd = -1;
     void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        PlaceholderStyle placeholderStyle = PlaceholderStyle());
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle());
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
-        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
     virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
-        const std::optional<TextStyle>& textStyle, const int32_t selStart, const int32_t selEnd);
+        const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
-        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
     virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
@@ -205,7 +223,7 @@ public:
     virtual void EndDrag();
     virtual bool IsDragging();
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
-    TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode);
+    TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode = false);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::optional<TextStyle> GetTextStyle() const
@@ -224,7 +242,7 @@ public:
     {
         resourceObject_ = resourceObject;
     }
-    void MarkNeedRemoveNewLine(bool value)
+    void SetNeedRemoveNewLine(bool value)
     {
         needRemoveNewLine = value;
     }
@@ -277,6 +295,7 @@ enum class PropertyInfo {
     FONTFEATURE,
     BASELINE_OFFSET,
     LINESPACING,
+    SYMBOL_EFFECT_OPTIONS,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -385,6 +404,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolColorList, std::vector<Color>);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
@@ -459,7 +479,7 @@ public:
     ~PlaceholderSpanItem() override = default;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        PlaceholderStyle placeholderStyle) override;
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle()) override;
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
 };
 
@@ -542,7 +562,7 @@ public:
     ~ImageSpanItem() override = default;
     PlaceholderRun run_;
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        PlaceholderStyle placeholderStyle) override;
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle()) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     void UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode);
     void SetImageSpanOptions(const ImageSpanOptions& options);

@@ -71,10 +71,14 @@ void QRCodeModifier::onDraw(DrawingContext& context)
     if (sizeInPixel == 0) {
         return;
     }
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
     auto scale = qrCodeSize / sizeInPixel;
     canvas.Save();
     canvas.Scale(scale, scale);
     canvas.DrawImage(image, paintOffset.GetX() / scale, paintOffset.GetY() / scale, RSSamplingOptions());
+    canvas.DetachBrush();
     canvas.Restore();
 }
 

@@ -49,6 +49,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            theme->symbolId_ = themeConstants->GetSymbolByName("checkmark");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -100,6 +101,11 @@ public:
     };
 
     ~MenuTheme() override = default;
+
+    uint32_t GetSymbolId() const
+    {
+        return symbolId_;
+    }
 
     int32_t GetFilterAnimationDuration() const
     {
@@ -285,6 +291,7 @@ private:
     Color innerBorderColor_ = Color::TRANSPARENT;
     Color borderColor_ = Color::TRANSPARENT;
     Dimension borderWidth_;
+    uint32_t symbolId_;
 };
 
 } // namespace OHOS::Ace::NG

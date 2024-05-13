@@ -50,7 +50,7 @@ const int32_t DEFAULT_STAR_NUM = 5;
 const int32_t RATING_STAR_NUM = 10;
 constexpr double RATING_SCORE = 3.0;
 constexpr double RATING_LAST_SCORE = 5.0;
-const std::string RATING_SCORE_STRING = "3";
+const std::string RATING_SCORE_STRING = "";
 constexpr double RATING_SCORE_2 = -2;
 constexpr double RATING_SCORE_3 = 3.5;
 constexpr double RATING_SCORE_4 = 3.0;
@@ -91,9 +91,6 @@ const int32_t INVALID_IMAGE_FLAG = 0b111;
 const std::string RATING_IMAGE_LOAD_FAILED = "ImageDataFailed";
 const std::string RATING_IMAGE_LOAD_SUCCESS = "ImageDataSuccess";
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
-const InternalResource::ResourceId FOREGROUND_IMAGE_RESOURCE_ID = InternalResource::ResourceId::RATE_STAR_BIG_ON_SVG;
-const InternalResource::ResourceId SECONDARY_IMAGE_RESOURCE_ID = InternalResource::ResourceId::RATE_STAR_BIG_OFF_SVG;
-const InternalResource::ResourceId BACKGROUND_IMAGE_RESOURCE_ID = InternalResource::ResourceId::RATE_STAR_BIG_OFF_SVG;
 const std::string RATING_FOREGROUND_IMAGE_KEY = "foregroundImageSourceInfo";
 const std::string RATING_SECONDARY_IMAGE_KEY = "secondaryImageSourceInfo";
 const std::string RATING_BACKGROUND_IMAGE_KEY = "backgroundImageSourceInfo";
@@ -108,10 +105,22 @@ public:
 void RatingTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == RatingTheme::TypeId()) {
+            return AceType::MakeRefPtr<RatingTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void RatingTestNg::TearDownTestCase()
 {
+    MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
 }
 
@@ -190,15 +199,15 @@ HWTEST_F(RatingTestNg, RatingRenderPropertyTest005, TestSize.Level1)
     rating.Create();
     rating.SetStepSize(RATING_STEP_SIZE);
     rating.SetRatingScore(RATING_SCORE);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
     ASSERT_NE(ratingRenderProperty, nullptr);
 
     // Test ratingScore and stepSize value.
     EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(0.0), RATING_STEP_SIZE);
-    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0),
-        Round(RATING_SCORE / RATING_STEP_SIZE) * RATING_STEP_SIZE);
+    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), RATING_SCORE);
+    ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**
@@ -216,9 +225,6 @@ HWTEST_F(RatingTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
     ratingTheme->starNum_ = DEFAULT_STAR_NUM;
     ratingTheme->ratingScore_ = DEFAULT_RATING_SCORE;
     ratingTheme->stepSize_ = DEFAULT_STEP_SIZE;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(ratingTheme));
     RatingModelNG rating;
     rating.Create();
     rating.SetRatingScore(RATING_SCORE_2);
@@ -233,7 +239,7 @@ HWTEST_F(RatingTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
     auto onChange = [&unknownRatingScore](const std::string& ratingScore) { unknownRatingScore = ratingScore; };
     rating.SetOnChange(onChange);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
     ASSERT_NE(ratingRenderProperty, nullptr);
@@ -245,9 +251,9 @@ HWTEST_F(RatingTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
      * @tc.expected: onChange Event will be fired, and unknownRatingScore will be assigned the correct value when it is
      * initialized for the first time.
      */
-    EXPECT_EQ(ratingLayoutProperty->GetStars().value_or(DEFAULT_STAR_NUM), DEFAULT_STAR_NUM);
-    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(DEFAULT_RATING_SCORE), DEFAULT_RATING_SCORE);
-    EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(DEFAULT_STEP_SIZE), DEFAULT_STEP_SIZE);
+    EXPECT_EQ(ratingLayoutProperty->GetStars().value_or(DEFAULT_STAR_NUM), RATING_STAR_NUM_1);
+    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(DEFAULT_RATING_SCORE), RATING_SCORE_2);
+    EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(DEFAULT_STEP_SIZE), RATING_STEP_SIZE_2);
     ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
     ratingRenderProperty->UpdateRatingScore(RATING_SCORE);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
@@ -258,7 +264,7 @@ HWTEST_F(RatingTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
      * @tc.expected: onChange Event will not be fired.
      */
     ratingPattern->lastRatingScore_ = RATING_SCORE;
-    ratingPattern->ConstrainsRatingScore();
+    ratingPattern->ConstrainsRatingScore(ratingLayoutProperty);
     EXPECT_TRUE(unknownRatingScore.empty());
 
     /**
@@ -267,13 +273,14 @@ HWTEST_F(RatingTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
      * @tc.expected: onChange Event will be fired.
      */
     ratingPattern->lastRatingScore_ = RATING_LAST_SCORE;
-    ratingPattern->ConstrainsRatingScore();
+    ratingPattern->ConstrainsRatingScore(ratingLayoutProperty);
     EXPECT_EQ(unknownRatingScore, RATING_SCORE_STRING);
+    ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**
  * @tc.name: RatingPatternGetImageSourceFromThemeTest007
- * @tc.desc: Invoke GetImageSourceInfoFromTheme and ready, success and fail callback functions.
+ * @tc.desc: success and fail callback functions.
  * @tc.type: FUNC
  */
 HWTEST_F(RatingTestNg, RatingPatternGetImageSourceFromThemeTest007, TestSize.Level1)
@@ -291,21 +298,6 @@ HWTEST_F(RatingTestNg, RatingPatternGetImageSourceFromThemeTest007, TestSize.Lev
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
 
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
-
-    const ImageSourceInfo foregroundImage = ratingPattern->GetImageSourceInfoFromTheme(RATING_FOREGROUND_FLAG);
-    const ImageSourceInfo secondaryImage = ratingPattern->GetImageSourceInfoFromTheme(RATING_SECONDARY_FLAG);
-    const ImageSourceInfo backgroundImage = ratingPattern->GetImageSourceInfoFromTheme(RATING_BACKGROUND_FLAG);
-    /**
-     * @tc.cases: case. cover branch switch imageFlag default branch.
-     */
-    const ImageSourceInfo groundImage = ratingPattern->GetImageSourceInfoFromTheme(INVALID_IMAGE_FLAG);
-
-    EXPECT_EQ(foregroundImage.GetResourceId(), FOREGROUND_IMAGE_RESOURCE_ID);
-    EXPECT_EQ(secondaryImage.GetResourceId(), SECONDARY_IMAGE_RESOURCE_ID);
-    EXPECT_EQ(backgroundImage.GetResourceId(), BACKGROUND_IMAGE_RESOURCE_ID);
     /**
      * @tc.steps: step2. Invoke CheckImageInfoHasChangedOrNot.
      */
@@ -422,9 +414,6 @@ HWTEST_F(RatingTestNg, RatingMeasureTest009, TestSize.Level1)
     ASSERT_NE(ratingLayoutAlgorithm, nullptr);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(ratingLayoutAlgorithm));
     frameNode->SetGeometryNode(geometryNode);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
 
     /**
      * @tc.steps: step3. Invoke MeasureContent when the size has not been defined.
@@ -566,21 +555,17 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
      */
     auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod1, nullptr);
-
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
     /**
      * @tc.steps: step3. 3 ImageLoadContexts carry out successfully.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .Times(::testing::AtLeast(4))
-        .WillOnce(Return(AceType::MakeRefPtr<RatingTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<RatingTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
-    ratingPattern->LoadForeground();
-    ratingPattern->LoadSecondary();
-    ratingPattern->LoadBackground();
+    ratingPattern->LoadForeground(ratingLayoutProperty, ratingTheme, iconTheme);
+    ratingPattern->LoadSecondary(ratingLayoutProperty, ratingTheme, iconTheme);
+    ratingPattern->LoadBackground(ratingLayoutProperty, ratingTheme, iconTheme);
     ASSERT_NE(ratingPattern->foregroundImageLoadingCtx_, nullptr);
     ASSERT_NE(ratingPattern->secondaryImageLoadingCtx_, nullptr);
     ASSERT_NE(ratingPattern->backgroundImageLoadingCtx_, nullptr);
@@ -608,18 +593,12 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
      * @tc.steps: case. when new 3 image load successfully and imageSuccessStateCode_ is 0b111 in the above situation
      * @tc.expected: ratingModifier will update new CanvasImage and Image Uri.
      */
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .Times(::testing::AtLeast(4))
-        .WillOnce(Return(AceType::MakeRefPtr<RatingTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<RatingTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
     rating.SetBackgroundSrc("", true);
     rating.SetForegroundSrc(RATING_SVG_URL, false);
     rating.SetSecondarySrc(RATING_SECONDARY_URL, false);
-    ratingPattern->LoadBackground();
-    ratingPattern->LoadForeground();
-    ratingPattern->LoadSecondary();
+    ratingPattern->LoadBackground(ratingLayoutProperty, ratingTheme, iconTheme);
+    ratingPattern->LoadForeground(ratingLayoutProperty, ratingTheme, iconTheme);
+    ratingPattern->LoadSecondary(ratingLayoutProperty, ratingTheme, iconTheme);
     EXPECT_FALSE(ratingPattern->secondaryConfig_.isSvg_);
     EXPECT_TRUE(ratingPattern->backgroundConfig_.isSvg_);
     EXPECT_TRUE(ratingPattern->foregroundConfig_.isSvg_);
@@ -774,9 +753,6 @@ HWTEST_F(RatingTestNg, RatingPatternTest014, TestSize.Level1)
  */
 HWTEST_F(RatingTestNg, RatingMeasureTest013, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
     /**
      * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
      * add contentModifierNode for fitting new builder
@@ -836,9 +812,6 @@ HWTEST_F(RatingTestNg, RatingOnChangeEventTest001, TestSize.Level1)
     ratingTheme->starNum_ = DEFAULT_STAR_NUM;
     ratingTheme->ratingScore_ = DEFAULT_RATING_SCORE;
     ratingTheme->stepSize_ = DEFAULT_STEP_SIZE;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(ratingTheme));
 
     RatingModelNG rating;
     rating.Create();
@@ -868,7 +841,7 @@ HWTEST_F(RatingTestNg, RatingTestNg001, TestSize.Level1)
     rating.SetRatingScore(RATING_SCORE);
     rating.SetStars(RATING_STAR_NUM);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto ratingAccessibilityProperty = frameNode->GetAccessibilityProperty<RatingAccessibilityProperty>();
@@ -877,6 +850,7 @@ HWTEST_F(RatingTestNg, RatingTestNg001, TestSize.Level1)
     EXPECT_EQ(ratingAccessibilityProperty->GetAccessibilityValue().current, RATING_SCORE);
     EXPECT_EQ(ratingAccessibilityProperty->GetAccessibilityValue().max, RATING_STAR_NUM);
     EXPECT_EQ(ratingAccessibilityProperty->GetAccessibilityValue().min, 0);
+    ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**
@@ -890,13 +864,13 @@ HWTEST_F(RatingTestNg, RatingTestNg002, TestSize.Level1)
     rating.Create();
     rating.SetRatingScore(RATING_SCORE);
     rating.SetStars(RATING_STAR_NUM);
-
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
     auto ratingAccessibilityProperty = frameNode->GetAccessibilityProperty<RatingAccessibilityProperty>();
     ASSERT_NE(ratingAccessibilityProperty, nullptr);
     EXPECT_EQ(ratingAccessibilityProperty->GetText(), std::to_string(RATING_SCORE));
+    ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**
@@ -922,9 +896,6 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
      * @tc.steps: step2. Invoke OnImageLoadSuccess to initialize image canvas.
      * @tc.expected: image canvas is not nullptr.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
     ratingPattern->OnImageLoadSuccess(RATING_FOREGROUND_FLAG);
     ratingPattern->OnImageLoadSuccess(RATING_SECONDARY_FLAG);
     ratingPattern->OnImageLoadSuccess(RATING_BACKGROUND_FLAG);

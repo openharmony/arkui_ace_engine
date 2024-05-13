@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,6 @@ namespace OHOS::Ace::NG {
 
 SvgLine::SvgLine() : SvgGraphic()
 {
-    declaration_ = AceType::MakeRefPtr<SvgLineDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
     InitGraphicFlag();
 }
 
@@ -49,14 +46,40 @@ SkPath SvgLine::AsPath(const Size& viewPort) const
 RSRecordingPath SvgLine::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
-    auto declaration = AceType::DynamicCast<SvgLineDeclaration>(declaration_);
-    CHECK_NULL_RETURN(declaration, path);
-    path.MoveTo(ConvertDimensionToPx(declaration->GetX1(), viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(declaration->GetY1(), viewPort, SvgLengthType::VERTICAL));
-    path.LineTo(ConvertDimensionToPx(declaration->GetX2(), viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(declaration->GetY2(), viewPort, SvgLengthType::VERTICAL));
+    path.MoveTo(ConvertDimensionToPx(lineAttr_.x1, viewPort, SvgLengthType::HORIZONTAL),
+        ConvertDimensionToPx(lineAttr_.y1, viewPort, SvgLengthType::VERTICAL));
+    path.LineTo(ConvertDimensionToPx(lineAttr_.x2, viewPort, SvgLengthType::HORIZONTAL),
+        ConvertDimensionToPx(lineAttr_.y2, viewPort, SvgLengthType::VERTICAL));
     return path;
 }
 #endif
+
+bool SvgLine::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgLineAttribute&)> attrs[] = {
+        { DOM_SVG_X1,
+            [](const std::string& val, SvgLineAttribute& attr) {
+                attr.x1 = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_X2,
+            [](const std::string& val, SvgLineAttribute& attr) {
+                attr.x2 = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_Y1,
+            [](const std::string& val, SvgLineAttribute& attr) {
+                attr.y1 = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_Y2,
+            [](const std::string& val, SvgLineAttribute& attr) {
+                attr.y2 = SvgAttributesParser::ParseDimension(val);
+            } },
+    };
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), name.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, lineAttr_);
+        return true;
+    }
+    return false;
+}
 
 } // namespace OHOS::Ace::NG

@@ -172,18 +172,12 @@ void TabBarPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
-    auto paintProperty = DynamicCast<TabBarPaintProperty>(paintWrapper->GetPaintProperty());
-    if (paintProperty) {
-        RectF rect;
-        auto indicator = paintProperty->GetIndicator().value_or(rect);
-        indicator.SetLeft(currentIndicatorOffset_ - indicatorStyle_.width.ConvertToPx() / 2);
-        tabBarModifier_->SetIndicator(indicator);
-    }
+    tabBarModifier_->SetIndicatorOffset(indicatorOffset_);
     tabBarModifier_->SetIndicatorColor(LinearColor(indicatorStyle_.color));
     tabBarModifier_->SetIndicatorHeight(indicatorStyle_.height.ConvertToPx());
     tabBarModifier_->SetIndicatorWidth(indicatorStyle_.width.ConvertToPx());
     tabBarModifier_->SetIndicatorBorderRadius(indicatorStyle_.borderRadius.ConvertToPx());
     tabBarModifier_->SetIndicatorMarginTop(indicatorStyle_.marginTop.ConvertToPx());
-    tabBarModifier_->SetSelectedMode(selectedMode_);
+    tabBarModifier_->SetHasIndicator(hasIndicator_);
 }
 } // namespace OHOS::Ace::NG

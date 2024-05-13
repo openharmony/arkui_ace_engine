@@ -43,8 +43,7 @@ void UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
     CHECK_NULL_VOID(row);
     auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
     row->MarkModifyDone();
     row->MarkDirtyNode();
 }
@@ -507,13 +506,31 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
     buttonEvent->SetEnabled(isEnabled);
 }
 
+void ContainerModalPattern::UpdateGestureRowVisible()
+{
+    auto gestureRow = GetGestureRow();
+    CHECK_NULL_VOID(gestureRow);
+    auto customTitleRow = GetCustomTitleRow();
+    CHECK_NULL_VOID(customTitleRow);
+    auto buttonsRow = GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    auto gestureRowProp = gestureRow->GetLayoutProperty();
+    auto customTitleRowProp = customTitleRow->GetLayoutProperty();
+    auto buttonsRowProp = buttonsRow->GetLayoutProperty();
+    if (customTitleRowProp->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE &&
+        buttonsRowProp->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+        gestureRowProp->UpdateVisibility(VisibleType::VISIBLE);
+    } else {
+        gestureRowProp->UpdateVisibility(VisibleType::GONE);
+    }
+}
+
 void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
     customTitleSettedShow_ = customTitleSettedShow;
     auto customTitleRow = GetCustomTitleRow();
     CHECK_NULL_VOID(customTitleRow);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
-    CHECK_NULL_VOID(customTitleLayoutProperty);
     auto containerModalLayoutProperty = GetHost()->GetLayoutProperty();
     PaddingProperty padding;
     if (customTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
@@ -541,11 +558,7 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     auto buttonsRow = GetControlButtonRow();
     CHECK_NULL_VOID(buttonsRow);
     buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
-    auto gestureRow = GetGestureRow();
-    CHECK_NULL_VOID(gestureRow);
-    auto gestureRowProp = gestureRow->GetLayoutProperty();
-    auto customVisible = customTitleLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
-    gestureRowProp->UpdateVisibility(customVisible == VisibleType::VISIBLE ? VisibleType::GONE : VisibleType::VISIBLE);
+    UpdateGestureRowVisible();
 }
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)

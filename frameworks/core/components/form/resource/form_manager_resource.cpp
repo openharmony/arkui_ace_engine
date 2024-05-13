@@ -94,7 +94,7 @@ void FormManagerResource::CallResRegisterMethod(
         if (callback) {
             callback(result);
         }
-    }, "ArkUIFormCallResRegister");
+    }, "ArkUIFormCallResRegisterMethod");
 }
 
 int32_t FormManagerResource::GetIntParam(const std::string& param, const std::string& name) const

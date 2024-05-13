@@ -56,6 +56,15 @@ public:
     {
         return damping_;
     }
+    bool IsEqual(const RefPtr<Curve>& curve) const override
+    {
+        auto other = DynamicCast<SpringCurve>(curve);
+        if (!other) {
+            return false;
+        }
+        return NearEqual(other->GetCurrentVelocity(), velocity_) && NearEqual(other->GetMass(), mass_) &&
+               NearEqual(other->GetStiffness(), stiffness_) && NearEqual(other->GetDamping(), damping_);
+    }
 
 private:
     void SetEndPosition(float endPosition, float startVelocity);

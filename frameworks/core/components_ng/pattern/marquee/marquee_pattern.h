@@ -82,6 +82,7 @@ public:
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnColorConfigurationUpdate() override;
     void DumpInfo() override;
+    void OnVisibleChange(bool isVisible) override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -97,8 +98,6 @@ private:
     void StartMarqueeAnimation();
     void StopMarqueeAnimation(bool stopAndStart);
     void SetTextOffset(float offsetX);
-    void RegistVisibleAreaChangeCallback();
-    void OnVisibleAreaChange(bool visible);
     bool OnlyPlayStatusChange();
     void ChangeAnimationPlayStatus();
     void StoreProperties();

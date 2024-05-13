@@ -214,4 +214,15 @@ void ParallelRecognizer::CleanRecognizerState()
     }
     currentBatchRecognizer_ = nullptr;
 }
+
+void ParallelRecognizer::ForceCleanRecognizer()
+{
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->ForceCleanRecognizer();
+        }
+    }
+    MultiFingersRecognizer::ForceCleanRecognizer();
+    currentBatchRecognizer_ = nullptr;
+}
 } // namespace OHOS::Ace::NG

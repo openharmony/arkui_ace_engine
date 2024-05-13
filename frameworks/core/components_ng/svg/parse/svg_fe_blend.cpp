@@ -24,48 +24,86 @@ RefPtr<SvgNode> SvgFeBlend::Create()
     return AceType::MakeRefPtr<SvgFeBlend>();
 }
 
-SvgFeBlend::SvgFeBlend() : SvgFe()
-{
-    declaration_ = AceType::MakeRefPtr<SvgFeBlendDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgFeBlend::SvgFeBlend() : SvgFe() {}
 
-RSBlendMode SvgFeBlend::GetBlendMode(FeBlendMode mode) const
+RSBlendMode SvgFeBlend::GetBlendMode(SvgFeBlendMode mode) const
 {
     switch (mode) {
-        case FeBlendMode::NORMAL:
+        case SvgFeBlendMode::NORMAL:
             return RSBlendMode::SRC_OVER;
-        case FeBlendMode::MULTIPLY:
+        case SvgFeBlendMode::MULTIPLY:
             return RSBlendMode::MULTIPLY;
-        case FeBlendMode::SCREEN:
+        case SvgFeBlendMode::SCREEN:
             return RSBlendMode::SCREEN;
-        case FeBlendMode::DARKEN:
+        case SvgFeBlendMode::DARKEN:
             return RSBlendMode::DARKEN;
-        case FeBlendMode::LIGHTEN:
+        case SvgFeBlendMode::LIGHTEN:
             return RSBlendMode::LIGHTEN;
         default:
             return RSBlendMode::SRC_OVER;
     };
 }
 
-void SvgFeBlend::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-    ColorInterpolationType& currentColor,
+void SvgFeBlend::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
+    const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
-    auto declaration = AceType::DynamicCast<SvgFeBlendDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    auto blendMode = declaration->GetBlendMode();
+    auto blendMode = feBlendAttr_.blendMode;
 
-    auto backImageFilter = MakeImageFilter(declaration->GetIn2(), imageFilter, resultHash);
-    auto foreImageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
+    auto backImageFilter = MakeImageFilter(feBlendAttr_.in2, imageFilter, resultHash);
+    auto foreImageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
     ConverImageFilterColor(foreImageFilter, srcColor, currentColor);
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
 
     imageFilter =
         RSRecordingImageFilter::CreateBlendImageFilter(GetBlendMode(blendMode), backImageFilter, foreImageFilter);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
-    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
+    RegisterResult(feAttr_.result, imageFilter, resultHash);
+}
+
+bool SvgFeBlend::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgFeBlendAttribute&)> attrs[] = {
+        { DOM_SVG_FE_IN2,
+            [](const std::string& val, SvgFeBlendAttribute& attr) {
+                static const LinearMapNode<SvgFeInType> IN_TABLE[] = {
+                    { "BackgroundAlpha", SvgFeInType::BACKGROUND_ALPHA },
+                    { "BackgroundImage", SvgFeInType::BACKGROUND_IMAGE },
+                    { "FillPaint", SvgFeInType::FILL_PAINT },
+                    { "SourceAlpha", SvgFeInType::SOURCE_ALPHA },
+                    { "SourceGraphic", SvgFeInType::SOURCE_GRAPHIC },
+                    { "StrokePaint", SvgFeInType::STROKE_PAINT },
+                };
+                int64_t inIndex = BinarySearchFindIndex(IN_TABLE, ArraySize(IN_TABLE), val.c_str());
+                if (inIndex != -1) {
+                    attr.in2.in = IN_TABLE[inIndex].value;
+                } else {
+                    attr.in2.id = val;
+                }
+            } },
+        { DOM_SVG_FE_MODE,
+            [](const std::string& val, SvgFeBlendAttribute& attr) {
+                static const LinearMapNode<SvgFeBlendMode> EDGE_MODE_TABLE[] = {
+                    { "darken", SvgFeBlendMode::DARKEN },
+                    { "lighten", SvgFeBlendMode::LIGHTEN },
+                    { "multiply", SvgFeBlendMode::MULTIPLY },
+                    { "normal", SvgFeBlendMode::NORMAL },
+                    { "screen", SvgFeBlendMode::SCREEN }
+                };
+                int64_t inIndex = BinarySearchFindIndex(EDGE_MODE_TABLE, ArraySize(EDGE_MODE_TABLE), val.c_str());
+                if (inIndex != -1) {
+                    attr.blendMode = EDGE_MODE_TABLE[inIndex].value;
+                }
+            } },
+    };
+    std::string key = name;
+    StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, feBlendAttr_);
+        return true;
+    }
+    return SvgFe::ParseAndSetSpecializedAttr(name, value);
 }
 
 } // namespace OHOS::Ace::NG

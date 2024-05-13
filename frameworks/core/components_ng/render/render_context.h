@@ -56,6 +56,16 @@ class FrameNode;
 class InspectorFilter;
 class Modifier;
 
+struct PaintFocusExtraInfo final {
+    PaintFocusExtraInfo() = default;
+    PaintFocusExtraInfo(bool isAccessibilityFocus, bool isFocusBoxGlow)
+        : isAccessibilityFocus(isAccessibilityFocus), isFocusBoxGlow(isFocusBoxGlow)
+    {}
+    ~PaintFocusExtraInfo() = default;
+    bool isAccessibilityFocus { false };
+    bool isFocusBoxGlow { false };
+};
+
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
@@ -100,9 +110,13 @@ public:
 
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
 
+    virtual void SyncGeometryPropertiesWithoutAnimation(
+        GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0)
+    {}
+
     virtual void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) {}
 
-    virtual void SyncGeometryProperties(const RectF& rectF) {}
+    virtual void SyncGeometryProperties(const RectF& rectF, bool isSkipFrameTransition = false) {}
 
     virtual void SetBorderRadius(const BorderRadiusProperty& value) {}
 
@@ -181,14 +195,15 @@ public:
 
     // Paint focus state by component's setting. It will paint along the paintRect
     virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
-        bool isAccessibilityFocus = false)
+        bool isAccessibilityFocus = false, bool isFocusBoxGlow = false)
     {}
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth, bool isAccessibilityFocus = false)
+        const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo)
     {}
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
-    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth,
+        bool isFocusBoxGlow = false)
     {}
 
     virtual void ClearFocusState() {}
@@ -303,6 +318,7 @@ public:
 
     virtual void SavePaintRect(bool isRound = true, uint8_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
+    virtual void UpdatePaintRect(const RectF& paintRect) {}
 
     virtual std::pair<RectF, bool> GetPaintRectWithTranslate()
     {
@@ -319,6 +335,8 @@ public:
     virtual void GetPointWithTransform(PointF& point) {}
 
     virtual void GetPointTransform(PointF& point) {}
+
+    virtual void GetPointTransformRotate(PointF& point) {}
 
     virtual RectF GetPaintRectWithoutTransform()
     {
@@ -422,6 +440,7 @@ public:
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
+    virtual void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) {}
     virtual void SetAlphaOffscreen(bool isOffScreen) {}
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
@@ -445,6 +464,12 @@ public:
         return nullptr;
     }
     virtual void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) {}
+
+    virtual bool CreateThumbnailPixelMapAsyncTask(
+        bool needScale, std::function<void(const RefPtr<PixelMap>)>&& callback)
+    {
+        return false;
+    }
 
     virtual void SetActualForegroundColor(const Color& value) {}
 
@@ -489,6 +514,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundEffect, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicRangeMode, DynamicRangeMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
 
     // CustomBackground
@@ -699,8 +725,8 @@ protected:
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
     virtual void OnDynamicLightUpRateUpdate(const float rate) {}
     virtual void OnDynamicLightUpDegreeUpdate(const float degree) {}
-    virtual void OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) {}
-    virtual void OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) {}
+    virtual void OnBgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) {}
+    virtual void OnFgDynamicBrightnessOptionUpdate(const std::optional<BrightnessOption>& brightnessOption) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
     virtual void OnBackBlendModeUpdate(BlendMode blendMode) {}
     virtual void OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType) {}

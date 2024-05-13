@@ -55,6 +55,7 @@
 #include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
+#include "core/interfaces/native/node/node_relative_container_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_span_modifier.h"
@@ -81,6 +82,7 @@
 #include "core/interfaces/native/node/rich_editor_modifier.h"
 #include "core/interfaces/native/node/row_modifier.h"
 #include "core/interfaces/native/node/row_split_modifier.h"
+#include "core/interfaces/native/node/scroller_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/select_modifier.h"
 #include "core/interfaces/native/node/shape_modifier.h"
@@ -207,7 +209,7 @@ const ArkUINodeModifiers impl = {
 #endif
     NodeModifier::GetFlexModifier, // FlexModifier
     nullptr, // ScrollBarModifier
-    nullptr, // ScrollerModifier
+    NodeModifier::GetScrollerModifier,
     nullptr, // TabContentModifier
     nullptr, // TabsControllerModifier
     nullptr, // SwiperControllerModifier
@@ -223,6 +225,7 @@ const ArkUINodeModifiers impl = {
     nullptr, // TextClockControllerModifier
     nullptr, // RichEditorControllerModifier
     nullptr, // TextAreaControllerModifier
+    NodeModifier::GetRelativeContainerModifier, // RelativeContainerModifier
     NodeModifier::GetParticleModifier,
     NodeModifier::GetNodeContentModifier,
     NodeModifier::GetSymbolGlyphModifier,

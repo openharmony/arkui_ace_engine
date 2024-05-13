@@ -65,5 +65,13 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("bindMenu", jsonDashArray, filter);
 
     json->PutExtAttr("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false", filter);
+    
+    auto expandingMode = "SubMenuExpandingMode.SIDE";
+    if (propExpandingMode_ == SubMenuExpandingMode::EMBEDDED) {
+        expandingMode = "SubMenuExpandingMode.EMBEDDED";
+    } else if (propExpandingMode_ == SubMenuExpandingMode::STACK) {
+        expandingMode = "SubMenuExpandingMode.STACK";
+    }
+    json->Put("subMenuExpandingMode", expandingMode);
 }
 } // namespace OHOS::Ace::NG

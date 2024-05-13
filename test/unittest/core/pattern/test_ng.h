@@ -194,6 +194,19 @@ public:
     {
         return GetChildRect(frameNode, index).Height();
     }
+
+    ElementIdType GetElmtId()
+    {
+        elmtId_++;
+        return elmtId_;
+    }
+
+    void ResetElmtId()
+    {
+        elmtId_ = ElementRegister::UndefinedElementId;
+    }
+
+    ElementIdType elmtId_ = ElementRegister::UndefinedElementId;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_PATTERN_H

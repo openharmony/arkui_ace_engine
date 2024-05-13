@@ -38,6 +38,7 @@ public:
     void SetLabelFontColor(const std::optional<Color>& color) override;
     void SetLabelFontFamily(const std::vector<std::string> &families) override;
     void SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent) override;
+    void SetSelectIconSymbol(std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply) override;
 
     static void SetSelected(FrameNode* frameNode, bool isSelected = false);
     static void SetLabelFontColor(FrameNode* frameNode, const std::optional<Color>& color);
@@ -52,6 +53,12 @@ public:
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle style);
     static void SetSelectIcon(FrameNode* frameNode, bool isShow = false);
     static void SetSelectIconSrc(FrameNode* frameNode, const std::string& src);
+    static void SetSelectIconSymbol(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply);
+
+private:
+    void UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps);
+    void AddExpandableAreaView(RefPtr<FrameNode> menuItem);
+    void AddClickableAreaView(RefPtr<FrameNode> menuItem, BorderRadiusProperty border);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MODEL_NG_H

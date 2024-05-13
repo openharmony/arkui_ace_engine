@@ -716,9 +716,11 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetAdaptiveWidth(ArkUIRuntimeCallI
     CalcDimension width;
     ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, width);
     if (width.Unit() == DimensionUnit::AUTO) {
+        CommonBridge::SetWidth(runtimeCallInfo);
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAdaptiveWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     } else {
+        CommonBridge::SetWidth(runtimeCallInfo);
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAdaptiveWidth(nativeNode);
     }
     CommonBridge::SetWidth(runtimeCallInfo);
@@ -730,6 +732,9 @@ ArkUINativeModuleValue AlphabetIndexerBridge::ResetAdaptiveWidth(ArkUIRuntimeCal
     CommonBridge::ResetWidth(runtimeCallInfo);
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAdaptiveWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

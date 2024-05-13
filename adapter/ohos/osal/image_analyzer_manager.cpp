@@ -18,6 +18,7 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "js_native_api_types.h"
 
+#include "base/geometry/offset.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/image_analyzer_adapter.h"
@@ -35,15 +36,23 @@ ImageAnalyzerManager::ImageAnalyzerManager(const RefPtr<NG::FrameNode>& frameNod
     imageAnalyzerAdapter_ = std::shared_ptr<ImageAnalyzerAdapter>(CreateImageAnalyzerAdapter());
 }
 
-void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap)
+void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    const NG::OffsetF& offset)
 {
     CHECK_NULL_VOID(pixelMap);
     CHECK_NULL_VOID(imageAnalyzerAdapter_);
     auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
 
-    if (holder_ == ImageAnalyzerHolder::CANVAS) {
+    analyzerUIConfig_.holder = holder_;
+    if (holder_ != ImageAnalyzerHolder::IMAGE) {
         analyzerUIConfig_.contentWidth = pixelMap->GetWidth();
         analyzerUIConfig_.contentHeight = pixelMap->GetHeight();
+    }
+
+    if (holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
+        analyzerUIConfig_.pixelMapWidth = pixelMap->GetWidth();
+        analyzerUIConfig_.pixelMapHeight = pixelMap->GetHeight();
+        analyzerUIConfig_.overlayOffset = offset;
     }
 
     RefPtr<NG::UINode> customNode;
@@ -91,7 +100,7 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     }
 
     CHECK_NULL_VOID(pixelMap);
-    if (holder_ == ImageAnalyzerHolder::CANVAS) {
+    if (holder_ != ImageAnalyzerHolder::IMAGE) {
         analyzerUIConfig_.contentWidth = pixelMap->GetWidth();
         analyzerUIConfig_.contentHeight = pixelMap->GetHeight();
     }
@@ -169,12 +178,14 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
     CHECK_NULL_VOID(overlayLayoutProperty);
     overlayLayoutProperty->UpdateMeasureType(NG::MeasureType::MATCH_PARENT);
     overlayLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    if (holder_ == ImageAnalyzerHolder::IMAGE) {
+    if (holder_ == ImageAnalyzerHolder::IMAGE || holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
         overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()),
                                                 Dimension(padding.Offset().GetY()));
-        auto renderContext = overlayNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->SetRenderFrameOffset({ -padding.Offset().GetX(), -padding.Offset().GetY() });
+        if (holder_ == ImageAnalyzerHolder::IMAGE) {
+            auto renderContext = overlayNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->SetRenderFrameOffset({ -padding.Offset().GetX(), -padding.Offset().GetY() });
+        }
     }
     overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }

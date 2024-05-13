@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "include/core/SkImageFilter.h"
 
+#include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_declaration.h"
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
 
@@ -36,28 +37,27 @@ public:
     void RegisterResult(const std::string& id, std::shared_ptr<RSImageFilter>& imageFilter,
         std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const;
 
-    static void ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& src,
-        const ColorInterpolationType& dst);
+    static void ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter,
+        const SvgColorInterpolationType& src, const SvgColorInterpolationType& dst);
 
-    static std::shared_ptr<RSImageFilter> MakeImageFilter(const FeIn& in,
+    static std::shared_ptr<RSImageFilter> MakeImageFilter(const SvgFeIn& in,
         std::shared_ptr<RSImageFilter>& imageFilter,
         std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash);
 
-    void GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, ColorInterpolationType& currentColor,
+    void GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, SvgColorInterpolationType& currentColor,
         std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash,
         const Rect& effectFilterArea = {});
 
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+
 protected:
-    virtual void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-        ColorInterpolationType& currentColor,
+    virtual void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const SvgColorInterpolationType& srcColor,
+        SvgColorInterpolationType& currentColor,
         std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
     {}
 
-    Dimension x_;
-    Dimension y_;
-    Dimension height_;
-    Dimension width_;
     Rect effectFilterArea_;
+    SvgFeCommonAttribute feAttr_;
 };
 
 } // namespace OHOS::Ace::NG

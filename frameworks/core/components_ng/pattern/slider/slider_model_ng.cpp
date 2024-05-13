@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 
+#include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
@@ -104,6 +106,13 @@ void SliderModelNG::SetMinResponsiveDistance(float value)
     }
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, MinResponsiveDistance, minResponse);
 }
+
+void SliderModelNG::SetValidSlideRange(float from, float to)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SliderModelNG::SetValidSlideRange(frameNode, from, to);
+}
+
 void SliderModelNG::SetShowSteps(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, ShowSteps, value);
@@ -287,6 +296,11 @@ void SliderModelNG::ResetSliderInteractionMode()
 void SliderModelNG::ResetMinResponsiveDistance()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, MinResponsiveDistance, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetValidSlideRange()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, ValidSlideRange, PROPERTY_UPDATE_RENDER);
 }
 
 void SliderModelNG::SetShowTips(FrameNode* frameNode, bool value, const std::optional<std::string>& content)
@@ -473,6 +487,11 @@ void SliderModelNG::ResetBlockImage(FrameNode* frameNode)
         SliderPaintProperty, BlockImageModuleName, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
+void SliderModelNG::ResetValidSlideRange(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, ValidSlideRange, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
 RefPtr<FrameNode> SliderModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -529,6 +548,41 @@ void SliderModelNG::SetReverse(FrameNode* frameNode, bool value)
 void SliderModelNG::SetStep(FrameNode* frameNode, float value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Step, value, frameNode);
+}
+
+void SliderModelNG::SetValidSlideRange(FrameNode* frameNode, float from, float to)
+{
+    if (std::isnan(from) || std::isnan(to)) {
+        return SliderModelNG::ResetValidSlideRange(frameNode);
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto minValue = paintProperty->GetMinValue(0.0f);
+    auto maxValue = paintProperty->GetMaxValue(100.0f);
+    auto step = paintProperty->GetStepValue(1.0f);
+    float fromValue = minValue;
+    float toValue = maxValue;
+    if (std::isfinite(from)) {
+        fromValue = from;
+    }
+    if (std::isfinite(to)) {
+        toValue = to;
+    }
+    if (GreatOrEqual(fromValue, minValue) && LessOrEqual(toValue, maxValue) && LessOrEqual(fromValue, toValue) &&
+        GreatNotEqual(step, 0.0f)) {
+        auto toValueCorrection = NearEqual(toValue - step * std::floor(toValue / step), 0) ? 0 : 1;
+        fromValue = LessOrEqual(fromValue, minValue) ? minValue : std::floor(fromValue / step) * step;
+        toValue = GreatOrEqual(toValue, maxValue) ?
+                  maxValue : (std::floor(toValue / step) + toValueCorrection) * step;
+        auto sliderValue = std::clamp(paintProperty->GetValueValue(fromValue), fromValue, toValue);
+        RefPtr<SliderModel::SliderValidRange> rangeValue =
+            AceType::MakeRefPtr<SliderModel::SliderValidRange>(fromValue, toValue);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Value, sliderValue, frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, ValidSlideRange, rangeValue, frameNode);
+    } else {
+        SliderModelNG::ResetValidSlideRange(frameNode);
+    }
 }
 
 Color SliderModelNG::GetBlockColor(FrameNode* frameNode)
@@ -667,4 +721,28 @@ void SliderModelNG::SetChangeValue(FrameNode* frameNode, double value, int32_t m
     pattern->SetSliderValue(value, mode);
 }
 
+Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
+{
+    Dimension defaultTrackThickness = Dimension(0.0f);
+    CHECK_NULL_RETURN(frameNode, defaultTrackThickness);
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, defaultTrackThickness);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, defaultTrackThickness);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, defaultTrackThickness);
+    auto sliderMode = layoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
+    if (sliderMode == SliderModel::SliderMode::OUTSET) {
+        defaultTrackThickness = theme->GetOutsetTrackThickness();
+    } else if (sliderMode == SliderModel::SliderMode::INSET) {
+        defaultTrackThickness = theme->GetInsetTrackThickness();
+    } else {
+        defaultTrackThickness = theme->GetNoneTrackThickness();
+    }
+
+    Dimension trackThickness = Dimension(0.0f);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderLayoutProperty, Thickness, trackThickness, frameNode, defaultTrackThickness);
+    return trackThickness;
+}
 } // namespace OHOS::Ace::NG

@@ -24,6 +24,7 @@ interface RepeatItem<T> {
 
 type RepeatItemGenFunc<T> = (i: RepeatItem<T>) => void;
 type RepeatKeyGenFunc<T> = (item: T, index?: number) => string;
+type OnMoveHandler = (from: number, to: number) => void;
 
 /*
     global function Repeat()
@@ -45,6 +46,7 @@ interface RepeatAPI<T> {
     each: (itemGenFunc: RepeatItemGenFunc<T>) => RepeatAPI<T>;  // chainable, call in this order
     key: (keyGenFunc: RepeatKeyGenFunc<T>) => RepeatAPI<T>;
     virtualScroll: () => RepeatAPI<T>;
+    onMove: (handler: OnMoveHandler) => RepeatAPI<T>;
 
     // do NOT use in app, transpiler adds as last of chained call
     render(isInitialRender: boolean): void;       

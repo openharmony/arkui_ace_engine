@@ -123,7 +123,7 @@ public:
         overlayRenderContext_ = overlayRenderContext;
     }
 
-    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading)
+    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading = 0.0f)
     {
         isFadingTop_ = isFadingTop;
         isFadingBottom_ = isFadingBottom;

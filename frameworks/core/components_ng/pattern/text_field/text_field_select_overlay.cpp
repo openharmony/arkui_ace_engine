@@ -37,6 +37,7 @@ namespace OHOS::Ace::NG {
 namespace {
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
+constexpr int32_t REQUEST_SELECT_ALL = 1 << 1;
 } // namespace
 
 bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -54,16 +55,17 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
             "The selection menu is not displayed cause Font size is zero or selectionMenuHidden is true");
         return false;
     }
-    UpdatePattern();
+    UpdatePattern(request);
     CHECK_NULL_RETURN(!pattern->IsTransparent(), false);
     pattern->ShowSelect();
     return true;
 }
 
-void TextFieldSelectOverlay::UpdatePattern()
+void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    auto isRequestSelectAll = (request.requestCode & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
     auto selectController = pattern->GetTextSelectController();
     selectController->CalculateHandleOffset();
     if (pattern->IsSelected() && selectController->IsHandleSamePosition()) {
@@ -71,7 +73,7 @@ void TextFieldSelectOverlay::UpdatePattern()
         selectController->UpdateCaretIndex(selectController->GetFirstHandleIndex());
         selectController->UpdateCaretOffset();
         selectController->MoveCaretToContentRect(selectController->GetCaretIndex());
-    } else if (!IsSingleHandle()) {
+    } else if (!IsSingleHandle() && !isRequestSelectAll) {
         auto rects = pattern->GetTextBoxes();
         if (!rects.empty() && NearEqual(rects.size(), 1) && NearZero(rects[0].Width())) {
             SetIsSingleHandle(true);
@@ -96,11 +98,16 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     latestReqeust_.reset();
 }
 
-void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
+void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     CloseMagnifier();
     if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
         OnResetTextSelection();
+        if (info && info->CanBackPressed()) {
+            pattern->OnBackPressed();
+        }
     }
 }
 
@@ -315,7 +322,7 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
             pattern->HandleOnCut();
             return;
         case OptionMenuActionId::SELECT_ALL:
-            pattern->HandleOnSelectAll(type == OptionMenuType::MOUSE_MENU);
+            pattern->HandleOnSelectAll(type == OptionMenuType::MOUSE_MENU, false, true);
             return;
         case OptionMenuActionId::PASTE:
             pattern->HandleOnPaste();
@@ -388,7 +395,11 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
             selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
         GetLocalPointWithTransform(movingCaretOffset);
         pattern->SetMovingCaretOffset(movingCaretOffset);
-        auto magnifierLocalOffset = localOffset;
+        auto contentRect = pattern->GetContentRect();
+        auto caretRect = pattern->GetCaretRect();
+        float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
+        float y = std::clamp(localOffset.GetY(), contentRect.Top(), contentRect.Bottom() - caretRect.Height());
+        auto magnifierLocalOffset = OffsetF(x, y);
         GetLocalPointWithTransform(magnifierLocalOffset);
         pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
     }
@@ -404,7 +415,6 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
             UpdateFirstHandleOffset();
         }
     }
-    pattern->UpdateRecordCaretIndex(selectController->GetCaretIndex());
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -442,5 +452,12 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldSelectOverlay::ProcessSelectAllOverlay(const OverlayRequest& request)
+{
+    OverlayRequest newRequest = request;
+    newRequest.requestCode = newRequest.requestCode | REQUEST_SELECT_ALL;
+    ProcessOverlay(newRequest);
 }
 } // namespace OHOS::Ace::NG

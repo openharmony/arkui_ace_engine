@@ -58,7 +58,7 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
         if (!event) {
             continue;
         }
-        if (event->GetEnable()) {
+        if (event->GetEnabled()) {
             if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
                 event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
             } else if (event->InBarRectRegion(localPoint, touchRestrict.sourceType)) {
@@ -72,7 +72,7 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
             }
         }
         bool clickJudge = event->ClickJudge(localPoint);
-        if (event->GetEnable() || clickJudge) {
+        if (event->GetEnabled() || clickJudge) {
             if (!clickRecognizer_) {
                 clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
             }

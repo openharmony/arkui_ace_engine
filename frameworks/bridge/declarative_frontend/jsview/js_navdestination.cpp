@@ -48,6 +48,15 @@ NavDestinationModel* NavDestinationModel::GetInstance()
 namespace OHOS::Ace::Framework {
 
 namespace {
+constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
+constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
+constexpr uint32_t SAFE_AREA_EDGE_SYSTEM = 0;
+constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
+constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
+constexpr uint32_t PARAMATER_LENGTH_ONE = 1;
+constexpr uint32_t PARAMATER_LENGTH_TWO = 2;
+constexpr uint32_t FIRST_INDEX = 0;
+constexpr uint32_t SECOND_INDEX = 1;
 
 bool ParseCommonTitle(const JSRef<JSObject>& jsObj)
 {
@@ -166,10 +175,17 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
+    std::vector<std::string> nameList;
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
-    NavDestinationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap, bundleName, moduleName);
+    nameList.emplace_back(bundleName);
+    nameList.emplace_back(moduleName);
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
+    if (src.empty() && pixMap == nullptr) {
+        SetSymbolOptionApply(info, iconSymbol, info[0]);
+    }
+    NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, noPixMap, pixMap, nameList);
 }
 
 void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
@@ -357,6 +373,44 @@ void JSNavDestination::SetWillDisAppear(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void JSNavDestination::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
+{
+    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL};
+    if (info.Length() >= PARAMATER_LENGTH_ONE && info[FIRST_INDEX]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[0]);
+        uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            auto value = paramArray->GetValueAt(i);
+            if (!value->IsNumber() ||
+                value->ToNumber<uint32_t>() >= SAFE_AREA_TYPE_LIMIT ||
+                value->ToNumber<uint32_t>() == SAFE_AREA_EDGE_SYSTEM) {
+                safeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
+                break;
+            }
+        }
+        opts.type = safeAreaType;
+    }
+
+    if (info.Length() >= PARAMATER_LENGTH_TWO && info[SECOND_INDEX]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[1]);
+        uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            auto value = paramArray->GetValueAt(i);
+            if (!value->IsNumber() ||
+                value->ToNumber<uint32_t>() >= SAFE_AREA_EDGE_LIMIT) {
+                safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
+                break;
+            }
+            if (value->ToNumber<uint32_t>() == SAFE_AREA_EDGE_TOP ||
+                value->ToNumber<uint32_t>() == SAFE_AREA_EDGE_BOTTOM) {
+                    safeAreaEdge |= (1 << value->ToNumber<uint32_t>());
+                }
+        }
+        opts.edges = safeAreaEdge;
+    }
+    NavDestinationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
     JSNavDestinationContext::JSBind(globalObj);
@@ -380,6 +434,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onWillShow", &JSNavDestination::SetWillShow);
     JSClass<JSNavDestination>::StaticMethod("onWillHide", &JSNavDestination::SetWillHide);
     JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
+    JSClass<JSNavDestination>::StaticMethod("ignoreLayoutSafeArea", &JSNavDestination::SetIgnoreLayoutSafeArea);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

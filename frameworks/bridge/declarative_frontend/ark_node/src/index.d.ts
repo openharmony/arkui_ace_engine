@@ -124,6 +124,28 @@ declare class ArkRowComponent extends ArkComponent {}
 
 declare class ArkStackComponent extends ArkComponent {}
 
+declare class ArkGridRowComponent extends ArkComponent {}
+
+declare class ArkGridColComponent extends ArkComponent {}
+
+declare class ArkBlankComponent extends ArkComponent {}
+
+declare class ArkImageComponent extends ArkComponent {}
+
+declare class ArkFlexComponent extends ArkComponent {}
+
+declare class ArkSwiperComponent extends ArkComponent {}
+
+declare class ArkProgressComponent extends ArkComponent {}
+
+declare class ArkScrollComponent extends ArkComponent {}
+
+declare class ArkRelativeContainerComponent extends ArkComponent {}
+
+declare class ArkListComponent extends ArkComponent {}
+
+declare class ArkListItemComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;
@@ -157,3 +179,5 @@ declare class NativeUtils {
   createNativeStrongRef(nodePtr: NodePtr): NativeStrongRef;
   createNativeWeakRef(nodePtr: NodePtr): NativeWeakRef;
 }
+
+declare function __getCustomProperty__(nodeId: number, key: string): Object | undefined;

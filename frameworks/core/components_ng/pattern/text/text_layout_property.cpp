@@ -95,6 +95,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("renderingStrategy",
         GetSymbolRenderingStrategyInJson(GetSymbolRenderingStrategy()).c_str(), filter);
     json->PutExtAttr("effectStrategy", GetSymbolEffectStrategyInJson(GetSymbolEffectStrategy()).c_str(), filter);
+    json->Put("symbolEffect", GetSymbolEffectOptionsInJson(
+        GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
 
     auto jsonDecoration = JsonUtil::Create(true);
     std::string type = V2::ConvertWrapTextDecorationToStirng(GetTextDecoration().value_or(TextDecoration::NONE));
@@ -135,6 +137,9 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         GetLineBreakStrategy().value_or(LineBreakStrategy::GREEDY)).c_str(), filter);
     json->PutExtAttr("ellipsisMode",
         V2::ConvertEllipsisModeToString(GetEllipsisMode().value_or(EllipsisMode::TAIL)).c_str(), filter);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

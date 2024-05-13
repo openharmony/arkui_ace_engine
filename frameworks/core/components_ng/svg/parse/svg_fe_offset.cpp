@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,24 +27,38 @@ RefPtr<SvgNode> SvgFeOffset::Create()
     return AceType::MakeRefPtr<SvgFeOffset>();
 }
 
-SvgFeOffset::SvgFeOffset() : SvgFe()
-{
-    declaration_ = AceType::MakeRefPtr<SvgFeOffsetDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgFeOffset::SvgFeOffset() : SvgFe() {}
 
-void SvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-    ColorInterpolationType& currentColor,
+void SvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
+    const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
-    auto declaration = AceType::DynamicCast<SvgFeOffsetDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
-    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
+    imageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
     imageFilter =
-        RSRecordingImageFilter::CreateOffsetImageFilter(declaration->GetDx(), declaration->GetDy(), imageFilter);
+        RSRecordingImageFilter::CreateOffsetImageFilter(feOffsetAttr_.dx.Value(),
+        feOffsetAttr_.dy.Value(), imageFilter);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
-    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
+    RegisterResult(feAttr_.result, imageFilter, resultHash);
+}
+
+bool SvgFeOffset::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgFeOffsetAttribute&)> attrs[] = {
+        { DOM_SVG_DX,
+            [](const std::string& val, SvgFeOffsetAttribute& attr) {
+                attr.dx = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_DY,
+            [](const std::string& val, SvgFeOffsetAttribute& attr) {
+                attr.dy = SvgAttributesParser::ParseDimension(val);
+            } },
+    };
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), name.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, feOffsetAttr_);
+        return true;
+    }
+    return SvgFe::ParseAndSetSpecializedAttr(name, value);
 }
 
 } // namespace OHOS::Ace::NG

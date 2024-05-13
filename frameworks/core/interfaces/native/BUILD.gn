@@ -40,6 +40,7 @@ template("ace_core_interfaces_native_node") {
       "node/data_panel_modifier.cpp",
       "node/divider_modifier.cpp",
       "node/extension_companion_node.cpp",
+      "node/extension_custom_node.cpp",
       "node/flex_modifier.cpp",
       "node/frame_node_modifier.cpp",
       "node/gauge_modifier.cpp",
@@ -75,6 +76,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_loading_progress_modifier.cpp",
       "node/node_modifiers.cpp",
       "node/node_refresh_modifier.cpp",
+      "node/node_relative_container_modifier.cpp",
       "node/node_scroll_modifier.cpp",
       "node/node_slider_modifier.cpp",
       "node/node_span_modifier.cpp",
@@ -102,6 +104,7 @@ template("ace_core_interfaces_native_node") {
       "node/rich_editor_modifier.cpp",
       "node/row_modifier.cpp",
       "node/row_split_modifier.cpp",
+      "node/scroller_modifier.cpp",
       "node/search_modifier.cpp",
       "node/select_modifier.cpp",
       "node/shape_modifier.cpp",
@@ -117,7 +120,11 @@ template("ace_core_interfaces_native_node") {
     ]
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
-    include_dirs = [ "${ace_root}/interfaces/inner_api/ace" ]
+    include_dirs = [
+      "${ace_root}/interfaces/inner_api/ace",
+      "${ace_root}/interfaces/native",
+      "${ace_root}/interfaces/native/node",
+    ]
 
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
@@ -133,7 +140,7 @@ template("ace_core_interfaces_native_node") {
         config.plugin_components_support) {
       sources += [ "node/plugin_modifier.cpp" ]
     }
-    external_deps = []
+    external_deps = [ "graphic_2d:librender_service_client" ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }

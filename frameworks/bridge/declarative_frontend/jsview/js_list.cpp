@@ -202,8 +202,12 @@ void JSList::SetScroller(RefPtr<JSScroller> scroller)
 void JSList::Create(const JSCallbackInfo& args)
 {
     ListModel::GetInstance()->Create();
-    if (args.Length() >= 1 && args[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    if (args.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> arg0 = args[0];
+    if (arg0->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(arg0);
         JSRef<JSVal> spaceValue = obj->GetProperty("space");
         if (!spaceValue->IsNull()) {
             CalcDimension space;
@@ -222,8 +226,6 @@ void JSList::Create(const JSCallbackInfo& args)
             SetScroller(jsScroller);
         }
     }
-
-    args.ReturnSelf();
 }
 
 void JSList::SetChildrenMainSize(const JSCallbackInfo& args)
@@ -252,6 +254,9 @@ void JSList::SetChildrenMainSize(const JSCallbackInfo& args)
         auto length = changeArray->Length();
         for (size_t i = 0; i < length; ++i) {
             auto change = changeArray->GetValueAt(i);
+            if (!change->IsObject()) {
+                continue;
+            }
             auto changeObject = JSRef<JSObject>::Cast(change);
             int32_t start = 0;
             int32_t deleteCount = 0;

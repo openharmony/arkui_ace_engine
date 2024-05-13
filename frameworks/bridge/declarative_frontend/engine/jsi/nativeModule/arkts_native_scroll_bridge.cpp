@@ -18,7 +18,10 @@
 #include "base/log/log.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_scroller.h"
+#include "core/components_ng/pattern/scroll/scroll_model.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "frameworks/core/components/scroll_bar/scroll_proxy.h"
 
 namespace OHOS::Ace::NG {
 constexpr double FRICTION_DEFAULT = 0.6;
@@ -368,6 +371,43 @@ ArkUINativeModuleValue ScrollBridge::ResetEnablePaging(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollModifier()->resetScrollEnablePaging(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::SetScrollInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsNull() && info[1]->IsObject()) {
+        Framework::JSScroller* jsScroller =
+            Framework::JSRef<Framework::JSObject>::Cast(info[1])->Unwrap<Framework::JSScroller>();
+        if (jsScroller) {
+            jsScroller->SetInstanceId(Container::CurrentId());
+            auto positionController = GetArkUINodeModifiers()->getScrollModifier()->getScroll(nativeNode);
+            auto nodePositionController =
+                AceType::Claim(reinterpret_cast<OHOS::Ace::ScrollControllerBase*>(positionController));
+            jsScroller->SetController(nodePositionController);
+            // Init scroll bar proxy.
+            auto proxy = jsScroller->GetScrollBarProxy();
+            if (!proxy) {
+                proxy = ScrollModel::GetInstance()->CreateScrollBarProxy();
+                jsScroller->SetScrollBarProxy(proxy);
+            }
+            auto proxyPtr = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(proxy));
+            GetArkUINodeModifiers()->getScrollModifier()->setScrollBarProxy(nativeNode, proxyPtr);
+        }
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::ResetScrollInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

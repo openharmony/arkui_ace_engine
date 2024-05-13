@@ -84,7 +84,7 @@ void TabContentModelImpl::Pop()
 }
 
 void TabContentModelImpl::SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
-    std::function<void()>&& builder, bool useContentOnly)
+    const std::optional<TabBarSymbol>& tabBarSymbol, std::function<void()>&& builder, bool useContentOnly)
 {
     auto tabContentItemComponent =
         AceType::DynamicCast<V2::TabContentItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

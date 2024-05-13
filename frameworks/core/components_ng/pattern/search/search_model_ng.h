@@ -82,6 +82,7 @@ public:
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
     static void SetIcon(FrameNode* frameNode, const std::optional<std::string>& icon);
+    static void SetCaretPosition(FrameNode* frameNode, const int32_t& value);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetInputFilter(
         FrameNode* frameNode, const std::string& value, const std::function<void(const std::string&)>& onError);

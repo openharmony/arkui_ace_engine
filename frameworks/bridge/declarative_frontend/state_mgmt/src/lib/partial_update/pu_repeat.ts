@@ -24,7 +24,7 @@ interface __IRepeatItemInternal<T> {
 
     // set new index value, used during  Repeat.each update when
     // - order of item in array has changed  (LazyforEach onDataMoved)
-    // - on child reuse. reuse children to render newItemValue. index of 
+    // - on child reuse. reuse children to render newItemValue. index of
     //   newItemValue is a new one
     updateIndex: (newIndexValue: number) => void;
 }
@@ -34,7 +34,7 @@ interface __RepeatItemFactoryReturn<T> extends RepeatItem<T>, __IRepeatItemInter
 // implementation for existing state observation system
 class __RepeatItemPU<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
 
-    // ObservedPropertyPU is the framework class that implements @State, @Provide 
+    // ObservedPropertyPU is the framework class that implements @State, @Provide
     // and App/LocalStorage properties
     private _observedItem: ObservedPropertyPU<T>;
     private _observedIndex?: ObservedPropertyPU<number>;
@@ -68,19 +68,18 @@ class __RepeatItemPU<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
     }
 }
 
-// framework internal, deep observation 
-// implementation for deep observation 
-
-@ObservedV2
+// Framework internal, deep observation
+// Using @ObservedV2_Internal instead of @ObservedV2 to avoid forcing V2 usage.
+@ObservedV2_Internal
 class __RepeatItemV2<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
 
     constructor(initialItem: T, initialIndex?: number) {
         this.item = initialItem;
         this.index = initialIndex
     }
-
-    @Trace item: T;
-    @Trace index?: number;
+    // Using @Trace_Internal instead of @Trace to avoid forcing V2 usage.
+    @Trace_Internal item: T;
+    @Trace_Internal index?: number;
 
     public updateItem(newItemValue: T): void {
         this.item = newItemValue;
@@ -93,11 +92,10 @@ class __RepeatItemV2<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
     }
 }
 
-
 // helper, framework internal
 interface __RepeatItemInfo<T> {
     key: string;
-    // also repeatItem includes index 
+    // also repeatItem includes index
     // we need separate index because repeatItem set set and updated later than index needs to be set.
     index: number;
     repeatItem?: __RepeatItemFactoryReturn<T>;
@@ -142,6 +140,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
     private arr_: Array<T>;
     private itemGenFunc_?: RepeatItemGenFunc<T>;
     private keyGenFunction_?: RepeatKeyGenFunc<T>;
+    private onMoveHandler_?: OnMoveHandler;
     private isVirtualScroll: boolean = false;
     private key2Item_: Map<string, __RepeatItemInfo<T>> = new Map<string, __RepeatItemInfo<T>>();
 
@@ -170,6 +169,11 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         return this;
     }
 
+    public onMove(handler: OnMoveHandler): RepeatAPI<T> {
+        this.onMoveHandler_ = handler;
+        return this;
+    }
+
     private genKeys(): Map<string, __RepeatItemInfo<T>> {
         const key2Item = new Map<string, __RepeatItemInfo<T>>();
         this.arr_.forEach((item, index) => {
@@ -181,7 +185,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
             // Causes all items to be re-rendered
             this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
             return this.genKeys();
-            
+
         }
         return key2Item;
     }
@@ -195,8 +199,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
             throw new Error(`itemGen function undefined. Usage error`)
         }
         if (this.isVirtualScroll) {
-            // TODO haoyu: add render for LazyforEach with child update
-            // there might not any rerender , I am not sure.
+            // TODO: Add render for LazyforEach with child update.
             throw new Error("TODO virtual code path");
         } else {
             isInitialRender ? this.initialRenderNoneVirtual() : this.rerenderNoneVirtual();
@@ -216,6 +219,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         })
         let removedChildElmtIds = new Array<number>();
         // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
+        RepeatNative.onMove(this.onMoveHandler_);
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         stateMgmtConsole.debug(`RepeatPU: initialRenderNoneVirtual elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
@@ -225,7 +229,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         const oldKey2Item: Map<string, __RepeatItemInfo<T>> = this.key2Item_;
         this.key2Item_ = this.genKeys();
 
-        // identify array items that have been deleted 
+        // identify array items that have been deleted
         // these are candidates for re-use
         const deletedKeysAndIndex = new Array<__RepeatItemInfo<T>>();
         for (const [key, feInfo] of oldKey2Item) {
@@ -254,7 +258,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
 
             } else if (deletedKeysAndIndex.length) {
                 // case #2:
-                // new array item, there is an deleted array items whose 
+                // new array item, there is an deleted array items whose
                 // UINode children cab re-used
                 const oldItemInfo = deletedKeysAndIndex.pop();
                 const reuseKey = oldItemInfo!.key;
@@ -283,7 +287,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         })
 
         // keep  this.id2item_. by removing all entries for remaining
-        // deleted items 
+        // deleted items
         deletedKeysAndIndex.forEach(delItem => {
             this.key2Item_.delete(delItem!.key);
         });
@@ -292,6 +296,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         // C++  tempChildren.clear() , trigger re-layout
         let removedChildElmtIds = new Array<number>();
         // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
+        RepeatNative.onMove(this.onMoveHandler_);
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         stateMgmtConsole.debug(`RepeatPU: rerenderNoneVirtual elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
@@ -314,6 +319,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
 
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
+
 class __RepeatPU<T> extends __RepeatV2<T> implements RepeatAPI<T> {
     private owningView_ : ViewPU;
 

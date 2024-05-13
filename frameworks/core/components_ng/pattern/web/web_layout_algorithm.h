@@ -27,8 +27,6 @@ public:
     WebLayoutAlgorithm();
     ~WebLayoutAlgorithm() override = default;
 
-    std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     void Measure(LayoutWrapper* layoutWrapper) override;
 
 private:

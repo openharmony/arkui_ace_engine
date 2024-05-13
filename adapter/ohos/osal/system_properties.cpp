@@ -304,12 +304,13 @@ bool IsFaultInjectEnabled()
     return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
 }
 
-std::vector<double> GetPercent()
+std::pair<float, float> GetPercent()
 {
     std::vector<double> result;
     StringUtils::StringSplitter(
         system::GetParameter("const.ark.darkModeAppBGColorBrightness", "0.10,0.05"), ',', result);
-    return result;
+    std::pair<float, float> percent(result.front(), result.back());
+    return percent;
 }
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
@@ -363,7 +364,7 @@ bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
-std::vector<double> SystemProperties::brightUpPercent_ = GetPercent();
+std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
@@ -480,7 +481,6 @@ void SystemProperties::InitDeviceInfo(
     apiVersion_ = std::to_string(::GetSdkApiVersion());
     releaseType_ = ::GetOsReleaseType();
     paramDeviceType_ = ::GetDeviceType();
-    brightUpPercent_ = GetPercent();
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
@@ -490,7 +490,6 @@ void SystemProperties::InitDeviceInfo(
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
-    rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();
     debugAutoUIEnabled_ = system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true";
     debugOffsetLogEnabled_ = system::GetParameter(ENABLE_DEBUG_OFFSET_LOG_KEY, "false") == "true";

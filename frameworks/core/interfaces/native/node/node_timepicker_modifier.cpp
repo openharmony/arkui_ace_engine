@@ -166,6 +166,20 @@ void ResetTimepickerUseMilitaryTime(ArkUINodeHandle node)
     TimePickerModelNG::SetHour24(frameNode, false);
 }
 
+void SetTimepickerLoop(ArkUINodeHandle node, int isLoop)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetWheelModeEnabled(frameNode, isLoop);
+}
+
+void ResetTimepickerLoop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetWheelModeEnabled(frameNode, true);
+}
+
 void SetTimepickerDateTimeOptions(
     ArkUINodeHandle node, ArkUI_Int32 hourType, ArkUI_Int32 minuteType, ArkUI_Int32 secondType)
 {
@@ -310,7 +324,8 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         SetTimepickerTextStyle, GetTimepickerSelectedTextStyle, SetTimepickerSelectedTextStyle,
         ResetTimepickerDisappearTextStyle, ResetTimepickerTextStyle, ResetTimepickerSelectedTextStyle,
         ResetTimepickerBackgroundColor, GetTimepickerUseMilitaryTime, SetTimepickerUseMilitaryTime,
-        ResetTimepickerUseMilitaryTime, SetTimepickerDateTimeOptions, ResetTimepickerDateTimeOptions };
+        ResetTimepickerUseMilitaryTime, SetTimepickerLoop, ResetTimepickerLoop, SetTimepickerDateTimeOptions,
+        ResetTimepickerDateTimeOptions };
 
     return &modifier;
 }

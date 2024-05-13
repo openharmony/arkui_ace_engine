@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -151,7 +152,7 @@ public:
         if (itemPosition_.empty()) {
             return 0.0f;
         }
-        if (GetStartIndex() == 0) {
+        if (GetStartIndex() == 0 && !isLoop_) {
             return itemPosition_.begin()->second.startPos;
         }
         return itemPosition_.begin()->second.startPos - spaceWidth_;
@@ -162,7 +163,7 @@ public:
         if (itemPosition_.empty()) {
             return 0.0f;
         }
-        if (GetEndIndex() == totalItemCount_ - 1) {
+        if (GetEndIndex() == totalItemCount_ - 1 && !isLoop_) {
             return itemPosition_.rbegin()->second.endPos;
         }
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
@@ -278,6 +279,16 @@ public:
         return std::move(itemPositionInAnimation_);
     }
 
+    void SetIsMeasureOneMoreItem(bool isMeasureOneMoreItem)
+    {
+        isMeasureOneMoreItem_ = isMeasureOneMoreItem;
+    }
+
+    void SetIsFrameAnimation(bool isFrameAnimation)
+    {
+        isFrameAnimation_ = isFrameAnimation;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
@@ -304,6 +315,11 @@ private:
     void CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void CaptureLayout(LayoutWrapper* layoutWrapper);
     bool IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) const;
+    bool CheckIsSingleCase(const RefPtr<SwiperLayoutProperty>& property);
+    void UpdateLayoutInfoBeforeMeasureSwiper(const RefPtr<SwiperLayoutProperty>& property);
+    void IndicatorAndArrowMeasure(LayoutWrapper* layoutWrapper, const OptionalSizeF& parentIdealSize);
+    float GetChildMainAxisSize(
+        const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty, Axis axis);
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -350,6 +366,9 @@ private:
     bool hasCachedCapture_ = false;
     bool isCaptureReverse_ = false;
     bool isNeedUpdateCapture_ = false;
+    bool isMeasureOneMoreItem_ = false;
+    bool isFrameAnimation_ = false;
+    std::set<int32_t> measuredItems_;
 };
 
 } // namespace OHOS::Ace::NG

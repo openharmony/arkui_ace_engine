@@ -16,16 +16,10 @@
 #include "frameworks/core/components_ng/svg/parse/svg_rect.h"
 
 #include "base/utils/utils.h"
-#include "frameworks/core/components/declaration/svg/svg_rect_declaration.h"
 
 namespace OHOS::Ace::NG {
 
-SvgRect::SvgRect() : SvgGraphic()
-{
-    declaration_ = AceType::MakeRefPtr<SvgRectDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgRect::SvgRect() : SvgGraphic() {}
 
 RefPtr<SvgNode> SvgRect::Create()
 {
@@ -38,47 +32,77 @@ SkPath SvgRect::AsPath(const Size& viewPort) const
 RSRecordingPath SvgRect::AsPath(const Size& viewPort) const
 #endif
 {
-    auto declaration = AceType::DynamicCast<SvgRectDeclaration>(declaration_);
-#ifndef USE_ROSEN_DRAWING
-    CHECK_NULL_RETURN(declaration, SkPath());
-#else
-    CHECK_NULL_RETURN(declaration, RSRecordingPath());
-#endif
     double rx = 0.0;
-    if (GreatOrEqual(declaration->GetRx().Value(), 0.0)) {
-        rx = ConvertDimensionToPx(declaration->GetRx(), viewPort, SvgLengthType::HORIZONTAL);
+    if (GreatOrEqual(rectAttr_.rx.Value(), 0.0)) {
+        rx = ConvertDimensionToPx(rectAttr_.rx, viewPort, SvgLengthType::HORIZONTAL);
     } else {
-        if (GreatNotEqual(declaration->GetRy().Value(), 0.0)) {
-            rx = ConvertDimensionToPx(declaration->GetRy(), viewPort, SvgLengthType::VERTICAL);
+        if (GreatNotEqual(rectAttr_.ry.Value(), 0.0)) {
+            rx = ConvertDimensionToPx(rectAttr_.ry, viewPort, SvgLengthType::VERTICAL);
         }
     }
     double ry = 0.0;
-    if (GreatOrEqual(declaration->GetRy().Value(), 0.0)) {
-        ry = ConvertDimensionToPx(declaration->GetRy(), viewPort, SvgLengthType::VERTICAL);
+    if (GreatOrEqual(rectAttr_.ry.Value(), 0.0)) {
+        ry = ConvertDimensionToPx(rectAttr_.ry, viewPort, SvgLengthType::VERTICAL);
     } else {
-        if (GreatNotEqual(declaration->GetRx().Value(), 0.0)) {
-            ry = ConvertDimensionToPx(declaration->GetRx(), viewPort, SvgLengthType::HORIZONTAL);
+        if (GreatNotEqual(rectAttr_.rx.Value(), 0.0)) {
+            ry = ConvertDimensionToPx(rectAttr_.rx, viewPort, SvgLengthType::HORIZONTAL);
         }
     }
 #ifndef USE_ROSEN_DRAWING
     SkRRect roundRect = SkRRect::MakeRectXY(
-        SkRect::MakeXYWH(ConvertDimensionToPx(declaration->GetX(), viewPort, SvgLengthType::HORIZONTAL),
-            ConvertDimensionToPx(declaration->GetY(), viewPort, SvgLengthType::VERTICAL),
-            ConvertDimensionToPx(declaration->GetWidth(), viewPort, SvgLengthType::HORIZONTAL),
-            ConvertDimensionToPx(declaration->GetHeight(), viewPort, SvgLengthType::VERTICAL)),
+        SkRect::MakeXYWH(ConvertDimensionToPx(rectAttr_.x, viewPort, SvgLengthType::HORIZONTAL),
+            ConvertDimensionToPx(rectAttr_.y, viewPort, SvgLengthType::VERTICAL),
+            ConvertDimensionToPx(rectAttr_.width, viewPort, SvgLengthType::HORIZONTAL),
+            ConvertDimensionToPx(rectAttr_.height, viewPort, SvgLengthType::VERTICAL)),
         rx, ry);
     SkPath path;
     path.addRRect(roundRect);
 #else
-    RSScalar left = ConvertDimensionToPx(declaration->GetX(), viewPort, SvgLengthType::HORIZONTAL);
-    RSScalar top = ConvertDimensionToPx(declaration->GetY(), viewPort, SvgLengthType::VERTICAL);
-    RSScalar width = ConvertDimensionToPx(declaration->GetWidth(), viewPort, SvgLengthType::HORIZONTAL);
-    RSScalar height = ConvertDimensionToPx(declaration->GetHeight(), viewPort, SvgLengthType::VERTICAL);
+    RSScalar left = ConvertDimensionToPx(rectAttr_.x, viewPort, SvgLengthType::HORIZONTAL);
+    RSScalar top = ConvertDimensionToPx(rectAttr_.y, viewPort, SvgLengthType::VERTICAL);
+    RSScalar width = ConvertDimensionToPx(rectAttr_.width, viewPort, SvgLengthType::HORIZONTAL);
+    RSScalar height = ConvertDimensionToPx(rectAttr_.height, viewPort, SvgLengthType::VERTICAL);
     RSRoundRect roundRect = RSRoundRect(RSRect(left, top, width + left, height + top), rx, ry);
     RSRecordingPath path;
     path.AddRoundRect(roundRect);
 #endif
     return path;
+}
+
+bool SvgRect::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
+{
+    static const LinearMapNode<void (*)(const std::string&, SvgRectAttribute&)> attrs[] = {
+        { DOM_SVG_HEIGHT,
+            [](const std::string& val, SvgRectAttribute& attr) {
+                attr.height = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_RX,
+            [](const std::string& val, SvgRectAttribute& attr) {
+                attr.rx = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_RY,
+            [](const std::string& val, SvgRectAttribute& attr) {
+                attr.ry = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_WIDTH,
+            [](const std::string& val, SvgRectAttribute& attr) {
+                attr.width = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_X,
+            [](const std::string& val, SvgRectAttribute& attr) {
+                attr.x = SvgAttributesParser::ParseDimension(val);
+            } },
+        { DOM_SVG_Y,
+            [](const std::string& val, SvgRectAttribute& attr) {
+                attr.y = SvgAttributesParser::ParseDimension(val);
+            } },
+    };
+    auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), name.c_str());
+    if (attrIter != -1) {
+        attrs[attrIter].value(value, rectAttr_);
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

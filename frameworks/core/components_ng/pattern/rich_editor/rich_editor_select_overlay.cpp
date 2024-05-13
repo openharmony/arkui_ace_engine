@@ -112,8 +112,10 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     TextSelectOverlay::OnHandleMove(handleRect, isFirst);
     auto parentGlobalOffset = pattern->GetParentGlobalOffset();
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset;
-    float x = std::clamp(localOffset.GetX(), 0.0f, pattern->GetContentRect().Width());
-    float y = std::clamp(localOffset.GetY(), 0.0f, pattern->GetContentRect().Height());
+    auto contentRect = pattern->GetContentRect();
+    auto caretRect = pattern->GetCaretRect();
+    float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
+    float y = std::clamp(localOffset.GetY(), contentRect.Top(), contentRect.Bottom() - caretRect.Height());
     localOffset = OffsetF(x, y);
     pattern->magnifierController_->SetLocalOffset(localOffset);
     if (isFirst) {
@@ -133,10 +135,10 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
     auto pattern = GetPattern<RichEditorPattern>();
     auto& textSelector = pattern->textSelector_;
     auto currentHandleIndex = pattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
+    pattern->SetCaretPosition(currentHandleIndex);
     if (isFirst) {
         pattern->HandleSelectionChange(currentHandleIndex, textSelector.destinationOffset);
     } else {
-        pattern->SetCaretPosition(currentHandleIndex);
         if (IsSingleHandle()) {
             auto textOffset = handleOffset + pattern->contentRect_.GetOffset() - pattern->richTextRect_.GetOffset();
             pattern->CalcAndRecordLastClickCaretInfo(Offset(textOffset.GetX(), textOffset.GetY()));
@@ -213,6 +215,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
+    selectInfo.pattern = AceType::WeakClaim(AceType::RawPtr(pattern));
     selectInfo.handlerColor = pattern->GetCaretColor();
     selectInfo.handleReverse = IsHandleReverse();
     bool usingMouse = pattern->IsUsingMouse();
@@ -301,7 +304,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     }
 }
 
-void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
+void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     TAG_LOGD(AceLogTag::ACE_TEXT, "menuType=%{public}d, closeReason=%{public}d", menuType, reason);
     auto pattern = GetPattern<RichEditorPattern>();

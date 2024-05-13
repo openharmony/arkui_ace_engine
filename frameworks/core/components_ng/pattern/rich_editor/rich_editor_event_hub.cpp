@@ -308,22 +308,12 @@ const std::list<RichEditorAbstractSpanResult>& RichEditorDeleteValue::GetRichEdi
     return richEditorDeleteSpans_;
 }
 
-void RichEditorDeleteValue::SetKeyboardType(KeyboardType Keyboard)
-{
-    Keyboard_ = Keyboard;
-}
-
-KeyboardType RichEditorDeleteValue::GetKeyboardType() const
-{
-    return Keyboard_;
-}
-
 void RichEditorChangeValue::SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span)
 {
     originalSpans_.emplace_back(span);
 }
 
-const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorOriginalSpans() const
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorOriginalSpans() const
 {
     return originalSpans_;
 }
@@ -333,9 +323,79 @@ void RichEditorChangeValue::SetRichEditorReplacedSpans(const RichEditorAbstractS
     replacedSpans_.emplace_back(span);
 }
 
-const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSpans() const
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSpans() const
 {
     return replacedSpans_;
+}
+
+void RichEditorChangeValue::SetRichEditorReplacedImageSpans(const RichEditorAbstractSpanResult& span)
+{
+    replacedImageSpans_.emplace_back(span);
+}
+
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedImageSpans() const
+{
+    return replacedImageSpans_;
+}
+
+void RichEditorChangeValue::SetRichEditorReplacedSymbolSpans(const RichEditorAbstractSpanResult& span)
+{
+    replacedSymbolSpans_.emplace_back(span);
+}
+
+const std::vector<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSymbolSpans() const
+{
+    return replacedSymbolSpans_;
+}
+
+void RichEditorChangeValue::SetRangeBefore(const TextRange& rangeBefore)
+{
+    rangeBefore_ = rangeBefore;
+}
+
+TextRange RichEditorChangeValue::GetRangeBefore() const
+{
+    return rangeBefore_;
+}
+
+void RichEditorChangeValue::SetRangeAfter(const TextRange& rangeAfter)
+{
+    rangeAfter_ = rangeAfter;
+}
+
+TextRange RichEditorChangeValue::GetRangeAfter() const
+{
+    return rangeAfter_;
+}
+
+void StyledStringChangeValue::SetRangeBefore(const TextRange& range)
+{
+    rangeBefore_ = range;
+}
+
+TextRange StyledStringChangeValue::GetRangeBefore() const
+{
+    return rangeBefore_;
+}
+
+void StyledStringChangeValue::SetRangeAfter(const TextRange& range)
+{
+    rangeAfter_ = range;
+}
+
+TextRange StyledStringChangeValue::GetRangeAfter() const
+{
+    return rangeAfter_;
+}
+
+void StyledStringChangeValue::SetReplacementString(const RefPtr<SpanStringBase>& styledString)
+{
+    replacementString_ = styledString;
+}
+
+const RefPtr<SpanStringBase> StyledStringChangeValue::GetReplacementString() const
+{
+    return replacementString_;
 }
 
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
@@ -441,14 +501,16 @@ bool RichEditorEventHub::HasOnWillChange() const
     return static_cast<bool>(onWillChange_);
 }
 
-void RichEditorEventHub::SetOnDidChange(std::function<void(const std::list<RichEditorAbstractSpanResult>&)>&& func)
+void RichEditorEventHub::SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func)
 {
     onDidChange_ = std::move(func);
 }
 
-void RichEditorEventHub::FireOnDidChange(const std::list<RichEditorAbstractSpanResult>& info)
+void RichEditorEventHub::FireOnDidChange(const RichEditorChangeValue& changeValue)
 {
-    onDidChange_(info);
+    if (onDidChange_) {
+        onDidChange_(changeValue);
+    }
 }
 
 bool RichEditorEventHub::HasOnDidChange() const
@@ -483,5 +545,35 @@ void RichEditorEventHub::FireOnCopy(NG::TextCommonEvent& value)
     if (onCopy_) {
         onCopy_(value);
     }
+}
+
+void RichEditorEventHub::SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)> && func)
+{
+    onStyledStringWillChange_ = std::move(func);
+}
+
+bool RichEditorEventHub::FireOnStyledStringWillChange(const StyledStringChangeValue& info)
+{
+    return onStyledStringWillChange_ ? onStyledStringWillChange_(info) : true;
+}
+
+bool RichEditorEventHub::HasOnStyledStringWillChange() const
+{
+    return static_cast<bool>(onStyledStringWillChange_);
+}
+
+void RichEditorEventHub::SetOnStyledStringDidChange(std::function<void(const StyledStringChangeValue&)> && func)
+{
+    onStyledStringDidChange_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnStyledStringDidChange(const StyledStringChangeValue& info)
+{
+    onStyledStringDidChange_(info);
+}
+
+bool RichEditorEventHub::HasOnStyledStringDidChange() const
+{
+    return static_cast<bool>(onStyledStringDidChange_);
 }
 } // namespace OHOS::Ace::NG

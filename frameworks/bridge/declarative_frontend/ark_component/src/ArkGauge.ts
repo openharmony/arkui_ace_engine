@@ -18,6 +18,7 @@ class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   gaugeNode: BuilderNode<[GaugeConfiguration]> | null = null;
   modifier: ContentModifier<GaugeConfiguration>;
+  needRebuild: boolean = false;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -52,10 +53,18 @@ class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     modifierWithKey(this._modifiersWithKeys, GaugeIndicatorModifier.identity, GaugeIndicatorModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<DataPanelConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<GaugeConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -63,10 +72,11 @@ class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
   }
   makeContentModifierNode(context: UIContext, gaugeConfiguration: GaugeConfiguration): FrameNode | null {
     gaugeConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.gaugeNode)) {
+    if (isUndefined(this.gaugeNode) || this.needRebuild) {
       let xNode = globalThis.requireNapi('arkui.node');
       this.gaugeNode = new xNode.BuilderNode(context);
       this.gaugeNode.build(this.builder, gaugeConfiguration);
+      this.needRebuild = false;
     } else {
       this.gaugeNode.update(gaugeConfiguration);
     }

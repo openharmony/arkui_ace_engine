@@ -207,6 +207,40 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(OverlayModifier);
 };
 
+class ForegroundModifier : public Modifier {
+    DECLARE_ACE_TYPE(ForegroundModifier, Modifier);
+
+public:
+    ForegroundModifier() = default;
+    ~ForegroundModifier() override = default;
+    virtual void onDraw(DrawingContext& Context) = 0;
+
+    void AttachProperty(const RefPtr<PropertyBase>& prop)
+    {
+        attachedProperties_.push_back(prop);
+    }
+
+    const std::vector<RefPtr<PropertyBase>>& GetAttachedProperties() const
+    {
+        return attachedProperties_;
+    }
+
+    const RectF& GetBoundsRect() const
+    {
+        return rect_;
+    }
+
+    void SetBoundsRect(const RectF& rect)
+    {
+        rect_ = rect;
+    }
+
+private:
+    std::vector<RefPtr<PropertyBase>> attachedProperties_;
+    RectF rect_;
+    ACE_DISALLOW_COPY_AND_MOVE(ForegroundModifier);
+};
+
 #define DECLARE_PROP_TYPED_CLASS(classname, template_class, type)        \
     class classname : public template_class<type> {                      \
         DECLARE_ACE_TYPE(classname, template_class);                     \

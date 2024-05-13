@@ -24,6 +24,17 @@ public:
     void Create() override;
     void SetBarrier(const std::vector<BarrierInfo>& barrierInfo) override;
     void SetGuideline(const std::vector<GuidelineInfo>& guidelineInfo) override;
+
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetBarrier(FrameNode* frameNode, const std::vector<BarrierInfo>& barrierInfo);
+    static void SetGuideline(FrameNode* frameNode, const std::vector<GuidelineInfo>& guidelineInfo);
+
+    static std::vector<BarrierInfo> GetBarrier(FrameNode* frameNode);
+    static std::vector<GuidelineInfo> GetGuideline(FrameNode* frameNode);
+
+    static void ResetBarrier(FrameNode* frameNode);
+    static void ResetGuideline(FrameNode* frameNode);
+
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RELATIVE_CONTAINER_RELATIVE_CONTAINER_MODEL_NG_H

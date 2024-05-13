@@ -21,9 +21,11 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_toggle_theme.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -131,6 +133,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseToggleIsOnObject(info, changeEventVal);
     }
+    JSToggleTheme::ApplyTheme(NG::ToggleType(toggleType_));
 }
 
 void JSToggle::JsWidth(const JSCallbackInfo& info)
@@ -144,22 +147,11 @@ void JSToggle::JsWidth(const JSCallbackInfo& info)
 
 void JSToggle::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    auto switchTheme = GetTheme<SwitchTheme>();
-    CHECK_NULL_VOID(switchTheme);
-    auto defaultWidth = switchTheme->GetWidth();
-    auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding();
-    auto width = defaultWidth - horizontalPadding * 2;
-    if (toggleType_ == 0) {
-        auto checkboxTheme = GetTheme<CheckboxTheme>();
-        CHECK_NULL_VOID(checkboxTheme);
-        defaultWidth = checkboxTheme->GetDefaultWidth();
-        horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding();
-        width = defaultWidth - horizontalPadding * 2;
-    }
-    CalcDimension value(width);
+    CalcDimension value;
     ParseJsDimensionVp(jsValue, value);
     if (value.IsNegative()) {
-        value = width;
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        return;
     }
     ToggleModel::GetInstance()->SetWidth(value);
 }
@@ -175,23 +167,11 @@ void JSToggle::JsHeight(const JSCallbackInfo& info)
 
 void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
-    CHECK_NULL_VOID(switchTheme);
-    auto defaultHeight = switchTheme->GetHeight();
-    auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
-    auto height = defaultHeight - verticalPadding * 2;
-    CalcDimension value(height);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVpNG(jsValue, value) || value.IsNegative()) {
-            value = height;
-        }
-    } else {
-        ParseJsDimensionVp(jsValue, value);
-        if (value.IsNegative()) {
-            value = height;
-        }
+    CalcDimension value;
+    ParseJsDimensionVp(jsValue, value);
+    if (value.IsNegative()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        return;
     }
     ToggleModel::GetInstance()->SetHeight(value);
 }

@@ -643,17 +643,19 @@ void ListItemPattern::FireSwipeActionStateChange(SwipeActionState newState)
     swipeActionState_ = newState;
     bool isStart = GreatNotEqual(curOffset_, 0.0);
     listItemEventHub->FireStateChangeEvent(newState, isStart);
+    if (newState == SwipeActionState::COLLAPSED) {
+        auto frameNode = GetListFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto listPattern = frameNode->GetPattern<ListPattern>();
+        CHECK_NULL_VOID(listPattern);
+        auto scrollableEvent = listPattern->GetScrollableEvent();
+        CHECK_NULL_VOID(scrollableEvent);
+        scrollableEvent->SetClickJudgeCallback(nullptr);
+    }
 }
 
 void ListItemPattern::ResetToItemChild()
 {
-    auto frameNode = GetListFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto listPattern = frameNode->GetPattern<ListPattern>();
-    CHECK_NULL_VOID(listPattern);
-    auto scrollableEvent = listPattern->GetScrollableEvent();
-    CHECK_NULL_VOID(scrollableEvent);
-    scrollableEvent->SetClickJudgeCallback(nullptr);
     swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
     FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
 }

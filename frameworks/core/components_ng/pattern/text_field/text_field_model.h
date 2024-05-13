@@ -148,6 +148,11 @@ struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
 };
 
+enum class PreviewTextStyle {
+    NORMAL,
+    UNDERLINE,
+};
+
 class ACE_EXPORT TextFieldControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextFieldControllerBase, AceType);
 

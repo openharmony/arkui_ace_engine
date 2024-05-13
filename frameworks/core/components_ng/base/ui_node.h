@@ -42,6 +42,7 @@ namespace OHOS::Ace::NG {
 struct ExtraInfo {
     std::string page;
     int32_t line = 0;
+    int32_t col = 0;
 };
 
 enum class NodeStatus : char {
@@ -66,8 +67,8 @@ public:
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
     virtual bool IsAtomicNode() const = 0;
 
-    void AttachContext(PipelineContext* context, bool recursive = false);
-    void DetachContext(bool recursive = false);
+    virtual void AttachContext(PipelineContext* context, bool recursive = false);
+    virtual void DetachContext(bool recursive = false);
 
     virtual int32_t FrameCount() const;
 
@@ -164,7 +165,8 @@ public:
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
     virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout);
 
-    void DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap);
+    bool IsAutoFillContainerNode();
+    void DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false);
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
@@ -289,8 +291,7 @@ public:
 
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
-    virtual void MarkDirtyNode(
-        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
+    virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     virtual void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
@@ -398,7 +399,8 @@ public:
         newChild->MountToParent(AceType::Claim(this), slot, false);
     }
     virtual void FastPreviewUpdateChildDone() {}
-    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false);
+    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
+        bool addToRenderTree = false);
     virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node);
 
     void SetDebugLine(const std::string& line)
@@ -568,6 +570,11 @@ public:
 
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
+    bool IsLayoutSeperately() const
+    {
+        return layoutSeperately_;
+    }
+
     virtual void PaintDebugBoundaryTreeAll(bool flag);
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
 
@@ -602,7 +609,35 @@ public:
     }
 
     void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
-    
+
+    virtual void RegisterUpdateJSInstanceCallback(std::function<void(int32_t)>&& callback)
+    {
+        updateJSInstanceCallback_ = std::move(callback);
+    }
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
+
+    bool GetIsGeometryTransitionIn() const
+    {
+        return isGeometryTransitionIn_;
+    }
+
+    void SetIsGeometryTransitionIn(bool isGeometryTransitionIn)
+    {
+        isGeometryTransitionIn_ = isGeometryTransitionIn;
+    }
+
+    virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
+    {
+        SetIsGeometryTransitionIn(isGeometryTransitionIn);
+        for (const auto& child : GetChildren()) {
+            child->SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+        }
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -655,7 +690,11 @@ protected:
 
     bool needCallChildrenUpdate_ = true;
 
+    bool layoutSeperately_ = false;
+
     virtual void PaintDebugBoundary(bool flag) {}
+
+    PipelineContext* context_ = nullptr;
 
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
@@ -682,6 +721,7 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
+    bool isGeometryTransitionIn_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
@@ -693,12 +733,11 @@ private:
     bool useOffscreenProcess_ = false;
 
     std::list<std::function<void()>> attachToMainTreeTasks_;
+    std::function<void(int32_t)> updateJSInstanceCallback_;
 
     std::string debugLine_;
     std::string viewId_;
     void* externalData_ = nullptr;
-
-    PipelineContext* context_ = nullptr;
 
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

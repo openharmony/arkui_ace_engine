@@ -113,7 +113,11 @@ class GridColOrderModifier extends ModifierWithKey<ArkGridColColumnOption> {
     }
   }
 }
-
+interface GridColParam {
+  span?: number | GridColColumnOption;
+  offset?: number | GridColColumnOption;
+  order?: number | GridColColumnOption;
+}
 class ArkGridColComponent extends ArkComponent implements GridColAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -128,6 +132,17 @@ class ArkGridColComponent extends ArkComponent implements GridColAttribute {
   }
   order(value: number | GridColColumnOption): GridColAttribute {
     modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, value);
+    return this;
+  }
+  initialize(value: Object[]): GridColAttribute {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity,
+        GridColSpanModifier, (value[0] as GridColParam).span);
+      modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity,
+        GridColOffsetModifier, (value[0] as GridColParam).offset);
+      modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity,
+        GridColOrderModifier, (value[0] as GridColParam).order);
+    }
     return this;
   }
 }

@@ -102,6 +102,7 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
         auto contentRow =
             CreateOptionsNode(dialogNode, calendarNode, dialogEvent, std::move(dialogCancelEvent), buttonInfos);
         contentRow->MountToParent(contentColumn);
+        UpdateDialogDefaultFocus(contentRow, contentColumn);
     }
 
     contentColumn->MarkModifyDone();
@@ -612,14 +613,12 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     }
     auto buttonCancelNode = CreateCancelNode(cancelEvent, buttonInfos);
     auto acceptIter = dialogEvent.find("acceptId");
-    DialogEvent acceptEvent = nullptr;
-    if (acceptIter != dialogEvent.end()) {
-        acceptEvent = acceptIter->second;
-    }
+    DialogEvent acceptEvent = (acceptIter != dialogEvent.end()) ? acceptIter->second : nullptr;
     auto buttonConfirmNode = CreateConfirmNode(dateNode, acceptEvent, buttonInfos);
 
     buttonCancelNode->MountToParent(contentRow);
     buttonConfirmNode->MountToParent(contentRow);
+    UpdateDefaultFocusByButtonInfo(contentRow, buttonConfirmNode, buttonCancelNode);
 
     auto event = [weakDialogNode = WeakPtr<FrameNode>(dialogNode),
                  weakPipelineContext = WeakPtr<PipelineContext>(pipelineContext)](const GestureEvent& /* info */) {
@@ -749,6 +748,32 @@ void CalendarDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo>&
         if (focusHub) {
             focusHub->SetIsDefaultFocus(true);
         }
+    }
+}
+
+void CalendarDialogView::UpdateDialogDefaultFocus(const RefPtr<FrameNode>& contentRow,
+    const RefPtr<FrameNode>& contentColumn)
+{
+    auto contentRowFocusHub = contentRow->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(contentRowFocusHub);
+    if (contentRowFocusHub->IsDefaultFocus()) {
+        auto contentColumnFocusHub = contentColumn->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(contentColumnFocusHub);
+        contentColumnFocusHub->SetIsDefaultFocus(true);
+    }
+}
+
+void CalendarDialogView::UpdateDefaultFocusByButtonInfo(const RefPtr<FrameNode>& optionsNode,
+    const RefPtr<FrameNode>& accept, const RefPtr<FrameNode>& cancel)
+{
+    auto acceptFocusHub = accept->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(acceptFocusHub);
+    auto cancelFocusHub = cancel->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(cancelFocusHub);
+    if (acceptFocusHub->IsDefaultFocus() || cancelFocusHub->IsDefaultFocus()) {
+        auto optionsNodeFocusHub = optionsNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(optionsNodeFocusHub);
+        optionsNodeFocusHub->SetIsDefaultFocus(true);
     }
 }
 } // namespace OHOS::Ace::NG

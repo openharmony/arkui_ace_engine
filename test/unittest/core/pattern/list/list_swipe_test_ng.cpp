@@ -17,11 +17,59 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+struct SwipeActionItem {
+    std::function<void()> builderAction;
+    Dimension actionAreaDistance;
+    OnDeleteEvent onDelete;
+    OnEnterDeleteAreaEvent onEnterDeleteArea;
+    OnExitDeleteAreaEvent onExitDeleteArea;
+    OnStateChangedEvent onStateChange;
+};
+} // namespace
 
 class ListSwipeTestNg : public ListTestNg {
 public:
+    void CreateWithSwipe(bool isStartNode, V2::SwipeEdgeEffect swipeEdgeEffect, int32_t itemNumber = TOTAL_ITEM_NUMBER);
+    void CreateWithSwipeAction(
+        SwipeActionItem& item, bool isStartArea, OnOffsetChangeFunc onOffsetChange, V2::SwipeEdgeEffect effect);
 };
+
+void ListSwipeTestNg::CreateWithSwipe(bool isStartNode, V2::SwipeEdgeEffect swipeEdgeEffect, int32_t itemNumber)
+{
+    CreateList();
+    auto startFunc = GetDefaultSwiperBuilder(START_NODE_LEN);
+    auto endFunc = GetDefaultSwiperBuilder(END_NODE_LEN);
+    for (int32_t index = 0; index < itemNumber; index++) {
+        if (isStartNode) {
+            CreateItemWithSwipe(startFunc, nullptr, swipeEdgeEffect);
+        } else {
+            CreateItemWithSwipe(nullptr, endFunc, swipeEdgeEffect);
+        }
+    }
+    CreateDone();
+}
+
+void ListSwipeTestNg::CreateWithSwipeAction(
+    SwipeActionItem& item, bool isStartArea, OnOffsetChangeFunc onOffsetChange, V2::SwipeEdgeEffect effect)
+{
+    CreateList();
+    ListItemModelNG itemModel = CreateListItem();
+    itemModel.SetSwiperAction(nullptr, nullptr, std::move(onOffsetChange), effect);
+    itemModel.SetDeleteArea(std::move(item.builderAction), std::move(item.onDelete),
+        std::move(item.onEnterDeleteArea), std::move(item.onExitDeleteArea), std::move(item.onStateChange),
+        item.actionAreaDistance, isStartArea);
+    {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateDone();
+}
 
 /**
  * @tc.name: SwiperItem001
@@ -299,6 +347,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem003, TestSize.Level1)
      * @tc.steps: step4. Swipe end fast
      * @tc.expected: swiperIndex_ change to SWIPER_END
      */
+    ClearOldList();
     CreateWithSwipe(false, V2::SwipeEdgeEffect::None);
     listItem = GetChildFrameNode(frameNode_, listItemIndex);
     listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
@@ -1148,8 +1197,9 @@ HWTEST_F(ListSwipeTestNg, SwiperItem021, TestSize.Level1)
      */
     auto startFunc = GetDefaultSwiperBuilder(START_NODE_LEN);
     auto endFunc = GetDefaultSwiperBuilder(END_NODE_LEN);
-    Create([startFunc, endFunc](
-               ListModelNG model) { CreateItemWithSwipe(startFunc, endFunc, V2::SwipeEdgeEffect::None); });
+    ListModelNG model = CreateList();
+    CreateItemWithSwipe(startFunc, endFunc, V2::SwipeEdgeEffect::None);
+    CreateDone();
     auto childNode = GetChildFrameNode(frameNode_, 0);
     auto childPattern = childNode->GetPattern<ListItemPattern>();
     auto childLayoutProperty = childNode->GetLayoutProperty<ListItemLayoutProperty>();

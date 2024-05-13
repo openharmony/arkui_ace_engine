@@ -87,6 +87,10 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, BarBackgroundColorModifier.identity, BarBackgroundColorModifier, value);
     return this;
   }
+  barBackgroundBlurStyle(value: BlurStyle): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, value);
+    return this;
+  }
   barGridAlign(value: BarGridColumnOptions): TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, BarGridAlignModifier.identity, BarGridAlignModifier, value);
     return this;
@@ -335,6 +339,25 @@ class BarBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
       getUINativeModule().tabs.resetBarBackgroundColor(node);
     } else {
       getUINativeModule().tabs.setBarBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class BarBackgroundBlurStyleModifier extends ModifierWithKey<BlurStyle> {
+  constructor(value: BlurStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('barbackgroundblurstyle');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetBarBackgroundBlurStyle(node);
+    } else {
+      getUINativeModule().tabs.setBarBackgroundBlurStyle(node, this.value);
     }
   }
 

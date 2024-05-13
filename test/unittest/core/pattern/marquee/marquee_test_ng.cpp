@@ -224,7 +224,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest002, TestSize.Level1)
     bool needSecondPlay = false;
     pattern->PlayMarqueeAnimation(start, playCount, needSecondPlay);
     pattern->OnAnimationFinish();
-    pattern->OnVisibleAreaChange(needSecondPlay);
+    pattern->OnVisibleChange(needSecondPlay);
     pattern->ChangeAnimationPlayStatus();
     pattern->StopMarqueeAnimation(needSecondPlay);
     AnimationUtils::PauseAnimation(pattern->animation_);
@@ -343,7 +343,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest004, TestSize.Level1)
     EXPECT_EQ(marqueePaintProperty->GetLoop(), -1);
     EXPECT_EQ(marqueePaintProperty->GetDirection(), MarqueeDirection::RIGHT);
     bool needSecondPlay = true;
-    pattern->OnVisibleAreaChange(needSecondPlay);
+    pattern->OnVisibleChange(needSecondPlay);
     pattern->measureChanged_ = true;
     frameNode->MarkDirtyNode();
     dirtyLayoutWrapperSwap = pattern->OnDirtyLayoutWrapperSwap(nullptr, dirtySwapConfig);
@@ -957,8 +957,8 @@ HWTEST_F(MarqueeTestNg, MarqueeTest012, TestSize.Level1)
     layoutWrapper.layoutProperty_->layoutConstraint_ = layoutConstraint;
     marqueeLayoutAlgorithm->Measure(&layoutWrapper);
     oTemp = layoutWrapper.GetGeometryNode()->GetFrameSize();
-    EXPECT_EQ(oTemp.Width(), CHILD_WIDTH_600);
-    EXPECT_EQ(oTemp.Height(), CHILD_WIDTH_200);
+    EXPECT_EQ(oTemp.Width(), MARQUEE_WIDTH_500);
+    EXPECT_EQ(oTemp.Height(), CHILD_HEIGHT_50);
 
     /**
      * @tc.steps: step8. set positionProperty_ and call Layout.
@@ -967,7 +967,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest012, TestSize.Level1)
     marqueeLayoutAlgorithm->Layout(&layoutWrapper);
     OffsetF offTemp = textLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
     EXPECT_EQ(offTemp.GetX(), 0);
-    EXPECT_EQ(offTemp.GetY(), 75);
+    EXPECT_EQ(offTemp.GetY(), 0);
 }
 
 /**
@@ -1527,7 +1527,6 @@ HWTEST_F(MarqueeTestNg, MarqueeTest021, TestSize.Level1)
     pattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::MAXIMIZE);
     EXPECT_FALSE(pattern->isOritationListenerRegisted_);
     EXPECT_FALSE(pattern->isRegistedAreaCallback_);
-    EXPECT_TRUE(pattern->measureChanged_);
 
     /**
      * @tc.steps: step4. Call RegistOritationListener.

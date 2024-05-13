@@ -121,6 +121,9 @@ public:
         return isSingleRange_;
     }
     static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
+    static int32_t GetSelectedSize(FrameNode* frameNode);
+    static std::string getTextPickerValues(FrameNode* frameNode);
+    static std::vector<uint32_t> getTextPickerSelecteds(FrameNode* frameNode);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

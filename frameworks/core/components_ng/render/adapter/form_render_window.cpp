@@ -101,7 +101,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task) {
         ContainerScope scope(id);
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIFormRenderWindowTask");
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIFormRenderServiceTask");
     }, id);
 #else
     taskExecutor_ = nullptr;
@@ -140,8 +140,10 @@ void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
         auto width = static_cast<float>(calcLayoutConstraint->maxSize->Width()->GetDimension().Value());
         auto height = static_cast<float>(calcLayoutConstraint->maxSize->Height()->GetDimension().Value());
         rootSRNode->SetBounds(0, 0, width, height);
+        CHECK_NULL_VOID(rsUIDirector_);
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
     }
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
 #endif
 }

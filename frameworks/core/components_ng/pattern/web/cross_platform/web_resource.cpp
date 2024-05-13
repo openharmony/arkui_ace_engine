@@ -153,7 +153,7 @@ void WebResource::CallResRegisterMethod(
         if (callback) {
             callback(result);
         }
-    }, "ArkUIWebResRegisterMethodCall");
+    }, "ArkUIWebCallResRegisterMethod");
 }
 
 std::string WebResource::GetStringParam(const std::string& param, const std::string& name) const

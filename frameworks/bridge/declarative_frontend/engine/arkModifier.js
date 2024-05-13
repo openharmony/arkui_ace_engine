@@ -201,7 +201,11 @@ class AttributeUpdater {
   }
   initializeModifier(instance) {}
   updateConstructorParams(...args) {
-    this._attribute.initialize(args);
+    if (!this.attribute) {
+      ArkLogConsole.info("AttributeUpdater has not been initialized before updateConstructorParams.");
+      return;
+    }
+    this.attribute.initialize(args);
   }
 }
 AttributeUpdater.StateEnum = {

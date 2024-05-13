@@ -29,7 +29,24 @@ using GetItemMainSizeByIndex = std::function<float(int32_t)>;
 class WaterFlowSections : public virtual AceType {
     DECLARE_ACE_TYPE(WaterFlowSections, AceType)
 public:
-    struct Section;
+    struct Section {
+        bool operator==(const Section& other) const
+        {
+            return itemsCount == other.itemsCount && crossCount == other.crossCount && columnsGap == other.columnsGap &&
+                   rowsGap == other.rowsGap && margin == other.margin;
+        }
+        bool operator!=(const Section& other) const
+        {
+            return !(*this == other);
+        }
+
+        int32_t itemsCount = 0;
+        std::optional<int32_t> crossCount;
+        GetItemMainSizeByIndex onGetItemMainSizeByIndex;
+        std::optional<Dimension> columnsGap;
+        std::optional<Dimension> rowsGap;
+        std::optional<MarginProperty> margin;
+    };
 
     WaterFlowSections() = default;
     ~WaterFlowSections() override = default;
@@ -48,38 +65,16 @@ public:
     /**
      * @brief check if last update was a special case where only itemCount in the last section is modified.
      *
-     * @return true only if itemCount in the last section has changed and everything else remains the same.
+     * @return true only if itemCount in the modified section has changed and everything else remains the same.
      */
     bool IsSpecialUpdate() const;
 
 private:
-    std::vector<Section> prevSections_; // for comparing and handling special cases
+    // {first changed section, index of that section}
+    // for comparing and handling special update case
+    std::optional<std::pair<Section, int32_t>> prevSection_;
     std::vector<Section> sections_;
     std::function<void(int32_t start)> onSectionDataChange_;
-};
-
-struct WaterFlowSections::Section {
-    bool operator==(const Section& other) const
-    {
-        return itemsCount == other.itemsCount && crossCount == other.crossCount && columnsGap == other.columnsGap &&
-               rowsGap == other.rowsGap && margin == other.margin;
-    }
-    bool operator!=(const Section& other) const
-    {
-        return !(*this == other);
-    }
-
-    int32_t itemsCount = 0;
-
-    std::optional<int32_t> crossCount;
-
-    GetItemMainSizeByIndex onGetItemMainSizeByIndex;
-
-    std::optional<Dimension> columnsGap;
-
-    std::optional<Dimension> rowsGap;
-
-    std::optional<MarginProperty> margin;
 };
 
 } // namespace OHOS::Ace::NG

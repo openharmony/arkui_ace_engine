@@ -112,6 +112,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(childGeometryNode);
     auto size = geometryNode->GetFrameSize();
 
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     viewSize_ = size;
     MinusPaddingToSize(padding, size);
@@ -129,6 +130,9 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     viewPortExtent_ = childSize;
     viewPortLength_ = GetMainAxisSize(viewPort_, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
+    if (layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL) {
+        currentOffset = OffsetF(size.Width() - childSize.Width() - currentOffset_, 0.0f);
+    }
     auto scrollAlignment = Alignment::CENTER;
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
         scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();

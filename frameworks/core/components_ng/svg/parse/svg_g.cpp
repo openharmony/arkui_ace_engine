@@ -21,12 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-SvgG::SvgG() : SvgGroup()
-{
-    declaration_ = AceType::MakeRefPtr<SvgDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgG::SvgG() : SvgGroup() {}
 
 RefPtr<SvgNode> SvgG::Create()
 {

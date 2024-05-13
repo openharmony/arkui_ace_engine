@@ -80,7 +80,7 @@ public:
      * @param width
      * @param height
      */
-    virtual int32_t OnSurfaceChange(float width, float height) = 0;
+    virtual int32_t OnSurfaceChange(float width, float height, float borderWidth = 0.0) = 0;
     /**
      * @brief OnSurfaceDetach.
      * @param surfaceId The surfaceNode ID.

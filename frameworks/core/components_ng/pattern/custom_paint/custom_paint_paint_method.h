@@ -27,7 +27,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
-#include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
+#include "core/components_ng/pattern/custom_paint/canvas_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_object.h"
@@ -441,7 +441,7 @@ protected:
     OnPostBackgroundTask onPostBackgroundTask_;
     FailedCallback failedCallback_;
 
-    RefPtr<RenderingContext2DModifier> contentModifier_;
+    RefPtr<CanvasModifier> contentModifier_;
     std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas_;
 
     SizeF lastLayoutSize_;

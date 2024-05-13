@@ -103,9 +103,6 @@ public:
         auto geometryNode = dirty->GetGeometryNode();
         offset_ = geometryNode->GetContentOffset();
         size_ = geometryNode->GetContentSize();
-        if (!isUserSetResponseRegion_) {
-            AddHotZoneRect();
-        }
         return true;
     }
 
@@ -157,14 +154,23 @@ public:
 
     void SetBuilderFunc(CheckBoxMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
+    }
+
+    RefPtr<FrameNode> GetContentModifierNode()
+    {
+        return contentModifierNode_;
     }
 
     void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
     {
         if (toggleMakeFunc == nullptr) {
             toggleMakeFunc_ = std::nullopt;
-            contentModifierNode_ = nullptr;
             OnModifyDone();
             return;
         }
@@ -239,6 +245,9 @@ private:
     void HandleMouseEvent(bool isHover);
     void HandleFocusEvent();
     void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void CheckPageNode();
     void LoadBuilder();
     void UpdateIndicator();
@@ -247,28 +256,23 @@ private:
     void StartExitAnimation();
     void UpdateState();
     void UpdateUnSelect();
-    void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, bool isSelected);
-    void NotifyCheckboxGroupStatusChange(
-        const RefPtr<FrameNode>& checkBoxGroupNode, std::vector<std::string> vec, bool isSameAsSelf, bool select);
-    void UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* frameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap);
     void CheckBoxGroupIsTrue();
     void SetPrePageIdToLastPageId();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
-    void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
-    void ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProperty>& paintProperty,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap);
+    void ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProperty>& paintProperty);
     void ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkBoxGroupNode, const std::vector<std::string>& vec,
         bool haveCheckBoxSelected, bool isAllCheckBoxSelected);
     std::string GetGroupNameWithNavId();
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
+    void InitCheckBoxStatusByGroup(RefPtr<FrameNode> checkBoxGroupNode,
+        const RefPtr<CheckBoxGroupPaintProperty>& groupPaintProperty, const std::list<RefPtr<FrameNode>>& list);
+    void UpdateCheckBoxGroupStatus(RefPtr<FrameNode> checkBoxGroupNode, const std::list<RefPtr<FrameNode>>& list);
 
     std::optional<CheckBoxMakeCallback> makeFunc_;
     std::optional<SwitchMakeCallback> toggleMakeFunc_;
@@ -288,16 +292,13 @@ private:
     bool isUserSetResponseRegion_ = false;
     bool focusEventInitialized_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
-    Dimension hotZoneHorizontalPadding_;
-    Dimension hotZoneVerticalPadding_;
     OffsetF offset_;
     SizeF size_;
-    OffsetF hotZoneOffset_;
-    SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
     RefPtr<FrameNode> builderNode_;
     std::optional<std::function<void()>> builder_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     RefPtr<CheckBoxModifier> checkboxModifier_;
     WeakPtr<GroupManager> groupManager_;

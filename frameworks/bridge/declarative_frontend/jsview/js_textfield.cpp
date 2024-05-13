@@ -377,30 +377,37 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
-    if (!jsValue->IsObject()) {
-        return;
-    }
-    CaretStyle caretStyle;
-    auto paramObject = JSRef<JSObject>::Cast(jsValue);
-    auto caretWidth = paramObject->GetProperty("width");
+    if (jsValue->IsObject()) {
+        CaretStyle caretStyle;
+        auto paramObject = JSRef<JSObject>::Cast(jsValue);
+        auto caretWidth = paramObject->GetProperty("width");
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
-        caretStyle.caretWidth = theme->GetCursorWidth();
-    } else {
-        CalcDimension width;
-        if (!ParseJsDimensionVpNG(caretWidth, width, false)) {
-            width = theme->GetCursorWidth();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
+            caretStyle.caretWidth = theme->GetCursorWidth();
+        } else {
+            CalcDimension width;
+            if (!ParseJsDimensionVpNG(caretWidth, width, false)) {
+                width = theme->GetCursorWidth();
+            }
+            if (LessNotEqual(width.Value(), 0.0)) {
+                width = theme->GetCursorWidth();
+            }
+            caretStyle.caretWidth = width;
         }
-        if (LessNotEqual(width.Value(), 0.0)) {
-            width = theme->GetCursorWidth();
+        TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
+
+        // set caret color
+        Color caretColor;
+        auto caretColorProp = paramObject->GetProperty("color");
+        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() || !ParseJsColor(caretColorProp, caretColor)) {
+            caretColor = theme->GetCursorColor();
         }
-        caretStyle.caretWidth = width;
+        TextFieldModel::GetInstance()->SetCaretColor(caretColor);
     }
-    TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
 }
 
 void JSTextField::SetCaretPosition(const JSCallbackInfo& info)
@@ -891,6 +898,9 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 
 void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     auto jsValue = info[0];
     auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
         JSRef<JSFunc>::Cast(jsValue));
@@ -1301,7 +1311,7 @@ void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
 bool JSTextField::ParseJsCustomKeyboardBuilder(
     const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc)
 {
-    if (info.Length() <= index) {
+    if (info.Length() <= index || !info[index]->IsObject()) {
         return false;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[index]);
@@ -1525,7 +1535,7 @@ void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
 void JSTextField::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        return;
+        value = 0;
     }
     TextFieldModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
@@ -1558,7 +1568,7 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
 void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseLengthMetricsToDimension(info[0], value)) {
+    if (!ParseLengthMetricsToPositiveDimension(info[0], value)) {
         value.Reset();
     }
     if (value.IsNegative()) {
@@ -1573,11 +1583,10 @@ void JSTextField::SetFontFeature(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
-    if (!jsValue->IsString()) {
-        return;
+    std::string fontFeatureSettings = "";
+    if (jsValue->IsString()) {
+        fontFeatureSettings = jsValue->ToString();
     }
-
-    std::string fontFeatureSettings = jsValue->ToString();
     TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 

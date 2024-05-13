@@ -425,7 +425,7 @@ private:
     RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
-    int64_t preTimeStamp_ = 0L;
+    uint64_t preTimeStamp_ = 0L;
     int64_t nanoPreDragMoveAnimationTime_ = 0L;
     WeakPtr<FrameNode> prepareDragFrameNode_;
     std::function<void(const std::string&)> addDataCallback_ = nullptr;

@@ -499,7 +499,7 @@ public:
 
     static std::string GetAtomicServiceBundleName();
 
-    static std::vector<double> GetDarkModeBrightnessPercent()
+    static std::pair<float, float> GetDarkModeBrightnessPercent()
     {
         return brightUpPercent_;
     }
@@ -559,7 +559,7 @@ private:
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
     static bool faultInjectEnabled_;
-    static std::vector<double> brightUpPercent_;
+    static std::pair<float, float> brightUpPercent_;
 };
 
 } // namespace OHOS::Ace

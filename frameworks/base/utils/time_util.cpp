@@ -73,6 +73,9 @@ std::string ConvertTimestampToStr(int64_t timestamp)
     // timestamp is in millisecond unit, divide 1000 to second
     auto t = static_cast<std::time_t>(timestamp / SEC_TO_MILLISEC);
     auto local = std::localtime(&t);
+    if (!local) {
+        return "";
+    }
     std::strftime(timeStr, MAX_TIME_STR_LEN, "%Y-%m-%d %H:%M:%S", local);
     std::stringstream oss;
     // milliseconds in timestr should be 3 characters length
