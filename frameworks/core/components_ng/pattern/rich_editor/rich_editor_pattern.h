@@ -668,7 +668,13 @@ public:
 
     OffsetF GetCaretOffset() const override
     {
-        return GetCaretRect().GetOffset();
+        // only used in magnifier, return position of the handle that is currently moving
+        return movingHandleOffset_;
+    }
+
+    void SetMovingHandleOffset(const OffsetF& handleOffset)
+    {
+        movingHandleOffset_ = handleOffset;
     }
 
     OffsetF GetParentGlobalOffset() const override
@@ -687,6 +693,7 @@ public:
     }
 
     OffsetF GetTextPaintOffset() const override;
+    OffsetF GetPaintRectGlobalOffset() const;
 
     float GetCrossOverHeight() const;
 
@@ -711,6 +718,7 @@ protected:
 private:
     friend class RichEditorSelectOverlay;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
+    Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
     void HandleOnCut() override;
@@ -1013,6 +1021,7 @@ private:
     PreviewTextRecord previewTextRecord_;
     float lastFontScale_ = -1;
     bool isCaretInContentArea_ = false;
+    OffsetF movingHandleOffset_;
 };
 } // namespace OHOS::Ace::NG
 
