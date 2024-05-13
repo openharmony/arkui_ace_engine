@@ -2019,7 +2019,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     if (container->IsUseStageModel() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
         task();
     } else {
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
+        AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
+        viewportConfigMgr_->UpdateConfig(aceViewportConfig, container, std::move(task), "ArkUIUpdateViewportConfig");
     }
 }
 
