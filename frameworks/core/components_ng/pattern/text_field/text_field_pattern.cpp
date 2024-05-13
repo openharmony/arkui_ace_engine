@@ -4031,6 +4031,7 @@ void TextFieldPattern::HandleCounterBorder()
     } else {
         if (IsUnderlineMode()) {
             ApplyUnderlineTheme();
+            UpdateCounterMargin();
         } else {
             SetThemeBorderAttr();
         }
