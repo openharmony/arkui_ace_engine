@@ -34,7 +34,7 @@ struct XComponentParams {
     std::string xcomponentId;
     std::string surfaceId;
     std::string libraryName;
-    JSXComponentController* controller;
+    JSXComponentController* controller = nullptr;
 };
 
 class XComponentClient {
