@@ -1437,7 +1437,8 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double offsetX = offset.GetX();
     double offsetY = offset.GetY();
-    double progressWidth = (value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width();
+    double progressWidth =
+        std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
     RSBrush brush;
     brush.SetAntiAlias(true);
     RSPen pen;
@@ -1506,7 +1507,8 @@ void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& off
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double offsetX = offset.GetX();
     double offsetY = offset.GetY();
-    double progressWidth = (value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Height();
+    double progressWidth =
+        std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Height(), contentSize.Height());
     RSBrush brush;
     brush.SetAntiAlias(true);
     RSPen pen;
