@@ -399,13 +399,10 @@ std::pair<float, float> ListItemGroupLayoutAlgorithm::GetItemGroupPosition(int32
 {
     V2::StickyStyle sticky = listLayoutProperty_->GetStickyStyle().value_or(V2::StickyStyle::NONE);
     if (scrollAlign_ == ScrollAlign::CENTER) {
-        float mainLen = 0;
-        float center = (startPos_ + endPos_) / 2;  // 2:average
         auto pos = itemPosition_.find(index);
         if (pos != itemPosition_.end()) {
-            mainLen = pos->second.endPos - pos->second.startPos;
             float refPos = (pos->second.endPos + pos->second.startPos) / 2 + paddingBeforeContent_; // 2:average
-            float delta = center - refPos;
+            float delta = (startPos_ + endPos_) / 2 - refPos;
             return { delta, totalMainSize_ + paddingBeforeContent_ + paddingAfterContent_ + delta };
         }
     } else if (scrollAlign_ == ScrollAlign::START) {

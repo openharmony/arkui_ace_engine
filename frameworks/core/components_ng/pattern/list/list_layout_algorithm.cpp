@@ -840,6 +840,24 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             }
         }
     }
+    RecycleGroupItem(layoutWrapper);
+}
+
+void ListLayoutAlgorithm::RecycleGroupItem(LayoutWrapper* layoutWrapper) const
+{
+    if (!isSnapCenter_ || childrenSize_) {
+        return;
+    }
+    auto startChild = itemPosition_.begin();
+    auto endChild = itemPosition_.rbegin();
+    if (startChild != itemPosition_.end() && startChild->second.isGroup) {
+        float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(startChild->first) : 0.0f;
+        CheckListItemGroupRecycle(layoutWrapper, startChild->first, startChild->second.startPos + chainOffset, true);
+    }
+    if (endChild != itemPosition_.rend() && endChild->second.isGroup) {
+        float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(endChild->first) : 0.0f;
+        CheckListItemGroupRecycle(layoutWrapper, endChild->first, endChild->second.endPos + chainOffset, false);
+    }
 }
 
 int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
@@ -1408,10 +1426,10 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
         }
     }
 
-    if (groupNeedAllLayout || targetIndex_) {
+    if (groupNeedAllLayout || targetIndex_ || (isSnapCenter_ && !childrenSize_)) {
         auto groupItemPosition = itemGroup->GetItemPosition();
         int32_t groupTotalItemCount = layoutWrapper->GetTotalChildCount() - itemGroup->GetItemStartIndex();
-        if (groupNeedAllLayout ||
+        if (groupNeedAllLayout || (isSnapCenter_ && !childrenSize_) ||
             (targetIndex_ && targetIndex_.value() == index) ||
             (!(forwardLayout && !groupItemPosition.empty() &&
             groupItemPosition.rbegin()->first == groupTotalItemCount - 1) &&
