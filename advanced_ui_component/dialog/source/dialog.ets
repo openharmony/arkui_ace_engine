@@ -470,7 +470,7 @@ export struct ConfirmDialog{
           .constraintSize({ minHeight: 36 })
         }
         Row() {
-          WithTheme({ theme: this.theme}) {
+          WithTheme({ theme: this.theme }) {
             Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
               .onChange((checked: boolean) => {
                 this.isChecked = checked
