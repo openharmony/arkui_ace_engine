@@ -441,6 +441,7 @@ void SetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWa
         paddings.bottom = std::optional<CalcLength>(sectionData.margin[1]);
         paddings.left = std::optional<CalcLength>(sectionData.margin[2]);
         paddings.right = std::optional<CalcLength>(sectionData.margin[3]);
+        section.margin = paddings;
     }
 
     waterFlowSections->ChangeData(start, 0, newSections);
