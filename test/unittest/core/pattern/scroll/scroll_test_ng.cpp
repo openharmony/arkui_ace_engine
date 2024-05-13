@@ -1562,7 +1562,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
         model.SetEnablePaging(true);
         model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
     });
-    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::INVALID);
+    EXPECT_EQ(pattern_->IsEnablePagingValid(), false);
 
     /**
      * @tc.steps: step3. Create scroll, first set snap and than set enablePaging.
@@ -1572,7 +1572,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
         model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
         model.SetEnablePaging(true);
     });
-    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::INVALID);
+    EXPECT_EQ(pattern_->IsEnablePagingValid(), false);
 
     /**
      * @tc.steps: step4. Create scroll, set enablePaging true and than set enablePaging false.
