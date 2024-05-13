@@ -41,10 +41,10 @@ HWTEST_F(GridIrregularFillerTest, AddNextRow001, TestSize.Level1)
     };
 
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    Create([option](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetLayoutOptions(option);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateDone(frameNode_);
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -80,10 +80,10 @@ HWTEST_F(GridIrregularFillerTest, AddNextRows002, TestSize.Level1)
     };
 
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    Create([option](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetLayoutOptions(option);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateDone(frameNode_);
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -116,10 +116,10 @@ HWTEST_F(GridIrregularFillerTest, AddNextRows002, TestSize.Level1)
  */
 HWTEST_F(GridIrregularFillerTest, SolveForward001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetLayoutOptions(GetOptionDemo2());
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo2());
+    CreateDone(frameNode_);
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -192,10 +192,10 @@ HWTEST_F(GridIrregularFillerTest, CheckMultiRow001, TestSize.Level1)
     };
 
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    Create([option](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetLayoutOptions(option);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateDone(frameNode_);
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -237,10 +237,10 @@ HWTEST_F(GridIrregularFillerTest, SolveBackward001, TestSize.Level1)
     };
 
     option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    Create([option](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetLayoutOptions(option);
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateDone(frameNode_);
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -283,10 +283,10 @@ HWTEST_F(GridIrregularFillerTest, SolveBackward001, TestSize.Level1)
  */
 HWTEST_F(GridIrregularFillerTest, SolveBackward002, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetLayoutOptions(GetOptionDemo10());
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo10());
+    CreateDone(frameNode_);
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -327,10 +327,10 @@ HWTEST_F(GridIrregularFillerTest, SolveBackward002, TestSize.Level1)
  */
 HWTEST_F(GridIrregularFillerTest, SolveOverScroll001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetLayoutOptions(GetOptionDemo12());
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo12());
+    CreateDone(frameNode_);
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -362,10 +362,10 @@ HWTEST_F(GridIrregularFillerTest, SolveOverScroll001, TestSize.Level1)
  */
 HWTEST_F(GridIrregularFillerTest, SolveOverScroll002, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetLayoutOptions(GetOptionDemo12());
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo12());
+    CreateDone(frameNode_);
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -396,10 +396,10 @@ HWTEST_F(GridIrregularFillerTest, SolveOverScroll002, TestSize.Level1)
  */
 HWTEST_F(GridIrregularFillerTest, Solve001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetLayoutOptions({});
-    });
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    CreateDone(frameNode_);
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
