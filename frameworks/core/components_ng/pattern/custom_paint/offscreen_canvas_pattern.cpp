@@ -445,6 +445,7 @@ size_t OffscreenCanvasPattern::GetBitmapSize()
 void OffscreenCanvasPattern::Reset()
 {
     offscreenPaintMethod_->Reset();
+    currentSetTextDirection_ = TextDirection::INHERIT;
 }
 
 void OffscreenCanvasPattern::UpdateTextDefaultDirection()
