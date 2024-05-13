@@ -468,4 +468,62 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0014, TestSize.Level1)
      */
     EXPECT_TRUE(drawable.Customized());
 }
+
+/**
+ * @tc.name: DrawableDescTest0015
+ * @tc.desc: test AnimatedDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create AnimatedDrawableDescriptor
+     * @tc.expected:return ANIMATED.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    int32_t duration = -1;
+    int32_t iterations = 2;
+    auto* animatedDrawable = new Napi::AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
+    auto res = animatedDrawable->GetDrawableType();
+    EXPECT_EQ(res, Napi::DrawableDescriptor::DrawableType::ANIMATED);
+
+    /**
+     * @tc.steps: step2. set value
+     */
+    animatedDrawable->SetDuration(1000);
+
+    /**
+     * @tc.steps: step3. check duration should be the value set.
+     */
+    EXPECT_EQ(animatedDrawable->GetDuration(), 1000);
+}
+
+/**
+ * @tc.name: DrawableDescTest0016
+ * @tc.desc: test AnimatedDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create AnimatedDrawableDescriptor
+     * @tc.expected:return ANIMATED.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    int32_t duration = -1;
+    int32_t iterations = 2;
+    auto* animatedDrawable = new Napi::AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
+    auto res = animatedDrawable->GetDrawableType();
+    EXPECT_EQ(res, Napi::DrawableDescriptor::DrawableType::ANIMATED);
+
+    /**
+     * @tc.steps: step2. set value
+     */
+    animatedDrawable->SetIterations(1);
+
+    /**
+     * @tc.steps: step3. check duration should be the value set.
+     */
+    EXPECT_EQ(animatedDrawable->GetIterations(), 1);
+}
 } // namespace OHOS::Ace
