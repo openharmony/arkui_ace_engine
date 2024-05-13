@@ -4591,7 +4591,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 }
 
 void TextFieldPattern::SetSelectionFlag(
-    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
 {
     if (!HasFocus() || GetIsPreviewText()) {
         return;
@@ -4605,8 +4605,13 @@ void TextFieldPattern::SetSelectionFlag(
         cursorVisible_ = false;
         showSelect_ = true;
         HandleSetSelection(selectionStart, selectionEnd, false);
-        selectController_->MoveFirstHandleToContentRect(selectionStart);
-        selectController_->MoveSecondHandleToContentRect(selectionEnd);
+        if (isForward) {
+            selectController_->MoveSecondHandleToContentRect(selectionEnd);
+            selectController_->MoveFirstHandleToContentRect(selectionStart, false);
+        } else {
+            selectController_->MoveFirstHandleToContentRect(selectionStart);
+            selectController_->MoveSecondHandleToContentRect(selectionEnd);
+        }
     }
     if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
@@ -5540,7 +5545,7 @@ void TextFieldPattern::SetAccessibilityAction()
                                                                              int32_t end, bool isForward) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->SetSelectionFlag(start, end, std::nullopt);
+        pattern->SetSelectionFlag(start, end, std::nullopt, isForward);
     });
 
     accessibilityProperty->SetActionCopy([weakPtr = WeakClaim(this)]() {
