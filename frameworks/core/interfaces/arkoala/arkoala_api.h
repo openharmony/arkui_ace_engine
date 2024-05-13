@@ -1688,6 +1688,8 @@ struct ArkUIImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* drawableDescriptor);
     void (*setPixelMapArray)(ArkUINodeHandle node, void* animatedDrawableDescriptor);
     void (*setResourceSrc)(ArkUINodeHandle node, void* resource);
+    void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
+    void* (*getDrawingColorFilter)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {

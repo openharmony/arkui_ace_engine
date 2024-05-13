@@ -195,9 +195,9 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
     ArkUI_SwiperIndicator* indicator = new ArkUI_SwiperIndicator;
     indicator->type = indicatorType;
     indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
-    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
-    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
-    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimRight = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimTop = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimBottom = ArkUI_OptionalFloat { 0, 0.0f };
     if (indicatorType == ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
         indicator->itemWidth = ArkUI_OptionalFloat { 0, 0.0f };
         indicator->itemHeight = ArkUI_OptionalFloat { 0, 0.0f };
@@ -217,14 +217,14 @@ void OH_ArkUI_SwiperIndicator_Dispose(ArkUI_SwiperIndicator* indicator)
     delete indicator;
 }
 
-void OH_ArkUI_SwiperIndicator_SetLeftPosition(ArkUI_SwiperIndicator* indicator, float value)
+void OH_ArkUI_SwiperIndicator_SetStartPosition(ArkUI_SwiperIndicator* indicator, float value)
 {
     CHECK_NULL_VOID(indicator);
     indicator->dimLeft.isSet = 1;
     indicator->dimLeft.value = value;
 }
 
-float OH_ArkUI_SwiperIndicator_GetLeftPosition(ArkUI_SwiperIndicator* indicator)
+float OH_ArkUI_SwiperIndicator_GetStartPosition(ArkUI_SwiperIndicator* indicator)
 {
     CHECK_NULL_RETURN(indicator, 0.0f);
     return indicator->dimLeft.value;
@@ -243,14 +243,14 @@ float OH_ArkUI_SwiperIndicator_GetTopPosition(ArkUI_SwiperIndicator* indicator)
     return indicator->dimTop.value;
 }
 
-void OH_ArkUI_SwiperIndicator_SetRightPosition(ArkUI_SwiperIndicator* indicator, float value)
+void OH_ArkUI_SwiperIndicator_SetEndPosition(ArkUI_SwiperIndicator* indicator, float value)
 {
     CHECK_NULL_VOID(indicator);
     indicator->dimRight.isSet = 1;
     indicator->dimRight.value = value;
 }
 
-float OH_ArkUI_SwiperIndicator_GetRightPosition(ArkUI_SwiperIndicator* indicator)
+float OH_ArkUI_SwiperIndicator_GetEndPosition(ArkUI_SwiperIndicator* indicator)
 {
     CHECK_NULL_RETURN(indicator, 0.0f);
     return indicator->dimRight.value;

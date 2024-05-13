@@ -909,11 +909,11 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_SwiperIndicator_SetLeftPosition"
+        "name": "OH_ArkUI_SwiperIndicator_SetStartPosition"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_SwiperIndicator_GetLeftPosition"
+        "name": "OH_ArkUI_SwiperIndicator_GetStartPosition"
     },
     {
         "first_introduced": "12",
@@ -925,11 +925,11 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_SwiperIndicator_SetRightPosition"
+        "name": "OH_ArkUI_SwiperIndicator_SetEndPosition"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_SwiperIndicator_GetRightPosition"
+        "name": "OH_ArkUI_SwiperIndicator_GetEndPosition"
     },
     {
         "first_introduced": "12",
