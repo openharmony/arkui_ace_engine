@@ -162,7 +162,6 @@ void RenderTexture::CalculateFitContain()
     const Size& layoutSize = GetLayoutSize();
     double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
     double sourceRatio = NearZero(sourceSize_.Height()) ? layoutRatio : sourceSize_.Width() / sourceSize_.Height();
-
     if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
         drawSize_ = layoutSize;
     } else if (sourceRatio < layoutRatio) {
@@ -177,7 +176,6 @@ void RenderTexture::CalculateFitCover()
     const Size& layoutSize = GetLayoutSize();
     double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
     double sourceRatio = NearZero(sourceSize_.Height()) ? layoutRatio : sourceSize_.Width() / sourceSize_.Height();
-
     if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
         drawSize_ = layoutSize;
     } else if (sourceRatio < layoutRatio) {
