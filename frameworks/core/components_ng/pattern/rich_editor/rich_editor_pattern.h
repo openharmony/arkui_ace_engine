@@ -624,6 +624,8 @@ public:
         showSelect_ = isShowSelect;
     }
 
+    const std::list<RefPtr<UINode>>& GetAllChildren() const override;
+
     void OnVirtualKeyboardAreaChanged() override;
 
     void SetCaretColor(const Color& caretColor)
