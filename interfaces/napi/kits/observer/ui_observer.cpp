@@ -215,7 +215,7 @@ void UIObserver::UnRegisterScrollEventCallback(const std::string& id, napi_value
     );
 }
 
-void UIObserver::HandleScrollEventStateChange(const std::string& id, const std::string& uniqueId,
+void UIObserver::HandleScrollEventStateChange(const std::string& id, int32_t uniqueId,
     NG::ScrollEventType eventType, float offset)
 {
     for (const auto& listener : scrollEventListeners_) {

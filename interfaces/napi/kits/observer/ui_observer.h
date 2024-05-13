@@ -44,7 +44,7 @@ public:
         const std::string& id, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterScrollEventCallback(napi_value cb);
     static void UnRegisterScrollEventCallback(const std::string& id, napi_value cb);
-    static void HandleScrollEventStateChange(const std::string& id, const std::string& uniqueId,
+    static void HandleScrollEventStateChange(const std::string& id, int32_t uniqueId,
         NG::ScrollEventType eventType, float offset);
 
     static void RegisterRouterPageCallback(
