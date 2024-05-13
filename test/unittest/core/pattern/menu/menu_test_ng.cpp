@@ -30,6 +30,7 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -2614,7 +2615,10 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.Level1)
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
 
     EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -2654,7 +2658,11 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.Level1)
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
 
     EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -2668,7 +2676,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.Level1)
     auto imageLayoutProperty = selectIconNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
     auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
-    ASSERT_FALSE(sourceInfo.has_value());
+    ASSERT_TRUE(sourceInfo.has_value());
 }
 
 /**
@@ -2700,7 +2708,11 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon004, TestSize.Level1)
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
     EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 

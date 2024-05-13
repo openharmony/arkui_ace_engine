@@ -256,6 +256,7 @@ public:
     static void SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius);
     static void SetBorderColor(FrameNode* frameNode, NG::BorderColorProperty borderColors);
     static void SetBorderStyle(FrameNode* frameNode, NG::BorderStyleProperty borderStyles);
+    static void SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin);
 
 private:
     void AddDragFrameNodeToManager() const;

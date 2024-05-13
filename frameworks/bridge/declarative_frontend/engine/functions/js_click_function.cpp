@@ -56,6 +56,8 @@ void JsClickFunction::Execute(const ClickInfo& info)
         obj->SetProperty<double>("tiltY", info.GetTiltY().value());
     }
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
+    obj->SetProperty<double>("axisVertical", 0.0f);
+    obj->SetProperty<double>("axisHorizontal", 0.0f);
 
     JSRef<JSVal> param = obj;
     JsFunction::ExecuteJS(1, &param);
@@ -88,6 +90,8 @@ void JsClickFunction::Execute(GestureEvent& info)
         obj->SetProperty<double>("tiltY", info.GetTiltY().value());
     }
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
+    obj->SetProperty<double>("axisVertical", 0.0f);
+    obj->SetProperty<double>("axisHorizontal", 0.0f);
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->Wrap<GestureEvent>(&info);
@@ -125,6 +129,8 @@ void JsClickFunction::Execute(MouseInfo& info)
         obj->SetProperty<double>("tiltY", info.GetTiltY().value());
     }
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
+    obj->SetProperty<double>("axisVertical", 0.0f);
+    obj->SetProperty<double>("axisHorizontal", 0.0f);
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->Wrap<MouseInfo>(&info);

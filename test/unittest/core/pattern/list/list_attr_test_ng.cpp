@@ -961,7 +961,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
     model.SetScrollEnabled(true);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    EXPECT_TRUE(pattern_->scrollableEvent_->GetEnable());
+    EXPECT_TRUE(pattern_->scrollableEvent_->GetEnabled());
 }
 
 /**
@@ -979,7 +979,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction002, TestSize.Level1)
     model.SetScrollEnabled(true);
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
     CreateDone();
-    EXPECT_FALSE(pattern_->scrollableEvent_->GetEnable());
+    EXPECT_FALSE(pattern_->scrollableEvent_->GetEnabled());
     EXPECT_TRUE(pattern_->IsScrollSnapAlignCenter());
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_TRUE(pattern_->IsAtBottom());
@@ -1000,7 +1000,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction003, TestSize.Level1)
     model.SetScrollEnabled(false);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    EXPECT_FALSE(pattern_->scrollableEvent_->GetEnable());
+    EXPECT_FALSE(pattern_->scrollableEvent_->GetEnabled());
 }
 
 /**
@@ -1018,7 +1018,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction004, TestSize.Level1)
     model.SetScrollEnabled(true);
     CreateListItems(1);
     CreateDone();
-    EXPECT_FALSE(pattern_->scrollableEvent_->GetEnable());
+    EXPECT_FALSE(pattern_->scrollableEvent_->GetEnabled());
 }
 
 /**

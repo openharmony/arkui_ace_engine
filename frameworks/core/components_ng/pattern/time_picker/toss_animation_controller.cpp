@@ -135,6 +135,7 @@ void TimePickerTossAnimationController::StopTossAnimation()
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
     CHECK_NULL_VOID(ref);
+    CHECK_NULL_VOID(ref->property_);
     auto column = AceType::DynamicCast<TimePickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     column->SetTossStatus(false);

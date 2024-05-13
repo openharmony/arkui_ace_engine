@@ -37,6 +37,25 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
     CallMenuStateChangeCallback("false");
 }
 
+void MenuWrapperPattern::OnModifyDone()
+{
+    InitFocusEvent();
+}
+
+void MenuWrapperPattern::InitFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HideMenu();
+    };
+    focusHub->SetOnBlurInternal(std::move(blurTask));
+}
+
 void MenuWrapperPattern::OnAttachToFrameNode()
 {
     RegisterOnTouch();

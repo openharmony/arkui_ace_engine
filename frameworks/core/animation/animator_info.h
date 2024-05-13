@@ -41,7 +41,6 @@ enum class EventOperation {
 using AnimatorEventFunc = std::function<void(const float&)>;
 
 class AnimatorInfo : public AceType {
-
 public:
     AnimatorInfo() = default;
     ~AnimatorInfo() override = default;

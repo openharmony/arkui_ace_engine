@@ -178,6 +178,7 @@
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "bridge/declarative_frontend/style_string/js_span_object.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
@@ -678,6 +679,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PasteButton", JSPasteButton::JSBind },
     { "Particle", JSParticle::JSBind },
     { "SaveButton", JSSaveButton::JSBind },
+    { "WithTheme", JSWithTheme::JSBind },
     { "__KeyboardAvoid__", JSKeyboardAvoid::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },

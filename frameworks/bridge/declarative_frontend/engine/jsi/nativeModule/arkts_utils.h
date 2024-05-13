@@ -152,6 +152,7 @@ public:
         EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
     static void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args,
         ArkUI_Float32 values[], int units[], int index);
+    static ArkUISizeType ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

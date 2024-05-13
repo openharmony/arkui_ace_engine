@@ -70,6 +70,19 @@ void SvgFilter::OnAsPaint()
         filterEffectsRegion.Height() * filterAttr_.height.Value()
     };
 
+    if (filterAttr_.x.Unit() != DimensionUnit::PERCENT) {
+        effectFilterArea.SetLeft(filterAttr_.x.Value());
+    }
+    if (filterAttr_.y.Unit() != DimensionUnit::PERCENT) {
+        effectFilterArea.SetTop(filterAttr_.y.Value());
+    }
+    if (filterAttr_.width.Unit() != DimensionUnit::PERCENT) {
+        effectFilterArea.SetWidth(filterAttr_.width.Value());
+    }
+    if (filterAttr_.height.Unit() != DimensionUnit::PERCENT) {
+        effectFilterArea.SetHeight(filterAttr_.height.Value());
+    }
+
     for (const auto& item : children_) {
         auto nodeFe = AceType::DynamicCast<SvgFe>(item);
         if (!nodeFe) {

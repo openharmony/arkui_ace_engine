@@ -181,6 +181,21 @@ public:
     }
 
 #if defined(PREVIEW)
+    void SetPkgNameList(const std::map<std::string, std::string>& map)
+    {
+        pkgNameMap_ = map;
+    }
+
+    void SetPkgAliasList(const std::map<std::string, std::string>& map)
+    {
+        pkgAliasMap_ = map;
+    }
+
+    void SetpkgContextInfoList(const std::map<std::string, std::vector<std::vector<std::string>>>& map)
+    {
+        pkgContextInfoMap_ = map;
+    }
+
     void SetPreviewFlag(bool flag)
     {
         isComponentPreview_ = flag;
@@ -246,6 +261,9 @@ private:
     std::string requiredComponent_ {};
     std::multimap<std::string, panda::Global<panda::ObjectRef>> previewComponents_;
     panda::Global<panda::ObjectRef> RootView_;
+    std::map<std::string, std::string> pkgNameMap_;
+    std::map<std::string, std::string> pkgAliasMap_;
+    std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap_;
 #endif
     static thread_local EcmaVM* threadVm_;
 };

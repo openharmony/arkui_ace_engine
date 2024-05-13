@@ -33,6 +33,8 @@ private:
     float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
     OffsetF MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size, bool stacked);
     float VerticalLayoutSubMenuHalfScreen(const SizeF& size, float position, const SizeF& menuItemSize);
+    OffsetF GetSubMenuLayoutOffset(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& parentMenuItem,
+        const SizeF& size, bool stacked);
     void ModifySubMenuWrapper(LayoutWrapper* layoutWrapper);
     void CheckMenuPadding(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);

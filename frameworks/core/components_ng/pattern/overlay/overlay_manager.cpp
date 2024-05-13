@@ -1502,6 +1502,10 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
+    auto subwindowMgr = SubwindowManager::GetInstance();
+    for (auto child: rootNode->GetChildren()) {
+        subwindowMgr->DeleteHotAreas(Container::CurrentId(), child->GetId());
+    }
     rootNode->Clean();
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -2398,7 +2402,7 @@ bool OverlayManager::ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<
         auto dialogPattern = DynamicCast<DialogPattern>(pattern);
         CHECK_NULL_RETURN(dialogPattern, false);
         if (dialogPattern->ShouldDismiss()) {
-            SetDismissDialogId(0);
+            SetDismissDialogId(overlay->GetId());
             dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
             return true;
@@ -2724,7 +2728,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
         auto dialogPattern = DynamicCast<DialogPattern>(pattern);
         CHECK_NULL_RETURN(dialogPattern, false);
         if (dialogPattern->ShouldDismiss()) {
-            SetDismissDialogId(0);
+            SetDismissDialogId(overlay->GetId());
             dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
             return true;
@@ -2812,6 +2816,7 @@ RefPtr<FrameNode> OverlayManager::GetModalNodeInStack(std::stack<WeakPtr<FrameNo
         return nullptr;
     }
     auto topModalNode = stack.top().Upgrade();
+    CHECK_NULL_RETURN(topModalNode, nullptr);
     if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
         return topModalNode;
     } else {
@@ -3196,6 +3201,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
     };
+    pipeline->RequestFrame();
     pipeline->AddAnimationClosure(bindSheetTask);
 }
 

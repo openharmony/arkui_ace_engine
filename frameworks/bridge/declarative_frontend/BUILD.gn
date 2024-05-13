@@ -78,6 +78,7 @@ base_output_path = get_label_info(":gen_js_proxyclass", "target_out_dir")
 jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
 jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
+ark_theme_obj_path = base_output_path + "/arkTheme.o"
 arkcomponent_obj_path = base_output_path + "/arkComponent.o"
 
 gen_obj("js_proxyclass") {
@@ -95,6 +96,15 @@ gen_obj("js_enum_style") {
     jsenumstyle_obj_path = base_output_path + "/js_enum_style.c"
   }
   output = jsenumstyle_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("ark_theme") {
+  input = "engine/arkTheme.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    ark_theme_obj_path = base_output_path + "/ark_theme.c"
+  }
+  output = ark_theme_obj_path
   snapshot_dep = []
 }
 
@@ -138,7 +148,9 @@ template("declarative_js_engine") {
 
     deps = [
       ":ark_modifier",
+      ":ark_theme_control",
       ":gen_obj_src_ark_component",
+      ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":shape",
@@ -339,6 +351,9 @@ template("declarative_js_engine") {
       "style_string/js_span_object.cpp",
       "style_string/js_span_string.cpp",
       "view_stack_processor.cpp",
+
+      # ark_theme
+      "ark_theme/theme_apply/js_with_theme.cpp",
 
       # Models implemenations for classic fw
       "jsview/models/action_sheet_model_impl.cpp",
@@ -654,7 +669,9 @@ template("declarative_js_engine_ng") {
 
     deps = [
       ":ark_modifier",
+      ":ark_theme_control",
       ":gen_obj_src_ark_component",
+      ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":shape",
@@ -847,6 +864,9 @@ template("declarative_js_engine_ng") {
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "style_string/js_span_object.cpp",
       "style_string/js_span_string.cpp",
+
+      # ark_theme
+      "ark_theme/theme_apply/js_with_theme.cpp",
     ]
 
     sources += [
@@ -1072,6 +1092,15 @@ ohos_abc("x_node") {
 ohos_abc("uicontext") {
   sources = [ "engine/jsUIContext.js" ]
   output_name = "uicontext"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("ark_theme_control") {
+  sources = [ "engine/arkThemeControl.js" ]
+  output_name = "theme"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

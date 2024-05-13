@@ -1117,6 +1117,16 @@ const __creatorMap__ = new Map([
                 return new ArkProgressComponent(node, type);
             });
         }],
+    ["Scroll", (context) => {
+            return new TypedFrameNode(context, "Scroll", (node, type) => {
+                return new ArkScrollComponent(node, type);
+            });
+        }],
+    ["RelativeContainer", (context) => {
+            return new TypedFrameNode(context, "RelativeContainer", (node, type) => {
+                return new ArkRelativeContainerComponent(node, type);
+            });
+        }],
     ["List", (context) => {
             return new TypedFrameNode(context, "List", (node, type) => {
                 return new ArkListComponent(node, type);

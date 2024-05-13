@@ -209,11 +209,11 @@ public:
         bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle());
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
-        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
     virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
-        const std::optional<TextStyle>& textStyle, const int32_t selStart, const int32_t selEnd);
+        const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
-        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
     virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);

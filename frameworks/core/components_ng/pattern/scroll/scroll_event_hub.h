@@ -28,8 +28,19 @@ enum class ScrollEdge {
     RIGHT,
 };
 
+struct TwoDimensionScrollResult {
+    Dimension xOffset;
+    Dimension yOffset;
+
+    bool operator==(const TwoDimensionScrollResult& scrollRes) const
+    {
+        return xOffset == scrollRes.xOffset && yOffset == scrollRes.yOffset;
+    }
+};
+
 using ScrollEvent = std::function<void(Dimension, Dimension)>;
 using ScrollEventWithState = std::function<void(Dimension, Dimension, ScrollState)>;
+using ScrollEventWithReturn = std::function<TwoDimensionScrollResult(Dimension, Dimension, ScrollState, ScrollSource)>;
 using ScrollEdgeEvent = std::function<void(ScrollEdge)>;
 using ScrollEndEvent = std::function<void()>;
 
@@ -50,12 +61,12 @@ public:
         onScroll_ = std::move(onScroll);
     }
 
-    const ScrollEventWithState& GetOnWillScrollEvent() const
+    const ScrollEventWithReturn& GetOnWillScrollEvent() const
     {
         return onWillScroll_;
     }
 
-    void SetOnWillScrollEvent(ScrollEventWithState&& onWillScroll)
+    void SetOnWillScrollEvent(ScrollEventWithReturn&& onWillScroll)
     {
         onWillScroll_ = std::move(onWillScroll);
     }
@@ -102,7 +113,7 @@ public:
 
 private:
     ScrollEvent onScroll_;
-    ScrollEventWithState onWillScroll_;
+    ScrollEventWithReturn onWillScroll_;
     ScrollEventWithState onDidScroll_;
     OnScrollBeginEvent onScrollBegin_;
     ScrollEndEvent onScrollEnd_;

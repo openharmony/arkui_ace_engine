@@ -573,7 +573,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
     return this;
   }
-  decoration(value: { type: TextDecorationType; color?: ResourceColor }): this {
+  decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): this {
     modifierWithKey(this._modifiersWithKeys, SearchDecorationModifier.identity, SearchDecorationModifier, value);
     return this;
   }

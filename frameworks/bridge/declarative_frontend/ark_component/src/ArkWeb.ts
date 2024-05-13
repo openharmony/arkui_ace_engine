@@ -310,6 +310,9 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   onRenderProcessResponding(callback: OnRenderProcessRespondingCallback): this {
     throw new Error('Method not implemented.');
   }
+  onViewportFitChanged(callback: OnViewportFitChangedCallback): this {
+    throw new Error('Method not implemented.');
+  }
 }
 
 // @ts-ignore

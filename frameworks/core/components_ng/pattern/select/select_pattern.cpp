@@ -967,10 +967,7 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
     Color fontColor = props->GetTextColor().value_or(Color::BLACK);
     json->PutExtAttr("fontColor", fontColor.ColorToString().c_str(), filter);
     json->PutExtAttr("font", props->InspectorGetTextFont().c_str(), filter);
-
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        json->PutExtAttr("controlSize", ConvertControlSizeToString(controlSize_).c_str(), filter);
-    }
+    json->PutExtAttr("controlSize", ConvertControlSizeToString(controlSize_).c_str(), filter);
 }
 
 void SelectPattern::ToJsonMenuBackgroundStyle(

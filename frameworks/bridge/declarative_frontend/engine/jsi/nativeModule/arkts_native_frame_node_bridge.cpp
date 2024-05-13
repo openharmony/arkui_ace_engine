@@ -166,7 +166,8 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
         { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK }, { "Blank", ARKUI_BLANK },
         { "Image", ARKUI_IMAGE }, { "GridRow", ARKUI_GRID_ROW }, { "GridCol", ARKUI_GRID_COL }, { "Flex", ARKUI_FLEX },
         { "Swiper", ARKUI_SWIPER }, { "Progress", ARKUI_PROGRESS }, { "List", ARKUI_LIST },
-        { "ListItem", ARKUI_LIST_ITEM } };
+        { "ListItem", ARKUI_LIST_ITEM }, { "Scroll", ARKUI_SCROLL },
+        { "RelativeContainer", ARKUI_RELATIVE_CONTAINER } };
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     RefPtr<FrameNode> node;
     auto iter = typeMap.find(type);

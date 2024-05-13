@@ -234,10 +234,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     gestureHub->SetPixelMap(nullptr);
                 }
             } else if (!isNotInPreviewState_) {
+                HideEventColumn();
                 if (gestureHub->GetTextDraggable()) {
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 } else {
-                    HideEventColumn();
                     HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                     HideFilter();
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
@@ -316,6 +316,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         if (gestureHub->GetTextDraggable()) {
+            actuator->HideEventColumn();
             actuator->textPixelMap_ = nullptr;
             actuator->HideTextAnimation();
         }
@@ -467,6 +468,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             actuator->SetIsNotInPreviewState(false);
             if (gestureHub->GetIsTextDraggable()) {
                 actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
+                actuator->SetEventColumn(actuator);
             }
             return;
         }
@@ -1204,10 +1206,18 @@ void DragEventActuator::HideEventColumn()
 
 void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
 {
-    auto callback = [this, weak = WeakClaim(this)](GestureEvent& /* info */) {
-        HideEventColumn();
-        HidePixelMap();
-        HideFilter();
+    auto callback = [weak = WeakClaim(this)](GestureEvent& /* info */) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        auto gestureHub = actuator->gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        actuator->HideEventColumn();
+        if (gestureHub->GetTextDraggable()) {
+            actuator->HideTextAnimation();
+        } else {
+            actuator->HidePixelMap();
+            actuator->HideFilter();
+        }
     };
     auto columnGestureHub = columnNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(columnGestureHub);

@@ -95,8 +95,8 @@ public:
     // handle close keyboard
     RefPtr<FrameNode> HandleFocusNode();
     void IsCloseSCBKeyboard();
-    void IsSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode);
-    void IsNotSCBWindowKeyboard(const RefPtr<FrameNode>& curFrameNode);
+    void IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
+    void IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
     void SetNeedSoftKeyboard(std::optional<bool> flag)
     {
         needSoftKeyboard_ = flag;
@@ -942,6 +942,7 @@ private:
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
+    bool lastAnimationStatus_ = true;
 };
 } // namespace OHOS::Ace::NG
 

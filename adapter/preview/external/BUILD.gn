@@ -42,6 +42,7 @@ ohos_source_set("preview_external_source") {
       "ability/stage/stage_app_info.cpp",
       "ability/stage/stage_context.cpp",
       "ability/stage/stage_hap_module_info.cpp",
+      "ability/stage/stage_pkg_context_info.cpp",
     ]
 
     # for rosen backend

@@ -1171,6 +1171,16 @@ class SubscriberManager {
         return SubscriberManager.GetInstance().makeId();
     }
     /**
+     *
+     * @returns a global unique id for state variables.
+     * Unlike MakeId, no need to get id from native side.
+     *
+     * @since 12
+     */
+    static MakeStateVariableId() {
+        return SubscriberManager.nextId_--;
+    }
+    /**
      * Check number of registered Subscriber / registered IDs.
      * @returns number of registered unique ids.
      *
@@ -1292,6 +1302,7 @@ class SubscriberManager {
         return ViewStackProcessor.MakeUniqueId();
     }
 }
+SubscriberManager.nextId_ = 0;
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2734,7 +2745,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
     constructor(subscribeMe, info) {
         super();
         this.subscribers_ = new Set();
-        this.id_ = SubscriberManager.MakeId();
+        this.id_ = SubscriberManager.MakeStateVariableId();
         SubscriberManager.Add(this);
         if (subscribeMe) {
             this.subscribers_.add(subscribeMe.id__());
@@ -4050,11 +4061,13 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
     ifElseBranchUpdateFunction(branchId, branchfunc) {
+        var _a, _b;
         const oldBranchid = If.getBranchId();
         if (branchId === oldBranchid) {
             
             return;
         }
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onIfElseBranchUpdateEnter();
         // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
         // ifElseNode stores the most recent branch, so we can compare
         // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
@@ -4066,6 +4079,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         
         this.purgeDeletedElmtIds();
         branchfunc();
+        (_b = PUV2ViewBase.arkThemeScopeManager) === null || _b === void 0 ? void 0 : _b.onIfElseBranchUpdateExit(removedChildElmtIds);
     }
     /**
      Partial updates for ForEach.
@@ -4232,6 +4246,11 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         return Array.from(PUV2ViewBase.inactiveComponents_)
             .map((component) => `- ${component}`).join('\n');
     }
+    onGlobalThemeChanged() {
+    }
+    static setArkThemeScopeManager(mgr) {
+        PUV2ViewBase.arkThemeScopeManager = mgr;
+    }
 } // class PUV2ViewBase
 // List of inactive components used for Dfx
 PUV2ViewBase.inactiveComponents_ = new Set();
@@ -4242,6 +4261,7 @@ PUV2ViewBase.compareNumber = (a, b) => {
 // static flag for paused rendering
 // when paused, getCurrentlyRenderedElmtId() will return UINodeRegisterProxy.notRecordingDependencies
 PUV2ViewBase.renderingPaused = false;
+PUV2ViewBase.arkThemeScopeManager = undefined;
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4363,15 +4383,13 @@ var _a;
 class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     constructor(subscriber, viewName) {
         super(subscriber, viewName);
-        this.owningView_ = undefined;
         // when owning ViewPU is inActive, delay notifying changes
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
         // install when current value is ObservedObject and the value type is not using compatibility mode
         // note value may change for union type variables when switching an object from one class to another.
         this.shouldInstallTrackedObjectReadCb = false;
         this.dependentElmtIdsByProperty_ = new PropertyDependencies();
-        this.decoratorInfo_ = '';
-        Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false });
+        Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false, value: undefined });
         Object.defineProperty(this, 'subscriberRefs_', { writable: true, enumerable: false, value: new Set() });
         if (subscriber) {
             if (subscriber instanceof ViewPU) {
@@ -5397,21 +5415,21 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 copy = new Set();
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
-                for (const setKey of obj.keys()) {
+                obj.forEach((setKey) => {
                     stack.push({ name: setKey });
                     copy.add(getDeepCopyOfObjectRecursive(setKey));
                     stack.pop();
-                }
+                });
             }
             else if (obj instanceof Map) {
                 copy = new Map();
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
-                for (const mapKey of obj.keys()) {
+                obj.forEach((mapKey) => {
                     stack.push({ name: mapKey });
                     copy.set(mapKey, getDeepCopyOfObjectRecursive(obj.get(mapKey)));
                     stack.pop();
-                }
+                });
             }
             else if (obj instanceof Date) {
                 copy = new Date();
@@ -5424,11 +5442,11 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
             }
-            for (const objKey of Object.keys(obj)) {
+            Object.keys(obj).forEach((objKey) => {
                 stack.push({ name: objKey });
                 Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
                 stack.pop();
-            }
+            });
             return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
         }
     }
@@ -5863,6 +5881,7 @@ class ViewPU extends PUV2ViewBase {
      *
     */
     constructor(parent, localStorage, elmtId = UINodeRegisterProxy.notRecordingDependencies, extraInfo = undefined) {
+        var _a;
         super(parent, elmtId, extraInfo);
         // flag for initial rendering or re-render on-going.
         this.isRenderInProgress = false;
@@ -5871,6 +5890,7 @@ class ViewPU extends PUV2ViewBase {
         this.runReuse_ = false;
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
+        this.hasBeenRecycled_ = false;
         // @Provide'd variables by this class and its ancestors
         this.providedVars_ = new Map();
         // Set of dependent elmtIds that need partial update
@@ -5904,6 +5924,7 @@ class ViewPU extends PUV2ViewBase {
         //this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
         this.localStoragebackStore_ = undefined;
         
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUCreate(this);
         if (localStorage) {
             this.localStorage_ = localStorage;
             
@@ -5981,11 +6002,30 @@ class ViewPU extends PUV2ViewBase {
     get isViewV3() {
         return false;
     }
+    onGlobalThemeChanged() {
+        this.onWillApplyThemeInternally();
+        this.forceCompleteRerender(false);
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                child.onGlobalThemeChanged();
+            }
+        });
+    }
     aboutToReuse(params) { }
     aboutToRecycle() { }
+    onWillApplyThemeInternally() {
+        var _a;
+        const theme = (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.getFinalTheme(this.id__());
+        if (theme) {
+            this.onWillApplyTheme(theme);
+        }
+    }
+    onWillApplyTheme(theme) { }
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
+        var _a;
         
         // if this isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
         // to set and recursively set its children any more
@@ -6024,6 +6064,7 @@ class ViewPU extends PUV2ViewBase {
         if (this.getParent()) {
             this.getParent().removeChild(this);
         }
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUDelete(this);
         this.localStoragebackStore_ = undefined;
     }
     debugInfoStateVars() {
@@ -6098,6 +6139,7 @@ class ViewPU extends PUV2ViewBase {
     }
     initialRenderView() {
         
+        this.onWillApplyThemeInternally();
         this.obtainOwnObservedProperties();
         this.isRenderInProgress = true;
         this.initialRender();
@@ -6152,7 +6194,7 @@ class ViewPU extends PUV2ViewBase {
             this.childrenWeakrefMap_.forEach((weakRefChild) => {
                 const child = weakRefChild.deref();
                 if (child) {
-                    if (child instanceof ViewPU) {
+                    if (child instanceof ViewPU && !child.hasBeenRecycled_) {
                         child.forceCompleteRerender(true);
                     }
                     else {
@@ -6419,8 +6461,10 @@ class ViewPU extends PUV2ViewBase {
         const _componentName = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') : 'unspecified UINode';
         const _popFunc = (classObject && 'pop' in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
+            var _a, _b;
             this.syncInstanceId();
             
+            (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             if (!this.isViewV3) {
                 // Enable PU state tracking only in PU @Components
@@ -6449,6 +6493,7 @@ class ViewPU extends PUV2ViewBase {
                 this.currentlyRenderedElmtIdStack_.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
+            (_b = PUV2ViewBase.arkThemeScopeManager) === null || _b === void 0 ? void 0 : _b.onComponentCreateExit(elmtId);
             
             this.restoreInstanceId();
         };
@@ -6522,7 +6567,7 @@ class ViewPU extends PUV2ViewBase {
         const newElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         const oldElmtId = node.id__();
         this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
-        this.addChild(node);
+        node.hasBeenRecycled_ = false;
         this.rebuildUpdateFunc(oldElmtId, compilerAssignedUpdateFunc);
         recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
     }
@@ -6549,7 +6594,7 @@ class ViewPU extends PUV2ViewBase {
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
-                if (child instanceof ViewPU) {
+                if (child instanceof ViewPU && !child.hasBeenRecycled_) {
                     child.aboutToReuseInternal();
                 }
                 else {
@@ -6568,7 +6613,7 @@ class ViewPU extends PUV2ViewBase {
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
-                if (child instanceof ViewPU) {
+                if (child instanceof ViewPU && !child.hasBeenRecycled_) {
                     child.aboutToRecycleInternal();
                 }
                 else {
@@ -6584,7 +6629,7 @@ class ViewPU extends PUV2ViewBase {
         if (this.getParent() && this.getParent() instanceof ViewPU && !this.getParent().isDeleting_) {
             const parentPU = this.getParent();
             parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
-            this.parent_.removeChild(this);
+            this.hasBeenRecycled_ = true;
             this.setActiveInternal(false);
         }
         else {

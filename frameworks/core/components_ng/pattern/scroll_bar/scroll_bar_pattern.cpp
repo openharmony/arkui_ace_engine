@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -204,14 +204,6 @@ void ScrollBarPattern::SetScrollBar(DisplayMode displayMode)
     }
 }
 
-void ScrollBarPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
-{
-    auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(dirty->GetHostNode()->GetPattern());
-    CHECK_NULL_VOID(scrollBarPattern);
-    currentOffset_ = scrollBarPattern->GetScrollOffset();
-    scrollableDistance_ = scrollBarPattern->GetScrollableDistance();
-}
-
 void ScrollBarPattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)
 {
     CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedScrollBar());
@@ -230,7 +222,7 @@ void ScrollBarPattern::UpdateScrollBarOffset()
     CHECK_NULL_VOID(layoutProperty);
     auto estimatedHeight = GetControlDistance() + (GetAxis() == Axis::VERTICAL ? viewSize.Height() : viewSize.Width());
 
-    UpdateScrollBarRegion(currentOffset_, estimatedHeight,
+    UpdateScrollBarRegion(scrollableNodeOffset_, estimatedHeight,
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
 
@@ -304,7 +296,6 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     bool updateFlag = false;
     if (!HasChild() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        SetScrollProperties(dirty);
         UpdateScrollBarOffset();
         updateFlag = true;
     } else {
@@ -371,7 +362,7 @@ bool ScrollBarPattern::IsAtBottom() const
     return GreatOrEqual(currentOffset_, scrollableDistance_);
 }
 
-void ScrollBarPattern::ValidateOffset(int32_t source)
+void ScrollBarPattern::ValidateOffset()
 {
     if (scrollableDistance_ <= 0.0f) {
         return;
@@ -392,7 +383,7 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source)
 
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
-    ValidateOffset(source);
+    ValidateOffset();
     if (scrollBarProxy_ && lastOffset_ != currentOffset_) {
         scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this));
     }
@@ -492,8 +483,7 @@ void ScrollBarPattern::SetAccessibilityAction()
         if (pattern->GetAxis() == Axis::NONE || pattern->GetScrollableDistance() == 0.0f) {
             return;
         }
-        auto source = pattern->GetCurrentPosition();
-        pattern->UpdateCurrentOffset(pattern->GetChildOffset(), source);
+        pattern->UpdateCurrentOffset(pattern->GetChildOffset(), SCROLL_FROM_BAR);
         // AccessibilityEventType::SCROLL_END
     });
 
@@ -503,8 +493,7 @@ void ScrollBarPattern::SetAccessibilityAction()
         if (pattern->GetAxis() == Axis::NONE || pattern->GetScrollableDistance() == 0.0f) {
             return;
         }
-        auto source = pattern->GetCurrentPosition();
-        pattern->UpdateCurrentOffset(-pattern->GetChildOffset(), source);
+        pattern->UpdateCurrentOffset(-pattern->GetChildOffset(), SCROLL_FROM_BAR);
         // AccessibilityEventType::SCROLL_END
     });
 }

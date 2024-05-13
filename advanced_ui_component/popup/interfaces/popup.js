@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ export const defaultTheme = {
         fontColor: {
             "id": -1,
             "type": 10001,
-            params: ['sys.color.ohos_id_color_text_primary'],
+            params: ['sys.color.font_primary'],
             "bundleName": "",
             "moduleName": ""
         }
@@ -61,7 +61,7 @@ export const defaultTheme = {
         fontColor: {
             "id": -1,
             "type": 10001,
-            params: ['sys.color.ohos_id_color_text_primary_activated'],
+            params: ['sys.color.font_emphasize'],
             "bundleName": "",
             "moduleName": ""
         },
@@ -94,7 +94,7 @@ export const defaultTheme = {
         fontColor: {
             "id": -1,
             "type": 10001,
-            params: ['sys.color.ohos_id_color_text_secondary'],
+            params: ['sys.color.font_secondary'],
             "bundleName": "",
             "moduleName": ""
         },
@@ -102,7 +102,7 @@ export const defaultTheme = {
         plainFontColor: {
             "id": -1,
             "type": 10001,
-            params: ['sys.color.ohos_id_color_text_primary'],
+            params: ['sys.color.font_primary'],
             "bundleName": "",
             "moduleName": ""
         }
@@ -125,7 +125,7 @@ export const defaultTheme = {
         fillColor: {
             "id": -1,
             "type": 10001,
-            params: ['sys.color.ohos_id_color_secondary'],
+            params: ['sys.color.icon_secondary'],
             "bundleName": "",
             "moduleName": ""
         },
@@ -201,7 +201,7 @@ export class PopupComponent extends ViewPU {
         this.__titleHeight = new ObservedPropertySimplePU(0, this, "titleHeight");
         this.__applyHeight = new ObservedPropertySimplePU(0, this, "applyHeight");
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, "buttonHeight");
-        this.__messageMaxWeight = new ObservedPropertySimplePU(0, this, "messageMaxWeight");
+        this.__messageMaxWeight = new ObservedPropertyObjectPU(0, this, 'messageMaxWeight');
         this.__beforeScreenStatus = new ObservedPropertySimplePU(undefined, this, "beforeScreenStatus");
         this.__currentScreenStatus = new ObservedPropertySimplePU(true, this, "currentScreenStatus");
         this.__applySizeOptions = new ObservedPropertyObjectPU(undefined, this, "applySizeOptions");
@@ -226,6 +226,13 @@ export class PopupComponent extends ViewPU {
             "bundleName": "",
             "moduleName": ""
         }, this, "secondButtonBackgroundColor");
+        this.__closeButtonFillColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.icon_secondary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        }, this, 'closeButtonFillColorWithTheme');
         this.listener = mediaquery.matchMediaSync('(orientation: landscape)');
         this.setInitiallyProvidedValue(a1);
     }
@@ -284,6 +291,9 @@ export class PopupComponent extends ViewPU {
         }
         if (a1.secondButtonBackgroundColor !== undefined) {
             this.secondButtonBackgroundColor = a1.secondButtonBackgroundColor;
+        }
+        if (a1.closeButtonFillColorWithTheme !== undefined) {
+            this.closeButtonFillColorWithTheme = a1.closeButtonFillColorWithTheme;
         }
         if (a1.listener !== undefined) {
             this.listener = a1.listener;
@@ -456,6 +466,14 @@ export class PopupComponent extends ViewPU {
         this.__secondButtonBackgroundColor.set(y);
     }
 
+    get closeButtonFillColorWithTheme() {
+        return this.__closeButtonFillColorWithTheme.get();
+    }
+
+    set closeButtonFillColorWithTheme(i6) {
+        this.__closeButtonFillColorWithTheme.set(i6);
+    }
+
     getIconWidth() {
         var d, e;
         return (e = (d = this.icon) === null || d === void 0 ? void 0 : d.width) !== null && e !== void 0 ? e : this.theme.icon.size.width;
@@ -531,7 +549,7 @@ export class PopupComponent extends ViewPU {
     }
 
     getCloseButtonFillColor() {
-        return this.theme.closeButton.fillColor;
+        return this.closeButtonFillColorWithTheme;
     }
 
     getCloseButtonHoverColor() {
@@ -681,6 +699,14 @@ export class PopupComponent extends ViewPU {
             left: this.theme.windows.padding.left - (this.theme.button.margin.right / 2),
             right: this.theme.windows.padding.right
         };
+    }
+
+    onWillApplyTheme(o10) {
+        this.theme.title.fontColor = o10.colors.fontPrimary;
+        this.theme.button.fontColor = o10.colors.fontEmphasize;
+        this.theme.message.fontColor = o10.colors.fontSecondary;
+        this.theme.message.plainFontColor = o10.colors.fontPrimary;
+        this.closeButtonFillColorWithTheme = o10.colors.iconSecondary;
     }
 
     aboutToAppear() {

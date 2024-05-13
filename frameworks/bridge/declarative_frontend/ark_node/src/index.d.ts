@@ -138,6 +138,10 @@ declare class ArkSwiperComponent extends ArkComponent {}
 
 declare class ArkProgressComponent extends ArkComponent {}
 
+declare class ArkScrollComponent extends ArkComponent {}
+
+declare class ArkRelativeContainerComponent extends ArkComponent {}
+
 declare class ArkListComponent extends ArkComponent {}
 
 declare class ArkListItemComponent extends ArkComponent {}

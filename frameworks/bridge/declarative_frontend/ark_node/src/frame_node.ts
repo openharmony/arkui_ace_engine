@@ -652,6 +652,16 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkProgressComponent(node, type);
       })
     }],
+    ["Scroll", (context: UIContext) => {
+      return new TypedFrameNode(context, "Scroll", (node: NodePtr, type: ModifierType) => {
+        return new ArkScrollComponent(node, type);
+      })
+    }],
+    ["RelativeContainer", (context: UIContext) => {
+      return new TypedFrameNode(context, "RelativeContainer", (node: NodePtr, type: ModifierType) => {
+        return new ArkRelativeContainerComponent(node, type);
+          })
+    }],
     ["List", (context: UIContext) => {
       return new TypedFrameNode(context, "List", (node: NodePtr, type: ModifierType) => {
         return new ArkListComponent(node, type);

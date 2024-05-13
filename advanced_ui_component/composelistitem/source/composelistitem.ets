@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { Theme } from '@ohos.arkui.theme';
+
 export enum IconType {
   BADGE = 1,
   NORMAL_ICON,
@@ -93,9 +95,6 @@ const OPERATEITEM_ICONLIKE_SIZE = 24;
 const OPERATEITEM_ARROW_WIDTH = 12
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
-const HOVERING_COLOR = '#0d000000';
-const TOUCH_DOWN_COLOR = '#1a000000';
-const ACTIVED_COLOR = '#1a0a59f7';
 const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
@@ -122,6 +121,15 @@ struct ContentItemStruct {
   description: ResourceStr | null = null;
   private itemRowSpace: number = NORMAL_ITEM_ROW_SPACE
   @State leftWidth: string = LEFT_PART_WIDTH
+  @State primaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary');
+  @State secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+  @State descriptionColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+
+  onWillApplyTheme(theme: Theme): void {
+    this.primaryTextColor = theme.colors.fontPrimary;
+    this.secondaryTextColor = theme.colors.fontSecondary;
+    this.descriptionColor = theme.colors.fontTertiary;
+  }
 
   aboutToAppear() {
     if (this.icon == null && this.iconStyle == null) {
@@ -164,7 +172,7 @@ struct ContentItemStruct {
     Column({ space: TEXT_COLUMN_SPACE }) {
       Text(this.primaryText)
         .fontSize($r('sys.float.ohos_id_text_size_body1'))
-        .fontColor($r('sys.color.ohos_id_color_text_primary'))
+        .fontColor(this.primaryTextColor)
         .maxLines(TEXT_MAX_LINE)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .fontWeight(FontWeight.Medium)
@@ -173,7 +181,7 @@ struct ContentItemStruct {
       if (this.secondaryText != null) {
         Text(this.secondaryText)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
-          .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+          .fontColor(this.secondaryTextColor)
           .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .focusable(true)
@@ -182,7 +190,7 @@ struct ContentItemStruct {
       if (this.description != null) {
         Text(this.description)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
-          .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+          .fontColor(this.descriptionColor)
           .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .focusable(true)
@@ -224,13 +232,22 @@ struct OperateItemStruct {
   @State radioState: boolean = false
   @State checkBoxState: boolean = false
   @State rightWidth: string = RIGHT_PART_WIDTH
+  @State secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+  @State hoveringColor: ResourceColor = '#0d000000';
+  @State activedColor: ResourceColor = '#1a0a59f7';
   @Link parentCanFocus: boolean
   @Link parentCanTouch: boolean
   @Link parentIsHover: boolean
   @Link parentCanHover: boolean
   @Link parentIsActive: boolean
-  @Link parentFrontColor: string
+  @Link parentFrontColor: ResourceColor;
   private rowSpace: number = DEFAULT_ROW_SPACE
+
+  onWillApplyTheme(theme: Theme): void {
+    this.secondaryTextColor = theme.colors.fontSecondary;
+    this.hoveringColor = theme.colors.interactiveHover;
+    this.activedColor = theme.colors.interactiveActive;
+  }
 
   aboutToAppear() {
     if (this.switch != null) {
@@ -283,13 +300,14 @@ struct OperateItemStruct {
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-        this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+      if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
-          this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
@@ -323,13 +341,14 @@ struct OperateItemStruct {
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-        this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+      if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
-          this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
@@ -350,7 +369,7 @@ struct OperateItemStruct {
     Text(text)
       .margin({ right: LISTITEM_PADDING })
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
-      .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+      .fontColor(this.secondaryTextColor)
       .focusable(true)
       .draggable(false)
       .flexShrink(1)
@@ -384,13 +403,14 @@ struct OperateItemStruct {
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-        this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+      if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
-          this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
@@ -419,13 +439,14 @@ struct OperateItemStruct {
       })
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
-        if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-          this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+        if (isHover && this.parentFrontColor === this.hoveringColor) {
+          this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
         }
         if (!isHover) {
           this.parentCanHover = true
           if (this.parentIsHover) {
-            this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+            this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+              (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
           }
         }
       })
@@ -453,13 +474,14 @@ struct OperateItemStruct {
       })
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
-        if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-          this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+        if (isHover && this.parentFrontColor === this.hoveringColor) {
+          this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
         }
         if (!isHover) {
           this.parentCanHover = true
           if (this.parentIsHover) {
-            this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+            this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+              (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
           }
         }
       })
@@ -492,13 +514,14 @@ struct OperateItemStruct {
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-        this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+      if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
-          this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
@@ -548,13 +571,14 @@ struct OperateItemStruct {
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor == HOVERING_COLOR) {
-        this.parentFrontColor = this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString()
+      if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
         this.parentCanHover = true
         if (this.parentIsHover) {
-          this.parentFrontColor = this.parentIsHover ? HOVERING_COLOR : (this.parentIsActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
+            (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
@@ -611,7 +635,7 @@ struct OperateItemStruct {
 export struct ComposeListItem {
   @Prop contentItem: ContentItem | null = null;
   @Prop operateItem: OperateItem | null = null;
-  @State frontColor: string = Color.Transparent.toString()
+  @State frontColor: ResourceColor = Color.Transparent.toString();
   @State borderSize: number = 0;
   @State canFocus: boolean = false
   @State canTouch: boolean = true
@@ -619,6 +643,17 @@ export struct ComposeListItem {
   @State isHover: boolean = true
   @State itemHeight: number = ItemHeight.FIRST_HEIGHT;
   @State isActive: boolean = false
+  @State hoveringColor: ResourceColor = '#0d000000';
+  @State touchDownColor: ResourceColor = '#1a000000';
+  @State activedColor: ResourceColor = '#1a0a59f7';
+  @State focusOutlineColor: ResourceColor = $r('sys.color.ohos_id_color_focused_outline');
+
+  onWillApplyTheme(theme: Theme): void {
+    this.hoveringColor = theme.colors.interactiveHover;
+    this.touchDownColor = theme.colors.interactivePressed;
+    this.activedColor = theme.colors.interactiveActive;
+    this.focusOutlineColor = theme.colors.interactiveFocus;
+  }
 
   aboutToAppear() {
     if (this.contentItem === undefined) {
@@ -729,15 +764,16 @@ export struct ComposeListItem {
       .onHover((isHover: boolean) => {
         this.isHover = isHover
         if (this.canHover) {
-          this.frontColor = isHover ? HOVERING_COLOR : (this.isActive ? ACTIVED_COLOR : Color.Transparent.toString())
+          this.frontColor = isHover ? this.hoveringColor :
+            (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
       })
       .onTouch((event: TouchEvent) => {
-        if (event.type == TouchType.Down && this.canTouch) {
-          this.frontColor = TOUCH_DOWN_COLOR
+        if (event.type === TouchType.Down && this.canTouch) {
+          this.frontColor = this.touchDownColor;
         }
-        if (event.type == TouchType.Up) {
-          this.frontColor = this.isActive ? ACTIVED_COLOR : Color.Transparent.toString()
+        if (event.type === TouchType.Up) {
+          this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
         }
       })
       .stateStyles({
@@ -745,7 +781,7 @@ export struct ComposeListItem {
           .border({
             radius: $r('sys.float.ohos_id_corner_radius_default_m'),
             width: ITEM_BORDER_SHOWN,
-            color: $r('sys.color.ohos_id_color_focused_outline'),
+            color: this.focusOutlineColor,
             style: BorderStyle.Solid
           })
         },

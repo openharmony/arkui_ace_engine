@@ -1128,7 +1128,47 @@ class TextInputBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiu
         (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
     } else {
       return true;
+    }  
+  }
+}
+  
+class TextInputBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetBackgroundColor(node);
+    } else {
+      getUINativeModule().textInput.setBackgroundColor(node, this.value);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputMarginModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputMargin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetMargin(node);
+    } else {
+      getUINativeModule().textInput.setMargin(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
   }
 }
 
@@ -1364,7 +1404,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   customKeyboard(event: () => void): TextInputAttribute {
     throw new Error('Method not implemented.');
   }
-  decoration(value: { type: TextDecorationType; color?: ResourceColor }): TextInputAttribute {
+  decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputDecorationModifier.identity, TextInputDecorationModifier, value);
     return this;
   }
@@ -1513,6 +1553,30 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   borderRadius(value: Length | BorderRadiuses): this {
     modifierWithKey(this._modifiersWithKeys, TextInputBorderRadiusModifier.identity, TextInputBorderRadiusModifier, value);
+    return this;
+  }
+  backgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputBackgroundColorModifier.identity, TextInputBackgroundColorModifier, value);
+    return this;
+  }
+  margin(value: Margin | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = <Length>value;
+        arkValue.right = <Length>value;
+        arkValue.bottom = <Length>value;
+        arkValue.left = <Length>value;
+      } else {
+        arkValue.top = (<Margin>value).top;
+        arkValue.right = (<Margin>value).right;
+        arkValue.bottom = (<Margin>value).bottom;
+        arkValue.left = (<Margin>value).left;
+      }
+      modifierWithKey(this._modifiersWithKeys, TextInputMarginModifier.identity, TextInputMarginModifier, arkValue);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TextInputMarginModifier.identity, TextInputMarginModifier, undefined);
+    }
     return this;
   }
 }

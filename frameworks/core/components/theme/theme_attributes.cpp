@@ -81,6 +81,8 @@ const char THEME_PATTERN_SHEET[] = "sheet_pattern";
 
 const char THEME_BLUR_STYLE_COMMON[] = "blur_style_common";
 const char THEME_PATTERN_SHADOW[] = "shadow_pattern";
+const char THEME_PATTERN_LINEAR_LAYOUT[] = "linear_layout_pattern";
+const char THEME_PATTERN_STACK[] = "stack_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";

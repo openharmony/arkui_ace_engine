@@ -163,7 +163,6 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
         JSRef<JSVal> strId = jsArr->GetValueAt(i);
         // Save return value of insert to know was it duplicate...
         std::pair<std::unordered_set<std::string>::iterator, bool> ret = newIds.insert(strId->ToString());
-
         // Duplicate Id detected. Will return index of those to caller.
         if (!ret.second) {
             duplicateIds->SetValueAt(duplicateIndx++, JSRef<JSVal>::Make(ToJSValue(i)));

@@ -88,6 +88,7 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& padding =
         layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorderWithDefault(horInterval_, 0.0f, 0.0f, 0.0f);
 
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(leftRow);
     auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
@@ -102,6 +103,12 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     leftRow->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     leftRow->GetGeometryNode()->SetMarginFrameOffset(OffsetF(padding.left.value_or(horInterval_), topSpace));
+    if (layoutDirection == TextDirection::RTL) {
+        leftRow->GetGeometryNode()->SetMarginFrameOffset(
+            OffsetF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.right.value_or(horInterval_) -
+                    leftRow->GetGeometryNode()->GetFrameSize().Width(),
+            topSpace));
+    }
     leftRow->Layout();
 
     topSpace = (itemHeight - rightRowSize.Height()) / 2.0f;
@@ -112,6 +119,9 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         OffsetF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.right.value_or(horInterval_) -
                     rightRow->GetGeometryNode()->GetFrameSize().Width(),
             topSpace));
+    if (layoutDirection == TextDirection::RTL) {
+        rightRow->GetGeometryNode()->SetMarginFrameOffset(OffsetF(padding.left.value_or(horInterval_), topSpace));
+    }
     rightRow->Layout();
 
     auto expandableArea = layoutWrapper->GetOrCreateChildByIndex(EXPANDABLE_AREA_VIEW_INDEX);

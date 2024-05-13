@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 98
+#define ARKUI_FULL_API_VERSION 99
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 98
+#define ARKUI_NODE_API_VERSION 99
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2071,6 +2071,8 @@ struct ArkUIScrollModifier {
     ArkUI_Int32 (*getScrollEdge)(ArkUINodeHandle node);
     void (*setScrollPage)(ArkUINodeHandle node, ArkUI_Int32 next, ArkUI_Int32 animation);
     void (*setScrollBy)(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y);
+    ArkUINodeHandle (*getScroll)(ArkUINodeHandle node);
+    void (*setScrollBarProxy)(ArkUINodeHandle node, ArkUINodeHandle proxy);
 };
 
 struct ArkUIListItemModifier {
@@ -2430,6 +2432,9 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTextAreaBorderRadius)(ArkUINodeHandle node);
+    void (*setTextAreaMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
+        const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
+    void (*resetTextAreaMargin)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2614,6 +2619,9 @@ struct ArkUITextInputModifier {
     void (*setTextInputNumberOfLines)(ArkUINodeHandle node, ArkUI_Int32 value);
     ArkUI_Int32 (*getTextInputNumberOfLines)(ArkUINodeHandle node);
     void (*resetTextInputNumberOfLines)(ArkUINodeHandle node);
+    void (*setTextInputMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
+        const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
+    void (*resetTextInputMargin)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2803,6 +2811,8 @@ struct ArkUIMenuItemModifier {
     void (*resetSelectIcon)(ArkUINodeHandle node);
     void (*setSelectIconSrc)(ArkUINodeHandle node, ArkUI_CharPtr iconSrc);
     void (*resetSelectIconSrc)(ArkUINodeHandle node);
+    void (*setSelectIconSymbol)(ArkUINodeHandle node, void* symbolFunction);
+    void (*resetSelectIconSymbol)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemGroupModifier {
@@ -3476,6 +3486,12 @@ struct ArkUIPatternLockModifier {
     void (*resetPatternLockRegularColor)(ArkUINodeHandle node);
     void (*setPatternLockPathColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetPatternLockPathColor)(ArkUINodeHandle node);
+    void (*setPatternLockActiveCircleColor)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPatternLockActiveCircleColor)(ArkUINodeHandle node);
+    void (*setPatternLockActiveCircleRadius)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit);
+    void (*resetPatternLockActiveCircleRadius)(ArkUINodeHandle node);
+    void (*setPatternLockEnableWaveEffect)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPatternLockEnableWaveEffect)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnSplitModifier {

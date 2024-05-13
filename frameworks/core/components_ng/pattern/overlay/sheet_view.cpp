@@ -295,7 +295,11 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     margin.top = CalcLength(SHEET_TITLE_AERA_MARGIN);
     layoutProperty->UpdateMargin(margin);
     PaddingProperty padding;
-    padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
+    } else {
+        padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
+    }
     layoutProperty->UpdatePadding(padding);
     auto columnProps = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnProps, nullptr);

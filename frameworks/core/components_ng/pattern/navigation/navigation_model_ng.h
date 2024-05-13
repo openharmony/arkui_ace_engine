@@ -82,6 +82,8 @@ public:
     static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
+    
+    void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

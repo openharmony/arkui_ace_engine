@@ -98,6 +98,12 @@ var WordBreak;
   WordBreak[WordBreak["BREAK_WORD"] = 2] = "break-word";
 })(WordBreak || (WordBreak = {}));
 
+var DpiFollowStrategy ;
+(function (DpiFollowStrategy ) {
+  DpiFollowStrategy [DpiFollowStrategy ["FOLLOW_HOST_DPI"] = 0] = "follow-host-dpi";
+  DpiFollowStrategy [DpiFollowStrategy ["FOLLOW_UI_EXTENSION_ABILITY_DPI"] = 1] = "follow-ui-extension-ability-dpi";
+})(DpiFollowStrategy  || (DpiFollowStrategy  = {}));
+
 var EllipsisMode;
 (function (EllipsisMode) {
   EllipsisMode[EllipsisMode["START"] = 0] = "start";
@@ -454,6 +460,18 @@ var ScrollState;
   ScrollState[ScrollState["Scroll"] = 1] = "Scroll";
   ScrollState[ScrollState["Fling"] = 2] = "Fling";
 })(ScrollState || (ScrollState = {}));
+
+var ScrollSource;
+(function (ScrollSource) {
+  ScrollSource[ScrollSource["DRAG"] = 0] = "DRAG";
+  ScrollSource[ScrollSource["FLING"] = 1] = "FLING";
+  ScrollSource[ScrollSource["EDGE_EFFECT"] = 2] = "EDGE_EFFECT";
+  ScrollSource[ScrollSource["OHTER_USER_INPUT"] = 3] = "OHTER_USER_INPUT";
+  ScrollSource[ScrollSource["SCROLL_BAR"] = 4] = "SCROLL_BAR";
+  ScrollSource[ScrollSource["SCROLL_BAR_FLING"] = 5] = "SCROLL_BAR_FLING";
+  ScrollSource[ScrollSource["SCROLLER"] = 6] = "SCROLLER";
+  ScrollSource[ScrollSource["SCROLLER_ANIMATION"] = 7] = "SCROLLER_ANIMATION";
+})(ScrollSource || (ScrollSource = {}));
 
 var TouchType;
 (function (TouchType) {
@@ -3056,3 +3074,10 @@ var SubMenuExpandingMode;
   SubMenuExpandingMode[SubMenuExpandingMode["EMBEDDED_EXPAND"] = 1] = "EMBEDDED";
   SubMenuExpandingMode[SubMenuExpandingMode["STACK_EXPAND"] = 2] = "STACK";
 })(SubMenuExpandingMode || (SubMenuExpandingMode = {}));
+
+var ViewportFit;
+(function (ViewportFit) {
+  ViewportFit[ViewportFit["AUTO"] = 0] = "AUTO";
+  ViewportFit[ViewportFit["CONTAINS"] = 1] = "CONTAINS";
+  ViewportFit[ViewportFit["COVER"] = 2] = "COVER";
+})(ViewportFit || (ViewportFit = {}));

@@ -75,7 +75,17 @@ public:
             focusPaintParam.SetPaintWidth(focusBorderWidth_);
             return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
         }
-        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+        FocusPattern focusPattern(FocusType::NODE, true, FocusStyleType::OUTER_BORDER);
+        auto pipline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipline, focusPattern);
+        auto theme = pipline->GetTheme<ButtonTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+        focusPattern.SetFocusPaintParams(focusPaintParam);
+        return focusPattern;
     }
 
     bool IsNeedAdjustByAspectRatio() override
@@ -348,15 +358,9 @@ protected:
     void OnTouchDown();
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
-    void HandleBackgroundColor();
-    void HandleBorderColorAndWidth();
+    void HandleButtonStyle();
     void HandleEnabled();
     void InitButtonLabel();
-    void InitFocusEvent();
-    void HandleFocusEvent(RefPtr<ButtonLayoutProperty>,
-        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
-    void HandleBlurEvent(RefPtr<ButtonLayoutProperty>,
-        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
     Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
         const RefPtr<Curve>& curve);
@@ -405,6 +409,17 @@ private:
     bool bgColorModify_ = false;
     bool scaleModify_ = false;
     bool shadowModify_ = false;
+    
+    void HandleBorderStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
+        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
+    void HandleBackgroundStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
+        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
+    void HandleFocusStatusStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
+        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
+    void HandleFocusStyleTask(RefPtr<ButtonLayoutProperty>,
+        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
+    void HandleBlurStyleTask(RefPtr<ButtonLayoutProperty>,
+        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
 };
 } // namespace OHOS::Ace::NG
 

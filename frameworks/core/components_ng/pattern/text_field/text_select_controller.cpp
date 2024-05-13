@@ -363,7 +363,7 @@ void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
     }
 }
 
-void TextSelectController::MoveFirstHandleToContentRect(int32_t index)
+void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool moveHandle)
 {
     CaretMetricsF firstHandleMetrics;
     firstHandleInfo_.index = index;
@@ -376,11 +376,11 @@ void TextSelectController::MoveFirstHandleToContentRect(int32_t index)
     firstHandleInfo_.rect = firstHandle;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
-    UpdateCaretOffset();
+    UpdateCaretOffset(TextAffinity::DOWNSTREAM, moveHandle);
     UpdateSecondHandleOffset();
 }
 
-void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
+void TextSelectController::MoveSecondHandleToContentRect(int32_t index, bool moveHandle)
 {
     CaretMetricsF secondHandleMetrics;
     secondHandleInfo_.index = index;
@@ -393,7 +393,7 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
     secondHandleInfo_.rect = secondHandle;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
-    UpdateCaretOffset();
+    UpdateCaretOffset(TextAffinity::DOWNSTREAM, moveHandle);
     UpdateFirstHandleOffset();
 }
 
@@ -457,7 +457,7 @@ void TextSelectController::UpdateSecondHandleOffset()
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
 }
 
-void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity)
+void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool moveHandle)
 {
     textAffinity_ = textAffinity;
     if (contentController_->IsEmpty()) {
@@ -476,7 +476,9 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity)
     caretRect.SetSize(SizeF(caretInfo_.rect.Width(),
         LessOrEqual(caretMetrics.height, 0.0) ? textFiled->PreferredLineHeight() : caretMetrics.height));
     caretInfo_.rect = caretRect;
-    MoveHandleToContentRect(caretInfo_.rect, 0.0f);
+    if (moveHandle) {
+        MoveHandleToContentRect(caretInfo_.rect, 0.0f);
+    }
 }
 
 void TextSelectController::UpdateCaretOffset(const OffsetF& offset)

@@ -157,6 +157,7 @@ public:
     static void OnRenderProcessNotResponding(const JSCallbackInfo& args);
     static void OnRenderProcessResponding(const JSCallbackInfo& args);
     static void SelectionMenuOptions(const JSCallbackInfo& args);
+    static void OnViewportFitChanged(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

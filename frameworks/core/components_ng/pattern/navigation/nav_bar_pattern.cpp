@@ -38,6 +38,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+// titlebar ZINDEX
+constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
 void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
     const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode)
 {
@@ -288,7 +290,7 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
         titleBarNode->SetJSViewActive(true);
 
         auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts && opts->Expansive()) {
+        if (opts) {
             titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }
     }
@@ -317,7 +319,7 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
         toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 
         auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts && opts->Expansive()) {
+        if (opts) {
             toolBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }
     }
@@ -340,7 +342,8 @@ void NavBarPattern::OnAttachToFrameNode()
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL };
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
 }
@@ -468,6 +471,12 @@ void NavBarPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarRenderContext = titleBarNode->GetRenderContext();
+    CHECK_NULL_VOID(titleBarRenderContext);
+    // set the titlebar to float on the top
+    titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     MountTitleBar(hostNode);
     MountToolBar(hostNode);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
@@ -475,7 +484,7 @@ void NavBarPattern::OnModifyDone()
 
     auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
     auto navBarContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarContentNode());
-    if (opts && opts->Expansive() && navBarContentNode) {
+    if (opts && navBarContentNode) {
         navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
         navBarContentNode->MarkModifyDone();
     }

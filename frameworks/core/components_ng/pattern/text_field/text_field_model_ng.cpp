@@ -651,6 +651,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 
 void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
+    CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBackgroundColor(frameNode, color);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color, frameNode);
 }
@@ -1860,6 +1861,17 @@ void TextFieldModelNG::SetBorderStyle(FrameNode* frameNode, NG::BorderStylePrope
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBorderStyle(frameNode, borderStyles);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderStyleFlagByUser, borderStyles, frameNode);
+}
+
+void TextFieldModelNG::SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin)
+{
+    CHECK_NULL_VOID(frameNode);
+    MarginProperty userMargin;
+    userMargin.top = margin.top;
+    userMargin.bottom = margin.bottom;
+    userMargin.left = margin.left;
+    userMargin.right = margin.right;
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin, frameNode);
 }
 
 } // namespace OHOS::Ace::NG

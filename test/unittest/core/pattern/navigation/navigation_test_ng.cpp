@@ -827,7 +827,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0022, TestSize.Level1)
     ASSERT_FALSE(contentNode->children_.empty());
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint = std::make_unique<MeasureProperty>();
-    std::optional<CalcLength> len = CalcLength("auto");
+    std::optional<CalcLength> len = CalcLength(200);
     calcLayoutConstraint->selfIdealSize = CalcSize(std::nullopt, len);
     navigationLayoutProperty->calcLayoutConstraint_ = std::move(calcLayoutConstraint);
     algorithm->MeasureContentChild(AceType::RawPtr(layoutWrapper), navigation, navigationLayoutProperty, SizeF());

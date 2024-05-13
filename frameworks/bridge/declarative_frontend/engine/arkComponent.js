@@ -6635,6 +6635,57 @@ class PatternLockAutoResetModifier extends ModifierWithKey {
   }
 }
 PatternLockAutoResetModifier.identity = Symbol('patternlockautoreset');
+class PatternLockActiveCircleColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetActiveCircleColor(node);
+    }
+    else {
+      getUINativeModule().patternLock.setActiveCircleColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PatternLockActiveCircleColorModifier.identity = Symbol('patternLockActiveCircleColor');
+class PatternLockActiveCircleRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetActiveCircleRadius(node);
+    }
+    else {
+      getUINativeModule().patternLock.setActiveCircleRadius(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PatternLockActiveCircleRadiusModifier.identity = Symbol('patternLockActiveCircleRadius');
+class PatternLockEnableWaveEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetEnableWaveEffect(node);
+    }
+    else {
+      getUINativeModule().patternLock.setEnableWaveEffect(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+PatternLockEnableWaveEffectModifier.identity = Symbol('patternLockEnableWaveEffect');
 class ArkPatternLockComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10316,6 +10367,43 @@ class TextAreaBorderRadiusModifier extends ModifierWithKey {
   }
 }
 TextAreaBorderRadiusModifier.identity = Symbol('textAreaBorderRadius');
+class TextAreaBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetBackgroundColor(node);
+    } else {
+      getUINativeModule().textArea.setBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaBackgroundColorModifier.identity = Symbol('textAreaBackgroundColor');
+class TextAreaMarginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetMargin(node);
+    }
+    else {
+      getUINativeModule().textArea.setMargin(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+TextAreaMarginModifier.identity = Symbol('textAreaMargin');
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10550,6 +10638,32 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   borderRadius(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaBorderRadiusModifier.identity, TextAreaBorderRadiusModifier, value);
+    return this;
+  }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaBackgroundColorModifier.identity, TextAreaBackgroundColorModifier, value);
+    return this;
+  }
+  margin(value) {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = value;
+        arkValue.right = value;
+        arkValue.bottom = value;
+        arkValue.left = value;
+      }
+      else {
+        arkValue.top = value.top;
+        arkValue.right = value.right;
+        arkValue.bottom = value.bottom;
+        arkValue.left = value.left;
+      }
+      modifierWithKey(this._modifiersWithKeys, TextAreaMarginModifier.identity, TextAreaMarginModifier, arkValue);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, TextAreaMarginModifier.identity, TextAreaMarginModifier, undefined);
+    }
     return this;
   }
 }
@@ -11660,6 +11774,43 @@ class TextInputBorderRadiusModifier extends ModifierWithKey {
   }
 }
 TextInputBorderRadiusModifier.identity = Symbol('textInputBorderRadius');
+class TextInputBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetBackgroundColor(node);
+    } else {
+      getUINativeModule().textInput.setBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputBackgroundColorModifier.identity = Symbol('textInputBackgroundColor');
+class TextInputMarginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetMargin(node);
+    }
+    else {
+      getUINativeModule().textInput.setMargin(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+TextInputMarginModifier.identity = Symbol('textInputMargin');
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -11935,6 +12086,32 @@ class ArkTextInputComponent extends ArkComponent {
   }
   borderRadius(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputBorderRadiusModifier.identity, TextInputBorderRadiusModifier, value);
+    return this;
+  }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputBackgroundColorModifier.identity, TextInputBackgroundColorModifier, value);
+    return this;
+  }
+  margin(value) {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = value;
+        arkValue.right = value;
+        arkValue.bottom = value;
+        arkValue.left = value;
+      }
+      else {
+        arkValue.top = value.top;
+        arkValue.right = value.right;
+        arkValue.bottom = value.bottom;
+        arkValue.left = value.left;
+      }
+      modifierWithKey(this._modifiersWithKeys, TextInputMarginModifier.identity, TextInputMarginModifier, arkValue);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, TextInputMarginModifier.identity, TextInputMarginModifier, undefined);
+    }
     return this;
   }
 }
@@ -13046,6 +13223,16 @@ class ArkGeometryTransition {
       return (this.id === another.id && this.options === another.options);
   }
 }
+class ArkSymbolEffect {
+  constructor() {
+    this.symbolEffect = undefined;
+    this.action = undefined;
+  }
+  isEqual(another) {
+    return (this.symbolEffect === another.symbolEffect) &&
+      (this.action === another.action);
+  }
+}
 /// <reference path='./import.ts' />
 /// <reference path='./ArkComponent.ts' />
 const FontWeightMap = {
@@ -13115,6 +13302,10 @@ class ArkButtonComponent extends ArkComponent {
   }
   size(value) {
     modifierWithKey(this._modifiersWithKeys, ButtonSizeModifier.identity, ButtonSizeModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
@@ -13570,6 +13761,10 @@ class ArkLoadingProgressComponent extends ArkComponent {
       LoadingProgressForegroundColorModifier, value);
     return this;
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().loadingProgress.setContentModifierBuilder(this.nativePtr, false);
@@ -13914,9 +14109,29 @@ class ScrollClipModifier extends ModifierWithKey {
   }
 }
 ScrollClipModifier.identity = Symbol('scrollClip');
+class ScrollInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollInitialize(node);
+    }
+    else {
+      getUINativeModule().scroll.setScrollInitialize(node, this.value);
+    }
+  }
+}
+ScrollInitializeModifier.identity = Symbol('scrollInitialize');
 class ArkScrollComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ScrollInitializeModifier.identity, ScrollInitializeModifier, value[0]);
+    }
+    return this;
   }
   scrollable(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollScrollableModifier.identity, ScrollScrollableModifier, value);
@@ -14062,6 +14277,10 @@ class ArkToggleComponent extends ArkComponent {
   }
   switchStyle(value) {
     modifierWithKey(this._modifiersWithKeys, ToggleSwitchStyleModifier.identity, ToggleSwitchStyleModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
@@ -14836,6 +15055,10 @@ class ArkRadioComponent extends ArkComponent {
   }
   responseRegion(value) {
     modifierWithKey(this._modifiersWithKeys, RadioResponseRegionModifier.identity, RadioResponseRegionModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
@@ -15648,6 +15871,10 @@ class ArkSliderComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, StepSizeModifier.identity, StepSizeModifier, value);
     return this;
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, false);
@@ -16008,6 +16235,10 @@ class ArkRatingComponent extends ArkComponent {
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, false);
@@ -16113,6 +16344,10 @@ class ArkCheckboxComponent extends ArkComponent {
   }
   responseRegion(value) {
     modifierWithKey(this._modifiersWithKeys, CheckBoxResponseRegionModifier.identity, CheckBoxResponseRegionModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
@@ -18127,6 +18362,10 @@ class ArkDataPanelComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, DataPanelTrackShadowModifier.identity, DataPanelTrackShadowModifier, value);
     return this;
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, false);
@@ -18602,6 +18841,10 @@ class ArkGaugeComponent extends ArkComponent {
   }
   indicator(value) {
     modifierWithKey(this._modifiersWithKeys, GaugeIndicatorModifier.identity, GaugeIndicatorModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
@@ -19347,6 +19590,10 @@ class ArkProgressComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ProgressBackgroundColorModifier.identity, ProgressBackgroundColorModifier, value);
     return this;
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().progress.setContentModifierBuilder(this.nativePtr, false);
@@ -19725,6 +19972,10 @@ class ArkTextClockComponent extends ArkComponent {
   fontFeature(value) {
     throw new Error('Method not implemented.');
   }
+  contentModifier(value) {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().textClock.setContentModifierBuilder(this.nativePtr, false);
@@ -19891,6 +20142,10 @@ class ArkTextTimerComponent extends ArkComponent {
   }
   format(value) {
     modifierWithKey(this._modifiersWithKeys, TextTimerFormatModifier.identity, TextTimerFormatModifier, value);
+    return this;
+  }
+  contentModifier(value) {
+    this.setContentModifier(value);
     return this;
   }
   setContentModifier(modifier) {
@@ -20299,6 +20554,9 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onRenderProcessResponding(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onViewportFitChanged(callback) {
     throw new Error('Method not implemented.');
   }
 }
@@ -21957,6 +22215,9 @@ if (globalThis.ListItemGroup !== undefined) {
 class ArkRelativeContainerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    return this;
   }
 }
 // @ts-ignore
@@ -24392,6 +24653,20 @@ class SymbolContentModifier extends ModifierWithKey {
 }
 SymbolContentModifier.identity = Symbol('symbolContent');
 
+class SymbolEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().symbolGlyph.resetSymbolEffectOptions(node);
+    } else {
+      getUINativeModule().symbolGlyph.setSymbolEffectOptions(node, this.value.symbolEffect, this.value.action);
+    }
+  }
+}
+SymbolEffectModifier.identity = Symbol('symbolEffect');
+
 /// <reference path='./import.ts' />
 class ArkSymbolGlyphComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -24421,6 +24696,13 @@ class ArkSymbolGlyphComponent extends ArkComponent {
   }
   effectStrategy(value) {
     modifierWithKey(this._modifiersWithKeys, EffectStrategyModifier.identity, EffectStrategyModifier, value);
+    return this;
+  }
+  symbolEffect(effect, action) {
+    let symbolEffect = new ArkSymbolEffect();
+    symbolEffect.symbolEffect = effect;
+    symbolEffect.action = action;
+    modifierWithKey(this._modifiersWithKeys, SymbolEffectModifier.identity, SymbolEffectModifier, symbolEffect);
     return this;
   }
 }

@@ -54,6 +54,12 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
+    auto pattern = GetImagePattern();
+    CHECK_NULL_VOID(pattern);
+    if (src.empty() && !pixMap && pattern->GetIsAnimation()) {
+        pattern->SetSrcUndefined(true);
+        return;
+    }
 
     // set draggable for framenode
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -68,9 +74,7 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
     auto srcInfo = CreateSourceInfo(src, pixMap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber(isUriPureNumber);
 
-    auto pattern = GetImagePattern();
-    CHECK_NULL_VOID(pattern);
-    if (pattern->GetIsAnimation()) {
+    if (pattern->GetImageType() != ImagePattern::ImageType::BASE) {
         if (pattern->GetHasSizeChanged()) {
             pattern->ResetPictureSize();
         }
@@ -82,7 +86,7 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
             frameNode->RemoveChild(imageFrameNode);
         }
     }
-    pattern->SetIsAnimation(false);
+    pattern->SetImageType(ImagePattern::ImageType::BASE);
 
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
 }
@@ -143,8 +147,9 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
         gestureHub->InitDragDropEvent();
     }
     frameNode->SetDraggable(draggable);
+    pattern->SetSrcUndefined(false);
     pattern->StopAnimation();
-    pattern->SetIsAnimation(true);
+    pattern->SetImageType(ImagePattern::ImageType::ANIMATION);
     std::vector<ImageProperties> images = imageList;
     pattern->SetImages(std::move(images));
     pattern->SetDuration(duration);
@@ -435,7 +440,7 @@ void ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawable
     CHECK_NULL_VOID(pattern);
 
     pattern->StopAnimation();
-    pattern->SetIsAnimation(true);
+    pattern->SetImageType(ImagePattern::ImageType::ANIMATION);
     pattern->SetImages(std::move(images));
     pattern->SetDuration(duration);
     pattern->SetIteration(iterations);

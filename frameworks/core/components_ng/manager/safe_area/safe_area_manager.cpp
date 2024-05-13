@@ -22,8 +22,27 @@
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
 {
-    // cutout regions currently not adjacent to edges, so ignore it.
-    return false;
+    // cutout regions adjacent to edges.
+    auto cutoutArea = safeArea;
+
+    if (cutoutArea.top_.IsValid()) {
+        cutoutArea.top_.start = 0;
+    }
+    if (safeArea.bottom_.IsValid()) {
+        cutoutArea.bottom_.end = PipelineContext::GetCurrentRootHeight();
+    }
+    if (cutoutArea.left_.IsValid()) {
+        cutoutArea.left_.start = 0;
+    }
+    if (cutoutArea.right_.IsValid()) {
+        cutoutArea.right_.end = PipelineContext::GetCurrentRootWidth();
+    }
+
+    if (cutoutSafeArea_ == cutoutArea) {
+        return false;
+    }
+    cutoutSafeArea_ = cutoutArea;
+    return true;
 }
 
 bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
