@@ -269,6 +269,8 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         buttonValue = info[0]->ToString();
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
+    // set font color
+    Color fontColor;
     if (info[1]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[1]);
 
@@ -283,16 +285,20 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         }
         SearchModel::GetInstance()->SetSearchButtonFontSize(size);
 
-        // set font color
-        Color fontColor;
         auto fontColorProp = param->GetProperty("fontColor");
+        fontColor = theme->GetSearchButtonTextColor();
         if (fontColorProp->IsUndefined() || fontColorProp->IsNull() || !ParseJsColor(fontColorProp, fontColor)) {
-            fontColor = theme->GetSearchButtonTextColor();
+            if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
+                SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+            }
+        } else {
+                SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
         }
-        SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
-        SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
+        if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
+            SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+        }
     }
 }
 
@@ -367,9 +373,12 @@ void JSSearch::SetCancelButton(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetCancelButtonStyle(cancelButtonStyle);
 
     auto iconProp = param->GetProperty("icon");
+    Color iconColor = theme->GetSearchIconColor();
     if (iconProp->IsUndefined() || iconProp->IsNull()) {
         SearchModel::GetInstance()->SetCancelIconSize(theme->GetIconHeight());
-        SearchModel::GetInstance()->SetCancelIconColor(theme->GetSearchIconColor());
+        if (!JSSeacrhTheme::ObtainCancelIconColor(iconColor)) {
+            SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+        }
         SearchModel::GetInstance()->SetRightIconSrcPath("");
     } else {
         SetIconStyle(info);
