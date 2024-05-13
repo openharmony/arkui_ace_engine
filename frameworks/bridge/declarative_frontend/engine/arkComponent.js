@@ -12631,6 +12631,16 @@ class ArkScrollSnapOptions {
       && (this.enableSnapToEnd === another.enableSnapToEnd));
   }
 }
+class ArkScrollOffsetOptions {
+  constructor() {
+    this.xOffset = undefined;
+    this.yOffset = undefined;
+  }
+  isEqual(another) {
+    return this.xOffset === another.xOffset && this.yOffset === another.yOffset;
+  }
+}
+
 class ArkGeometryTransition {
   constructor() {
       this.id = undefined;
@@ -13526,6 +13536,36 @@ class ScrollClipModifier extends ModifierWithKey {
   }
 }
 ScrollClipModifier.identity = Symbol('scrollClip');
+class ScrollInitialOffsetModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetInitialOffset(node);
+    }
+    else {
+      getUINativeModule().scroll.setInitialOffset(node, this.value.xOffset, this.value.yOffset);
+    }
+  }
+  checkObjectDiff() {
+    return !((this.stageValue.xOffset === this.value.xOffset) &&
+    (this.stageValue.yOffset === this.value.yOffset));
+  }
+}
+ScrollInitialOffsetModifier.identity = Symbol('initialOffset');
+
+class ScrollFlingSpeedLimitModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetFlingSpeedLimit(node);
+    } else {
+      getUINativeModule().scroll.setFlingSpeedLimit(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ScrollFlingSpeedLimitModifier.identity = Symbol('flingSpeedLimit');
+
 class ScrollInitializeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -13642,6 +13682,23 @@ class ArkScrollComponent extends ArkComponent {
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollClipModifier.identity, ScrollClipModifier, value);
+    return this;
+  }
+  initialOffset(value) {
+    let options = new ArkScrollOffsetOptions();
+    if (value) {
+      if (value.xOffset) {
+        options.xOffset = value.xOffset;
+      }
+      if (value.yOffset) {
+        options.yOffset = value.yOffset;
+      }
+      modifierWithKey(this._modifiersWithKeys, ScrollInitialOffsetModifier.identity, ScrollInitialOffsetModifier, options);
+    }
+    return this;
+  }
+  flingSpeedLimit(value) {
+    modifierWithKey(this._modifiersWithKeys, ScrollFlingSpeedLimitModifier.identity, ScrollFlingSpeedLimitModifier, value);
     return this;
   }
 }
