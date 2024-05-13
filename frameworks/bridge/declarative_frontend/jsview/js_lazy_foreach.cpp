@@ -161,6 +161,7 @@ void JSLazyForEach::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLazyForEach>::Declare("LazyForEach");
     JSClass<JSLazyForEach>::StaticMethod("createInternal", &JSLazyForEach::Create);
+    JSClass<JSLazyForEach>::StaticMethod("create", &JSLazyForEach::Create);
     JSClass<JSLazyForEach>::StaticMethod("pop", &JSLazyForEach::Pop);
     JSClass<JSLazyForEach>::StaticMethod("onMove", &JSLazyForEach::OnMove);
     JSClass<JSLazyForEach>::Bind(globalObj);
