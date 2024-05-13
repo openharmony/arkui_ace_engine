@@ -30,6 +30,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -123,13 +124,43 @@ void SwitchPattern::InitFocusEvent()
 void SwitchPattern::HandleBlurEvent()
 {
     CHECK_NULL_VOID(switchModifier_);
-    switchModifier_->SetIsFocused(false);
+    RemoveIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(false);
 }
 
 void SwitchPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(switchModifier_);
-    switchModifier_->SetIsFocused(true);
+    AddIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(true);
+}
+
+void SwitchPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void SwitchPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void SwitchPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    CHECK_NULL_VOID(switchModifier_);
+    switchModifier_->SetIsFocused(isFocusAcitve);
 }
 
 void SwitchPattern::UpdateSwitchPaintProperty()
