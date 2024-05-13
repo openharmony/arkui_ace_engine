@@ -135,21 +135,18 @@ public:
         }
         selectedRect.clear();
         auto firstRect = lineGroup.begin()->second;
-        if (lineGroup.size() == 1) {
-            selectedRect.emplace_back(firstRect);
-            return;
+        float lastLineBottom = firstRect.Top();
+        auto end = *(lineGroup.rbegin());
+        for (auto const& line : lineGroup) {
+            if (line == end) {
+                break;
+            }
+            auto rect = RectF(line.second.Left(), lastLineBottom, longestLine - line.second.Left(),
+                line.second.Bottom() - lastLineBottom);
+            selectedRect.emplace_back(rect);
+            lastLineBottom = line.second.Bottom();
         }
-        firstRect.SetWidth(longestLine - firstRect.Left());
-        selectedRect.emplace_back(firstRect);
-        auto endRect = lineGroup.rbegin()->second;
-        endRect.SetWidth(endRect.Right());
-        endRect.SetLeft(0.0f);
-        selectedRect.emplace_back(endRect);
-        const int32_t drawMiddleLineNumberLimit = 2;
-        if (static_cast<int32_t>(lineGroup.size()) > drawMiddleLineNumberLimit || firstRect.Left() <= endRect.Right()) {
-            auto middleRect = RectF(0.0f, firstRect.Bottom(), longestLine, endRect.Top() - firstRect.Bottom());
-            selectedRect.emplace_back(middleRect);
-        }
+        selectedRect.emplace_back(RectF(end.second.Left(), lastLineBottom, end.second.Width(), end.second.Height()));
     }
 
     // The methods that need to be implemented for input class components
