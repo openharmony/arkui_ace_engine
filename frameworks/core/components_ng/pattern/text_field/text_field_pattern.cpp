@@ -217,7 +217,7 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
         result += item;
         result += ",";
     }
-    result = result.substr(0, result.length() - 1);
+    result = result.substr(0, static_cast<int32_t>(result.length()) - 1);
     return result;
 }
 
@@ -1360,8 +1360,9 @@ void TextFieldPattern::HandleOnPaste()
         textfield->ResetObscureTickCountDown();
         textfield->selectController_->UpdateCaretIndex(newCaretPosition);
         if (layoutProperty->HasMaxLength()) {
-            textfield->showCountBorderStyle_ = (originLength - (end - start) + pasteData.length()) >
-                                               layoutProperty->GetMaxLengthValue(Infinity<uint32_t>());
+            int32_t sum = originLength - (end - start) + static_cast<int32_t>(pasteData.length());
+            textfield->showCountBorderStyle_ = sum >
+                static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
             textfield->HandleCountStyle();
         }
         textfield->CloseSelectOverlay(true);
@@ -2885,7 +2886,7 @@ void TextFieldPattern::OnHover(bool isHover)
     } else {
         int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
-        windowId = GetSCBSystemWindowId();
+        windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         pipeline->FreeMouseStyleHoldNode(frameId);
@@ -2897,7 +2898,7 @@ void TextFieldPattern::RestoreDefaultMouseState()
 {
     int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
-    windowId = GetSCBSystemWindowId();
+    windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
@@ -2917,7 +2918,7 @@ void TextFieldPattern::ChangeMouseState(
     auto y = location.GetY();
     int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
-    windowId = GetSCBSystemWindowId();
+    windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
     if (GreatNotEqual(x, 0) && LessNotEqual(x, frameRect_.Width()) && GreatNotEqual(y, 0) &&
         LessNotEqual(y, frameRect_.Height())) {
@@ -2946,7 +2947,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
     int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
-    windowId = GetSCBSystemWindowId();
+    windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
     if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover() || scrollBar->InBarRectRegion(point))) {
         pipeline->SetMouseStyleHoldNode(frameId);
@@ -3434,8 +3435,9 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
         caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
     }
     if (layoutProperty->HasMaxLength()) {
-        showCountBorderStyle_ = (originLength + StringUtils::ToWstring(insertValue).length()) >
-                                layoutProperty->GetMaxLengthValue(Infinity<uint32_t>());
+        int32_t sum = originLength + static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
+        showCountBorderStyle_ = sum >
+            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
         HandleCountStyle();
     }
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
@@ -6834,8 +6836,9 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     selectController_->UpdateCaretIndex(start + caretMoveLength);
 
     if (layoutProperty->HasMaxLength()) {
-        showCountBorderStyle_ = (originLength + StringUtils::ToWstring(info.text).length()) >
-            layoutProperty->GetMaxLengthValue(Infinity<uint32_t>());
+        int32_t sum = originLength + static_cast<int32_t>(StringUtils::ToWstring(info.text).length());
+        showCountBorderStyle_ = sum >
+            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
         HandleCountStyle();
     }
 
