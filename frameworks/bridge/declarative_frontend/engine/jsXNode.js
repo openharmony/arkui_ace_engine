@@ -666,7 +666,7 @@ class FrameNode {
     }
     disposeTree() {
         let parent = this.getParent();
-        if (parent?.getNodeType() == "NodeContainer") {
+        if (parent?.getNodeType() === "NodeContainer") {
             getUINativeModule().nodeContainer.clean(parent?.getNodePtr());
         }
         else {
@@ -1135,6 +1135,16 @@ const __creatorMap__ = new Map([
     ["ListItem", (context) => {
             return new TypedFrameNode(context, "ListItem", (node, type) => {
                 return new ArkListItemComponent(node, type);
+            });
+        }],
+    ["Divider", (context) => {
+        return new TypedFrameNode(context, "Divider", (node, type) => {
+            return new ArkDividerComponent(node, type);
+            });
+        }],
+    ["LoadingProgress", (context) => {
+        return new TypedFrameNode(context, "LoadingProgress", (node, type) => {
+            return new ArkLoadingProgressComponent(node, type);
             });
         }],
 ]);

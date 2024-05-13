@@ -4630,6 +4630,9 @@ class ArkDividerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  initialize(value) {
+    return this;
+  }
   vertical(value) {
     modifierWithKey(this._modifiersWithKeys, DividerVerticalModifier.identity, DividerVerticalModifier, value);
     return this;
@@ -4842,6 +4845,11 @@ class ArkGridRowComponent extends ArkComponent {
       this.setColumns(value[0].columns);
       this.setBreakpoints(value[0].breakpoints);
       this.setDirection(value[0].direction);
+    } else {
+      this.setGutter(null);
+      this.setColumns(null);
+      this.setBreakpoints(null);
+      this.setDirection(null);
     }
     return this;
   }
@@ -5445,9 +5453,13 @@ class ArkGridColComponent extends ArkComponent {
   }
   initialize(value) {
     if (value[0] !== undefined) {
-      modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value.span);
-      modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity, GridColOffsetModifier, value.offset);
-      modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, value.order);
+      modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value[0].span);
+      modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity, GridColOffsetModifier, value[0].offset);
+      modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, value[0].order);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, null);
+      modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity, GridColOffsetModifier, null);
+      modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, null);
     }
     return this;
   }
@@ -13164,6 +13176,9 @@ if (globalThis.Button !== undefined) {
 class ArkLoadingProgressComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    return this;
   }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, LoadingProgressColorModifier.identity, LoadingProgressColorModifier, value);
