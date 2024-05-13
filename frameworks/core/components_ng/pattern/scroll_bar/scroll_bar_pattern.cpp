@@ -204,14 +204,6 @@ void ScrollBarPattern::SetScrollBar(DisplayMode displayMode)
     }
 }
 
-void ScrollBarPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
-{
-    auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(dirty->GetHostNode()->GetPattern());
-    CHECK_NULL_VOID(scrollBarPattern);
-    scrollableNodeOffset_ = scrollBarPattern->GetScrollableNodeOffset();
-    scrollableDistance_ = scrollBarPattern->GetScrollableDistance();
-}
-
 void ScrollBarPattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)
 {
     CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedScrollBar());
@@ -304,7 +296,6 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     bool updateFlag = false;
     if (!HasChild() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        SetScrollProperties(dirty);
         UpdateScrollBarOffset();
         updateFlag = true;
     } else {
