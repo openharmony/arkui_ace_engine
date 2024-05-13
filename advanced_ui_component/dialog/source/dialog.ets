@@ -324,7 +324,7 @@ export struct SelectDialog{
           }.paddingContentStyle().width('100%')
         }
         List({ space: 1 }) {
-          ForEach(this.radioContent, (item: SheetInfo, index?: number) => {
+          ForEach(this.radioContent, (item: SheetInfo, index: number) => {
             ListItem() {
               Column() {
                 Button() {
@@ -354,7 +354,7 @@ export struct SelectDialog{
                   item.action && item.action();
                   this.controller.close();
                 })
-                if (index && index < this.radioContent.length - 1) {
+                if (index < this.radioContent.length - 1) {
                   Divider().color(this.dividerColorWithTheme).paddingStyle();
                 }
               }.paddingStyle()
@@ -470,11 +470,13 @@ export struct ConfirmDialog{
           .constraintSize({ minHeight: 36 })
         }
         Row() {
-          Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
-            .onChange((checked: boolean) => {
-              this.isChecked = checked
-            })
-            .margin({ left: 0, right: 8 })
+          WithTheme({ theme: this.theme}) {
+            Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
+              .onChange((checked: boolean) => {
+                this.isChecked = checked
+              })
+              .margin({ left: 0, right: 8 })
+          }
           Text(this.checkTips)
             .fontSize($r('sys.float.ohos_id_text_size_body2'))
             .fontWeight(FontWeight.Medium)
