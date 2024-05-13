@@ -351,6 +351,7 @@ void SwiperArrowPattern::UpdateArrowContent()
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
     if (V2::SWIPER_LEFT_ARROW_ETS_TAG == GetHost()->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             symbolLayoutProperty->UpdateSymbolSourceInfo(
@@ -371,10 +372,6 @@ void SwiperArrowPattern::UpdateArrowContent()
     symbolLayoutProperty->UpdateFontSize(swiperArrowLayoutProperty->GetArrowSizeValue());
     symbolLayoutProperty->UpdateSymbolColorList({ swiperArrowLayoutProperty->GetArrowColorValue() });
     if (!swiperArrowLayoutProperty->GetEnabledValue(true)) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-        CHECK_NULL_VOID(swiperIndicatorTheme);
         buttonNode->GetRenderContext()->UpdateBackgroundColor(
             backgroundColor_.BlendOpacity(swiperIndicatorTheme->GetArrowDisabledAlpha()));
         symbolLayoutProperty->UpdateSymbolColorList({ swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(

@@ -459,10 +459,10 @@ private:
     Dimension indicatorDigitHeight_;
     Dimension indicatorDotItemSpace_;
     Dimension indicatorPaddingDot_;
-    uint32_t leftSymbolId_;
-    uint32_t rightSymbolId_;
-    uint32_t upSymbolId_;
-    uint32_t downSymbolId_;
+    uint32_t leftSymbolId_ = 0;
+    uint32_t rightSymbolId_ = 0;
+    uint32_t upSymbolId_ = 0;
+    uint32_t downSymbolId_ = 0;
 };
 
 } // namespace OHOS::Ace
