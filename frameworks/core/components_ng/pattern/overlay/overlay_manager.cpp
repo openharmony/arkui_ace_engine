@@ -696,10 +696,11 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         if (wrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
             ShowPreviewDisappearAnimation(wrapperPattern);
         }
+        auto layoutProperty = menu->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
         auto renderContext = menu->GetRenderContext();
         if (renderContext->HasDisappearTransition()) {
-            auto layoutProperty = menu->GetLayoutProperty();
-            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
             renderContext->SetTransitionOutCallback(
                 [rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
                                     weak = WeakClaim(this)] {

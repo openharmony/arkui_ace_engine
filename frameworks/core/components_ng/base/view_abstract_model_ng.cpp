@@ -245,7 +245,23 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
-
+    auto targetId = targetNode->GetId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    if (subwindow) {
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto menuNode = overlayManager->GetMenuNode(targetId);
+        if (menuNode) {
+            auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+            CHECK_NULL_VOID(menuWrapperPattern);
+            menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
+        }
+    }
     if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
         BindContextMenuSingle(buildFunc, menuParam, previewBuildFunc);
     } else {
