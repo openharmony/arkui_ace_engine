@@ -542,11 +542,6 @@ bool CheckAttributeObject(const ArkUI_AttributeItem* item)
     return true;
 }
 
-bool CheckRangFloat(float start, float end, float value)
-{
-    return value >= start && value <= end;
-}
-
 bool CheckAttributeIndicator(const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, false);
@@ -10299,7 +10294,7 @@ void ResetSliderBlockStyle(ArkUI_NodeHandle node)
 
 int32_t SetSliderValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0 || !CheckRangFloat(ZERO_F, HUNDRED, item->value[0].f32)) {
+    if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getSliderModifier()->setSliderValue(node->uiNodeHandle, item->value[0].f32);
@@ -10320,7 +10315,7 @@ void ResetSliderValue(ArkUI_NodeHandle node)
 
 int32_t SetSliderMinValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0 || !CheckRangFloat(ZERO_F, HUNDRED, item->value[0].f32)) {
+    if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getSliderModifier()->setMinLabel(node->uiNodeHandle, item->value[0].f32);
@@ -10341,7 +10336,7 @@ void ResetSliderMinValue(ArkUI_NodeHandle node)
 
 int32_t SetSliderMaxValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0 || !CheckRangFloat(ZERO_F, HUNDRED, item->value[0].f32)) {
+    if (item->size == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getSliderModifier()->setMaxLabel(node->uiNodeHandle, item->value[0].f32);
@@ -10362,7 +10357,7 @@ void ResetSliderMaxValue(ArkUI_NodeHandle node)
 
 int32_t SetSliderStep(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0 || !CheckRangFloat(SLIDER_STEP_MIN_F, HUNDRED, item->value[0].f32)) {
+    if (item->size == 0 || LessNotEqual(item->value[0].f32, SLIDER_STEP_MIN_F)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getSliderModifier()->setStep(node->uiNodeHandle, item->value[0].f32);
