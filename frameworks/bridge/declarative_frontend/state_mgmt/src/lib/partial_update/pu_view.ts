@@ -38,6 +38,8 @@ abstract class ViewPU extends PUV2ViewBase
 
   private recycleManager_: RecycleManager = undefined;
 
+  private hasBeenRecycled_: boolean = false;
+
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: Map<string, ObservedPropertyAbstractPU<any>> = new Map<string, ObservedPropertyAbstractPU<any>>();
 
@@ -395,7 +397,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
         const child = weakRefChild.deref();
         if (child) {
-          if (child instanceof ViewPU) {
+          if (child instanceof ViewPU && !child.hasBeenRecycled_) {
             child.forceCompleteRerender(true);
           } else {
             throw new Error('forceCompleteRerender not implemented for ViewV2, yet');
@@ -809,7 +811,7 @@ abstract class ViewPU extends PUV2ViewBase
     const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const oldElmtId: number = node.id__();
     this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
-    this.addChild(node);
+    node.hasBeenRecycled_ = false;
     this.rebuildUpdateFunc(oldElmtId, compilerAssignedUpdateFunc);
     recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
   }
@@ -838,7 +840,7 @@ abstract class ViewPU extends PUV2ViewBase
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
-        if (child instanceof ViewPU) {
+        if (child instanceof ViewPU && !child.hasBeenRecycled_) {
           child.aboutToReuseInternal();
         } else {
           // FIXME fix for mixed V2 - V3 Hierarchies
@@ -857,7 +859,7 @@ abstract class ViewPU extends PUV2ViewBase
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
-        if (child instanceof ViewPU) {
+        if (child instanceof ViewPU && !child.hasBeenRecycled_) {
           child.aboutToRecycleInternal();
         } else {
           // FIXME fix for mixed V2 - V3 Hierarchies
@@ -874,7 +876,7 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.getParent() && this.getParent() instanceof ViewPU && !(this.getParent() as ViewPU).isDeleting_) {
       const parentPU : ViewPU = this.getParent() as ViewPU;
       parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
-      this.parent_.removeChild(this);
+      this.hasBeenRecycled_ = true;
       this.setActiveInternal(false);
     } else {
       this.resetRecycleCustomNode();

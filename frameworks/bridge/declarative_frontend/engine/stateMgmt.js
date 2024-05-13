@@ -5890,6 +5890,7 @@ class ViewPU extends PUV2ViewBase {
         this.runReuse_ = false;
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
+        this.hasBeenRecycled_ = false;
         // @Provide'd variables by this class and its ancestors
         this.providedVars_ = new Map();
         // Set of dependent elmtIds that need partial update
@@ -6193,7 +6194,7 @@ class ViewPU extends PUV2ViewBase {
             this.childrenWeakrefMap_.forEach((weakRefChild) => {
                 const child = weakRefChild.deref();
                 if (child) {
-                    if (child instanceof ViewPU) {
+                    if (child instanceof ViewPU && !child.hasBeenRecycled_) {
                         child.forceCompleteRerender(true);
                     }
                     else {
@@ -6566,7 +6567,7 @@ class ViewPU extends PUV2ViewBase {
         const newElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         const oldElmtId = node.id__();
         this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
-        this.addChild(node);
+        node.hasBeenRecycled_ = false;
         this.rebuildUpdateFunc(oldElmtId, compilerAssignedUpdateFunc);
         recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
     }
@@ -6593,7 +6594,7 @@ class ViewPU extends PUV2ViewBase {
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
-                if (child instanceof ViewPU) {
+                if (child instanceof ViewPU && !child.hasBeenRecycled_) {
                     child.aboutToReuseInternal();
                 }
                 else {
@@ -6612,7 +6613,7 @@ class ViewPU extends PUV2ViewBase {
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
-                if (child instanceof ViewPU) {
+                if (child instanceof ViewPU && !child.hasBeenRecycled_) {
                     child.aboutToRecycleInternal();
                 }
                 else {
@@ -6628,7 +6629,7 @@ class ViewPU extends PUV2ViewBase {
         if (this.getParent() && this.getParent() instanceof ViewPU && !this.getParent().isDeleting_) {
             const parentPU = this.getParent();
             parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
-            this.parent_.removeChild(this);
+            this.hasBeenRecycled_ = true;
             this.setActiveInternal(false);
         }
         else {
