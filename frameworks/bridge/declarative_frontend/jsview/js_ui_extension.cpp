@@ -364,7 +364,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
         if (transferringCallerValue->IsBoolean()) {
             transferringCaller = transferringCallerValue->ToBoolean();
         }
-        JSRef<JSVal> enableDensityDPI = obj->GetProperty("enableDensityDPI");
+        JSRef<JSVal> enableDensityDPI = obj->GetProperty("dpiFollowStrategy");
         if (enableDensityDPI->IsNumber()) {
             densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? false :  true;
         }
