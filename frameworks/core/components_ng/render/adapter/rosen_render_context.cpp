@@ -1764,10 +1764,8 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
         auto tmp = leftX;
         leftX = (leftX - centerX) * cos(-1 * radian) + (leftY - centerY) * sin(-1 * radian);
         leftY = -1 * (tmp - centerX) * sin(-1 * radian) + (leftY - centerY) * cos(-1 * radian);
-        auto leftXCalc = leftX + centerX;
-        auto leftYCalc = leftY + centerY;
-        leftX = newRect.GetOffset().GetX() + leftXCalc;
-        leftY = newRect.GetOffset().GetY() + leftYCalc;
+        leftX += newRect.GetOffset().GetX() + centerX;
+        leftY += newRect.GetOffset().GetY() + centerY;
         auto offset = OffsetF(leftX + translate[0], leftY + translate[1]);
         rect.SetOffset(offset);
         if (degree == 180) {
