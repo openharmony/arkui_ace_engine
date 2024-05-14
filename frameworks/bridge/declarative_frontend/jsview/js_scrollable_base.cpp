@@ -32,9 +32,26 @@ void JSScrollableBase::JsOnWillScroll(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsFunction()) {
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                            const CalcDimension& scrollOffset, const ScrollState& scrollState) {
-            auto params = ConvertToJSValues(scrollOffset, scrollState);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
+                            const CalcDimension& scrollOffset, const ScrollState& scrollState,
+                            ScrollSource scrollSource) {
+            auto params = ConvertToJSValues(scrollOffset, scrollState, scrollSource);
+            ScrollFrameResult scrollRes { .offset = scrollOffset };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                return scrollRes;
+            }
+
+            if (!result->IsObject()) {
+                return scrollRes;
+            }
+
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("offsetRemain");
+            if (dxRemainValue->IsNumber()) {
+                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollRes;
         };
         NG::ScrollableModelNG::SetOnWillScroll(std::move(onScroll));
     }
@@ -45,6 +62,7 @@ void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
     if (args.Length() > 0 && args[0]->IsFunction()) {
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(scrollOffset, scrollState);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
         };

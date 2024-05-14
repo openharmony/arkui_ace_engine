@@ -81,6 +81,8 @@ const char THEME_PATTERN_SHEET[] = "sheet_pattern";
 
 const char THEME_BLUR_STYLE_COMMON[] = "blur_style_common";
 const char THEME_PATTERN_SHADOW[] = "shadow_pattern";
+const char THEME_PATTERN_LINEAR_LAYOUT[] = "linear_layout_pattern";
+const char THEME_PATTERN_STACK[] = "stack_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
@@ -191,6 +193,9 @@ const char POPUP_BUTTON_TEXT_FONT_SIZE[] = "popup_button_text_font_size";
 // pattern attributes for badge
 const char BADGE_BORDER_COLOR[] = "border_color";
 const char BADGE_BORDER_WIDTH[] = "border_width";
+const char BADGE_AGE_FONT_SIZE[] = "text_age_font_size";
+const char BADGE_AGE_SIZE[] = "badge_age_size";
+const char BADGE_AFE_ADD_PADDING[] = "badge_age_add_padding";
 // swiper attributes
 const char INDICATOR_TEXT_FONT_SIZE[] = "indicator_text_font_size";
 const char INDICATOR_TEXT_FONT_COLOR[] = "indicator_text_font_color";

@@ -1466,7 +1466,7 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         auto stageManager = pipelineContext->GetStageManager();
         auto stageNode = stageManager->GetStageNode();
         auto popNode = stageNode->GetChildren().back();
-        int8_t popIndex = static_cast<int8_t>(stageNode->GetChildren().size() - 1);
+        int32_t popIndex = stageNode->GetChildren().size() - 1;
         bool findPage = false;
         if (info.routerMode == RouterMode::SINGLE) {
             auto pageInfo = FindPageInStack(info.url);
@@ -1479,14 +1479,24 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         if (!findPage) {
             LoadPage(GenerateNextPageId(), info, true, false);
         }
-        if (popIndex < 0 || popNode == stageNode->GetChildren().back()) {
+        // if current pop node index not equals to popIndex, popNode is reused, don't need to popNode
+        if (popIndex < 0 || popNode == stageNode->GetChildren().back() ||
+            stageNode->GetChildIndex(popNode) != popIndex) {
             return;
         }
         auto iter = pageRouterStack_.begin();
         std::advance(iter, popIndex);
-        pageRouterStack_.erase(iter);
+        auto lastIter = pageRouterStack_.erase(iter);
         pageRouterStack_.emplace_back(WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(popNode)));
         popNode->MovePosition(stageNode->GetChildren().size() - 1);
+        for (auto iter = lastIter; iter != pageRouterStack_.end(); iter++, popIndex++) {
+            auto pageNode = iter->Upgrade();
+            if (!pageNode) {
+                continue;
+            }
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            pagePattern->GetPageInfo()->SetPageIndex(popIndex);
+        }
         PopPage("", false, false);
         return;
     }

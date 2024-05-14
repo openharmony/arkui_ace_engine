@@ -30,6 +30,8 @@ void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
     auto target = CreateEventTargetObject(hoverInfo);
     hoverObj->SetPropertyObject("target", target);
     hoverObj->SetProperty<double>("sourceTool", static_cast<int32_t>(hoverInfo.GetSourceTool()));
+    hoverObj->SetProperty<double>("axisVertical", 0.0f);
+    hoverObj->SetProperty<double>("axisHorizontal", 0.0f);
     hoverObj->Wrap<HoverInfo>(&hoverInfo);
     JSRef<JSVal> hoverVal = JSRef<JSObject>::Cast(hoverObj);
     JSRef<JSVal> params[] = { isHoverParam, hoverVal };

@@ -654,6 +654,16 @@ bool NavigationModelNG::CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNod
 
 bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>& navBarNode)
 {
+    // titleBar node
+    if (!navBarNode->GetTitleBarNode()) {
+        int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
+        auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+            V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+        navBarNode->AddChild(titleBarNode);
+        navBarNode->SetTitleBarNode(titleBarNode);
+    }
+
     // navBar content node
     if (!navBarNode->GetNavBarContentNode()) {
         int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -667,19 +677,10 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         navBarNode->SetNavBarContentNode(navBarContentNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+                .edges = SAFE_AREA_EDGE_ALL };
             navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
-    }
-
-    // titleBar node
-    if (!navBarNode->GetTitleBarNode()) {
-        int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
-        auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-            V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-        navBarNode->AddChild(titleBarNode);
-        navBarNode->SetTitleBarNode(titleBarNode);
     }
 
     // toolBar node
@@ -729,7 +730,8 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         navigationGroupNode->SetDividerNode(dividerNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+                .edges = SAFE_AREA_EDGE_ALL };
             dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
 
@@ -1540,6 +1542,9 @@ void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& va
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->SetUserSetNavBarWidthFlag(true);
+    if (navigationPattern->GetInitNavBarWidth() != value) {
+        navigationPattern->SetInitNavBarWidth(value);
+    }
 }
 
 void NavigationModelNG::SetNavBarPosition(FrameNode* frameNode, NG::NavBarPosition mode)
@@ -1811,5 +1816,17 @@ void NavigationModelNG::SetToolbarOptions(NavigationToolbarOptions&& opt)
     auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
     CHECK_NULL_VOID(toolBarPattern);
     toolBarPattern->SetToolbarOptions(std::move(opt));
+}
+
+void NavigationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
 }
 } // namespace OHOS::Ace::NG

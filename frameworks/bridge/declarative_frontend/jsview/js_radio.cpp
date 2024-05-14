@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_radio_theme.h"
 
 namespace OHOS::Ace {
 
@@ -90,6 +91,7 @@ void JSRadio::Create(const JSCallbackInfo& info)
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         RadioModel::GetInstance()->SetBuilder(std::move(customBuilderFunc));
     }
+    JSRadioTheme::ApplyTheme();
 }
 
 void JSRadio::ParseIndicator(const JSCallbackInfo& info, std::optional<int32_t>& indicator,

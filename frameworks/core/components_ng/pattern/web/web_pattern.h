@@ -96,6 +96,7 @@ public:
     using OnControllerAttachedCallback = std::function<void()>;
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
@@ -209,6 +210,16 @@ public:
     void SetPermissionClipboardCallback(PermissionClipboardCallback&& Callback)
     {
         permissionClipboardCallback_ = std::move(Callback);
+    }
+
+    void SetDefaultFileSelectorShowCallback(DefaultFileSelectorShowCallback&& Callback)
+    {
+        defaultFileSelectorShowCallback_ = std::move(Callback);
+    }
+
+    DefaultFileSelectorShowCallback GetDefaultFileSelectorShowCallback()
+    {
+        return defaultFileSelectorShowCallback_;
     }
 
     PermissionClipboardCallback GetPermissionClipboardCallback() const
@@ -448,6 +459,8 @@ public:
     bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
+    void UpdateOnFocusTextField(bool isFocus);
+    bool OnBackPressed() override;
     bool OnBackPressedForFullScreen() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
@@ -501,6 +514,7 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     void Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
+    void CloseKeyboard();
 
 private:
     friend class WebContextSelectOverlay;
@@ -717,6 +731,7 @@ private:
     SetWebIdCallback setWebIdCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
+    DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
     RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
@@ -810,6 +825,7 @@ private:
     std::queue<TouchEventInfo> touchEventQueue_;
     std::unordered_map<int32_t, bool> naitve_map_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
+    bool embedNeedKeyboard_ = false;
 };
 } // namespace OHOS::Ace::NG
 

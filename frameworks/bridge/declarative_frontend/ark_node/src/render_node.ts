@@ -159,7 +159,7 @@ class LengthMetrics {
   }
 }
 
-declare type Resource = import('../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/global/resource').Resource;
+declare interface Resource {}
 
 declare enum Color {
   White,

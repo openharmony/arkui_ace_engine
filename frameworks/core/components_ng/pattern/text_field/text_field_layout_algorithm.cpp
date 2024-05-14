@@ -919,6 +919,7 @@ bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textSty
     if (needLayout) {
         CHECK_NULL_RETURN(paragraph_, false);
         auto maxSize = GetMaxMeasureSize(contentConstraint);
+        ApplyIndent(maxSize.Width());
         paragraph_->Layout(maxSize.Width());
     }
     return true;

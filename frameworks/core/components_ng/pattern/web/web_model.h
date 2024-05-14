@@ -166,6 +166,7 @@ public:
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
 
     virtual void SetCopyOptionMode(CopyOptions mode) {};
+    virtual void SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetOpenAppLinkFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetIntelligentTrackingPreventionResultId(
@@ -178,6 +179,7 @@ public:
     virtual void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) {};
+    virtual void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
 
 private:
     static std::unique_ptr<WebModel> instance_;

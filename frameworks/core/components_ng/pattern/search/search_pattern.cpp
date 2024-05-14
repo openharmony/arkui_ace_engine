@@ -204,7 +204,7 @@ void SearchPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(textFieldFrameNode);
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
         CHECK_NULL_VOID(textFieldPattern);
-        textFieldPattern->SetSelectionFlag(start, end, std::nullopt);
+        textFieldPattern->SetSelectionFlag(start, end, std::nullopt, isForward);
     });
 
     textAccessibilityProperty->SetActionSetIndex([weakPtr = WeakClaim(this)](int32_t index) {

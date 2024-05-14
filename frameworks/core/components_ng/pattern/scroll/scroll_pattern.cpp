@@ -182,9 +182,9 @@ void ScrollPattern::CheckScrollable()
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (GreatNotEqual(scrollableDistance_, 0.0f)) {
-        SetScrollEnable(layoutProperty->GetScrollEnabled().value_or(true));
+        SetScrollEnabled(layoutProperty->GetScrollEnabled().value_or(true));
     } else {
-        SetScrollEnable(layoutProperty->GetScrollEnabled().value_or(true) && GetAlwaysEnabled());
+        SetScrollEnabled(layoutProperty->GetScrollEnabled().value_or(true) && GetAlwaysEnabled());
     }
 }
 
@@ -373,12 +373,12 @@ void ScrollPattern::HandleScrollPosition(float scroll)
     onScroll(scrollX, scrollY);
 }
 
-void ScrollPattern::FireOnWillScroll(float scroll)
+float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
 {
     auto eventHub = GetEventHub<ScrollEventHub>();
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_RETURN(eventHub, scroll);
     auto onScroll = eventHub->GetOnWillScrollEvent();
-    CHECK_NULL_VOID(onScroll);
+    CHECK_NULL_RETURN(onScroll, scroll);
     Dimension scrollX(0, DimensionUnit::VP);
     Dimension scrollY(0, DimensionUnit::VP);
     Dimension scrollPx(scroll, DimensionUnit::PX);
@@ -388,7 +388,15 @@ void ScrollPattern::FireOnWillScroll(float scroll)
     } else {
         scrollY.SetValue(scrollVpValue);
     }
-    onScroll(scrollX, scrollY, GetScrollState());
+    auto scrollRes =
+        onScroll(scrollX, scrollY, GetScrollState(), ScrollablePattern::ConvertScrollSource(GetScrollSource()));
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, scroll);
+    if (GetAxis() == Axis::HORIZONTAL) {
+        return context->NormalizeToPx(scrollRes.xOffset);
+    } else {
+        return context->NormalizeToPx(scrollRes.yOffset);
+    }
 }
 
 void ScrollPattern::FireOnDidScroll(float scroll)
@@ -495,14 +503,13 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
     SetScrollSource(source);
     FireAndCleanScrollingListener();
+    lastOffset_ = currentOffset_;
     auto willScrollPosition = currentOffset_ + delta;
     willScrollPosition = ValidateOffset(source, willScrollPosition);
-    FireOnWillScroll(currentOffset_ - willScrollPosition);
-
-    lastOffset_ = currentOffset_;
-    currentOffset_ += delta;
+    auto userOffset = FireTwoDimensionOnWillScroll(currentOffset_ - willScrollPosition);
+    currentOffset_ -= userOffset;
     ValidateOffset(source);
-    HandleScrollPosition(-delta);
+    HandleScrollPosition(userOffset);
     if (IsCrashTop()) {
         HandleCrashTop();
     } else if (IsCrashBottom()) {

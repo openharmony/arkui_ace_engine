@@ -17,7 +17,8 @@
 
 namespace OHOS::Ace {
 StageContext::StageContext()
-    : appInfo_(Referenced::MakeRefPtr<StageAppInfo>()), hapModuleInfo_(Referenced::MakeRefPtr<StageHapModuleInfo>())
+    : appInfo_(Referenced::MakeRefPtr<StageAppInfo>()), hapModuleInfo_(Referenced::MakeRefPtr<StageHapModuleInfo>()),
+    pkgContextInfo_(Referenced::MakeRefPtr<StagePkgContextInfo>())
 {}
 
 void StageContext::Parse(const std::string& contents)
@@ -39,5 +40,10 @@ const RefPtr<StageAppInfo>& StageContext::GetAppInfo() const
 const RefPtr<StageHapModuleInfo>& StageContext::GetHapModuleInfo() const
 {
     return hapModuleInfo_;
+}
+
+const RefPtr<StagePkgContextInfo>& StageContext::GetPkgContextInfo() const
+{
+    return pkgContextInfo_;
 }
 } // namespace OHOS::Ace

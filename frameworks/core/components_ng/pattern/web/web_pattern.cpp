@@ -21,6 +21,7 @@
 #include "display_manager.h"
 #include "file_uri.h"
 #include "image_source.h"
+#include "input_method_controller.h"
 #include "parameters.h"
 
 #include "base/geometry/ng/offset_t.h"
@@ -45,6 +46,7 @@
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -257,6 +259,9 @@ void WebPattern::OnContextMenuHide()
 
 bool WebPattern::NeedSoftKeyboard() const
 {
+    if (embedNeedKeyboard_) {
+        return true;
+    }
     if (delegate_) {
         return delegate_->NeedSoftKeyboard();
     }
@@ -1244,6 +1249,9 @@ void WebPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(delegate_);
     isFocus_ = true;
+    if (GetNativeEmbedModeEnabledValue(false)) {
+        embedNeedKeyboard_ = true;
+    }
     if (needOnFocus_) {
         delegate_->OnFocus();
     } else {
@@ -1255,6 +1263,7 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
+    embedNeedKeyboard_ = false;
     if (!selectPopupMenuShowing_) {
         delegate_->SetBlurReason(static_cast<OHOS::NWeb::BlurReason>(blurReason));
         delegate_->OnBlur();
@@ -1408,12 +1417,16 @@ void WebPattern::OnAreaChangedInner()
 {
     auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     auto resizeOffset = Offset(offset.GetX(), offset.GetY());
+
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    Size webSize = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+
+    delegate_->OnAreaChange({resizeOffset.GetX(), resizeOffset.GetY(), webSize.Width(), webSize.Height()});
     if (CheckSafeAreaIsExpand()) {
-        auto frameNode = GetHost();
-        CHECK_NULL_VOID(frameNode);
-        auto geometryNode = frameNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        drawSize_ = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+        drawSize_ = webSize;
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     }
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
@@ -2044,6 +2057,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
             drawSize_.SetSize(drawSizeCache_);
             UpdateWebLayoutSize(width, height, false);
+            UpdateOnFocusTextField(false);
             isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         }
         return false;
@@ -2054,6 +2068,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         }
         drawSize_.SetSize(drawSizeCache_);
         UpdateWebLayoutSize(width, height, false);
+        UpdateOnFocusTextField(false);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         drawSizeCache_.SetSize(drawSize_);
@@ -2064,7 +2079,11 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         if (height - GetCoordinatePoint()->GetY() < keyboard) {
             return true;
         }
+        if (!delegate_->NeedSoftKeyboard() && embedNeedKeyboard_) {
+            return false;
+        }
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        UpdateOnFocusTextField(true);
         auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, false);
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2590,43 +2609,26 @@ RectF WebPattern::ComputeClippedSelectionBounds(
         return RectF();
     }
     auto offset = GetCoordinatePoint().value_or(OffsetF());
-    int32_t startY = static_cast<int32_t>(
-        (startHandle->GetY() - startHandle->GetViewPortY()) / pipeline->GetDipScale());
-    int32_t endY = static_cast<int32_t>(
-        (endHandle->GetY() - endHandle->GetViewPortY()) / pipeline->GetDipScale());
-    int32_t startEdgeHeight = static_cast<int32_t>(startHandle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
-    int32_t endEdgeHeight = static_cast<int32_t>(endHandle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
-    float selectX = 0;
-    float selectY = 0;
-    float selectWidth = params->GetSelectWidth();
-    float selectHeight = static_cast<float>((startHandle->GetEdgeHeight() + endHandle->GetEdgeHeight()) / 2);
+    float selectX = params->GetSelectX();
+    float selectY = params->GetSelectY();
     float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX()) / 2);
     float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY()) / 2);
-    if (endY < endEdgeHeight) {
-        selectY -= selectHeight;
-    } else if (startY >= startEdgeHeight &&
-        LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), startHandle->GetY())) {
-        selectY += GetHostFrameSize().value_or(SizeF()).Height();
-    } else if (startY < startEdgeHeight &&
-        GreatNotEqual(endHandle->GetY(), GetHostFrameSize().value_or(SizeF()).Height())) {
-        selectY -= selectHeight;
-    } else {
-        return RectF(static_cast<float>(viewPortX + offset.GetX() + params->GetSelectX()),
-            static_cast<float>(viewPortY + offset.GetY() + params->GetSelectY()),
-            params->GetSelectWidth(), params->GetSelectXHeight());
+    if (LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), selectY)) {
+        selectY = GetHostFrameSize().value_or(SizeF()).Height();
+    } else if (LessOrEqual(static_cast<float>(selectY + params->GetSelectXHeight()), 0)) {
+        selectY = 0;
     }
+
     if (viewPortX) {
         selectX += viewPortX;
     }
     if (viewPortY) {
         selectY += viewPortY;
     }
-    selectX = selectX + offset.GetX() + params->GetSelectX();
+    selectX += offset.GetX();
     selectY += offset.GetY();
-    TAG_LOGI(AceLogTag::ACE_WEB,
-        "SelectionBounds selectX:%{public}f, selectY:%{public}f, selectWidth:%{public}f, selectHeight:%{public}f",
-        selectX, selectY, selectWidth, selectHeight);
-    return RectF(selectX, selectY, selectWidth, selectHeight);
+    TAG_LOGI(AceLogTag::ACE_WEB, "SelectionBounds selectX:%{public}f, selectY:%{public}f", selectX, selectY);
+    return RectF(selectX, selectY, 0, 0);
 }
 
 void WebPattern::QuickMenuIsNeedNewAvoid(
@@ -2909,7 +2911,7 @@ void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTi
     MarginProperty textMargin;
     CalculateTooltipMargin(textNode, textMargin);
     textLayoutProperty->UpdateMargin(textMargin);
-    
+
     BorderColorProperty borderColor;
     borderColor.SetColor(Color::BLACK);
     textRenderContext->UpdateBorderColor(borderColor);
@@ -3257,6 +3259,9 @@ void WebPattern::UpdateTouchHandleForOverlay()
         firstHandleInfo.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
         secondHandleInfo.isShow = IsTouchHandleShow(endSelectionHandle_);
         secondHandleInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+        if (firstHandleInfo.isShow || secondHandleInfo.isShow) {
+            selectOverlayProxy_->SetIsNewAvoid(false);
+        }
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
         selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
         selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
@@ -3273,6 +3278,10 @@ void WebPattern::UpdateLocale()
 void WebPattern::OnWindowShow()
 {
     delegate_->OnRenderToForeground();
+    if (!isOfflineMode_) {
+        delegate_->OnOnlineRenderToForeground();
+    }
+
     if (isWindowShow_ || !isVisible_) {
         return;
     }
@@ -3360,6 +3369,36 @@ void WebPattern::OnResizeNotWork()
 
     ACE_SCOPED_TRACE("WebPattern::OnResizeNotWork");
     isWaiting_ = false;
+}
+
+void WebPattern::UpdateOnFocusTextField(bool isFocus)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    isFocus ? textFieldManager->SetOnFocusTextField(WeakClaim(this))
+            : textFieldManager->ClearOnFocusTextField(host->GetId());
+}
+
+bool WebPattern::OnBackPressed()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web %{public}d receives back press event", host->GetId());
+    if (IsVirtualKeyBoardShow()) {
+        CloseSelectOverlay();
+        SelectCancel();
+        TAG_LOGI(AceLogTag::ACE_WEB, "Request close soft keyboard.");
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        CHECK_NULL_RETURN(inputMethod, false);
+        inputMethod->HideTextInput();
+        inputMethod->Close();
+        return true;
+    }
+    return false;
 }
 
 bool WebPattern::OnBackPressedForFullScreen() const
@@ -4192,5 +4231,16 @@ void WebPattern::OnHideAutofillPopup()
     };
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(destructor);
+}
+void WebPattern::CloseKeyboard()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->CloseKeyboard();
+    embedNeedKeyboard_ = false;
 }
 } // namespace OHOS::Ace::NG

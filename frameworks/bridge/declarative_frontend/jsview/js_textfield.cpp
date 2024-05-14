@@ -402,11 +402,16 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
 
         // set caret color
         Color caretColor;
-        auto caretColorProp = paramObject->GetProperty("color");
-        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() || !ParseJsColor(caretColorProp, caretColor)) {
-            caretColor = theme->GetCursorColor();
+        if (!paramObject->HasProperty("color")) {
+            return;
+        } else {
+            auto caretColorProp = paramObject->GetProperty("color");
+            if (caretColorProp->IsUndefined() || caretColorProp->IsNull()
+                || !ParseJsColor(caretColorProp, caretColor)) {
+                caretColor = theme->GetCursorColor();
+            }
+            TextFieldModel::GetInstance()->SetCaretColor(caretColor);
         }
-        TextFieldModel::GetInstance()->SetCaretColor(caretColor);
     }
 }
 
@@ -1535,7 +1540,7 @@ void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
 void JSTextField::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        return;
+        value = 0;
     }
     TextFieldModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
@@ -1568,7 +1573,7 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
 void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseLengthMetricsToDimension(info[0], value)) {
+    if (!ParseLengthMetricsToPositiveDimension(info[0], value)) {
         value.Reset();
     }
     if (value.IsNegative()) {
@@ -1583,11 +1588,10 @@ void JSTextField::SetFontFeature(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
-    if (!jsValue->IsString()) {
-        return;
+    std::string fontFeatureSettings = "";
+    if (jsValue->IsString()) {
+        fontFeatureSettings = jsValue->ToString();
     }
-
-    std::string fontFeatureSettings = jsValue->ToString();
     TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 

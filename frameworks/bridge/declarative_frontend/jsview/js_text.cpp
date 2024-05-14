@@ -46,6 +46,7 @@
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_theme.h"
 
 namespace OHOS::Ace {
 
@@ -380,7 +381,7 @@ void JSText::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    if (!ParseLengthMetricsToDimension(args, value)) {
+    if (!ParseLengthMetricsToPositiveDimension(args, value)) {
         value.Reset();
     }
     if (value.IsNegative()) {
@@ -610,6 +611,7 @@ void JSText::Create(const JSCallbackInfo& info)
         TextModel::GetInstance()->Create(data);
     }
 
+    JSTextTheme::ApplyTheme();
     if (info.Length() <= 1 || !info[1]->IsObject()) {
         return;
     }
@@ -882,9 +884,6 @@ void JSText::JsClip(const JSCallbackInfo& info)
 void JSText::SetFontFeature(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        return;
-    }
-    if (!info[0]->IsString()) {
         return;
     }
 

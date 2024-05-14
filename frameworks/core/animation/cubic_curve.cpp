@@ -45,7 +45,6 @@ float CubicCurve::MoveInternal(float time)
     while (true) {
         float midpoint = (start + end) / 2;
         float estimate = CalculateCubic(x0_, x1_, midpoint);
-
         if (NearEqual(time, estimate, cubicErrorBound_)) {
             return CalculateCubic(y0_, y1_, midpoint);
         }

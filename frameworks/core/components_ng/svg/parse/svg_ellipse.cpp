@@ -16,7 +16,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_ellipse.h"
 
 #include "base/utils/utils.h"
-#include "frameworks/core/components/declaration/svg/svg_ellipse_declaration.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -53,8 +53,8 @@ RSRecordingPath SvgEllipse::AsPath(const Size& viewPort) const
         }
     }
 #ifndef USE_ROSEN_DRAWING
-    SkRect rect = SkRect::MakeXYWH(ConvertDimensionToPx(declaration->GetCx(), viewPort, SvgLengthType::HORIZONTAL) - rx,
-        ConvertDimensionToPx(declaration->GetCy(), viewPort, SvgLengthType::VERTICAL) - ry, rx + rx, ry + ry);
+    SkRect rect = SkRect::MakeXYWH(ConvertDimensionToPx(ellipseAttr_.cx, viewPort, SvgLengthType::HORIZONTAL) - rx,
+        ConvertDimensionToPx(ellipseAttr_.cy, viewPort, SvgLengthType::VERTICAL) - ry, rx + rx, ry + ry);
     path.addOval(rect);
 #else
     RSScalar left = ConvertDimensionToPx(ellipseAttr_.cx, viewPort, SvgLengthType::HORIZONTAL) - rx;
@@ -68,19 +68,19 @@ RSRecordingPath SvgEllipse::AsPath(const Size& viewPort) const
 bool SvgEllipse::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgEllipseAttribute&)> attrs[] = {
-        { DOM_SVG_CX,
+        { SVG_CX,
             [](const std::string& val, SvgEllipseAttribute& attr) {
                 attr.cx = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_CY,
+        { SVG_CY,
             [](const std::string& val, SvgEllipseAttribute& attr) {
                 attr.cy = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_RX,
+        { SVG_RX,
             [](const std::string& val, SvgEllipseAttribute& attr) {
                 attr.rx = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_RY,
+        { SVG_RY,
             [](const std::string& val, SvgEllipseAttribute& attr) {
                 attr.ry = SvgAttributesParser::ParseDimension(val);
             } },

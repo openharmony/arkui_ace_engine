@@ -125,6 +125,20 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     }
   }
 
+  class SymbolEffectModifier extends ModifierWithKey<ArkSymbolEffect> {
+    constructor(value: ArkSymbolEffect) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('symbolGlyphSymbolEffect');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetSymbolEffectOptions(node);
+      } else {
+        getUINativeModule().symbolGlyph.setSymbolEffectOptions(node, this.value.symbolEffect, this.value.action);
+      }
+    }
+  }
+
   class SymbolContentModifier extends ModifierWithKey<Resource> {
     constructor(value: Resource) {
       super(value);
@@ -174,6 +188,13 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     }
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute {
       modifierWithKey(this._modifiersWithKeys, EffectStrategyModifier.identity, EffectStrategyModifier, value);
+      return this;
+    }
+    symbolEffect(effect: SymbolEffect, action?: boolean | number): SymbolGlyphAttribute {
+      let symbolEffect = new ArkSymbolEffect();
+      symbolEffect.symbolEffect = effect;
+      symbolEffect.action = action;
+      modifierWithKey(this._modifiersWithKeys, SymbolEffectModifier.identity, SymbolEffectModifier, symbolEffect);
       return this;
     }
   }

@@ -1082,6 +1082,17 @@ public:
         return declaration_->GetRenderProcessRespondingId();
     }
 
+    void SetViewportFitChangedId(const EventMarker& viewportFitId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetViewportFitChangedId(viewportFitId);
+    }
+
+    const EventMarker& GetViewportFitChangedId() const
+    {
+        return declaration_->GetViewportFitChangedId();
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;

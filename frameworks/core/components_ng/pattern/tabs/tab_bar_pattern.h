@@ -232,6 +232,7 @@ public:
     void SetTabBarStyle(TabBarStyle tabBarStyle)
     {
         tabBarStyle_ = tabBarStyle;
+        InitLongPressAndDragEvent();
     }
 
     TabBarStyle GetTabBarStyle() const
@@ -451,7 +452,8 @@ private:
     bool OnKeyEventWithoutClick(const RefPtr<FrameNode>& host, const KeyEvent& event);
     void HandleLongPressEvent(const GestureEvent& info);
     void ShowDialogWithNode(int32_t index);
-    void CloseDialog(int32_t index);
+    void CloseDialog();
+    void InitLongPressAndDragEvent();
     void HandleClick(const GestureEvent& info);
     void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(const TouchLocationInfo& info);
@@ -466,6 +468,8 @@ private:
         int32_t maskIndex, float& selectedImageSize, float& unselectedImageSize, OffsetF& originalSelectedMaskOffset,
         OffsetF& originalUnselectedMaskOffset);
     void UpdateBottomTabBarImageColor(const std::vector<int32_t>& selectedIndexes, int32_t maskIndex);
+    void UpdateSymbolApply(const RefPtr<NG::FrameNode>& symbolNode, RefPtr<TextLayoutProperty>& symbolProperty,
+        int32_t index, std::string type);
     bool CheckSvg(int32_t index) const;
 
     void HandleTouchDown(int32_t index);

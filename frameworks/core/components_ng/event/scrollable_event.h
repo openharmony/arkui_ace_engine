@@ -68,14 +68,14 @@ public:
         return scrollable_;
     }
 
-    void SetEnabled(bool enable)
+    void SetEnabled(bool enabled)
     {
-        enable_ = enable;
+        enabled_ = enabled;
     }
 
-    bool GetEnable() const
+    bool GetEnabled() const
     {
-        return enable_;
+        return enabled_;
     }
 
     bool Idle() const
@@ -169,7 +169,7 @@ public:
 
 private:
     Axis axis_ = Axis::VERTICAL;
-    bool enable_ = true;
+    bool enabled_ = true;
     RefPtr<Scrollable> scrollable_;
     BarCollectTouchTargetCallback barCollectTouchTarget_;
     BarCollectTouchTargetCallback barCollectLongPressTarget_;

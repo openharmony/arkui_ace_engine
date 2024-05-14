@@ -109,6 +109,7 @@ public:
     }
 
     void HideSubMenu();
+    void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
 
     RefPtr<FrameNode> GetMenu() const
     {
@@ -317,6 +318,8 @@ private:
         return false;
     }
     bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+    void OnModifyDone() override;
+    void InitFocusEvent();
     void OnAttachToFrameNode() override;
     void RegisterOnTouch();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

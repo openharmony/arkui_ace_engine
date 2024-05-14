@@ -55,6 +55,8 @@ declare enum XComponentType {
   TEXTURE
 }
 
+declare interface XComponentController { }
+
 declare abstract class ViewPU {
   id__(): number;
   aboutToUpdate?: (updateParams: Object) => void;
@@ -137,6 +139,14 @@ declare class ArkFlexComponent extends ArkComponent {}
 declare class ArkSwiperComponent extends ArkComponent {}
 
 declare class ArkProgressComponent extends ArkComponent {}
+
+declare class ArkScrollComponent extends ArkComponent {}
+
+declare class ArkRelativeContainerComponent extends ArkComponent {}
+
+declare class ArkListComponent extends ArkComponent {}
+
+declare class ArkListItemComponent extends ArkComponent {}
 
 declare class UICommonEvent {
   private _nodePtr: NodePtr;

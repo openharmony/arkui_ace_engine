@@ -24,7 +24,8 @@
 namespace OHOS::Ace {
 class MockTaskExecutor : public TaskExecutor {
 public:
-    bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name) const override
+    bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const override
     {
         CHECK_NULL_RETURN(task, false);
         task();

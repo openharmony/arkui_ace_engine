@@ -22,98 +22,98 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 
-const noop = (p4) => {
+const noop = (f9) => {
 };
 const colorStops = [['rgba(0, 0, 0, 1)', 0], ['rgba(0, 0, 0, 0)', 1]];
 const defaultTheme = {
     itemStyle: {
         size: ChipSize.NORMAL,
-        backgroundColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-        fontColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-        selectedFontColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-        selectedBackgroundColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-        fillColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-        selectedFillColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        fontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        selectedFontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        selectedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        fillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        selectedFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
     chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
 };
 const iconGroupSuffixTheme = {
-    backgroundColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-    borderRadius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_tips_instant_tip'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+    backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+    borderRadius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_tips_instant_tip'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     smallIconSize: 16,
     normalIconSize: 24,
     smallBackgroundSize: 28,
     normalBackgroundSize: 36,
     marginLeft: 8,
     marginRight: 16,
-    fillColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
+    fillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
 };
-function parseDimension(j4, k4, l4, m4) {
-    if (k4 === void (0) || k4 === null) {
-        return m4;
+function parseDimension(z8, a9, b9, c9) {
+    if (a9 === void (0) || a9 === null) {
+        return c9;
     }
-    const n4 = j4.getHostContext()?.resourceManager;
-    if (typeof k4 === 'object') {
-        let o4 = k4;
-        if (o4.type === 10002 || o4.type === 10007) {
-            if (n4.getNumber(o4.id) >= 0) {
-                return k4;
+    const d9 = z8.getHostContext()?.resourceManager;
+    if (typeof a9 === "object") {
+        let e9 = a9;
+        if (e9.type === 10002 || e9.type === 10007) {
+            if (d9.getNumber(e9.id) >= 0) {
+                return a9;
             }
         }
-        else if (o4.type === 10003) {
-            if (isValidDimensionString(n4.getStringSync(o4.id))) {
-                return k4;
+        else if (e9.type === 10003) {
+            if (isValidDimensionString(d9.getStringSync(e9.id))) {
+                return a9;
             }
         }
     }
-    else if (typeof k4 === 'number') {
-        if (k4 >= 0) {
-            return k4;
+    else if (typeof a9 === "number") {
+        if (a9 >= 0) {
+            return a9;
         }
     }
-    else if (typeof k4 === 'string') {
-        if (l4(k4)) {
-            return k4;
+    else if (typeof a9 === "string") {
+        if (b9(a9)) {
+            return a9;
         }
     }
-    return m4;
+    return c9;
 }
-function isValidString(f4, g4) {
-    const h4 = f4.match(g4);
-    if (!h4 || h4.length < 3) {
+function isValidString(v8, w8) {
+    const x8 = v8.match(w8);
+    if (!x8 || x8.length < 3) {
         return false;
     }
-    const i4 = Number.parseFloat(h4[1]);
-    return i4 >= 0;
+    const y8 = Number.parseFloat(x8[1]);
+    return y8 >= 0;
 }
-function isValidDimensionString(e4) {
-    return isValidString(e4, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i"));
+function isValidDimensionString(u8) {
+    return isValidString(u8, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i"));
 }
-function isValidDimensionNoPercentageString(d4) {
-    return isValidString(d4, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$", "i"));
+function isValidDimensionNoPercentageString(t8) {
+    return isValidString(t8, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$", "i"));
 }
 export class IconGroupSuffix extends ViewPU {
-    constructor(x3, y3, z3, a4 = -1, b4 = undefined, c4) {
-        super(x3, z3, a4, c4);
-        if (typeof b4 === 'function') {
-            this.paramsGenerator_ = b4;
+    constructor(n8, o8, p8, q8 = -1, r8 = undefined, s8) {
+        super(n8, p8, q8, s8);
+        if (typeof r8 === "function") {
+            this.paramsGenerator_ = r8;
         }
-        this.__chipSize = this.initializeConsume('chipSize', 'chipSize');
-        this.__items = new SynchedPropertyObjectOneWayPU(y3.items, this, 'items');
-        this.setInitiallyProvidedValue(y3);
+        this.__chipSize = this.initializeConsume("chipSize", "chipSize");
+        this.__items = new SynchedPropertyObjectOneWayPU(o8.items, this, "items");
+        this.setInitiallyProvidedValue(o8);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(w3) {
-        if (w3.items === undefined) {
+    setInitiallyProvidedValue(m8) {
+        if (m8.items === undefined) {
             this.__items.set([]);
         }
     }
-    updateStateVars(v3) {
-        this.__items.reset(v3.items);
+    updateStateVars(l8) {
+        this.__items.reset(l8.items);
     }
-    purgeVariableDependenciesOnElmtId(u3) {
-        this.__chipSize.purgeDependencyOnElmtId(u3);
-        this.__items.purgeDependencyOnElmtId(u3);
+    purgeVariableDependenciesOnElmtId(k8) {
+        this.__chipSize.purgeDependencyOnElmtId(k8);
+        this.__items.purgeDependencyOnElmtId(k8);
     }
     aboutToBeDeleted() {
         this.__chipSize.aboutToBeDeleted();
@@ -124,14 +124,14 @@ export class IconGroupSuffix extends ViewPU {
     get chipSize() {
         return this.__chipSize.get();
     }
-    set chipSize(t3) {
-        this.__chipSize.set(t3);
+    set chipSize(j8) {
+        this.__chipSize.set(j8);
     }
     get items() {
         return this.__items.get();
     }
-    set items(s3) {
-        this.__items.set(s3);
+    set items(i8) {
+        this.__items.set(i8);
     }
     getBackgroundSize() {
         if (this.chipSize === ChipSize.SMALL) {
@@ -141,35 +141,28 @@ export class IconGroupSuffix extends ViewPU {
             return iconGroupSuffixTheme.normalBackgroundSize;
         }
     }
-    getIconSize(q3) {
-        if (q3 === undefined) {
+    getIconSize(g8) {
+        if (g8 === undefined) {
             return this.chipSize === ChipSize.SMALL ? iconGroupSuffixTheme.smallIconSize : iconGroupSuffixTheme.normalIconSize;
         }
-        let r3;
+        let h8;
         if (this.chipSize === ChipSize.SMALL) {
-            r3 = parseDimension(this.getUIContext(), q3, isValidDimensionString, iconGroupSuffixTheme.smallIconSize);
+            h8 = parseDimension(this.getUIContext(), g8, isValidDimensionString, iconGroupSuffixTheme.smallIconSize);
         }
         else {
-            r3 = parseDimension(this.getUIContext(), q3, isValidDimensionString, iconGroupSuffixTheme.normalIconSize);
+            h8 = parseDimension(this.getUIContext(), g8, isValidDimensionString, iconGroupSuffixTheme.normalIconSize);
         }
-        return r3;
+        return h8;
     }
     initialRender() {
-        this.observeComponentCreation((o3, p3) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(o3);
+        this.observeComponentCreation2((e8, f8) => {
             Row.create();
-            if (!p3) {
-                Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-        });
-        this.observeComponentCreation((t2, u2) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t2);
+        }, Row);
+        this.observeComponentCreation2((j7, k7) => {
             ForEach.create();
-            const v2 = x2 => {
-                const y2 = x2;
-                this.observeComponentCreation((l3, m3) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(l3);
+            const l7 = n7 => {
+                const o7 = n7;
+                this.observeComponentCreation2((b8, c8) => {
                     Button.createWithChild();
                     Button.size({
                         width: this.getBackgroundSize(),
@@ -178,67 +171,44 @@ export class IconGroupSuffix extends ViewPU {
                     Button.backgroundColor(iconGroupSuffixTheme.backgroundColor);
                     Button.borderRadius(iconGroupSuffixTheme.borderRadius);
                     Button.onClick(() => {
-                        if (!(y2 instanceof SymbolGlyphModifier)) {
-                            y2.action();
+                        if (!(o7 instanceof SymbolGlyphModifier)) {
+                            o7.action();
                         }
                     });
                     Button.borderRadius(iconGroupSuffixTheme.borderRadius);
-                    if (!m3) {
-                        Button.pop();
-                    }
-                    ViewStackProcessor.StopGetAccessRecording();
-                });
-                this.observeComponentCreation((b3, c3) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(b3);
+                }, Button);
+                this.observeComponentCreation2((r7, s7) => {
                     If.create();
-                    if (y2 instanceof SymbolGlyphModifier) {
+                    if (o7 instanceof SymbolGlyphModifier) {
                         this.ifElseBranchUpdateFunction(0, () => {
-                            this.observeComponentCreation((j3, k3) => {
-                                ViewStackProcessor.StartGetAccessRecordingFor(j3);
+                            this.observeComponentCreation2((z7, a8) => {
                                 SymbolGlyph.create();
                                 SymbolGlyph.fontColor([iconGroupSuffixTheme.fillColor]);
-                                SymbolGlyph.fontSize(this.getIconSize(''));
-                                SymbolGlyph.attributeModifier.bind(this)(y2);
+                                SymbolGlyph.fontSize(this.getIconSize());
+                                SymbolGlyph.attributeModifier.bind(this)(o7);
                                 SymbolGlyph.focusable(true);
-                                if (!k3) {
-                                    SymbolGlyph.pop();
-                                }
-                                ViewStackProcessor.StopGetAccessRecording();
-                            });
+                            }, SymbolGlyph);
                         });
                     }
                     else {
                         this.ifElseBranchUpdateFunction(1, () => {
-                            this.observeComponentCreation((f3, g3) => {
-                                ViewStackProcessor.StartGetAccessRecordingFor(f3);
-                                Image.create(y2.icon.src);
+                            this.observeComponentCreation2((v7, w7) => {
+                                Image.create(o7.icon.src);
                                 Image.fillColor(iconGroupSuffixTheme.fillColor);
                                 Image.size({
-                                    width: this.getIconSize(y2.icon?.size?.width),
-                                    height: this.getIconSize(y2.icon?.size?.height)
+                                    width: this.getIconSize(o7.icon?.size?.width),
+                                    height: this.getIconSize(o7.icon?.size?.height)
                                 });
                                 Image.focusable(true);
-                                if (!g3) {
-                                    Image.pop();
-                                }
-                                ViewStackProcessor.StopGetAccessRecording();
-                            });
+                            }, Image);
                         });
                     }
-                    if (!c3) {
-                        If.pop();
-                    }
-                    ViewStackProcessor.StopGetAccessRecording();
-                });
+                }, If);
                 If.pop();
                 Button.pop();
             };
-            this.forEachUpdateFunction(t2, this.items || [], v2);
-            if (!u2) {
-                ForEach.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-        });
+            this.forEachUpdateFunction(j7, this.items || [], l7);
+        }, ForEach);
         ForEach.pop();
         Row.pop();
     }
@@ -247,73 +217,74 @@ export class IconGroupSuffix extends ViewPU {
     }
 }
 export class ChipGroup extends ViewPU {
-    constructor(l2, m2, n2, o2 = -1, p2 = undefined, q2) {
-        super(l2, n2, o2, q2);
-        if (typeof p2 === 'function') {
-            this.paramsGenerator_ = p2;
+    constructor(b7, c7, d7, e7 = -1, f7 = undefined, g7) {
+        super(b7, d7, e7, g7);
+        if (typeof f7 === "function") {
+            this.paramsGenerator_ = f7;
         }
-        this.__items = new SynchedPropertyObjectOneWayPU(m2.items, this, 'items');
-        this.__itemStyle = new SynchedPropertyObjectOneWayPU(m2.itemStyle, this, 'itemStyle');
-        this.__chipSize = new ObservedPropertyObjectPU(defaultTheme.itemStyle.size, this, 'chipSize');
-        this.addProvidedVar('chipSize', this.__chipSize, false);
-        this.__selectedIndexes = new SynchedPropertyObjectOneWayPU(m2.selectedIndexes, this, 'selectedIndexes');
-        this.__multiple = new SynchedPropertySimpleOneWayPU(m2.multiple, this, 'multiple');
-        this.__chipGroupSpace = new SynchedPropertyObjectOneWayPU(m2.chipGroupSpace, this, 'chipGroupSpace');
+        this.__items = new SynchedPropertyObjectOneWayPU(c7.items, this, "items");
+        this.__itemStyle = new SynchedPropertyObjectOneWayPU(c7.itemStyle, this, "itemStyle");
+        this.__chipSize = new ObservedPropertyObjectPU(defaultTheme.itemStyle.size, this, "chipSize");
+        this.addProvidedVar("chipSize", this.__chipSize, false);
+        this.__selectedIndexes = new SynchedPropertyObjectOneWayPU(c7.selectedIndexes, this, "selectedIndexes");
+        this.__multiple = new SynchedPropertySimpleOneWayPU(c7.multiple, this, "multiple");
+        this.__chipGroupSpace = new SynchedPropertyObjectOneWayPU(c7.chipGroupSpace, this, "chipGroupSpace");
         this.suffix = undefined;
         this.onChange = noop;
         this.scroller = new Scroller();
-        this.__isReachEnd = new ObservedPropertySimplePU(this.scroller.isAtEnd(), this, 'isReachEnd');
-        this.setInitiallyProvidedValue(m2);
-        this.declareWatch('itemStyle', this.itemStyleOnChange);
+        this.__isReachEnd = new ObservedPropertySimplePU(this.scroller.isAtEnd(), this, "isReachEnd");
+        this.setInitiallyProvidedValue(c7);
+        this.declareWatch("itemStyle", this.itemStyleOnChange);
+        this.declareWatch("multiple", this.onMultipleChange);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(k2) {
-        if (k2.items === undefined) {
+    setInitiallyProvidedValue(a7) {
+        if (a7.items === undefined) {
             this.__items.set([]);
         }
-        if (k2.itemStyle === undefined) {
+        if (a7.itemStyle === undefined) {
             this.__itemStyle.set(defaultTheme.itemStyle);
         }
-        if (k2.chipSize !== undefined) {
-            this.chipSize = k2.chipSize;
+        if (a7.chipSize !== undefined) {
+            this.chipSize = a7.chipSize;
         }
-        if (k2.selectedIndexes === undefined) {
+        if (a7.selectedIndexes === undefined) {
             this.__selectedIndexes.set([0]);
         }
-        if (k2.multiple === undefined) {
+        if (a7.multiple === undefined) {
             this.__multiple.set(false);
         }
-        if (k2.chipGroupSpace === undefined) {
+        if (a7.chipGroupSpace === undefined) {
             this.__chipGroupSpace.set(defaultTheme.chipGroupSpace);
         }
-        if (k2.suffix !== undefined) {
-            this.suffix = k2.suffix;
+        if (a7.suffix !== undefined) {
+            this.suffix = a7.suffix;
         }
-        if (k2.onChange !== undefined) {
-            this.onChange = k2.onChange;
+        if (a7.onChange !== undefined) {
+            this.onChange = a7.onChange;
         }
-        if (k2.scroller !== undefined) {
-            this.scroller = k2.scroller;
+        if (a7.scroller !== undefined) {
+            this.scroller = a7.scroller;
         }
-        if (k2.isReachEnd !== undefined) {
-            this.isReachEnd = k2.isReachEnd;
+        if (a7.isReachEnd !== undefined) {
+            this.isReachEnd = a7.isReachEnd;
         }
     }
-    updateStateVars(j2) {
-        this.__items.reset(j2.items);
-        this.__itemStyle.reset(j2.itemStyle);
-        this.__selectedIndexes.reset(j2.selectedIndexes);
-        this.__multiple.reset(j2.multiple);
-        this.__chipGroupSpace.reset(j2.chipGroupSpace);
+    updateStateVars(z6) {
+        this.__items.reset(z6.items);
+        this.__itemStyle.reset(z6.itemStyle);
+        this.__selectedIndexes.reset(z6.selectedIndexes);
+        this.__multiple.reset(z6.multiple);
+        this.__chipGroupSpace.reset(z6.chipGroupSpace);
     }
-    purgeVariableDependenciesOnElmtId(i2) {
-        this.__items.purgeDependencyOnElmtId(i2);
-        this.__itemStyle.purgeDependencyOnElmtId(i2);
-        this.__chipSize.purgeDependencyOnElmtId(i2);
-        this.__selectedIndexes.purgeDependencyOnElmtId(i2);
-        this.__multiple.purgeDependencyOnElmtId(i2);
-        this.__chipGroupSpace.purgeDependencyOnElmtId(i2);
-        this.__isReachEnd.purgeDependencyOnElmtId(i2);
+    purgeVariableDependenciesOnElmtId(y6) {
+        this.__items.purgeDependencyOnElmtId(y6);
+        this.__itemStyle.purgeDependencyOnElmtId(y6);
+        this.__chipSize.purgeDependencyOnElmtId(y6);
+        this.__selectedIndexes.purgeDependencyOnElmtId(y6);
+        this.__multiple.purgeDependencyOnElmtId(y6);
+        this.__chipGroupSpace.purgeDependencyOnElmtId(y6);
+        this.__isReachEnd.purgeDependencyOnElmtId(y6);
     }
     aboutToBeDeleted() {
         this.__items.aboutToBeDeleted();
@@ -329,44 +300,47 @@ export class ChipGroup extends ViewPU {
     get items() {
         return this.__items.get();
     }
-    set items(h2) {
-        this.__items.set(h2);
+    set items(x6) {
+        this.__items.set(x6);
     }
     get itemStyle() {
         return this.__itemStyle.get();
     }
-    set itemStyle(g2) {
-        this.__itemStyle.set(g2);
+    set itemStyle(w6) {
+        this.__itemStyle.set(w6);
     }
     get chipSize() {
         return this.__chipSize.get();
     }
-    set chipSize(f2) {
-        this.__chipSize.set(f2);
+    set chipSize(v6) {
+        this.__chipSize.set(v6);
     }
     get selectedIndexes() {
         return this.__selectedIndexes.get();
     }
-    set selectedIndexes(e2) {
-        this.__selectedIndexes.set(e2);
+    set selectedIndexes(u6) {
+        this.__selectedIndexes.set(u6);
     }
     get multiple() {
         return this.__multiple.get();
     }
-    set multiple(d2) {
-        this.__multiple.set(d2);
+    set multiple(t6) {
+        this.__multiple.set(t6);
     }
     get chipGroupSpace() {
         return this.__chipGroupSpace.get();
     }
-    set chipGroupSpace(c2) {
-        this.__chipGroupSpace.set(c2);
+    set chipGroupSpace(s6) {
+        this.__chipGroupSpace.set(s6);
     }
     get isReachEnd() {
         return this.__isReachEnd.get();
     }
-    set isReachEnd(b2) {
-        this.__isReachEnd.set(b2);
+    set isReachEnd(r6) {
+        this.__isReachEnd.set(r6);
+    }
+    onMultipleChange() {
+        this.selectedIndexes = [0];
     }
     itemStyleOnChange() {
         this.chipSize = this.getChipSize();
@@ -381,12 +355,32 @@ export class ChipGroup extends ViewPU {
         return defaultTheme.itemStyle.size;
     }
     getFontColor() {
+        if (typeof this.itemStyle.fontColor == 'object') {
+            let q6 = this.itemStyle.fontColor;
+            if (q6 == undefined || q6 == null) {
+                return defaultTheme.itemStyle.fontColor;
+            }
+            if (q6.type === 10001) {
+                return this.itemStyle.fontColor;
+            }
+            return defaultTheme.itemStyle.fontColor;
+        }
         if (this.itemStyle && this.itemStyle.fontColor) {
             return this.itemStyle.fontColor;
         }
         return defaultTheme.itemStyle.fontColor;
     }
     getSelectedFontColor() {
+        if (typeof this.itemStyle.selectedFontColor == 'object') {
+            let p6 = this.itemStyle.selectedFontColor;
+            if (p6 == undefined || p6 == null) {
+                return defaultTheme.itemStyle.selectedFontColor;
+            }
+            if (p6.type === 10001) {
+                return this.itemStyle.selectedFontColor;
+            }
+            return defaultTheme.itemStyle.selectedFontColor;
+        }
         if (this.itemStyle && this.itemStyle.selectedFontColor) {
             return this.itemStyle.selectedFontColor;
         }
@@ -405,31 +399,51 @@ export class ChipGroup extends ViewPU {
         return defaultTheme.itemStyle.selectedFillColor;
     }
     getBackgroundColor() {
+        if (typeof this.itemStyle.backgroundColor == 'object') {
+            let o6 = this.itemStyle.backgroundColor;
+            if (o6 == undefined || o6 == null) {
+                return defaultTheme.itemStyle.backgroundColor;
+            }
+            if (o6.type === 10001) {
+                return this.itemStyle.backgroundColor;
+            }
+            return defaultTheme.itemStyle.backgroundColor;
+        }
         if (this.itemStyle && this.itemStyle.backgroundColor) {
             return this.itemStyle.backgroundColor;
         }
         return defaultTheme.itemStyle.backgroundColor;
     }
     getSelectedBackgroundColor() {
+        if (typeof this.itemStyle.selectedBackgroundColor == 'object') {
+            let n6 = this.itemStyle.selectedBackgroundColor;
+            if (n6 == undefined || n6 == null) {
+                return defaultTheme.itemStyle.selectedBackgroundColor;
+            }
+            if (n6.type === 10001) {
+                return this.itemStyle.selectedBackgroundColor;
+            }
+            return defaultTheme.itemStyle.selectedBackgroundColor;
+        }
         if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
             return this.itemStyle.selectedBackgroundColor;
         }
         return defaultTheme.itemStyle.selectedBackgroundColor;
     }
     getSelectedIndexes() {
-        let w1 = [];
-        w1 = (this.selectedIndexes ?? [0]).filter((y1, z1, a2) => {
-            return (y1 >= 0 &&
-                y1 % 1 == 0 &&
-                y1 != null &&
-                y1 != undefined &&
-                a2.indexOf(y1) === z1 &&
-                y1 < (this.items || []).length);
+        let i6 = [];
+        i6 = (this.selectedIndexes ?? [0]).filter((k6, l6, m6) => {
+            return (k6 >= 0 &&
+                k6 % 1 == 0 &&
+                k6 != null &&
+                k6 != undefined &&
+                m6.indexOf(k6) === l6 &&
+                k6 < (this.items || []).length);
         });
-        if (w1.length == 0) {
-            w1 = [0];
+        if (i6.length == 0) {
+            i6 = [0];
         }
-        return w1;
+        return i6;
     }
     isMultiple() {
         return this.multiple ?? false;
@@ -446,41 +460,30 @@ export class ChipGroup extends ViewPU {
     getOnChange() {
         return this.onChange ?? noop;
     }
-    isSelected(r1) {
+    isSelected(d6) {
         if (!this.isMultiple()) {
-            return r1 == this.getSelectedIndexes()[0];
+            return d6 == this.getSelectedIndexes()[0];
         }
         else {
-            return this.getSelectedIndexes().some((t1, u1, v1) => {
-                return (t1 == r1);
+            return this.getSelectedIndexes().some((f6, g6, h6) => {
+                return (f6 == d6);
             });
         }
     }
     initialRender() {
-        this.observeComponentCreation((p1, q1) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(p1);
+        this.observeComponentCreation2((b6, c6) => {
             Row.create();
             Row.align(Alignment.End);
-            Row.width('100%');
+            Row.width("100%");
             Row.height(64);
-            if (!q1) {
-                Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-        });
-        this.observeComponentCreation((n1, o1) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(n1);
+        }, Row);
+        this.observeComponentCreation2((z5, a6) => {
             Stack.create();
             Stack.layoutWeight(1);
             Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
             Stack.alignContent(Alignment.End);
-            if (!o1) {
-                Stack.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-        });
-        this.observeComponentCreation((k1, l1) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(k1);
+        }, Stack);
+        this.observeComponentCreation2((w5, x5) => {
             Scroll.create(this.scroller);
             Scroll.scrollable(ScrollDirection.Horizontal);
             Scroll.scrollBar(BarState.Off);
@@ -489,55 +492,48 @@ export class ChipGroup extends ViewPU {
             Scroll.onScroll(() => {
                 this.isReachEnd = this.scroller.isAtEnd();
             });
-            if (!l1) {
-                Scroll.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-        });
-        this.observeComponentCreation((i1, j1) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(i1);
+        }, Scroll);
+        this.observeComponentCreation2((u5, v5) => {
             Row.create({ space: this.getChipGroupItemSpace() });
             Row.padding({ left: this.getChipGroupStartSpace(),
                 right: this.getChipGroupEndSpace() });
             Row.constraintSize({ minWidth: '100%' });
-            if (!j1) {
-                Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-        });
-        this.observeComponentCreation((v, w) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(v);
+        }, Row);
+        this.observeComponentCreation2((h5, i5) => {
             ForEach.create();
-            const x = (z, a1) => {
-                const b1 = z;
-                this.observeComponentCreation((d1, e1) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(d1);
+            const j5 = (l5, m5) => {
+                const n5 = l5;
+                this.observeComponentCreation2((p5, q5) => {
                     If.create();
-                    if (b1) {
+                    if (n5) {
                         this.ifElseBranchUpdateFunction(0, () => {
-                            Chip.bind(this)(makeBuilderParameterProxy('Chip', { prefixIcon: () => ({
-                                    src: b1.prefixIcon?.src ?? "",
-                                    size: b1.prefixIcon?.size ?? undefined,
+                            Chip.bind(this)(makeBuilderParameterProxy("Chip", { prefixIcon: () => ({
+                                    src: n5.prefixIcon?.src ?? "",
+                                    size: n5.prefixIcon?.size ?? undefined,
                                     fillColor: this.getFillColor(),
                                     activatedFillColor: this.getSelectedFillColor()
-                                }), prefixSymbol: () => b1?.prefixSymbol, label: () => ({
-                                    text: b1?.label?.text ?? " ",
+                                }), prefixSymbol: () => n5?.prefixSymbol, label: () => ({
+                                    text: n5?.label?.text ?? " ",
                                     fontColor: this.getFontColor(),
                                     activatedFontColor: this.getSelectedFontColor(),
                                 }), suffixIcon: () => ({
-                                    src: b1.suffixIcon?.src ?? "",
-                                    size: b1.suffixIcon?.size ?? undefined,
+                                    src: n5.suffixIcon?.src ?? "",
+                                    size: n5.suffixIcon?.size ?? undefined,
                                     fillColor: this.getFillColor(),
                                     activatedFillColor: this.getSelectedFillColor()
-                                }), suffixSymbol: () => b1?.suffixSymbol, allowClose: () => b1.allowClose ?? false, enabled: () => true, activated: () => this.isSelected(a1), backgroundColor: () => this.getBackgroundColor(), size: () => this.getChipSize(), activatedBackgroundColor: () => this.getSelectedBackgroundColor(), onClicked: () => () => {
-                                    if (this.isSelected(a1)) {
-                                        this.selectedIndexes.splice(this.selectedIndexes.indexOf(a1), 1);
+                                }), suffixSymbol: () => n5?.suffixSymbol, allowClose: () => n5.allowClose ?? false, enabled: () => true, activated: () => this.isSelected(m5), backgroundColor: () => this.getBackgroundColor(), size: () => this.getChipSize(), activatedBackgroundColor: () => this.getSelectedBackgroundColor(), onClicked: () => () => {
+                                    if (this.isSelected(m5)) {
+                                        if (!(!this.isMultiple())) {
+                                            if (this.getSelectedIndexes().length > 1) {
+                                                this.selectedIndexes.splice(this.selectedIndexes.indexOf(m5), 1);
+                                            }
+                                        }
                                     }
                                     else {
                                         if (!this.isMultiple()) {
                                             this.selectedIndexes = [];
                                         }
-                                        this.selectedIndexes.push(a1);
+                                        this.selectedIndexes.push(m5);
                                     }
                                     this.getOnChange()(this.getSelectedIndexes());
                                 } }), this);
@@ -547,29 +543,19 @@ export class ChipGroup extends ViewPU {
                         this.ifElseBranchUpdateFunction(1, () => {
                         });
                     }
-                    if (!e1) {
-                        If.pop();
-                    }
-                    ViewStackProcessor.StopGetAccessRecording();
-                });
+                }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(v, this.items || [], x, undefined, true, false);
-            if (!w) {
-                ForEach.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-        });
+            this.forEachUpdateFunction(h5, this.items || [], j5, undefined, true, false);
+        }, ForEach);
         ForEach.pop();
         Row.pop();
         Scroll.pop();
-        this.observeComponentCreation((o, p) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(o);
+        this.observeComponentCreation2((a5, b5) => {
             If.create();
             if (this.suffix && !this.isReachEnd) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation((t, u) => {
-                        ViewStackProcessor.StartGetAccessRecordingFor(t);
+                    this.observeComponentCreation2((f5, g5) => {
                         Stack.create();
                         Stack.width(iconGroupSuffixTheme.normalBackgroundSize);
                         Stack.height(this.getChipSize() === ChipSize.SMALL ?
@@ -578,11 +564,7 @@ export class ChipGroup extends ViewPU {
                         Stack.linearGradient({ angle: 90, colors: colorStops });
                         Stack.blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN);
                         Stack.hitTestBehavior(HitTestMode.None);
-                        if (!u) {
-                            Stack.pop();
-                        }
-                        ViewStackProcessor.StopGetAccessRecording();
-                    });
+                    }, Stack);
                     Stack.pop();
                 });
             }
@@ -590,27 +572,17 @@ export class ChipGroup extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
-            if (!p) {
-                If.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-        });
+        }, If);
         If.pop();
         Stack.pop();
-        this.observeComponentCreation((h, i) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(h);
+        this.observeComponentCreation2((t4, u4) => {
             If.create();
             if (this.suffix) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation((m, n) => {
-                        ViewStackProcessor.StartGetAccessRecordingFor(m);
+                    this.observeComponentCreation2((y4, z4) => {
                         Row.create();
                         Row.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight });
-                        if (!n) {
-                            Row.pop();
-                        }
-                        ViewStackProcessor.StopGetAccessRecording();
-                    });
+                    }, Row);
                     this.suffix.bind(this)(this);
                     Row.pop();
                 });
@@ -619,11 +591,7 @@ export class ChipGroup extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
-            if (!i) {
-                If.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-        });
+        }, If);
         If.pop();
         Row.pop();
     }

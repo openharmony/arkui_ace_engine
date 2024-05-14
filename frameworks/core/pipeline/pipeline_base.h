@@ -1061,6 +1061,16 @@ public:
         return halfLeading_;
     }
 
+    void SetUseCutout(bool useCutout)
+    {
+        useCutout_ = useCutout;
+    }
+
+    bool GetUseCutout() const
+    {
+        return useCutout_;
+    }
+
     bool GetOnFoucs() const
     {
         return onFocus_;
@@ -1324,6 +1334,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
+    bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
 
     bool delaySurfaceChange_ = false;
