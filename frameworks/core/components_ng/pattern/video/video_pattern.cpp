@@ -1333,6 +1333,15 @@ void VideoPattern::SetMethodCall()
             fullScreenPattern->ExitFullScreen();
         }, "ArkUIVideoExitFullScreen");
     });
+    videoController->SetResetImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+        uiTaskExecutor.PostTask([weak]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto targetPattern = pattern->GetTargetVideoPattern();
+            CHECK_NULL_VOID(targetPattern);
+            targetPattern->ResetMediaPlayer();
+        }, "ArkUIVideoReset");
+    });
     CHECK_NULL_VOID(videoControllerV2_);
     videoControllerV2_->AddVideoController(videoController);
 }

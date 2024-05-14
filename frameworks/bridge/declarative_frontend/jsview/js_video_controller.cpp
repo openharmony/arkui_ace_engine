@@ -39,6 +39,7 @@ void JSVideoController::JSBind(BindingTarget globalObj)
     JSClass<JSVideoController>::CustomMethod("setCurrentTime", &JSVideoController::SetCurrentTime);
     JSClass<JSVideoController>::CustomMethod("requestFullscreen", &JSVideoController::RequestFullscreen);
     JSClass<JSVideoController>::CustomMethod("exitFullscreen", &JSVideoController::ExitFullscreen);
+    JSClass<JSVideoController>::CustomMethod("reset", &JSVideoController::Reset);
     JSClass<JSVideoController>::Bind(globalObj, JSVideoController::Constructor, JSVideoController::Destructor);
 }
 
@@ -59,6 +60,13 @@ void JSVideoController::Destructor(JSVideoController* videoController)
         if (controller) {
             controller->Clear();
         }
+    }
+}
+
+void JSVideoController::Reset(const JSCallbackInfo& args)
+{
+    if (videoController_) {
+        videoController_->Reset();
     }
 }
 
