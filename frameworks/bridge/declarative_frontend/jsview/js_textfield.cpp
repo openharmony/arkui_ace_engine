@@ -402,14 +402,16 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
 
         // set caret color
         Color caretColor;
-        auto caretColorProp = paramObject->GetProperty("color");
-        if (caretColorProp->IsNull()) {
+        if (!paramObject->HasProperty("color")) {
             return;
+        } else {
+            auto caretColorProp = paramObject->GetProperty("color");
+            if (caretColorProp->IsUndefined() || caretColorProp->IsNull()
+                || !ParseJsColor(caretColorProp, caretColor)) {
+                caretColor = theme->GetCursorColor();
+            }
+            TextFieldModel::GetInstance()->SetCaretColor(caretColor);
         }
-        if (caretColorProp->IsUndefined() || !ParseJsColor(caretColorProp, caretColor)) {
-            caretColor = theme->GetCursorColor();
-        }
-        TextFieldModel::GetInstance()->SetCaretColor(caretColor);
     }
 }
 
