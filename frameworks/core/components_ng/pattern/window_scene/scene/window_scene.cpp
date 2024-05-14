@@ -225,7 +225,7 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 void WindowScene::AddOrRemoveChild(RefPtr<FrameNode> host, RefPtr<FrameNode> aimNode,
     bool addFlag, std::string nodeType)
 {
-    if (AddFlag) {
+    if (addFlag) {
         host->AddChild(aimNode);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene AddChild %{public}s", nodeType.c_str());
     } else {
