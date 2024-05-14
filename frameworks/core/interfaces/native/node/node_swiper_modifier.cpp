@@ -1084,5 +1084,23 @@ void SetSwiperGestureSwipe(ArkUINodeHandle node, void* extraParam)
     };
     SwiperModelNG::SetOnGestureSwipe(frameNode, std::move(onEvent));
 }
+
+void SetSwiperOnContentDidScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_SWIPER_DID_CONTENT_SCROLL;
+        event.componentAsyncEvent.data[NUM_0].i32 = selectedIndex;
+        event.componentAsyncEvent.data[NUM_1].i32 = index;
+        event.componentAsyncEvent.data[NUM_2].f32 = position;
+        event.componentAsyncEvent.data[NUM_3].f32 = mainAxisLength;
+        SendArkUIAsyncEvent(&event);
+    };
+    SwiperModelNG::SetOnContentDidScroll(frameNode, std::move(onEvent));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

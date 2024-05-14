@@ -112,6 +112,11 @@ void OH_ArkUI_WaterFlowSectionOption_SetMargin(ArkUI_WaterFlowSectionOption* opt
     }
 }
 
+int32_t OH_ArkUI_WaterFlowSectionOption_GetSize(ArkUI_WaterFlowSectionOption* option)
+{
+    return static_cast<int32_t>(option->sections.size());
+}
+
 int32_t OH_ArkUI_WaterFlowSectionOption_GetItemCount(ArkUI_WaterFlowSectionOption* option, int32_t index)
 {
     auto size = static_cast<int32_t>(option->sections.size());
@@ -160,6 +165,16 @@ ArkUI_Margin OH_ArkUI_WaterFlowSectionOption_GetMargin(ArkUI_WaterFlowSectionOpt
     margin.bottom = option->sections[index].margin[2];
     margin.left = option->sections[index].margin[3];
     return margin;
+}
+
+void OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndex(
+    ArkUI_WaterFlowSectionOption* option, int32_t index, float (*callback)(int32_t itemIndex))
+{
+    auto size = static_cast<int32_t>(option->sections.size());
+    if (size == 0 || size < index + 1) {
+        return;
+    }
+    option->sections[index].onGetItemMainSizeByIndex = reinterpret_cast<void*>(callback);
 }
 
 #ifdef __cplusplus

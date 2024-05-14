@@ -1939,6 +1939,15 @@ void OH_ArkUI_WaterFlowSectionOption_SetItemCount(ArkUI_WaterFlowSectionOption* 
     int32_t index, int32_t itemCount);
 
 /**
+* @brief Gets the FlowItem grouping configuration information array length.
+*
+* @param option FlowItem Indicates the packet configuration.
+* @return array size.
+* @since 12
+*/
+int32_t OH_ArkUI_WaterFlowSectionOption_GetSize(ArkUI_WaterFlowSectionOption* option);
+
+/**
 * @brief Obtains the number of items in the water flow section that matches the specified index.
 *
 * @param option Indicates the pointer to a water flow section configuration.
@@ -2035,6 +2044,17 @@ void OH_ArkUI_WaterFlowSectionOption_SetMargin(ArkUI_WaterFlowSectionOption* opt
 * @since 12
 */
 ArkUI_Margin OH_ArkUI_WaterFlowSectionOption_GetMargin(ArkUI_WaterFlowSectionOption* option, int32_t index);
+
+/**
+* @brief 通过FlowItem分组配置信息根据flowItemIndex获取指定Item的主轴大小。
+*
+* @param option FlowItem分组配置信息。
+* @param index FlowItem索引值。
+* @param callback 根据index获取指定Item的主轴大小。
+* @since 12
+*/
+void OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndex(ArkUI_WaterFlowSectionOption* option,
+    int32_t index, float(*callback)(int32_t itemIndex));
 
 /**
  * @brief Create auxiliary line information in the RelativeContaine container.
