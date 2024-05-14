@@ -124,6 +124,10 @@ public:
     void FireAsyncCallbacks();
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
+    void DispatchFollowHostDensity(bool densityDpi);
+    void OnDpiConfigurationUpdate() override;
+    void SetDensityDpi(bool densityDpi);
+    bool GetDensityDpi();
 
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
@@ -235,6 +239,7 @@ private:
     bool isModal_ = false;
     bool isAsyncModalBinding_ = false;
     bool isShowPlaceholder_ = false;
+    bool densityDpi_ = false;
     int32_t callbackId_ = 0;
     RectF displayArea_;
     bool isKeyAsync_ = false;

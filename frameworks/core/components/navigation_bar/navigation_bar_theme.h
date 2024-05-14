@@ -91,8 +91,8 @@ public:
     private:
         void SetSymbolTheme(const RefPtr<ThemeConstants>& themeConstants, RefPtr<NavigationBarTheme>& theme) const
         {
-            theme->backSymbolId_ = themeConstants->GetSymbolByName("arrow_left");
-            theme->moreSymbolId_ = themeConstants->GetSymbolByName("dot_grid_2x2");
+            theme->backSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_left");
+            theme->moreSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.dot_grid_2x2");
         }
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<NavigationBarTheme>& theme) const
         {

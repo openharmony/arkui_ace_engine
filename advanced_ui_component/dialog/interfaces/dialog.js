@@ -888,7 +888,7 @@ export class SelectDialog extends ViewPU {
             Button.pop();
             this.observeComponentCreation2((x14, y14) => {
               If.create();
-              if (h14 && h14 < this.radioContent.length - 1) {
+              if (h14 < this.radioContent.length - 1) {
                 this.ifElseBranchUpdateFunction(0, () => {
                   this.observeComponentCreation2((c15, d15) => {
                     Divider.create();
@@ -1271,6 +1271,9 @@ export class ConfirmDialog extends ViewPU {
       Row.width('100%');
       Row.padding({ left: 24, right: 24, top: 8, bottom: 8 });
     }, Row);
+    this.observeComponentCreation2((l12, m12) => {
+      WithTheme.create({ theme: this.theme });
+    }, WithTheme);
     this.observeComponentCreation2((g12, h12) => {
       Checkbox.create({ name: 'checkbox', group: 'checkboxGroup' });
       Checkbox.select(this.isChecked);
@@ -1280,6 +1283,7 @@ export class ConfirmDialog extends ViewPU {
       Checkbox.margin({ left: 0, right: 8 });
     }, Checkbox);
     Checkbox.pop();
+    WithTheme.pop();
     this.observeComponentCreation2((d12, e12) => {
       Text.create(this.checkTips);
       Text.fontSize({

@@ -375,6 +375,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListItem>::Declare("ListItem");
     JSClass<JSListItem>::StaticMethod("createInternal", &JSListItem::Create);
+    JSClass<JSListItem>::StaticMethod("create", &JSListItem::Create);
 
     JSClass<JSListItem>::StaticMethod("sticky", &JSListItem::SetSticky);
     JSClass<JSListItem>::StaticMethod("editable", &JSListItem::SetEditable);

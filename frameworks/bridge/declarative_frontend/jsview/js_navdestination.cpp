@@ -181,10 +181,13 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     nameList.emplace_back(bundleName);
     nameList.emplace_back(moduleName);
-    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
-    if (src.empty() && pixMap == nullptr) {
-        SetSymbolOptionApply(info, iconSymbol, info[0]);
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+    if (info[0]->IsObject()) {
+        if (src.empty() && pixMap == nullptr) {
+            SetSymbolOptionApply(info, iconSymbol, info[0]);
+        }
     }
+
     NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, noPixMap, pixMap, nameList);
 }
 

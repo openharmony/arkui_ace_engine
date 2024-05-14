@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,11 +96,11 @@ export class Index extends ViewPU {
     this.__iconOpacity.set(newValue);
   }
   onWindowFocused() {
-    this.textColor = 0xff000000;
+    this.textColor = $r("sys.color.ohos_id_color_primary");
     this.iconOpacity = 1;
   }
   onWindowUnfocused() {
-    this.textColor = 0x66000000;
+    this.textColor = $r("sys.color.ohos_id_color_primary");
     this.iconOpacity = 0.4;
   }
   setAppTitle(content) {
@@ -151,6 +151,7 @@ export class Index extends ViewPU {
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.textAlign(TextAlign.Start);
       Text.layoutWeight(1.0);
+      Text.opacity(this.iconOpacity);
       if (!isInitialRender) {
         Text.pop();
       }

@@ -15,12 +15,14 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 
 #include "interfaces/native/node/node_model.h"
+#include "base/geometry/calc_dimension.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
@@ -445,6 +447,37 @@ ArkUI_Int32 GetScrollEdge(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(type);
 }
 
+void SetScrollInitialOffset(ArkUINodeHandle node,  ArkUI_Float32 xOffsetValue, ArkUI_Int32 xOffsetUnit,
+    ArkUI_Float32 yOffsetValue, ArkUI_Int32 yOffsetUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension xOffset = CalcDimension(xOffsetValue, static_cast<OHOS::Ace::DimensionUnit>(xOffsetUnit));
+    CalcDimension yOffset = CalcDimension(yOffsetValue, static_cast<OHOS::Ace::DimensionUnit>(yOffsetUnit));
+    ScrollModelNG::SetInitialOffset(frameNode, NG::OffsetT(xOffset, yOffset));
+}
+
+void ResetScrollInitialOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetInitialOffset(frameNode, NG::OffsetT(CalcDimension(), CalcDimension()));
+}
+
+void SetScrollFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 max)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, max);
+}
+
+void ResetScrollFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, -1.0f);
+}
+
 void SetScrollPage(ArkUINodeHandle node, ArkUI_Int32 next, ArkUI_Int32 animation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -463,6 +496,23 @@ void SetScrollBy(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y)
     RefPtr<ScrollableController> controller = pattern->GetOrCreatePositionController();
     CHECK_NULL_VOID(controller);
     controller->ScrollBy(x, y, false);
+}
+
+ArkUINodeHandle GetScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto controller = ScrollModelNG::GetOrCreateController(frameNode);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(controller));
+}
+
+void SetScrollBarProxy(ArkUINodeHandle node, ArkUINodeHandle proxy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto scrollProxy = AceType::Claim(reinterpret_cast<ScrollProxy*>(proxy));
+    CHECK_NULL_VOID(scrollProxy);
+    ScrollModelNG::SetScrollBarProxy(frameNode, scrollProxy);
 }
 } // namespace
 
@@ -510,8 +560,14 @@ const ArkUIScrollModifier* GetScrollModifier()
         GetScrollNestedScroll,
         GetScrollOffset,
         GetScrollEdge,
+        SetScrollInitialOffset,
+        ResetScrollInitialOffset,
+        SetScrollFlingSpeedLimit,
+        ResetScrollFlingSpeedLimit,
         SetScrollPage,
         SetScrollBy,
+        GetScroll,
+        SetScrollBarProxy,
     };
     /* clang-format on */
     return &modifier;

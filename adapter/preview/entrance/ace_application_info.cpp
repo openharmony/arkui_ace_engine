@@ -33,7 +33,7 @@
 
 namespace OHOS::Ace::Platform {
 
-void AceApplicationInfoImpl::ChangeLocale(const std::string& language, const std::string& countryOrRegion) 
+void AceApplicationInfoImpl::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
     std::string languageLower = language;
     std::transform(language.begin(), language.end(), languageLower.begin(), ::tolower);

@@ -142,8 +142,8 @@ void JSNavigation::ParseBarItems(
         }
 
         auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
-        if (!itemSymbolIconObject->IsUndefined()) {
-            std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
+        if (itemSymbolIconObject->IsObject()) {
+            std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
             SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
             toolBarItem.iconSymbol = iconSymbol;
         }
@@ -181,8 +181,8 @@ void JSNavigation::ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& t
     std::string icon;
     std::string activeIcon;
     auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
-    if (!itemSymbolIconObject->IsUndefined()) {
-        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
+    if (itemSymbolIconObject->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
         SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
         toolBarItem.iconSymbol = iconSymbol;
     }
@@ -192,8 +192,8 @@ void JSNavigation::ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& t
     }
 
     auto itemActiveSymbolIconObject = itemObject->GetProperty("activeSymbolIcon");
-    if (!itemActiveSymbolIconObject->IsUndefined()) {
-        std::function<void(WeakPtr<NG::FrameNode>)> activeSymbol;
+    if (itemActiveSymbolIconObject->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> activeSymbol = nullptr;
         SetSymbolOptionApply(info, activeSymbol, itemActiveSymbolIconObject);
         toolBarItem.activeIconSymbol = activeSymbol;
     }
@@ -454,11 +454,12 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
     nameList.emplace_back(bundleName);
     nameList.emplace_back(moduleName);
 
-    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
-    if (src.empty() && pixMap == nullptr) {
-        SetSymbolOptionApply(info, iconSymbol, info[0]);
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+    if (info[0]->IsObject()) {
+        if (src.empty() && pixMap == nullptr) {
+            SetSymbolOptionApply(info, iconSymbol, info[0]);
+        }
     }
-
     NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, noPixMap, pixMap, nameList);
 }
 

@@ -436,7 +436,6 @@ class SearchInputFilterModifier extends ModifierWithKey<ArkSearchInputFilter> {
     }
   }
 }
-
 class SearchTextIndentModifier extends ModifierWithKey<Dimension> {
   constructor(value: Dimension) {
     super(value);
@@ -453,22 +452,195 @@ class SearchTextIndentModifier extends ModifierWithKey<Dimension> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class SearchMaxLengthModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchMaxLength');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetMaxLength(node);
+    } else {
+      getUINativeModule().search.setMaxLength(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchTypeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetType(node);
+    } else {
+      getUINativeModule().search.setType(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchOnEditChangeModifier extends ModifierWithKey<(isEditing: boolean) => void> {
+  constructor(value: (isEditing: boolean) => void) {
+    super(value);
+  }
+  static identity = Symbol('searchOnEditChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnEditChange(node);
+    } else {
+      getUINativeModule().search.setOnEditChange(node, this.value);
+    }
+  }
+}
+
+class SearchOnSubmitModifier extends ModifierWithKey<(enterKey: EnterKeyType, event: SubmitEvent) => void> {
+  constructor(value: (enterKey: EnterKeyType, event: SubmitEvent) => void) {
+    super(value);
+  }
+  static identity = Symbol('searchOnSubmit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnSubmit(node);
+    } else {
+      getUINativeModule().search.setOnSubmit(node, this.value);
+    }
+  }
+}
+
+class SearchOnCopyModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('searchOnCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnCopy(node);
+    } else {
+      getUINativeModule().search.setOnCopy(node, this.value);
+    }
+  }
+}
+
+class SearchOnCutModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('searchOnCut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnCut(node);
+    } else {
+      getUINativeModule().search.setOnCut(node, this.value);
+    }
+  }
+}
+
+class SearchOnPasteModifier extends ModifierWithKey<(value: string, event: PasteEvent) => void> {
+  constructor(value: (value: string, event: PasteEvent) => void) {
+    super(value);
+  }
+  static identity = Symbol('searchOnPaste');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnPaste(node);
+    } else {
+      getUINativeModule().search.setOnPaste(node, this.value);
+    }
+  }
+}
+
+class SearchOnChangeModifier extends ModifierWithKey<(value: string) => void> {
+  constructor(value: (value: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('searchOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnChange(node);
+    } else {
+      getUINativeModule().search.setOnChange(node, this.value);
+    }
+  }
+}
+
+class SearchOnTextSelectionChangeModifier extends ModifierWithKey<(selectionStart: number, selectionEnd: number) => void> {
+  constructor(value: (selectionStart: number, selectionEnd: number) => void) {
+    super(value);
+  }
+  static identity = Symbol('searchOnTextSelectionChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnTextSelectionChange(node);
+    } else {
+      getUINativeModule().search.setOnTextSelectionChange(node, this.value);
+    }
+  }
+}
+
+class SearchOnContentScrollModifier extends ModifierWithKey<(totalOffsetX: number, totalOffsetY: number) => void> {
+  constructor(value: (totalOffsetX: number, totalOffsetY: number) => void) {
+    super(value);
+  }
+  static identity = Symbol('searchOnContentScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnContentScroll(node);
+    } else {
+      getUINativeModule().search.setOnContentScroll(node, this.value);
+    }
+  }
+}
+
+class SearchShowCounterModifier extends ModifierWithKey<ArkTextFieldShowCounter> {
+  constructor(value: ArkTextFieldShowCounter) {
+    super(value);
+  }
+  static identity = Symbol('searchShowCounter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetShowCounter(node);
+    }
+    else {
+      getUINativeModule().search.setShowCounter(node, this.value.value!, this.value.highlightBorder, this.value.thresholdPercentage);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
+      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
+  }
+}
 
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   onEditChange(callback: (isEditing: boolean) => void): SearchAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnEditChangeModifier.identity,
+      SearchOnEditChangeModifier, callback);
+    return this;
   }
   type(value: SearchType): SearchAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchTypeModifier.identity,
+      SearchTypeModifier, value);
+    return this;
   }
   maxLength(value: number): SearchAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchMaxLengthModifier.identity,
+      SearchMaxLengthModifier, value);
+    return this;
   }
   onEditChanged(callback: (isEditing: boolean) => void): SearchAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnEditChangeModifier.identity,
+      SearchOnEditChangeModifier, callback);
+    return this;
   }
   customKeyboard(event: () => void): SearchAttribute {
     throw new Error('Method not implemented.');
@@ -477,28 +649,48 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     throw new Error('Method not implemented.');
   }
   onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): SearchAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnContentScrollModifier.identity,
+      SearchOnContentScrollModifier, callback);
+    return this;
   }
   onChange(callback: (value: string) => void): SearchAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnChangeModifier.identity,
+      SearchOnChangeModifier, callback);
+    return this;
   }
   onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): SearchAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnTextSelectionChangeModifier.identity,
+      SearchOnTextSelectionChangeModifier, callback);
+    return this;
   }
   onCopy(callback: (value: string) => void): SearchAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnCopyModifier.identity,
+      SearchOnCopyModifier, callback);
+    return this;
   }
   onCut(callback: (value: string) => void): SearchAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnCutModifier.identity,
+      SearchOnCutModifier, callback);
+    return this;
   }
   onSubmit(callback: (value: string) => void): SearchAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnSubmitModifier.identity,
+      SearchOnSubmitModifier, callback);
+    return this;
   }
   onPaste(callback: (value: string) => void): SearchAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnPasteModifier.identity,
+      SearchOnPasteModifier, callback);
+    return this;
   }
-  showCounter(value: boolean): SearchAttribute {
-    throw new Error('Method not implemented.');
+  showCounter(value: boolean, options?: InputCounterOptions): SearchAttribute {
+    let arkValue: ArkTextFieldShowCounter = new ArkTextFieldShowCounter();
+    arkValue.value = value;
+    arkValue.highlightBorder = options?.highlightBorder;
+    arkValue.thresholdPercentage = options?.thresholdPercentage;
+    modifierWithKey(this._modifiersWithKeys, SearchShowCounterModifier.identity,
+      SearchShowCounterModifier, arkValue);
+    return this;
   }
   searchButton(value: string, option?: SearchButtonOptions): SearchAttribute {
     let searchButton = new ArkSearchButton();

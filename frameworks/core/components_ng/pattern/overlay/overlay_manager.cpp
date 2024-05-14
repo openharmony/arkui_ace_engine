@@ -1502,6 +1502,10 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
+    auto subwindowMgr = SubwindowManager::GetInstance();
+    for (auto child: rootNode->GetChildren()) {
+        subwindowMgr->DeleteHotAreas(Container::CurrentId(), child->GetId());
+    }
     rootNode->Clean();
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -5000,6 +5004,19 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
             }
         },
         option.GetOnFinishEvent());
+}
+
+void OverlayManager::UpdateGatherNodeToTop()
+{
+    auto frameNode = gatherNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto rootNode = frameNode->GetParent();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->RemoveChild(frameNode);
+    frameNode->MountToParent(rootNode);
+    frameNode->OnMountToParentDone();
+    rootNode->RebuildRenderContextTree();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 RefPtr<FrameNode> OverlayManager::GetPixelMapContentNode() const

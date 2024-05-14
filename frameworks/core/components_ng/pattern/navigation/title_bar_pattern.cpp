@@ -103,10 +103,11 @@ void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPt
         // symbol -> symbol
         auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolProperty);
-        backIconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(backButtonIconNode)));
         symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         auto iconColor = theme->GetIconColor();
         symbolProperty->UpdateSymbolColorList({ iconColor });
+        // User-defined color overrides the default color of the theme
+        backIconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(backButtonIconNode)));
         backButtonIconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else if (titleBarLayoutProperty->HasImageSource()) {
         // symbol -> image
@@ -134,6 +135,7 @@ void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPt
         backButtonImageNode->MarkModifyDone();
     } else {
         auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolProperty);
         auto iconColor = theme->GetIconColor();
         symbolProperty->UpdateSymbolColorList({ iconColor });
         backButtonIconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

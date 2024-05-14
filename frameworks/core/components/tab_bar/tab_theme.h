@@ -58,6 +58,7 @@ public:
                 theme->subTabHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_horizontal_padding", 0.0_vp);
                 theme->subTabTopPadding_ = pattern->GetAttr<Dimension>("subtab_top_padding", 0.0_vp);
                 theme->subTabBottomPadding_ = pattern->GetAttr<Dimension>("subtab_bottom_padding", 0.0_vp);
+                theme->subTabItemPadding_ = pattern->GetAttr<Dimension>("subtab_item_padding", 0.0_vp);
                 theme->subTabBarHoverColor_ = pattern->GetAttr<Color>("subtab_hover_color", Color::WHITE);
                 theme->subTabBarPressedColor_ = pattern->GetAttr<Color>("subtab_press_color", Color::WHITE);
                 theme->subtabTextDefaultFontSize_ =
@@ -223,6 +224,11 @@ public:
     const Dimension& GetSubTabHorizontalPadding() const
     {
         return subTabHorizontalPadding_;
+    }
+
+    const Dimension& GetSubTabItemPadding() const
+    {
+        return subTabItemPadding_;
     }
 
     const Dimension& GetSubTabTopPadding() const
@@ -432,6 +438,7 @@ private:
     Dimension subTabHorizontalPadding_;
     Dimension subTabTopPadding_;
     Dimension subTabBottomPadding_;
+    Dimension subTabItemPadding_;
     Color subTabBarHoverColor_;
     Color subTabBarPressedColor_;
     Dimension subtabTextDefaultFontSize_;

@@ -18,7 +18,7 @@ class XComponentNode extends FrameNode {
   private xcomponentNode_: any;
   private renderType_: NodeRenderType;
   constructor(uiContext: UIContext, options: RenderOptions,
-    id: string, type: XComponentType, libraryname?: string) {
+    id: string, type: XComponentType, libraryname?: string, controller?: XComponentController) {
     super(uiContext, 'XComponentNode');
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     this.xcomponentNode_ = getUINativeModule().xcomponentNode;
@@ -26,7 +26,7 @@ class XComponentNode extends FrameNode {
     const surfaceId = options.surfaceId;
     const selfIdealWidth = options.selfIdealSize.width;
     const selfIdealHeight = options.selfIdealSize.height;
-    this.nativeModule_ = this.xcomponentNode_.create(elmtId, id, type, this.renderType_, surfaceId, selfIdealWidth, selfIdealHeight, libraryname);
+    this.nativeModule_ = this.xcomponentNode_.create(elmtId, id, type, this.renderType_, surfaceId, selfIdealWidth, selfIdealHeight, libraryname, controller);
     this.xcomponentNode_.registerOnCreateCallback(this.nativeModule_, this.onCreate);
     this.xcomponentNode_.registerOnDestroyCallback(this.nativeModule_, this.onDestroy);
     this.nodePtr_ = this.xcomponentNode_.getFrameNode(this.nativeModule_);

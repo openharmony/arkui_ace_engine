@@ -27,7 +27,6 @@ std::vector<std::string> JsForEachFunction::ExecuteIdentityMapper()
     if (!jsIdentityMapperFunc_.IsEmpty()) {
         JSRef<JSVal> argv[] = { jsIdentityMapperFunc_.Lock() };
         jsKeys = JSRef<JSObject>::Cast(JsFunction::ExecuteJS(1, argv));
-
         if (jsKeys.IsEmpty()) {
             return result;
         }
