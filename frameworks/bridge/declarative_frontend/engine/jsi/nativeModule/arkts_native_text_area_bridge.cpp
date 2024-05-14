@@ -898,10 +898,16 @@ ArkUINativeModuleValue TextAreaBridge::SetCaretStyle(ArkUIRuntimeCallInfo* runti
     }
     Color color;
     uint32_t caretColor;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color)) {
-        caretColor = color.GetValue();
+    if (!caretColorArg->IsUndefined()) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color)) {
+            caretColor = color.GetValue();
+        } else {
+            caretColor = textFieldTheme->GetCursorColor().GetValue();
+        }
     } else {
-        caretColor = textFieldTheme->GetCursorColor().GetValue();
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaCaret(
+            nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()));
+        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaCaretStyle(
         nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor);

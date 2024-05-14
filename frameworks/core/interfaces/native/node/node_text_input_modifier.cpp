@@ -1686,6 +1686,15 @@ void ResetTextInputMargin(ArkUINodeHandle node)
     paddings.right = NG::CalcLength(0.0);
     TextFieldModelNG::SetMargin(frameNode, paddings);
 }
+
+void SetTextInputCaret(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CaretStyle caretStyle;
+    caretStyle.caretWidth = CalcDimension(value, (DimensionUnit)unit);
+    TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -1739,7 +1748,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputCustomKeyboardOption, ResetTextInputCustomKeyboard, SetTextInputLineBreakStrategy,
         ResetTextInputLineBreakStrategy,  SetTextInputShowKeyBoardOnFocus, GetTextInputShowKeyBoardOnFocus,
         ResetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, GetTextInputNumberOfLines,
-        ResetTextInputNumberOfLines, SetTextInputMargin, ResetTextInputMargin };
+        ResetTextInputNumberOfLines, SetTextInputMargin, ResetTextInputMargin, SetTextInputCaret };
     return &modifier;
 }
 
