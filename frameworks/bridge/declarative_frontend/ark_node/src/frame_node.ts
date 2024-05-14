@@ -672,6 +672,16 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkListItemComponent(node, type);
       })
     }],
+    ["Divider", (context: UIContext) => {
+      return new TypedFrameNode(context, "Divider", (node: NodePtr, type: ModifierType) => {
+        return new ArkDividerComponent(node, type);
+      })
+    }],
+    ["LoadingProgress", (context: UIContext) => {
+      return new TypedFrameNode(context, "LoadingProgress", (node: NodePtr, type: ModifierType) => {
+        return new ArkLoadingProgressComponent(node, type);
+      })
+    }],
   ]
 )
 
