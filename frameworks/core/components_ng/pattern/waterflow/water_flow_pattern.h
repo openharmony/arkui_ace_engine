@@ -34,6 +34,10 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool IsReverse() const override;
+    bool hasFooter()
+    {
+        return footer_.Upgrade() != nullptr;
+    };
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void UpdateScrollBarOffset() override;
 
