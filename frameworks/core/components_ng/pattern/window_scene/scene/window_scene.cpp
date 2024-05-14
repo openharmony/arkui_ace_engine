@@ -222,6 +222,18 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     }
 }
 
+void WindowScene::AddOrRemoveChild(RefPtr<FrameNode> host, RefPtr<FrameNode> aimNode,
+    bool addFlag, std::string nodeType)
+{
+    if (AddFlag) {
+        host->AddChild(aimNode);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene AddChild %{public}s", nodeType.c_str());
+    } else {
+        host->RemoveChild(aimNode);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene RemoveChild %{public}s", nodeType.c_str());
+    }
+}
+
 void WindowScene::BufferAvailableCallback()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
@@ -256,7 +268,7 @@ void WindowScene::BufferAvailableCallback()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        host->RemoveChild(self->startingNode_);
+        self->AddOrRemoveChild(host, self->startingNode_, false, self->startingNode);
         self->startingNode_.Reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
@@ -281,9 +293,9 @@ void WindowScene::OnActivation()
             self->destroyed_ = false;
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
-            host->RemoveChild(self->startingNode_);
-            host->RemoveChild(self->contentNode_);
-            host->RemoveChild(self->snapshotNode_);
+            self->AddOrRemoveChild(host, self->startingNode_, false, self->startingNode);
+            self->AddOrRemoveChild(host, self->contentNode_, false, self->contentNode);
+            self->AddOrRemoveChild(host, self->snapshotNode_, false, self->snapshotNode);
             self->startingNode_.Reset();
             self->contentNode_.Reset();
             self->snapshotNode_.Reset();
@@ -294,11 +306,11 @@ void WindowScene::OnActivation()
             self->session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT && self->snapshotNode_) {
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
-            host->RemoveChild(self->snapshotNode_);
+            self->AddOrRemoveChild(host, self->snapshotNode_, false, self->snapshotNode);
             self->snapshotNode_.Reset();
             self->session_->SetNeedSnapshot(true);
             self->CreateStartingNode();
-            host->AddChild(self->startingNode_);
+            self->AddOrRemoveChild(host, self->startingNode_, true, self->startingNode);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else if (self->session_->GetSessionState() != Rosen::SessionState::STATE_DISCONNECT && self->startingNode_) {
             auto surfaceNode = self->session_->GetSurfaceNode();
@@ -306,6 +318,7 @@ void WindowScene::OnActivation()
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
             host->AddChild(self->contentNode_, 0);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene AddChild contentNode");
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         }
@@ -337,6 +350,7 @@ void WindowScene::OnConnect()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         host->AddChild(self->contentNode_, 0);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene AddChild contentNode");
         self->contentNode_->ForceSyncGeometryNode();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] Add app window finished, id: %{public}d, name: %{public}s",
@@ -361,10 +375,11 @@ void WindowScene::OnForeground()
         CHECK_NULL_VOID(self->snapshotNode_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        host->RemoveChild(self->snapshotNode_);
+        self->AddOrRemoveChild(host, self->snapshotNode_, false, self->snapshotNode);
         self->snapshotNode_.Reset();
         self->session_->SetNeedSnapshot(true);
         host->AddChild(self->contentNode_, 0);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene AddChild contentNode");
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
@@ -390,10 +405,10 @@ void WindowScene::OnDisconnect()
         if (!self->snapshotNode_ && !self->startingNode_) {
             if (snapshot) {
                 self->CreateSnapshotNode(snapshot);
-                host->AddChild(self->snapshotNode_);
+                self->AddOrRemoveChild(host, self->snapshotNode_, true, self->snapshotNode);
             } else {
                 self->CreateStartingNode();
-                host->AddChild(self->startingNode_);
+                self->AddOrRemoveChild(host, self->startingNode_, true, self->startingNode);
             }
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

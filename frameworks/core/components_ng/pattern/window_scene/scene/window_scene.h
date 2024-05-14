@@ -47,6 +47,9 @@ protected:
     void OnDisconnect() override;
 
 private:
+    std::string startingNode = "startingNode";
+    std::string contentNode = "contentNode";
+    std::string snapshotNode = "snapshotNode";
     std::shared_ptr<Rosen::RSSurfaceNode> CreateLeashWindowNode();
     void BufferAvailableCallback();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
@@ -55,6 +58,7 @@ private:
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_;
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
+    void AddOrRemoveChild(RefPtr<FrameNode> host, RefPtr<FrameNode> aimNode, bool addFlag, std::string nodeType);
 };
 } // namespace OHOS::Ace::NG
 
