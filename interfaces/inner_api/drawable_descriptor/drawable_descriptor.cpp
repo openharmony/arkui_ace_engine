@@ -661,7 +661,7 @@ int32_t AnimatedDrawableDescriptor::GetIterations()
 
 void AnimatedDrawableDescriptor::SetDuration(int32_t duration)
 {
-    if (duration_ <= 0) {
+    if (duration <= 0) {
         duration_ = DEFAULT_DURATION * static_cast<int32_t>(pixelMapList_.size());
     } else {
         duration_ = duration;
@@ -670,7 +670,7 @@ void AnimatedDrawableDescriptor::SetDuration(int32_t duration)
 
 void AnimatedDrawableDescriptor::SetIterations(int32_t iterations)
 {
-    if (iterations_ < -1) {
+    if (iterations < -1) {
         iterations_ = 1;
     } else {
         iterations_ = iterations;
