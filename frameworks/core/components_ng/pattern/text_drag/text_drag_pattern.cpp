@@ -244,17 +244,25 @@ void TextDragPattern::CalculateLineAndArc(std::vector<TextPoint>& points, std::s
     auto originRadius = TEXT_DRAG_RADIUS.ConvertToPx();
     auto radius = originRadius * radiusRatio;
     path->MoveTo(points[0].x + radius, points[0].y);
+    auto frontPoint = points[0];
     size_t step = 2;
     for (size_t i = 0; i + step < points.size(); i++) {
         auto firstPoint = points[i];
         auto crossPoint = points[i + 1];
         auto secondPoint = points[i + step];
-
+        float tempRadius = radius;
         if (crossPoint.y == firstPoint.y) {
             int directionX = (crossPoint.x - firstPoint.x) > 0 ? 1 : -1;
             int directionY = (secondPoint.y - crossPoint.y) > 0 ? 1 : -1;
             auto direction =
                 (directionX * directionY > 0) ? RSPathDirection::CW_DIRECTION : RSPathDirection::CCW_DIRECTION;
+            bool isInwardFoldingCorner = frontPoint.x == firstPoint.x && firstPoint.y == crossPoint.y &&
+                secondPoint.x == crossPoint.x;
+            isInwardFoldingCorner = isInwardFoldingCorner && (frontPoint.y - firstPoint.y) *
+                (crossPoint.y - secondPoint.y) > 0;
+            if (isInwardFoldingCorner) {
+                radius = std::min(std::abs(secondPoint.y - crossPoint.y) / CONSTANT_HALF, tempRadius);
+            }
             path->LineTo(crossPoint.x - radius * directionX, crossPoint.y);
             path->ArcTo(radius, radius, 0.0f, direction, crossPoint.x, crossPoint.y + radius * directionY);
         } else {
@@ -262,10 +270,20 @@ void TextDragPattern::CalculateLineAndArc(std::vector<TextPoint>& points, std::s
             int directionY = (crossPoint.y - firstPoint.y) > 0 ? 1 : -1;
             auto direction =
                 (directionX * directionY < 0) ? RSPathDirection::CW_DIRECTION : RSPathDirection::CCW_DIRECTION;
+            bool isInwardFoldingCorner = frontPoint.y == firstPoint.y && firstPoint.x == crossPoint.x &&
+                secondPoint.y == crossPoint.y;
+            isInwardFoldingCorner = isInwardFoldingCorner && (frontPoint.x - firstPoint.x) *
+                (crossPoint.x - secondPoint.x) > 0;
+            if (isInwardFoldingCorner) {
+                radius = std::min(std::abs(firstPoint.y - crossPoint.y) / CONSTANT_HALF, tempRadius);
+            }
             path->LineTo(crossPoint.x, crossPoint.y - radius * directionY);
             path->ArcTo(radius, radius, 0.0f, direction, crossPoint.x + radius * directionX, secondPoint.y);
         }
+        radius = tempRadius;
+        frontPoint = firstPoint;
     }
+    path->MoveTo(points[0].x + radius, points[0].y);
 }
 
 void TextDragPattern::CalculateLine(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path)
