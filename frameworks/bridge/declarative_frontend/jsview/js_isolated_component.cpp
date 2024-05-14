@@ -45,6 +45,21 @@ using namespace Commonlibrary::Concurrent::WorkerModule;
 
 namespace OHOS::Ace::Framework {
 
+static Worker* ParseWorker(const JSRef<JSVal>& jsWorker)
+{
+    auto hostEngine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(hostEngine, nullptr);
+    NativeEngine* hostNativeEngine = hostEngine->GetNativeEngine();
+    CHECK_NULL_RETURN(hostNativeEngine, nullptr);
+    panda::Local<JsiValue> value = jsWorker.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
+    Worker* worker = nullptr;
+    napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine),
+        nativeValue, reinterpret_cast<void**>(&worker));
+    return worker;
+}
+
 void JSIsolatedComponent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSIsolatedComponent>::Declare("IsolatedComponent");
@@ -72,17 +87,7 @@ void JSIsolatedComponent::Create(const JSCallbackInfo& info)
 
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
     CHECK_NULL_VOID(want);
-    auto hostEngine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_VOID(hostEngine);
-    NativeEngine* hostNativeEngine = hostEngine->GetNativeEngine();
-    CHECK_NULL_VOID(hostNativeEngine);
-    auto jsWorker = obj->GetProperty("worker");
-    panda::Local<JsiValue> value = jsWorker.Get().GetLocalHandle();
-    JSValueWrapper valueWrapper = value;
-    napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
-    Worker* worker = nullptr;
-    napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine),
-        nativeValue, reinterpret_cast<void**>(&worker));
+    Worker* worker = ParseWorker(obj->GetProperty("worker"));
     if (worker == nullptr) {
         TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "worker is null");
         return;
