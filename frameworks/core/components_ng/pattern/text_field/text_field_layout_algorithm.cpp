@@ -87,14 +87,23 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleTextOverflowAndWordBreak(TextStyle
     bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
 {
     if (!isTextArea && isInlineStyle) {
+        //textinput inline
         if (textFieldLayoutProperty->HasTextOverflow()) {
-            textStyle.SetTextOverflow(textFieldLayoutProperty->GetTextOverflow().value());
+            if (textFieldLayoutProperty->GetTextOverflow() == TextOverflow::DEFAULT) {
+                textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+            } else {
+                textStyle.SetTextOverflow(textFieldLayoutProperty->GetTextOverflow().value());
+            }
         } else {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         }
     } else {
         if (textFieldLayoutProperty->HasTextOverflow()) {
-            textStyle.SetTextOverflow(textFieldLayoutProperty->GetTextOverflow().value());
+            if (textFieldLayoutProperty->GetTextOverflow() == TextOverflow::DEFAULT) {
+                textStyle.SetTextOverflow(TextOverflow::CLIP);
+            } else {
+                textStyle.SetTextOverflow(textFieldLayoutProperty->GetTextOverflow().value());
+            }
         } else {
             textStyle.SetTextOverflow(TextOverflow::CLIP);
         }

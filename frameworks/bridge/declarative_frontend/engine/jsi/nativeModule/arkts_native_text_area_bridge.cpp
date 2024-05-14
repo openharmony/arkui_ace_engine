@@ -38,8 +38,9 @@ const int32_t MINI_VALID_VALUE = 1;
 const int32_t MAX_VALID_VALUE = 100;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
+constexpr uint32_t DEFAULT_OVERFLOW = 4;
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
-    TextOverflow::MARQUEE };
+    TextOverflow::MARQUEE, TextOverflow::DEFAULT };
 const std::string DEFAULT_FONT_WEIGHT = "400";
 const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::START, OHOS::Ace::TextAlign::CENTER,
     OHOS::Ace::TextAlign::END, OHOS::Ace::TextAlign::JUSTIFY };
@@ -920,14 +921,14 @@ ArkUINativeModuleValue TextAreaBridge::SetTextOverflow(ArkUIRuntimeCallInfo* run
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t value;
     if (secondArg->IsUndefined()) {
-        value = 0;
+        value = DEFAULT_OVERFLOW;
     } else if (secondArg->IsNumber()) {
         value = secondArg->Int32Value(vm);
     } else {
-        return panda::JSValueRef::Undefined(vm);
+        value = DEFAULT_OVERFLOW;
     }
     if (value < 0 || value >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
-        return panda::JSValueRef::Undefined(vm);
+        value = DEFAULT_OVERFLOW;
     }
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaTextOverflow(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
