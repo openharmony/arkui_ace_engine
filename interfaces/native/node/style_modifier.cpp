@@ -465,7 +465,7 @@ bool CheckAttributeIsScrollNestedMode(int32_t value)
 bool CheckAttributeIsSliderStyle(int32_t value)
 {
     int32_t minEnumValue = static_cast<int32_t>(ArkUI_SliderStyle::ARKUI_SLIDER_STYLE_OUT_SET);
-    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_SliderStyle::ARKUI_SLIDER_STYLE_IN_SET);
+    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_SliderStyle::ARKUI_SLIDER_STYLE_NONE);
     return value >= minEnumValue && value <= maxEnumValue;
 }
 

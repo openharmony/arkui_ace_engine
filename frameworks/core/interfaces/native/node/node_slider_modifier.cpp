@@ -24,13 +24,14 @@ namespace OHOS::Ace::NG {
 const bool DEFAULT_SHOW_STEPS = false;
 const bool DEFAULT_SHOW_TIPS = false;
 const std::vector<SliderModel::SliderMode> SLIDER_MODE = { SliderModel::SliderMode::OUTSET,
-    SliderModel::SliderMode::INSET, SliderModel::SliderMode::CAPSULE, };
+    SliderModel::SliderMode::INSET, SliderModel::SliderMode::NONE, SliderModel::SliderMode::CAPSULE, };
 const std::vector<SliderModel::BlockStyleType> SLIDER_STYLE_TYPE = { SliderModel::BlockStyleType::DEFAULT,
     SliderModel::BlockStyleType::IMAGE, SliderModel::BlockStyleType::SHAPE };
 std::map<SliderModel::SliderMode, int> SLIDER_MODE_MAP = {
     { SliderModel::SliderMode::OUTSET, 0 },
     { SliderModel::SliderMode::INSET, 1 },
-    { SliderModel::SliderMode::CAPSULE, 2 } };
+    { SliderModel::SliderMode::NONE, 2 },
+    { SliderModel::SliderMode::CAPSULE, 3 } };
 std::map<SliderModel::BlockStyleType, int> SLIDER_STYLE_TYPE_MAP = {
     { SliderModel::BlockStyleType::DEFAULT, 0 },
     { SliderModel::BlockStyleType::IMAGE, 1 },
