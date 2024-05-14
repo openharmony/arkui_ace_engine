@@ -131,7 +131,7 @@ void RosenWindow::RequestFrame()
             auto windowId = rsWindow_->GetWindowId();
             auto instanceId = Container::CurrentIdSafely();
             auto task = [windowId, instanceId, timeStamp = lastRequestVsyncTime_]() {
-                LOGE("VsyncCallback not executed!");
+                LOGE("ArkUI request vsync，but no vsync was received within 3 seconds");
                 EventReport::SendVsyncException(VsyncExcepType::UI_VSYNC_TIMEOUT, windowId, instanceId, timeStamp);
             };
             onVsyncEventCheckTimer_.Reset(task);
