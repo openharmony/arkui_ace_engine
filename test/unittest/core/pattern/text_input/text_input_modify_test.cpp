@@ -681,6 +681,87 @@ HWTEST_F(TextFieldModifyTest, DoCallback007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DoCallback008
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. callback the InitDragDrop in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+
+    /**
+     * @tc.steps: step3. mock drag drop.
+     */
+    pattern_->GetThumbnailCallback()(Offset(0.0f, 0.0f));
+    pattern_->OnDragDrop()(dragEvent, "");
+    EXPECT_TRUE(pattern_->showSelect_);
+}
+
+/**
+ * @tc.name: DoCallback009
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the InitDragDrop in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+
+    /**
+     * @tc.steps: step3. mock drag drop.
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+    pattern_->OnDragDrop()(dragEvent, "");
+    EXPECT_EQ(pattern_->dragStatus_, DragStatus::ON_DROP);
+}
+
+/**
+ * @tc.name: DoCallback0010
+ * @tc.desc: Test function OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, DoCallback010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. callback the InitDragDrop in OnModifyDone.
+     * @tc.expected: Check if return true.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+
+    /**
+     * @tc.steps: step3. mock drag drop.
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    pattern_->OnDragDrop()(dragEvent, "hello world");
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    EXPECT_EQ(pattern_->dragStatus_, DragStatus::ON_DROP);
+}
+
+/**
  * @tc.name: MouseEvent001
  * @tc.desc: Test mouse event.
  * @tc.type: FUNC
