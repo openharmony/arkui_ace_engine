@@ -167,7 +167,10 @@ void UIExtensionPattern::OnConnect()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
     CHECK_NULL_VOID(context);
     auto surfaceNode = sessionWrapper_->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNode);
+    if (!surfaceNode) {
+        UIEXT_LOGE("Get surfaceNode from session is null.");
+        return;
+    }
     context->SetRSNode(surfaceNode);
     RemovePlaceholderNode();
     host->AddChild(contentNode_, 0);
@@ -459,7 +462,10 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID(pointerEvent);
+    if (!pointerEvent) {
+        UIEXT_LOGE("The pointerEvent is empty.");
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
@@ -467,7 +473,10 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
-    CHECK_NULL_VOID(window);
+    if (!window) {
+        UIEXT_LOGE("The pipline window is empty.");
+        return;
+    }
     auto rsWindow = window->GetRSWindow();
     auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
     if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
