@@ -74,6 +74,7 @@ constexpr Dimension SWIPER_GUTTER = 16.0_vp;
 constexpr float PX_EPSILON = 0.01f;
 constexpr float FADE_DURATION = 500.0f;
 constexpr float SPRING_DURATION = 600.0f;
+constexpr float DEFAULT_MINIMUM_AMPLITUDE_PX = 1.0f;
 constexpr int32_t INDEX_DIFF_TWO = 2;
 constexpr int32_t FIRST_CAPTURE_DELAY_TIME = 30;
 const std::string SWIPER_DRAG_SCENE = "swiper_drag_scene";
@@ -2729,7 +2730,15 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     AnimationOption option;
     option.SetDuration(GetDuration());
     motionVelocity_ = velocity / translate;
-    option.SetCurve(GetCurveIncludeMotion());
+    auto curve = GetCurveIncludeMotion();
+    auto minimumAmplitudeRatio = DEFAULT_MINIMUM_AMPLITUDE_PX / translate;
+    if (InstanceOf<InterpolatingSpring>(curve) &&
+        LessNotEqualCustomPrecision(
+            minimumAmplitudeRatio, InterpolatingSpring::DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO)) {
+        auto interpolatingSpring = AceType::DynamicCast<InterpolatingSpring>(curve);
+        interpolatingSpring->UpdateMinimumAmplitudeRatio(minimumAmplitudeRatio);
+    }
+    option.SetCurve(curve);
     option.SetFinishCallbackType(GetFinishCallbackType());
     OffsetF offset;
     if (GetDirection() == Axis::HORIZONTAL) {
