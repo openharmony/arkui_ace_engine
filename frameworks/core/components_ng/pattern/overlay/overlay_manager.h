@@ -466,6 +466,7 @@ public:
         const RefPtr<UINode>& windowScene);
     void RemoveGatherNode();
     void RemoveGatherNodeWithAnimation();
+    void UpdateGatherNodeToTop();
     RefPtr<FrameNode> GetGatherNode() const
     {
         return gatherNodeWeak_.Upgrade();
