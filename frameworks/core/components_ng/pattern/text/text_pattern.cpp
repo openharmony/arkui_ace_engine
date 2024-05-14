@@ -976,7 +976,6 @@ void TextPattern::InitMouseEvent()
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->sourceType_ = info.GetSourceDevice();
         pattern->HandleMouseEvent(info);
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -1042,8 +1041,10 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
         if (IsSelected()) {
             selectOverlay_->SetSelectionHoldCallback();
         }
+        sourceType_ = info.GetSourceDevice();
     } else if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleMouseRightButton(info, textOffset);
+        sourceType_ = info.GetSourceDevice();
     }
 }
 
@@ -1976,6 +1977,9 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
         ShowSelectOverlay();
     } else {
         CloseSelectOverlay();
+        if (IsSelected()) {
+            selectOverlay_->SetSelectionHoldCallback();
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
