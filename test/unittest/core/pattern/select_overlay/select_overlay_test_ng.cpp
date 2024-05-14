@@ -64,6 +64,7 @@ const Color COLOR_ALPHA_MASK = Color::FromRGB(255, 100, 100);
 constexpr MenuType TYPE = MenuType::MENU;
 const OffsetF offset(10, 10);
 int32_t callBackFlag = 0;
+constexpr float RK356_HEIGHT = 1136.0f;
 } // namespace
 
 class SelectOverlayTestNg : public testing::Test {
@@ -2833,6 +2834,75 @@ HWTEST_F(SelectOverlayTestNg, NewMenuAvoidStrategy001, TestSize.Level1)
     OffsetF expectRet3(100, -100);
     bool equal3 = (ret3 == expectRet3);
     EXPECT_TRUE(equal3);
+}
+
+/**
+ * @tc.name: NewMenuAvoidStrategy002
+ * @tc.desc: Test NewMenuAvoidStrategy002 in Select Overlay algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, NewMenuAvoidStrategy002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuInfo.menuIsShow = false;
+    selectInfo.selectArea = { 100, 500, 200, 50 };
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+    * @tc.steps: step2. Create pattern and geometryNode.
+    */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    /**
+    * @tc.steps: step3. Get layoutWrapper and layoutAlgorithm.
+    * @tc.expected: layoutWrapper and layoutAlgorithm are created successfully
+    */
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto selectOverlayLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
+    auto newNode = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(selectOverlayLayoutAlgorithm);
+
+    /**
+    * @tc.steps: step4. set keyboardInset_ to button.
+    */
+    SafeAreaInsets::Inset insetBottom;
+    insetBottom.start = RK356_HEIGHT - 1;
+    insetBottom.end = RK356_HEIGHT;
+    RefPtr<SafeAreaManager> safeAreamanager = AceType::MakeRefPtr<SafeAreaManager>();
+    safeAreamanager->keyboardInset_ = SafeAreaInsets::Inset(insetBottom);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->safeAreaManager_ = safeAreamanager;
+
+    /**
+    * @tc.steps: step5. Test cases.
+    */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+
+    auto menuWidth = 200;
+    auto menuHeight = 100;
+    infoPtr->firstHandle.isShow = false;
+    infoPtr->secondHandle.isShow = false;
+    auto ret = newNode->NewMenuAvoidStrategy(menuWidth, menuHeight);
+    OffsetF expectRet(100, 200);
+    bool equal = (ret == expectRet);
+    EXPECT_TRUE(equal);
 }
 
 /**

@@ -489,11 +489,9 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(float menuWidth, floa
                                                                                           : offsetBetweenSelectArea;
             }
         } else {
-            // 上下手柄均不可见 -> 选区上方 > 选区底部
-            auto offsetUnderSelectArea =
-                std::clamp((double)selectArea.Bottom() - menuHeight, (double)topArea, bottomLimitOffsetY);
+            // 上下手柄均不可见 -> 选区上方 > 选区中间
             offsetY = !upHandle.isShow && LessNotEqual(topArea, offsetUponSelectArea) ? offsetUponSelectArea
-                                                                                      : offsetUnderSelectArea;
+                                                                                      : offsetBetweenSelectArea;
         }
     }
     if (hasKeyboard && GreatNotEqual(offsetY, bottomLimitOffsetY)) {
