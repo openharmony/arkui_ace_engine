@@ -15906,6 +15906,16 @@ class ArkNavDestinationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
     return this;
   }
+  backButtonIcon(value) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
+      NavDestinationBackButtonIconModifier, value);
+    return this;
+  }
+  mode(value) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationModeModifier.identity,
+      NavDestinationModeModifier, value);
+    return this;
+  }
   onShown(callback) {
     throw new Error('Method not implemented.');
   }
@@ -16683,6 +16693,7 @@ class ModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
+  static identity = Symbol('mode');
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().navigation.resetMode(node);
@@ -16692,7 +16703,34 @@ class ModeModifier extends ModifierWithKey {
     }
   }
 }
-ModeModifier.identity = Symbol('mode');
+class NavDestinationBackButtonIconModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  static identity = Symbol('backButtonIcon');
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetBackButtonIcon(node);
+    } else {
+      getUINativeModule().navDestination.setBackButtonIcon(node, this.value);
+    }
+  }
+}
+
+class NavDestinationModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetMode(node);
+    }
+    else {
+      getUINativeModule().navDestination.setMode(node, this.value);
+    }
+  }
+}
+NavDestinationModeModifier.identity = Symbol('mode');
 class HideToolBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

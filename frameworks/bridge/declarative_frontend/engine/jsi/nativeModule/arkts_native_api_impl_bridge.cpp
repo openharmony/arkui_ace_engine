@@ -1765,6 +1765,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetHideTitleBar));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideTitleBar"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetHideTitleBar));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackButtonIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetBackButtonIcon));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackButtonIcon"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetBackButtonIcon));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetNavDestinationMode));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetNavDestinationMode));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestination"), navDestination);
 
     auto particle = panda::ObjectRef::New(vm);

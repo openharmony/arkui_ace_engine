@@ -26,6 +26,16 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
     return this;
   }
+  backButtonIcon(value: any): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
+      NavDestinationBackButtonIconModifier, value);
+    return this;
+  }
+  mode(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationModeModifier.identity,
+      NavDestinationModeModifier, value);
+    return this;
+  }
   onShown(callback: () => void): this {
     throw new Error('Method not implemented.');
   }
@@ -48,6 +58,35 @@ class HideTitleBarModifier extends ModifierWithKey<boolean> {
       getUINativeModule().navDestination.resetHideTitleBar(node);
     } else {
       getUINativeModule().navDestination.setHideTitleBar(node, this.value!);
+    }
+  }
+}
+
+class NavDestinationBackButtonIconModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backButtonIcon');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetBackButtonIcon(node);
+    } else {
+      getUINativeModule().navDestination.setBackButtonIcon(node, this.value);
+    }
+  }
+}
+
+class NavDestinationModeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('mode');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetMode(node);
+    } else {
+      getUINativeModule().navDestination.setMode(node, this.value);
     }
   }
 }
