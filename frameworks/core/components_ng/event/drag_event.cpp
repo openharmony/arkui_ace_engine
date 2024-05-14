@@ -791,7 +791,9 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     CHECK_NULL_VOID(frameNode);
     auto pixelMap = frameNode->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    auto frameOffset = frameNode->GetOffsetInScreen();
+    auto center = frameNode->GetPaintRectCenter();
+    auto frameOffset = OffsetF(center.GetX() - (pixelMap->GetWidth() / 2.0f),
+        center.GetY() - (pixelMap->GetHeight() / 2.0f));
     imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() {return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_VOID(imageNode);
