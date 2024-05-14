@@ -5458,7 +5458,7 @@ HWTEST_F(TextInputCursorTest, FinishTextPreview002, TestSize.Level1)
      * @tc.expected: check GetIsPreviewText return false
      */
     pattern_->HandleBlurEvent();
-    EXPECT_TRUE(pattern_->inputOperations_.front() == InputOperation::SET_PREVIEW_FINISH);
+    EXPECT_FALSE(pattern_->GetIsPreviewText());
     FlushLayoutTask(frameNode_);
 }
 
