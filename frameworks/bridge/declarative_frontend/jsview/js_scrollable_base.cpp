@@ -30,7 +30,10 @@ void JSScrollableBase::JSFlingSpeedLimit(const JSCallbackInfo& info)
 
 void JSScrollableBase::JsOnWillScroll(const JSCallbackInfo& args)
 {
-    if (args.Length() > 0 && args[0]->IsFunction()) {
+    if (args.Length() <= 0) {
+        return;
+    }
+    if (args[0]->IsFunction()) {
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState,
                             ScrollSource scrollSource) {
@@ -54,6 +57,8 @@ void JSScrollableBase::JsOnWillScroll(const JSCallbackInfo& args)
             return scrollRes;
         };
         NG::ScrollableModelNG::SetOnWillScroll(std::move(onScroll));
+    } else {
+        NG::ScrollableModelNG::SetOnWillScroll(nullptr);
     }
 }
 
