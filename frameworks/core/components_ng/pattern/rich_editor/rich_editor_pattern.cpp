@@ -1944,6 +1944,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     lastClickTimeStamp_ = info.GetTimeStamp();
     if (info.GetSourceDevice() != SourceType::MOUSE && SelectOverlayIsOn() &&
         BetweenSelectedPosition(info.GetGlobalLocation())) {
+        selectOverlay_->UpdateMenuOffset();
         selectOverlay_->ShowMenu();
         return;
     }
@@ -6138,10 +6139,6 @@ void RichEditorPattern::OnScrollEndCallback()
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         scrollBar->ScheduleDisappearDelayTask();
-    }
-    if (IsSelectAreaVisible()) {
-        selectOverlay_->UpdateMenuOffset();
-        selectOverlay_->ShowMenu();
     }
 }
 
