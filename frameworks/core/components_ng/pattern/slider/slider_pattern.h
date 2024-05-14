@@ -132,6 +132,7 @@ public:
     OffsetF CalculateGlobalSafeOffset();
     void UpdateValue(float value);
     void OnVisibleChange(bool isVisible) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void SetBuilderFunc(SliderMakeCallback&& makeFunc)
     {
@@ -183,6 +184,7 @@ private:
     void HandlingGestureStart(const GestureEvent& info);
     void HandlingGestureEvent(const GestureEvent& info);
     void HandledGestureEvent();
+    void InitWindowSizeChanged(const RefPtr<FrameNode>& host);
 
     void UpdateValueByLocalLocation(const std::optional<Offset>& localLocation);
     void FireChangeEvent(int32_t mode);
@@ -225,11 +227,24 @@ private:
     void UpdateToValidValue();
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
+    void SetSkipGestureEvents()
+    {
+        skipGestureEvents_ = true;
+    }
+    void ResetSkipGestureEvents()
+    {
+        skipGestureEvents_ = false;
+    }
+    bool IsSkipGestureEvents()
+    {
+        return skipGestureEvents_;
+    }
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;
     float minResponse_ = 0.0f;
+    bool skipGestureEvents_ = false;
     float minResponseStartValue_ = value_;
     bool isMinResponseExceedFlag_ = false;
     SourceType eventSourceDevice_ = SourceType::NONE;

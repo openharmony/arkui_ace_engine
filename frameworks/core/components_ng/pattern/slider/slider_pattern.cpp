@@ -18,6 +18,7 @@
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -68,6 +69,7 @@ void SliderPattern::OnModifyDone()
     sliderInteractionMode_ =
         sliderPaintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK);
     minResponse_ = sliderPaintProperty->GetMinResponsiveDistance().value_or(0.0f);
+    InitWindowSizeChanged(host);
     UpdateToValidValue();
     UpdateBlock();
     InitClickEvent(gestureHub);
@@ -123,6 +125,13 @@ void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
     }
 }
 
+void SliderPattern::InitWindowSizeChanged(const RefPtr<FrameNode>& host)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+}
+
 bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
 {
     if (skipMeasure || dirty->SkipMeasureContent()) {
@@ -176,6 +185,14 @@ bool SliderPattern::UpdateParameters()
     borderBlank_ = (length - sliderLength_) * HALF;
 
     return true;
+}
+
+void SliderPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    if (type == WindowSizeChangeReason::ROTATION &&
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        SetSkipGestureEvents();
+    }
 }
 
 void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -296,6 +313,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchInfo = touchList.front();
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
+        ResetSkipGestureEvents();
         if (fingerId_ != -1) {
             return;
         }
@@ -310,6 +328,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         FireChangeEvent(SliderChangeMode::Begin);
         OpenTranslateAnimation(SliderStatus::CLICK);
     } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        ResetSkipGestureEvents();
         if (fingerId_ != touchInfo.GetFingerId()) {
             return;
         }
@@ -461,7 +480,7 @@ bool SliderPattern::isMinResponseExceed(const std::optional<Offset>& localLocati
     CHECK_NULL_RETURN(sliderLayoutProperty, false);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, false);
-    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    const auto& content = host->GetGeometryNode()->GetContent();
     CHECK_NULL_RETURN(content, false);
     auto contentOffset = content->GetRect().GetOffset();
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
@@ -490,7 +509,7 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
-    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    const auto& content = host->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto contentOffset = content->GetRect().GetOffset();
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
@@ -597,9 +616,7 @@ void SliderPattern::UpdateBubble()
 
 void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (direction_ == GetDirection() && panEvent_) {
-        return;
-    }
+    if (direction_ == GetDirection() && panEvent_) return;
     direction_ = GetDirection();
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider handle action start");
@@ -615,9 +632,11 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider handle action update");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandlingGestureEvent(info);
-        pattern->FireChangeEvent(SliderChangeMode::Moving);
-        pattern->OpenTranslateAnimation(SliderStatus::MOVE);
+        if (!pattern->IsSkipGestureEvents()) {
+            pattern->HandlingGestureEvent(info);
+            pattern->FireChangeEvent(SliderChangeMode::Moving);
+            pattern->OpenTranslateAnimation(SliderStatus::MOVE);
+        }
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider handle action end");
