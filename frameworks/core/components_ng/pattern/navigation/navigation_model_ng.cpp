@@ -341,12 +341,13 @@ void UpdateBarItemPattern(const RefPtr<BarItemNode>& barItemNode, const BarItem&
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    CHECK_NULL_VOID(barItemPattern);
     if (barItem.status == NG::NavToolbarItemStatus::ACTIVE &&
         ((barItem.activeIcon.has_value() && !barItem.activeIcon.value().empty()) ||
             (barItem.activeIconSymbol.has_value() && barItem.activeIconSymbol.value() != nullptr)) &&
         ((barItem.icon.has_value() && !barItem.icon.value().empty()) ||
             (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr))) {
-        if (barItem.iconSymbol.has_value()) {
+        if (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr) {
             barItemPattern->SetInitialIconSymbol(barItem.iconSymbol.value());
         } else if (barItem.icon.has_value()) {
             ImageSourceInfo initialIconInfo(barItem.icon.value());
@@ -354,7 +355,7 @@ void UpdateBarItemPattern(const RefPtr<BarItemNode>& barItemNode, const BarItem&
             barItemPattern->SetInitialIconImageSourceInfo(initialIconInfo);
         }
 
-        if (barItem.activeIconSymbol.has_value()) {
+        if (barItem.activeIconSymbol.has_value() && barItem.activeIconSymbol.value() != nullptr) {
             barItemPattern->SetActiveIconSymbol(barItem.activeIconSymbol.value());
         } else if (barItem.activeIcon.has_value()) {
             ImageSourceInfo activeIconInfo(barItem.activeIcon.value());
@@ -1558,8 +1559,9 @@ void NavigationModelNG::SetUsrNavigationMode(FrameNode* frameNode, NavigationMod
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, UsrNavigationMode, mode, frameNode);
 }
 
-void NavigationModelNG::SetBackButtonIcon(
-    FrameNode* frameNode, const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+void NavigationModelNG::SetBackButtonIcon(FrameNode* frameNode,
+    const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src, bool noPixMap,
+    RefPtr<PixelMap>& pixMap)
 {
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1578,6 +1580,7 @@ void NavigationModelNG::SetBackButtonIcon(
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
     titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
+    titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarNode->MarkModifyDone();
 }
 

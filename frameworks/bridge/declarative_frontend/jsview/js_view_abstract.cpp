@@ -9818,7 +9818,7 @@ void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)
 }
 
 void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
-    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSObject> modifierObj)
+    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj)
 {
     auto vm = info.GetVm();
     auto globalObj = JSNApi::GetGlobalObject(vm);
@@ -9828,7 +9828,7 @@ void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
     if (globalFuncRef->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
-        if (modifierObj->IsUndefined()) {
+        if (!modifierObj->IsObject()) {
             symbolApply = nullptr;
         } else {
             auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
