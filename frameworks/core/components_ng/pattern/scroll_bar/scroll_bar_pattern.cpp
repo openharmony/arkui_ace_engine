@@ -25,7 +25,7 @@ namespace {
 constexpr int32_t BAR_DISAPPEAR_DELAY_DURATION = 2000; // 2000ms
 constexpr int32_t BAR_DISAPPEAR_DURATION = 300;        // 300ms
 constexpr int32_t BAR_APPEAR_DURATION = 100;           // 100ms
-constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 15;       // 15 fps/s, the expected frame rate of opacity animation
+constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 15;       // 15fps, the expected frame rate of opacity animation
 constexpr int32_t BAR_DISAPPEAR_MIN_FRAME_RATE = 0;
 constexpr int32_t BAR_DISAPPEAR_MAX_FRAME_RATE = 90;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
