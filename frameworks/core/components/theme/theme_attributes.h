@@ -195,6 +195,9 @@ extern const char POPUP_BUTTON_TEXT_FONT_SIZE[];
 // pattern attributes for badge
 extern const char BADGE_BORDER_COLOR[];
 extern const char BADGE_BORDER_WIDTH[];
+extern const char BADGE_AGE_FONT_SIZE[];
+extern const char BADGE_AGE_SIZE[];
+extern const char BADGE_AFE_ADD_PADDING[];
 // swiper attributes
 extern const char INDICATOR_TEXT_FONT_SIZE[];
 extern const char INDICATOR_TEXT_FONT_COLOR[];
