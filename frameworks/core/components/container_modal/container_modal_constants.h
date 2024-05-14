@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ const Dimension TITLE_PADDING_END = 20.0_vp;
 const Dimension ZERO_PADDING = 0.0_vp;
 const Dimension TITLE_ELEMENT_MARGIN_HORIZONTAL = 12.0_vp;
 const Dimension TITLE_ELEMENT_MARGIN_HORIZONTAL_ACCESS_DEVICE = 8.0_vp;
-const Dimension TITLE_ICON_SIZE = 20.0_vp;
+const Dimension TITLE_ICON_SIZE = 24.0_vp;
 const Dimension TITLE_BUTTON_SIZE = 24.0_vp;
 const Dimension TITLE_TEXT_FONT_SIZE = 16.0_fp;
 const Dimension CONTENT_PADDING = 4.0_vp;
