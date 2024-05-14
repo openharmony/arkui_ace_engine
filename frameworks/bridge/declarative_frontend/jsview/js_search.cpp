@@ -271,8 +271,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
     // set font color
-    Color fontColor;
-    fontColor = theme->GetSearchButtonTextColor();
+    Color fontColor = theme->GetSearchButtonTextColor();
     if (info[1]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[1]);
 
