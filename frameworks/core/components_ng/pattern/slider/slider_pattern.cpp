@@ -300,37 +300,59 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
             return;
         }
         fingerId_ = touchInfo.GetFingerId();
-        axisFlag_ = false;
-        lastTouchLocation_ = touchInfo.GetLocalLocation();
-        if (showTips_) {
-            bubbleFlag_ = true;
-            UpdateBubble();
-        }
-        mousePressedFlag_ = true;
-        FireChangeEvent(SliderChangeMode::Begin);
-        OpenTranslateAnimation(SliderStatus::CLICK);
+        HandleTouchDown(touchInfo.GetLocalLocation(), info.GetSourceDevice());
     } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         if (fingerId_ != touchInfo.GetFingerId()) {
             return;
         }
-        if (lastTouchLocation_.has_value() && lastTouchLocation_.value() == touchInfo.GetLocalLocation()) {
-            // when Touch Down area is at Pan Area, value is unchanged.
-            allowDragEvents_ = sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_ONLY;
-            if (allowDragEvents_ && !AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
-                UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
-            }
-            FireChangeEvent(SliderChangeMode::Click);
-        }
+        HandleTouchUp(touchInfo.GetLocalLocation(), info.GetSourceDevice());
         fingerId_ = -1;
-        UpdateToValidValue();
-        if (bubbleFlag_ && !isFocusActive_) {
-            bubbleFlag_ = false;
-        }
-        mousePressedFlag_ = false;
-        FireChangeEvent(SliderChangeMode::End);
-        CloseTranslateAnimation();
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SliderPattern::HandleTouchDown(const Offset& location, SourceType sourceType)
+{
+    axisFlag_ = false;
+    if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_AND_CLICK) {
+        allowDragEvents_ = true;
+        if (!AtPanArea(location, sourceType)) {
+            UpdateValueByLocalLocation(location);
+        }
+    } else if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP) {
+        lastTouchLocation_ = location;
+    }
+    if (showTips_) {
+        bubbleFlag_ = true;
+        UpdateBubble();
+    }
+    mousePressedFlag_ = true;
+    FireChangeEvent(SliderChangeMode::Begin);
+    OpenTranslateAnimation(SliderStatus::CLICK);
+}
+
+void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
+{
+    if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP &&
+        lastTouchLocation_.has_value() && lastTouchLocation_.value() == location) {
+        allowDragEvents_ = true;
+        if (!AtPanArea(location, sourceType)) {
+            UpdateValueByLocalLocation(location);
+        }
+        UpdateToValidValue();
+        FireChangeEvent(SliderChangeMode::Click);
+    } else {
+        UpdateToValidValue();
+    }
+    if (bubbleFlag_ && !isFocusActive_) {
+        bubbleFlag_ = false;
+    }
+    mousePressedFlag_ = false;
+    if (sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP) {
+        FireChangeEvent(SliderChangeMode::Click);
+    }
+    FireChangeEvent(SliderChangeMode::End);
+    CloseTranslateAnimation();
 }
 
 void SliderPattern::InitializeBubble()

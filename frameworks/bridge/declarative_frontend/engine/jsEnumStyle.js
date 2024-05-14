@@ -1895,6 +1895,7 @@ var SliderInteraction;
 (function (SliderInteraction) {
   SliderInteraction[SliderInteraction["SLIDE_AND_CLICK"] = 0] = "SLIDE_AND_CLICK";
   SliderInteraction[SliderInteraction["SLIDE_ONLY"] = 1] = "SLIDE_ONLY";
+  SliderInteraction[SliderInteraction["SLIDE_AND_CLICK_UP"] = 2] = "SLIDE_AND_CLICK_UP";
 })(SliderInteraction || (SliderInteraction = {}));
 
 var TitleStyle;
