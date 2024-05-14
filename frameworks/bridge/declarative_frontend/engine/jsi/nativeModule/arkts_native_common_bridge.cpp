@@ -1452,6 +1452,10 @@ ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
         GetArkUINodeModifiers()->getCommonModifier()->resetWidth(nativeNode);
     } else {
         if (LessNotEqual(width.Value(), 0.0)) {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                GetArkUINodeModifiers()->getCommonModifier()->resetWidth(nativeNode);
+                return panda::JSValueRef::Undefined(vm);
+            }
             width.SetValue(0.0);
         }
 
@@ -1489,6 +1493,10 @@ ArkUINativeModuleValue CommonBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
         GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
+                return panda::JSValueRef::Undefined(vm);
+            }
             height.SetValue(0.0);
         }
         if (height.Unit() == DimensionUnit::CALC) {
