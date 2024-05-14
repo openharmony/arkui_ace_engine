@@ -259,6 +259,9 @@ void WebPattern::OnContextMenuHide()
 
 bool WebPattern::NeedSoftKeyboard() const
 {
+    if (embedNeedKeyboard_) {
+        return true;
+    }
     if (delegate_) {
         return delegate_->NeedSoftKeyboard();
     }
@@ -1246,6 +1249,9 @@ void WebPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(delegate_);
     isFocus_ = true;
+    if (GetNativeEmbedModeEnabledValue(false)) {
+        embedNeedKeyboard_ = true;
+    }
     if (needOnFocus_) {
         delegate_->OnFocus();
     } else {
@@ -1257,6 +1263,7 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
+    embedNeedKeyboard_ = false;
     if (!selectPopupMenuShowing_) {
         delegate_->SetBlurReason(static_cast<OHOS::NWeb::BlurReason>(blurReason));
         delegate_->OnBlur();
@@ -2071,6 +2078,9 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         }
         if (height - GetCoordinatePoint()->GetY() < keyboard) {
             return true;
+        }
+        if (!delegate_->NeedSoftKeyboard() && embedNeedKeyboard_) {
+            return false;
         }
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
         UpdateOnFocusTextField(true);
@@ -4221,5 +4231,16 @@ void WebPattern::OnHideAutofillPopup()
     };
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(destructor);
+}
+void WebPattern::CloseKeyboard()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->CloseKeyboard();
+    embedNeedKeyboard_ = false;
 }
 } // namespace OHOS::Ace::NG
