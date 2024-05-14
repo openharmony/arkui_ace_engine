@@ -7896,7 +7896,7 @@ const ArkUI_AttributeItem* GetLayoutRect(ArkUI_NodeHandle node)
     g_numberValues[0].i32 = intArray[0];
     g_numberValues[1].i32 = intArray[1];
     g_numberValues[2].i32 = intArray[2]; // 2:index of width
-    g_numberValues[3].f32 = intArray[3]; // 3:index of height
+    g_numberValues[3].i32 = intArray[3]; // 3:index of height
     g_attributeItem.size = NUM_4;
     return &g_attributeItem;
 }
