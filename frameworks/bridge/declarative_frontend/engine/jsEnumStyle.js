@@ -1739,6 +1739,14 @@ class Indicator {
     this.bottomValue = value;
     return this;
   }
+  start(value) {
+    this.startValue = value;
+    return this;
+  }
+  end(value) {
+    this.endValue = value;
+    return this;
+  }
   static dot() {
     return new DotIndicator();
   }

@@ -84,12 +84,24 @@ void SwiperArrowPattern::OnClick() const
     CHECK_NULL_VOID(swiperController);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto swiperLayoutProperty = GetSwiperArrowLayoutProperty();
+    CHECK_NULL_VOID(swiperLayoutProperty);
     if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
-        swiperController->ShowPrevious();
+        if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL &&
+            AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            swiperController->ShowNext();
+        } else {
+            swiperController->ShowPrevious();
+        }
         return;
     }
     if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
-        swiperController->ShowNext();
+        if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL &&
+            AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            swiperController->ShowPrevious();
+        } else {
+            swiperController->ShowNext();
+        }
     }
 }
 

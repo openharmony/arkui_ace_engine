@@ -439,6 +439,8 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     JSRef<JSVal> topValue = obj->GetProperty("topValue");
     JSRef<JSVal> rightValue = obj->GetProperty("rightValue");
     JSRef<JSVal> bottomValue = obj->GetProperty("bottomValue");
+    JSRef<JSVal> startValue = obj->GetProperty("startValue");
+    JSRef<JSVal> endValue = obj->GetProperty("endValue");
     JSRef<JSVal> itemWidthValue = obj->GetProperty("itemWidthValue");
     JSRef<JSVal> itemHeightValue = obj->GetProperty("itemHeightValue");
     JSRef<JSVal> selectedItemWidthValue = obj->GetProperty("selectedItemWidthValue");
@@ -455,6 +457,8 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimTop = ParseIndicatorDimension(topValue);
     swiperParameters.dimRight = ParseIndicatorDimension(rightValue);
     swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
+    swiperParameters.dimStart =  ParseIndicatorDimension(startValue);
+    swiperParameters.dimEnd =  ParseIndicatorDimension(endValue);
     CalcDimension dimPosition;
     bool parseItemWOk =
         ParseJsDimensionVp(itemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
