@@ -132,7 +132,8 @@ ACE_FORCE_EXPORT OptionalSizeF CreateIdealSize(
  * @return SizeF the node size info.
  */
 OptionalSizeF CreateIdealSizeByPercentRef(
-    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool needToConstrain = false);
+    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool needToConstrain = false,
+    const std::unique_ptr<MeasureProperty>& rawConstraint = nullptr);
 
 /**
  * @brief Create max size for children which is parent's max size minus margin and padding.
