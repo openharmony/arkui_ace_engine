@@ -141,7 +141,7 @@ void PanRecognizer::OnAccepted()
     SendCallbackMsg(onActionUpdate_);
     // if gesture is blocked by double click, recognizer will receive up before onAccepted
     // in this case, recognizer need to send onActionEnd when onAccepted
-    if (fingersId_.empty()) {
+    if (isTouchEventFinished_) {
         SendCallbackMsg(onActionEnd_);
     }
 }
@@ -184,6 +184,7 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -324,6 +325,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     // Clear All fingers' velocity when fingersId is empty.
     if (fingersId_.empty()) {
         panVelocity_.ResetAll();
+        isTouchEventFinished_ = true;
     }
 }
 
@@ -356,6 +358,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    isTouchEventFinished_ = false;
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
