@@ -720,6 +720,18 @@ public:
     }
     bool IsContainerModalVisible() override;
 
+    void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) override;
+
+    void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type) override;
+
+    void CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action) override;
+
+    void CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action) override;
+
+    void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) override;
+
+    void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);

@@ -54,6 +54,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "bridge/card_frontend/card_frontend.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
@@ -78,6 +79,9 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/event/axis_event.h"
+#include "core/event/mouse_event.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -770,6 +774,7 @@ void AceContainer::InitializeCallback()
                                     const TouchEvent& event, const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
+        context->CheckAndLogLastReceivedTouchEventInfo(event.touchEventId, event.type);
         auto touchTask = [context, event, markProcess, node]() {
             if (node) {
                 context->OnTouchEvent(event, node);
@@ -778,6 +783,7 @@ void AceContainer::InitializeCallback()
             }
             CHECK_NULL_VOID(markProcess);
             markProcess();
+            context->CheckAndLogLastConsumedTouchEventInfo(event.touchEventId, event.type);
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -793,6 +799,7 @@ void AceContainer::InitializeCallback()
                                     const MouseEvent& event, const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
+        context->CheckAndLogLastReceivedMouseEventInfo(event.touchEventId, event.action);
         auto mouseTask = [context, event, markProcess, node]() {
             if (node) {
                 context->OnMouseEvent(event, node);
@@ -801,6 +808,7 @@ void AceContainer::InitializeCallback()
             }
             CHECK_NULL_VOID(markProcess);
             markProcess();
+            context->CheckAndLogLastConsumedMouseEventInfo(event.touchEventId, event.action);
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -816,6 +824,7 @@ void AceContainer::InitializeCallback()
                                    const AxisEvent& event, const std::function<void()>& markProcess,
                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
+        context->CheckAndLogLastReceivedAxisEventInfo(event.touchEventId, event.action);
         auto axisTask = [context, event, markProcess, node]() {
             if (node) {
                 context->OnAxisEvent(event, node);
@@ -824,6 +833,7 @@ void AceContainer::InitializeCallback()
             }
             CHECK_NULL_VOID(markProcess);
             markProcess();
+            context->CheckAndLogLastConsumedAxisEventInfo(event.touchEventId, event.action);
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
