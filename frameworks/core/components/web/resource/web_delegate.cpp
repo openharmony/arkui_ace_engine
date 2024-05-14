@@ -5124,6 +5124,9 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
     if (!webPattern) {
         return false;
     }
+    if (webPattern->IsRootNeedExportTexture()) {
+        return false;
+    }
     return webPattern->NotifyStartDragTask();
 }
 
