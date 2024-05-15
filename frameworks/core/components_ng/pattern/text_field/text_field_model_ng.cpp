@@ -1874,4 +1874,24 @@ void TextFieldModelNG::SetMargin(FrameNode* frameNode, NG::PaddingProperty& marg
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin, frameNode);
 }
 
+PaddingProperty TextFieldModelNG::GetMargin(FrameNode* frameNode)
+{
+    CalcLength defaultDimen = CalcLength(0, DimensionUnit::VP);
+    NG::PaddingProperty margins;
+    margins.top = std::optional<CalcLength>(defaultDimen);
+    margins.right = std::optional<CalcLength>(defaultDimen);
+    margins.bottom = std::optional<CalcLength>(defaultDimen);
+    margins.left = std::optional<CalcLength>(defaultDimen);
+    auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(textfieldPaintProperty, margins);
+    if (textfieldPaintProperty->HasMarginByUser()) {
+        const auto& property = textfieldPaintProperty->GetMarginByUserValue();
+        margins.top = std::optional<CalcLength>(property.top);
+        margins.right = std::optional<CalcLength>(property.right);
+        margins.bottom = std::optional<CalcLength>(property.bottom);
+        margins.left = std::optional<CalcLength>(property.left);
+    }
+    return margins;
+}
+
 } // namespace OHOS::Ace::NG

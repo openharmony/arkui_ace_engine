@@ -2454,6 +2454,7 @@ struct ArkUITextAreaModifier {
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetTextAreaMargin)(ArkUINodeHandle node);
     void (*setTextAreaCaret)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*getTextAreaMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit);
 };
 
 struct ArkUITextInputModifier {
@@ -2643,6 +2644,7 @@ struct ArkUITextInputModifier {
     void (*resetTextInputMargin)(ArkUINodeHandle node);
     void (*setTextInputCaret)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     ArkUINodeHandle (*getTextInputController)(ArkUINodeHandle node);
+    void (*getTextInputMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit);
 };
 
 struct ArkUIWebModifier {
