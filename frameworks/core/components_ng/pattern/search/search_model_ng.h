@@ -133,6 +133,7 @@ public:
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetShowCounterBorder(FrameNode* frameNode, bool value);
+    static RefPtr<TextFieldControllerBase> GetSearchController(FrameNode* frameNode);
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);

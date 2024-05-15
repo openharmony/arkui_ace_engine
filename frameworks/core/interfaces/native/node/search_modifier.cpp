@@ -706,6 +706,16 @@ void ResetSearchShowCounterOptions(ArkUINodeHandle node)
     SearchModelNG::SetShowCounterBorder(frameNode, true);
 }
 
+ArkUINodeHandle GetSearchController(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto controller = SearchModelNG::GetSearchController(frameNode);
+    CHECK_NULL_RETURN(controller, nullptr);
+    auto nodecontroller = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(controller));
+    return nodecontroller;
+}
+
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -729,7 +739,7 @@ const ArkUISearchModifier* GetSearchModifier()
         SetSearchOnPaste, ResetSearchOnPaste, SetSearchOnChange, ResetSearchOnChange,
         SetSearchOnTextSelectionChange, ResetSearchOnTextSelectionChange,
         SetSearchOnContentScroll, ResetSearchOnContentScroll,
-        SetSearchShowCounterOptions, ResetSearchShowCounterOptions };
+        SetSearchShowCounterOptions, ResetSearchShowCounterOptions, GetSearchController };
     return &modifier;
 }
 

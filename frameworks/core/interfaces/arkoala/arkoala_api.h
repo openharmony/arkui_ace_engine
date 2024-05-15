@@ -3177,6 +3177,7 @@ struct ArkUISearchModifier {
     void (*setSearchShowCounter)(
         ArkUINodeHandle node, ArkUI_Bool open, ArkUI_Int32 thresholdPercentage, ArkUI_Bool highlightBorderr);
     void (*resetSearchShowCounter)(ArkUINodeHandle node);
+    ArkUINodeHandle (*getSearchController)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

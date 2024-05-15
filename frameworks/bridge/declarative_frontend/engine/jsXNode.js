@@ -1152,6 +1152,11 @@ const __creatorMap__ = new Map([
             return new ArkLoadingProgressComponent(node, type);
             });
         }],
+    ["Search", (context) => {
+        return new TypedFrameNode(context, "Search", (node, type) => {
+            return new ArkSearchComponent(node, type);
+            });
+        }],
 ]);
 class TypedNode {
     static createNode(context, type) {
