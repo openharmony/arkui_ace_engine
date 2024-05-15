@@ -35,9 +35,9 @@ public:
     ~FocusView() override = default;
 
     virtual std::list<int32_t> GetRouteOfFirstScope() = 0;
-    virtual std::string GetEntryFocusViewName()
+    virtual bool IsEntryFocusView()
     {
-        return std::string();
+        return true;
     }
     virtual bool IsFocusViewLegal()
     {

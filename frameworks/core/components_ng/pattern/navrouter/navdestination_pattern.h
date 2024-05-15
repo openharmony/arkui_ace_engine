@@ -149,13 +149,9 @@ public:
         return {};
     }
 
-    std::string GetEntryFocusViewName() override
+    bool IsEntryFocusView() override
     {
-        /*
-        |-> Any FocusView (entry focus view)
-          |-> NavDestination
-        */
-        return ENTRY_ANY_FOCUSVIEW;
+        return false;
     }
 
     void SetIsOnShow(bool isOnShow)
