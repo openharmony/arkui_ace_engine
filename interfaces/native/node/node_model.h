@@ -101,6 +101,11 @@ struct ArkUIFullNodeAPI;
 
 namespace OHOS::Ace::NodeModel {
 
+inline bool UsePXUnit(ArkUI_NodeHandle nodePtr)
+{
+    return nodePtr && (nodePtr->lengthMetricUnit == ARKUI_LENGTH_METRIC_UNIT_PX);
+}
+
 bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);

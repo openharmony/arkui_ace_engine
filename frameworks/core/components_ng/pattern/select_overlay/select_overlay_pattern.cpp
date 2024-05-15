@@ -643,4 +643,9 @@ void SelectOverlayPattern::UpdateSelectArea(const RectF& selectArea)
 {
     info_->selectArea = selectArea;
 }
+
+void SelectOverlayPattern::SetIsNewAvoid(bool isNewAvoid)
+{
+    info_->isNewAvoid = isNewAvoid;
+}
 } // namespace OHOS::Ace::NG

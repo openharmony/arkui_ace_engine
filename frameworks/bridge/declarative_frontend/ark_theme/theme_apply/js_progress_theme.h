@@ -41,12 +41,6 @@ public:
             auto borderColor = themeColors->BackgroundEmphasize();
             ViewAbstractModel::GetInstance()->SetBorderColor(borderColor, borderColor, borderColor, borderColor);
             ViewAbstractModel::GetInstance()->SetColorBlend(Color::BLACK); // default for restore color after pressed
-            ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
-            // focused
-            ViewStackModel::GetInstance()->SetVisualState(VisualState::FOCUSED);
-            ViewAbstractModel::GetInstance()->SetOuterBorderColor(themeColors->InteractiveFocus());
-            CalcDimension outerBorderWidth(JSProgressTheme::outerBorderWidthValue, OHOS::Ace::DimensionUnit::PX);
-            ViewAbstractModel::GetInstance()->SetOuterBorderWidth(outerBorderWidth);
             // pressed
             ViewStackModel::GetInstance()->SetVisualState(VisualState::PRESSED);
             ViewAbstractModel::GetInstance()->SetColorBlend(themeColors->InteractivePressed());
@@ -55,21 +49,20 @@ public:
         } else if (style == ProgressStyle::Linear || style == ProgressStyle::Eclipse) {
             ProgressModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundSecondary());
         }
-
-        NG::GradientColor endSideColor;
-        NG::GradientColor beginSideColor;
-        OHOS::Ace::NG::Gradient gradient;
-        endSideColor.SetLinearColor(LinearColor(themeColors->BackgroundEmphasize()));
-        endSideColor.SetDimension(Dimension(0.0f));
-        beginSideColor.SetLinearColor(LinearColor(themeColors->BackgroundEmphasize()));
-        beginSideColor.SetDimension(Dimension(1.0f));
-        gradient.AddColor(endSideColor);
-        gradient.AddColor(beginSideColor);
-        ProgressModel::GetInstance()->SetGradientColor(gradient);
-        ProgressModel::GetInstance()->SetColor(themeColors->BackgroundEmphasize());
+        if (style != ProgressStyle::Ring && style != ProgressStyle::ScaleRing) {
+            NG::GradientColor endSideColor;
+            NG::GradientColor beginSideColor;
+            OHOS::Ace::NG::Gradient gradient;
+            endSideColor.SetLinearColor(LinearColor(themeColors->BackgroundEmphasize()));
+            endSideColor.SetDimension(Dimension(0.0f));
+            beginSideColor.SetLinearColor(LinearColor(themeColors->BackgroundEmphasize()));
+            beginSideColor.SetDimension(Dimension(1.0f));
+            gradient.AddColor(endSideColor);
+            gradient.AddColor(beginSideColor);
+            ProgressModel::GetInstance()->SetGradientColor(gradient);
+            ProgressModel::GetInstance()->SetColor(themeColors->BackgroundEmphasize());
+        }
     }
-private:
-    static constexpr double outerBorderWidthValue = 2.0;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_PROGRESS_THEME_H

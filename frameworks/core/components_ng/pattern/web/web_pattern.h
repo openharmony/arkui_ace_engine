@@ -29,6 +29,7 @@
 #include "core/common/udmf/unified_data.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components/web/web_event.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -38,6 +39,7 @@
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/web/web_accessibility_node.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
+#include "core/components_ng/pattern/web/web_context_select_overlay.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_layout_algorithm.h"
 #include "core/components_ng/pattern/web/web_paint_property.h"
@@ -84,8 +86,8 @@ enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 #endif
 } // namespace
 
-class WebPattern : public NestableScrollContainer, public SelectionHost {
-    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, SelectionHost);
+class WebPattern : public NestableScrollContainer, public TextBase {
+    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
@@ -94,6 +96,7 @@ public:
     using OnControllerAttachedCallback = std::function<void()>;
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
@@ -207,6 +210,16 @@ public:
     void SetPermissionClipboardCallback(PermissionClipboardCallback&& Callback)
     {
         permissionClipboardCallback_ = std::move(Callback);
+    }
+
+    void SetDefaultFileSelectorShowCallback(DefaultFileSelectorShowCallback&& Callback)
+    {
+        defaultFileSelectorShowCallback_ = std::move(Callback);
+    }
+
+    DefaultFileSelectorShowCallback GetDefaultFileSelectorShowCallback()
+    {
+        return defaultFileSelectorShowCallback_;
     }
 
     PermissionClipboardCallback GetPermissionClipboardCallback() const
@@ -395,6 +408,8 @@ public:
     void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
+    void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);
+    void OnContextMenuHide();
     void QuickMenuIsNeedNewAvoid(
         SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
@@ -444,7 +459,9 @@ public:
     bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
-    bool OnBackPressed() const;
+    void UpdateOnFocusTextField(bool isFocus);
+    bool OnBackPressed() override;
+    bool OnBackPressedForFullScreen() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
     bool IsImageDrag();
@@ -497,8 +514,13 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     void Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
+    void CloseKeyboard();
 
 private:
+    friend class WebContextSelectOverlay;
+    void ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
+        TextResponseType responseType = TextResponseType::RIGHT_CLICK, bool handleReverse = false);
+    void CloseContextSelectionMenu();
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -709,6 +731,7 @@ private:
     SetWebIdCallback setWebIdCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
+    DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
     RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
@@ -748,6 +771,10 @@ private:
     bool isEnhanceSurface_ = false;
     bool isAllowWindowOpenMethod_ = false;
     OffsetF webOffset_;
+    RefPtr<WebContextSelectOverlay> contextSelectOverlay_ = nullptr;
+    RefPtr<WebContextMenuParam> contextMenuParam_ = nullptr;
+    RefPtr<ContextMenuResult> contextMenuResult_ = nullptr;
+    RectF selectArea_;
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> quickMenuCallback_ = nullptr;
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
@@ -798,6 +825,7 @@ private:
     std::queue<TouchEventInfo> touchEventQueue_;
     std::unordered_map<int32_t, bool> naitve_map_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
+    bool embedNeedKeyboard_ = false;
 };
 } // namespace OHOS::Ace::NG
 

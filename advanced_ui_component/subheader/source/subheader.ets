@@ -15,6 +15,7 @@
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import { TextModifier } from '@ohos.arkui.modifier'
+import { Theme } from '@ohos.arkui.theme';
 
 const INDEX_ZERO: number = 0;
 const INDEX_ONE: number = 1;
@@ -38,7 +39,6 @@ const SINGLE_ICON_ZONE_SIZE: number = 32;
 const RIGHT_SINGLE_ICON_SIZE: number = 24;
 const LOADING_SIZE: number = 24;
 const PADDING_LEVEL_2: number = 4;
-const PADDING_LEVEL_4: number = 8;
 const MAX_RIGHT_WIDTH: Length = '34%';
 
 export enum OperationType {
@@ -87,6 +87,17 @@ class FontStyle {
   public alignment?: Alignment;
 }
 
+class SubHeaderTheme {
+  public fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
+  public fontSecondaryColor: ResourceColor = $r('sys.color.font_secondary');
+  public fontButtonColor: ResourceColor = $r('sys.color.font_emphasize');
+  public iconArrowColor: ResourceColor = $r('sys.color.icon_tertiary');
+  public textArrowHoverBgColor: ResourceColor = $r('sys.color.interactive_hover');
+  public borderFocusColor: ResourceColor = $r('sys.color.interactive_focus');
+  public leftIconColor: ResourceColor = $r('sys.color.icon_secondary');
+  public rightIconColor: ResourceColor = $r('sys.color.icon_primary');
+}
+
 @Styles
 function commonContentPadding() {
   .padding({
@@ -120,7 +131,7 @@ function secondaryTitleStyles(fontStyle: FontStyle) {
 @Extend(Text)
 function primaryTitleStyles(fontStyle: FontStyle) {
   .fontSize($r('sys.float.Subtitle_L'))
-  .fontColor($r('sys.color.font_primary'))
+  .fontColor(fontStyle?.fontColor ?? $r('sys.color.font_primary'))
   .fontWeight(fontStyle?.fontWeight)
   .maxLines(fontStyle?.maxLines)
   .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -151,8 +162,8 @@ export struct SubHeader {
   operationSymbolOptions?: Array<SymbolOptions> | null = null;
   // 内部变量
   @State isDuplicateLine: boolean = false;
-  @State textArrowBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
-  @State buttonBgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
+  @State textArrowBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+  @State buttonBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State textArrowFocus: boolean = false;
   @State buttonFocus: boolean = false;
   @State textArrowStyleWidth: number = 0;
@@ -165,6 +176,18 @@ export struct SubHeader {
   @State flexAlign: FlexAlign = FlexAlign.SpaceBetween;
   @BuilderParam titleBuilder?: () => void;
   @Prop contentMargin: Margin;
+  @Provide subHeaderTheme: SubHeaderTheme = new SubHeaderTheme()
+
+  onWillApplyTheme(theme: Theme) {
+    this.subHeaderTheme.fontPrimaryColor = theme.colors.fontPrimary;
+    this.subHeaderTheme.fontSecondaryColor = theme.colors.fontSecondary;
+    this.subHeaderTheme.fontButtonColor = theme.colors.fontEmphasize;
+    this.subHeaderTheme.iconArrowColor = theme.colors.iconTertiary;
+    this.subHeaderTheme.textArrowHoverBgColor = theme.colors.interactiveHover;
+    this.subHeaderTheme.borderFocusColor = theme.colors.interactiveFocus;
+    this.subHeaderTheme.leftIconColor = theme.colors.iconSecondary;
+    this.subHeaderTheme.rightIconColor = theme.colors.iconPrimary;
+  }
 
   build() {
     Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.End }) {
@@ -254,7 +277,7 @@ export struct SubHeader {
         SymbolGlyph($$.iconOptions?.icon)
           .focusable(true)
           .fontSize($$.iconOptions?.symbolicIconOption?.fontSize ?? LEFT_ICON_SIZE)
-          .fontColor($$.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_secondary')])
+          .fontColor($$.iconOptions?.symbolicIconOption?.fontColor ?? [this.subHeaderTheme.leftIconColor])
           .fontWeight($$.iconOptions?.symbolicIconOption?.fontWeight)
           .renderingStrategy($$.iconOptions?.symbolicIconOption?.renderingStrategy)
           .effectStrategy($$.iconOptions?.symbolicIconOption?.effectStrategy)
@@ -262,6 +285,7 @@ export struct SubHeader {
           .flexShrink(0)
       } else {
         Image($$.iconOptions?.icon)
+          .fillColor(this.subHeaderTheme.leftIconColor)
           .width(LEFT_ICON_SIZE)
           .height(LEFT_ICON_SIZE)
           .margin({ right: $r('sys.float.padding_level4') })
@@ -273,6 +297,7 @@ export struct SubHeader {
           maxLines: DOUBLE_LINE_NUM,
           fontWeight: FontWeight.Medium,
           alignment: Alignment.Start,
+          fontColor: this.subHeaderTheme.fontSecondaryColor,
         })
         .attributeModifier(this.secondaryTitleModifier)
         .flexShrink(1)
@@ -292,6 +317,7 @@ export struct SubHeader {
           fontWeight: FontWeight.Bold,
           maxLines: SINGLE_LINE_NUM,
           alignment: Alignment.Start,
+          fontColor: this.subHeaderTheme.fontPrimaryColor,
         })
         .attributeModifier(this.primaryTitleModifier)
         .width('100%')
@@ -300,6 +326,7 @@ export struct SubHeader {
           maxLines: SINGLE_LINE_NUM,
           fontWeight: FontWeight.Regular,
           alignment: Alignment.Start,
+          fontColor: this.subHeaderTheme.fontSecondaryColor,
         })
         .width('100%')
         .margin({
@@ -323,6 +350,7 @@ export struct SubHeader {
           maxLines: DOUBLE_LINE_NUM,
           fontWeight: FontWeight.Medium,
           alignment: Alignment.Start,
+          fontColor: this.subHeaderTheme.fontSecondaryColor,
         })
         .width('100%')
         .onAppear(() => {
@@ -370,6 +398,7 @@ export struct SubHeader {
           fontWeight: FontWeight.Bold,
           maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
+          fontColor: this.subHeaderTheme.fontPrimaryColor,
         })
         .width('100%')
         .onAppear(() => {
@@ -392,7 +421,7 @@ export struct SubHeader {
               .secondaryTitleStyles({
                 fontWeight: FontWeight.Medium,
                 maxLines: SINGLE_LINE_NUM,
-                fontColor: $r('sys.color.font_emphasize'),
+                fontColor: this.subHeaderTheme.fontButtonColor,
               })
               .focusable(true)
           }
@@ -416,7 +445,7 @@ export struct SubHeader {
           })
           .onHover((isHover: boolean) => {
             if (isHover) {
-              this.buttonBgColor = $r('sys.color.interactive_hover');
+              this.buttonBgColor = this.subHeaderTheme.textArrowHoverBgColor;
             } else {
               this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
             }
@@ -453,7 +482,7 @@ export struct SubHeader {
             .hitTestBehavior(HitTestMode.None)
             .border({
               width: BORDER_WIDTH,
-              color: $r('sys.color.interactive_focus')
+              color: this.subHeaderTheme.borderFocusColor
             })
             .borderRadius($r('sys.float.corner_radius_level4'))
         }
@@ -479,21 +508,15 @@ export struct SubHeader {
                 maxLines: SINGLE_LINE_NUM,
                 fontWeight: FontWeight.Regular,
                 alignment: Alignment.End,
+                fontColor: this.subHeaderTheme.fontSecondaryColor,
               })
               .margin({
-                right: $r('sys.float.padding_level2'),
+                right: PADDING_LEVEL_2 + ARROW_ICON_WIDTH,
                 top: $r('sys.float.padding_level4'),
                 bottom: $r('sys.float.padding_level4'),
               })
               .focusable(true)
-              .constraintSize({ maxWidth: this.getMaxArrowTextWidth() })
           }
-          Image($r('sys.media.ohos_ic_public_arrow_right'))
-            .fillColor($r('sys.color.ohos_id_color_tertiary'))
-            .width(ARROW_ICON_WIDTH)
-            .height(ARROW_ICON_HEIGHT)
-            .focusable(true)
-            .draggable(false)
         }
         .alignItems(VerticalAlign.Center)
         .borderRadius($r('sys.float.corner_radius_level4'))
@@ -510,83 +533,82 @@ export struct SubHeader {
           left: $r('sys.float.padding_level2'),
           right: $r('sys.float.padding_level4'),
         })
-        .onHover((isHover: boolean) => {
-          if (isHover) {
-            this.textArrowBgColor = $r('sys.color.interactive_hover');
-          } else {
-            this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-          }
-        })
-        .onTouch((event) => {
-          if (event.type === TouchType.Down) {
-            this.textArrowBgColor = $r('sys.color.interactive_pressed');
-          }
-          if (event.type === TouchType.Up) {
-            this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-          }
-        })
-        .onKeyEvent((event) => {
-          if (event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_SPACE) {
-            if (textArrow.action) {
-              textArrow.action();
-            }
-          }
-        })
-        .onClick((event) => {
-          if (textArrow.action) {
-            textArrow.action();
-          }
-        })
         .onAreaChange((oldValue: Area, newValue: Area) => {
           this.textArrowStyleWidth = Number(newValue.width);
           this.textArrowStyleHeight = Number(newValue.height);
         })
 
-        Row()
-          .height(this.textArrowStyleHeight)
-          .width(this.textArrowStyleWidth)
-          .hitTestBehavior(HitTestMode.None)
-          .border({
-            radius: $r('sys.float.corner_radius_level4'),
-            width: $r('sys.float.outline_extra_larger'),
-            color: $r('sys.color.interactive_focus'),
-          })
-          .stateStyles({
-            focused: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                width: $r('sys.float.outline_extra_larger'),
-                color: $r('sys.color.interactive_focus'),
-              })
-              .backgroundColor($r('sys.color.interactive_focus'))
-            },
-            pressed: pressedStyle,
-            disabled: disabledStyle,
-            normal: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                width: $r('sys.float.border_none'),
-                color: $r('sys.color.ohos_id_color_focused_outline_transparent'),
-              })
-            }
-          })
+        Row() {
+          Image($r('sys.media.ohos_ic_public_arrow_right'))
+            .fillColor(this.subHeaderTheme.iconArrowColor)
+            .width(ARROW_ICON_WIDTH)
+            .height(ARROW_ICON_HEIGHT)
+            .focusable(true)
+            .draggable(false)
+        }
+        .justifyContent(FlexAlign.End)
+        .height(this.textArrowStyleHeight)
+        .width(this.textArrowStyleWidth)
+        .hitTestBehavior(HitTestMode.None)
+        .padding({ right: $r('sys.float.padding_level4') })
+        .border({
+          radius: $r('sys.float.corner_radius_level4'),
+          width: $r('sys.float.outline_extra_larger'),
+          color: $r('sys.color.interactive_focus'),
+        })
+        .stateStyles({
+          focused: {
+            .border({
+              radius: $r('sys.float.corner_radius_level4'),
+              width: $r('sys.float.outline_extra_larger'),
+              color: this.subHeaderTheme.borderFocusColor ,
+            })
+          },
+          pressed: pressedStyle,
+          disabled: disabledStyle,
+          normal: {
+            .border({
+              radius: $r('sys.float.corner_radius_level4'),
+              width: $r('sys.float.border_none'),
+              color: $r('sys.color.ohos_id_color_focused_outline_transparent'),
+            })
+          }
+        })
       }
     }
+    .onHover((isHover: boolean) => {
+      if (isHover) {
+        this.textArrowBgColor = this.subHeaderTheme.textArrowHoverBgColor;
+      } else {
+        this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+      }
+    })
+    .onTouch((event) => {
+      if (event.type === TouchType.Down) {
+        this.textArrowBgColor = $r('sys.color.interactive_pressed');
+      }
+      if (event.type === TouchType.Up) {
+        this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+      }
+    })
+    .onKeyEvent((event) => {
+      if (event.keyCode === KeyCode.KEYCODE_ENTER || event.keyCode === KeyCode.KEYCODE_SPACE) {
+        if (textArrow.action) {
+          textArrow.action();
+        }
+      }
+    })
+    .onClick((event) => {
+      if (textArrow.action) {
+        textArrow.action();
+      }
+    })
     .focusable(true)
     .justifyContent(FlexAlign.End)
     .margin({
       left: $r('sys.float.padding_level4'),
       right: this.contentMargin?.right ?? $r('sys.float.padding_level4'),
     })
-  }
-
-  /**
-   * OperationType.TEXT_ARROW,文字最大宽度 = 整体宽度 减去 箭头宽度和间距
-   * @returns 文字最大宽度
-   */
-  private getMaxArrowTextWidth(): number {
-    return this.textArrowStyleWidth - PADDING_LEVEL_2 * 2 - PADDING_LEVEL_4 -
-      ARROW_ICON_WIDTH;
   }
 
   @Builder
@@ -685,6 +707,7 @@ struct SingleIconStyle {
   @State bgColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State isFocus: boolean = false;
   item: ContentIconOption | null = null;
+  @Consume subHeaderTheme: SubHeaderTheme;
 
   build() {
     if (this.item && this.item.iconOptions) {
@@ -709,10 +732,9 @@ struct SingleIconStyle {
           .border({
             radius: $r('sys.float.corner_radius_level4'),
             width: BORDER_WIDTH,
-            color: $r('sys.color.interactive_focus'),
+            color: this.subHeaderTheme.borderFocusColor,
             style: BorderStyle.Solid,
           })
-          .backgroundColor($r('sys.color.interactive_focus'))
         },
         pressed: pressedStyle,
         disabled: disabledStyle,
@@ -754,13 +776,13 @@ struct SingleIconStyle {
         SymbolGlyph(this.item.iconOptions?.icon)
           .focusable(true)
           .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?? RIGHT_SINGLE_ICON_SIZE)
-          .fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [$r('sys.color.icon_primary')])
+          .fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [this.subHeaderTheme.rightIconColor])
           .fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight)
           .renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy)
           .effectStrategy(this.item.iconOptions?.symbolicIconOption?.effectStrategy)
       } else {
         Image(this.item?.iconOptions?.icon)
-          .fillColor($r('sys.color.icon_primary'))
+          .fillColor(this.subHeaderTheme.rightIconColor)
           .width(RIGHT_SINGLE_ICON_SIZE)
           .height(RIGHT_SINGLE_ICON_SIZE)
           .focusable(true)

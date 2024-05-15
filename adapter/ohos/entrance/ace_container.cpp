@@ -784,7 +784,8 @@ void AceContainer::InitializeCallback()
             touchTask();
             return;
         }
-        context->GetTaskExecutor()->PostTask(touchTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerTouchEvent");
+        context->GetTaskExecutor()->PostTask(
+            touchTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerTouchEvent", PriorityType::VIP);
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
@@ -806,7 +807,8 @@ void AceContainer::InitializeCallback()
             mouseTask();
             return;
         }
-        context->GetTaskExecutor()->PostTask(mouseTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerMouseEvent");
+        context->GetTaskExecutor()->PostTask(
+            mouseTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerMouseEvent", PriorityType::VIP);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
@@ -828,7 +830,8 @@ void AceContainer::InitializeCallback()
             axisTask();
             return;
         }
-        context->GetTaskExecutor()->PostTask(axisTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent");
+        context->GetTaskExecutor()->PostTask(
+            axisTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent", PriorityType::VIP);
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
@@ -1357,6 +1360,9 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    auto context = runtimeContext_.lock();
+    DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
+    DumpLog::GetInstance().Print("moduleName:" + context->GetHapModuleInfo()->moduleName);
     result = DumpInfo(params);
     const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
     auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
@@ -1774,6 +1780,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
         Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
     });
 #endif
+    auto context = runtimeContext_.lock();
+    if (context != nullptr) {
+        targetVersion_ = context->GetApplicationInfo()->apiTargetVersion;
+    }
 }
 
 void AceContainer::SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow)
@@ -2712,6 +2722,22 @@ void AceContainer::TerminateUIExtension()
     auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
     CHECK_NULL_VOID(uiExtensionContext);
     uiExtensionContext->TerminateSelf();
+}
+
+Rosen::WMError AceContainer::RegisterAvoidAreaChangeListener(sptr<Rosen::IAvoidAreaChangedListener>& listener)
+{
+    if (!uiWindow_) {
+        return Rosen::WMError::WM_DO_NOTHING;
+    }
+    return uiWindow_->RegisterAvoidAreaChangeListener(listener);
+}
+
+Rosen::WMError AceContainer::UnregisterAvoidAreaChangeListener(sptr<Rosen::IAvoidAreaChangedListener>& listener)
+{
+    if (!uiWindow_) {
+        return Rosen::WMError::WM_DO_NOTHING;
+    }
+    return uiWindow_->UnregisterAvoidAreaChangeListener(listener);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()

@@ -340,7 +340,8 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             offset *= friction;
         }
-        gridLayoutInfo_.currentOffset_ += offset;
+        auto userOffset = FireOnWillScroll(-offset);
+        gridLayoutInfo_.currentOffset_ -= userOffset;
 
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
@@ -348,7 +349,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             gridLayoutInfo_.offsetEnd_ = false;
             gridLayoutInfo_.reachEnd_ = false;
         }
-        FireOnWillScroll(-offset);
         return true;
     }
     if (gridLayoutInfo_.reachStart_) {
@@ -357,18 +357,18 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
                 ScrollablePattern::CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
             offset *= friction;
         }
-        gridLayoutInfo_.currentOffset_ += offset;
+        auto userOffset = FireOnWillScroll(-offset);
+        gridLayoutInfo_.currentOffset_ -= userOffset;
 
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (LessNotEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
             gridLayoutInfo_.reachStart_ = false;
         }
-        FireOnWillScroll(-offset);
         return true;
     }
-    FireOnWillScroll(-offset);
-    gridLayoutInfo_.currentOffset_ += offset;
+    auto userOffset = FireOnWillScroll(-offset);
+    gridLayoutInfo_.currentOffset_ -= userOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -441,10 +441,10 @@ void GridPattern::CheckScrollable()
         }
     }
 
-    SetScrollEnable(scrollable_);
+    SetScrollEnabled(scrollable_);
 
     if (!gridLayoutProperty->GetScrollEnabled().value_or(scrollable_)) {
-        SetScrollEnable(false);
+        SetScrollEnabled(false);
     }
 }
 
@@ -1907,7 +1907,7 @@ float GridPattern::IrregularAnimateToCenter(float mainGap) const
     }
     auto size = GridLayoutUtils::GetItemSize(&info, RawPtr(host), *targetIndex_);
     auto [center, offset] = info.FindItemCenter(it->first, size.rows, mainGap);
-    return info.GetHeightInRange(0, center, mainGap) + offset - info.lastMainSize_ / 2.0f;
+    return info.GetTotalHeightFromZeroIndex(center, mainGap) + offset - info.lastMainSize_ / 2.0f;
 }
 
 std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()

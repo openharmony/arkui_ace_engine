@@ -953,4 +953,17 @@ void TextModelNG::ResetSelectedBackgroundColor(FrameNode* frameNode)
         textLayoutProperty->ResetSelectedBackgroundColor();
     }
 }
+
+void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    if (value) {
+        textPattern->SetTextContentParagraph(value->paragraph);
+    } else {
+        textPattern->SetTextContentParagraph(nullptr);
+    }
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 } // namespace OHOS::Ace::NG

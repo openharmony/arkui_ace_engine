@@ -21,18 +21,17 @@ namespace {} // namespace
 
 class SwiperArrowTestNg : public SwiperTestNg {
 public:
-    ImageSourceInfo GetImageInfo(const RefPtr<FrameNode>& arrowNode);
+    RefPtr<TextLayoutProperty> GetSymbolProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<MockRenderContext> GetArrowContext(const RefPtr<FrameNode>& arrowNode);
     void HandleMouseEvent(Offset mousePoint);
     AssertionResult VerifyArrowVisible(bool leftArrowVisible, bool rightArrowVisible);
 };
 
-ImageSourceInfo SwiperArrowTestNg::GetImageInfo(const RefPtr<FrameNode>& arrowNode)
+RefPtr<TextLayoutProperty> SwiperArrowTestNg::GetSymbolProperty(const RefPtr<FrameNode>& arrowNode)
 {
     auto buttonNode = AceType::DynamicCast<FrameNode>(arrowNode->GetFirstChild());
-    auto imageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
-    auto imageSourceInfo = imageNode->GetLayoutProperty<ImageLayoutProperty>()->GetImageSourceInfo();
-    return imageSourceInfo.value();
+    auto symbolNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    return symbolNode->GetLayoutProperty<TextLayoutProperty>();
 }
 
 RefPtr<MockRenderContext> SwiperArrowTestNg::GetArrowContext(const RefPtr<FrameNode>& arrowNode)
@@ -70,19 +69,26 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set arrow
-     * @tc.expected: Vertify imageInfo
+     * @tc.expected: Vertify symbol type/color
      */
     CreateWithItem([](SwiperModelNG model) {
         model.SetDisplayArrow(true); // show arrow
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftImageInfo = GetImageInfo(leftArrowNode_);
-    auto rightImageInfo = GetImageInfo(rightArrowNode_);
-    EXPECT_EQ(leftImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
-    EXPECT_EQ(rightImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
-    EXPECT_EQ(leftImageInfo.GetFillColor(), ARROW_PARAMETERS.arrowColor.value());
-    EXPECT_EQ(leftImageInfo.GetFillColor(), rightImageInfo.GetFillColor());
+    auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
+    EXPECT_EQ(leftButtonNode->GetTag(), V2::BUTTON_ETS_TAG);
+    auto leftSymbolNode = AceType::DynamicCast<FrameNode>(leftButtonNode->GetFirstChild());
+    EXPECT_EQ(leftSymbolNode->GetTag(), V2::SYMBOL_ETS_TAG);
+
+    auto leftSymbolProperty = GetSymbolProperty(leftArrowNode_);
+    auto rightSymbolProperty = GetSymbolProperty(rightArrowNode_);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    EXPECT_EQ(leftSymbolProperty->GetSymbolSourceInfoValue(), SymbolSourceInfo(swiperTheme->GetLeftSymbolId()));
+    EXPECT_EQ(rightSymbolProperty->GetSymbolSourceInfoValue(), SymbolSourceInfo(swiperTheme->GetRightSymbolId()));
+    EXPECT_EQ(leftSymbolProperty->GetSymbolColorListValue({})[0], ARROW_PARAMETERS.arrowColor);
+    EXPECT_EQ(leftSymbolProperty->GetSymbolColorList(), rightSymbolProperty->GetSymbolColorList());
 }
 
 /**
@@ -94,7 +100,7 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set VERTICAL and enabled:false
-     * @tc.expected: Vertify imageInfo
+     * @tc.expected: Vertify symbol type/color
      */
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
@@ -103,12 +109,16 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent002, TestSize.Level1)
         model.SetArrowStyle(ARROW_PARAMETERS);
         model.SetEnabled(false);
     });
-    auto leftImageInfo = GetImageInfo(leftArrowNode_);
-    auto rightImageInfo = GetImageInfo(rightArrowNode_);
-    EXPECT_EQ(leftImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG);
-    EXPECT_EQ(rightImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
-    EXPECT_EQ(leftImageInfo.GetFillColor(), ARROW_PARAMETERS.arrowColor.value().BlendOpacity(ARROW_DISABLED_ALPHA));
-    EXPECT_EQ(leftImageInfo.GetFillColor(), rightImageInfo.GetFillColor());
+    auto leftSymbol = GetSymbolProperty(leftArrowNode_);
+    auto rightSymbol = GetSymbolProperty(rightArrowNode_);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    EXPECT_EQ(leftSymbol->GetSymbolSourceInfoValue(), SymbolSourceInfo(swiperIndicatorTheme->GetUpSymbolId()));
+    EXPECT_EQ(rightSymbol->GetSymbolSourceInfoValue(), SymbolSourceInfo(swiperIndicatorTheme->GetDownSymbolId()));
+    EXPECT_EQ(leftSymbol->GetSymbolColorListValue({})[0],
+        ARROW_PARAMETERS.arrowColor.value().BlendOpacity(ARROW_DISABLED_ALPHA));
+    EXPECT_EQ(leftSymbol->GetSymbolColorList(), rightSymbol->GetSymbolColorList());
 }
 
 /**

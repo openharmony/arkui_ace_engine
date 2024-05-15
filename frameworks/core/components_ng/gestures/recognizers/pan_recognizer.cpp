@@ -139,6 +139,11 @@ void PanRecognizer::OnAccepted()
     ReportSlideOn();
     SendCallbackMsg(onActionStart_);
     SendCallbackMsg(onActionUpdate_);
+    // if gesture is blocked by double click, recognizer will receive up before onAccepted
+    // in this case, recognizer need to send onActionEnd when onAccepted
+    if (isTouchEventFinished_) {
+        SendCallbackMsg(onActionEnd_);
+    }
 }
 
 void PanRecognizer::OnRejected()
@@ -179,6 +184,7 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -319,6 +325,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     // Clear All fingers' velocity when fingersId is empty.
     if (fingersId_.empty()) {
         panVelocity_.ResetAll();
+        isTouchEventFinished_ = true;
     }
 }
 
@@ -351,6 +358,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    isTouchEventFinished_ = false;
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
@@ -602,6 +610,8 @@ Offset PanRecognizer::GetRawGlobalLocation(int32_t postEventNodeId)
             rawLastPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
         return Offset(rawLastPoint.GetX(), rawLastPoint.GetY());
     }
+    NGGestureRecognizer::Transform(
+        localPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
     return Offset(localPoint.GetX(), localPoint.GetY());
 }
 
@@ -746,6 +756,22 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     onActionCancel_ = std::move(curr->onActionCancel_);
 
     return true;
+}
+
+Axis PanRecognizer::GetAxisDirection()
+{
+    auto hasHorizontal = direction_.type & PanDirection::HORIZONTAL;
+    auto hasVertical = direction_.type & PanDirection::VERTICAL;
+    if (direction_.type == PanDirection::ALL || (hasHorizontal && hasVertical)) {
+        return Axis::FREE;
+    }
+    if (hasHorizontal) {
+        return Axis::HORIZONTAL;
+    }
+    if (hasVertical) {
+        return Axis::VERTICAL;
+    }
+    return Axis::NONE;
 }
 
 void PanRecognizer::SetDirection(const PanDirection& direction)

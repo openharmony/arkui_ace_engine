@@ -91,6 +91,7 @@ class JSBuilderNode extends BaseNode {
       return;
     }
     child.updateStateVars(params);
+    child.updateDirtyElements();
   }
   public createOrGetNode(elmtId: number, builder: () => object): object {
     const entry = this.updateFuncByElmtId.get(elmtId);
@@ -117,7 +118,7 @@ class JSBuilderNode extends BaseNode {
     if (this.frameNode_ === undefined || this.frameNode_ === null) {
       this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
     }
-    this.frameNode_.setNodePtr(this._nativeRef);
+    this.frameNode_.setNodePtr(this._nativeRef, this.nodePtr_);
     this.frameNode_.setRenderNode(this._nativeRef);
     this.frameNode_.setBaseNode(this);
     __JSScopeUtil__.restoreInstanceId();

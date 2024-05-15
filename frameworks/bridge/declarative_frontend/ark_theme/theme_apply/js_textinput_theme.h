@@ -38,19 +38,28 @@ public:
         TextFieldModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary(), false);
         TextFieldModel::GetInstance()->SetTextColor(themeColors->FontPrimary());
         TextFieldModel::GetInstance()->SetPlaceholderColor(themeColors->FontSecondary());
-        TextFieldModel::GetInstance()->SetCaretColor(themeColors->InteractiveFocus());
+        TextFieldModel::GetInstance()->SetCaretColor(themeColors->Brand());
         ViewAbstractModel::GetInstance()->SetOuterBorderColor(themeColors->InteractiveFocus());
         ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
+        Color selectedColor = themeColors.value().Brand();
+        // Alpha = 255 means opaque
+        if (selectedColor.GetAlpha() == JSThemeUtils::DEFAULT_ALPHA) {
+            // Default setting of 20% opacity
+            selectedColor = selectedColor.ChangeOpacity(JSThemeUtils::DEFAULT_OPACITY);
+        }
+        TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 
         // focused
         ViewStackModel::GetInstance()->SetVisualState(VisualState::FOCUSED);
         TextFieldModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary(), false);
+        TextFieldModel::GetInstance()->SetCaretColor(themeColors->Brand());
         CalcDimension outerBorderWidth(JSTextInputTheme::outerBorderWidthPx, OHOS::Ace::DimensionUnit::PX);
         ViewAbstractModel::GetInstance()->SetOuterBorderWidth(outerBorderWidth);
 
         // pressed
         ViewStackModel::GetInstance()->SetVisualState(VisualState::PRESSED);
         TextFieldModel::GetInstance()->SetBackgroundColor(themeColors->InteractivePressed(), false);
+        TextFieldModel::GetInstance()->SetCaretColor(themeColors->Brand());
         ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
 
         // clear state

@@ -150,6 +150,7 @@ const std::string TEXT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\"
 const std::string TEXT_EQUALS_VALUE =
     R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
 const Ace::WordBreak TEXT_WORD_BREAK = Ace::WordBreak::BREAK_ALL;
+const Ace::LineBreakStrategy TEXT_LINE_BREAK_STRATEGY = Ace::LineBreakStrategy::GREEDY;
 const std::string TEXT_FOR_AI_SINGLE = "phone: 18888888888";
 const std::string TEXT_FOR_AI = "phone: 12345678900,url: www.baidu.com";
 const std::string SPAN_PHONE = "12345678900";
@@ -255,6 +256,7 @@ struct TestProperty {
     std::optional<Dimension> letterSpacing = std::nullopt;
     std::optional<Dimension> textIndent = std::nullopt;
     std::optional<Ace::WordBreak> wordBreak = std::nullopt;
+    std::optional<Ace::LineBreakStrategy> lineBreakStrategy = std::nullopt;
 };
 
 struct ImageSpanNodeProperty {
@@ -406,6 +408,9 @@ RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue
     if (testProperty.wordBreak.has_value()) {
         textModel.SetWordBreak(testProperty.wordBreak.value());
     }
+    if (testProperty.lineBreakStrategy.has_value()) {
+        textModel.SetLineBreakStrategy(testProperty.lineBreakStrategy.value());
+    }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
     return AceType::DynamicCast<FrameNode>(element);
@@ -458,6 +463,7 @@ void TextTestNg::UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutP
     textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
     textLayoutProperty->UpdateWordBreak(TEXT_WORD_BREAK);
+    textLayoutProperty->UpdateLineBreakStrategy(TEXT_LINE_BREAK_STRATEGY);
 }
 
 std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> Init()
@@ -521,6 +527,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
     testProperty.adaptMaxFontSize = std::make_optional(ADAPT_MAX_FONT_SIZE_VALUE);
     testProperty.textIndent = std::make_optional(TEXT_INDENT);
     testProperty.wordBreak = std::make_optional(TEXT_WORD_BREAK);
+    testProperty.lineBreakStrategy = std::make_optional(TEXT_LINE_BREAK_STRATEGY);
 
     RefPtr<FrameNode> frameNode = CreateTextParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
@@ -553,6 +560,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetAdaptTextSize(),
         testProperty.adaptMinFontSize.has_value() || testProperty.adaptMaxFontSize.has_value());
     EXPECT_EQ(textStyle.GetWordBreak(), TEXT_WORD_BREAK);
+    EXPECT_EQ(textStyle.GetLineBreakStrategy(), TEXT_LINE_BREAK_STRATEGY);
 
     /**
      * @tc.cases: case2. renderContext has foreground color and modifier will foreground color flag
@@ -5279,6 +5287,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest009, TestSize.Level1)
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = "zh-CN",
         .wordBreak = textStyle.GetWordBreak(),
+        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
 
@@ -6006,6 +6015,7 @@ HWTEST_F(TextTestNg, TextModelNgProperty002, TestSize.Level1)
     font.fontStyle = ITALIC_FONT_STYLE_VALUE;
     TextModelNG::SetFont(node, font);
     TextModelNG::SetWordBreak(node, WordBreak::BREAK_ALL);
+    TextModelNG::SetLineBreakStrategy(node, LineBreakStrategy::BALANCED);
 
     /**
      * @tc.steps: step2. test property.
@@ -6024,6 +6034,7 @@ HWTEST_F(TextTestNg, TextModelNgProperty002, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontFamily().value(), FONT_FAMILY_VALUE);
     EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(layoutProperty->GetWordBreak().value(), WordBreak::BREAK_ALL);
+    EXPECT_EQ(layoutProperty->GetLineBreakStrategy().value(), LineBreakStrategy::BALANCED);
 }
 
 /**

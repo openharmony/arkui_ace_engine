@@ -103,10 +103,11 @@ void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPt
         // symbol -> symbol
         auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolProperty);
-        backIconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(backButtonIconNode)));
         symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         auto iconColor = theme->GetIconColor();
         symbolProperty->UpdateSymbolColorList({ iconColor });
+        // User-defined color overrides the default color of the theme
+        backIconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(backButtonIconNode)));
         backButtonIconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else if (titleBarLayoutProperty->HasImageSource()) {
         // symbol -> image
@@ -134,6 +135,7 @@ void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPt
         backButtonImageNode->MarkModifyDone();
     } else {
         auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolProperty);
         auto iconColor = theme->GetIconColor();
         symbolProperty->UpdateSymbolColorList({ iconColor });
         backButtonIconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -864,7 +866,8 @@ void TitleBarPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_TOP };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -1025,7 +1028,20 @@ void TitleBarPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(backButtonImgRender);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    backButtonImgRender->UpdateSvgFillColor(theme->GetBackButtonIconColor());
+    auto iconColor = theme->GetBackButtonIconColor();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        iconColor = theme->GetIconColor();
+        auto backButtonColor = theme->GetCompBackgroundColor();
+        auto renderContext = backButton->GetRenderContext();
+        auto backButtonPattern = backButton->GetPattern<ButtonPattern>();
+        backButtonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
+        backButtonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        backButtonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
+        backButtonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+        renderContext->UpdateBackgroundColor(backButtonColor);
+        backButton->MarkModifyDone();
+    }
+    backButtonImgRender->UpdateSvgFillColor(iconColor);
     backButtonImgNode->MarkModifyDone();
 }
 

@@ -369,6 +369,8 @@ private:
     double GetShiftDistance(int32_t index, ScrollDirection dir);
     void OnTouchDown();
     void OnTouchUp();
+    void ParseTouchListener();
+    void ParseMouseEvent();
     void InitMouseAndPressEvent();
     void HandleMouseEvent(bool isHover);
     void SetButtonBackgroundColor(const Color& pressColor);

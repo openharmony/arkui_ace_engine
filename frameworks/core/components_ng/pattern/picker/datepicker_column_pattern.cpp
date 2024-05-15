@@ -54,7 +54,7 @@ const float MOVE_DISTANCE = 5.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t PRESS_ANIMATION_DURATION = 100;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
-constexpr int32_t MINDDLE_CHILD_INDEX = 2;
+constexpr int32_t MIDDLE_CHILD_INDEX = 2;
 constexpr char MEASURE_SIZE_STRING[] = "TEST";
 constexpr float FONTWEIGHT = 0.5f;
 constexpr float FONT_SIZE_PERCENT = 1.0f;
@@ -130,40 +130,9 @@ void DatePickerColumnPattern::OnModifyDone()
     }
 }
 
-void DatePickerColumnPattern::InitMouseAndPressEvent()
+void DatePickerColumnPattern::ParseTouchListener()
 {
-    if (mouseEvent_ || touchListener_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto columnEventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(columnEventHub);
-    RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
-    CHECK_NULL_VOID(touchListener);
-    auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(columnGesture);
-    columnGesture->AddTouchEvent(touchListener);
-    CHECK_NULL_VOID(GetToss());
-    auto toss = GetToss();
-    auto childSize = static_cast<int32_t>(host->GetChildren().size());
-    RefPtr<FrameNode> middleChild = nullptr;
-    auto midSize = childSize / 2;
-    middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
-    CHECK_NULL_VOID(middleChild);
-    auto eventHub = middleChild->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
-    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleMouseEvent(isHover);
-    };
-    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnHoverEvent(mouseEvent_);
-    auto gesture = middleChild->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this), toss](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
@@ -182,6 +151,45 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+}
+
+void DatePickerColumnPattern::ParseMouseEvent()
+{
+    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(isHover);
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+}
+
+void DatePickerColumnPattern::InitMouseAndPressEvent()
+{
+    if (mouseEvent_ || touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto columnEventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(columnEventHub);
+    RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
+    CHECK_NULL_VOID(touchListener);
+    auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(columnGesture);
+    columnGesture->AddTouchEvent(touchListener);
+    auto childSize = static_cast<int32_t>(host->GetChildren().size());
+    RefPtr<FrameNode> middleChild = nullptr;
+    auto midSize = childSize / 2;
+    middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
+    CHECK_NULL_VOID(middleChild);
+    auto eventHub = middleChild->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ParseMouseEvent();
+    inputHub->AddOnHoverEvent(mouseEvent_);
+    auto gesture = middleChild->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    ParseTouchListener();
     gesture->AddTouchEvent(touchListener_);
     for (int32_t i = 0; i < childSize; i++) {
         RefPtr<FrameNode> childNode = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
@@ -969,12 +977,12 @@ float DatePickerColumnPattern::GetShiftDistance(uint32_t index, DatePickerScroll
             } else {
                 val = optionProperties_[index].height +
                       (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
-                          MINDDLE_CHILD_INDEX;
+                          MIDDLE_CHILD_INDEX;
                 distance = std::ceil(val);
             }
             break;
         case DatePickerOptionIndex::COLUMN_INDEX_3:
-            val = (optionProperties_[index].height - optionProperties_[nextIndex].fontheight) / MINDDLE_CHILD_INDEX +
+            val = (optionProperties_[index].height - optionProperties_[nextIndex].fontheight) / MIDDLE_CHILD_INDEX +
                   optionProperties_[nextIndex].height;
             distance = (dir == DatePickerScrollDirection::DOWN) ? val : (0.0f - val);
             distance = std::floor(distance);
@@ -985,7 +993,7 @@ float DatePickerColumnPattern::GetShiftDistance(uint32_t index, DatePickerScroll
             } else {
                 val = optionProperties_[index].height +
                       (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
-                          MINDDLE_CHILD_INDEX;
+                          MIDDLE_CHILD_INDEX;
                 distance = std::ceil(0.0f - val);
             }
             break;
@@ -1031,11 +1039,11 @@ float DatePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, Date
             } else {
                 distance = optionProperties_[index].height +
                            (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
-                               MINDDLE_CHILD_INDEX;
+                               MIDDLE_CHILD_INDEX;
             }
             break;
         case DatePickerOptionIndex::COLUMN_INDEX_1:
-            val = (optionProperties_[index].height - optionProperties_[nextIndex].fontheight) / MINDDLE_CHILD_INDEX +
+            val = (optionProperties_[index].height - optionProperties_[nextIndex].fontheight) / MIDDLE_CHILD_INDEX +
                   optionProperties_[nextIndex].height;
             distance = (dir == DatePickerScrollDirection::DOWN) ? val : (0.0f - val);
             distance = std::floor(distance);
@@ -1046,7 +1054,7 @@ float DatePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, Date
             } else {
                 val = optionProperties_[index].height +
                       (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) /
-                          MINDDLE_CHILD_INDEX;
+                          MIDDLE_CHILD_INDEX;
                 distance = 0.0f - val;
             }
             break;
@@ -1218,56 +1226,60 @@ void DatePickerColumnPattern::PlayRestAnimation()
     CreateAnimation(scrollDelta_, 0.0);
 }
 
+DimensionRect DatePickerColumnPattern::CalculateHotZone(
+    int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight)
+{
+    float hotZoneHeight = 0.0f;
+    float hotZoneOffsetY = 0.0f;
+    if (index == midSize) {
+        hotZoneHeight = middleChildHeight;
+    }
+    if (size_.Height() <= middleChildHeight) {
+        hotZoneHeight = index == midSize ? size_.Height() : 0;
+    } else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight)) {
+        if ((index == midSize + 1) || (index == midSize - 1)) {
+            hotZoneHeight = (size_.Height() - middleChildHeight) / MIDDLE_CHILD_INDEX;
+            hotZoneOffsetY = (index == midSize - 1) ? (otherChildHeight - hotZoneHeight) : 0;
+        }
+    } else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_DISAPPEAR * otherChildHeight)) {
+        if ((index == midSize + 1) || (index == midSize - 1)) {
+            hotZoneHeight = otherChildHeight;
+        } else if ((index == midSize + HOT_ZONE_HEIGHT_CANDIDATE) || (index == midSize - HOT_ZONE_HEIGHT_CANDIDATE)) {
+            hotZoneHeight = (size_.Height() - middleChildHeight - HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight) /
+                            MIDDLE_CHILD_INDEX;
+            hotZoneOffsetY = (index == midSize - HOT_ZONE_HEIGHT_CANDIDATE) ? (otherChildHeight - hotZoneHeight) : 0;
+        }
+    } else {
+        if ((index == midSize + 1) || (index == midSize - 1)) {
+            hotZoneHeight = otherChildHeight;
+        } else if ((index == midSize + HOT_ZONE_HEIGHT_CANDIDATE) || (index == midSize - HOT_ZONE_HEIGHT_CANDIDATE)) {
+            hotZoneHeight = otherChildHeight;
+        }
+    }
+    OffsetF hotZoneOffset;
+    SizeF hotZoneSize;
+    hotZoneOffset.SetX(0.0f);
+    hotZoneOffset.SetY(hotZoneOffsetY);
+    hotZoneSize.SetWidth(size_.Width());
+    hotZoneSize.SetHeight(hotZoneHeight);
+    DimensionRect hotZoneRegion;
+    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
+    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
+    return hotZoneRegion;
+}
+
 void DatePickerColumnPattern::AddHotZoneRectToText()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childSize = static_cast<int32_t>(host->GetChildren().size());
-    auto midSize = childSize / MINDDLE_CHILD_INDEX;
+    auto midSize = childSize / MIDDLE_CHILD_INDEX;
     auto middleChildHeight = optionProperties_[midSize].height;
     auto otherChildHeight = optionProperties_[midSize - 1].height;
     for (int32_t i = 0; i < childSize; i++) {
         RefPtr<FrameNode> childNode = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
         CHECK_NULL_VOID(childNode);
-        float hotZoneHegiht = 0.0f;
-        float hotZoneOffsetY = 0.0f;
-        if (size_.Height() <= middleChildHeight) {
-            hotZoneHegiht = i == midSize ? size_.Height() : 0;
-        } else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight)) {
-            if (i == midSize) {
-                hotZoneHegiht = middleChildHeight;
-            } else if ((i == midSize + 1) || (i == midSize - 1)) {
-                hotZoneHegiht = (size_.Height() - middleChildHeight) / MINDDLE_CHILD_INDEX;
-                hotZoneOffsetY = (i == midSize - 1) ? (otherChildHeight - hotZoneHegiht) : 0;
-            }
-        } else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_DISAPPEAR * otherChildHeight)) {
-            if (i == midSize) {
-                hotZoneHegiht = middleChildHeight;
-            } else if ((i == midSize + 1) || (i == midSize - 1)) {
-                hotZoneHegiht = otherChildHeight;
-            } else if ((i == midSize + HOT_ZONE_HEIGHT_CANDIDATE) || (i == midSize - HOT_ZONE_HEIGHT_CANDIDATE)) {
-                hotZoneHegiht = (size_.Height() - middleChildHeight - HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight) /
-                                MINDDLE_CHILD_INDEX;
-                hotZoneOffsetY = (i == midSize - HOT_ZONE_HEIGHT_CANDIDATE) ? (otherChildHeight - hotZoneHegiht) : 0;
-            }
-        } else {
-            if (i == midSize) {
-                hotZoneHegiht = middleChildHeight;
-            } else if ((i == midSize + 1) || (i == midSize - 1)) {
-                hotZoneHegiht = otherChildHeight;
-            } else if ((i == midSize + HOT_ZONE_HEIGHT_CANDIDATE) || (i == midSize - HOT_ZONE_HEIGHT_CANDIDATE)) {
-                hotZoneHegiht = otherChildHeight;
-            }
-        }
-        OffsetF hotZoneOffset;
-        SizeF hotZoneSize;
-        hotZoneOffset.SetX(0.0f);
-        hotZoneOffset.SetY(hotZoneOffsetY);
-        hotZoneSize.SetWidth(size_.Width());
-        hotZoneSize.SetHeight(hotZoneHegiht);
-        DimensionRect hotZoneRegion;
-        hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
-        hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
+        DimensionRect hotZoneRegion = CalculateHotZone(i, midSize, middleChildHeight, otherChildHeight);
         childNode->AddHotZoneRect(hotZoneRegion);
     }
 }

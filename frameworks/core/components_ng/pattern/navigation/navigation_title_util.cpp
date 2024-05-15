@@ -257,6 +257,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const BarItem& barI
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_RETURN(iconNode, nullptr);
         auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(symbolProperty, nullptr);
         symbolProperty->UpdateFontSize(iconWidth);
         if (isButtonEnabled) {
             symbolProperty->UpdateSymbolColorList({ iconColor });
@@ -303,14 +304,18 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
         return;
     }
 
-    if (menuItem.action || iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+    if (menuItem.action) {
         auto gestureEventHub = buttonNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureEventHub);
         auto clickCallback = [action = menuItem.action, weakNode = WeakPtr<FrameNode>(iconNode)](GestureEvent& info) {
             if (info.GetSourceDevice() == SourceType::KEYBOARD) {
                 return;
             }
+            if (action) {
+                action();
+            }
             auto symbol = weakNode.Upgrade();
+            CHECK_NULL_VOID(symbol);
             if (symbol->GetTag() == V2::SYMBOL_ETS_TAG) {
                 auto symbolProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
                 CHECK_NULL_VOID(symbolProperty);
@@ -320,9 +325,6 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
                 symbolEffectOptions.SetIsTxtActiveSource(0);
                 symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
                 symbol->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            }
-            if (action) {
-                action();
             }
         };
         gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));

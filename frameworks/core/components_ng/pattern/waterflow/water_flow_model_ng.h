@@ -110,6 +110,7 @@ public:
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetWaterflowFooter(FrameNode* frameNode, FrameNode* footerNode);
+    static bool hasFooter(FrameNode* frameNode);
     static void SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed);
 };
 } // namespace OHOS::Ace::NG

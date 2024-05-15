@@ -918,6 +918,9 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
         obj->SetProperty<std::string>("navigationId", result->navigationId);
         obj->SetProperty<std::string>("name", result->name);
         obj->SetProperty<int32_t>("state", static_cast<int32_t>(result->state));
+        obj->SetProperty<int32_t>("index", result->index);
+        obj->SetPropertyObject("param", JsConverter::ConvertNapiValueToJsVal(result->param));
+        obj->SetProperty<std::string>("navDestinationId", result->navDestinationId);
         info.SetReturnValue(obj);
     }
 }

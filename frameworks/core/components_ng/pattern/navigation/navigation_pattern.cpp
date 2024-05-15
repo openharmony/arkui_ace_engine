@@ -146,7 +146,8 @@ void NavigationPattern::OnAttachToFrameNode()
     }
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
 }
@@ -187,7 +188,7 @@ void NavigationPattern::OnModifyDone()
     auto layoutProperty = hostNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
-    if (opts && opts->Expansive()) {
+    if (opts) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation SafArea expand as %{public}s", opts->ToString().c_str());
 
         navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
@@ -399,33 +400,32 @@ void NavigationPattern::CheckTopNavPathChange(
                 navDestinationFocusView->SetIsViewRootScopeFocused(false);
             }
             navDestinationFocusView->FocusViewShow();
-        } else {
-            // back to navBar case
-            auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-            CHECK_NULL_VOID(navBarNode);
-            auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(
-                hostNode->GetLayoutProperty());
-            if (!navigationLayoutProperty->GetHideNavBarValue(false)) {
-                navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-                navBarNode->SetJSViewActive(true);
-            }
-            auto stageManager = context->GetStageManager();
-            if (stageManager != nullptr) {
-                RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
-                CHECK_NULL_VOID(pageNode);
-                auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-                CHECK_NULL_VOID(pagePattern);
-                auto pageInfo = pagePattern->GetPageInfo();
-                NotifyPageShow(pageInfo->GetPageUrl());
-            }
-            navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-            auto navBarFocusView = navBarNode->GetPattern<FocusView>();
-            CHECK_NULL_VOID(navBarFocusView);
-            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                navBarFocusView->SetIsViewRootScopeFocused(false);
-            }
-            navBarFocusView->FocusViewShow();
         }
+    } else {
+        // back to navBar case
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+        CHECK_NULL_VOID(navBarNode);
+        auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
+        if (!navigationLayoutProperty->GetHideNavBarValue(false)) {
+            navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            navBarNode->SetJSViewActive(true);
+        }
+        auto stageManager = context->GetStageManager();
+        if (stageManager != nullptr) {
+            RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+            CHECK_NULL_VOID(pageNode);
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            CHECK_NULL_VOID(pagePattern);
+            auto pageInfo = pagePattern->GetPageInfo();
+            NotifyPageShow(pageInfo->GetPageUrl());
+        }
+        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+        auto navBarFocusView = navBarNode->GetPattern<FocusView>();
+        CHECK_NULL_VOID(navBarFocusView);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            navBarFocusView->SetIsViewRootScopeFocused(false);
+        }
+        navBarFocusView->FocusViewShow();
     }
     bool isShow = false;
     bool isDialog =

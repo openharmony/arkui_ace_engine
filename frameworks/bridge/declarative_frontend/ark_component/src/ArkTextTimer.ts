@@ -51,6 +51,11 @@ class ArkTextTimerComponent extends ArkComponent implements TextTimerAttribute {
     return this;
   }
 
+  contentModifier(value: ContentModifier<TextTimerConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
+
   setContentModifier(modifier: ContentModifier<TextTimerConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().textTimer.setContentModifierBuilder(this.nativePtr, false);

@@ -462,12 +462,12 @@ void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
     if (showInSubWindow) {
         std::vector<Rect> rects;
         if (!isBlock) {
-            auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(),
+            auto rect = Rect(childOffsetForPaint_.GetX(), childOffsetForPaint_.GetY(),
                 childSize_.Width(), childSize_.Height());
             rects.emplace_back(rect);
         } else {
             auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
-            auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(),
+            auto rect = Rect(childOffsetForPaint_.GetX(), childOffsetForPaint_.GetY(),
                 childSize_.Width(), childSize_.Height());
             rects.emplace_back(parentWindowRect);
             rects.emplace_back(rect);

@@ -206,14 +206,14 @@ public:
     int32_t selectedEnd = -1;
     void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        PlaceholderStyle placeholderStyle = PlaceholderStyle());
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle());
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
-        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
     virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
-        const std::optional<TextStyle>& textStyle, const int32_t selStart, const int32_t selEnd);
+        const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
-        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
     virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
@@ -223,7 +223,7 @@ public:
     virtual void EndDrag();
     virtual bool IsDragging();
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
-    TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode);
+    TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode = false);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::optional<TextStyle> GetTextStyle() const
@@ -479,7 +479,7 @@ public:
     ~PlaceholderSpanItem() override = default;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        PlaceholderStyle placeholderStyle) override;
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle()) override;
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
 };
 
@@ -562,7 +562,7 @@ public:
     ~ImageSpanItem() override = default;
     PlaceholderRun run_;
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        PlaceholderStyle placeholderStyle) override;
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle()) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     void UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode);
     void SetImageSpanOptions(const ImageSpanOptions& options);

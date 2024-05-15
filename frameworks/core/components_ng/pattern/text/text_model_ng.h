@@ -19,6 +19,8 @@
 #include <functional>
 #include <string>
 
+#include "interfaces/native/node/styled_string.h"
+
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
@@ -113,6 +115,7 @@ public:
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
     static void SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
     static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);

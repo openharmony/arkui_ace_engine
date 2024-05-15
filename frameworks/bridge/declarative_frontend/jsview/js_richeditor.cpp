@@ -675,7 +675,7 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
 }
 
 void JSRichEditor::SetChangeTextSpans(
-    JSRef<JSArray>& jsArray, const std::list<NG::RichEditorAbstractSpanResult>& spanList)
+    JSRef<JSArray>& jsArray, const std::vector<NG::RichEditorAbstractSpanResult>& spanList)
 {
     int32_t index = 0;
     for (const auto& it : spanList) {
@@ -783,7 +783,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnWillChange(const NG::RichEditorChangeValue&
     return JSRef<JSVal>::Cast(OnWillChangeObj);
 }
 
-JSRef<JSVal> JSRichEditor::CreateJsOnDidChange(const std::list<NG::RichEditorAbstractSpanResult>& spanList)
+JSRef<JSVal> JSRichEditor::CreateJsOnDidChange(const std::vector<NG::RichEditorAbstractSpanResult>& spanList)
 {
     JSRef<JSArray> richEditorReplacedSpans = JSRef<JSArray>::New();
     SetChangeTextSpans(richEditorReplacedSpans, spanList);
@@ -2083,7 +2083,8 @@ void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const J
         height = theme->GetTextStyle().GetLineHeight();
         updateSpanStyle.updateLineHeight = height;
         style.SetLineHeight(height);
-    } else {
+    } else if (!lineHeight->IsUndefined() &&
+               !std::all_of(lineHeight->ToString().begin(), lineHeight->ToString().end(), ::isdigit)) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         height = theme->GetTextStyle().GetLineHeight();
@@ -2102,7 +2103,8 @@ void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const J
         letters = theme->GetTextStyle().GetLetterSpacing();
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
-    } else {
+    } else if (!letterSpacing->IsUndefined() && !letterSpacing->IsNull() &&
+               !std::all_of(letterSpacing->ToString().begin(), letterSpacing->ToString().end(), ::isdigit)) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         letters = theme->GetTextStyle().GetLetterSpacing();

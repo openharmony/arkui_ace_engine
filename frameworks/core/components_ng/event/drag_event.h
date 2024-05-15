@@ -231,6 +231,8 @@ public:
     static RefPtr<FrameNode> CreateBadgeTextNode(
         const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
 
+    void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
+
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
     void UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& frameNode);

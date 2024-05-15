@@ -32,7 +32,6 @@ void GeometryNode::Reset()
     parentGlobalOffset_.Reset();
     parentAbsoluteOffset_.Reset();
     parentLayoutConstraint_.reset();
-    previousState_.reset();
 }
 
 RefPtr<GeometryNode> GeometryNode::Clone() const
@@ -50,7 +49,6 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     }
     node->parentGlobalOffset_ = parentGlobalOffset_;
     node->parentLayoutConstraint_ = parentLayoutConstraint_;
-    node->previousState_ = previousState_ ? std::make_unique<RectF>(*previousState_) : nullptr;
     node->parentAbsoluteOffset_ = parentAbsoluteOffset_;
     return node;
 }
@@ -69,25 +67,33 @@ void GeometryNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
 #endif
 }
 
-void GeometryNode::Restore()
+RectF GeometryNode::GetParentAdjust() const
 {
-    CHECK_NULL_VOID(previousState_);
-    restoreCache_ = std::make_unique<RectF>(frame_.rect_);
-    frame_.rect_ = *previousState_;
-    previousState_ = nullptr;
+    return parentAdjust_;
 }
 
-bool GeometryNode::RestoreCache()
+void GeometryNode::SetParentAdjust(RectF parentAdjust)
 {
-    CHECK_NULL_RETURN(restoreCache_, false);
-    frame_.rect_ = *restoreCache_;
-    restoreCache_ = nullptr;
-    return true;
+    parentAdjust_ = parentAdjust;
 }
 
-void GeometryNode::Save()
+RectF GeometryNode::GetSelfAdjust() const
 {
-    // INVARIANT: previousState_ is null when Save() is called (only allow 1 layer of save/restore)
-    previousState_ = std::make_unique<RectF>(frame_.rect_);
+    return selfAdjust_;
+}
+
+void GeometryNode::SetSelfAdjust(RectF selfAdjust)
+{
+    selfAdjust_ = selfAdjust;
+}
+
+RectF GeometryNode::GetFrameRectWithoutSafeArea() const
+{
+    return frame_.rect_;
+}
+
+RectF GeometryNode::GetFrameRectWithSafeArea() const
+{
+    return selfAdjust_ + parentAdjust_ + frame_.rect_;
 }
 } // namespace OHOS::Ace::NG

@@ -285,6 +285,12 @@ public:
 
     virtual void SetContext(int32_t instanceId, NativeReference* context) {}
 
+    virtual void SetPkgNameList(const std::map<std::string, std::string>& map) {}
+
+    virtual void SetPkgAliasList(const std::map<std::string, std::string>& map) {}
+
+    virtual void SetpkgContextInfoList(const std::map<std::string, std::vector<std::vector<std::string>>>& map) {}
+
     bool IsDebugVersion() const
     {
         return isDebugVersion_;

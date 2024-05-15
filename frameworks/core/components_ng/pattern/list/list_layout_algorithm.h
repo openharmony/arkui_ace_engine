@@ -400,6 +400,7 @@ protected:
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
+    void RecycleGroupItem(LayoutWrapper* layoutWrapper) const;
     void CheckJumpToIndex();
     void CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper, int32_t startIndex,
         float& startPos, bool isGroup, bool forwardLayout);

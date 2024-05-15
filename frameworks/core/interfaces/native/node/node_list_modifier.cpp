@@ -552,6 +552,20 @@ void SetScrollBy(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y)
     ListModelNG::SetScrollBy(frameNode, x, y);
 }
 
+void SetInitialIndex(ArkUINodeHandle node, ArkUI_Int32 index)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetInitialIndex(frameNode, index);
+}
+
+void ResetInitialIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetInitialIndex(frameNode, 0);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -561,14 +575,14 @@ const ArkUIListModifier* GetListModifier()
         SetMultiSelectable, ResetMultiSelectable, SetChainAnimation, ResetChainAnimation, SetCachedCount,
         ResetCachedCount, GetEnableScrollInteraction, SetEnableScrollInteraction, ResetEnableScrollInteraction,
         GetSticky, SetSticky, ResetSticky, GetListEdgeEffect, SetListEdgeEffect, ResetListEdgeEffect, GetListDirection,
-        SetListDirection, ResetListDirection, GetListFriction, SetListFriction, ResetListFriction,
-        GetListNestedScroll, SetListNestedScroll, ResetListNestedScroll, GetListScrollBar, SetListScrollBar,
-        ResetListScrollBar, GetListScrollBarWidth, SetListScrollBarWidth, ResetListScrollBarWidth,
-        GetListScrollBarColor, SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem,
-        ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset,
-        SetContentEndOffset, ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions,
-        ResetChainAnimationOptions, GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge,
-        SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy };
+        SetListDirection, ResetListDirection, GetListFriction, SetListFriction, ResetListFriction, GetListNestedScroll,
+        SetListNestedScroll, ResetListNestedScroll, GetListScrollBar, SetListScrollBar, ResetListScrollBar,
+        GetListScrollBarWidth, SetListScrollBarWidth, ResetListScrollBarWidth, GetListScrollBarColor,
+        SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem, ResetAlignListItem,
+        SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset,
+        ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
+        GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
+        GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex };
     return &modifier;
 }
 
@@ -644,14 +658,19 @@ void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onWillScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) -> void {
+    auto onWillScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state,
+                            ScrollSource source) -> ScrollFrameResult {
+        ScrollFrameResult scrollRes { .offset = offset };
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_LIST_WILL_SCROLL;
+        event.componentAsyncEvent.subKind = ON_WATER_FLOW_WILL_SCROLL;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
-        event.componentAsyncEvent.data[1].i32 = static_cast<int32_t>(state);
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
+        event.componentAsyncEvent.data[2].i32 = static_cast<int>(source);
         SendArkUIAsyncEvent(&event);
+        scrollRes.offset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
+        return scrollRes;
     };
     ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
 }

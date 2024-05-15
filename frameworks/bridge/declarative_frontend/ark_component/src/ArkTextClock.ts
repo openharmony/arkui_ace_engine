@@ -56,6 +56,10 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
   fontFeature(value: string): this {
     throw new Error('Method not implemented.');
   }
+  contentModifier(value: ContentModifier<TextClockConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<TextClockConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().textClock.setContentModifierBuilder(this.nativePtr, false);

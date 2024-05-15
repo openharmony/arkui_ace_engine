@@ -125,6 +125,7 @@ public:
             isExecuteOnDisappear_ = true;
             onDisappear_();
         }
+        isDismissProcess_ = false;
     }
 
     void UpdateOnWillDisappear(std::function<void()>&& onWillDisappear)
@@ -264,6 +265,7 @@ public:
 
     void SheetSpringBack()
     {
+        isDismissProcess_ = false;
         SheetTransition(true);
     }
 
@@ -431,6 +433,16 @@ public:
         return isAnimationProcess_;
     }
 
+    void SetDismissProcess(bool isProcess)
+    {
+        isDismissProcess_ = isProcess;
+    }
+
+    bool GetDismissProcess()
+    {
+        return isDismissProcess_;
+    }
+
     float GetPageHeightWithoutOffset() const
     {
         return pageHeight_;
@@ -586,6 +598,7 @@ private:
     bool isFirstInit_ = true;
     bool isAnimationBreak_ = false;
     bool isAnimationProcess_ = false;
+    bool isDismissProcess_ = false;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
     bool windowChanged_ = false;
 

@@ -520,15 +520,15 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
     placeholderStyle.width = 9.0;
     placeholderStyle.height = 10.0;
     placeholderStyle.verticalAlign = VerticalAlign::TOP;
-    auto index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    auto index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
     placeholderStyle.verticalAlign = VerticalAlign::CENTER;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
     placeholderStyle.verticalAlign = VerticalAlign::BOTTOM;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
     placeholderStyle.verticalAlign = VerticalAlign::BASELINE;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
     placeholderStyle.verticalAlign = VerticalAlign::NONE;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
 
     MockParagraph::TearDown();
 }

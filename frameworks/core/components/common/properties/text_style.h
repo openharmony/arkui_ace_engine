@@ -237,6 +237,7 @@ public:
     TextStyle() = default;
     TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight, FontStyle fontStyle,
         const Color& textColor);
+    TextStyle(double fontSize) : fontSize_(fontSize) {}
     ~TextStyle() = default;
 
     bool operator==(const TextStyle& rhs) const;
@@ -705,7 +706,7 @@ public:
 
 private:
     std::vector<std::string> fontFamilies_;
-    std::list<std::pair<std::string, int32_t>> fontFeatures_;
+    std::list<std::pair<std::string, int32_t>> fontFeatures_ { { "\"pnum\"", 1 } };
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     std::vector<Shadow> textShadows_;

@@ -298,6 +298,7 @@ public:
     bool GetInt32Arg(size_t index, int32_t& value) const;
     bool GetUint32Arg(size_t index, uint32_t& value) const;
     bool GetDoubleArg(size_t index, double& value) const;
+    bool GetDoubleArrayArg(size_t index, std::vector<double>& valueArr) const;
     bool GetStringArg(size_t index, std::string& value) const;
 
 private:

@@ -16,14 +16,15 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_node_bridge.h"
 
 #include "bridge/declarative_frontend/jsview/js_xcomponent.h"
+#include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
+
 namespace OHOS::Ace::NG {
 
-ArkUINativeModuleValue XComponentNodeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
+Framework::XComponentParams XComponentNodeBridge::SetXComponentNodeParams(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-
     Framework::XComponentParams params;
+
     // elmtId
     Local<JSValueRef> arg = runtimeCallInfo->GetCallArgRef(0);
     if (arg->IsNumber()) {
@@ -64,7 +65,21 @@ ArkUINativeModuleValue XComponentNodeBridge::Create(ArkUIRuntimeCallInfo* runtim
     if (arg->IsString()) {
         params.libraryName = arg->ToString(vm)->ToString();
     }
+    // xComponentController
+    arg = runtimeCallInfo->GetCallArgRef(8);
+    if (!arg->IsUndefined()) {
+        params.controller =
+            static_cast<Framework::JSXComponentController*>(Local<panda::ObjectRef>(arg)->GetNativePointerField(0));
+    }
 
+    return params;
+}
+
+ArkUINativeModuleValue XComponentNodeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::XComponentParams params = SetXComponentNodeParams(runtimeCallInfo, vm);
     void* jsXComponent = Framework::JSXComponent::Create(params);
     auto nativeModule = panda::NativePointerRef::New(
         vm, reinterpret_cast<void*>(jsXComponent),

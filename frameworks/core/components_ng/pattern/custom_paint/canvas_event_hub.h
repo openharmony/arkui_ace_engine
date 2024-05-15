@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_EVENT_HUB_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_EVENT_HUB_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_EVENT_HUB_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_EVENT_HUB_H
 
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
 using ReadyEvent = std::function<void()>;
 
-class CustomPaintEventHub : public EventHub {
-    DECLARE_ACE_TYPE(CustomPaintEventHub, EventHub)
+class CanvasEventHub : public EventHub {
+    DECLARE_ACE_TYPE(CanvasEventHub, EventHub)
 
 public:
-    CustomPaintEventHub() = default;
-    ~CustomPaintEventHub() override = default;
+    CanvasEventHub() = default;
+    ~CanvasEventHub() override = default;
 
     void SetOnReady(ReadyEvent&& readyEvent)
     {
@@ -44,4 +44,4 @@ private:
     ReadyEvent readyEvent_;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_EVENT_HUB_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_EVENT_HUB_H

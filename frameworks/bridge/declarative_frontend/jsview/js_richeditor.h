@@ -38,9 +38,9 @@ public:
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
     static void SetChangeTextSpans(
-        JSRef<JSArray>& jsArray, const std::list<NG::RichEditorAbstractSpanResult>& spanList);
+        JSRef<JSArray>& jsArray, const std::vector<NG::RichEditorAbstractSpanResult>& spanList);
     static JSRef<JSVal> CreateJsOnWillChange(const NG::RichEditorChangeValue& changeValue);
-    static JSRef<JSVal> CreateJsOnDidChange(const std::list<NG::RichEditorAbstractSpanResult>& spanList);
+    static JSRef<JSVal> CreateJsOnDidChange(const std::vector<NG::RichEditorAbstractSpanResult>& spanList);
     static void JsClip(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void SetCopyOptions(const JSCallbackInfo& info);

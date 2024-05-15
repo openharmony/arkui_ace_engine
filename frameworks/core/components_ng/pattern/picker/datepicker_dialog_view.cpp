@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "base/geometry/dimension.h"
+#include "base/i18n/date_time_sequence.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
@@ -71,6 +72,15 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     auto pickerStack = CreateStackNode();
     auto dateNode = CreateAndMountDateNode(settingData, pickerStack);
     auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    DateTimeSequence sequence;
+    auto language = AceApplicationInfo::GetInstance().GetLanguage();
+    OrderResult orderResult = sequence.GetDateOrder(language);
+    if (language == "ug") {
+        pickerPattern->SetDateOrder("y-d-M");
+    } else {
+        auto dateOrder = orderResult.dateOrder;
+        pickerPattern->SetDateOrder(dateOrder);
+    }
     CHECK_NULL_RETURN(pickerPattern, nullptr);
     pickerPattern->SetIsShowInDialog(true);
     auto buttonTitleNode = CreateAndMountButtonTitleNode(dateNode, contentColumn);

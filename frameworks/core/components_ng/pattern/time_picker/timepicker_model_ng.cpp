@@ -104,7 +104,9 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool h
         auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
-        stackMinuteNode->MountToParent(timePickerNode);
+        auto language = AceApplicationInfo::GetInstance().GetLanguage();
+        language == "ug" ? stackMinuteNode->MountToParent(timePickerNode, 0)
+                            : stackMinuteNode->MountToParent(timePickerNode);
         minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     timePickerRowPattern->SetHasSecond(hasSecond);
@@ -252,6 +254,12 @@ void TimePickerModelNG::SetDateTimeOptions(ZeroPrefixType& hourType,
 void TimePickerModelNG::SetWheelModeEnabled(bool wheelModeEnabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Loop, wheelModeEnabled);
+}
+
+void TimePickerModelNG::SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Loop, wheelModeEnabled, frameNode);
 }
 
 void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)

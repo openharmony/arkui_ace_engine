@@ -301,11 +301,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         }
         fingerId_ = touchInfo.GetFingerId();
         axisFlag_ = false;
-        // when Touch Down area is at Pan Area, value is unchanged.
-        allowDragEvents_ = sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_ONLY;
-        if (allowDragEvents_ && !AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
-            UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
-        }
+        lastTouchLocation_ = touchInfo.GetLocalLocation();
         if (showTips_) {
             bubbleFlag_ = true;
             UpdateBubble();
@@ -317,13 +313,20 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         if (fingerId_ != touchInfo.GetFingerId()) {
             return;
         }
+        if (lastTouchLocation_.has_value() && lastTouchLocation_.value() == touchInfo.GetLocalLocation()) {
+            // when Touch Down area is at Pan Area, value is unchanged.
+            allowDragEvents_ = sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_ONLY;
+            if (allowDragEvents_ && !AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
+                UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
+            }
+            FireChangeEvent(SliderChangeMode::Click);
+        }
         fingerId_ = -1;
         UpdateToValidValue();
         if (bubbleFlag_ && !isFocusActive_) {
             bubbleFlag_ = false;
         }
         mousePressedFlag_ = false;
-        FireChangeEvent(SliderChangeMode::Click);
         FireChangeEvent(SliderChangeMode::End);
         CloseTranslateAnimation();
     }
@@ -542,9 +545,9 @@ float SliderPattern::GetValueInValidRange(
             if (NearEqual(step, 0.0f)) {
                 step = 1.0f;
             }
-            auto toValueCorrection = NearEqual(toValue - step * static_cast<int>(toValue / step), 0) ? 0 : 1;
-            fromValue = LessOrEqual(fromValue, min) ? min : static_cast<int>(fromValue / step) * step;
-            toValue = GreatOrEqual(toValue, max) ? max : (static_cast<int>(toValue / step) + toValueCorrection) * step;
+            auto toValueCorrection = NearEqual(toValue - step * std::floor(toValue / step), 0) ? 0 : 1;
+            fromValue = LessOrEqual(fromValue, min) ? min : std::floor(fromValue / step) * step;
+            toValue = GreatOrEqual(toValue, max) ? max : (std::floor(toValue / step) + toValueCorrection) * step;
             return LessNotEqual(value, fromValue) ? fromValue : GreatNotEqual(value, toValue) ? toValue : value;
         }
     }

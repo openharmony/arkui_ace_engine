@@ -51,6 +51,7 @@ public:
 
     class SliderValidRange final : public AceType {
     public:
+        SliderValidRange() = default;
         SliderValidRange(float from, float to) : fromValue(from), toValue(to) {}
         ~SliderValidRange() = default;
         float GetFromValue() const

@@ -242,6 +242,15 @@ void ForEachNode::MoveData(int32_t from, int32_t to)
     if (from == to) {
         return;
     }
+
+    auto idIter = ids_.begin();
+    std::advance(idIter, from);
+    auto id = *idIter;
+    ids_.erase(idIter);
+    idIter = ids_.begin();
+    std::advance(idIter, to);
+    ids_.insert(idIter, id);
+
     auto& children = ModifyChildren();
     auto fromIter = children.begin();
     std::advance(fromIter, from);

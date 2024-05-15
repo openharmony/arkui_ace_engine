@@ -37,7 +37,7 @@ private:
      *
      * @return true if Parent is marked dirty successfully
      */
-    bool RequestParentDirty(bool childExpansiveAndMark = false) override;
+    bool RequestParentDirty() override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_ITEM_NODE_H

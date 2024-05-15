@@ -209,6 +209,7 @@ private:
     OffsetF targetOffsetForPaint_;
     SizeF childSize_;
     OffsetF childOffset_;
+    // Offset from upper left corner of the screen
     OffsetF childOffsetForPaint_;
     OffsetF arrowPosition_;
     OffsetF arrowPositionForPaint_;

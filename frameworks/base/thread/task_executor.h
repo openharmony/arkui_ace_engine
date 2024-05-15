@@ -25,6 +25,22 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
+
+// 1. Must be consistent with AppExecFwk::EventQueue::Priority.
+// 2. Do not use this ability arbitrarily.
+enum class PriorityType : int32_t {
+    // The highest priority queue, should be distributed until the tasks in the queue are completed.
+    VIP = 0,
+    // Event that should be distributed at once if possible.
+    IMMEDIATE,
+    // High priority event, sorted by handle time, should be distributed before low priority event.
+    HIGH,
+    // Normal event, sorted by handle time.
+    LOW,
+    // Event that should be distributed only if no other event right now.
+    IDLE,
+};
+
 class TaskExecutor : public AceType {
     DECLARE_ACE_TYPE(TaskExecutor, AceType);
     ACE_DISALLOW_COPY_AND_MOVE(TaskExecutor);
@@ -54,9 +70,10 @@ public:
      * @param name Name of the task.
      * @return Returns 'true' whether task has been post successfully.
      */
-    bool PostTask(Task&& task, TaskType type, const std::string& name) const
+    bool PostTask(
+        Task&& task, TaskType type, const std::string& name, PriorityType priorityType = PriorityType::LOW) const
     {
-        return PostDelayedTask(std::move(task), type, 0, name);
+        return PostDelayedTask(std::move(task), type, 0, name, priorityType);
     }
 
     /**
@@ -67,9 +84,10 @@ public:
      * @param name Name of the task.
      * @return Returns 'true' if task has been posted successfully.
      */
-    bool PostTask(const Task& task, TaskType type, const std::string& name) const
+    bool PostTask(const Task& task, TaskType type, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const
     {
-        return PostDelayedTask(task, type, 0, name);
+        return PostDelayedTask(task, type, 0, name, priorityType);
     }
 
     /**
@@ -112,12 +130,13 @@ public:
      * @param name Name of the task.
      * @return Returns 'true' if task has been posted successfully.
      */
-    bool PostDelayedTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name) const
+    bool PostDelayedTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const
     {
         if (delayTime > 0 && type == TaskType::BACKGROUND) {
             return false;
         }
-        return OnPostTask(std::move(task), type, delayTime, name);
+        return OnPostTask(std::move(task), type, delayTime, name, priorityType);
     }
 
     /**
@@ -130,9 +149,10 @@ public:
      * @param name Name of the task.
      * @return Returns 'true' if task has been posted successfully.
      */
-    bool PostDelayedTask(const Task& task, TaskType type, uint32_t delayTime, const std::string& name) const
+    bool PostDelayedTask(const Task& task, TaskType type, uint32_t delayTime, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const
     {
-        return PostDelayedTask(Task(task), type, delayTime, name);
+        return PostDelayedTask(Task(task), type, delayTime, name, priorityType);
     }
 
     /**
@@ -243,7 +263,8 @@ public:
 protected:
     TaskExecutor() = default;
 
-    virtual bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name) const = 0;
+    virtual bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const = 0;
     virtual Task WrapTaskWithTraceId(Task&& task, int32_t id) const = 0;
 
 #ifdef ACE_DEBUG

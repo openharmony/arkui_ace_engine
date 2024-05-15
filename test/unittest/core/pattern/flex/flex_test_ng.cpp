@@ -41,7 +41,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const float OFFSET_TOP = 0.0f;
+const float OFFSET_TOP = 20.0f;
 const float OFFSET_LEFT = 0.0f;
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
@@ -119,6 +119,8 @@ struct WrapProperties {
     WrapAlignment wrapAlignment = WrapAlignment::START;
     WrapAlignment wrapMainAxisAlignment = WrapAlignment::START;
     WrapAlignment wrapCrossAxisAlignment = WrapAlignment::START;
+    Dimension mainSpace = Dimension(20.0, DimensionUnit::VP);
+    Dimension crossSpace = Dimension(20.0, DimensionUnit::VP);
 };
 
 void UpdateWrapProperties(const RefPtr<FlexLayoutProperty>& layoutProperty, const WrapProperties& wrapProperty)
@@ -128,6 +130,8 @@ void UpdateWrapProperties(const RefPtr<FlexLayoutProperty>& layoutProperty, cons
     layoutProperty->UpdateAlignment(wrapProperty.wrapAlignment);
     layoutProperty->UpdateMainAlignment(wrapProperty.wrapMainAxisAlignment);
     layoutProperty->UpdateCrossAlignment(wrapProperty.wrapCrossAxisAlignment);
+    layoutProperty->UpdateSpace(wrapProperty.mainSpace);
+    layoutProperty->UpdateCrossSpace(wrapProperty.crossSpace);
 }
 
 struct FlexProperties {
@@ -165,6 +169,8 @@ HWTEST_F(FlexTestNg, FlexWrapFrameNodeCreator001, TestSize.Level1)
         flexLayoutProperty->GetMainAlignmentValue(WrapAlignment::START) == wrapProperty.wrapMainAxisAlignment, true);
     EXPECT_EQ(
         flexLayoutProperty->GetCrossAlignmentValue(WrapAlignment::START) == wrapProperty.wrapCrossAxisAlignment, true);
+    EXPECT_EQ(flexLayoutProperty->GetSpaceValue({}).Value() == wrapProperty.mainSpace.Value(), true);
+    EXPECT_EQ(flexLayoutProperty->GetCrossSpaceValue({}).Value() == wrapProperty.crossSpace.Value(), true);
 
     /**
      * @tc.steps: step1. Call CreateFlexGrow.
@@ -438,10 +444,14 @@ HWTEST_F(FlexTestNg, FlexWrapPatternTest002, TestSize.Level1)
     flexModelNG.SetWrapMainAlignment(WrapAlignment::START);
     flexModelNG.SetWrapCrossAlignment(WrapAlignment::START);
     flexModelNG.SetWrapAlignment(WrapAlignment::START);
+    flexModelNG.SetMainSpace(Dimension(20.0, DimensionUnit::VP));
+    flexModelNG.SetCrossSpace(Dimension(20.0, DimensionUnit::VP));
     EXPECT_EQ(flexLayoutProperty->GetWrapDirection(), WrapDirection::HORIZONTAL);
     EXPECT_EQ(flexLayoutProperty->GetMainAlignment(), WrapAlignment::START);
     EXPECT_EQ(flexLayoutProperty->GetCrossAlignment(), WrapAlignment::START);
     EXPECT_EQ(flexLayoutProperty->GetAlignment(), WrapAlignment::START);
+    EXPECT_EQ(flexLayoutProperty->GetSpaceValue({}).Value(), 20.0);
+    EXPECT_EQ(flexLayoutProperty->GetCrossSpaceValue({}).Value(), 20.0);
 
     int32_t value = 1;
     flexModelNG.SetJustifyContent(value);

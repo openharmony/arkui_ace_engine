@@ -154,6 +154,13 @@ typedef struct ArkUI_BarrierOption ArkUI_BarrierOption;
 typedef struct ArkUI_SwiperIndicator ArkUI_SwiperIndicator;
 
 /**
+ * @brief Defines formatted string data objects supported by the text component.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_StyledString ArkUI_StyledString;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -878,6 +885,8 @@ typedef enum {
     ARKUI_SLIDER_STYLE_OUT_SET = 0,
     /** The slider is in the slider track. */
     ARKUI_SLIDER_STYLE_IN_SET,
+    /** No slider. */
+    ARKUI_SLIDER_STYLE_NONE,
 } ArkUI_SliderStyle;
 
 /**

@@ -101,6 +101,10 @@ void NavigationTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    auto context = MockPipelineContext::GetCurrent();
+    if (context) {
+        context->stageManager_ = nullptr;
+    }
 }
 
 void NavigationTestNg::TearDownTestSuite()
@@ -827,7 +831,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0022, TestSize.Level1)
     ASSERT_FALSE(contentNode->children_.empty());
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint = std::make_unique<MeasureProperty>();
-    std::optional<CalcLength> len = CalcLength("auto");
+    std::optional<CalcLength> len = CalcLength(200);
     calcLayoutConstraint->selfIdealSize = CalcSize(std::nullopt, len);
     navigationLayoutProperty->calcLayoutConstraint_ = std::move(calcLayoutConstraint);
     algorithm->MeasureContentChild(AceType::RawPtr(layoutWrapper), navigation, navigationLayoutProperty, SizeF());
@@ -1052,7 +1056,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.push A
@@ -1061,7 +1065,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
 HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
@@ -1105,7 +1109,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step3.pop page B
@@ -1114,7 +1118,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
 HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
@@ -1158,7 +1162,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step3.pop page B

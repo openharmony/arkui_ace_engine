@@ -367,6 +367,7 @@ protected:
     int32_t currentFingers_ = 0;
     RefPtr<GestureInfo> gestureInfo_;
     GestureJudgeFunc sysJudge_ = nullptr;
+    bool isTouchEventFinished_ = false;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

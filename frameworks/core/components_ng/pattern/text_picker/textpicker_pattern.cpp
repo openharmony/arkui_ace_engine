@@ -752,11 +752,11 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
     }
     result += std::string(",\"index\":") + "[";
     for (uint32_t i = 0; i < indexs.size(); i++) {
-        result += "\"" + std::to_string(indexs[i]);
+        result += std::to_string(indexs[i]);
         if (indexs.size() > 0 && indexs.size() != i + 1) {
-            result += "\",";
+            result += ",";
         } else {
-            result += "\"]";
+            result += "]";
         }
     }
     result += ",\"status\":" + std::to_string(status) + "}";

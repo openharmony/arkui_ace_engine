@@ -135,19 +135,21 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnVirtualKeyboardHeightChange(Layout
 void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrapper,
     RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, SizeF idealSize, bool matchChildren)
 {
-    // grid with columnsTemplate/rowsTemplate and maxCount
-    if (!matchChildren && !gridLayoutProperty->HasMaxCount()) {
-        return;
-    }
-    std::optional<CalcLength> mainAxisIdealSize;
-    const auto& selfLayoutConstraint = gridLayoutProperty->GetCalcLayoutConstraint();
-    if (selfLayoutConstraint && selfLayoutConstraint->selfIdealSize.has_value()) {
-        mainAxisIdealSize = axis_ == Axis::HORIZONTAL ? selfLayoutConstraint->selfIdealSize->Width()
-                                                      : selfLayoutConstraint->selfIdealSize->Height();
-    }
+    if (!matchChildren) {
+        // grid with columnsTemplate/rowsTemplate and maxCount
+        if (!gridLayoutProperty->HasMaxCount()) {
+            return;
+        }
+        std::optional<CalcLength> mainAxisIdealSize;
+        const auto& selfLayoutConstraint = gridLayoutProperty->GetCalcLayoutConstraint();
+        if (selfLayoutConstraint && selfLayoutConstraint->selfIdealSize.has_value()) {
+            mainAxisIdealSize = axis_ == Axis::HORIZONTAL ? selfLayoutConstraint->selfIdealSize->Width()
+                                                          : selfLayoutConstraint->selfIdealSize->Height();
+        }
 
-    if (mainAxisIdealSize.has_value()) {
-        return;
+        if (mainAxisIdealSize.has_value()) {
+            return;
+        }
     }
 
     auto lengthOfItemsInViewport = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
