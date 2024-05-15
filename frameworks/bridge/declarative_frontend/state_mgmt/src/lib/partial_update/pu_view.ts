@@ -918,7 +918,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    appStorageLink.setDecoratorInfo('@StorageLink');
+    appStorageLink?.setDecoratorInfo('@StorageLink');
     return appStorageLink;
   }
 
@@ -928,7 +928,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    appStorageProp.setDecoratorInfo('@StorageProp');
+    appStorageProp?.setDecoratorInfo('@StorageProp');
     return appStorageProp;
   }
 
@@ -939,7 +939,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    localStorageLink.setDecoratorInfo('@LocalStorageLink');
+    localStorageLink?.setDecoratorInfo('@LocalStorageLink');
     return localStorageLink;
   }
 
@@ -950,7 +950,7 @@ abstract class ViewPU extends PUV2ViewBase
         ? undefined
         : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
-    localStorageProp.setDecoratorInfo('@LocalStorageProp');
+    localStorageProp?.setDecoratorInfo('@LocalStorageProp');
     return localStorageProp;
   }
 
