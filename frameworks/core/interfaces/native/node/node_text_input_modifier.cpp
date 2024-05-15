@@ -1299,6 +1299,16 @@ ArkUI_CharPtr GetTextInputFontFeature(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
+ArkUINodeHandle GetTextInputController(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto controller = TextFieldModelNG::GetOrCreateController(frameNode);
+    CHECK_NULL_RETURN(controller, nullptr);
+    auto nodecontroller = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(controller));
+    return nodecontroller;
+}
+
 ArkUI_Float32 GetTextInputAdaptMinFontSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1748,7 +1758,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputCustomKeyboardOption, ResetTextInputCustomKeyboard, SetTextInputLineBreakStrategy,
         ResetTextInputLineBreakStrategy,  SetTextInputShowKeyBoardOnFocus, GetTextInputShowKeyBoardOnFocus,
         ResetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, GetTextInputNumberOfLines,
-        ResetTextInputNumberOfLines, SetTextInputMargin, ResetTextInputMargin, SetTextInputCaret };
+        ResetTextInputNumberOfLines, SetTextInputMargin, ResetTextInputMargin, SetTextInputCaret,
+        GetTextInputController };
     return &modifier;
 }
 
