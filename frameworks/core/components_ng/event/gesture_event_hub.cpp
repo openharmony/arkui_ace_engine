@@ -946,8 +946,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     pixelMapDuplicated->Scale(scale, scale, AceAntiAliasingOption::HIGH);
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
-    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale,
-        !NearEqual(scale, windowScale * defaultPixelMapScale));
+    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, IsPixelMapNeedScale());
     windowScale = NearZero(windowScale) ? 1.0f : windowScale;
     dragDropManager->SetPixelMapOffset(pixelMapOffset / windowScale);
     DragEventActuator::ResetNode(frameNode);
