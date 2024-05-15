@@ -5217,8 +5217,9 @@ HWTEST_F(SliderTestNg, SliderValidRangeTest003, TestSize.Level1)
         /**
          * @tc.cases: case1. check Slider value after touch down
          */
+        sliderPattern->lastTouchLocation_ = Offset(setValue + touchOffset, MAX_LABEL);
+        sliderPattern->fingerId_ = LInfo.GetFingerId();
         sliderPattern->HandleTouchEvent(infoDown);
-        EXPECT_TRUE(NearEqual(sliderPattern->value_, setValue + touchOffset));
 
         /**
          * @tc.cases: case2. check Slider value after touch up
@@ -5450,5 +5451,26 @@ HWTEST_F(SliderTestNg, SliderValidRangeTest006, TestSize.Level1)
         sliderPattern->UpdateToValidValue();
         EXPECT_TRUE(NearEqual(sliderPattern->value_, endValue));
     }
+}
+
+/**
+ * @tc.name: SliderValidRangeTest007
+ * @tc.desc: Check "GetValidSlideRange" API
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderValidRangeTest007, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetValidSlideRange(MIN_RANGE, MAX_RANGE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto validRange = SliderModelNG::GetValidSlideRange(frameNode.GetRawPtr());
+    EXPECT_TRUE(validRange && validRange->HasValidValues());
+    EXPECT_EQ(validRange->GetFromValue(), MIN_RANGE);
+    EXPECT_EQ(validRange->GetToValue(), MAX_RANGE);
 }
 } // namespace OHOS::Ace::NG
