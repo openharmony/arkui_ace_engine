@@ -447,4 +447,16 @@ void WindowPattern::SetWindowSceneConsumed(int32_t action)
         }
     }
 }
+
+void WindowPattern::AddOrRemoveChild(RefPtr<FrameNode> host, RefPtr<FrameNode> aimNode,
+    bool addFlag, std::string nodeType)
+{
+    if (addFlag) {
+        host->AddChild(aimNode);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene AddChild %{public}s", nodeType.c_str());
+    } else {
+        host->RemoveChild(aimNode);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene RemoveChild %{public}s", nodeType.c_str());
+    }
+}
 } // namespace OHOS::Ace::NG

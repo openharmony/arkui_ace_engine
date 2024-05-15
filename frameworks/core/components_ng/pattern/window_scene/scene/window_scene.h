@@ -47,9 +47,6 @@ protected:
     void OnDisconnect() override;
 
 private:
-    std::string startingNode = "startingNode";
-    std::string contentNode = "contentNode";
-    std::string snapshotNode = "snapshotNode";
     std::shared_ptr<Rosen::RSSurfaceNode> CreateLeashWindowNode();
     void BufferAvailableCallback();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
