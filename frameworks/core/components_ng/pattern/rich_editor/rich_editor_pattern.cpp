@@ -2814,32 +2814,7 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     if (status_ == Status::DRAGGING) {
         status_ = Status::NONE;
     }
-    std::unordered_set<int32_t> imgNodeIds;
-    std::for_each(dragSpanItems_.begin(), dragSpanItems_.end(), [&imgNodeIds](RefPtr<SpanItem>& item) {
-        CHECK_NULL_VOID(item);
-        item->EndDrag();
-        auto imageSpanItem = DynamicCast<ImageSpanItem>(item);
-        CHECK_NULL_VOID(imageSpanItem);
-        imgNodeIds.emplace(imageSpanItem->imageNodeId);
-    });
-    const auto& childrens = host->GetChildren();
-    for (const auto& child : childrens) {
-        auto findResult = imgNodeIds.find(child->GetId());
-        if (findResult == imgNodeIds.end()) {
-            continue;
-        }
-        auto imageNode = DynamicCast<ImageSpanNode>(child);
-        if (!imageNode) {
-            continue;
-        }
-        auto renderContext = imageNode->GetRenderContext();
-        if (!renderContext) {
-            continue;
-        }
-        renderContext->UpdateOpacity(1);
-        imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
-    dragSpanItems_.clear();
+    ResetDragSpanItems();
     if (recoverDragResultObjects_.empty()) {
         return;
     }
@@ -2853,6 +2828,44 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
         ResetSelection();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void RichEditorPattern::ResetDragSpanItems()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::unordered_set<int32_t> nodeIds;
+    std::for_each(dragSpanItems_.begin(), dragSpanItems_.end(), [&nodeIds](RefPtr<SpanItem>& item) {
+        CHECK_NULL_VOID(item);
+        item->EndDrag();
+        auto imageSpanItem = DynamicCast<ImageSpanItem>(item);
+        if (imageSpanItem) {
+            nodeIds.emplace(imageSpanItem->imageNodeId);
+            return;
+        }
+        auto placeholderSpanItem = DynamicCast<PlaceholderSpanItem>(item);
+        if (placeholderSpanItem) {
+            nodeIds.emplace(placeholderSpanItem->placeholderSpanNodeId);
+        }
+    });
+    const auto& childrens = host->GetChildren();
+    for (const auto& child : childrens) {
+        auto findResult = nodeIds.find(child->GetId());
+        if (findResult == nodeIds.end()) {
+            continue;
+        }
+        auto node = DynamicCast<FrameNode>(child);
+        if (!node) {
+            continue;
+        }
+        auto renderContext = node->GetRenderContext();
+        if (!renderContext) {
+            continue;
+        }
+        renderContext->UpdateOpacity(1);
+        node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    dragSpanItems_.clear();
 }
 
 bool RichEditorPattern::SelectOverlayIsOn()
