@@ -55,7 +55,6 @@ private:
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_;
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
-    void AddOrRemoveChild(RefPtr<FrameNode> host, RefPtr<FrameNode> aimNode, bool addFlag, std::string nodeType);
 };
 } // namespace OHOS::Ace::NG
 
