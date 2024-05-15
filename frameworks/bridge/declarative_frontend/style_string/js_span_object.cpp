@@ -1204,11 +1204,13 @@ void JSParagraphStyleSpan::ParseJsMaxLines(const JSRef<JSObject>& obj, SpanParag
         return;
     }
     JSRef<JSVal> args = obj->GetProperty("maxLines");
-    int32_t value = Infinity<uint32_t>();
+    int32_t value = Infinity<int32_t>();
     if (args->ToString() != "Infinity") {
         JSContainerBase::ParseJsInt32(args, value);
     }
-    paragraphStyle.maxLines = value;
+    if (!args->IsUndefined()) {
+        paragraphStyle.maxLines = value;
+    }
 }
 
 void JSParagraphStyleSpan::ParseJsTextOverflow(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
