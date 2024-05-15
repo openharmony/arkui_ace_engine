@@ -133,10 +133,12 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     auto contentRect = pattern->GetContentRect();
     auto caretRect = pattern->GetCaretRect();
     float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
-    float y = std::clamp(localOffset.GetY(), contentRect.Top(), contentRect.Bottom() - caretRect.Height());
-    localOffset = OffsetF(x, y);
-
-    auto magnifierLocalOffset = localOffset;
+    float y = localOffset.GetY();
+    if (!isFirst) {
+        y = y + handleRect.Height() - caretRect.Height();
+    }
+    y = std::clamp(y, contentRect.Top(), contentRect.Bottom() - caretRect.Height());
+    auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
 
