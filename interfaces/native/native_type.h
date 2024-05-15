@@ -2496,22 +2496,22 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
 void OH_ArkUI_SwiperIndicator_Dispose(ArkUI_SwiperIndicator* indicator);
 
 /**
- * @brief Sets the distance between the navigation point and the left of the swiper.
+ * @brief Sets the distance between the navigation point and the start of the swiper.
  *
  * @param indicator Indicates the pointer to the indicator.
- * @param value Indicates the distance between the navigation point and the left of the swiper.
+ * @param value Indicates the distance between the navigation point and the start of the swiper.
  * @since 12
 */
-void OH_ArkUI_SwiperIndicator_SetLeftPosition(ArkUI_SwiperIndicator* indicator, float value);
+void OH_ArkUI_SwiperIndicator_SetStartPosition(ArkUI_SwiperIndicator* indicator, float value);
 
 /**
- * @brief Obtains the distance between the navigation point and the left of the swiper.
+ * @brief Obtains the distance between the navigation point and the start of the swiper.
  *
  * @param indicator Indicates the pointer to the indicator.
- * @return Returns the distance between the navigation point and the left of the swiper.
+ * @return Returns the distance between the navigation point and the start of the swiper.
  * @since 12
 */
-float OH_ArkUI_SwiperIndicator_GetLeftPosition(ArkUI_SwiperIndicator* indicator);
+float OH_ArkUI_SwiperIndicator_GetStartPosition(ArkUI_SwiperIndicator* indicator);
 
 /**
  * @brief Sets the distance between the navigation point and the top of the swiper.
@@ -2532,22 +2532,22 @@ void OH_ArkUI_SwiperIndicator_SetTopPosition(ArkUI_SwiperIndicator* indicator, f
 float OH_ArkUI_SwiperIndicator_GetTopPosition(ArkUI_SwiperIndicator* indicator);
 
 /**
- * @brief Sets the distance between the navigation point and the right of the swiper.
+ * @brief Sets the distance between the navigation point and the end of the swiper.
  *
  * @param indicator Indicates the pointer to the indicator.
- * @param value Indicates the distance between the navigation point and the right of the swiper.
+ * @param value Indicates the distance between the navigation point and the end of the swiper.
  * @since 12
 */
-void OH_ArkUI_SwiperIndicator_SetRightPosition(ArkUI_SwiperIndicator* indicator, float value);
+void OH_ArkUI_SwiperIndicator_SetEndPosition(ArkUI_SwiperIndicator* indicator, float value);
 
 /**
- * @brief Obtains the distance between the navigation point and the right of the swiper.
+ * @brief Obtains the distance between the navigation point and the end of the swiper.
  *
  * @param indicator Indicates the pointer to the indicator.
- * @return Returns the distance between the navigation point and the right of the swiper.
+ * @return Returns the distance between the navigation point and the end of the swiper.
  * @since 12
 */
-float OH_ArkUI_SwiperIndicator_GetRightPosition(ArkUI_SwiperIndicator* indicator);
+float OH_ArkUI_SwiperIndicator_GetEndPosition(ArkUI_SwiperIndicator* indicator);
 
 /**
  * @brief Sets the distance between the navigation point and the bottom of the swiper.
