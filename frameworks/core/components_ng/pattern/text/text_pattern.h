@@ -593,17 +593,28 @@ public:
     {
         return childNodes_;
     }
-
-    void SetTextContentParagraph(void* paragraph)
+    // add for capi NODE_TEXT_CONTENT_WITH_STYLED_STRING
+    void SetExternalParagraph(void* paragraph)
     {
-        textParagraph_ = paragraph;
+        externalParagraph_ = paragraph;
     }
 
-    const std::optional<void*>& GetTextContentParagraph()
+    const std::optional<void*>& GetExternalParagraph()
     {
-        return textParagraph_;
+        return externalParagraph_;
     }
 
+    void SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans);
+
+    void SetExternalParagraphStyle(std::optional<ParagraphStyle> paragraphStyle)
+    {
+        externalParagraphStyle_ = paragraphStyle;
+    }
+
+    std::optional<ParagraphStyle> GetExternalParagraphStyle()
+    {
+        return externalParagraphStyle_;
+    }
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -795,7 +806,8 @@ private:
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
     std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder_;
     bool isDetachFromMainTree_ = false;
-    std::optional<void*> textParagraph_;
+    std::optional<void*> externalParagraph_;
+    std::optional<ParagraphStyle> externalParagraphStyle_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG
