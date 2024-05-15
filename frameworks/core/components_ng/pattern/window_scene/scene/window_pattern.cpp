@@ -448,14 +448,14 @@ void WindowPattern::SetWindowSceneConsumed(int32_t action)
     }
 }
 
-void WindowPattern::AddOrRemoveChild(RefPtr<FrameNode> host, RefPtr<FrameNode> aimNode,
-    bool addFlag, std::string nodeType)
+void WindowPattern::AddOrRemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& aimChild,
+    bool addFlag, const std::string& nodeType, int32_t index)
 {
     if (addFlag) {
-        host->AddChild(aimNode);
+        host->AddChild(aimChild, index);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene AddChild %{public}s", nodeType.c_str());
     } else {
-        host->RemoveChild(aimNode);
+        host->RemoveChild(aimChild);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene RemoveChild %{public}s", nodeType.c_str());
     }
 }
