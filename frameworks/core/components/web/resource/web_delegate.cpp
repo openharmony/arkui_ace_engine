@@ -2723,8 +2723,6 @@ void WebDelegate::RegisterAvoidAreaChangeListener()
         cutoutSafeArea_ = container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT);
         navigationIndicatorSafeArea_ =
             container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-        InitCacheCutoutEdge();
-
         avoidAreaChangedListener_ = new WebAvoidAreaChangedListener(AceType::WeakClaim(this));
         OHOS::Rosen::WMError regCode = container->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         TAG_LOGI(AceLogTag::ACE_WEB, "RegisterAvoidAreaChangeListener result:%{public}d", (int) regCode);
@@ -6583,18 +6581,6 @@ void WebDelegate::OnHideAutofillPopup()
     webPattern->OnHideAutofillPopup();
 }
 
-void WebDelegate::InitCacheCutoutEdge()
-{
-    if (cacheCutoutEdge_ > 0) {
-        return;
-    }
-    if (cutoutSafeArea_.top_.start > 0) {
-        cacheCutoutEdge_ = cutoutSafeArea_.top_.start;
-    } else if (cutoutSafeArea_.left_.start > 0) {
-        cacheCutoutEdge_ = cutoutSafeArea_.left_.start;
-    }
-}
-
 void WebDelegate::OnAreaChange(const OHOS::Ace::Rect& area)
 {
     if (currentArea_ == area) {
@@ -6631,7 +6617,6 @@ void WebDelegate::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHO
     } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
         changed = (cutoutSafeArea_ != safeArea);
         cutoutSafeArea_ = safeArea;
-        InitCacheCutoutEdge();
     } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
         changed = (navigationIndicatorSafeArea_ != safeArea);
         navigationIndicatorSafeArea_ = safeArea;
@@ -6651,7 +6636,7 @@ void WebDelegate::OnSafeInsetsChange()
 
     int left = 0;
     if (resultSafeArea.left_.IsValid() && resultSafeArea.left_.end > currentArea_.Left()) {
-        left = resultSafeArea.left_.end;
+        left = resultSafeArea.left_.start + resultSafeArea.left_.end;
     }
     int top = 0;
     if (resultSafeArea.top_.IsValid() && resultSafeArea.top_.end > currentArea_.Top()) {
@@ -6659,7 +6644,9 @@ void WebDelegate::OnSafeInsetsChange()
     }
     int right = 0;
     if (resultSafeArea.right_.IsValid() && resultSafeArea.right_.start < currentArea_.Right()) {
-        right = resultSafeArea.right_.end - resultSafeArea.right_.start + cacheCutoutEdge_;
+        constexpr static int32_t CUTOUT_EDGES_BALANCE_FACTOR = 2;
+        right = resultSafeArea.right_.end - resultSafeArea.right_.start +
+                (currentArea_.Right() - resultSafeArea.right_.end) * CUTOUT_EDGES_BALANCE_FACTOR;
     }
     int bottom = 0;
     if (resultSafeArea.bottom_.IsValid() && resultSafeArea.bottom_.start < currentArea_.Bottom()) {
