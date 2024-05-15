@@ -58,6 +58,9 @@ bool SvgFeGaussianBlur::ParseAndSetSpecializedAttr(const std::string& name, cons
             if (!StringUtils::ParseStringToArray(val, vectorRes)) {
                 return;
             }
+            if (vectorRes.empty() || vectorRes.size() > 2) {
+                return;
+            }
             attr.stdDeviationX = vectorRes[0];
             attr.stdDeviationY = vectorRes.size() > 1 ? vectorRes[1] : vectorRes[0];
         } },
