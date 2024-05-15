@@ -195,9 +195,9 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
     ArkUI_SwiperIndicator* indicator = new ArkUI_SwiperIndicator;
     indicator->type = indicatorType;
     indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
-    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
-    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
-    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimRight = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimTop = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimBottom = ArkUI_OptionalFloat { 0, 0.0f };
     if (indicatorType == ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
         indicator->itemWidth = ArkUI_OptionalFloat { 0, 0.0f };
         indicator->itemHeight = ArkUI_OptionalFloat { 0, 0.0f };
