@@ -4054,15 +4054,15 @@ typedef enum {
     NODE_LIST_SCROLL_TO_INDEX,
 
     /**
-    * @brief 设置List交叉轴方向宽度大于ListItem交叉轴宽度 * lanes时，
-    * ListItem在List交叉轴方向的布局方式，支持属性设置，属性重置和属性获取接口。
-    *
-    * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * @brief 设置List交叉轴方向宽度大于ListItem交叉轴宽度 * lanes时，
+     * ListItem在List交叉轴方向的布局方式，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
      * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment} \n
      * \n
      * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
      * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlignment}  \n
-    */
+     */
     NODE_LIST_ALIGN_LIST_ITEM,
 
     /**
@@ -4324,6 +4324,19 @@ typedef enum {
     * effect, 0 indicates no active effect, default value is 0。\n
     */
     NODE_SWIPER_SWIPE_TO_INDEX,
+
+    /**
+     * @brief: Set the delineation component of the ListItem, supporting property settings, property resets, and
+     * property acquisition interfaces.
+     *
+     * Attribute setting method parameter {@link ArkUI_AttributeItem} format: \n
+     * .object: Construct using the {@link ArkUI_ListitemSwipeActionOption} object. \n
+     * \n
+     * The return value of the attribute acquisition method {@link ArkUI_AttributeItem} format: \n
+     * .object: Construct using the {@link ArkUI_ListitemSwipeActionOption} object. \n
+     *
+     */
+    NODE_LIST_ITEM_SWIPE_ACTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST_ITEM,
 
     /**
      * @brief Defines the header of the list item group.
