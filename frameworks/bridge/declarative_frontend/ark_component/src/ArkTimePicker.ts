@@ -19,7 +19,8 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
     super(nativePtr, classType);
   }
   loop(value: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TimepickerLoopModifier.identity, TimepickerLoopModifier, value);
+    return this;
   }
   useMilitaryTime(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TimepickerUseMilitaryTimeModifier.identity,
@@ -151,6 +152,20 @@ class TimepickerUseMilitaryTimeModifier extends ModifierWithKey<boolean> {
       getUINativeModule().timepicker.resetTimepickerUseMilitaryTime(node);
     } else {
       getUINativeModule().timepicker.setTimepickerUseMilitaryTime(node, this.value);
+    }
+  }
+}
+
+class TimepickerLoopModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timepickerLoop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerLoop(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerLoop(node, this.value);
     }
   }
 }

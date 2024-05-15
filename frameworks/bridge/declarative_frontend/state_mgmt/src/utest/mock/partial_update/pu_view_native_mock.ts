@@ -78,4 +78,8 @@ abstract class NativeViewPartialUpdate {
   resetRecycleCustomNode(): void {
     console.warn("NativeViewPU(Mock).resetRecycleCustomNode() -  unimplemented!");
   }
+
+  sendStateInfo(stateInfo: string): void {
+    console.warn("NativeViewPU(Mock).sendStateInfo() -  unimplemented!");
+  }
 }

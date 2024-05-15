@@ -248,8 +248,7 @@ void SystemWindowScene::RegisterFocusCallback()
             CHECK_NULL_VOID(self);
             CHECK_NULL_VOID(self->GetSession());
             pipeline->RestoreDefault(self->GetSession()->GetPersistentId());
-        },
-            "ArkUIWindowUnfocus", TaskExecutor::TaskType::UI);
+        }, "ArkUIWindowUnfocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }

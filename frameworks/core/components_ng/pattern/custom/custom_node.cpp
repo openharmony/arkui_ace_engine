@@ -162,10 +162,13 @@ void CustomNode::MarkNeedSyncRenderTree(bool needRebuild)
     }
 }
 
-RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
+RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
+    if (!isCache) {
+        SetJSViewActive(true);
+    }
     Render();
-    return UINode::GetFrameChildByIndex(index, needBuild, isCache);
+    return UINode::GetFrameChildByIndex(index, needBuild, isCache, addToRenderTree);
 }
 
 void CustomNode::DoSetActiveChildRange(int32_t start, int32_t end)

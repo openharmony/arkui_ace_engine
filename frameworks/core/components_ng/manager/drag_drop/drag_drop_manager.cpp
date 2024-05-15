@@ -50,7 +50,7 @@ constexpr float TOUCH_DRAG_PPIXELMAP_SCALE = 1.05f;
 constexpr int32_t MAX_RETRY_TIMES = 3;
 constexpr int32_t MAX_RETRY_DURATION = 800;
 constexpr float MOVE_DISTANCE_LIMIT = 20.0f;
-constexpr int64_t MOVE_TIME_LIMIT = 6L;
+constexpr uint64_t MOVE_TIME_LIMIT = 6L;
 constexpr int64_t DRAG_MOVE_TIME_THRESHOLD = 16 * 1000 * 1000;
 constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 } // namespace
@@ -134,7 +134,7 @@ RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& cust
     rootNode->SetHostRootId(pipeline->GetInstanceId());
     rootNode->SetHostPageId(-1);
     rootNode->AddChild(customNode);
-    rootNode->AttachToMainTree();
+    rootNode->AttachToMainTree(false, AceType::RawPtr(pipeline));
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     pipeline->FlushUITasks();
     return rootNode;
@@ -567,7 +567,7 @@ bool DragDropManager::isDistanceLimited(const Point& point)
 
 bool DragDropManager::isTimeLimited(const PointerEvent& pointerEvent, const Point& point)
 {
-    int64_t currentTimeStamp = static_cast<uint64_t>(
+    uint64_t currentTimeStamp = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(pointerEvent.time.time_since_epoch()).count());
     if (currentTimeStamp > preTimeStamp_ && currentTimeStamp - preTimeStamp_ < MOVE_TIME_LIMIT) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "onDragMove, time is less than limit, point X: %{public}f, Y: %{public}f",
@@ -1593,7 +1593,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
         [renderContext, info = info_, newOffset, overlayManager, gatherNodeCenter]() {
             renderContext->UpdateTransformScale({ info.scale, info.scale });
             renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
-            UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, info.scale);
+            UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, info.scale, info.width, info.height);
             UpdateTextNodePosition(info.textNode, newOffset);
         },
         option.GetOnFinishEvent());
@@ -1673,7 +1673,7 @@ void DragDropManager::SetDragBehavior(
 }
 
 void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
-    OffsetF gatherNodeCenter, float scale)
+    OffsetF gatherNodeCenter, float scale, float previewWidth, float previewHeight)
 {
     CHECK_NULL_VOID(overlayManager);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
@@ -1681,7 +1681,8 @@ void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlay
     borderRadius.SetRadius(PIXELMAP_BORDER_RADIUS);
     borderRadius.multiValued = false;
     int i = 0;
-    int cnt = gatherNodeChildrenInfo.size();
+    int cnt = static_cast<int>(gatherNodeChildrenInfo.size());
+    scale = scale <= 0.0f ? 1.0f : scale;
     for (const auto& child : gatherNodeChildrenInfo) {
         auto imageNode = child.imageNode.Upgrade();
         CHECK_NULL_VOID(imageNode);
@@ -1690,9 +1691,12 @@ void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlay
         imageContext->UpdatePosition(OffsetT<Dimension>(
             Dimension(gatherNodeCenter.GetX() - child.halfWidth),
             Dimension(gatherNodeCenter.GetY() - child.halfHeight)));
-        if (scale > 0) {
-            imageContext->UpdateTransformScale({ scale, scale });
+        auto updateScale = scale;
+        if (((child.width > previewWidth) || (child.height > previewHeight)) &&
+            !NearZero(child.width) && !NearZero(child.height)) {
+            updateScale *= std::min(previewWidth / child.width, previewHeight / child.height);
         }
+        imageContext->UpdateTransformScale({ updateScale, updateScale });
         imageContext->UpdateBorderRadius(borderRadius);
         auto angle = 0.0f;
         if (i == cnt - FIRST_GATHER_PIXEL_MAP) {
@@ -1781,7 +1785,7 @@ void DragDropManager::GetGatherPixelMap(const RefPtr<PixelMap>& pixelMap)
     gatherPixelMaps_.push_back(pixelMap);
 }
 
-void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale)
+void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale, float previewWidth, float previewHeight)
 {
     for (auto gatherPixelMap : gatherPixelMaps_) {
         RefPtr<PixelMap> pixelMapDuplicated = gatherPixelMap;
@@ -1792,7 +1796,13 @@ void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale)
             pixelMapDuplicated = gatherPixelMap;
         }
 #endif
-        pixelMapDuplicated->Scale(scale, scale, AceAntiAliasingOption::HIGH);
+        auto width = pixelMapDuplicated->GetWidth() * scale;
+        auto height = pixelMapDuplicated->GetHeight() * scale;
+        auto updateScale = scale;
+        if (((width > previewWidth) || (height > previewHeight)) && !NearZero(width) && !NearZero(height)) {
+            updateScale = std::min(previewWidth / width, previewHeight / height);
+        }
+        pixelMapDuplicated->Scale(updateScale, updateScale, AceAntiAliasingOption::HIGH);
         dragData.shadowInfos.push_back({pixelMapDuplicated, 0.0f, 0.0f});
     }
     gatherPixelMaps_.clear();

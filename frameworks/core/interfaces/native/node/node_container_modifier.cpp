@@ -29,10 +29,19 @@ void Rebuild(int32_t nodeId)
     pattern->RemakeNode();
 }
 
+void Clean(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->CleanChild();
+}
+
 namespace NodeModifier {
 const ArkUINodeContainerModifier* GetNodeContainerModifier()
 {
-    static const ArkUINodeContainerModifier modifier = { Rebuild };
+    static const ArkUINodeContainerModifier modifier = { Rebuild, Clean };
     return &modifier;
 }
 }

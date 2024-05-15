@@ -35,7 +35,18 @@ public:
     static RefPtr<FrameNode> CreateKeyboard(int32_t targetId, std::function<void()> builder)
     {
         CHECK_NULL_RETURN(builder, nullptr);
+        // build keyboard node
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        builder();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        auto keyboardNode = AceType::DynamicCast<UINode>(customNode);
 
+        return CreateKeyboardWithNode(targetId, keyboardNode);
+    };
+
+    static RefPtr<FrameNode> CreateKeyboardWithNode(int32_t targetId, const RefPtr<UINode>& keyboardNode)
+    {
+        CHECK_NULL_RETURN(keyboardNode, nullptr);
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::KEYBOARD_ETS_TAG, targetId);
         // create wrapper node
@@ -44,13 +55,6 @@ public:
         auto wrapperLayoutProperty = wrapperNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_RETURN(wrapperLayoutProperty, nullptr);
         wrapperLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-
-        // build keyboard node
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        builder();
-        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        auto keyboardNode = AceType::DynamicCast<UINode>(customNode);
-        CHECK_NULL_RETURN(keyboardNode, nullptr);
 
         wrapperNode->AddChild(keyboardNode);
         wrapperNode->MarkModifyDone();

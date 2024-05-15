@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 constexpr Dimension TEXT_DRAG_RADIUS = 12.0_vp;
@@ -81,7 +82,7 @@ public:
 
     static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
 
-    void Initialize(const ParagraphT& paragraph, const TextDragData& data)
+    void Initialize(const RefPtr<Paragraph>& paragraph, const TextDragData& data)
     {
         paragraph_ = paragraph;
         textDragData_ = data;
@@ -95,7 +96,7 @@ public:
         return MakeRefPtr<TextDragPaintMethod>(WeakClaim(this), overlayModifier_);
     }
 
-    const ParagraphT& GetParagraph() const
+    const WeakPtr<Paragraph>& GetParagraph() const
     {
         return paragraph_;
     }
@@ -159,7 +160,7 @@ public:
         return selBackGroundPath_;
     }
 
-    std::shared_ptr<RSPath> GenerateBackgroundPath(float offset);
+    std::shared_ptr<RSPath> GenerateBackgroundPath(float offset, float radiusRatio = 1.0f);
 
     std::shared_ptr<RSPath> GenerateSelBackgroundPath(float offset);
 
@@ -201,7 +202,7 @@ protected:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     std::shared_ptr<RSPath> GenerateClipPath();
     void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset, bool needAdjust = true);
-    void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
+    void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path, float radiusRatio);
     void CalculateLine(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
 
     void SetLastLineHeight(float lineHeight)
@@ -213,10 +214,11 @@ protected:
     RefPtr<TextDragOverlayModifier> overlayModifier_;
 
     TextDragData textDragData_;
+
 private:
     float lastLineHeight_ = 0.0f;
     OffsetF contentOffset_;
-    ParagraphT paragraph_;
+    WeakPtr<Paragraph> paragraph_;
     std::shared_ptr<RSPath> clipPath_;
     std::shared_ptr<RSPath> backGroundPath_;
     std::shared_ptr<RSPath> selBackGroundPath_;

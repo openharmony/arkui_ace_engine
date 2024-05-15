@@ -18,8 +18,8 @@
 
 #include <cstdint>
 #include <optional>
-#include <string>
 #include <set>
+#include <string>
 
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -31,6 +31,7 @@
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
@@ -39,14 +40,15 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_select_overlay.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -85,8 +87,9 @@ enum class RecordType {
     DRAG = 5
 };
 
-class RichEditorPattern : public TextPattern, public ScrollablePattern, public TextInputClient, public Magnifier {
-    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, Magnifier);
+class RichEditorPattern
+    : public TextPattern, public ScrollablePattern, public TextInputClient, public Magnifier, public SpanWatcher {
+    DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, Magnifier, SpanWatcher);
 
 public:
     RichEditorPattern();
@@ -101,9 +104,78 @@ public:
         int32_t deleteCaretPostion;
     };
 
+    struct PreviewTextRecord {
+        int32_t startOffset = INVALID_VALUE;
+        int32_t endOffset = INVALID_VALUE;
+        int32_t spanIndex = INVALID_VALUE;
+        int32_t currentClickedPosition = INVALID_VALUE;
+        bool isPreviewTextInputting = false;
+        RefPtr<SpanItem> previewTextSpan;
+
+        std::string ToString() const
+        {
+            auto jsonValue = JsonUtil::Create(true);
+            if (previewTextSpan) {
+                JSON_STRING_PUT_STRING(jsonValue, previewTextSpan->content);
+            }
+            JSON_STRING_PUT_BOOL(jsonValue, isPreviewTextInputting);
+            JSON_STRING_PUT_INT(jsonValue, startOffset);
+            JSON_STRING_PUT_INT(jsonValue, endOffset);
+            JSON_STRING_PUT_INT(jsonValue, spanIndex);
+            JSON_STRING_PUT_INT(jsonValue, currentClickedPosition);
+
+            return jsonValue->ToString();
+        }
+
+        void Reset()
+        {
+            startOffset = INVALID_VALUE;
+            endOffset = INVALID_VALUE;
+            spanIndex = INVALID_VALUE;
+            currentClickedPosition = INVALID_VALUE;
+            isPreviewTextInputting = false;
+            previewTextSpan = nullptr;
+        }
+
+        bool IsValid() const
+        {
+            return previewTextSpan && startOffset >= 0 && endOffset >= startOffset;
+        }
+    };
+
+    int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
+
+    bool InitPreviewText(const std::string& previewTextValue, const PreviewRange range);
+
+    bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange range);
+
+    void FinishTextPreview() override;
+
+    void ReceivePreviewTextStyle(const std::string& style) override
+    {
+        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PreviewTextStyle, style);
+    }
+
+    const Color& GetPreviewTextDecorationColor() const;
+
+    bool IsPreviewTextInputting()
+    {
+        return previewTextRecord_.IsValid();
+    }
+
+    std::vector<RectF> GetPreviewTextRects();
+
+    float GetPreviewTextUnderlineWidth() const;
+
+    PreviewTextStyle GetPreviewTextStyle() const;
+
+    void InsertValueInPreview(const std::string& insertValue);
+
+    bool BetweenPreviewTextPosition(const Offset& globalOffset);
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
     TextInputAction GetDefaultTextInputAction() const;
-    
+
     // RichEditor needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
@@ -148,6 +220,16 @@ public:
         richEditorController_ = controller;
     }
 
+    const RefPtr<RichEditorStyledStringController>& GetRichEditorStyledStringController()
+    {
+        return richEditorStyledStringController_;
+    }
+
+    void SetRichEditorStyledStringController(const RefPtr<RichEditorStyledStringController>& controller)
+    {
+        richEditorStyledStringController_ = controller;
+    }
+
     long long GetTimestamp() const
     {
         return timestamp_;
@@ -162,6 +244,36 @@ public:
         }
     }
 
+    void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
+    {
+        caretChangeListener_ = listener;
+    }
+
+    void SetStyledString(const RefPtr<SpanString>& value);
+
+    RefPtr<MutableSpanString> GetStyledString() const
+    {
+        return styledString_;
+    }
+
+    void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) override;
+    void ProcessStyledString();
+    void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
+    void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
+    void InsertValueInStyledString(const std::string& insertValue);
+    RefPtr<SpanString> CreateStyledStringByTextStyle(
+        const std::string& insertValue, const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle);
+    RefPtr<FontSpan> CreateFontSpanByTextStyle(
+        const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle, int32_t length);
+    RefPtr<DecorationSpan> CreateDecorationSpanByTextStyle(
+        const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle, int32_t length);
+    void DeleteBackwardInStyledString(int32_t length);
+    void DeleteForwardInStyledString(int32_t length, bool isIME = true);
+
+    bool BeforeStyledStringChange(int32_t start, int32_t length, const std::string& string);
+    bool BeforeStyledStringChange(int32_t start, int32_t length, const RefPtr<SpanString>& styledString);
+    void AfterStyledStringChange(int32_t start, int32_t length, const std::string& string);
+
     void ResetBeforePaste();
     void ResetAfterPaste();
 
@@ -169,7 +281,7 @@ public:
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void MoveCaretOnLayoutSwap();
+    void MoveCaretOnLayoutSwap(bool isReduceSize);
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
@@ -195,11 +307,9 @@ public:
     void SetDefaultColor(RefPtr<SpanNode>& spanNode);
     void HandleOnDelete(bool backward) override;
     std::pair<bool, bool> IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length);
-    int32_t CalculateDeleteLength(int32_t length, bool isBackward, bool& isSpanSelected);
+    int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 0) override;
-    void DeleteBackward(int32_t length = 0, bool isExternalkeyboard = false);
-    std::wstring DeleteBackwardOperation(int32_t length = 0, bool isExternalkeyboard = false);
-    std::wstring GetBackwardDeleteText(int32_t length);
+    std::wstring DeleteBackwardOperation(int32_t length = 0);
     void DeleteForward(int32_t length) override;
     std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
@@ -266,14 +376,21 @@ public:
     void FireOnDeleteComplete(const RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
-    bool SymbolSpanUpdateStyle(
-        RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
+    void SetSelectSpanStyle(int32_t start, int32_t end, RefPtr<SpanNode>& target, KeyCode code, bool isStart);
+    void GetSelectSpansPositionInfo(
+        int32_t start, int32_t end, SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
+    void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
+    bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
+    struct UpdateSpanStyle GetUpdateSpanStyle();
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style);
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
-    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
+    int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
+        bool updateCaret = true);
+    void DisableDrag(RefPtr<ImageSpanNode> imageNode);
+    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
@@ -287,7 +404,7 @@ public:
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
     void RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange);
     bool IsShowHandle();
-    void SetHandles();
+    void UpdateSelectionInfo(int32_t start, int32_t end);
     bool IsEditing();
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
@@ -298,6 +415,7 @@ public:
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
+    void ShowHandles(const bool isNeedShowHandles) override;
     void ShowHandles() override;
     void HandleMenuCallbackOnSelectAll();
     void HandleOnSelectAll() override;
@@ -308,8 +426,11 @@ public:
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     OffsetF CalculateEmptyValueCaretRect();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
+    void RemoveEmptySpanItems();
     RefPtr<GestureEventHub> GetGestureEventHub();
     float GetSelectedMaxWidth();
+    void AfterAddImage(RichEditorChangeValue& changeValue);
+    bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
 
     bool IsUsingMouse() const
     {
@@ -342,7 +463,7 @@ public:
         return caretSpanIndex_;
     }
 
-    const std::list<ParagraphManager::ParagraphInfo>& GetParagraphs() const
+    std::list<ParagraphManager::ParagraphInfo> GetParagraphs() const override
     {
         return paragraphs_.GetParagraphs();
     }
@@ -507,12 +628,7 @@ public:
         showSelect_ = isShowSelect;
     }
 
-    const std::list<RefPtr<UINode>>& GetAllChildren() const override
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, TextPattern::GetAllChildren());
-        return host->GetChildren();
-    }
+    const std::list<RefPtr<UINode>>& GetAllChildren() const override;
 
     void OnVirtualKeyboardAreaChanged() override;
 
@@ -556,7 +672,13 @@ public:
 
     OffsetF GetCaretOffset() const override
     {
-        return GetCaretRect().GetOffset();
+        // only used in magnifier, return position of the handle that is currently moving
+        return movingHandleOffset_;
+    }
+
+    void SetMovingHandleOffset(const OffsetF& handleOffset)
+    {
+        movingHandleOffset_ = handleOffset;
     }
 
     OffsetF GetParentGlobalOffset() const override
@@ -575,6 +697,7 @@ public:
     }
 
     OffsetF GetTextPaintOffset() const override;
+    OffsetF GetPaintRectGlobalOffset() const;
 
     float GetCrossOverHeight() const;
 
@@ -599,6 +722,7 @@ protected:
 private:
     friend class RichEditorSelectOverlay;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
+    Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
     void HandleOnCut() override;
@@ -710,9 +834,6 @@ private:
     int32_t DeleteValueSetTextSpan(const RefPtr<SpanItem>& spanItem, int32_t currentPosition, int32_t length,
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
-    bool DeleteImageBySoftKeyboard(const RichEditorDeleteValue& info);
-    void DeleteTextSpanInfo(const RefPtr<FrameNode>& host, std::set<int32_t, std::greater<int32_t>>& SpanNodes,
-        const RichEditorAbstractSpanResult& spanResult);
     bool OnKeyEvent(const KeyEvent& keyEvent);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
@@ -724,13 +845,16 @@ private:
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
 
     void GetChangeSpanStyle(RichEditorChangeValue& changeValue, std::optional<TextStyle>& spanTextStyle,
-        const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
+        std::optional<struct UpdateParagraphStyle>& spanParaStyle, const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
     void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::string& insertValue,
-        int32_t textIndex, std::optional<TextStyle> style, bool isCreate = false, bool fixDel = true);
+        int32_t textIndex, std::optional<TextStyle> textStyle, std::optional<struct UpdateParagraphStyle> paraStyle,
+        bool isCreate = false, bool fixDel = true);
     void GetReplacedSpanFission(RichEditorChangeValue& changeValue, int32_t& innerPosition, std::string& content,
-        int32_t startSpanIndex, int32_t offsetInSpan, std::optional<TextStyle> style);
+        int32_t startSpanIndex, int32_t offsetInSpan, std::optional<TextStyle> textStyle,
+        std::optional<struct UpdateParagraphStyle> paraStyle);
     void CreateSpanResult(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t spanIndex,
-        int32_t offsetInSpan, int32_t endInSpan, std::string content, std::optional<TextStyle> style);
+        int32_t offsetInSpan, int32_t endInSpan, std::string content, std::optional<TextStyle> textStyle,
+        std::optional<struct UpdateParagraphStyle> paraStyle);
     void SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle);
     void CalcInsertValueObj(TextInsertValueInfo& info, int textIndex, bool isCreate = false);
     void GetDeletedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t length,
@@ -763,6 +887,8 @@ private:
     float MoveTextRect(float offset);
     void MoveCaretToContentRect(bool downStreamFirst = true);
     void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
+    void MoveCaretToContentRect(float offset, int32_t source);
+    bool IsCaretInContentArea();
     bool IsTextArea() const override
     {
         return true;
@@ -780,6 +906,7 @@ private:
     // ai analysis fun
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
+    bool IsIndexAfterOrInSymbolOrEmoji(int32_t index);
     void AdjustCursorPosition(int32_t& pos);
     void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
@@ -849,6 +976,8 @@ private:
     struct UpdateSpanStyle updateSpanStyle_;
     CancelableCallback<void()> caretTwinklingTask_;
     RefPtr<RichEditorController> richEditorController_;
+    RefPtr<RichEditorStyledStringController> richEditorStyledStringController_;
+    RefPtr<MutableSpanString> styledString_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
     RectF frameRect_;
     std::optional<struct UpdateSpanStyle> typingStyle_;
@@ -857,6 +986,7 @@ private:
     std::optional<Color> caretColor_;
     std::optional<Color> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
+    std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
     Offset selectionMenuOffset_;
     // add for scroll
@@ -892,6 +1022,10 @@ private:
     bool keyboardAvoidance_ = false;
     int32_t richEditorInstanceId_ = -1;
     bool contentChange_ = false;
+    PreviewTextRecord previewTextRecord_;
+    float lastFontScale_ = -1;
+    bool isCaretInContentArea_ = false;
+    OffsetF movingHandleOffset_;
 };
 } // namespace OHOS::Ace::NG
 

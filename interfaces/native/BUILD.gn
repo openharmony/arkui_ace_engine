@@ -51,6 +51,7 @@ ohos_shared_library("ace_ndk") {
     "native_interface_xcomponent.cpp",
     "node/animate_impl.cpp",
     "node/dialog_model.cpp",
+    "node/drawable_descriptor.cpp",
     "node/event_converter.cpp",
     "node/gesture_impl.cpp",
     "node/native_impl.cpp",
@@ -60,7 +61,9 @@ ohos_shared_library("ace_ndk") {
     "node/node_animate.cpp",
     "node/node_extened.cpp",
     "node/node_model.cpp",
+    "node/node_node_relative_container.cpp",
     "node/style_modifier.cpp",
+    "node/waterflow_section_option.cpp",
   ]
 
   deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
@@ -73,9 +76,14 @@ ohos_shared_library("ace_ndk") {
       "USE_HILOG",
     ]
     sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
-    deps += [ ":libace_ndk_rom" ]
+    deps += [
+      ":libace_ndk_rom",
+      "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
+    ]
     external_deps = [
+      "graphic_2d:native_drawing_ndk",
       "hilog:libhilog",
+      "image_framework:pixelmap",
       "napi:ace_napi",
     ]
     version_script =

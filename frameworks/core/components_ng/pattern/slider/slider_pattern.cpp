@@ -50,6 +50,7 @@ bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
 void SliderPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -67,7 +68,7 @@ void SliderPattern::OnModifyDone()
     sliderInteractionMode_ =
         sliderPaintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK);
     minResponse_ = sliderPaintProperty->GetMinResponsiveDistance().value_or(0.0f);
-    UpdateCircleCenterOffset();
+    UpdateToValidValue();
     UpdateBlock();
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
@@ -78,7 +79,6 @@ void SliderPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitializeBubble();
     SetAccessibilityAction();
-    FireBuilder();
 }
 
 void SliderPattern::CalcSliderValue()
@@ -301,11 +301,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         }
         fingerId_ = touchInfo.GetFingerId();
         axisFlag_ = false;
-        // when Touch Down area is at Pan Area, value is unchanged.
-        allowDragEvents_ = sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_ONLY;
-        if (allowDragEvents_ && !AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
-            UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
-        }
+        lastTouchLocation_ = touchInfo.GetLocalLocation();
         if (showTips_) {
             bubbleFlag_ = true;
             UpdateBubble();
@@ -317,12 +313,20 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         if (fingerId_ != touchInfo.GetFingerId()) {
             return;
         }
+        if (lastTouchLocation_.has_value() && lastTouchLocation_.value() == touchInfo.GetLocalLocation()) {
+            // when Touch Down area is at Pan Area, value is unchanged.
+            allowDragEvents_ = sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_ONLY;
+            if (allowDragEvents_ && !AtPanArea(touchInfo.GetLocalLocation(), info.GetSourceDevice())) {
+                UpdateValueByLocalLocation(touchInfo.GetLocalLocation());
+            }
+            FireChangeEvent(SliderChangeMode::Click);
+        }
         fingerId_ = -1;
+        UpdateToValidValue();
         if (bubbleFlag_ && !isFocusActive_) {
             bubbleFlag_ = false;
         }
         mousePressedFlag_ = false;
-        FireChangeEvent(SliderChangeMode::Click);
         FireChangeEvent(SliderChangeMode::End);
         CloseTranslateAnimation();
     }
@@ -507,6 +511,47 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     sliderPaintProperty->UpdateValue(value_);
     valueChangeFlag_ = !NearEqual(oldValue, value_);
     UpdateCircleCenterOffset();
+}
+
+void SliderPattern::UpdateToValidValue()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+
+    float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+    float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
+    float oldValue = value_;
+    auto value = sliderPaintProperty->GetValueValue(value_);
+    value_ = GetValueInValidRange(sliderPaintProperty, value, min, max);
+    valueRatio_ = (value_ - min) / (max - min);
+    sliderPaintProperty->UpdateValue(value_);
+    valueChangeFlag_ = !NearEqual(oldValue, value_);
+    UpdateCircleCenterOffset();
+    UpdateBubble();
+}
+
+float SliderPattern::GetValueInValidRange(
+    const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max)
+{
+    CHECK_NULL_RETURN(paintProperty, value);
+    if (paintProperty->GetValidSlideRange().has_value()) {
+        auto range = paintProperty->GetValidSlideRange().value();
+        if (range->HasValidValues()) {
+            auto fromValue = range->GetFromValue();
+            auto toValue = range->GetToValue();
+            float step = stepRatio_ * (max - min);
+            if (NearEqual(step, 0.0f)) {
+                step = 1.0f;
+            }
+            auto toValueCorrection = NearEqual(toValue - step * std::floor(toValue / step), 0) ? 0 : 1;
+            fromValue = LessOrEqual(fromValue, min) ? min : std::floor(fromValue / step) * step;
+            toValue = GreatOrEqual(toValue, max) ? max : (std::floor(toValue / step) + toValueCorrection) * step;
+            return LessNotEqual(value, fromValue) ? fromValue : GreatNotEqual(value, toValue) ? toValue : value;
+        }
+    }
+    return value;
 }
 
 void SliderPattern::UpdateTipsValue()
@@ -818,7 +863,13 @@ bool SliderPattern::MoveStep(int32_t stepCount)
             nextValue = std::ceil((nextValue - min) / step) * step + min;
         }
     }
-    nextValue = std::clamp(nextValue, min, max);
+    auto validSlideRange = sliderPaintProperty->GetValidSlideRange();
+    if (validSlideRange.has_value() && validSlideRange.value()->HasValidValues()) {
+        nextValue =
+            std::clamp(nextValue, validSlideRange.value()->GetFromValue(), validSlideRange.value()->GetToValue());
+    } else {
+        nextValue = std::clamp(nextValue, min, max);
+    }
     if (NearEqual(nextValue, value_)) {
         return false;
     }
@@ -1321,11 +1372,20 @@ void SliderPattern::RemoveIsFocusActiveUpdateEvent()
 
 void SliderPattern::FireBuilder()
 {
-    CHECK_NULL_VOID(makeFunc_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChildAtIndex(0);
-    contentModifierNode_ = BuildContentModifierNode();
+    if (!makeFunc_.has_value()) {
+        host->RemoveChildAndReturnIndex(contentModifierNode_);
+        contentModifierNode_ = nullptr;
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);

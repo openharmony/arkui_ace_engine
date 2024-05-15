@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_painter.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
 class RichEditorOverlayModifier : public TextOverlayModifier {
@@ -38,12 +39,17 @@ public:
     void SetScrollBarOpacityType(int32_t type);
     void SetTextHeight(float value);
     void SetFrameSize(const SizeF& value);
+    void SetPreviewTextDecorationColor(const Color& value);
+    void SetPreviewTextUnderlineWidth(float value);
+    void SetShowPreviewTextDecoration(bool value);
+    void SetPreviewTextStyle(const PreviewTextStyle& value);
     float GetCaretHeight() const;
     float GetCaretWidth() const;
     OffsetF GetCaretOffset() const;
     void onDraw(DrawingContext& drawingContext) override;
     void UpdateScrollBar(PaintWrapper* paintWrapper);
 private:
+    void PaintPreviewTextDecoration(DrawingContext& drawingContext) const;
     void PaintCaret(DrawingContext& drawingContext) const;
     void PaintScrollBar(DrawingContext& context);
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
@@ -62,6 +68,10 @@ private:
     WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     RefPtr<PropertySizeF> frameSize_;
     MagnifierPainter magnifierPainter_;
+    RefPtr<PropertyColor> previewTextDecorationColor_;
+    RefPtr<PropertyFloat> previewTextUnderlineWidth_;
+    RefPtr<PropertyBool> showPreviewTextDecoration_;
+    PreviewTextStyle previewTextStyle_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

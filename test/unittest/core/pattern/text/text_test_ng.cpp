@@ -37,6 +37,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -59,7 +60,6 @@
 #include "core/event/mouse_event.h"
 #include "frameworks/base/window/drag_window.h"
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
-#include "core/components/common/properties/text_style_parser.h"
 
 #undef private
 #undef protected
@@ -150,6 +150,7 @@ const std::string TEXT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\"
 const std::string TEXT_EQUALS_VALUE =
     R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
 const Ace::WordBreak TEXT_WORD_BREAK = Ace::WordBreak::BREAK_ALL;
+const Ace::LineBreakStrategy TEXT_LINE_BREAK_STRATEGY = Ace::LineBreakStrategy::GREEDY;
 const std::string TEXT_FOR_AI_SINGLE = "phone: 18888888888";
 const std::string TEXT_FOR_AI = "phone: 12345678900,url: www.baidu.com";
 const std::string SPAN_PHONE = "12345678900";
@@ -170,6 +171,10 @@ const struct TextDataDetectResult TEXT_DATA_DETECT_RESULT = { 0,
     "{\"bundlename\":\"com.XXXXXX.hmsapp.hiai\",\"abilityname\":\"EntityMenuUIExtensionAbility\"}" };
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
 const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const std::string MULTIPLE_SPAN1 = "Span1";
+const std::string MULTIPLE_SPAN2 = "Span2\n";
+const std::string MULTIPLE_SPAN3 = "Span3\n";
+const std::string MULTIPLE_SPAN4 = "Span4";
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 
@@ -204,6 +209,31 @@ void TestUpdateScenario(const RefPtr<TextPattern>& pattern)
         }
     }
 }
+
+void ConstructSpanItemList1(std::list<RefPtr<SpanItem>>& spans)
+{
+    RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> span2 = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> span3 = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> span4 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = MULTIPLE_SPAN1;
+    spans.emplace_back(span1);
+
+    span2->content = MULTIPLE_SPAN2;
+    span2->textLineStyle->UpdateTextAlign(TextAlign::CENTER);
+    span2->textLineStyle->UpdateMaxLines(1);
+    spans.emplace_back(span2);
+
+    span3->content = MULTIPLE_SPAN3;
+    span3->textLineStyle->UpdateTextAlign(TextAlign::END);
+    span3->textLineStyle->UpdateTextIndent(Dimension(20.0f));
+    span3->textLineStyle->UpdateWordBreak(WordBreak::BREAK_ALL);
+    span3->textLineStyle->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    spans.emplace_back(span3);
+
+    span4->content = MULTIPLE_SPAN4;
+    spans.emplace_back(span4);
+}
 } // namespace
 
 struct TestProperty {
@@ -226,6 +256,7 @@ struct TestProperty {
     std::optional<Dimension> letterSpacing = std::nullopt;
     std::optional<Dimension> textIndent = std::nullopt;
     std::optional<Ace::WordBreak> wordBreak = std::nullopt;
+    std::optional<Ace::LineBreakStrategy> lineBreakStrategy = std::nullopt;
 };
 
 struct ImageSpanNodeProperty {
@@ -377,6 +408,9 @@ RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue
     if (testProperty.wordBreak.has_value()) {
         textModel.SetWordBreak(testProperty.wordBreak.value());
     }
+    if (testProperty.lineBreakStrategy.has_value()) {
+        textModel.SetLineBreakStrategy(testProperty.lineBreakStrategy.value());
+    }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
     return AceType::DynamicCast<FrameNode>(element);
@@ -429,6 +463,7 @@ void TextTestNg::UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutP
     textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
     textLayoutProperty->UpdateWordBreak(TEXT_WORD_BREAK);
+    textLayoutProperty->UpdateLineBreakStrategy(TEXT_LINE_BREAK_STRATEGY);
 }
 
 std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> Init()
@@ -492,6 +527,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
     testProperty.adaptMaxFontSize = std::make_optional(ADAPT_MAX_FONT_SIZE_VALUE);
     testProperty.textIndent = std::make_optional(TEXT_INDENT);
     testProperty.wordBreak = std::make_optional(TEXT_WORD_BREAK);
+    testProperty.lineBreakStrategy = std::make_optional(TEXT_LINE_BREAK_STRATEGY);
 
     RefPtr<FrameNode> frameNode = CreateTextParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
@@ -524,6 +560,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetAdaptTextSize(),
         testProperty.adaptMinFontSize.has_value() || testProperty.adaptMaxFontSize.has_value());
     EXPECT_EQ(textStyle.GetWordBreak(), TEXT_WORD_BREAK);
+    EXPECT_EQ(textStyle.GetLineBreakStrategy(), TEXT_LINE_BREAK_STRATEGY);
 
     /**
      * @tc.cases: case2. renderContext has foreground color and modifier will foreground color flag
@@ -773,7 +810,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
     auto rowLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     auto ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
     EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
 }
 
@@ -1151,7 +1188,7 @@ HWTEST_F(TextTestNg, TextLayoutTest003, TestSize.Level1)
 
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
     auto result = textLayoutAlgorithm->AdaptMinTextSize(
-        textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode));
+        textStyle, CREATE_VALUE, parentLayoutConstraint, AceType::RawPtr(textFrameNode));
 
     /**
      * @tc.steps: step4. check the fontSize.
@@ -1207,7 +1244,7 @@ HWTEST_F(TextTestNg, TextLayoutTest004, TestSize.Level1)
 
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
     auto result = textLayoutAlgorithm->AdaptMinTextSize(
-        textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode));
+        textStyle, CREATE_VALUE, parentLayoutConstraint, AceType::RawPtr(textFrameNode));
 
     /**
      * @tc.steps: step4. check the fontSize.
@@ -1263,7 +1300,7 @@ HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
 
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
     auto result = textLayoutAlgorithm->AdaptMinTextSize(
-        textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode));
+        textStyle, CREATE_VALUE, parentLayoutConstraint, AceType::RawPtr(textFrameNode));
 
     /**
      * @tc.steps: step4. check the fontSize.
@@ -1361,7 +1398,7 @@ HWTEST_F(TextTestNg, TextLayoutTest007, TestSize.Level1)
     textLayoutProperty->UpdateContent(CREATE_VALUE);
     textLayoutProperty->UpdateBaselineOffset(BASELINE_OFFSET_VALUE);
     LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize.SetHeight(-1.0);
+    parentLayoutConstraint.maxSize.SetHeight(100.0);
 
     /**
      * @tc.steps: step3. create textLayoutAlgorithm.
@@ -1380,8 +1417,7 @@ HWTEST_F(TextTestNg, TextLayoutTest007, TestSize.Level1)
     /**
      * @tc.steps: step4. check the size.
      */
-
-    EXPECT_EQ(sizeX, std::nullopt);
+    EXPECT_EQ(sizeX, SizeF(0.0f, 20.0f));
 }
 
 /**
@@ -1814,7 +1850,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest001, TestSize.Level1)
     textLayoutAlgorithm->baselineOffset_ = BASE_LINE_OFFSET;
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraphManager_->GetMaxWidth());
 }
 
 /**
@@ -1873,7 +1909,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
     textPattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(std::move(textStyle)));
     auto contentModifier = textPattern->GetContentModifier();
     textLayoutAlgorithm->SetPropertyToModifier(textLayoutProperty, contentModifier);
-    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraphManager_->GetMaxWidth());
 }
 
 /**
@@ -1919,7 +1955,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest003, TestSize.Level1)
         textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraphManager_->GetMaxWidth());
 }
 
 /**
@@ -1964,7 +2000,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest004, TestSize.Level1)
         textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraphManager_->GetMaxWidth());
 }
 
 /**
@@ -2010,7 +2046,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest005, TestSize.Level1)
         textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraphManager_->GetMaxWidth());
 }
 
 /**
@@ -2113,7 +2149,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
-    textContentModifier.SetParagraph(paragraph);
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     // call onDraw function(textRacing_ = true)
     MarqueeOption option;
     textContentModifier.StartTextRace(option);
@@ -2124,7 +2160,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     textContentModifier.onDraw(context);
     EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
     EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
-    EXPECT_EQ(textContentModifier.paragraph_, paragraph);
+    textPattern->pManager_->Reset();
 }
 
 /**
@@ -2195,7 +2231,7 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetTextWidth).WillOnce(Return(100.0f));
+    EXPECT_CALL(*paragraph, GetLongestLine).WillOnce(Return(100.0f));
     /**
      * @tc.steps: step1. create textFrameNode.
      */
@@ -2205,6 +2241,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
 
     /**
      * @tc.steps: step2. set textLayoutProperty.
@@ -2219,12 +2256,13 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
      * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent function.
      * @tc.expected: The width of the return value of MeasureContent is equal to 100.0f
      */
-    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto textLayoutAlgorithm = textPattern->CreateLayoutAlgorithm();
     auto contentSize =
         textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(contentSize.value().Width(), 100.0f);
+    textPattern->pManager_->Reset();
 }
 
 /**
@@ -2270,7 +2308,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest007, TestSize.Level1)
         textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraphManager_->GetMaxWidth());
 }
 
 /**
@@ -2323,28 +2361,28 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
     // maxFontSize < minFontSize
     textStyle.SetAdaptMaxFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
     textStyle.SetAdaptMinFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(
-                  textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)),
+    EXPECT_EQ(
+        textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, AceType::RawPtr(textFrameNode)),
         true);
 
     // create paragraph failed
     MockParagraph::enabled_ = false;
     textStyle.SetAdaptMaxFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
     textStyle.SetAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(
-                  textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)),
+    EXPECT_EQ(
+        textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, AceType::RawPtr(textFrameNode)),
         false);
     MockParagraph::enabled_ = true;
 
     // increase font size
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(
-                  textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)),
+    EXPECT_EQ(
+        textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, AceType::RawPtr(textFrameNode)),
         true);
 
     // set NormalizeToPx false
     textStyle.adaptFontSizeStep_.SetUnit(DimensionUnit::CALC);
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(
-                  textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)),
+    EXPECT_EQ(
+        textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, AceType::RawPtr(textFrameNode)),
         false);
 }
 
@@ -2803,7 +2841,6 @@ HWTEST_F(TextTestNg, ApplyIndents001, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    rowLayoutAlgorithm->ApplyIndent(textStyle, RECT_WIDTH_VALUE);
     auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode));
     EXPECT_TRUE(ret);
 }
@@ -2851,7 +2888,6 @@ HWTEST_F(TextTestNg, ShowSelectOverlay003, TestSize.Level1)
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
 
     pattern->copyOption_ = CopyOptions::Distributed;
-    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     pattern->textForDisplay_ = "test";
     pattern->textSelector_.Update(0, 20);
 
@@ -2879,7 +2915,6 @@ HWTEST_F(TextTestNg, ShowSelectOverlay004, TestSize.Level1)
      * @tc.steps: step2. construct menuOptionItems
      */
     pattern->copyOption_ = CopyOptions::InApp;
-    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     pattern->textForDisplay_ = "test";
     pattern->textSelector_.Update(0, 20);
     std::vector<MenuOptionsParam> menuOptionItems;
@@ -2911,7 +2946,7 @@ HWTEST_F(TextTestNg, IsDraggable001, TestSize.Level1)
 
     auto [host, pattern] = Init();
     pattern->copyOption_ = CopyOptions::Distributed;
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     host->draggable_ = true;
     host->eventHub_->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
@@ -2934,6 +2969,7 @@ HWTEST_F(TextTestNg, IsDraggable001, TestSize.Level1)
      */
     pattern->textSelector_.Update(-1);
     EXPECT_FALSE(pattern->IsDraggable(Offset(1, 1)));
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -2959,7 +2995,7 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
 
     // test GetTextBoxes and GetLineHeight
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     std::vector<RectF> rects { RectF(0, 0, 20, 20) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
 
@@ -2971,6 +3007,7 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
 
     auto height = pattern->GetLineHeight();
     EXPECT_EQ(height, 20);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -3378,7 +3415,7 @@ HWTEST_F(TextTestNg, HandleClickEvent002, TestSize.Level1)
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
 
     /**
      * @tc.steps: step4. create GestureEvent and call HandleClickEvent function with invalid textSelector
@@ -3390,6 +3427,7 @@ HWTEST_F(TextTestNg, HandleClickEvent002, TestSize.Level1)
     pattern->HandleClickEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -2);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -2);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -3447,7 +3485,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent002, TestSize.Level1)
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
 
     /**
      * @tc.steps: step3. create MouseInfo and call HandleMouseEvent function
@@ -3460,6 +3498,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent002, TestSize.Level1)
     pattern->HandleMouseEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -3483,7 +3522,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent003, TestSize.Level1)
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 0 });
 
     /**
      * @tc.steps: step3. create MouseInfo and call HandleMouseEvent function
@@ -3552,6 +3591,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent003, TestSize.Level1)
     pattern->HandleMouseEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -3575,7 +3615,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent004, TestSize.Level1)
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
 
     /**
      * @tc.steps: step3. create MouseInfo and call HandleMouseEvent function
@@ -3589,6 +3629,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent004, TestSize.Level1)
     pattern->isDoubleClick_ = true;
     pattern->HandleMouseEvent(info);
     EXPECT_FALSE(pattern->isDoubleClick_);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -3627,7 +3668,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent005, TestSize.Level1)
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> rects { RectF(0, 0, 40, 40) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     pattern->CreateHandles();
     pattern->textSelector_.Update(0, 20);
 
@@ -3658,6 +3699,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent005, TestSize.Level1)
     EXPECT_TRUE(!pattern->dataDetectorAdapter_->hasClickedAISpan_);
     EXPECT_EQ(pattern->textResponseType_, TextResponseType::RIGHT_CLICK);
     EXPECT_EQ(pattern->selectedType_, TextSpanType::TEXT);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -3698,7 +3740,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent006, TestSize.Level1)
      * @tc.steps: step2. test text_pattern.h HandleMouseRightButton function.
      * @tc.expect: expect selectedType_ IMAGE when mouse release offset not in textContentRect region.
      */
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 30 });
     auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
     auto mouseEvent = inputHub->mouseEventActuator_->inputEvents_.back();
     MouseInfo info;
@@ -3712,6 +3754,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent006, TestSize.Level1)
     (*mouseEvent)(info);
     EXPECT_EQ(pattern->textResponseType_, TextResponseType::RIGHT_CLICK);
     EXPECT_EQ(pattern->selectedType_, TextSpanType::IMAGE);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -3770,66 +3813,6 @@ HWTEST_F(TextTestNg, HandleOnCopy002, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandlePanStart001
- * @tc.desc: test text_pattern.h HandlePanStart function when IsDraggable is false
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, HandlePanStart001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern
-     */
-    auto [frameNode, pattern] = Init();
-    pattern->copyOption_ = copyOption;
-    pattern->textSelector_.Update(0, 20);
-    GestureEvent info;
-    info.localLocation_ = Offset(1, 1);
-    /**
-     * @tc.steps: step2. call HandlePanStart function
-     * @tc.expected: The function exits normally
-     */
-    pattern->HandlePanStart(info);
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
-}
-
-/**
- * @tc.name: HandlePanStart002
- * @tc.desc: test text_pattern.h HandlePanStart function when IsDraggable is true
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, HandlePanStart002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern
-     */
-    auto [frameNode, pattern] = Init();
-    frameNode->draggable_ = true;
-    pattern->copyOption_ = CopyOptions::InApp;
-    pattern->textSelector_.Update(0, 3);
-    pattern->textForDisplay_ = TEXT_CONTENT;
-    pattern->selectOverlayProxy_ = nullptr;
-    GestureEvent info;
-    info.localLocation_ = Offset(1.0, 1.0);
-
-    /**
-     * @tc.steps: step2. create paragraph
-     */
-    ParagraphStyle paragraphStyle;
-    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
-    ASSERT_NE(paragraph, nullptr);
-    pattern->paragraph_ = paragraph;
-
-    /**
-     * @tc.steps: step3. call HandlePanStart function
-     * @tc.expected: The function exits normally
-     */
-    pattern->HandlePanStart(info);
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
-}
-
-/**
  * @tc.name: HandleLongPress001
  * @tc.desc: test text_pattern.h HandleLongPress function when IsDraggable is false
  * @tc.type: FUNC
@@ -3841,7 +3824,6 @@ HWTEST_F(TextTestNg, HandleLongPress001, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     frameNode->draggable_ = false;
-    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->textSelector_.Update(0, 3);
     pattern->textForDisplay_ = TEXT_CONTENT;
@@ -3879,7 +3861,7 @@ HWTEST_F(TextTestNg, HandleLongPress002, TestSize.Level1)
     frameNode->draggable_ = true;
     frameNode->eventHub_->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->textSelector_.Update(0, 3);
     pattern->textForDisplay_ = TEXT_CONTENT;
@@ -3892,83 +3874,7 @@ HWTEST_F(TextTestNg, HandleLongPress002, TestSize.Level1)
     pattern->HandleLongPress(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
-}
-
-/**
- * @tc.name: HandlePanUpdateAndEnd001
- * @tc.desc: test text_pattern.h HandlePanUpdate function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, HandlePanUpdateAndEnd001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern
-     */
-    auto [frameNode, pattern] = Init();
-    pattern->copyOption_ = CopyOptions::InApp;
-    pattern->textSelector_.Update(0, 20);
-    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
-    GestureEvent info;
-    info.localLocation_ = Offset(1, 1);
-
-    /**
-     * @tc.steps: step2. construct dragWindow_
-     */
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto rect = pipelineContext->GetCurrentWindowRect();
-    auto contentRect_ = CONTENT_RECT;
-    pattern->HandlePanUpdate(info);
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
-    pattern->HandlePanEnd(info);
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
-    // create textdrag window
-    auto dragWindow = DragWindow::CreateTextDragWindow("APP_DRAG_WINDOW",
-        static_cast<int32_t>(host->GetPaintRectOffset().GetX() + rect.Left()),
-        static_cast<int32_t>(host->GetPaintRectOffset().GetY() + rect.Top()),
-        static_cast<int32_t>(contentRect_.Width() + contentRect_.GetX()), contentRect_.Height() + contentRect_.GetY());
-    pattern->dragWindow_ = dragWindow;
-    pattern->HandlePanEnd(info);
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
-
-    dragWindow = DragWindow::CreateTextDragWindow("APP_DRAG_WINDOW",
-        static_cast<int32_t>(host->GetPaintRectOffset().GetX() + rect.Left()),
-        static_cast<int32_t>(host->GetPaintRectOffset().GetY() + rect.Top()),
-        static_cast<int32_t>(contentRect_.Width() + contentRect_.GetX()), contentRect_.Height() + contentRect_.GetY());
-    pattern->dragWindow_ = dragWindow;
-
-    /**
-     * @tc.steps: step3. call HandlePanUpdate function
-     * @tc.expected: The function exits normally
-     */
-    pattern->HandlePanUpdate(info);
-    EXPECT_NE(pattern->textSelector_.GetTextStart(), -1);
-    EXPECT_NE(pattern->textSelector_.GetTextEnd(), -1);
-
-    /**
-     * @tc.steps: step4. construct dragProxy_
-     */
-    // draw select text on drag window
-    pattern->dragWindow_->DrawTextNG(pattern->paragraph_, pattern);
-    // add select data to clipboard
-    auto manager = pipelineContext->GetDragDropManager();
-    ASSERT_NE(manager, nullptr);
-    auto dragDropProxy = manager->CreateTextDragDropProxy();
-    ASSERT_NE(dragDropProxy, nullptr);
-    pattern->dragDropProxy_ = dragDropProxy;
-
-    /**
-     * @tc.steps: step5. call HandlePanEnd function
-     * @tc.expected: The function exits normally
-     */
-    pattern->HandlePanEnd(info);
-    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -3991,7 +3897,7 @@ HWTEST_F(TextTestNg, HandleOnSelectAll001, TestSize.Level1)
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
 
     /**
      * @tc.steps: step3. call HandleOnSelectAll
@@ -4000,6 +3906,7 @@ HWTEST_F(TextTestNg, HandleOnSelectAll001, TestSize.Level1)
     pattern->HandleOnSelectAll();
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), pattern->textForDisplay_.length());
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -4143,7 +4050,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode and geometryNode.
      */
     auto [host, pattern] = Init();
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto renderContext = host->GetRenderContext();
@@ -4199,6 +4106,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
      */
     pattern->OnModifyDone();
     EXPECT_EQ(renderContext->GetObscured(), reasons);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -4316,7 +4224,7 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
-    textContentModifier->SetParagraph(paragraph);
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     TextStyle textStyle;
     textStyle.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textStyle.SetTextColor(TEXT_COLOR_VALUE);
@@ -4380,6 +4288,7 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
      */
     textContentModifier->DrawObscuration(context);
     EXPECT_EQ(textContentModifier->drawObscuredRects_, drawObscuredRects);
+    textPattern->pManager_->Reset();
 }
 
 /**
@@ -4405,10 +4314,9 @@ HWTEST_F(TextTestNg, TextContentModifier005, TestSize.Level1)
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
-    textPattern->paragraph_ = paragraph;
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
     std::vector<WeakPtr<FrameNode>> imageNodeList;
-    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(),
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     imageNodeList.emplace_back(AceType::WeakClaim(AceType::RawPtr(imageNode)));
     textPattern->SetImageSpanNodeList(imageNodeList);
@@ -4425,6 +4333,7 @@ HWTEST_F(TextTestNg, TextContentModifier005, TestSize.Level1)
 
     ASSERT_NE(textPaintMethod->textContentModifier_, nullptr);
     EXPECT_EQ(textPaintMethod->textContentModifier_->imageNodeList_.size(), 1);
+    textPattern->pManager_->Reset();
 }
 
 /*
@@ -4515,7 +4424,6 @@ HWTEST_F(TextTestNg, BetweenSelectedPosition001, TestSize.Level1)
      */
     auto [host, pattern] = Init();
     pattern->copyOption_ = CopyOptions::Distributed;
-    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     host->draggable_ = true;
     host->eventHub_->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
@@ -4524,6 +4432,7 @@ HWTEST_F(TextTestNg, BetweenSelectedPosition001, TestSize.Level1)
      * @tc.steps: step2. set selected rect to [0, 0] - [20, 20]
      */
     pattern->textSelector_.Update(0, 20);
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
 
     /**
      * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
@@ -4534,6 +4443,7 @@ HWTEST_F(TextTestNg, BetweenSelectedPosition001, TestSize.Level1)
     for (uint32_t turn = 0; turn < cases.size(); ++turn) {
         EXPECT_EQ(pattern->BetweenSelectedPosition(cases[turn]), exceptResults[turn]);
     }
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -4548,7 +4458,6 @@ HWTEST_F(TextTestNg, OnHandleMove002, TestSize.Level1)
      */
     auto [host, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
-    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     SelectOverlayInfo selectOverlayInfo;
     selectOverlayInfo.singleLineHeight = NODE_ID;
     auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
@@ -4600,55 +4509,6 @@ HWTEST_F(TextTestNg, GetGlobalOffset001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateImageSpanAndLayout001
- * @tc.desc: test text_layout_algorithm.cpp CreateImageSpanAndLayout function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, CreateImageSpanAndLayout001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
-     */
-    auto [frameNode, pattern] = Init();
-    auto pipeline = frameNode->GetContextRefPtr();
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-
-    /**
-     * @tc.steps: step2. Add Text and Image Span.
-     */
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    layoutWrapper->children_.push_back(layoutWrapper);
-
-    auto textSpanNode = CreateSpanNodeWithSetDefaultProperty("this is a test.");
-    ASSERT_NE(textSpanNode, nullptr);
-    pattern->AddChildSpanItem(textSpanNode);
-    frameNode->AddChild(textSpanNode);
-    nodeId = stack->ClaimNodeId();
-    auto imageSpanNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    ASSERT_NE(imageSpanNode, nullptr);
-    pattern->AddChildSpanItem(imageSpanNode);
-    frameNode->AddChild(imageSpanNode);
-
-    /**
-     * @tc.steps: step3. Init TextLayoutAlgorithm and Paragraph, then run the CreateImageSpanAndLayout Func.
-     * @tc.expected: Construct result is True.
-     */
-    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    TextStyle textStyle;
-    LayoutConstraintF contentConstraint;
-    rowLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode));
-    auto ret = rowLayoutAlgorithm->CreateImageSpanAndLayout(
-        textStyle, "", contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_TRUE(ret);
-}
-
-/**
  * @tc.name: ApplyIndents002
  * @tc.desc: test text_layout_algorithm.cpp ApplyIndents function
  * @tc.type: FUNC
@@ -4672,8 +4532,7 @@ HWTEST_F(TextTestNg, ApplyIndents002, TestSize.Level1)
      * @tc.steps: step3. run the ApplyIndents Func.
      * @tc.expected: paragraph_.rawPtr_ is nullptr.
      */
-    rowLayoutAlgorithm->ApplyIndent(textStyle, 10.0);
-    EXPECT_NE(rowLayoutAlgorithm->paragraph_.rawPtr_, nullptr);
+    EXPECT_NE(rowLayoutAlgorithm->paragraphManager_->GetParagraphs().front().paragraph, nullptr);
 }
 
 /**
@@ -4700,8 +4559,7 @@ HWTEST_F(TextTestNg, ApplyIndents003, TestSize.Level1)
      * @tc.steps: step3. run the ApplyIndents Func.
      * @tc.expected: paragraph_.rawPtr_ is nullptr.
      */
-    rowLayoutAlgorithm->ApplyIndent(textStyle, 10.0);
-    EXPECT_NE(rowLayoutAlgorithm->paragraph_.rawPtr_, nullptr);
+    EXPECT_NE(rowLayoutAlgorithm->paragraphManager_->GetParagraphs().front().paragraph.rawPtr_, nullptr);
 }
 
 /**
@@ -4954,7 +4812,7 @@ HWTEST_F(TextTestNg, HandleTouchEvent001, TestSize.Level1)
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
 
     /**
      * @tc.steps: step4. create GestureEvent and call HandleTouchEvent.
@@ -4970,6 +4828,7 @@ HWTEST_F(TextTestNg, HandleTouchEvent001, TestSize.Level1)
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -2);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -2);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -4998,7 +4857,7 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
 
     /**
      * @tc.steps: step4. create GestureEvent and call HandleClickEvent function quickly to trigger doubleClick.
@@ -5030,6 +4889,7 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
     EXPECT_TRUE(pattern->hasClicked_);
     pattern->HandleClickEvent(info);
     EXPECT_FALSE(pattern->hasClicked_);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -5046,10 +4906,7 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent002, TestSize.Level1)
     textModelNG.Create(CREATE_VALUE);
     textModelNG.SetCopyOption(CopyOptions::Local);
     std::function<void()> buildFunc = []() {};
-    SelectMenuParam memuParam {
-        .onAppear = [](int32_t, int32_t) {},
-        .onDisappear = []() {}
-    };
+    SelectMenuParam memuParam { .onAppear = [](int32_t, int32_t) {}, .onDisappear = []() {} };
     TextSpanType textSpanType = TextSpanType::TEXT;
     TextResponseType textResponseType = TextResponseType::LONG_PRESS;
     textModelNG.BindSelectionMenu(textSpanType, textResponseType, buildFunc, memuParam);
@@ -5067,7 +4924,7 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent002, TestSize.Level1)
      */
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(5), Return(true)));
 
@@ -5081,6 +4938,7 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent002, TestSize.Level1)
     EXPECT_EQ(pattern->textResponseType_, TextResponseType::NONE);
     EXPECT_TRUE(pattern->textSelector_.IsValid());
     EXPECT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -5112,11 +4970,9 @@ HWTEST_F(TextTestNg, HandleClickEventTest001, TestSize.Level1)
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
     EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100.f));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(100.f));
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     //set text component frame size [180, 60].
-    LayoutConstraintF layoutConstraintF {
-        .selfIdealSize = OptionalSizeF(180.f, 60.f)
-    };
+    LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(180.f, 60.f) };
     frameNode->Measure(layoutConstraintF);
     //set boundsRect (0.00, 0.00) - [180.00 x 100.00]
     pattern->CreateNodePaintMethod();
@@ -5133,6 +4989,7 @@ HWTEST_F(TextTestNg, HandleClickEventTest001, TestSize.Level1)
     pattern->HandleClickEvent(info);
     EXPECT_TRUE(isSpanPhoneClicked);
     EXPECT_TRUE(!pattern->textSelector_.IsValid());
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -5301,7 +5158,6 @@ HWTEST_F(TextTestNg, CloseSelectionMenu001, TestSize.Level1)
     pattern->HandleLongPress(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
     pattern->copyOption_ = CopyOptions::Distributed;
-    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     pattern->textForDisplay_ = CREATE_VALUE;
     pattern->textSelector_.Update(0, 20);
     pattern->ShowSelectOverlay();
@@ -5331,7 +5187,7 @@ HWTEST_F(TextTestNg, OnTextSelectionChange001, TestSize.Level1)
     pattern->selectOverlayProxy_ = nullptr;
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     pattern->HandleOnSelectAll();
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), pattern->textForDisplay_.length());
@@ -5339,6 +5195,7 @@ HWTEST_F(TextTestNg, OnTextSelectionChange001, TestSize.Level1)
     pattern->ResetSelection();
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -5378,10 +5235,11 @@ HWTEST_F(TextTestNg, OnTextSelectionChange002, TestSize.Level1)
      * @tc.steps: step3. create paragraph
      */
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    pattern->paragraph_ = paragraph;
     EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(10.f));
     EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(2), Return(false)));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     GestureEvent info;
     info.localLocation_ = Offset(1, 2);
     pattern->HandleLongPress(info);
@@ -5395,6 +5253,7 @@ HWTEST_F(TextTestNg, OnTextSelectionChange002, TestSize.Level1)
     EXPECT_EQ(isSelectChanged, true);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 2);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -5428,6 +5287,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest009, TestSize.Level1)
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = "zh-CN",
         .wordBreak = textStyle.GetWordBreak(),
+        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
 
@@ -5452,9 +5312,9 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest009, TestSize.Level1)
      * @tc.expected: textLayoutAlgorithm->paragraph_.rawPtr_ is nullptr.
      */
     auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(textPattern->CreateLayoutAlgorithm());
-    textLayoutAlgorithm->SetParagraph(paragraph);
-    textLayoutAlgorithm->UpdateParagraphForAISpan(textStyle, AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_NE(textLayoutAlgorithm->paragraph_.rawPtr_, nullptr);
+    textLayoutAlgorithm->paragraphManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    textLayoutAlgorithm->UpdateParagraphForAISpan(textStyle, AccessibilityManager::RawPtr(layoutWrapper), paragraph);
+    EXPECT_NE(textLayoutAlgorithm->paragraphManager_->GetParagraphs().front().paragraph.rawPtr_, nullptr);
 }
 
 /**
@@ -5481,7 +5341,7 @@ HWTEST_F(TextTestNg, HandleClickAISpanEvent, TestSize.Level1)
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> rects { RectF(0, 0, 20, 20) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
 
     pattern->SetTextDetectEnable(true);
     RectF textContentRect = CONTENT_RECT;
@@ -5514,6 +5374,7 @@ HWTEST_F(TextTestNg, HandleClickAISpanEvent, TestSize.Level1)
 
     pattern->HandleClickAISpanEvent(textOffset);
     EXPECT_TRUE(pattern->dataDetectorAdapter_->hasClickedAISpan_);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -5947,60 +5808,6 @@ HWTEST_F(TextTestNg, SetTextDetectTypes001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitPanEvent001
- * @tc.desc: test test_pattern.h InitPanEvent, dragWindow will be create/destroy as expected.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, InitPanEvent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern, InitPanEvent.
-     */
-    TextModelNG textModelNG;
-    textModelNG.Create("012345678900000000000");
-    textModelNG.SetCopyOption(CopyOptions::Local);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    frameNode->eventHub_->SetOnDragStart(
-        [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    pattern->textSelector_.Update(0, 15);
-
-    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureEventHub, nullptr);
-    pattern->InitPanEvent(gestureEventHub);
-    EXPECT_EQ(pattern->dragWindow_, nullptr);
-
-    GestureEvent info;
-    info.SetLocalLocation(Offset(0, 10));
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    pattern->paragraph_ = paragraph;
-    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
-    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
-    /**
-     * @tc.steps: step2. test HandlePanStart.
-     * @tc.expect: expect dragWindow created.
-     */
-    auto panEvent = gestureEventHub->panEventActuator_->panEvents_.back();
-    auto onPanStart = panEvent->GetActionStartEventFunc();
-    onPanStart(info);
-    EXPECT_NE(pattern->dragWindow_, nullptr);
-
-    /**
-     * @tc.steps: step3. test HandlePanUpdate.
-     */
-    auto onPanUpdate = panEvent->GetActionUpdateEventFunc();
-    onPanUpdate(info);
-
-    /**
-     * @tc.steps: step4. test HandlePanEnd.
-     * @tc.expect: expect dragWindow Destroyed.
-     */
-    auto onPanEnd = panEvent->GetActionEndEventFunc();
-    onPanEnd(info);
-    EXPECT_EQ(pattern->dragWindow_, nullptr);
-}
-
-/**
  * @tc.name: CreateNodePaintMethod001
  * @tc.desc: test text_pattern.h CreateNodePaintMethod function
  * @tc.type: FUNC
@@ -6019,16 +5826,15 @@ HWTEST_F(TextTestNg, CreateNodePaintMethod001, TestSize.Level1)
     textModelNG.SetTextShadow({ textShadow });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     frameNode->GetRenderContext()->UpdateClipEdge(false);
-    LayoutConstraintF layoutConstraintF {
-        .selfIdealSize = OptionalSizeF(240.f, 60.f)
-    };
+    LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
     frameNode->Measure(layoutConstraintF);
     frameNode->Layout();
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(200.f));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(80.f));
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->Reset();
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
 
     /**
      * @tc.steps: step2. test CreateNodePaintMethod.
@@ -6041,6 +5847,7 @@ HWTEST_F(TextTestNg, CreateNodePaintMethod001, TestSize.Level1)
     EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Width(), 240.f);
     EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Height(), 92.f);
     EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -6059,16 +5866,15 @@ HWTEST_F(TextTestNg, CreateNodePaintMethod002, TestSize.Level1)
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    LayoutConstraintF layoutConstraintF {
-        .selfIdealSize = OptionalSizeF(240.f, 60.f)
-    };
+    LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
     frameNode->Measure(layoutConstraintF);
     frameNode->Layout();
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(200.f));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(80.f));
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->Reset();
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
 
     /**
      * @tc.steps: step2. test CreateNodePaintMethod.
@@ -6102,6 +5908,7 @@ HWTEST_F(TextTestNg, CreateNodePaintMethod002, TestSize.Level1)
     EXPECT_EQ(responseRegion.GetWidth().Value(), 240.0);
     EXPECT_EQ(responseRegion.GetHeight().Value(), 60.0);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -6208,6 +6015,7 @@ HWTEST_F(TextTestNg, TextModelNgProperty002, TestSize.Level1)
     font.fontStyle = ITALIC_FONT_STYLE_VALUE;
     TextModelNG::SetFont(node, font);
     TextModelNG::SetWordBreak(node, WordBreak::BREAK_ALL);
+    TextModelNG::SetLineBreakStrategy(node, LineBreakStrategy::BALANCED);
 
     /**
      * @tc.steps: step2. test property.
@@ -6226,6 +6034,7 @@ HWTEST_F(TextTestNg, TextModelNgProperty002, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontFamily().value(), FONT_FAMILY_VALUE);
     EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(layoutProperty->GetWordBreak().value(), WordBreak::BREAK_ALL);
+    EXPECT_EQ(layoutProperty->GetLineBreakStrategy().value(), LineBreakStrategy::BALANCED);
 }
 
 /**
@@ -6267,19 +6076,16 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmLayout001, TestSize.Level1)
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> selectedRects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20), RectF(60, 60, 20, 20) };
     EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(selectedRects));
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
     host->AddChild(placeholderSpanNode);
     placeholderSpanNode->SetParent(host);
 
     MarginPropertyF margin { .left = 40.f, .right = 40.f, .top = 80.f, .bottom = 80.f };
-    ImageSpanNodeProperty firstProperty {
-        .imageSrc = std::make_optional("image"),
+    ImageSpanNodeProperty firstProperty { .imageSrc = std::make_optional("image"),
         .margin = std::make_optional(margin),
-        .verticalAlign = std::make_optional(VerticalAlign::CENTER)
-    };
+        .verticalAlign = std::make_optional(VerticalAlign::CENTER) };
     auto imageSpanNode = CreateImageSpanNode(firstProperty);
     host->AddChild(imageSpanNode);
     imageSpanNode->SetParent(host);
@@ -6290,19 +6096,17 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmLayout001, TestSize.Level1)
      *     layout function run normally.
      * @tc.expect: expect layoutAlgorithm_ spanItemChildSize number 2.
      */
-    LayoutConstraintF layoutConstraintF {
-        .selfIdealSize = OptionalSizeF(240.f, 60.f)
-    };
+    LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
     frameNode->Measure(layoutConstraintF);
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     frameNode->Layout();
 
     auto layoutWrapper = frameNode->GetLayoutAlgorithm();
     ASSERT_NE(layoutWrapper, nullptr);
-    auto textLayoutAlgorithm =
-        AceType::DynamicCast<TextLayoutAlgorithm>(layoutWrapper->GetLayoutAlgorithm());
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(layoutWrapper->GetLayoutAlgorithm());
     ASSERT_NE(textLayoutAlgorithm, nullptr);
-    EXPECT_EQ(textLayoutAlgorithm->spanItemChildren_.size(), 2); // 2 means:two child spannode
+    EXPECT_EQ(textLayoutAlgorithm->spans_.front().size(), 2); // 2 means:two child spannode
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -6323,14 +6127,13 @@ HWTEST_F(TextTestNg, CreateParagphTest001, TestSize.Level1)
      * @tc.steps: step2. test CreateParagraph.
      * @tc.expect: expect SYMBOL_ETS_TAG CreateParagraph run Normally.
      */
-    LayoutConstraintF layoutConstraintF {
-        .selfIdealSize = OptionalSizeF(240.f, 60.f)
-    };
+    LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
     frameNode->Measure(layoutConstraintF);
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     frameNode->Layout();
     EXPECT_TRUE(true);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -6387,14 +6190,12 @@ HWTEST_F(TextTestNg, AdaptMaxTextSizeTest001, TestSize.Level1)
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = host->GetPattern<TextPattern>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    pattern->paragraph_ = paragraph;
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(0.f));
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(1));
     EXPECT_CALL(*paragraph, DidExceedMaxLines).WillRepeatedly(Return(false));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    LayoutConstraintF layoutConstraintF {
-        .selfIdealSize = OptionalSizeF(240.f, 60.f)
-    };
+    LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
     frameNode->Measure(layoutConstraintF);
     frameNode->Layout();
 
@@ -6409,6 +6210,7 @@ HWTEST_F(TextTestNg, AdaptMaxTextSizeTest001, TestSize.Level1)
     auto geometryNode = frameNode->GetGeometryNode();
     EXPECT_EQ(geometryNode->GetFrameRect().Width(), 240.f);
     EXPECT_EQ(geometryNode->GetFrameRect().Height(), 60.f);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -6426,11 +6228,11 @@ HWTEST_F(TextTestNg, SetImageSpanTextStyleTest001, TestSize.Level1)
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = host->GetPattern<TextPattern>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    pattern->paragraph_ = paragraph;
-    std::vector<RectF> rects { RectF(0, 0, 20, 20), RectF(20, 20, 20, 20),
-        RectF(40, 40, 20, 20), RectF(60, 60, 20, 20) };
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    std::vector<RectF> rects { RectF(0, 0, 20, 20), RectF(20, 20, 20, 20), RectF(40, 40, 20, 20),
+        RectF(60, 60, 20, 20) };
     EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(rects));
-    std::vector<RectF> selctRects { RectF(0, 0, 20, 20), RectF(0, 0, 30, 30)  };
+    std::vector<RectF> selctRects { RectF(0, 0, 20, 20), RectF(0, 0, 30, 30) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
     MarginPropertyF margin { .left = 40.f, .right = 40.f, .top = 80.f, .bottom = 80.f };
     std::vector<std::string> placeHolderStrings { "please", "input", "text" };
@@ -6456,13 +6258,12 @@ HWTEST_F(TextTestNg, SetImageSpanTextStyleTest001, TestSize.Level1)
      * @tc.expect: expect textLayoutAlgorithm::SetImageSpanTextStyle run normally.
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    LayoutConstraintF layoutConstraintF {
-        .selfIdealSize = OptionalSizeF(240.f, 60.f)
-    };
+    LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
     frameNode->Measure(layoutConstraintF);
     auto geometryNode = frameNode->GetGeometryNode();
     EXPECT_EQ(geometryNode->GetFrameRect().Width(), 240.f);
     EXPECT_EQ(geometryNode->GetFrameRect().Height(), 60.f);
+    pattern->pManager_->Reset();
 }
 
 /**
@@ -6531,5 +6332,107 @@ HWTEST_F(TextTestNg, SetLineSpacing001, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetLineSpacing(), LINE_SPACING_VALUE);
     TextModelNG::SetLineSpacing(frameNode, LINE_SPACING_VALUE_1);
     EXPECT_EQ(textLayoutProperty->GetLineSpacing(), LINE_SPACING_VALUE_1);
+}
+
+/**
+ * @tc.name: TextLayoutAlgorithm
+ * @tc.desc: test TextLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlgorithm001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. construct spanItem_.
+     */
+    std::list<RefPtr<SpanItem>> spans;
+    ConstructSpanItemList1(spans);
+    EXPECT_EQ(spans.size(), 4);
+    textPattern->spans_ = spans;
+    textPattern->isSpanStringMode_ = true;
+
+    /**
+     * @tc.steps: step3. call TextLayoutAlgorithm.
+     * @tc.expected: the spans of each paragraph are split correctly.
+     */
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(textPattern->CreateLayoutAlgorithm());
+    auto size = textLayoutAlgorithm->spans_.size();
+    EXPECT_EQ(size, 3);
+
+    auto firstSpans = textLayoutAlgorithm->spans_.front();
+    EXPECT_EQ(firstSpans.size(), 2);
+
+    auto endSpans = textLayoutAlgorithm->spans_.back();
+    EXPECT_EQ(endSpans.size(), 1);
+}
+
+/**
+ * @tc.name: TextLayoutAlgorithm
+ * @tc.desc: test UpdateParagraphBySpan of MultipleParagraphLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, UpdateParagraphBySpan001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textLayoutAlgorithm.
+     * @tc.expected: the spans of each paragraph are split correctly.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    std::list<RefPtr<SpanItem>> spans;
+    ConstructSpanItemList1(spans);
+    textPattern->spans_ = spans;
+    textPattern->isSpanStringMode_ = true;
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(textPattern->CreateLayoutAlgorithm());
+    EXPECT_EQ(textLayoutAlgorithm->spans_.size(), 3);
+
+    /**
+     * @tc.steps: step2. call MeasureContent.
+     * @tc.expected: the paragraphs are and paragraph style created correctly.
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    auto paragraphs = textLayoutAlgorithm->paragraphManager_->GetParagraphs();
+    EXPECT_EQ(paragraphs.size(), 3);
+
+    auto iter = paragraphs.begin();
+
+    auto firstParagraph = *(iter);
+    ASSERT_NE(firstParagraph.paragraph, nullptr);
+
+    auto paragraphStyle = firstParagraph.paragraphStyle;
+    EXPECT_EQ(paragraphStyle.align, TextAlign::START);
+    EXPECT_EQ(paragraphStyle.maxLines, UINT32_MAX);
+
+    iter++;
+    auto secondParagraph = *(iter);
+    ASSERT_NE(secondParagraph.paragraph, nullptr);
+    paragraphStyle = secondParagraph.paragraphStyle;
+    EXPECT_EQ(paragraphStyle.align, TextAlign::END);
+    EXPECT_EQ(paragraphStyle.indent, Dimension(20.0f));
+    EXPECT_EQ(paragraphStyle.wordBreak, WordBreak::BREAK_ALL);
+    EXPECT_EQ(paragraphStyle.textOverflow, TextOverflow::ELLIPSIS);
+
+    iter++;
+    auto thirdParagraph = *(iter);
+    ASSERT_NE(thirdParagraph.paragraph, nullptr);
 }
 } // namespace OHOS::Ace::NG

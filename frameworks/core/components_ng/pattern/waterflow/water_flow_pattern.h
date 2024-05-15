@@ -34,6 +34,10 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool IsReverse() const override;
+    bool hasFooter()
+    {
+        return footer_.Upgrade() != nullptr;
+    };
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void UpdateScrollBarOffset() override;
 
@@ -54,6 +58,13 @@ public:
         return MakeRefPtr<WaterFlowAccessibilityProperty>();
     }
 
+    RefPtr<ScrollableController> GetPositionController() const
+    {
+        return positionController_;
+    }
+
+    void TriggerModifyDone();
+    
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool UpdateStartIndex(int32_t index);

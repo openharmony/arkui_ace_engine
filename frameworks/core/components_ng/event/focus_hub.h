@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_event.h"
@@ -158,12 +159,21 @@ public:
     {
         focusPadding = padding;
     }
+    void SetFocusBoxGlow(bool focusBoxGlow)
+    {
+        focusBoxGlow_ = focusBoxGlow;
+    }
+    bool IsFocusBoxGlow() const
+    {
+        return focusBoxGlow_;
+    }
 
 private:
     std::optional<RoundRect> paintRect;
     std::optional<Color> paintColor;
     std::optional<Dimension> paintWidth;
     std::optional<Dimension> focusPadding;
+    bool focusBoxGlow_ = false;
 };
 
 class ACE_EXPORT FocusPattern : public virtual AceType {
@@ -193,6 +203,7 @@ public:
         if (paintParams.HasFocusPadding()) {
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
+        paintParams_->SetFocusBoxGlow(paintParams.IsFocusBoxGlow());
     }
     FocusPattern(const FocusPattern& focusPattern)
     {
@@ -254,6 +265,7 @@ public:
         if (paintParams.HasFocusPadding()) {
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
+        paintParams_->SetFocusBoxGlow(paintParams.IsFocusBoxGlow());
     }
 
     bool GetIsFocusActiveWhenFocused() const
@@ -378,6 +390,7 @@ public:
         if (paramsPtr->HasFocusPadding()) {
             focusPaintParamsPtr_->SetFocusPadding(paramsPtr->GetFocusPadding());
         }
+        focusPaintParamsPtr_->SetFocusBoxGlow(paramsPtr->IsFocusBoxGlow());
     }
 
     bool HasPaintRect() const
@@ -408,6 +421,12 @@ public:
     {
         CHECK_NULL_RETURN(focusPaintParamsPtr_, Dimension());
         return focusPaintParamsPtr_->GetPaintWidth();
+    }
+
+    bool IsFocusBoxGlow() const
+    {
+        CHECK_NULL_RETURN(focusPaintParamsPtr_, false);
+        return focusPaintParamsPtr_->IsFocusBoxGlow();
     }
 
     bool HasFocusPadding() const
@@ -467,6 +486,14 @@ public:
             focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
         }
         focusPaintParamsPtr_->SetFocusPadding(padding);
+    }
+
+    void SetFocusBoxGlow(bool isFocusBoxGlow)
+    {
+        if (!focusPaintParamsPtr_) {
+            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+        }
+        focusPaintParamsPtr_->SetFocusBoxGlow(isFocusBoxGlow);
     }
 
     RefPtr<FocusManager> GetFocusManager() const;
@@ -953,6 +980,8 @@ public:
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     void RemoveFocusScopeIdAndPriority();
     bool AcceptFocusOfPriorityChild();
+    bool SetLastWeakFocusNodeToPreviousNode();
+    void SetLastWeakFocusToPreviousInFocusView();
     bool GetIsFocusGroup() const
     {
         return isGroup_;
@@ -966,6 +995,16 @@ public:
     std::string GetFocusScopeId() const
     {
         return focusScopeId_;
+    }
+
+    FocusBox& GetFocusBox()
+    {
+        return box_;
+    }
+
+    FocusPriority GetFocusPriority() const
+    {
+        return focusPriority_;
     }
 
 protected:
@@ -1026,6 +1065,8 @@ private:
     bool IsNestingFocusGroup();
     void SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId);
 
+    void RaiseZIndex(); // Recover z-index in ClearFocusState
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
@@ -1053,11 +1094,13 @@ private:
     bool hasForwardMovement_ { false };
     bool hasBackwardMovement_ { false };
     bool isFocusActiveWhenFocused_ { false };
+    bool isRaisedZIndex_ { false };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
     std::unique_ptr<FocusPaintParam> focusPaintParamsPtr_;
     std::function<void(RoundRect&)> getInnerFocusRectFunc_;
+    FocusBox box_;
 
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;

@@ -79,14 +79,16 @@ std::string TimePickerRowAccessibilityProperty::GetText() const
 void TimePickerRowAccessibilityProperty::GetMinuteText(std::string& result) const
 {
     auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<NG::TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"].Upgrade();
     CHECK_NULL_VOID(minuteColumn);
 
     auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minutePickerColumnPattern);
-    int minute = minutePickerColumnPattern->GetCurrentIndex();
+    int minute = static_cast<int>(minutePickerColumnPattern->GetCurrentIndex());
     std::string textMinute = std::to_string(minute);
     if (minute < DOUBLE_DIGIT) {
         if (timePickerRowPattern->GetPrefixMinute() != ZeroPrefixType::HIDE) {
@@ -99,14 +101,16 @@ void TimePickerRowAccessibilityProperty::GetMinuteText(std::string& result) cons
 void TimePickerRowAccessibilityProperty::GetSecondText(std::string& result) const
 {
     auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<NG::TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
     if (timePickerRowPattern->GetHasSecond()) {
         auto allChildNode = timePickerRowPattern->GetAllChildNode();
         auto secondColumn = allChildNode["second"].Upgrade();
         CHECK_NULL_VOID(secondColumn);
         auto secondPickerColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(secondPickerColumnPattern);
-        int second = secondPickerColumnPattern->GetCurrentIndex();
+        int second = static_cast<int>(secondPickerColumnPattern->GetCurrentIndex());
         std::string textSecond = std::to_string(second);
         if (second < DOUBLE_DIGIT) {
             if (timePickerRowPattern->GetPrefixSecond() != ZeroPrefixType::HIDE) {

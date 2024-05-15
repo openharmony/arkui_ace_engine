@@ -327,7 +327,7 @@ public:
     }
 
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
-        OffsetF gatherNodeCenter, float scale);
+        OffsetF gatherNodeCenter, float scale, float previewWidth, float previewHeight);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
         const RefPtr<FrameNode>& imageNode);
     static void UpdateTextNodePosition(const RefPtr<FrameNode>& textNode, const Offset& localPoint);
@@ -343,7 +343,7 @@ public:
     }
 
     void GetGatherPixelMap(const RefPtr<PixelMap>& pixelMap);
-    void PushGatherPixelMap(DragDataCore& dragData, float scale);
+    void PushGatherPixelMap(DragDataCore& dragData, float scale, float previewWidth = 0.0f, float previewHeight = 0.0f);
     bool HasGatherNode()
     {
         return hasGatherNode_;
@@ -425,7 +425,7 @@ private:
     RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
-    int64_t preTimeStamp_ = 0L;
+    uint64_t preTimeStamp_ = 0L;
     int64_t nanoPreDragMoveAnimationTime_ = 0L;
     WeakPtr<FrameNode> prepareDragFrameNode_;
     std::function<void(const std::string&)> addDataCallback_ = nullptr;

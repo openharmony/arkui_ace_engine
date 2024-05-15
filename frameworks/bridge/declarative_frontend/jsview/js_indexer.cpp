@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_indexer_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_style.h"
@@ -54,8 +55,10 @@ IndexerModel* IndexerModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::AlignStyle::RIGHT };
-const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT };
+const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::AlignStyle::RIGHT, V2::AlignStyle::START,
+    V2::AlignStyle::END };
+const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::AlignStyle::RIGHT, NG::AlignStyle::START,
+    NG::AlignStyle::END };
 constexpr Dimension DEFAULT_ITEM_SIZE = 16.0_vp;
 constexpr double ZERO_RADIUS = 0.0;
 constexpr double POPUP_ITEM_DEFAULT_RADIUS = 24.0;
@@ -107,6 +110,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
     if (selectedProperty->IsNumber()) {
         selectedVal = selectedProperty->ToNumber<int32_t>();
         IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        JSIndexerTheme::ApplyTheme();
     } else if (length > 0 && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
         auto selectedValueProperty = selectedObj->GetProperty("value");
@@ -114,6 +118,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
             selectedVal = selectedValueProperty->ToNumber<int32_t>();
         }
         IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        JSIndexerTheme::ApplyTheme();
         JSRef<JSVal> changeEventVal = selectedObj->GetProperty("changeEvent");
         if (!changeEventVal.IsEmpty()) {
             if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
@@ -125,6 +130,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
         args.ReturnSelf();
     } else {
         IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        JSIndexerTheme::ApplyTheme();
     }
 }
 
@@ -324,8 +330,8 @@ void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    int32_t value = Container::IsCurrentUseNewPipeline() ? static_cast<int32_t>(NG::AlignStyle::RIGHT)
-                                                         : static_cast<int32_t>(V2::AlignStyle::RIGHT);
+    int32_t value = Container::IsCurrentUseNewPipeline() ? static_cast<int32_t>(NG::AlignStyle::END)
+                                                         : static_cast<int32_t>(V2::AlignStyle::END);
     auto alignValue = -1;
     if (args[0]->IsNumber()) {
         alignValue = args[0]->ToNumber<int32_t>();

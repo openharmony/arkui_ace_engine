@@ -22,6 +22,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/picker_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/timepicker_model_impl.h"
@@ -38,6 +39,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_date_picker_theme.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_time_picker_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -141,8 +144,6 @@ TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-
 JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -191,78 +192,11 @@ JSRef<JSVal> DatePickerDateChangeEventToJSValue(const DatePickerChangeEvent& eve
         dateTime.tm_min = minute->GetInt();
     }
 
-    auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
+    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
+    auto duration = timestamp.time_since_epoch();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     auto dateObj = JSDate::New(milliseconds);
     return JSRef<JSVal>::Cast(dateObj);
-}
-
-std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args)
-{
-    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
-    if (!args->IsObject()) {
-        return prop;
-    }
-
-    std::optional<CalcDimension> radiusTopLeft;
-    std::optional<CalcDimension> radiusTopRight;
-    std::optional<CalcDimension> radiusBottomLeft;
-    std::optional<CalcDimension> radiusBottomRight;
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-    CalcDimension topLeft;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
-        radiusTopLeft = topLeft;
-    }
-    CalcDimension topRight;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
-        radiusTopRight = topRight;
-    }
-    CalcDimension bottomLeft;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
-        radiusBottomLeft = bottomLeft;
-    }
-    CalcDimension bottomRight;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
-        radiusBottomRight = bottomRight;
-    }
-    if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
-        !radiusBottomRight.has_value()) {
-        return prop;
-    }
-    NG::BorderRadiusProperty borderRadius;
-    if (radiusTopLeft.has_value()) {
-        borderRadius.radiusTopLeft = radiusTopLeft;
-    }
-    if (radiusTopRight.has_value()) {
-        borderRadius.radiusTopRight = radiusTopRight;
-    }
-    if (radiusBottomLeft.has_value()) {
-        borderRadius.radiusBottomLeft = radiusBottomLeft;
-    }
-    if (radiusBottomRight.has_value()) {
-        borderRadius.radiusBottomRight = radiusBottomRight;
-    }
-    borderRadius.multiValued = true;
-    prop = borderRadius;
-
-    return prop;
-}
-
-std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
-{
-    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
-    CalcDimension radiusDim;
-    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        return prop;
-    }
-    if (JSViewAbstract::ParseJsDimensionVpNG(args, radiusDim)) {
-        NG::BorderRadiusProperty borderRadius;
-        borderRadius.SetRadius(radiusDim);
-        borderRadius.multiValued = false;
-        prop = borderRadius;
-    } else if (args->IsObject()) {
-        prop = HandleDifferentRadius(args);
-    }
-    return prop;
 }
 
 void ParseFontOfButtonStyle(const JSRef<JSObject>& pickerButtonParamObject, ButtonInfo& buttonInfo)
@@ -281,13 +215,13 @@ void ParseFontOfButtonStyle(const JSRef<JSObject>& pickerButtonParamObject, Butt
     }
     auto fontWeight = pickerButtonParamObject->GetProperty("fontWeight");
     if (fontWeight->IsString() || fontWeight->IsNumber()) {
-        buttonInfo.fontWeight = ConvertStrToFontWeight(fontWeight->ToString());
+        buttonInfo.fontWeight = ConvertStrToFontWeight(fontWeight->ToString(), FontWeight::MEDIUM);
     }
     JSRef<JSVal> style = pickerButtonParamObject->GetProperty("fontStyle");
     if (style->IsNumber()) {
         auto value = style->ToNumber<int32_t>();
-        if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
-            buttonInfo.fontStyle = FONT_STYLES[value];
+        if (value >= 0 && value < static_cast<int32_t>(FontStyle::NONE)) {
+            buttonInfo.fontStyle = static_cast<FontStyle>(value);
         }
     }
     JSRef<JSVal> family = pickerButtonParamObject->GetProperty("fontFamily");
@@ -344,6 +278,9 @@ std::vector<ButtonInfo> ParseButtonStyles(const JSRef<JSObject>& paramObject)
         auto acceptButtonStyleParamObject = JSRef<JSObject>::Cast(acceptButtonStyle);
         buttonInfos.emplace_back(ParseButtonStyle(acceptButtonStyleParamObject));
         buttonInfos[0].isAcceptButton = true;
+    } else {
+        ButtonInfo buttonInfo;
+        buttonInfos.emplace_back(buttonInfo);
     }
     auto cancelButtonStyle = paramObject->GetProperty("cancelButtonStyle");
     if (cancelButtonStyle->IsObject()) {
@@ -751,7 +688,9 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
         }
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
-    SetDefaultAttributes();
+    if (!JSDatePickerTheme::ApplyTheme()) {
+        SetDefaultAttributes();
+    }
 }
 
 void JSDatePicker::SetDefaultAttributes()
@@ -1026,6 +965,11 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     settingData.lunarswitch = lunarSwitch->ToBoolean();
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
+    auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
+    if (dateTimeOptionsValue->IsObject()) {
+        auto dateTimeOptionsObj = JSRef<JSObject>::Cast(dateTimeOptionsValue);
+        JSDatePickerDialog::ParseDateTimeOptions(dateTimeOptionsObj, settingData.dateTimeOptions);
+    }
     auto parseStartDate = ParseDate(startDate);
     auto parseEndDate = ParseDate(endDate);
     if (parseStartDate.GetYear() <= 0) {
@@ -1149,13 +1093,10 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     CHECK_NULL_VOID(theme);
 
     DialogProperties properties;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        properties.alignment = DialogAlignment::BOTTOM;
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-        }
-    } else {
-        properties.alignment = DialogAlignment::CENTER;
+    properties.alignment = theme->GetAlignment();
+    if (properties.alignment == DialogAlignment::BOTTOM &&
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
     }
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -1178,13 +1119,11 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     JSDatePicker::ParseTextProperties(paramObj, settingData.properties);
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
-            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowDateDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowDateDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowDatePicker");
 }
@@ -1291,6 +1230,31 @@ PickerTime JSDatePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
         pickerTime.SetSecond(second->ToNumber<int32_t>());
     }
     return pickerTime;
+}
+
+void JSDatePickerDialog::ParseDateTimeOptions(const JSRef<JSObject>& paramObj, DateTimeType& dateTimeOptions)
+{
+    dateTimeOptions.hourType = ZeroPrefixType::AUTO;
+    dateTimeOptions.minuteType = ZeroPrefixType::AUTO;
+    dateTimeOptions.secondType = ZeroPrefixType::AUTO;
+
+    auto hourValue = paramObj->GetProperty(TIMEPICKER_OPTIONS_HOUR);
+    if (hourValue->IsString()) {
+        std::string hour = hourValue->ToString();
+        if (hour == TIMEPICKER_OPTIONS_TWO_DIGIT_VAL) {
+            dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+        } else if (hour == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+            dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+        }
+    }
+    auto minuteValue = paramObj->GetProperty(TIMEPICKER_OPTIONS_MINUTE);
+    if (minuteValue->IsString()) {
+        dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+        std::string minute = minuteValue->ToString();
+        if (minute == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+            dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+        }
+    }
 }
 
 void JSTimePicker::JSBind(BindingTarget globalObj)
@@ -1443,7 +1407,9 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
             TimePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
         }
     }
-    SetDefaultAttributes();
+    if (!JSTimePickerTheme::ApplyTheme()) {
+        SetDefaultAttributes();
+    }
 }
 
 void JSTimePicker::SetDefaultAttributes()
@@ -1643,6 +1609,11 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
     JSDatePicker::ParseTextProperties(paramObject, settingData.properties);
+    auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
+    if (dateTimeOptionsValue->IsObject()) {
+        auto dateTimeOptionsObj = JSRef<JSObject>::Cast(dateTimeOptionsValue);
+        JSDatePickerDialog::ParseDateTimeOptions(dateTimeOptionsObj, settingData.dateTimeOptions);
+    }
 
     // Parse alignment
     auto alignmentValue = paramObject->GetProperty("alignment");
@@ -1732,14 +1703,12 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     settingData.isUseMilitaryTime = useMilitaryTime->ToBoolean();
 
     DialogProperties properties;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        properties.alignment = DialogAlignment::BOTTOM;
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-        }
-    } else {
-        properties.alignment = DialogAlignment::CENTER;
+    properties.alignment = theme->GetAlignment();
+    if (properties.alignment == DialogAlignment::BOTTOM &&
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
     }
+
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
@@ -1754,14 +1723,12 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent,
+        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(
-                properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI, "ArkUIDialogShowTimePicker");
 }

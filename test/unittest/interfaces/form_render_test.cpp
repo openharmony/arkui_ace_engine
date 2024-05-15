@@ -222,8 +222,8 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     renderDelegate->SetErrorEventHandler(std::move(onError));
 
     std::string onSurfaceChangeEventKey;
-    auto onSurfaceChange = [&onSurfaceChangeEventKey](
-                               float /* width */, float /* height */) { onSurfaceChangeEventKey = CHECK_KEY; };
+    auto onSurfaceChange = [&onSurfaceChangeEventKey](float /* width */,
+                        float /* height */, float /* borderWidth */) { onSurfaceChangeEventKey = CHECK_KEY; };
     renderDelegate->SetSurfaceChangeEventHandler(std::move(onSurfaceChange));
 
     /**

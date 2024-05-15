@@ -282,6 +282,15 @@ ohos_unittest("ui_event_test") {
   ]
 }
 
+ace_unittest("extension_custom_node_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [
+    "$ace_root/frameworks/core/interfaces/native/node/extension_custom_node.cpp",
+    "extension_custom_node_test_ng.cpp",
+  ]
+}
+
 ohos_unittest("ace_forward_compatibility_test") {
   module_out_path = interface_test_output_path
 
@@ -317,6 +326,7 @@ group("interfaces_unittest") {
   deps = [
     ":ace_forward_compatibility_test",
     ":drawable_descriptor_test",
+    ":extension_custom_node_test_ng",
     ":form_render_group_test",
     ":form_render_test",
     ":navigation_controller_test",

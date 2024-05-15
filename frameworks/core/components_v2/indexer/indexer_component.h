@@ -67,6 +67,8 @@ inline constexpr uint32_t INDEXER_ACTIVE_BG_COLOR = 0x1F0A59F7;
 enum class AlignStyle {
     LEFT = 0,
     RIGHT,
+    START,
+    END,
 };
 
 class ACE_EXPORT IndexerComponent : public ComponentGroup {

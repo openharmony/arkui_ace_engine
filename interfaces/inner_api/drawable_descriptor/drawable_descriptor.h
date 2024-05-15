@@ -71,6 +71,10 @@ public:
     {
         pixelMap_ = pixelMap;
     }
+    bool HasPixelMap()
+    {
+        return pixelMap_.has_value();
+    }
     void ResetPixelMap()
     {
         pixelMap_.reset();
@@ -137,6 +141,11 @@ public:
         customized_ = true;
     }
 
+    bool Customized()
+    {
+        return customized_;
+    }
+
     void InitialMask(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
     bool GetDefaultMask();
 
@@ -186,6 +195,8 @@ public:
     std::vector<std::shared_ptr<Media::PixelMap>> GetPixelMapList();
     int32_t GetDuration();
     int32_t GetIterations();
+    void SetDuration(int32_t duration);
+    void SetIterations(int32_t iteration);
 private:
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList_;
     int32_t duration_ = -1;

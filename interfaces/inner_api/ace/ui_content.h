@@ -139,6 +139,7 @@ public:
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
+    virtual void ProcessFormVisibleChange(bool isVisible) {};
     virtual void NotifyRotationAnimationEnd() {};
 
     // only vaild in ContainerModalPatternEnhance

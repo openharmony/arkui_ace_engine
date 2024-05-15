@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_BLEND_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_BLEND_H
 
-#include "core/components/declaration/svg/svg_fe_blend_declaration.h"
 #include "core/components_ng/svg/parse/svg_fe.h"
 
 namespace OHOS::Ace::NG {
@@ -29,10 +28,14 @@ public:
     ~SvgFeBlend() override = default;
     static RefPtr<SvgNode> Create();
 
-    RSBlendMode GetBlendMode(FeBlendMode mode) const;
+    RSBlendMode GetBlendMode(SvgFeBlendMode mode) const;
     void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
-        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor,
+        const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
         std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const override;
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+
+private:
+    SvgFeBlendAttribute feBlendAttr_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -64,6 +64,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
         AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK));
     minResponse_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     blockType_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
+    useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     // others
     UpdateData(parameters);
     UpdateThemeColor();
@@ -129,6 +130,9 @@ void SliderContentModifier::InitializeShapeProperty()
 
 void SliderContentModifier::onDraw(DrawingContext& context)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     DrawBackground(context);
     DrawStep(context);
     DrawSelect(context);

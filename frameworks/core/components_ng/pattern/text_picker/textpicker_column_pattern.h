@@ -342,6 +342,7 @@ public:
     }
 
     int32_t GetOverScrollDeltaIndex() const;
+    void SetCanLoop(bool isLoop);
 
 private:
     void OnModifyDone() override;
@@ -368,6 +369,8 @@ private:
     double GetShiftDistance(int32_t index, ScrollDirection dir);
     void OnTouchDown();
     void OnTouchUp();
+    void ParseTouchListener();
+    void ParseMouseEvent();
     void InitMouseAndPressEvent();
     void HandleMouseEvent(bool isHover);
     void SetButtonBackgroundColor(const Color& pressColor);
@@ -468,6 +471,7 @@ private:
     bool touchBreak_ = false;
     bool animationBreak_ = false;
     bool needOptionPropertyHeightReset_ = false;
+    bool isLoop_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

@@ -50,6 +50,10 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetFirstHandleInfo()
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = pattern->textSelector_.firstHandle;
     handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+
+    auto localPaintRect = handleInfo.paintRect;
+    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+    SetTransformPaintInfo(handleInfo, localPaintRect);
     return handleInfo;
 }
 
@@ -60,6 +64,10 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetSecondHandleInfo()
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = pattern->textSelector_.secondHandle;
     handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+
+    auto localPaintRect = handleInfo.paintRect;
+    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+    SetTransformPaintInfo(handleInfo, localPaintRect);
     return handleInfo;
 }
 
@@ -111,11 +119,27 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     CHECK_NULL_VOID(!pattern->spans_.empty());
     TextSelectOverlay::OnHandleMove(handleRect, isFirst);
     auto parentGlobalOffset = pattern->GetParentGlobalOffset();
-    auto localOffset = handleRect.GetOffset() - parentGlobalOffset;
-    float x = std::clamp(localOffset.GetX(), 0.0f, pattern->GetContentRect().Width());
-    float y = std::clamp(localOffset.GetY(), 0.0f, pattern->GetContentRect().Height());
+    if (hasTransform_) {
+        parentGlobalOffset = GetPaintOffsetWithoutTransform();
+    }
+    auto localOffset = handleRect.GetOffset() - parentGlobalOffset; // original offset
+
+    // update moving handle offset
+    auto movingHandleOffset = pattern->ConvertTouchOffsetToTextOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+    auto movingHandleOffsetF = OffsetF(movingHandleOffset.GetX(), movingHandleOffset.GetY());
+    GetLocalPointWithTransform(movingHandleOffsetF); // do affine transformation
+    pattern->SetMovingHandleOffset(movingHandleOffsetF);
+
+    auto contentRect = pattern->GetContentRect();
+    auto caretRect = pattern->GetCaretRect();
+    float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
+    float y = std::clamp(localOffset.GetY(), contentRect.Top(), contentRect.Bottom() - caretRect.Height());
     localOffset = OffsetF(x, y);
-    pattern->magnifierController_->SetLocalOffset(localOffset);
+
+    auto magnifierLocalOffset = localOffset;
+    GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
+    pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
+
     if (isFirst) {
         pattern->textSelector_.firstHandle.SetOffset(localOffset);
     } else {
@@ -133,10 +157,10 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
     auto pattern = GetPattern<RichEditorPattern>();
     auto& textSelector = pattern->textSelector_;
     auto currentHandleIndex = pattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
+    pattern->SetCaretPosition(currentHandleIndex);
     if (isFirst) {
         pattern->HandleSelectionChange(currentHandleIndex, textSelector.destinationOffset);
     } else {
-        pattern->SetCaretPosition(currentHandleIndex);
         if (IsSingleHandle()) {
             auto textOffset = handleOffset + pattern->contentRect_.GetOffset() - pattern->richTextRect_.GetOffset();
             pattern->CalcAndRecordLastClickCaretInfo(Offset(textOffset.GetX(), textOffset.GetY()));
@@ -188,7 +212,14 @@ RectF RichEditorSelectOverlay::GetSelectArea()
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, {});
-    return pattern->GetSelectArea();
+    auto intersectRect = pattern->GetSelectArea();
+
+    if (hasTransform_) {
+        auto textPaintOffset = GetPaintOffsetWithoutTransform();
+        intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
+        GetGlobalRectWithTransform(intersectRect);
+    }
+    return intersectRect;
 }
 
 void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag)
@@ -213,6 +244,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
+    selectInfo.pattern = AceType::WeakClaim(AceType::RawPtr(pattern));
     selectInfo.handlerColor = pattern->GetCaretColor();
     selectInfo.handleReverse = IsHandleReverse();
     bool usingMouse = pattern->IsUsingMouse();
@@ -235,7 +267,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     selectInfo.menuInfo.editorType = static_cast<int32_t>(pattern->GetEditorType());
     selectInfo.callerFrameNode = pattern->GetHost();
     selectInfo.isNewAvoid = true;
-    selectInfo.selectArea = pattern->GetSelectArea();
+    selectInfo.selectArea = GetSelectArea();
     selectInfo.checkIsTouchInHostArea =
     [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const PointF& touchPoint) -> bool {
         auto pattern = weak.Upgrade();
@@ -249,6 +281,12 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     selectInfo.recreateOverlay = requestCode == REQUEST_RECREATE;
     CheckEditorTypeChange(selectInfo, pattern->GetEditorType());
     pattern->CopySelectionMenuParams(selectInfo, responseType);
+    if (hasTransform_) {
+        selectInfo.callerNodeInfo = {
+            .paintFrameRect = GetPaintRectWithTransform(),
+            .paintOffset = GetPaintRectOffsetWithTransform()
+        };
+    }
 }
 
 void RichEditorSelectOverlay::CheckEditorTypeChange(SelectOverlayInfo& selectInfo, TextSpanType selectType)
@@ -301,7 +339,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     }
 }
 
-void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
+void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     TAG_LOGD(AceLogTag::ACE_TEXT, "menuType=%{public}d, closeReason=%{public}d", menuType, reason);
     auto pattern = GetPattern<RichEditorPattern>();

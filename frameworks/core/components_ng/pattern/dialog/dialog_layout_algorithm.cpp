@@ -104,7 +104,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!customSize_) {
         auto maxSize = layoutConstraint->maxSize;
         maxSize.MinusPadding(0, 0, safeAreaInsets_.top_.Length(), 0);
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && LessNotEqual(gridCount_, 0)) {
             maxSize.MinusPadding(0, 0, 0, safeAreaInsets_.bottom_.Length());
         }
         childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
@@ -255,6 +255,10 @@ LayoutConstraintF DialogLayoutAlgorithm::CreateDialogChildConstraint(
 bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout,
     const RefPtr<DialogLayoutProperty>& dialogProp)
 {
+    // when width is valid, gridCount_ is -1
+    if (GreatOrEqual(gridCount_, 0)) {
+        return false;
+    }
     CHECK_NULL_RETURN(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE), false);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -266,7 +270,6 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
         maxSize.Width() - dialogTheme->GetMarginLeft().ConvertToPx() - dialogTheme->GetMarginRight().ConvertToPx();
     auto defaultMaxWidth = dialogTheme->GetContainerMaxWidth().ConvertToPx();
     width = defaultMaxWidth < width ? defaultMaxWidth : width;
-    
     if (dialogProp->GetWidth().has_value()) {
         auto dialogWidth = dialogProp->GetWidth().value_or(Dimension(-1, DimensionUnit::VP));
         auto widthVal = dialogWidth.Unit() == DimensionUnit::PERCENT ? maxSize.Width() : dialogWidth.ConvertToPx();
@@ -429,14 +432,14 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
 }
 int32_t DialogLayoutAlgorithm::GetDeviceColumn(GridSizeType type)
 {
-    int32_t columnNum = 16;
+    int32_t columnNum;
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, columnNum);
+    CHECK_NULL_RETURN(pipelineContext, 0);
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, columnNum);
+    CHECK_NULL_RETURN(dialogTheme, 0);
     int32_t deviceColumn = dialogTheme->GetDeviceColumns();
     if (deviceColumn > 0) {
-        return deviceColumn;
+        columnNum = deviceColumn;
     } else {
         if (type == GridSizeType::SM) {
             columnNum = DIALOG_DEVICE_COLUMN_TWO;
@@ -755,7 +758,16 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    if (isShowInSubWindow_ && !container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetSubContainerId(Container::CurrentId());
+        container = AceEngine::Get().GetContainer(currentId);
+    }
+    CHECK_NULL_RETURN(container, topLeftPoint + dialogOffset);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_RETURN(context, topLeftPoint + dialogOffset);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
     if (!customSize_ && topLeftPoint.GetY() < safeAreaInsets_.top_.end) {
         topLeftPoint.SetY(safeAreaInsets_.top_.end);

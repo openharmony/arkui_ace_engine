@@ -59,6 +59,8 @@ public:
     static JSRef<JSObject> CreateNewNavPathStackJSObject();
     static void SetNativeNavPathStack(JSRef<JSObject> jsStack, JSRef<JSObject> nativeStack);
 
+    static bool CheckIsValid(JSValueWrapper object);
+
 private:
     static void Constructor(const JSCallbackInfo& info);
     static void Destructor(JSNavPathStack* stack);

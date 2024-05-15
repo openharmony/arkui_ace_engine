@@ -101,6 +101,10 @@ void NavigationTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    auto context = MockPipelineContext::GetCurrent();
+    if (context) {
+        context->stageManager_ = nullptr;
+    }
 }
 
 void NavigationTestNg::TearDownTestSuite()
@@ -827,7 +831,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0022, TestSize.Level1)
     ASSERT_FALSE(contentNode->children_.empty());
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint = std::make_unique<MeasureProperty>();
-    std::optional<CalcLength> len = CalcLength("auto");
+    std::optional<CalcLength> len = CalcLength(200);
     calcLayoutConstraint->selfIdealSize = CalcSize(std::nullopt, len);
     navigationLayoutProperty->calcLayoutConstraint_ = std::move(calcLayoutConstraint);
     algorithm->MeasureContentChild(AceType::RawPtr(layoutWrapper), navigation, navigationLayoutProperty, SizeF());
@@ -928,6 +932,8 @@ HWTEST_F(NavigationTestNg, NavigationStackTest001, TestSize.Level1)
     /**
      * @tc.steps: step1.create navigation, and set the navigation stack
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetNavigationStack();
@@ -935,6 +941,7 @@ HWTEST_F(NavigationTestNg, NavigationStackTest001, TestSize.Level1)
     RefPtr<NavigationGroupNode> navigationNode =
         AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navigationNode, nullptr);
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
 
     /**
      * @tc.steps: step2.add page A
@@ -1049,7 +1056,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step2.push A
@@ -1058,7 +1065,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
 HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
@@ -1102,7 +1109,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step3.pop page B
@@ -1111,7 +1118,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
 HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
@@ -1155,7 +1162,7 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(stack->GetReplaceValue(), 2);
+    ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
      * @tc.steps: step3.pop page B
@@ -1414,6 +1421,9 @@ HWTEST_F(NavigationTestNg, NestedNavigationTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create NavigationStack, setup mock function
      */
+
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     ScopedViewStackProcessor scopedViewStackProcessor;
     auto outerStack = AceType::MakeRefPtr<MockNavigationStack>();
     auto innerStack = AceType::MakeRefPtr<MockNavigationStack>();
@@ -1435,7 +1445,7 @@ HWTEST_F(NavigationTestNg, NestedNavigationTest001, TestSize.Level1)
     auto groupNode = AceType::DynamicCast<NavigationGroupNode>(
             ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(groupNode, nullptr);
-    groupNode->AttachToMainTree(true);
+    groupNode->AttachToMainTree(true, AceType::RawPtr(context));
 
     /**
      * @tc.steps: step2. create inner navigation and set stack

@@ -14,12 +14,40 @@
  */
 
 /// <reference path='./import.ts' />
+class FlexInitializeModifier extends ModifierWithKey<FlexParam> {
+  constructor(value: FlexParam) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('flexInitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().flex.resetFlexInitialize(node);
+    } else {
+      getUINativeModule().flex.setFlexInitialize(node, this.value.direction, this.value.wrap,
+        this.value.justifyContent, this.value.alignItems, this.value.alignContent);
+    }
+  }
+}
+interface FlexParam {
+  direction?: FlexDirection;
+  wrap?: FlexWrap;
+  justifyContent?: FlexAlign;
+  alignItems?: ItemAlign;
+  alignContent?: FlexAlign;
+}
 class ArkFlexComponent extends ArkComponent implements FlexAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   pointLight(value: PointLightStyle): this {
     throw new Error('Method not implemented.');
+  }
+  initialize(value: Object[]): FlexAttribute {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, FlexInitializeModifier.identity,
+        FlexInitializeModifier, (value[0] as FlexParam));
+    }
+    return this;
   }
 }
 

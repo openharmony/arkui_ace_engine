@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/models/progress_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_progress_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/text/text_theme.h"
@@ -96,6 +97,7 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
 
     ProgressModel::GetInstance()->Create(0.0, value, 0.0, total, static_cast<NG::ProgressType>(g_progressType));
+    JSProgressTheme::ApplyTheme(progressStyle);
 }
 
 void JSProgress::JSBind(BindingTarget globalObj)

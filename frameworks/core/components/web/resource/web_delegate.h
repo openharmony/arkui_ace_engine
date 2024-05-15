@@ -533,10 +533,22 @@ public:
     void SetGestureEventResult(bool result) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
+    bool GetEventResult() { return eventResult_; }
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result_;
     bool sendTask_ = false;
+    bool eventResult_ = false;
+};
+
+class WebAvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
+public:
+    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
+    ~WebAvoidAreaChangedListener() = default;
+
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+private:
+    WeakPtr<WebDelegate> webDelegate_;
 };
 
 enum class ScriptItemType {
@@ -666,6 +678,7 @@ public:
     void HandleTouchMove(const std::vector<std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo>> &touch_point_infos,
                          bool fromOverlay = false);
     void HandleTouchCancel();
+    void HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy);
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
@@ -761,6 +774,9 @@ public:
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
     bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
     void OnTooltip(const std::string& tooltip);
+    void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void SuggestionSelected(int32_t index);
+    void OnHideAutofillPopup();
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
@@ -840,6 +856,7 @@ public:
 #endif
     void SetToken();
     void SetRenderMode(RenderMode renderMode);
+    void SetFitContentMode(WebLayoutMode layoutMode);
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
@@ -861,6 +878,17 @@ public:
     // Backward
     void Backward();
     bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
+
+    void OnRenderProcessNotResponding(
+        const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
+    void OnRenderProcessResponding();
+    std::string GetSelectInfo() const;
+
+    void OnOnlineRenderToForeground();
+
+    void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
+    void OnAreaChange(const OHOS::Ace::Rect& area);
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
 
 private:
     void InitWebEvent();
@@ -934,7 +962,6 @@ private:
     void UnregisterSurfacePositionChangedCallback();
 
     void NotifyPopupWindowResult(bool result);
-    void IsNativeType(const double& x, const double& y);
 
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
     void SurfaceOcclusionCallback(float visibleRatio);
@@ -942,6 +969,10 @@ private:
     void ratioStrToFloat(const std::string& str);
     // Return canonical encoding name according to the encoding alias name.
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
+    void RegisterAvoidAreaChangeListener();
+    void UnregisterAvoidAreaChangeListener();
+    void OnSafeInsetsChange();
+    void InitCacheCutoutEdge();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1001,8 +1032,12 @@ private:
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
+    EventCallbackV2 onRenderProcessNotRespondingV2_;
+    EventCallbackV2 onRenderProcessRespondingV2_;
+    EventCallbackV2 onViewportFitChangedV2_;
 
     int32_t renderMode_;
+    int32_t layoutMode_;
     std::string bundlePath_;
     std::string bundleDataPath_;
     std::string hapPath_;
@@ -1046,6 +1081,12 @@ private:
     bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
+    OHOS::Ace::Rect currentArea_;
+    NG::SafeAreaInsets systemSafeArea_;
+    NG::SafeAreaInsets cutoutSafeArea_;
+    NG::SafeAreaInsets navigationIndicatorSafeArea_;
+    uint32_t cacheCutoutEdge_ = 0;
+    sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
 #endif
 };
 

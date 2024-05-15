@@ -14,13 +14,12 @@
  */
 
 /**
- * 
- * This file includes only framework internal classes and functions 
+ *
+ * This file includes only framework internal classes and functions
  * non are part of SDK. Do not access from app.
- */
-
-/**
- * Helper class for handling V3 decorated variables
+ *
+ *
+ * Helper class for handling V2 decorated variables
  */
 class VariableUtilV3 {
     /**
@@ -43,7 +42,7 @@ class VariableUtilV3 {
       target[storeProp] = newValue;
       ObserveV2.getObserve().addRef(target, attrName);
     }
-  
+
       /**
        * setReadOnlyAttr - helper function used to update @param
        * from parent @Component. Not allowed for @param @once .
@@ -59,7 +58,7 @@ class VariableUtilV3 {
         stateMgmtConsole.error(error);
         throw new Error(error);
       }
-  
+
       const storeProp = ObserveV2.OB_PREFIX + attrName;
       // @observed class and @track attrName
       if (newValue === target[storeProp]) {
@@ -76,96 +75,96 @@ class VariableUtilV3 {
       }
     }
   }
-  
-  class ProvideConsumeUtilV3 {
+
+  class ProviderConsumerUtilV2 {
     private static readonly ALIAS_PREFIX = '___pc_alias_';
-  
-  
+
     /**
-     * Helper function to add meta data about @provide and @consume decorators to ViewV2
-     * similar to @see addVariableDecoMeta, but adds the alias to allow search from @consume for @provide counterpart
+     *  meta added to the ViewV2
+     *  varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
+     *  prefix_@Provider_aliasName: {'varName': ..., 'aliasName': ...., 'deco': '@Provider' | '@Consumer'
+     */
+    private static metaAliasKey(aliasName: string, deco: '@Provider' | '@Consumer') : string {
+      return `${ProviderConsumerUtilV2.ALIAS_PREFIX}_${deco}_${aliasName}`;;
+    }
+
+    /**
+     * Helper function to add meta data about @Provider and @Consumer decorators to ViewV2
+     * similar to @see addVariableDecoMeta, but adds the alias to allow search from @Consumer for @Provider counterpart
      * @param proto prototype object of application class derived from ViewV2
      * @param varName decorated variable
      * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
      */
-    public static addProvideConsumeVariableDecoMeta(proto: Object, varName: string, aliasName: string, deco: '@provide' | '@consume'): void {
+    public static addProvideConsumeVariableDecoMeta(proto: Object, varName: string, aliasName: string, deco: '@Provider' | '@Consumer'): void {
       // add decorator meta data to prototype
       const meta = proto[ObserveV2.V2_DECO_META] ??= {};
       // note: aliasName is the actual alias not the prefixed version
       meta[varName] = { 'deco': deco, 'aliasName': aliasName };
-  
+
       // prefix to avoid name collisions with variable of same name as the alias!
-      const aliasProp = ProvideConsumeUtilV3.ALIAS_PREFIX + aliasName;
-      meta[aliasProp] = { 'varName': varName, 'deco': deco };
-  
-      // FIXME 
-      // when splitting ViewPU and ViewV2
-      // use instanceOf. Until then, this is a workaround.
-      // any @state, @track, etc V3 event handles this function to return false
-      Reflect.defineProperty(proto, 'isViewV3', {
-        get() { return true; },
-        enumerable: false
-      }
-      );
+      const aliasProp = ProviderConsumerUtilV2.metaAliasKey(aliasName, deco);
+      meta[aliasProp] = { 'varName': varName, 'aliasName': aliasName, 'deco': deco };
     }
-  
-    public static setupConsumeVarsV3(view: ViewV2): boolean {
+
+    public static setupConsumeVarsV2(view: ViewV2): boolean {
       const meta = view && view[ObserveV2.V2_DECO_META];
       if (!meta) {
         return;
       }
-  
+
       for (const [key, value] of Object.entries(meta)) {
-        if ((value as any).deco === '@consume' && (value as any).varName) {
-          const prefixedAliasName = key;
-          let result = ProvideConsumeUtilV3.findProvide(view, prefixedAliasName);
+        // check all entries of this format varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
+        // do not check alias entries
+        // 'varName' is only in alias entries, see addProvideConsumeVariableDecoMeta
+        if (typeof value == 'object' && value['deco'] === '@Consumer' && !('varName' in value)) {
+          let result = ProviderConsumerUtilV2.findProvider(view, value['aliasName']);
           if (result && result[0] && result[1]) {
-            ProvideConsumeUtilV3.connectConsume2Provide(view, (value as any).varName, result[0], result[1]);
+            ProviderConsumerUtilV2.connectConsumer2Provider(view, key, result[0], result[1]);
           } else {
-            ProvideConsumeUtilV3.defineConsumeWithoutProvide(view, (value as any).varName);
+            ProviderConsumerUtilV2.defineConsumerWithoutProvider(view, key);
           }
         }
       }
     }
-  
+
     /**
-    * v3: find a @provide'ed variable from its nearest ancestor ViewV2.
+    * find a @Provider'ed variable from its nearest ancestor ViewV2.
     * @param searchingAliasName The key name to search for.
     * @returns A tuple containing the ViewPU instance where the provider is found
     * and the provider name
     * If root @Component reached without finding, returns undefined.
     */
-    private static findProvide(view: ViewV2, searchingPrefixedAliasName: string): [ViewV2, string] | undefined {
+    private static findProvider(view: ViewV2, aliasName: string): [ViewV2, string] | undefined {
       let checkView : IView | undefined = view?.getParent();
+      const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, "@Provider");
+      stateMgmtConsole.debug(`findProvider: Try to connect ${view.debugInfo__()} '@Consumer ${aliasName}' to @Provider counterpart....`);
       while (checkView) {
         const meta = checkView.constructor?.prototype[ObserveV2.V2_DECO_META];
         if (checkView instanceof ViewV2 && meta && meta[searchingPrefixedAliasName]) {
           const aliasMeta = meta[searchingPrefixedAliasName];
-          const providedVarName: string | undefined = aliasMeta && (aliasMeta.deco === '@provide' ? aliasMeta.varName : undefined);
-  
+          const providedVarName: string | undefined = (aliasMeta && (aliasMeta.deco === '@Provider') ? aliasMeta.varName : undefined);
+
           if (providedVarName) {
-            stateMgmtConsole.debug(`findProvide: success: ${checkView.debugInfo__()} has matching @provide('${searchingPrefixedAliasName.substring(ProvideConsumeUtilV3.ALIAS_PREFIX.length)}') ${providedVarName}`);
+            stateMgmtConsole.debug(`findProvider: success: ${checkView.debugInfo__()} has matching @Provider('${aliasName}') ${providedVarName}`);
             return [checkView, providedVarName];
           }
         }
-        checkView = checkView.getParent(); // FIXME IView
+        checkView = checkView.getParent();
       }; // while
-      stateMgmtConsole.debug(`findProvide:  ${view.debugInfo__()} @consume('${searchingPrefixedAliasName.substring(ProvideConsumeUtilV3.ALIAS_PREFIX.length)}'), no matching @provide found amongst ancestor @Components`);
+      stateMgmtConsole.warn(`findProvider: ${view.debugInfo__()} @Consumer('${aliasName}'), no matching @Provider found amongst ancestor @ComponentV2's!`);
       return undefined;
     }
-  
-    private static connectConsume2Provide(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): void {
-      stateMgmtConsole.debug(`connectConsume2PRovide: Connect ${consumeView.debugInfo__()} '@consume ${consumeVarName}' to ${provideView.debugInfo__()} '@provide ${provideVarName}'`);
-  
+
+    private static connectConsumer2Provider(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): void {
       const weakView = new WeakRef<ViewV2>(provideView);
       const provideViewName = provideView.constructor?.name;
       Reflect.defineProperty(consumeView, consumeVarName, {
         get() {
-          stateMgmtConsole.propertyAccess(`@consume ${consumeVarName} get`);
+          stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} get`);
           ObserveV2.getObserve().addRef(this, consumeVarName);
           const view = weakView.deref();
           if (!view) {
-            const error = `${this.debugInfo__()}: get() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`;
+            const error = `${this.debugInfo__()}: get() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
             stateMgmtConsole.error(error);
             throw new Error(error);
           }
@@ -173,16 +172,16 @@ class VariableUtilV3 {
         },
         set(val) {
           // If the object has not been observed, you can directly assign a value to it. This improves performance.
-          stateMgmtConsole.propertyAccess(`@consume ${consumeVarName} set`);
+          stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} set`);
           const view = weakView.deref();
           if (!view) {
-            const error = `${this.debugInfo__()}: set() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`;
+            const error = `${this.debugInfo__()}: set() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
             stateMgmtConsole.error(error);
             throw new Error(error);
           }
-  
+
           if (val !== view[provideVarName]) {
-            stateMgmtConsole.propertyAccess(`@consume ${consumeVarName} valueChanged`);
+            stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} valueChanged`);
             view[provideVarName] = val;
             if (this[ObserveV2.SYMBOL_REFS]) { // This condition can improve performance.
               ObserveV2.getObserve().fireChange(this, consumeVarName);
@@ -192,10 +191,10 @@ class VariableUtilV3 {
         enumerable: true
       });
     }
-  
-    private static defineConsumeWithoutProvide(consumeView: ViewV2, consumeVarName: string): void {
-      stateMgmtConsole.debug(`defineConsumeWithoutProvide: ${consumeView.debugInfo__()} @consume ${consumeVarName} does not have @provide counter part, uses local init value`);
-  
+
+    private static defineConsumerWithoutProvider(consumeView: ViewV2, consumeVarName: string): void {
+      stateMgmtConsole.debug(`defineConsumerWithoutProvider: ${consumeView.debugInfo__()} @Consumer ${consumeVarName} does not have @Provider counter part, will use local init value`);
+
       const storeProp = ObserveV2.OB_PREFIX + consumeVarName;
       consumeView[storeProp] = consumeView[consumeVarName]; // use local init value, also as backing store
       Reflect.defineProperty(consumeView, consumeVarName, {
@@ -215,22 +214,52 @@ class VariableUtilV3 {
       });
     }
   }
-  
-  // The prop parameter is not carried when the component is updated.
-  // FIXME what is the purpose of this ?
-  /*
-  let updateChild = ViewPU.prototype["updateStateVarsOfChildByElmtId"];
-  ViewPU.prototype["updateStateVarsOfChildByElmtId"] = function (elmtId, params) {
-    updateChild?.call(this, elmtId, params);
-    let child = this.getChildById(elmtId);
-    if (child) {
-      let realParams = child.paramsGenerator_ ? child.paramsGenerator_() : params
-      for (let k in realParams) {
-        if (ObserveV2.OB_PREFIX + k in child) {
-          child[k] = realParams[k];
-        }
-      }
-    }
+
+/*
+  Internal decorator for @Trace without usingV2ObservedTrack call.
+  Real @Trace decorator function is in v2_decorators.ts
+*/
+const Trace_Internal = (target: Object, propertyKey: string): void => {
+    return trackInternal(target, propertyKey);
+};
+
+/*
+  Internal decorator for @ObservedV2 without usingV2ObservedTrack call.
+  Real @ObservedV2 decorator function is in v2_decorators.ts
+*/
+function ObservedV2_Internal<T extends ConstructorV2>(BaseClass: T): T {
+    return observedV2Internal<T>(BaseClass);
+}
+
+/*
+  @ObservedV2 decorator function uses this in v2_decorators.ts
+*/
+function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
+
+  // prevent @Track inside @observed class
+  if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
+    const error = `'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
+    stateMgmtConsole.applicationError(error);
+    throw new Error(error);
   }
-  */
-  
+
+  if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
+    // not an error, suspicious of developer oversight
+    stateMgmtConsole.warn(`'@observed class ${BaseClass?.name}': no @track property inside. Is this intended? Check our application.`);
+  }
+
+  // Use ID_REFS only if number of observed attrs is significant
+  const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
+  const count = attrList.filter(attr => attr.startsWith(ObserveV2.OB_PREFIX)).length;
+  if (count > 5) {
+    stateMgmtConsole.log(`'@observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
+    BaseClass.prototype[ObserveV2.ID_REFS] = {};
+  }
+  return class extends BaseClass {
+    constructor(...args) {
+      super(...args);
+      AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
+      AsyncAddComputedV2.addComputed(this, BaseClass.name);
+    }
+  };
+}

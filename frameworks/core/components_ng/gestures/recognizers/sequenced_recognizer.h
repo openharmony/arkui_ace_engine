@@ -47,6 +47,7 @@ public:
     }
 
     void CleanRecognizerState() override;
+    void ForceCleanRecognizer() override;
     
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};

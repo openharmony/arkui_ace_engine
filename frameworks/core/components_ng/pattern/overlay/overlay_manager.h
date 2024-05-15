@@ -162,22 +162,25 @@ public:
         const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode, bool isRightToLeft = false);
     void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
-        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
-    void ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
-        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, PickerTime> timePickerProperty,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
+        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {},
+        const std::vector<ButtonInfo>& buttonInfos = std::vector<ButtonInfo>({}));
+    void ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
+        std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {},
+        const std::vector<ButtonInfo>& buttonInfos = std::vector<ButtonInfo>({}));
     void ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
-        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
+        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {},
+        const std::vector<ButtonInfo>& buttonInfos = std::vector<ButtonInfo>({}));
     void ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
-        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
+        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {},
+        const std::vector<ButtonInfo>& buttonInfos = std::vector<ButtonInfo>({}));
     void PopModalDialog(int32_t maskId);
 
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
@@ -268,7 +271,6 @@ public:
     void SetHasFilter(bool hasFilter)
     {
         hasFilter_ = hasFilter;
-        hasFilterActived = true;
     }
 
     bool GetHasEvent()
@@ -401,6 +403,7 @@ public:
     void RemoveSheetMask(RefPtr<FrameNode>& sheetNode, RefPtr<UINode>& rootNode);
 
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
+    void BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
 
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
@@ -444,11 +447,6 @@ public:
 
     void SetCustomKeyboardOption(bool supportAvoidance);
 
-    void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
-        RefPtr<FrameNode> customKeyboard);
-
-    void SetCustomKeybroadHeight(float customHeight = 0.0);
-
     void SetFilterActive(bool actived)
     {
         hasFilterActived = actived;
@@ -468,6 +466,7 @@ public:
         const RefPtr<UINode>& windowScene);
     void RemoveGatherNode();
     void RemoveGatherNodeWithAnimation();
+    void UpdateGatherNodeToTop();
     RefPtr<FrameNode> GetGatherNode() const
     {
         return gatherNodeWeak_.Upgrade();
@@ -526,6 +525,7 @@ private:
     void CloseDialogInner(const RefPtr<FrameNode>& dialogNode);
 
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
+    void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, AnimationOption& option,
@@ -557,7 +557,7 @@ private:
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     bool DialogInMapHoldingFocus();
-    void PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn);
+    void PlayKeyboardTransition(const RefPtr<FrameNode>& customKeyboard, bool isTransitionIn);
     void FireNavigationStateChange(bool show, const RefPtr<UINode>& node = nullptr);
     RefPtr<FrameNode> GetModalNodeInStack(std::stack<WeakPtr<FrameNode>>& stack);
     void PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn);

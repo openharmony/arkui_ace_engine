@@ -54,6 +54,7 @@ public:
     int32_t OpenFile(const std::string& uriStr, const std::string& mode) override;
     void* QueryThumbnailResFromDataAbility(const std::string& uri) override;
     int32_t ReadMovingPhotoVideo(const std::string &uri) override;
+    std::string GetMovingPhotoImageUri(const std::string& uri) override;
 
 private:
     int32_t OpenFileWithDataAbility(const std::string& uriStr, const std::string& mode);

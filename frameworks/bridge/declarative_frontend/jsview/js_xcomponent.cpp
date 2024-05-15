@@ -43,6 +43,11 @@ XComponentType ConvertToXComponentType(const std::string& type)
     if (type == "node") {
         return XComponentType::NODE;
     }
+#ifdef PLATFORM_VIEW_SUPPORTED
+    if (type == "platform_view") {
+        return XComponentType::PLATFORM_VIEW;
+    }
+#endif
     return XComponentType::SURFACE;
 }
 } // namespace
@@ -215,11 +220,14 @@ void JSXComponent::Create(const JSCallbackInfo& info)
 
 void* JSXComponent::Create(const XComponentParams& params)
 {
-    auto* jsXComponent = new JSXComponent();
+    std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
+    if (params.controller) {
+        xcomponentController = params.controller->GetController();
+    }
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(XComponentModel::GetInstance()->Create(params.elmtId,
         static_cast<float>(params.width), static_cast<float>(params.height), params.xcomponentId,
-        static_cast<XComponentType>(params.xcomponentType), params.libraryName, nullptr));
-    jsXComponent->SetFrameNode(frameNode);
+        static_cast<XComponentType>(params.xcomponentType), params.libraryName, xcomponentController));
+    frameNode->SetIsArkTsFrameNode(true);
     auto pattern = frameNode->GetPattern<NG::XComponentPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->SetRenderType(static_cast<NodeRenderType>(params.renderType));
@@ -231,6 +239,8 @@ void* JSXComponent::Create(const XComponentParams& params)
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, nullptr);
+    auto* jsXComponent = new JSXComponent();
+    jsXComponent->SetFrameNode(frameNode);
     taskExecutor->PostTask(
         [weak = AceType::WeakClaim(AceType::RawPtr(frameNode))]() {
             auto frameNode = weak.Upgrade();

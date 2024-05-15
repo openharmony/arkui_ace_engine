@@ -26,7 +26,8 @@ void StorageImpl::SetString(const std::string& key, const std::string& value)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_VOID(pref);
-    LOGI("Set preference with key %{public}s, value %{public}s", key.c_str(), value.c_str());
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "Set preference with key %{public}s, value %{public}s",
+        key.c_str(), value.c_str());
     pref->PutString(key, value);
     pref->Flush();
 }

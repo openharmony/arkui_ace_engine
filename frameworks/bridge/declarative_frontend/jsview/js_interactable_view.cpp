@@ -307,7 +307,11 @@ void JSInteractableView::JsRemoteMessage(const JSCallbackInfo& info, RemoteCallb
 
 std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JSCallbackInfo& info)
 {
-    auto obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return []() {};
+    }
+    auto obj = JSRef<JSObject>::Cast(arg);
     auto actionValue = obj->GetProperty("action");
     std::string action;
     if (actionValue->IsString()) {

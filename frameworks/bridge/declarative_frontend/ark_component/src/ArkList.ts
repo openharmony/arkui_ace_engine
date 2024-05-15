@@ -329,9 +329,55 @@ class ListFadingEdgeModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class ListSpaceModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listSpace');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetSpace(node);
+    }
+    else {
+      getUINativeModule().list.setSpace(node, this.value);
+    }
+  }
+}
+
+class ListInitialIndexModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listInitialIndex');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetInitialIndex(node);
+    }
+    else {
+      getUINativeModule().list.setInitialIndex(node, this.value);
+    }
+  }
+}
+
+interface ListParam {
+  initialIndex?: number;
+  space?: number | string
+}
+
 class ArkListComponent extends ArkComponent implements ListAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): this {
+    if (value[0] !== undefined) {
+      if ((value[0] as ListParam).initialIndex !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, ListInitialIndexModifier.identity, ListInitialIndexModifier, (value[0] as ListParam).initialIndex);
+      }
+      if ((value[0] as ListParam).space !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, ListSpaceModifier.identity, ListSpaceModifier, (value[0] as ListParam).space);
+      }
+    }
+    return this;
   }
   lanes(value: number | LengthConstrain, gutter?: any): this {
     let opt: ArkLanesOpt = new ArkLanesOpt();

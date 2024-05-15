@@ -44,6 +44,7 @@ public:
         paintProperty->propPaintShadow_ = ClonePaintShadow();
         paintProperty->propProgressStatus_ = CloneProgressStatus();
         paintProperty->propEnableSmoothEffect_ = CloneEnableSmoothEffect();
+        paintProperty->propIsSensitive_ = CloneIsSensitive();
         return paintProperty;
     }
 
@@ -59,6 +60,7 @@ public:
         ResetPaintShadow();
         ResetProgressStatus();
         ResetEnableSmoothEffect();
+        ResetIsSensitive();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -94,6 +96,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PaintShadow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ProgressStatus, ProgressStatus, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableSmoothEffect, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSensitive, bool, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

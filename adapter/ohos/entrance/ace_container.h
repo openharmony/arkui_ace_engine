@@ -299,7 +299,7 @@ public:
 
     void ForceFullGC() override;
 
-    void SetLocalStorage(NativeReference* storage, NativeReference* context);
+    void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
     bool ParseThemeConfig(const std::string& themeConfig);
 
@@ -529,9 +529,12 @@ public:
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         StopDragCallback&& stopDragCallback) override;
 
-    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup) override;
+    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node,
+        AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
+    bool ChangeType(AbilityBase::ViewData& viewData);
+    AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
 
     void SearchElementInfoByAccessibilityIdNG(
         int64_t elementId, int32_t mode, int64_t baseParent,
@@ -592,6 +595,13 @@ public:
 
     void RegisterOverlayNodePositionsUpdateCallback(
         const std::function<void(std::vector<Ace::RectF>)>&& callback);
+
+    OHOS::Rosen::WMError RegisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
+    OHOS::Rosen::WMError UnregisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
+    int32_t GetTargetVersion() const
+    {
+        return targetVersion_;
+    }
 
 private:
     virtual bool MaybeRelease() override;
@@ -675,6 +685,7 @@ private:
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
+    int32_t targetVersion_;
 };
 
 } // namespace OHOS::Ace::Platform

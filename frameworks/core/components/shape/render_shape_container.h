@@ -86,7 +86,6 @@ protected:
     int32_t row_ = 0;
     int32_t column_ = 0;
     std::vector<double> mesh_;
-
 };
 
 } // namespace OHOS::Ace

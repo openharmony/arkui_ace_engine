@@ -16,12 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT RichEditorLayoutAlgorithm : public TextLayoutAlgorithm {
-    DECLARE_ACE_TYPE(RichEditorLayoutAlgorithm, TextLayoutAlgorithm);
+class ACE_EXPORT RichEditorLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm {
+    DECLARE_ACE_TYPE(RichEditorLayoutAlgorithm, MultipleParagraphLayoutAlgorithm);
 
 public:
     RichEditorLayoutAlgorithm() = delete;
@@ -34,9 +34,7 @@ public:
     }
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
-
     void Layout(LayoutWrapper* layoutWrapper) override;
-
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     const RectF& GetTextRect()
@@ -45,40 +43,29 @@ public:
     }
 
 protected:
-    OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
+    void GetSpanParagraphStyle(const std::unique_ptr<TextLineStyle>& lineStyle, ParagraphStyle& pStyle) override;
 
 private:
-    void GetPlaceholderRects(std::vector<RectF>& rectF) override;
-    RefPtr<SpanItem> GetFirstTextSpanItem() const;
-    int32_t GetPreviousLength() const override;
+    OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
+    bool CreateParagraph(
+        const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) override;
+    bool BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     ParagraphStyle GetParagraphStyle(
         const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const override;
-
-    void ApplyIndent(const TextStyle& textStyle, double width) override
-    { // do nothing
-    }
-
-    float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group);
-
+    float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
     void UpdateRichTextRect(const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper);
 
     void SetPlaceholder(LayoutWrapper* layoutWrapper);
 
-    std::string SpansToString()
-    {
-        std::stringstream ss;
-        for (auto& list : spans_) {
-            ss << "[";
-            for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
-                ss << "[" << StringUtils::RestoreEscape(item->content) << "], "; });
-            ss << "], ";
-        }
-        return ss.str();
-    }
     void CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target);
     void AppendNewLineSpan();
 
-    std::vector<std::list<RefPtr<SpanItem>>> spans_;
+    const std::list<RefPtr<SpanItem>>& GetSpans() const
+    {
+        return allSpans_;
+    }
+
     std::list<RefPtr<SpanItem>> allSpans_;
     ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;

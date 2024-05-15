@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
+using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
 class ArkTSUtils {
 public:
     static uint32_t ColorAlphaAdapt(uint32_t origin);
@@ -78,6 +79,7 @@ public:
     static uint32_t parseShadowType(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId);
     static void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
         std::optional<CalcDimension>& optionalDimension);
     static void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim,
@@ -133,6 +135,24 @@ public:
         }
         return false;
     }
+    static BorderStyle ConvertBorderStyle(int32_t value);
+    static void PushOuterBorderDimensionVector(
+        const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options);
+    static void ParseOuterBorderWidth(
+        ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<ArkUI_Float32> &values);
+    static void PushOuterBorderColorVector(
+        const std::optional<Color>& valueColor, std::vector<uint32_t> &options);
+    static void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo,
+        EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
+    static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
+        EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex);
+    static void PushOuterBorderStyleVector(
+        const std::optional<BorderStyle>& value, std::vector<uint32_t> &options);
+    static void ParseOuterBorderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo,
+        EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
+    static void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args,
+        ArkUI_Float32 values[], int units[], int index);
+    static ArkUISizeType ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

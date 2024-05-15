@@ -211,7 +211,7 @@ int32_t FormRendererDelegateProxy::OnError(const std::string& code, const std::s
     return reply.ReadInt32();
 }
 
-int32_t FormRendererDelegateProxy::OnSurfaceChange(float width, float height)
+int32_t FormRendererDelegateProxy::OnSurfaceChange(float width, float height, float borderWidth)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -226,6 +226,11 @@ int32_t FormRendererDelegateProxy::OnSurfaceChange(float width, float height)
 
     if (!data.WriteFloat(height)) {
         HILOG_ERROR("write height fail, action error");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteFloat(borderWidth)) {
+        HILOG_ERROR("write borderWidth fail, action error");
         return ERR_INVALID_VALUE;
     }
 

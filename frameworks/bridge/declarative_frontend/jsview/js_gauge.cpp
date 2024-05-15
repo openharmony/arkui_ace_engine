@@ -121,7 +121,10 @@ void JSGauge::SetStartAngle(const JSCallbackInfo& info)
 {
     float startAngle = NG::DEFAULT_START_DEGREE;
     if (info[0]->IsNumber()) {
-        startAngle = info[0]->ToNumber<float>();
+        startAngle = std::fmod(info[0]->ToNumber<double>(), NG::DEFAULT_END_DEGREE);
+        if (Negative(startAngle)) {
+            startAngle += NG::DEFAULT_END_DEGREE;
+        }
     }
     GaugeModel::GetInstance()->SetStartAngle(startAngle);
 }
@@ -130,7 +133,10 @@ void JSGauge::SetEndAngle(const JSCallbackInfo& info)
 {
     float endAngle = NG::DEFAULT_END_DEGREE;
     if (info[0]->IsNumber()) {
-        endAngle = info[0]->ToNumber<float>();
+        endAngle = std::fmod(info[0]->ToNumber<double>(), NG::DEFAULT_END_DEGREE);
+        if (Negative(endAngle)) {
+            endAngle += NG::DEFAULT_END_DEGREE;
+        }
     }
     GaugeModel::GetInstance()->SetEndAngle(endAngle);
 }
@@ -348,7 +354,7 @@ void JSGauge::SetDescription(const JSCallbackInfo& info)
         GaugeModel::GetInstance()->SetIsShowDescription(false);
         return;
     }
-    if (info[0]->IsUndefined()) {
+    if (info[0]->IsUndefined() || !info[0]->IsObject()) {
         GaugeModel::GetInstance()->SetIsShowLimitValue(true);
         GaugeModel::GetInstance()->SetIsShowDescription(false);
         return;
@@ -359,7 +365,7 @@ void JSGauge::SetDescription(const JSCallbackInfo& info)
         GaugeModel::GetInstance()->SetIsShowLimitValue(false);
         GaugeModel::GetInstance()->SetIsShowDescription(true);
         ViewStackModel::GetInstance()->NewScope();
-        JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+        JsFunction jsBuilderFunc(info.This(), JSRef<JSFunc>::Cast(builderObject));
         ACE_SCORING_EVENT("Gauge.description.builder");
         jsBuilderFunc.Execute();
         auto customNode = ViewStackModel::GetInstance()->Finish();

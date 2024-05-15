@@ -121,12 +121,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
     stack->AddChild(content);
     column->AddChild(stack);
     column->AddChild(BuildGestureRow(containerModalNode));
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_RETURN(containerPattern, nullptr);
+    SetContainerModalPattern(containerPattern);
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
     containerModalNode->AddChild(AddControlButtons(containerModalNode, controlButtonsRow));
-
-    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
-    CHECK_NULL_RETURN(containerPattern, nullptr);
     containerPattern->Init();
     return containerModalNode;
 }
@@ -338,10 +338,9 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
     if ((!subWindowManger->GetSubwindow(Container::CurrentId()) ||
             !subWindowManger->GetSubwindow(Container::CurrentId())->GetShown())) {
         ACE_SCOPED_TRACE("ContainerModalViewEnhance::ShowMaxMenu");
-        MenuParam menu {};
-        menu.isAboveApps = true;
-        menu.type = MenuType::CONTEXT_MENU;
-        ViewAbstract::BindMenuWithCustomNode(menuList, targetNode, menuPosition, menu);
+        MenuParam menuParam {};
+        menuParam.type = MenuType::CONTEXT_MENU;
+        SubwindowManager::GetInstance()->ShowMenuNG(menuList, menuParam, targetNode, menuPosition);
     }
     ResetHoverTimer();
     return menuList;

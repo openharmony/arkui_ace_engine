@@ -88,6 +88,7 @@ const float SURFACE_HEIGHT = 150.0f;
 const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
 bool isAxis = false;
+bool isLock = true;
 
 TouchType ConvertXComponentTouchType(const OH_NativeXComponent_TouchEventType& type)
 {
@@ -1405,12 +1406,12 @@ HWTEST_F(XComponentTestNg, XComponentSetHistoryPointTest20, TestSize.Level1)
         EXPECT_EQ(item.y, CHILD_OFFSET_HEIGHT);
         EXPECT_EQ(item.screenX, CHILD_OFFSET_WIDTH);
         EXPECT_EQ(item.screenY, CHILD_OFFSET_HEIGHT);
-        EXPECT_EQ(item.type, static_cast<OH_NativeXComponent_TouchEventType>(TouchType::PULL_DOWN));
+        EXPECT_EQ(static_cast<int>(item.type), static_cast<int>(TouchType::PULL_DOWN));
         EXPECT_EQ(item.size, XCOMPONENT_ID_LEN_MAX);
         EXPECT_EQ(item.force, FORCE);
         EXPECT_EQ(item.titlX, CHILD_OFFSET_WIDTH);
         EXPECT_EQ(item.titlY, CHILD_OFFSET_HEIGHT);
-        EXPECT_EQ(item.sourceTool, static_cast<OH_NativeXComponent_TouchEvent_SourceTool>(SourceTool::MOUSE));
+        EXPECT_EQ(static_cast<int>(item.sourceTool), static_cast<int>(SourceTool::MOUSE));
     }
 }
 
@@ -1879,6 +1880,22 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
         SetBounds(newSurfaceOffsetX, newSurfaceOffsetY, SURFACE_WIDTH, SURFACE_HEIGHT))
         .WillOnce(Return());
     xcomponentController->UpdateSurfaceBounds();
+
+    /**
+     * @tc.steps: step5. call XcomponentController's interface relative to SetSurfaceRotation
+     * @tc.expected: handlingSurfaceRenderContext_->SetSurfaceRotation(isLock) is called
+     */
+    EXPECT_CALL(
+        *AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_), SetSurfaceRotation(isLock))
+        .WillOnce(Return());
+    xcomponentController->SetSurfaceRotation(isLock);
+
+    /**
+     * @tc.steps: step6. call XcomponentController's interface relative to GetSurfaceRotation
+     * @tc.expected: the lock status get from GetSurfaceRotation equals the lock status set by SetSurfaceRotation
+     */
+    auto lock = xcomponentController->GetSurfaceRotation();
+    EXPECT_EQ(lock, isLock);
 }
 
 /**
@@ -2007,9 +2024,9 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
      * @tc.expected: xcomponent frameNode create successfully
      */
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    std::string onSurfaceCreatedSurfaceId;
-    std::string onSurfaceChangedSurfaceId;
-    std::string onSurfaceDestroyedSurfaceId;
+    std::string onSurfaceCreatedSurfaceId = "";
+    std::string onSurfaceChangedSurfaceId = "";
+    std::string onSurfaceDestroyedSurfaceId = "";
     auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](
                                 const std::string& surfaceId) { onSurfaceCreatedSurfaceId = surfaceId; };
     auto onSurfaceChanged = [&onSurfaceChangedSurfaceId](const std::string& surfaceId, const RectF& /* rect */) {
@@ -2045,14 +2062,14 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
         SetBounds(0, 0, MAX_WIDTH, MAX_HEIGHT))
         .WillOnce(Return());
     pattern->BeforeSyncGeometryProperties(config);
-    EXPECT_EQ(onSurfaceCreatedSurfaceId, SURFACE_ID);
-    EXPECT_EQ(onSurfaceChangedSurfaceId, SURFACE_ID);
+    EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceCreatedSurfaceId.c_str());
+    EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceChangedSurfaceId.c_str());
 
     /**
      * @tc.steps: step3. call OnDetachFromFrameNode
      * @tc.expected: onSurfaceDestroyed has called
      */
     pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
-    EXPECT_EQ(onSurfaceDestroyedSurfaceId, SURFACE_ID);
+    EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceDestroyedSurfaceId.c_str());
 }
 } // namespace OHOS::Ace::NG

@@ -176,6 +176,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void InitDateIndex();
     void InitClickEvent();
     void InitOnKeyEvent();
     void InitOnHoverEvent();
@@ -206,6 +207,10 @@ private:
     uint32_t yearPrefixZeroCount_ = 0;
     uint32_t monthPrefixZeroCount_ = 0;
     uint32_t dayPrefixZeroCount_ = 0;
+	
+    int32_t yearIndex_ = 0;
+    int32_t monthIndex_ = 2;
+    int32_t dayIndex_ = 4;
 
     std::optional<int32_t> subId_;
     std::optional<int32_t> contentId_;

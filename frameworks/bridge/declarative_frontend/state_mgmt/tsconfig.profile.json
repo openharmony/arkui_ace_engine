@@ -7,6 +7,7 @@
     "src/lib/common/ace_trace.native.d.ts",
     "src/lib/common/state_mgmt_profiler.ts",
     "src/lib/common/state_mgmt_profiler.native.d.ts",
+    "src/lib/common/ark_tools.d.ts",
     "src/lib/common/environment_setting.d.ts",
     "src/lib/common/storage.d.ts",
     "src/lib/common/local_storage_native.d.ts",

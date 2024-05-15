@@ -67,7 +67,10 @@ public:
     virtual void DrawShadow(const TestingPath& path, const TestingPoint3& planeParams, const TestingPoint3& devLightPos,
         float lightRadius, TestingColor /* ambientColor */, TestingColor /* spotColor */, TestingShadowFlags flag)
     {}
-
+    virtual void DrawShadowStyle(const TestingPath& path, const TestingPoint3& planeParams,
+        const TestingPoint3& devLightPos, float lightRadius, TestingColor /* ambientColor */,
+        TestingColor /* spotColor */, TestingShadowFlags flag, bool isLimitElevation)
+    {}
     virtual TestingCanvas& AttachPen(const TestingPen& pen)
     {
         return *this;

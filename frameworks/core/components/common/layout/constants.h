@@ -332,6 +332,18 @@ enum class ImageFit {
     COVER_TOP_LEFT,
 };
 
+enum class DynamicRangeMode {
+    HIGH = 0,
+    CONSTRAINT,
+    STANDARD,
+};
+
+enum class AIImageQuality {
+    NONE = 1,
+    NORMAL,
+    HIGH,
+};
+
 enum class ImageRenderMode {
     ORIGINAL = 0,
     TEMPLATE,
@@ -691,7 +703,16 @@ enum class PositionMode {
     BOTTOM,
 };
 
-enum class XComponentType { UNKNOWN = -1, SURFACE = 0, COMPONENT, TEXTURE, NODE };
+enum class XComponentType {
+    UNKNOWN = -1,
+    SURFACE = 0,
+    COMPONENT,
+    TEXTURE,
+    NODE,
+#ifdef PLATFORM_VIEW_SUPPORTED
+    PLATFORM_VIEW = 999,
+#endif
+};
 
 enum class RenderMode { ASYNC_RENDER = 0, SYNC_RENDER };
 
@@ -727,6 +748,7 @@ enum class GestureTypeName {
     CLICK = 7,
     BOXSELECT = 8,
     WEBSCROLL = 9,
+    TEXTFIELD_BOXSELECT = 10
 };
 
 enum class ModifierKey {

@@ -236,7 +236,9 @@ std::string TextareaComposedElement::ConvertFontFamily(const std::vector<std::st
         result += item;
         result += ",";
     }
-    result = result.substr(0, result.size() - 1);
+    if (result.size() > 0) {
+        result = result.substr(0, result.size() - 1);
+    }
     return result;
 }
 

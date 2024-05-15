@@ -28,7 +28,6 @@ DeclarativeEngineLoader::~DeclarativeEngineLoader() = default;
 
 RefPtr<JsEngine> DeclarativeEngineLoader::CreateJsEngine(int32_t instanceId) const
 {
-
 #ifdef USE_ARK_ENGINE
     return AceType::MakeRefPtr<JsiDeclarativeEngine>(instanceId);
 #endif

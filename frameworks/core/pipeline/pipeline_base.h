@@ -312,6 +312,8 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
+    virtual void CheckAndUpdateKeyboardInset() {}
+
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
     virtual std::shared_ptr<NavigationController> GetNavigationController(const std::string& id)
@@ -1059,6 +1061,16 @@ public:
         return halfLeading_;
     }
 
+    void SetUseCutout(bool useCutout)
+    {
+        useCutout_ = useCutout;
+    }
+
+    bool GetUseCutout() const
+    {
+        return useCutout_;
+    }
+
     bool GetOnFoucs() const
     {
         return onFocus_;
@@ -1147,6 +1159,21 @@ public:
     virtual bool IsContainerModalVisible()
     {
         return false;
+    }
+
+    void SetStateProfilerStatus(bool stateProfilerStatus)
+    {
+        stateProfilerStatus_ = stateProfilerStatus;
+    }
+
+    bool GetStateProfilerStatus() const
+    {
+        return stateProfilerStatus_;
+    }
+
+    uint32_t GetFrameCount() const
+    {
+        return frameCount_;
     }
 
 protected:
@@ -1307,6 +1334,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
+    bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
 
     bool delaySurfaceChange_ = false;
@@ -1314,6 +1342,8 @@ private:
     int32_t height_ = -1;
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
+    uint32_t frameCount_ = 0;
+    bool stateProfilerStatus_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

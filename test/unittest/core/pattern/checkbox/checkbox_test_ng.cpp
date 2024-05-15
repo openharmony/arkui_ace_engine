@@ -650,6 +650,19 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest016, TestSize.Level1)
  */
 HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest017, TestSize.Level1)
 {
+    /*
+     * @tc.steps: step1. create stageManager.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    auto groupManager = pageEventHub->GetGroupManager();
+    pageNode->eventHub_ = pageEventHub;
+    stageNode->AddChild(pageNode);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    pipelineContext->stageManager_ = stageManager;
+
     CheckBoxModelNG checkBoxModelNG1;
     checkBoxModelNG1.Create(NAME, GROUP_NAME, TAG);
     auto frameNode1 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -669,29 +682,26 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest017, TestSize.Level1)
     auto groupFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(groupFrameNode, nullptr);
 
-    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap;
-    checkBoxGroupMap[GROUP_NAME].push_back(frameNode1);
-    checkBoxGroupMap[GROUP_NAME].push_back(frameNode2);
-    checkBoxGroupMap[GROUP_NAME].push_back(frameNode3);
-    checkBoxGroupMap[GROUP_NAME].push_back(groupFrameNode);
-    checkBoxGroupMap[GROUP_NAME].push_back(nullptr);
-    bool isSelected = true;
-    pattern1->UpdateCheckBoxGroupStatus(frameNode1, checkBoxGroupMap, isSelected);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, frameNode1);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, frameNode2);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, frameNode3);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, nullptr);
+    groupManager->AddCheckBoxGroup(GROUP_NAME, groupFrameNode);
+
+    auto list = groupManager->GetCheckboxList(GROUP_NAME);
+    pattern1->UpdateCheckBoxGroupStatus(frameNode1, list);
     auto checkBoxPaintProperty1 = frameNode1->GetPaintProperty<CheckBoxPaintProperty>();
     EXPECT_NE(checkBoxPaintProperty1, nullptr);
     checkBoxPaintProperty1->UpdateCheckBoxSelect(true);
     auto checkBoxPaintProperty2 = frameNode2->GetPaintProperty<CheckBoxPaintProperty>();
     EXPECT_NE(checkBoxPaintProperty2, nullptr);
     checkBoxPaintProperty2->UpdateCheckBoxSelect(false);
-    pattern1->UpdateCheckBoxGroupStatus(frameNode1, checkBoxGroupMap, isSelected);
-    isSelected = false;
-    pattern1->UpdateCheckBoxGroupStatus(frameNode1, checkBoxGroupMap, isSelected);
+    pattern1->UpdateCheckBoxGroupStatus(frameNode1, list);
     checkBoxPaintProperty2->UpdateCheckBoxSelect(true);
     auto checkBoxPaintProperty3 = frameNode3->GetPaintProperty<CheckBoxPaintProperty>();
     EXPECT_NE(checkBoxPaintProperty3, nullptr);
     checkBoxPaintProperty3->UpdateCheckBoxSelect(true);
-    isSelected = true;
-    pattern1->UpdateCheckBoxGroupStatus(frameNode1, checkBoxGroupMap, isSelected);
+    pattern1->UpdateCheckBoxGroupStatus(frameNode1, list);
 }
 
 /**
@@ -885,31 +895,31 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
 
-    MarginProperty margin;
-    margin.left = CalcLength(CHECK_MARK_SIZE.ConvertToPx());
-    layoutProperty->UpdateMargin(margin); // GetMarginProperty
+    PaddingProperty padding;
+    padding.left = CalcLength(CHECK_MARK_SIZE.ConvertToPx());
+    layoutProperty->UpdatePadding(padding); // GetMarginProperty
 
     checkBoxPattern->OnModifyDone();
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
+    EXPECT_EQ(layoutProperty->GetPaddingProperty()->left.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetPaddingProperty()->right.value(),
         CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
+    EXPECT_EQ(layoutProperty->GetPaddingProperty()->top.value(),
         CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
+    EXPECT_EQ(layoutProperty->GetPaddingProperty()->bottom.value(),
         CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
 
-    MarginProperty margin1;
-    margin1.right = CalcLength(CHECK_MARK_SIZE.ConvertToPx());
-    layoutProperty->UpdateMargin(margin1); // GetMarginProperty
+    PaddingProperty padding1;
+    padding1.right = CalcLength(CHECK_MARK_SIZE.ConvertToPx());
+    layoutProperty->UpdatePadding(padding1); // GetMarginProperty
 
     checkBoxPattern->OnModifyDone();
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
-        CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
-        CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
-        CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetPaddingProperty()->left.value(),
+        CalcLength(checkBoxTheme->GetDefaultPaddingSize()));
+    EXPECT_EQ(layoutProperty->GetPaddingProperty()->right.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetPaddingProperty()->top.value(),
+        CalcLength(checkBoxTheme->GetDefaultPaddingSize()));
+    EXPECT_EQ(layoutProperty->GetPaddingProperty()->bottom.value(),
+        CalcLength(checkBoxTheme->GetDefaultPaddingSize()));
 }
 
 /**
@@ -964,12 +974,6 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest027, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     bool result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(result);
-    /**
-     * cover method AddHotZoneRect
-     */
-    pattern->AddHotZoneRect();
-    EXPECT_EQ(pattern->hotZoneOffset_.GetX(), 0.0f);
-    EXPECT_EQ(pattern->hotZoneSize_.Width(), 80.0f);
     /**
      * cover method RemoveLastHotZoneRect
      */
@@ -1884,79 +1888,6 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest002, TestSize.Level1)
     EXPECT_TRUE(pattern->lastSelect_ == true);
 }
 
-/**
- * @tc.name: CheckBoxPatternTest017
- * @tc.desc: Test UpdateCheckBoxGroupStatus.
- * @tc.type: FUNC
- */
-HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0117, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init CheckBox node
-     */
-    CheckBoxModelNG checkBoxModelNG;
-    checkBoxModelNG.Create("test", GROUP_NAME, "testTemp");
-    RefPtr<FrameNode> frame = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    FrameNode* checkBoxFrameNode = AceType::RawPtr(frame);
-    auto checkBoxPattern = checkBoxFrameNode->GetPattern<CheckBoxPattern>();
-    auto checkBoxEventHub = checkBoxFrameNode->GetEventHub<NG::CheckBoxEventHub>();
-    checkBoxEventHub->SetGroupName(GROUP_NAME);
-    checkBoxFrameNode->eventHub_ = checkBoxEventHub;
-
-    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap;
-
-    /**
-     * @tc.steps: step2. Create frameNode1 with V2::CHECKBOXGROUP_ETS_TAG and create some parameters
-     */
-    auto frameNode1 = FrameNode::GetOrCreateFrameNode(
-        V2::CHECKBOXGROUP_ETS_TAG, 1, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
-    auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
-    frameNode1->paintProperty_ = groupPaintProperty;
-
-    /**
-     * @tc.steps: step3. Create CheckBoxPattern and call UpdateCheckBoxGroupStatusWhenDetach
-     */
-    checkBoxGroupMap[GROUP_NAME].push_back(nullptr);
-    checkBoxGroupMap[GROUP_NAME].push_back(frameNode1);
-    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(checkBoxFrameNode, checkBoxGroupMap);
-    auto pattern = frameNode1->GetPattern<CheckBoxGroupPattern>();
-    EXPECT_EQ(pattern->uiStatus_, UIStatus::ON_TO_OFF);
-    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::NONE);
-
-    /**
-     * @tc.steps: step4. Create frameNode2 with test and create some parameters
-     */
-    auto frameNode2 =
-        FrameNode::GetOrCreateFrameNode("test", 2, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
-    auto paintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
-    paintProperty->UpdateCheckBoxSelect(true);
-    frameNode2->paintProperty_ = paintProperty;
-    frameNode2->eventHub_ = AceType::MakeRefPtr<CheckBoxEventHub>();
-    checkBoxGroupMap[GROUP_NAME].push_back(frameNode2);
-    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(checkBoxFrameNode, checkBoxGroupMap);
-    EXPECT_EQ(pattern->uiStatus_, UIStatus::OFF_TO_ON);
-    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
-
-    /**
-     * @tc.steps: step5. Create frameNode3 and frameNode4 with test and create some parameters
-     * @tc.expected: uiStatus_ is unselected and selectStatus is PART
-     */
-    auto frameNode3 =
-        FrameNode::GetOrCreateFrameNode("test", 3, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
-    auto paintProperty3 = AceType::MakeRefPtr<CheckBoxPaintProperty>();
-    frameNode3->paintProperty_ = paintProperty3;
-    checkBoxGroupMap[GROUP_NAME].push_back(frameNode3);
-    auto frameNode4 =
-        FrameNode::GetOrCreateFrameNode("test", 4, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
-    auto paintProperty4 = AceType::MakeRefPtr<CheckBoxPaintProperty>();
-    paintProperty4->UpdateCheckBoxSelect(false);
-    frameNode4->paintProperty_ = paintProperty4;
-    checkBoxGroupMap[GROUP_NAME].push_back(frameNode4);
-    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(checkBoxFrameNode, checkBoxGroupMap);
-    EXPECT_EQ(pattern->uiStatus_, UIStatus::UNSELECTED);
-    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::PART);
-}
-
 HWTEST_F(CheckBoxTestNG, OnAfterModifyDone003, TestSize.Level1)
 {
     /**
@@ -2184,10 +2115,6 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
     auto groupManager = pageEventHub->GetGroupManager();
-    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
-    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
-    groupManager->AddCheckBoxToGroup(GROUP_NAME, 4);
-    groupManager->AddCheckBoxToGroup(GROUP_NAME, 5);
     pageNode->eventHub_ = pageEventHub;
 
     stageNode->AddChild(pageNode);
@@ -2204,10 +2131,12 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
     auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     groupPaintProperty->isCheckBoxCallbackDealed_ = true;
     frameNode2->paintProperty_ = groupPaintProperty;
+    groupManager->AddCheckBoxGroup(GROUP_NAME, frameNode2);
     auto frameNode3 = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<Pattern>());
     auto paintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
     paintProperty->UpdateCheckBoxSelect(true);
     frameNode3->paintProperty_ = paintProperty;
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, frameNode3);
     ElementRegister::GetInstance()->itemMap_[2] = AceType::WeakClaim(AceType::RawPtr(frameNode2));
     ElementRegister::GetInstance()->itemMap_[3] = AceType::WeakClaim(AceType::RawPtr(frameNode3));
     ElementRegister::GetInstance()->itemMap_[4] = nullptr;
@@ -2226,7 +2155,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
      */
     groupPaintProperty->isCheckBoxCallbackDealed_ = false;
     checkBoxPattern->CheckBoxGroupIsTrue();
-    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::NONE);
     EXPECT_TRUE(groupPaintProperty->isCheckBoxCallbackDealed_);
 
     /*
@@ -2236,7 +2165,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
     groupPaintProperty->isCheckBoxCallbackDealed_ = false;
     paintPropertyTemp->UpdateCheckBoxSelect(false);
     checkBoxPattern->CheckBoxGroupIsTrue();
-    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::PART);
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::NONE);
 }
 
 /**
@@ -2272,8 +2201,6 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0119, TestSize.Level1)
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
     auto groupManager = pageEventHub->GetGroupManager();
-    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
-    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
     pageNode->eventHub_ = pageEventHub;
 
     stageNode->AddChild(pageNode);
@@ -2287,6 +2214,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0119, TestSize.Level1)
     checkBoxPattern->groupManager_ = GroupManager::GetGroupManager();
     checkBoxGroupPattern->groupManager_ = GroupManager::GetGroupManager();
     auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::CHECKBOXGROUP_ETS_TAG, 2, checkBoxGroupPattern);
+    groupManager->AddCheckBoxGroup(GROUP_NAME, frameNode2);
     auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     groupPaintProperty->isCheckBoxCallbackDealed_ = false;
     frameNode2->paintProperty_ = groupPaintProperty;
@@ -2294,6 +2222,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0119, TestSize.Level1)
     auto paintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
     paintProperty->UpdateCheckBoxSelect(false);
     frameNode3->paintProperty_ = paintProperty;
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, frameNode3);
     ElementRegister::GetInstance()->itemMap_[2] = AceType::WeakClaim(AceType::RawPtr(frameNode2));
     ElementRegister::GetInstance()->itemMap_[3] = AceType::WeakClaim(AceType::RawPtr(frameNode3));
 
@@ -2339,9 +2268,6 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0120, TestSize.Level1)
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
     auto groupManager = pageEventHub->GetGroupManager();
-    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
-    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
-    groupManager->AddCheckBoxToGroup(GROUP_NAME, 4);
     pageNode->eventHub_ = pageEventHub;
     stageNode->AddChild(pageNode);
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
@@ -2357,10 +2283,12 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0120, TestSize.Level1)
     auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     groupPaintProperty->isCheckBoxCallbackDealed_ = false;
     frameNode2->paintProperty_ = groupPaintProperty;
+    groupManager->AddCheckBoxGroup(GROUP_NAME, frameNode2);
     auto frameNode3 = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<CheckBoxPattern>());
     auto paintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
     paintProperty->ResetCheckBoxSelect();
     frameNode3->paintProperty_ = paintProperty;
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, frameNode3);
     ElementRegister::GetInstance()->itemMap_[2] = AceType::WeakClaim(AceType::RawPtr(frameNode2));
     ElementRegister::GetInstance()->itemMap_[3] = AceType::WeakClaim(AceType::RawPtr(frameNode3));
     ElementRegister::GetInstance()->itemMap_[4] = nullptr;

@@ -28,7 +28,6 @@ namespace OHOS::Ace::NG {
 namespace {
 // for indicator
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.4f;
 constexpr float LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
 constexpr float LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY = 1.0f;
@@ -64,7 +63,6 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
-    dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
@@ -89,19 +87,6 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         dotIndicatorModifier_->SetIsPressed(false);
     }
     dotIndicatorModifier_->SetFocusedAndSelectedColor(paintWrapper);
-}
-
-void DotIndicatorModifier::SetFocusedAndSelectedColor(PaintWrapper* paintWrapper)
-{
-    auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    auto swiperTheme = GetSwiperIndicatorTheme();
-    CHECK_NULL_VOID(swiperTheme);
-    if (isFocused_->Get()) {
-        SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetFocusedSelectedColor()));
-    } else {
-        SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
-    }
 }
 
 void DotIndicatorPaintMethod::GetLongPointAnimationStateSecondCenter(
@@ -278,10 +263,10 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
     Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
     auto indicatorPaddingSide = static_cast<float>(paddingSide.ConvertToPx());
     auto contentWidth = indicatorPaddingSide + allPointDiameterSum + allPointSpaceSum + indicatorPaddingSide;
-    auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
-    auto contentHeight = indicatorPadding + itemHeight + indicatorPadding;
+    auto indicatorHeightPadding = swiperTheme->GetIndicatorBgHeight().ConvertToPx();
+    auto contentHeight = indicatorHeightPadding + itemHeight + indicatorHeightPadding;
     if (selectedItemHeight > itemHeight) {
-        contentHeight = indicatorPadding + selectedItemHeight + indicatorPadding;
+        contentHeight = indicatorHeightPadding + selectedItemHeight + indicatorHeightPadding;
     }
     float marginX = ((axis_ == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * 0.5;
     float marginY = ((axis_ == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - contentHeight) * 0.5;

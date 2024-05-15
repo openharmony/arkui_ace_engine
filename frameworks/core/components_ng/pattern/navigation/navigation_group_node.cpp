@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,6 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
@@ -121,7 +120,8 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             auto navBarContentNode = AceType::DynamicCast<FrameNode>(contentNode);
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+                .edges = SAFE_AREA_EDGE_ALL };
             navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
     }
@@ -144,11 +144,11 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         return;
     }
 
-    for (int32_t i = static_cast<int32_t>(navDestinationNodes.size()) - 1; i >= 0; --i) {
-        const auto& childNode = navDestinationNodes[i];
+    for (uint32_t index = 0; index < navDestinationNodes.size(); index++) {
+        const auto& childNode = navDestinationNodes[index];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
-        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size())
+        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, index, navDestinationNodes.size())
          || hasChanged);
     }
 
@@ -245,7 +245,6 @@ void NavigationGroupNode::RemoveRedundantNavDestination(
                 navDestination->GetContentNode()->Clean();
             }
             navigationContentNode->RemoveChild(navDestination, true);
-            navDestinationPattern->SetCustomNode(nullptr);
             hasChanged = true;
         } else {
             // remain the last child for pop animation
@@ -401,22 +400,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
     CHECK_NULL_VOID(preBackIcon);
 
     auto preFrameSize = preNode->GetGeometryNode()->GetFrameSize();
-    RefPtr<TitleBarNode> curTitleNode;
-    if (curNode) {
-        if (isNavBar) {
-            auto navBarNode = AceType::DynamicCast<NavBarNode>(curNode);
-            CHECK_NULL_VOID(navBarNode);
-            navBarNode->SetTransitionType(PageTransitionType::ENTER_POP);
-            curTitleNode = navBarNode ? AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode()) : nullptr;
-        } else {
-            auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-            CHECK_NULL_VOID(curNavDestination);
-            curNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
-            curTitleNode =
-                curNavDestination ? AceType::DynamicCast<TitleBarNode>(curNavDestination->GetTitleBarNode()) : nullptr;
-        }
-        CHECK_NULL_VOID(curTitleNode);
-    }
+    RefPtr<TitleBarNode> curTitleBarNode;
+    GetCurTitleBarNode(curTitleBarNode, curNode, isNavBar);
+    CHECK_NULL_VOID(curTitleBarNode);
 
     /* create animation finish callback */
     CleanPopAnimations();
@@ -427,6 +413,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation end");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto navigation = weakNavigation.Upgrade();
+            auto backIcon = weakPreBackIcon.Upgrade();
             if (navigation) {
                 navigation->isOnAnimation_ = false;
                 navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
@@ -453,16 +440,17 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto preTitleNode = weakPreTitle.Upgrade();
             if (preTitleNode) {
                 preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+                preTitleNode->GetRenderContext()->SetOpacity(1.0);
             }
-
             if (!preNavDesNode->IsCacheNode() && preNavDesNode->GetContentNode()) {
                 preNavDesNode->GetContentNode()->Clean();
             }
-
+            if (backIcon)  {
+                backIcon->GetRenderContext()->SetOpacity(1.0);
+            }
             auto parent = preNavDesNode->GetParent();
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(preNavDesNode);
-            preNavDesPattern->SetCustomNode(nullptr);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
@@ -483,7 +471,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
         float flag = CheckLanguageDirection();
         curNode->GetRenderContext()->UpdateTranslateInXY({ -curFrameSize.Width() * PARENT_PAGE_OFFSET * flag, 0.0f });
-        curTitleNode->GetRenderContext()->UpdateTranslateInXY(
+        curTitleBarNode->GetRenderContext()->UpdateTranslateInXY(
             { curFrameSize.Width() * PARENT_TITLE_OFFSET * flag, 0.0f });
     }
 
@@ -491,7 +479,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         callback);
     auto newPopAnimation = AnimationUtils::StartAnimation(option, [
-        this, preNode, preTitleNode, preFrameSize, curNode, curTitleNode]() {
+        this, preNode, preTitleNode, preFrameSize, curNode, curTitleBarNode]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start");
             /* preNode */
@@ -505,7 +493,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             /* curNode */
             if (curNode) {
                 curNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-                curTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+                curTitleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
             }
     }, option.GetOnFinishEvent());
     if (newPopAnimation) {
@@ -639,7 +627,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     /* curNode */
     float flag = CheckLanguageDirection();
     curNode->GetRenderContext()->ClipWithRRect(
-        RectF(RectF(0.0f, 0.0f, curFrameSize.Width() * HALF, REMOVE_CLIP_SIZE)),
+        RectF(0.0f, 0.0f, curFrameSize.Width() * HALF, REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     curNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
     curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
@@ -708,9 +696,6 @@ std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::BackButtonAnimat
     return AnimationUtils::StartAnimation(transitionOption, [backButtonNodeContext]() {
         CHECK_NULL_VOID(backButtonNodeContext);
         backButtonNodeContext->SetOpacity(0.0f);
-    }, [backButtonNodeContext]() {
-        backButtonNodeContext->UpdateOpacity(1.0);
-        backButtonNodeContext->SetOpacity(1.0f);
     });
 }
 
@@ -744,9 +729,6 @@ std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::TitleOpacityAnim
         return AnimationUtils::StartAnimation(opacityOption, [titleRenderContext]() {
             CHECK_NULL_VOID(titleRenderContext);
             titleRenderContext->SetOpacity(0.0f);
-        }, [titleRenderContext]() {
-            titleRenderContext->UpdateOpacity(1.0);
-            titleRenderContext->SetOpacity(1.0f);
         });
     }
     opacityOption.SetDelay(OPACITY_TITLE_IN_DELAY);
@@ -831,7 +813,6 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
     auto parent = AceType::DynamicCast<FrameNode>(preNode->GetParent());
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(preNode);
-    navDestinationPattern->SetCustomNode(nullptr);
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -916,6 +897,12 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
     if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild &&
         !navDestination->IsOnAnimation()) {
+        auto navigationPattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+        if (!pattern->GetIsOnShow() && navigationPattern) {
+            navigationPattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_SHOW, true);
+            navigationPattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_SHOW, true);
+            pattern->SetIsOnShow(true);
+        }
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         navDestination->SetJSViewActive(true);
     }
@@ -1042,6 +1029,24 @@ float NavigationGroupNode::CheckLanguageDirection()
         return -1.0f;
     } else {
         return 1.0f;
+    }
+}
+void NavigationGroupNode::GetCurTitleBarNode(
+    RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode, bool isNavBar)
+{
+    if (curNode) {
+        if (isNavBar) {
+            auto navBarNode = AceType::DynamicCast<NavBarNode>(curNode);
+            CHECK_NULL_VOID(navBarNode);
+            navBarNode->SetTransitionType(PageTransitionType::ENTER_POP);
+            curTitleBarNode = navBarNode ? AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode()) : nullptr;
+        } else {
+            auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+            CHECK_NULL_VOID(curNavDestination);
+            curNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
+            curTitleBarNode =
+                curNavDestination ? AceType::DynamicCast<TitleBarNode>(curNavDestination->GetTitleBarNode()) : nullptr;
+        }
     }
 }
 } // namespace OHOS::Ace::NG

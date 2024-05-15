@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -32,8 +33,8 @@
 
 namespace OHOS::Ace::NG {
 
-class NavDestinationPattern : public Pattern, public FocusView {
-    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView);
+class NavDestinationPattern : public Pattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder);
@@ -212,6 +213,8 @@ public:
         return isUserDefinedBgColor_;
     }
 
+    void OnLanguageConfigurationUpdate() override;
+
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -225,6 +228,7 @@ private:
     WeakPtr<UINode> navigationNode_;
     bool isOnShow_ = false;
     bool isUserDefinedBgColor_ = false;
+    bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
 };

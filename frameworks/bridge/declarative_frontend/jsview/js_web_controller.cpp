@@ -1031,6 +1031,17 @@ void JSWebController::SetJavascriptInterface(const JSCallbackInfo& args)
             }
         }
     }
+
+    JSRef<JSVal> asyncMethodList = obj->GetProperty("asyncMethodList");
+    if (asyncMethodList->IsArray()) {
+        JSRef<JSArray> asyncArray = JSRef<JSArray>::Cast(asyncMethodList);
+        for (size_t i = 0; i < asyncArray->Length(); i++) {
+            JSRef<JSVal> asyncMethod = asyncArray->GetValueAt(i);
+            if (asyncMethod->IsString()) {
+                methods.emplace_back(asyncMethod->ToString());
+            }
+        }
+    }
     methods_[objName] = methods;
 
     webController_->SetInitJavascriptInterface([weak = WeakClaim(this)]() {

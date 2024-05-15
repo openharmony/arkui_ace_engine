@@ -37,6 +37,7 @@ ace_unittest("grid_test_ng") {
   sources += [
     "irregular/grid_irregular_filler_test.cpp",
     "irregular/grid_irregular_layout_test.cpp",
+    "irregular/grid_layout_range_solver_test.cpp",
     "irregular/irregular_matrics.cpp",
     "layout_info_test.cpp",
   ]

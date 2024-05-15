@@ -1806,4 +1806,33 @@ HWTEST_F(GaugeTestNg, GaugePatternTest001, TestSize.Level1)
     gaugePattern->SetBuilderFunc(node);
     gaugePattern->BuildContentModifierNode();
 }
+
+/**
+ * @tc.name: GaugePrivacySensitiveTest001
+ * @tc.desc: Test OnSensitiveStyleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugePrivacySensitiveTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GaugePattern.
+     */
+    Create(VALUE, MIN, MAX);
+    frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto valueTextId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    pattern_->minValueTextId_ = valueTextId;
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. change privacy sensitive and check status.
+     */
+    pattern_->OnSensitiveStyleChange(false);
+    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), false);
+    pattern_->OnSensitiveStyleChange(true);
+    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), true);
+}
 } // namespace OHOS::Ace::NG

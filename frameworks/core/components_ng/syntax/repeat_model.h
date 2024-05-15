@@ -40,6 +40,7 @@ public:
 
     virtual void CreateNewChildStart(const std::string& key) = 0;
     virtual void CreateNewChildFinish(const std::string& key) = 0;
+    virtual void OnMove(std::function<void(int32_t, int32_t)>&& onMove) = 0;
     
 private:
      static std::unique_ptr<RepeatModel> instance;

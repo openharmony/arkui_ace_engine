@@ -16,7 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_PATTERN_H
 
-#include "frameworks/core/components_ng/svg/parse/svg_quote.h"
+#include "core/components_ng/svg/parse/svg_attributes_parser.h"
+#include "core/components_ng/svg/parse/svg_quote.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,6 +30,10 @@ public:
     static RefPtr<SvgNode> Create();
     void OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
     void OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+
+private:
+    SvgPatternAttribute patternAttr_;
 };
 
 } // namespace OHOS::Ace::NG

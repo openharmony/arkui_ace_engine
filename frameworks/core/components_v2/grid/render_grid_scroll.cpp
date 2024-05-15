@@ -1632,7 +1632,6 @@ int32_t RenderGridScroll::GetIndexByPosition(double position) const
 
         startPosition = item->GetPosition().GetY();
         endPosition = item->GetPosition().GetY() + item->GetLayoutSize().Height();
-
         if ((position > startPosition && position < endPosition) || NearEqual(position, startPosition) ||
             startPosition > position) {
             return gridItem->GetIndex();

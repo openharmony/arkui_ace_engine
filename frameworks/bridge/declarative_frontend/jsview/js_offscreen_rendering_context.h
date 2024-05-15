@@ -50,12 +50,33 @@ public:
         return id;
     }
 
+    void SetWidth(double width)
+    {
+        width_ = width;
+    }
+
+    double GetWidth() const
+    {
+        return width_;
+    }
+
+    void SetHeight(double height)
+    {
+        height_ = height;
+    }
+
+    double GetHeight() const
+    {
+        return height_;
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(JSOffscreenRenderingContext);
 
 private:
     static std::mutex mutex_;
     uint32_t id;
-
+    double width_ = 0.0f;
+    double height_ = 0.0f;
     static std::unordered_map<uint32_t, RefPtr<AceType>> offscreenPatternMap_;
     static uint32_t offscreenPatternCount_;
 };

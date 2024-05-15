@@ -36,6 +36,7 @@ public:
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);
+    virtual void SetExpandingMode(const NG::SubMenuExpandingMode& expandingMode) {};
 
 private:
     static std::unique_ptr<MenuModel> instance_;

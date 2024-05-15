@@ -87,6 +87,12 @@ Matrix4 Matrix4::CreateFactorSkew(double x, double y)
         1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 }
 
+Matrix4 Matrix4::CreateFactorPerspective(double x, double y)
+{
+    return Matrix4(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, x, y, 0.0f, 1.0f);
+}
+
 Matrix4 Matrix4::CreatePerspective(double distance)
 {
     auto result = CreateIdentity();
@@ -109,6 +115,23 @@ Matrix4 Matrix4::Invert(const Matrix4& matrix)
     }
 
     return inverted;
+}
+
+Matrix4 Matrix4::QuaternionToMatrix(double x, double y, double z, double w)
+{
+    double norm = std::sqrt(w * w + x * x + y * y + z * z);
+    if (LessOrEqual(norm, 0.0f)) {
+        return Matrix4();
+    }
+    w /= norm;
+    x /= norm;
+    y /= norm;
+    z /= norm;
+
+    return Matrix4(1.0 - 2.0 * (y * y + z * z), 2.0 * (x * y - w * z), 2.0 * (x * z + w * y), 0.0,
+        2.0 * (x * y + w * z), 1.0 - 2.0 * (x * x + z * z), 2.0 * (y * z - w * x), 0.0,
+        2.0 * (x * z - w * y), 2.0 * (y * z + w * x), 1.0 - 2.0 * (x * x + y * y), 0.0,
+        0.0, 0.0, 0.0, 1.0);
 }
 
 Matrix4::Matrix4()

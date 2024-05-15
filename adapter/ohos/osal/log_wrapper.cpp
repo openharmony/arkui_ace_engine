@@ -15,6 +15,10 @@
 
 #include "base/log/log_wrapper.h"
 
+#ifdef _GNU_SOURCE
+#include <dlfcn.h>
+#endif
+#include <mutex>
 #include <cstring>
 #include <map>
 #include <unordered_map>
@@ -102,7 +106,7 @@ const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_WINDOW_SCENE, "AceWindowScene" },
     { AceLogTag::ACE_NODE_CONTAINER, "AceNodeContainer" },
     { AceLogTag::ACE_NATIVE_NODE, "AceNativeNode" },
-    { AceLogTag::ACE_DYNAMIC_COMPONENT, "AceDynamicComponent" },
+    { AceLogTag::ACE_ISOLATED_COMPONENT, "AceIsolatedComponent" },
     { AceLogTag::ACE_MARQUEE, "AceMarquee" },
     { AceLogTag::ACE_OBSERVER, "AceObserver" },
     { AceLogTag::ACE_EMBEDDED_COMPONENT, "AceEmbeddedComponent" },
@@ -116,6 +120,7 @@ const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_CANVAS_COMPONENT, "AceCanvasComponent" },
     { AceLogTag::ACE_SCROLL_BAR, "AceScrollBar" },
     { AceLogTag::ACE_MOVING_PHOTO, "AceMovingPhoto" },
+    { AceLogTag::ACE_ARK_COMPONENT, "AceArkComponent" },
 };
 // initial static member object
 LogLevel LogWrapper::level_ = LogLevel::DEBUG;
@@ -140,4 +145,23 @@ const std::string LogWrapper::GetIdWithReason()
 }
 #endif
 
+bool LogBacktrace(size_t maxFrameNums)
+{
+    static const char* (*pfnGetTrace)(size_t, size_t);
+#ifdef _GNU_SOURCE
+    if (!pfnGetTrace) {
+        pfnGetTrace = (decltype(pfnGetTrace))dlsym(RTLD_DEFAULT, "GetTrace");
+    }
+#endif
+    if (!pfnGetTrace) {
+        return false;
+    }
+
+    static std::mutex mtx;
+    std::lock_guard lock(mtx);
+    size_t skipFrameNum = 2;
+    LOGI("Backtrace: skipFrameNum=%{public}zu maxFrameNums=%{public}zu\n%{public}s",
+        skipFrameNum, maxFrameNums, pfnGetTrace(skipFrameNum, maxFrameNums));
+    return true;
+}
 } // namespace OHOS::Ace

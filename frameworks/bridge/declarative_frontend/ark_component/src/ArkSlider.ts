@@ -18,6 +18,7 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   sliderNode: BuilderNode<[SliderConfiguration]> | null = null;
   modifier: ContentModifier<SliderConfiguration>;
+  needRebuild: boolean = false;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -83,9 +84,22 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     modifierWithKey(this._modifiersWithKeys, StepSizeModifier.identity, StepSizeModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<SliderConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
+  slideRange(value: ValidSlideRange): this {
+    modifierWithKey(this._modifiersWithKeys, ValidSlideRangeModifier.identity, ValidSlideRangeModifier, value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<SliderConfiguration>): this {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -93,10 +107,11 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   }
   makeContentModifierNode(context: UIContext, sliderConfiguration: SliderConfiguration): FrameNode | null {
     sliderConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.sliderNode)) {
+    if (isUndefined(this.sliderNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.sliderNode = new xNode.BuilderNode(context);
       this.sliderNode.build(this.builder, sliderConfiguration);
+      this.needRebuild = false;
     } else {
       this.sliderNode.update(sliderConfiguration);
     }
@@ -339,6 +354,24 @@ class TrackThicknessModifier extends ModifierWithKey<Length> {
       getUINativeModule().slider.resetThickness(node);
     } else {
       getUINativeModule().slider.setThickness(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ValidSlideRangeModifier extends ModifierWithKey<ValidSlideRange> {
+  constructor(value: ValidSlideRange) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('slideRange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetValidSlideRange(node);
+    } else {
+      getUINativeModule().slider.setValidSlideRange(node, this.value);
     }
   }
 

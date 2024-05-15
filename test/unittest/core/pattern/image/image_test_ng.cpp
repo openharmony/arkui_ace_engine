@@ -19,8 +19,6 @@
 
 #include "gtest/gtest.h"
 
-#include "core/image/image_source_info.h"
-
 #define private public
 #define protected public
 
@@ -54,6 +52,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
+#include "core/image/image_source_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -806,7 +805,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true, true);
     /**
      * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
      */
@@ -837,7 +836,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<TextTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
 
     auto overlayPaintMethod = imagePaintMethod.GetOverlayDrawFunction(&paintWrapper);
     EXPECT_TRUE(overlayPaintMethod);
@@ -2299,6 +2298,84 @@ HWTEST_F(ImageTestNg, TestObjectFit001, TestSize.Level1)
     EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::TOP_LEFT);
     EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::TOP_LEFT);
 }
+
+/**
+ * @tc.name: TestDynamicRangeMode001
+ * @tc.desc: Test image dynamicRangeMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestDynamicRangeMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+
+    /**
+     * @tc.steps: step2. get ImagePattern ImageRenderProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+
+    /**
+     * @tc.steps: step3. set dynamicRangeMode
+     */
+    imageRenderProperty->UpdateDynamicMode(DynamicRangeMode::CONSTRAINT);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode(), DynamicRangeMode::CONSTRAINT);
+
+    /**
+     * @tc.steps: step4. set dynamicRangeMode
+     */
+    imageRenderProperty->UpdateDynamicMode(DynamicRangeMode::STANDARD);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode(), DynamicRangeMode::STANDARD);
+
+    /**
+     * @tc.steps: step5. set dynamicRangeMode
+     */
+    imageRenderProperty->UpdateDynamicMode(DynamicRangeMode::HIGH);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode(), DynamicRangeMode::HIGH);
+}
+
+/**
+ * @tc.name: TestEnhancedImageQuality001
+ * @tc.desc: Test image EnhancedImageQuality.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestEnhancedImageQuality001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+
+    /**
+     * @tc.steps: step2. get ImagePattern ImageRenderProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+
+    /**
+     * @tc.steps: step3. set EnhancedImageQuality
+     */
+    imagePattern->SetImageQuality(AIImageQuality::HIGH);
+    EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::HIGH);
+
+    /**
+     * @tc.steps: step3. set EnhancedImageQuality
+     */
+    imagePattern->SetImageQuality(AIImageQuality::NONE);
+    EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::NONE);
+
+    /**
+     * @tc.steps: step3. set EnhancedImageQuality
+     */
+    imagePattern->SetImageQuality(AIImageQuality::NORMAL);
+    EXPECT_EQ(imagePattern->GetImageQuality(), AIImageQuality::NORMAL);
+}
+
 /**
  * @tc.name: ImageSetDraggable0001
  * @tc.desc: Set the draggable attribute of ImageModelNG object.
@@ -2436,5 +2513,55 @@ HWTEST_F(ImageTestNg, ImagePixelMapListTest0001, TestSize.Level1)
     EXPECT_EQ(imagePattern->durationTotal_, DURATION_DEFAULT);
     EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
     EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
+}
+
+/**
+ * @tc.name: ImageSensitiveTest0001
+ * @tc.desc: Test image privacySensitive.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSensitiveTest0001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_FALSE(frameNode->IsPrivacySensitive());
+    frameNode->SetPrivacySensitive(true);
+    EXPECT_TRUE(frameNode->IsPrivacySensitive());
+    frameNode->SetPrivacySensitive(false);
+    EXPECT_FALSE(frameNode->isPrivacySensitive_);
+}
+
+/**
+ * @tc.name: ImageSensitiveTest0002
+ * @tc.desc: Test image OnSensitiveStyleChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSensitiveTest0002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get ImagePattern and call OnSensitiveStyleChange.
+     * @tc.expected: isSensitive_ is true when setting privacy sensitive and card notification.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    frameNode->SetPrivacySensitive(true);
+    imagePattern->OnSensitiveStyleChange(false);
+    EXPECT_FALSE(imagePattern->isSensitive_);
+    imagePattern->OnSensitiveStyleChange(true);
+    EXPECT_TRUE(imagePattern->isSensitive_);
+    frameNode->SetPrivacySensitive(false);
+    imagePattern->OnSensitiveStyleChange(true);
+    EXPECT_FALSE(imagePattern->isSensitive_);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true, true);
+    EXPECT_TRUE(imagePaintMethod.sensitive_);
 }
 } // namespace OHOS::Ace::NG

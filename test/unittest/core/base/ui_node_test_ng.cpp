@@ -1178,11 +1178,16 @@ HWTEST_F(UINodeTestNg, UINodeTestNg040, TestSize.Level1)
      * @tc.steps: step1. set onMainTree_ is true and call AddChild
      * @tc.expected: children_.size() is 2
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     auto it = std::find(ZERO->children_.begin(), ZERO->children_.end(), ZERO);
     ZERO->onMainTree_ = true;
+    ZERO->context_ = AceType::RawPtr(context);
     ZERO->DoAddChild(it, ONE, false);
     ZERO->DoAddChild(it, TWO, true);
     EXPECT_EQ(ZERO->children_.size(), 2);
+    ZERO->onMainTree_ = false;
+    ZERO->context_ = nullptr;
 }
 
 /**
@@ -1247,6 +1252,41 @@ HWTEST_F(UINodeTestNg, UINodeTestNg043, TestSize.Level1)
     parent->UINode::GetFrameChildByIndex(0, false);
     EXPECT_FALSE(parent->UINode::GetDisappearingChildById(""));
     EXPECT_FALSE(parent->UINode::GetFrameChildByIndex(5, false));
+}
+
+/**
+ * @tc.name: UINodeTestNg044
+* @tc.desc: Test ui node method of instanceid
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a uinode
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ASSERT_NE(testNode, nullptr);
+
+    int32_t testId = 0;
+    testNode->RegisterUpdateJSInstanceCallback([&testId](int32_t newId) {
+        testId = newId;
+    });
+
+    /**
+     * @tc.steps: step2. attach context
+     */
+    testNode->AttachContext(AceType::RawPtr(context), true);
+    EXPECT_EQ(testNode->context_, AceType::RawPtr(context));
+    EXPECT_EQ(testNode->instanceId_, context->GetInstanceId());
+    EXPECT_EQ(testId, context->GetInstanceId());
+
+    /**
+     * @tc.steps: step3. detach context
+     */
+    testNode->DetachContext(true);
+    EXPECT_EQ(testNode->context_, nullptr);
 }
 
 /**

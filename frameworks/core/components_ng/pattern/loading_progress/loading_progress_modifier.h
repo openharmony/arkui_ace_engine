@@ -91,6 +91,12 @@ public:
     }
     void CloseAnimation(float date, float cometLen, float cometOpacity, float cometScale);
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        CHECK_NULL_VOID(useContentModifier_);
+        useContentModifier_->Set(useContentModifier);
+    }
+
 private:
     void AdjustMatrix(RSCamera3D& camera, RSMatrix& matrix);
     float GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber);
@@ -108,6 +114,7 @@ private:
     RefPtr<AnimatablePropertyFloat> cometSizeScale_;
     RefPtr<AnimatablePropertyFloat> cometTailLen_;
     RefPtr<AnimatablePropertyFloat> sizeScale_;
+    RefPtr<PropertyBool> useContentModifier_;
 
     LoadingProgressOwner loadingProgressOwner_;
     bool isLoading_ = false;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 
 #include "base/utils/noncopyable.h"
 #include "core/animation/svg_animate.h"
-#include "frameworks/core/components/declaration/svg/svg_animate_declaration.h"
+#include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
@@ -50,7 +50,7 @@ private:
     static CalcMode ConvertCalcMode(const std::string& val);
 
     RefPtr<Animator> animator_;
-    RefPtr<SvgAnimateDeclaration> animDeclaration_;
+    SvgAnimateAttribute animateAttr_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SvgAnimation);
 };

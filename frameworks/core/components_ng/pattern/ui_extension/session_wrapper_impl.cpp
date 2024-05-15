@@ -349,6 +349,13 @@ bool SessionWrapperImpl::NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::Key
     return isConsumed;
 }
 
+bool SessionWrapperImpl::NotifyKeyEventAsync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
+{
+    CHECK_NULL_RETURN(session_, false);
+    session_->TransferKeyEventAsync(keyEvent, isPreIme);
+    return true;
+}
+
 bool SessionWrapperImpl::NotifyAxisEventSync(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
 {
     return false;
@@ -607,6 +614,17 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
     UIEXT_LOGD("The occcupied area with 'keyboardHeight = %{public}d' is notified to the provider.", keyboardHeight);
     session_->NotifyOccupiedAreaChangeInfo(info);
     return true;
+}
+
+void SessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
+{
+    CHECK_NULL_VOID(session_);
+    if (isDensityDpi) {
+        float density = PipelineBase::GetCurrentDensity();
+        session_->NotifyDensityFollowHost(isDensityDpi, density);
+        return;
+    }
+    session_->NotifyDensityFollowHost(isDensityDpi);
 }
 /***************************** End: The interface to control the display area and the avoid area **********************/
 

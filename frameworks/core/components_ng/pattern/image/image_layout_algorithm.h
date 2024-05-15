@@ -41,6 +41,13 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
+    void Layout(LayoutWrapper* layoutWrapper) override;
+
+    static void PerformImageAnimationLayout(LayoutWrapper* layoutWrapper);
+    static bool IsImageAnimationLayout(LayoutWrapper* layoutWrapper);
+
 private:
     WeakPtr<ImageLoadingContext> loadingCtx_;
     WeakPtr<ImageLoadingContext> altLoadingCtx_;

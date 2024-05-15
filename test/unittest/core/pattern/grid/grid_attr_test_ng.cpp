@@ -15,6 +15,9 @@
 
 #include "grid_test_ng.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -685,7 +688,7 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
         CreateFixedItem(7);
     });
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT))); // normal item
+    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT)));        // normal item
 
     /**
      * @tc.steps: step2. Change colStart and colEnd
@@ -696,7 +699,7 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
     itemLayoutProperty->UpdateColumnEnd(1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // update items
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
+    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT)));        // big item
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH, ITEM_HEIGHT))); // normal item
 }
 
@@ -713,7 +716,7 @@ HWTEST_F(GridAttrTestNg, EnableScrollInteraction001, TestSize.Level1)
     });
     EXPECT_TRUE(layoutProperty_->GetScrollEnabledValue());
 }
-    
+
 /**
  * @tc.name: EnableScrollInteraction002
  * @tc.desc: Test property about enableScrollInteraction.
@@ -1022,7 +1025,7 @@ HWTEST_F(GridAttrTestNg, LayoutOptions001, TestSize.Level1)
      * @tc.expected: Each gridItem rect is correct
      */
     GridLayoutOptions option;
-    option.irregularIndexes = { 6, 1, 4};
+    option.irregularIndexes = { 6, 1, 4 };
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(option);

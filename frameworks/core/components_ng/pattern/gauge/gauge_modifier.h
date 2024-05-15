@@ -51,8 +51,8 @@ struct SingleSegmentGradientInfo {
     float shadowRadius = 0.0f;
     ColorStopArray colorStopArray;
 };
-class GaugeModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(GaugeModifier, ContentModifier);
+class GaugeModifier : public ForegroundModifier {
+    DECLARE_ACE_TYPE(GaugeModifier, ForegroundModifier);
 public:
     GaugeModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern): pattern_(pattern)
     {
@@ -79,7 +79,6 @@ public:
 
     void onDraw(DrawingContext& context) override;
     void UpdateValue();
-
     void SetUseContentModifier(bool useContentModifier)
     {
         if (useContentModifier_) {
@@ -125,10 +124,10 @@ private:
     void DrawHighLight(RSCanvas& canvas, RenderRingInfo& data, float drawStartDegree);
     void CalculateStartAndSweepDegree(RefPtr<GaugePaintProperty>& paintProperty, RenderRingInfo& data);
     float GetOffsetDegree(RenderRingInfo& data, float oppositeSide);
-    float GetValueRatio(RefPtr<GaugePaintProperty>& paintProperty);
     void CreateDefaultColor(std::vector<RSColorQuad>& colors, std::vector<float>& pos);
     void CreateDefaultTrianglePath(float pathStartVertexX, float pathStartVertexY, float radius, RSPath& path);
     WeakPtr<Pattern> pattern_;
+    void GetDrawPath(RSPath& path, RenderRingInfo& data, float startAngle, float sweepAngle);
 
     RefPtr<AnimatablePropertyFloat> value_;
     RefPtr<AnimatablePropertyFloat> min_;
@@ -149,7 +148,6 @@ private:
     RefPtr<PropertyBool> isShowIndicator_;
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyBool> indicatorChange_;
-
     ACE_DISALLOW_COPY_AND_MOVE(GaugeModifier);
 };
 } // namespace OHOS::Ace::NG

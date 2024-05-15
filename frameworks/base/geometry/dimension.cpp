@@ -182,7 +182,7 @@ Dimension Dimension::FromString(const std::string& str)
         return Dimension(value, unit);
     }
 
-    for (int32_t i = str.length() - 1; i >= 0; --i) {
+    for (int32_t i = static_cast<int32_t>(str.length() - 1); i >= 0; --i) {
         if (str[i] >= '0' && str[i] <= '9') {
             value = StringUtils::StringToDouble(str.substr(0, i + 1));
             auto subStr = str.substr(i + 1);

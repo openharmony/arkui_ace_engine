@@ -85,10 +85,10 @@ int64_t Date::GetMilliSecondsByDateTime(std::tm& dateTime)
     auto local = std::localtime(&now);
     CHECK_NULL_RETURN(local, 0);
     if (dateTime.tm_year == 0) {
-        dateTime.tm_year = static_cast<uint32_t>(local->tm_year);
+        dateTime.tm_year = local->tm_year;
     }
     if (dateTime.tm_mday == 0) {
-        dateTime.tm_mday = static_cast<uint32_t>(local->tm_mday);
+        dateTime.tm_mday = local->tm_mday;
     }
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
     auto duration = timestamp.time_since_epoch();

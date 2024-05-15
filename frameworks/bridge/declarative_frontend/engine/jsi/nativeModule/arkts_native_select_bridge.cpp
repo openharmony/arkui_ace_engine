@@ -36,10 +36,17 @@ panda::Local<panda::JSValueRef> JsSelectChangeCallback(panda::JsiRuntimeCallInfo
     auto value = secondArg->ToString(vm)->ToString();
     auto ref = runtimeCallInfo->GetThisRef();
     auto obj = ref->ToObject(vm);
+    FrameNode* frameNode = nullptr;
     if (obj->GetNativePointerFieldCount() < 1) {
-        return panda::JSValueRef::Undefined(vm);
+        if (!ref->IsProxy()) {
+            return panda::JSValueRef::Undefined(vm);
+        }
+        auto frameNodeIdValue = obj->Get(vm, "frameNodeId_");
+        auto frameNodeId = frameNodeIdValue->Int32Value(vm);
+        frameNode = ElementRegister::GetInstance()->GetFrameNodePtrById(frameNodeId);
+    } else {
+        frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     SelectModelNG::SetChangeValue(frameNode, index, value);
     return panda::JSValueRef::Undefined(vm);
@@ -728,12 +735,13 @@ ArkUINativeModuleValue SelectBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             ContainerScope scope(containerId);
             auto context = ArkTSUtils::GetContext(vm);
             CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
-            const char* keysOfSelect[] = { "value", "icon", "selected", "index", "triggerSelect"};
+            const char* keysOfSelect[] = { "value", "icon", "selected", "index", "triggerSelect", "frameNodeId_"};
             Local<JSValueRef> valuesOfSelect[] = { panda::StringRef::NewFromUtf8(vm, config.value_.c_str()),
                 panda::StringRef::NewFromUtf8(vm, config.icon_.c_str()),
                 panda::BooleanRef::New(vm, config.selected_),
                 panda::NumberRef::New(vm, config.index_),
-                panda::FunctionRef::New(vm, JsSelectChangeCallback)};
+                panda::FunctionRef::New(vm, JsSelectChangeCallback),
+                panda::NumberRef::New(vm, frameNode->GetId())};
             auto select = panda::ObjectRef::NewWithNamedProperties(vm,
                 ArraySize(keysOfSelect), keysOfSelect, valuesOfSelect);
             select->SetNativePointerFieldCount(vm, 1);

@@ -48,19 +48,7 @@ public:
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
-    Axis GetAxisDirection() override
-    {
-        if (direction_.type == PanDirection::ALL) {
-            return Axis::FREE;
-        }
-        if ((direction_.type & PanDirection::VERTICAL) == 0) {
-            return Axis::HORIZONTAL;
-        }
-        if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
-            return Axis::VERTICAL;
-        }
-        return Axis::NONE;
-    }
+    Axis GetAxisDirection() override;
 
     void SetDirection(const PanDirection& direction);
 
@@ -84,6 +72,8 @@ public:
     void ForceCleanRecognizer() override;
 
     bool AboutToAddCurrentFingers(int32_t touchId) override;
+
+    bool AboutToMinusCurrentFingers(int32_t touchId) override;
 
 private:
     class PanVelocity {
@@ -120,6 +110,7 @@ private:
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
     void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
+    Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     GestureJudgeResult TriggerGestureJudgeCallback();
@@ -162,7 +153,6 @@ private:
     double newDistance_ = 0.0;
     PanDirection newDirection_;
     bool isFlushTouchEventsEnd_ = false;
-    InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     bool isForDrag_ = false;
     bool isAllowMouse_ = true;
 };

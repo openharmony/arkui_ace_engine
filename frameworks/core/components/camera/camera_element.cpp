@@ -426,7 +426,7 @@ void CameraElement::CreateTexture()
             if (cameraElement) {
                 cameraElement->OnError(errorcode, errormsg);
             }
-            }, "ArkUICameraErrorCallback");
+        }, "ArkUICameraErrorCallback");
     };
     texture_ = AceType::MakeRefPtr<Texture>(context_, errorCallback);
 

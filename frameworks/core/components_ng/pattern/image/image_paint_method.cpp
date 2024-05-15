@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
 #include "core/common/container.h"
+#include "core/components/image/image_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
@@ -96,6 +97,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.imageInterpolation_ = intepolation;
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     config.smoothEdge_ = renderProps->GetSmoothEdge().value_or(0.0f);
+    config.dynamicMode = renderProps->GetDynamicModeValue(DynamicRangeMode::STANDARD);
     if (renderProps) {
         config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
     }
@@ -133,7 +135,12 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     auto svgCanvas = DynamicCast<SvgCanvasImage>(canvasImage_);
     if (svgCanvas && InstanceOf<SvgCanvasImage>(canvasImage_)) {
         svgCanvas->SetFillColor(props->GetSvgFillColor());
-        svgCanvas->SetSmoothEdge(props->GetSmoothEdge().value_or(0.0f));
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto theme = pipeline->GetTheme<ImageTheme>();
+        CHECK_NULL_RETURN(theme, nullptr);
+        auto smoothEdgeValue = std::max(theme->GetMinEdgeAntialiasing(), props->GetSmoothEdge().value_or(0.0f));
+        svgCanvas->SetSmoothEdge(smoothEdgeValue);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             std::optional<ImageColorFilter> imageColorFilter = std::nullopt;
             if (paintConfig.colorFilter_.colorFilterMatrix_ || paintConfig.colorFilter_.colorFilterDrawing_) {
@@ -143,7 +150,12 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
         }
     }
     ImagePainter imagePainter(canvasImage_);
-    return [imagePainter, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, {}, contentSize); };
+    auto sensitive = sensitive_;
+    return [imagePainter, contentSize, sensitive](RSCanvas& canvas) {
+        if (!sensitive) {
+            imagePainter.DrawImage(canvas, {}, contentSize);
+        }
+    };
 }
 
 CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)

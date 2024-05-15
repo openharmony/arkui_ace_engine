@@ -352,7 +352,7 @@ int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textLayoutAlgorithm, 0);
-    auto paragraph = textLayoutAlgorithm->GetParagraph();
+    auto paragraph = textLayoutAlgorithm->GetSingleParagraph();
     CHECK_NULL_RETURN(paragraph, 0);
     auto paragHeight = paragraph->GetHeight();
     auto paragLineCount = paragraph->GetLineCount();

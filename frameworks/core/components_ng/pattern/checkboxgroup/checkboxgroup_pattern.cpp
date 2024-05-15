@@ -41,9 +41,9 @@ void CheckBoxGroupPattern::OnAttachToFrameNode()
 void CheckBoxGroupPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto groupManager = groupManager_.Upgrade();
+    auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
-    groupManager->RemoveCheckBoxFromGroup(GetGroupNameWithNavId(), frameNode->GetId());
+    groupManager->RemoveCheckBoxGroup(GetGroupNameWithNavId(), frameNode->GetId());
 }
 
 void CheckBoxGroupPattern::OnModifyDone()
@@ -58,16 +58,27 @@ void CheckBoxGroupPattern::OnModifyDone()
     CHECK_NULL_VOID(checkBoxTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetMarginProperty()) {
-        MarginProperty margin;
-        margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-        margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-        margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
-        margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
-        layoutProperty->UpdateMargin(margin);
+    PaddingProperty padding;
+    padding.left = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
+    padding.right = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
+    padding.top = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
+    padding.bottom = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
+    auto& setPadding = layoutProperty->GetPaddingProperty();
+    if (setPadding) {
+        if (setPadding->left.has_value()) {
+            padding.left = setPadding->left;
+        }
+        if (setPadding->right.has_value()) {
+            padding.right = setPadding->right;
+        }
+        if (setPadding->top.has_value()) {
+            padding.top = setPadding->top;
+        }
+        if (setPadding->bottom.has_value()) {
+            padding.bottom = setPadding->bottom;
+        }
     }
-    hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
-    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
+    layoutProperty->UpdatePadding(padding);
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
@@ -283,34 +294,17 @@ void CheckBoxGroupPattern::UpdateState()
     }
     auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (!groupManager_.Upgrade()) {
-        groupManager_ = GroupManager::GetGroupManager();
-    }
-    auto groupManager = groupManager_.Upgrade();
-    CHECK_NULL_VOID(groupManager);
     auto preGroup = GetPreGroup();
-    auto group = GetGroupNameWithNavId();
     if (!preGroup.has_value()) {
-        groupManager->AddCheckBoxGroupToGroup(group, host->GetId());
-        auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        if (paintProperty->HasCheckBoxGroupSelect() && paintProperty->GetCheckBoxGroupSelectValue()) {
-            auto selectAll = paintProperty->GetCheckBoxGroupSelectValue();
-            if (selectAll) {
-                paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
-            }
-            if (selectAll || (!selectAll && !isFirstCreated_)) {
-                UpdateUIStatus(selectAll);
-            }
-            initSelected_ = selectAll;
-        }
-        isFirstCreated_ = false;
-        SetPreGroup(group);
+        InitPreGroup();
         return;
     }
+    auto groupManager = GetGroupManager();
+    CHECK_NULL_VOID(groupManager);
+    auto group = GetGroupNameWithNavId();
     if (preGroup.value() != group) {
-        groupManager->RemoveCheckBoxFromGroup(preGroup.value(), host->GetId());
-        groupManager->AddCheckBoxGroupToGroup(group, host->GetId());
+        groupManager->RemoveCheckBoxGroup(preGroup.value(), host->GetId());
+        groupManager->AddCheckBoxGroup(group, host);
         SetPreGroup(group);
         return;
     }
@@ -338,6 +332,30 @@ void CheckBoxGroupPattern::UpdateState()
     updateFlag_ = false;
 }
 
+void CheckBoxGroupPattern::InitPreGroup()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto groupManager = GetGroupManager();
+    CHECK_NULL_VOID(groupManager);
+    auto group = GetGroupNameWithNavId();
+    groupManager->AddCheckBoxGroup(group, host);
+    auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasCheckBoxGroupSelect() && paintProperty->GetCheckBoxGroupSelectValue()) {
+        auto selectAll = paintProperty->GetCheckBoxGroupSelectValue();
+        if (selectAll) {
+            paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+        }
+        if (selectAll || (!selectAll && !isFirstCreated_)) {
+            UpdateUIStatus(selectAll);
+        }
+        initSelected_ = selectAll;
+    }
+    isFirstCreated_ = false;
+    SetPreGroup(group);
+}
+
 void CheckBoxGroupPattern::OnAfterModifyDone()
 {
     auto host = GetHost();
@@ -351,16 +369,11 @@ void CheckBoxGroupPattern::OnAfterModifyDone()
     CHECK_NULL_VOID(eventHub);
     std::vector<std::string> vec;
     if (initSelected_) {
-        auto groupManager = groupManager_.Upgrade();
+        auto groupManager = GetGroupManager();
         CHECK_NULL_VOID(groupManager);
-        auto checkBoxGroupMap = groupManager->GetCheckBoxGroupMap();
-        const auto& list = checkBoxGroupMap[GetGroupNameWithNavId()];
-        for (auto&& item : list) {
-            auto node = item.Upgrade();
-            if (!node || node == host) {
-                continue;
-            }
-            if (node->GetTag() == V2::CHECKBOXGROUP_ETS_TAG) {
+        auto list = groupManager->GetCheckboxList(GetGroupNameWithNavId());
+        for (auto node : list) {
+            if (!node) {
                 continue;
             }
             auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
@@ -386,65 +399,44 @@ void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frame
         paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::NONE);
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto groupManager = groupManager_.Upgrade();
-    CHECK_NULL_VOID(groupManager);
-    auto checkBoxGroupMap = groupManager->GetCheckBoxGroupMap();
-    auto group = GetGroupNameWithNavId();
-    UpdateCheckBoxStatus(frameNode, checkBoxGroupMap, group, select);
+    UpdateCheckBoxStatus(frameNode, select);
 }
 
-void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode,
-    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, const std::string& group,
-    bool select)
+void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode, bool select)
 {
+    auto groupManager = GetGroupManager();
+    CHECK_NULL_VOID(groupManager);
+    auto group = GetGroupNameWithNavId();
+    auto list = groupManager->GetCheckboxList(group);
     std::vector<std::string> vec;
     auto status =
         select ? CheckBoxGroupPaintProperty::SelectStatus::ALL : CheckBoxGroupPaintProperty::SelectStatus::NONE;
-    const auto& list = checkBoxGroupMap[group];
-    GetCheckBoxNameList(frameNode, checkBoxGroupMap, group, select, vec);
-    CheckboxGroupResult groupResult(vec, int(status));
-    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
-    eventHub->UpdateChangeEvent(&groupResult);
-    for (auto&& item : list) {
-        auto node = item.Upgrade();
-        if (node == frameNode) {
-            continue;
-        }
+    for (auto && node : list) {
         if (!node) {
             continue;
         }
-        if (node->GetTag() == V2::CHECKBOXGROUP_ETS_TAG) {
+        auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto eventHub = node->GetEventHub<CheckBoxEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !eventHub->IsEnabled()) {
             continue;
-        } else {
-            auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
-            CHECK_NULL_VOID(paintProperty);
-            auto eventHub = node->GetEventHub<CheckBoxEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                if (eventHub->IsEnabled() == false) {
-                    continue;
-                }
-            }
-            if (!paintProperty->HasCheckBoxSelect()) {
-                if (select) {
-                    paintProperty->UpdateCheckBoxSelect(select);
-                    auto pattern = node->GetPattern<CheckBoxPattern>();
-                    pattern->StartCustomNodeAnimation(select);
-                    pattern->UpdateUIStatus(select);
-                    pattern->SetLastSelect(select);
-                    eventHub->UpdateChangeEvent(select);
-                }
-            }
-            if (paintProperty->HasCheckBoxSelect() && paintProperty->GetCheckBoxSelectValue() != select) {
-                paintProperty->UpdateCheckBoxSelect(select);
-                auto pattern = node->GetPattern<CheckBoxPattern>();
-                pattern->StartCustomNodeAnimation(select);
-                pattern->UpdateUIStatus(select);
-                pattern->SetLastSelect(select);
-                eventHub->UpdateChangeEvent(select);
-            }
+        }
+        if (select) {
+            vec.push_back(eventHub->GetName());
+        }
+        if (paintProperty->GetCheckBoxSelectValue(false) != select) {
+            paintProperty->UpdateCheckBoxSelect(select);
+            auto pattern = node->GetPattern<CheckBoxPattern>();
+            pattern->StartCustomNodeAnimation(select);
+            pattern->UpdateUIStatus(select);
+            pattern->SetLastSelect(select);
+            eventHub->UpdateChangeEvent(select);
         }
     }
+    CheckboxGroupResult groupResult(vec, int(status));
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    eventHub->UpdateChangeEvent(&groupResult);
 }
 
 void CheckBoxGroupPattern::UpdateRepeatedGroupStatus(const RefPtr<FrameNode>& frameNode, bool select)
@@ -537,25 +529,6 @@ FocusPattern CheckBoxGroupPattern::GetFocusPattern() const
     return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
 }
 
-// Set the default hot zone for the component.
-void CheckBoxGroupPattern::AddHotZoneRect()
-{
-    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
-    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
-    DimensionRect hotZoneRegion;
-    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
-    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    std::vector<DimensionRect> hotZoneRegions;
-    hotZoneRegions.emplace_back(hotZoneRegion);
-    gestureHub->SetResponseRegion(hotZoneRegions);
-}
-
 void CheckBoxGroupPattern::RemoveLastHotZoneRect() const
 {
     auto host = GetHost();
@@ -588,6 +561,7 @@ void CheckBoxGroupPattern::InitializeModifierParam(CheckBoxGroupModifier::Parame
     paintParameters.hoverToTouchDuration = checkBoxTheme->GetHoverToTouchDuration();
     paintParameters.uiStatus = UIStatus::UNSELECTED;
     paintParameters.status = CheckBoxGroupPaintProperty::SelectStatus::NONE;
+    paintParameters.defaultPaddingSize = checkBoxTheme->GetDefaultPaddingSize();
 }
 
 void CheckBoxGroupPattern::UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters)
@@ -689,22 +663,17 @@ void CheckBoxGroupPattern::UpdateCheckBoxStyle()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto groupManager = groupManager_.Upgrade();
+    auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
     auto checkBoxGroupEventHub = GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(checkBoxGroupEventHub);
-    auto checkBoxGroupMap = groupManager->GetCheckBoxGroupMap();
     auto group = checkBoxGroupEventHub->GetGroupName();
+    auto list = groupManager->GetCheckboxList(group);
     CheckBoxStyle groupStyle;
     GetCheckBoxGroupStyle(host, groupStyle);
     auto isEnabled = checkBoxGroupEventHub->IsEnabled();
-    const auto& list = checkBoxGroupMap[group];
-    for (auto&& item : list) {
-        auto node = item.Upgrade();
-        if (node == host || !node) {
-            continue;
-        }
-        if (node->GetTag() == V2::CHECKBOXGROUP_ETS_TAG) {
+    for (auto node : list) {
+        if (!node) {
             continue;
         }
         const auto& checkboxEventHub = node->GetEventHub<EventHub>();
@@ -738,36 +707,6 @@ void CheckBoxGroupPattern::SetCheckBoxStyle(const RefPtr<CheckBoxPaintProperty>&
         pattern->SetOriginalCheckboxStyle(OriginalCheckBoxStyle::NONE);
         paintProperty->UpdateCheckBoxSelectedStyle(checkBoxGroupStyle);
         checkboxNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
-}
-
-void CheckBoxGroupPattern::GetCheckBoxNameList(const RefPtr<FrameNode>& frameNode,
-    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, const std::string& group,
-    bool select, std::vector<std::string>& vec)
-{
-    const auto& list = checkBoxGroupMap[group];
-    for (auto&& item : list) {
-        auto node = item.Upgrade();
-        if (node == frameNode) {
-            continue;
-        }
-        if (!node) {
-            continue;
-        }
-        if (node->GetTag() == V2::CHECKBOXGROUP_ETS_TAG) {
-            continue;
-        }
-        auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        auto eventHub = node->GetEventHub<CheckBoxEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            if (select && eventHub->IsEnabled()) {
-                vec.push_back(eventHub->GetName());
-            }
-        } else if (select) {
-            vec.push_back(eventHub->GetName());
-        }
     }
 }
 } // namespace OHOS::Ace::NG

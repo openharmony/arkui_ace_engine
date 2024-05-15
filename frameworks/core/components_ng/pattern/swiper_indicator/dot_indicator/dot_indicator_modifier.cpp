@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
@@ -54,7 +55,13 @@ constexpr int32_t BLACK_POINT_DURATION = 400;
 void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
     ContentProperty contentProperty;
-    contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
+    if (isFocused_->Get()) {
+        auto swiperTheme = GetSwiperIndicatorTheme();
+        CHECK_NULL_VOID(swiperTheme);
+        contentProperty.backgroundColor = swiperTheme->GetFocusedBgColor();
+    } else {
+        contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
+    }
     contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
     contentProperty.longPointLeftCenterX = longPointLeftCenterX_->Get();
     contentProperty.longPointRightCenterX = longPointRightCenterX_->Get();
@@ -66,6 +73,31 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.itemHalfSizes = itemHalfSizes_->Get();
     PaintBackground(context, contentProperty);
     PaintContent(context, contentProperty);
+}
+
+void DotIndicatorModifier::SetFocusedAndSelectedColor(PaintWrapper* paintWrapper)
+{
+    auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    Color unselectedFocusedColor = swiperTheme->GetColor();
+    Color selectedFocusedColor = swiperTheme->GetSelectedColor();
+    if (isFocused_->Get()) {
+        if (selectedFocusedColor == paintProperty->GetSelectedColor()) {
+            SetSelectedColor(swiperTheme->GetFocusedSelectedColor());
+        } else {
+            SetSelectedColor(paintProperty->GetSelectedColorValue(selectedFocusedColor));
+        }
+        if (unselectedFocusedColor == paintProperty->GetColor()) {
+            SetUnselectedColor(swiperTheme->GetFocusUnSelectedColor());
+        } else {
+            SetUnselectedColor(paintProperty->GetColorValue(unselectedFocusedColor));
+        }
+    } else {
+        SetUnselectedColor(paintProperty->GetColorValue(unselectedFocusedColor));
+        SetSelectedColor(paintProperty->GetSelectedColorValue(selectedFocusedColor));
+    }
 }
 
 void DotIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
@@ -85,9 +117,12 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     // Background necessary property
     float rectWidth =
         contentProperty.indicatorPadding + allPointDiameterSum + allPointSpaceSum + contentProperty.indicatorPadding;
-    float rectHeight = contentProperty.indicatorPadding + itemHeight + contentProperty.indicatorPadding;
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    auto indicatorHeightPadding = swiperTheme->GetIndicatorBgHeight().ConvertToPx();
+    float rectHeight = indicatorHeightPadding + itemHeight + indicatorHeightPadding;
     if (selectedItemHeight > itemHeight) {
-        rectHeight = contentProperty.indicatorPadding + selectedItemHeight + contentProperty.indicatorPadding;
+        rectHeight = indicatorHeightPadding + selectedItemHeight + indicatorHeightPadding;
     }
 
     auto widthChangeValue = (backgroundWidthDilateRatio_->Get() - 1.0f) * rectWidth;
@@ -141,7 +176,7 @@ std::pair<float, float> DotIndicatorModifier::GetTouchBottomCenterX(ContentPrope
     float leftCenterX = contentProperty.longPointLeftCenterX;
     float rightCenterX = contentProperty.longPointRightCenterX;
 
-    if (isCustomSize_) {
+    if (isCustomSize_ || contentProperty.vectorBlackPointCenterX.empty()) {
         return { leftCenterX, rightCenterX };
     }
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
@@ -192,7 +227,7 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     PaintSelectedIndicator(canvas, leftCenter, rightCenter,
         contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
 
-    bool isLeftTouchBottom = (currentIndex_ == totalCount - 1);
+    bool isLeftTouchBottom = (currentIndex_ == static_cast<int32_t>(totalCount) - 1);
     bool isRightTouchBottom = (currentIndex_ == 0);
     bool isTouchBottom = (isLeftTouchBottom || isRightTouchBottom);
     if (!isTouchBottom || totalCount == 0 || !isTouchBottomLoop_) {

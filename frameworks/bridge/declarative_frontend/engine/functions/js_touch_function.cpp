@@ -30,7 +30,7 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
     touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
-    touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetOriginalId());
+    touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
     touchInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
     touchInfoObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
     touchInfoObj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
@@ -55,6 +55,7 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     auto target = CreateEventTargetObject(info);
     eventObj->SetPropertyObject("target", target);
     eventObj->SetProperty<double>("pressure", info.GetForce());
+    eventObj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsTouchPreventDefault));
     if (info.GetTiltX().has_value()) {
         eventObj->SetProperty<double>("tiltX", info.GetTiltX().value());
     }
@@ -81,6 +82,8 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
         eventObj->SetProperty<int32_t>("type", static_cast<int32_t>(changeTouch.front().GetTouchType()));
     }
     eventObj->SetPropertyObject("changedTouches", changeTouchArr);
+    eventObj->SetProperty<double>("axisVertical", 0.0f);
+    eventObj->SetProperty<double>("axisHorizontal", 0.0f);
     eventObj->SetPropertyObject(
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
     eventObj->SetPropertyObject(

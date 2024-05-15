@@ -58,13 +58,56 @@ JSRenderingContext::JSRenderingContext()
 
 void JSRenderingContext::JSBind(BindingTarget globalObj)
 {
+    // Define the class "CanvasRenderingContext2D"
     JSClass<JSRenderingContext>::Declare("CanvasRenderingContext2D");
 
-    JSClass<JSRenderingContext>::CustomMethod("toDataURL", &JSCanvasRenderer::JsToDataUrl);
+    // Define all properties of the "CanvasRenderingContext2D"
     JSClass<JSRenderingContext>::CustomProperty(
         "width", &JSRenderingContext::JsGetWidth, &JSRenderingContext::JsSetWidth);
     JSClass<JSRenderingContext>::CustomProperty(
         "height", &JSRenderingContext::JsGetHeight, &JSRenderingContext::JsSetHeight);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "filter", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetFilter);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "direction", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetDirection);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "fillStyle", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetFillStyle);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "strokeStyle", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetStrokeStyle);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "lineCap", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetLineCap);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "lineJoin", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetLineJoin);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "miterLimit", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetMiterLimit);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "lineWidth", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetLineWidth);
+    JSClass<JSRenderingContext>::CustomProperty("font", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetFont);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "textAlign", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetTextAlign);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "textBaseline", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetTextBaseline);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "globalAlpha", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetGlobalAlpha);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "globalCompositeOperation", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetGlobalCompositeOperation);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "lineDashOffset", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetLineDashOffset);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "shadowBlur", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetShadowBlur);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "shadowColor", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetShadowColor);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "shadowOffsetX", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetShadowOffsetX);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "shadowOffsetY", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetShadowOffsetY);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "imageSmoothingEnabled", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetImageSmoothingEnabled);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "imageSmoothingQuality", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetImageSmoothingQuality);
+
+    // Define all methods of the "CanvasRenderingContext2D"
+    JSClass<JSRenderingContext>::CustomMethod("toDataURL", &JSCanvasRenderer::JsToDataUrl);
     JSClass<JSRenderingContext>::CustomMethod("createRadialGradient", &JSCanvasRenderer::JsCreateRadialGradient);
     JSClass<JSRenderingContext>::CustomMethod("fillRect", &JSCanvasRenderer::JsFillRect);
     JSClass<JSRenderingContext>::CustomMethod("strokeRect", &JSCanvasRenderer::JsStrokeRect);
@@ -106,55 +149,16 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("getPixelMap", &JSCanvasRenderer::JsGetPixelMap);
     JSClass<JSRenderingContext>::CustomMethod("setPixelMap", &JSCanvasRenderer::JsSetPixelMap);
     JSClass<JSRenderingContext>::CustomMethod("drawBitmapMesh", &JSCanvasRenderer::JsDrawBitmapMesh);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "filter", &JSCanvasRenderer::JsGetFilter, &JSCanvasRenderer::JsSetFilter);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "direction", &JSCanvasRenderer::JsGetDirection, &JSCanvasRenderer::JsSetDirection);
-
-    JSClass<JSRenderingContext>::CustomProperty(
-        "fillStyle", &JSCanvasRenderer::JsGetFillStyle, &JSCanvasRenderer::JsSetFillStyle);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "strokeStyle", &JSCanvasRenderer::JsGetStrokeStyle, &JSCanvasRenderer::JsSetStrokeStyle);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "lineCap", &JSCanvasRenderer::JsGetLineCap, &JSCanvasRenderer::JsSetLineCap);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "lineJoin", &JSCanvasRenderer::JsGetLineJoin, &JSCanvasRenderer::JsSetLineJoin);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "miterLimit", &JSCanvasRenderer::JsGetMiterLimit, &JSCanvasRenderer::JsSetMiterLimit);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "lineWidth", &JSCanvasRenderer::JsGetLineWidth, &JSCanvasRenderer::JsSetLineWidth);
-    JSClass<JSRenderingContext>::CustomProperty("font", &JSCanvasRenderer::JsGetFont, &JSCanvasRenderer::JsSetFont);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "textAlign", &JSCanvasRenderer::JsGetTextAlign, &JSCanvasRenderer::JsSetTextAlign);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "textBaseline", &JSCanvasRenderer::JsGetTextBaseline, &JSCanvasRenderer::JsSetTextBaseline);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "globalAlpha", &JSCanvasRenderer::JsGetGlobalAlpha, &JSCanvasRenderer::JsSetGlobalAlpha);
-    JSClass<JSRenderingContext>::CustomProperty("globalCompositeOperation",
-        &JSCanvasRenderer::JsGetGlobalCompositeOperation, &JSCanvasRenderer::JsSetGlobalCompositeOperation);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "lineDashOffset", &JSCanvasRenderer::JsGetLineDashOffset, &JSCanvasRenderer::JsSetLineDashOffset);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "shadowBlur", &JSCanvasRenderer::JsGetShadowBlur, &JSCanvasRenderer::JsSetShadowBlur);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "shadowColor", &JSCanvasRenderer::JsGetShadowColor, &JSCanvasRenderer::JsSetShadowColor);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "shadowOffsetX", &JSCanvasRenderer::JsGetShadowOffsetX, &JSCanvasRenderer::JsSetShadowOffsetX);
-    JSClass<JSRenderingContext>::CustomProperty(
-        "shadowOffsetY", &JSCanvasRenderer::JsGetShadowOffsetY, &JSCanvasRenderer::JsSetShadowOffsetY);
-    JSClass<JSRenderingContext>::CustomProperty("imageSmoothingEnabled", &JSCanvasRenderer::JsGetImageSmoothingEnabled,
-        &JSCanvasRenderer::JsSetImageSmoothingEnabled);
-    JSClass<JSRenderingContext>::CustomProperty("imageSmoothingQuality", &JSCanvasRenderer::JsGetImageSmoothingQuality,
-        &JSCanvasRenderer::JsSetImageSmoothingQuality);
     JSClass<JSRenderingContext>::CustomMethod(
         "transferFromImageBitmap", &JSRenderingContext::JsTransferFromImageBitmap);
-
     JSClass<JSRenderingContext>::CustomMethod("createConicGradient", &JSCanvasRenderer::JsCreateConicGradient);
     JSClass<JSRenderingContext>::CustomMethod("saveLayer", &JSCanvasRenderer::JsSaveLayer);
     JSClass<JSRenderingContext>::CustomMethod("restoreLayer", &JSCanvasRenderer::JsRestoreLayer);
     JSClass<JSRenderingContext>::CustomMethod("reset", &JSCanvasRenderer::JsReset);
     JSClass<JSRenderingContext>::CustomMethod("startImageAnalyzer", &JSRenderingContext::JsStartImageAnalyzer);
     JSClass<JSRenderingContext>::CustomMethod("stopImageAnalyzer", &JSRenderingContext::JsStopImageAnalyzer);
+
+    // Register the "CanvasRenderingContext2D" to the golbal object of the vm
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
 }
 
@@ -164,16 +168,14 @@ void JSRenderingContext::Constructor(const JSCallbackInfo& args)
     jsRenderContext->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsRenderContext));
 
-    if (args.Length() != 0) {
-        if (args[0]->IsObject()) {
-            JSRenderingContextSettings* jsContextSetting =
-                JSRef<JSObject>::Cast(args[0])->Unwrap<JSRenderingContextSettings>();
-            if (jsContextSetting == nullptr) {
-                return;
-            }
-            bool anti = jsContextSetting->GetAntialias();
-            jsRenderContext->SetAnti(anti);
-        }
+    auto* jsContextSetting = args.UnwrapArg<JSRenderingContextSettings>(0);
+    CHECK_NULL_VOID(jsContextSetting);
+    bool anti = jsContextSetting->GetAntialias();
+    jsRenderContext->SetAnti(anti);
+
+    int32_t unit = 0;
+    if (args.GetInt32Arg(1, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+        jsRenderContext->SetUnit(CanvasUnit::PX);
     }
 }
 
@@ -190,8 +192,9 @@ void JSRenderingContext::JsGetWidth(const JSCallbackInfo& info)
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
     canvasRenderingContext2DModel->GetWidth(canvasPattern_, width);
-
-    width = PipelineBase::Px2VpWithCurrentDensity(width);
+    double density = GetDensity();
+    density = (density == 0.0 ? 1.0 : density);
+    width /= density;
     auto returnValue = JSVal(ToJSValue(width));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
@@ -213,8 +216,9 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
     canvasRenderingContext2DModel->GetHeight(canvasPattern_, height);
-
-    height = PipelineBase::Px2VpWithCurrentDensity(height);
+    double density = GetDensity();
+    density = (density == 0.0 ? 1.0 : density);
+    height /= density;
     auto returnValue = JSVal(ToJSValue(height));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);

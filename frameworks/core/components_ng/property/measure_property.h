@@ -59,7 +59,8 @@ public:
 
     bool IsValid() const
     {
-        return width_ && height_;
+        return (width_ && height_) && (width_->GetDimension().Unit() != DimensionUnit::AUTO &&
+                                          height_->GetDimension().Unit() != DimensionUnit::AUTO);
     }
 
     const std::optional<CalcLength>& Width() const

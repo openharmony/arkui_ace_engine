@@ -201,4 +201,11 @@ void ExtensionCompanionNode::OnOverlayDraw(DrawingContext& context)
         InnerOverlayDraw(context);
     }
 }
+
+bool ExtensionCompanionNode::NeedRender() const
+{
+    ArkUI_Uint32 mask = ArkUIAPINodeFlags::CUSTOM_OVERLAY_DRAW | ArkUIAPINodeFlags::CUSTOM_FOREGROUND_DRAW |
+        ArkUIAPINodeFlags::CUSTOM_DRAW;
+    return (flags_ & mask) != 0;
+}
 } // namespace OHOS::Ace::NG

@@ -40,6 +40,10 @@ static constexpr size_t ARGC_WITH_MODE_AND_CALLBACK = 3;
 static constexpr uint32_t STANDARD = 0;
 static constexpr uint32_t SINGLE = 1;
 static constexpr uint32_t INVALID = 2;
+static constexpr uint32_t RESULT_ARRAY_INDEX_INDEX = 0;
+static constexpr uint32_t RESULT_ARRAY_NAME_INDEX = 1;
+static constexpr uint32_t RESULT_ARRAY_PATH_INDEX = 2;
+static constexpr uint32_t RESULT_ARRAY_LENGTH = 3;
 
 static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
 {
@@ -54,7 +58,6 @@ static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
 
 static void ParseParams(napi_env env, napi_value params, std::string& paramsString)
 {
-    // TODO: Save the original data instead of making the serial number.
     if (params == nullptr) {
         return;
     }
@@ -514,16 +517,16 @@ static napi_value JSRouterGetState(napi_env env, napi_callback_info info)
     size_t routeNameLen = routeName.length();
     size_t routePathLen = routePath.length();
 
-    napi_value resultArray[3] = { 0 };
-    napi_create_int32(env, routeIndex, &resultArray[0]);
-    napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[1]);
-    napi_create_string_utf8(env, routePath.c_str(), routePathLen, &resultArray[2]);
+    napi_value resultArray[RESULT_ARRAY_LENGTH] = { 0 };
+    napi_create_int32(env, routeIndex, &resultArray[RESULT_ARRAY_INDEX_INDEX]);
+    napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[RESULT_ARRAY_NAME_INDEX]);
+    napi_create_string_utf8(env, routePath.c_str(), routePathLen, &resultArray[RESULT_ARRAY_PATH_INDEX]);
 
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    napi_set_named_property(env, result, "index", resultArray[0]);
-    napi_set_named_property(env, result, "name", resultArray[1]);
-    napi_set_named_property(env, result, "path", resultArray[2]);
+    napi_set_named_property(env, result, "index", resultArray[RESULT_ARRAY_INDEX_INDEX]);
+    napi_set_named_property(env, result, "name", resultArray[RESULT_ARRAY_NAME_INDEX]);
+    napi_set_named_property(env, result, "path", resultArray[RESULT_ARRAY_PATH_INDEX]);
     return result;
 }
 
@@ -559,10 +562,10 @@ static napi_value JSGetStateByIndex(napi_env env, napi_callback_info info)
     size_t routeNameLen = routeName.length();
     size_t routePathLen = routePath.length();
 
-    napi_value resultArray[3] = { 0 };
-    napi_create_int32(env, routeIndex, &resultArray[0]);
-    napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[1]);
-    napi_create_string_utf8(env, routePath.c_str(), routePathLen, &resultArray[2]);
+    napi_value resultArray[RESULT_ARRAY_LENGTH] = { 0 };
+    napi_create_int32(env, routeIndex, &resultArray[RESULT_ARRAY_INDEX_INDEX]);
+    napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[RESULT_ARRAY_NAME_INDEX]);
+    napi_create_string_utf8(env, routePath.c_str(), routePathLen, &resultArray[RESULT_ARRAY_PATH_INDEX]);
     
     napi_value parsedParams = nullptr;
     if (!routeParams.empty()) {
@@ -573,9 +576,9 @@ static napi_value JSGetStateByIndex(napi_env env, napi_callback_info info)
 
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    napi_set_named_property(env, result, "index", resultArray[0]);
-    napi_set_named_property(env, result, "name", resultArray[1]);
-    napi_set_named_property(env, result, "path", resultArray[2]);
+    napi_set_named_property(env, result, "index", resultArray[RESULT_ARRAY_INDEX_INDEX]);
+    napi_set_named_property(env, result, "name", resultArray[RESULT_ARRAY_NAME_INDEX]);
+    napi_set_named_property(env, result, "path", resultArray[RESULT_ARRAY_PATH_INDEX]);
     napi_set_named_property(env, result, "params", parsedParams);
     return result;
 }

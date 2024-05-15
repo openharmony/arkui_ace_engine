@@ -30,6 +30,14 @@ JsiType<T>::JsiType(panda::Local<T> val)
 }
 
 template<typename T>
+JsiType<T>::JsiType(const EcmaVM *vm, panda::Local<T> val)
+{
+    if (!val.IsEmpty()) {
+        handle_ = panda::CopyableGlobal(vm, val);
+    }
+}
+
+template<typename T>
 template<typename S>
 JsiType<T>::JsiType(panda::Local<S> val)
 {

@@ -26,7 +26,6 @@ namespace OHOS::Ace::NG {
 
 namespace {
 const int32_t DIVIDER_SIZE = 2;
-const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const float PICKER_HEIGHT_HALF = 3.5f;
 const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t MAX_HALF_DISPLAY_COUNT = 2;
@@ -119,10 +118,9 @@ void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutPrope
         }
     }
 
-    uint32_t showCount_ = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE;
+    uint32_t showCount_ = pickerTheme->GetShowCountPortrait();
+    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        showCount_ = pickerTheme->GetShowCountLandscape();
     }
 
     if (isDefaultPickerItemHeight_) {

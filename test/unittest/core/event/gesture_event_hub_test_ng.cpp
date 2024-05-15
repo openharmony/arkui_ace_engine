@@ -2579,7 +2579,7 @@ HWTEST_F(GestureEventHubTestNg, TestSetDragGatherPixelMap001, TestSize.Level1)
     auto itemPattern2 = gridItemNode2->GetPattern<GridItemPattern>();
     ASSERT_NE(itemPattern2, nullptr);
     itemPattern2->SetSelected(true);
-    NG::DragPreviewOption option { NG::DragPreviewMode::AUTO, false, true };
+    NG::DragPreviewOption option { true, false, true };
     gridItemNode1->SetDragPreviewOptions(option);
     gridNode->AddChild(gridItemNode1);
     gridNode->AddChild(gridItemNode2);
@@ -2742,4 +2742,42 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest033, TestSize.Level1)
     EXPECT_NE(guestureEventHub->GetClickEvent(), nullptr);
 }
 
+/**
+ * @tc.name: UpdateExtraInfoTest001
+ * @tc.desc: Test UpdateExtraInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode、guestureEventHub.DragPreviewOption
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    Dimension dimen(2.0);
+    BlurBackGroundInfo bgBackEffect = {{dimen, 1.0f, 1.0f, Color::TRANSPARENT,
+        AdaptiveColor::DEFAULT, {{2.0f, 2.0f}}}};
+    std::optional<Shadow> shadowVal;
+    std::optional<BorderRadiusProperty> borderRadiusVal;
+    OptionsAfterApplied optionTmp = {0, shadowVal, "test", borderRadiusVal, {bgBackEffect}};
+    DragPreviewOption dragPreviewInfos;
+    dragPreviewInfos.options = optionTmp;
+    frameNode->SetDragPreviewOptions(dragPreviewInfos);
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    /**
+     * @tc.steps: step2. Test UpdateExtraInfo
+    */
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    guestureEventHub->UpdateExtraInfo(frameNode, arkExtraInfoJson, 1.0f);
+    auto radiusJs = arkExtraInfoJson->GetDouble("blur_radius", -1);
+    EXPECT_EQ(radiusJs, 2.0);
+    /**
+     * @tc.steps: step3. Test UpdateExtraInfo invalid
+     */
+    dragPreviewInfos.options.blurbgEffect.backGroundEffect.radius.SetValue(0);
+    frameNode->SetDragPreviewOptions(dragPreviewInfos);
+    auto jsInfos = JsonUtil::Create(true);
+    guestureEventHub->UpdateExtraInfo(frameNode, jsInfos, 1.0f);
+    radiusJs = jsInfos->GetDouble("blur_radius", -1);
+    EXPECT_EQ(radiusJs, -1);
+}
 } // namespace OHOS::Ace::NG

@@ -32,6 +32,16 @@
 #include "core/components/common/properties/text_style.h"
 #include "frameworks/base/utils/measure_util.h"
 
+extern const char _binary_measure_js_start[];
+extern const char _binary_measure_abc_start[];
+#if !defined(IOS_PLATFORM)
+extern const char _binary_measure_js_end[];
+extern const char _binary_measure_abc_end[];
+#else
+extern const char* _binary_measure_js_end;
+extern const char* _binary_measure_abc_end;
+#endif
+
 namespace OHOS::Ace::Napi {
 static int32_t HandleIntStyle(napi_value fontStyleNApi, napi_env env)
 {
@@ -334,18 +344,40 @@ static napi_value MeasureExport(napi_env env, napi_value exports)
     return exports;
 }
 
-static napi_module measureModule = {
+extern "C" __attribute__((visibility("default"))) void NAPI_measure_GetJSCode(const char** buf, int* bufLen)
+{
+    if (buf != nullptr) {
+        *buf = _binary_measure_js_start;
+    }
+
+    if (bufLen != nullptr) {
+        *bufLen = _binary_measure_js_end - _binary_measure_js_start;
+    }
+}
+
+extern "C" __attribute__((visibility("default"))) void NAPI_measure_GetABCCode(const char** buf, int* buflen)
+{
+    if (buf != nullptr) {
+        *buf = _binary_measure_abc_start;
+    }
+    if (buflen != nullptr) {
+        *buflen = _binary_measure_abc_end - _binary_measure_abc_start;
+    }
+}
+
+static napi_module_with_js measureModule = {
     .nm_version = 1,
     .nm_flags = 0,
-    .nm_filename = nullptr,
+    .nm_filename = "libmeasure.z.so/measure.js",
     .nm_register_func = MeasureExport,
     .nm_modname = "measure",
     .nm_priv = ((void*)0),
-    .reserved = { 0 },
+    .nm_get_abc_code = NAPI_measure_GetABCCode,
+    .nm_get_js_code = NAPI_measure_GetJSCode,
 };
 
 extern "C" __attribute__((constructor)) void MeasureRegister()
 {
-    napi_module_register(&measureModule);
+    napi_module_with_js_register(&measureModule);
 }
 } // namespace OHOS::Ace::Napi

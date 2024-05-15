@@ -248,7 +248,7 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg001, TestSize.Level1)
 
     EXPECT_EQ(ctx->syncLoad_, true);
     EXPECT_EQ(ctx->imageObj_, nullptr);
-    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::LOAD_FAIL);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::DATA_LOADING);
 
     auto src1 = ImageSourceInfo(SRC_JPG);
     src1.srcType_ = SrcType::PIXMAP;

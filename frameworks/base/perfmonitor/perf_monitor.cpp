@@ -371,7 +371,7 @@ void PerfMonitor::RecordBaseInfo(SceneRecord* record)
 {
     baseInfo.pid = AceApplicationInfo::GetInstance().GetPid();
     baseInfo.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
-    baseInfo.versionCode = AceApplicationInfo::GetInstance().GetAppVersionCode();
+    baseInfo.versionCode = static_cast<int32_t>(AceApplicationInfo::GetInstance().GetAppVersionCode());
     baseInfo.versionName = AceApplicationInfo::GetInstance().GetAppVersionName();
     baseInfo.processName = AceApplicationInfo::GetInstance().GetProcessName();
     baseInfo.abilityName = AceApplicationInfo::GetInstance().GetAbilityName();

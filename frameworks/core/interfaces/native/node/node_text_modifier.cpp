@@ -14,12 +14,14 @@
  */
 #include "core/interfaces/native/node/node_text_modifier.h"
 
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/text_style.h"
@@ -50,6 +52,7 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeigh
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
 
 std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = { { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
                                                                                 0 },
@@ -623,6 +626,13 @@ void SetTextDetectEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
     TextModelNG::SetTextDetectEnable(frameNode, static_cast<bool>(value));
 }
 
+ArkUI_Int32 GetTextDetectEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetTextDetectEnable(frameNode));
+}
+
 void ResetTextDetectEnable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -779,6 +789,114 @@ void ResetTextLineSpacing(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING);
 }
+
+void SetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size)
+{
+    std::string textTypes;
+    for (int i = 0; i < size; i++) {
+        auto index = values[i];
+        if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
+            continue;
+        }
+        if (i != 0) {
+            textTypes.append(",");
+        }
+        textTypes.append(TEXT_DETECT_TYPES[index]);
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextDetectConfig(frameNode, textTypes);
+}
+
+ArkUI_Int32 GetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto typeString = TextModelNG::GetTextDetectConfig(frameNode);
+    std::vector<std::string> types;
+    StringUtils::StringSplitter(typeString, ',', types);
+    for (int i = 0; i < types.size(); i++) {
+        auto ret = std::find(TEXT_DETECT_TYPES.begin(), TEXT_DETECT_TYPES.end(), types[i]);
+        values[i] = ret != TEXT_DETECT_TYPES.end() ? ret - TEXT_DETECT_TYPES.begin() : -1;
+    }
+    return types.size();
+}
+
+void ResetTextDataDetectorConfig(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextDetectConfig(frameNode, "");
+}
+
+ArkUI_CharPtr GetTextFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = UnParseFontFeatureSetting(TextModelNG::GetFontFeature(frameNode));
+    return g_strValue.c_str();
+}
+
+void SetLineBreakStrategy(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (lineBreakStrategy < 0 || lineBreakStrategy >= LINE_BREAK_STRATEGY_TYPES.size()) {
+        lineBreakStrategy = 0; // 0 is the default value of LineBreakStrategy::GREEDY
+    }
+    TextModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[lineBreakStrategy]);
+}
+
+void ResetLineBreakStrategy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // 0 is the default value of LineBreakStrategy::GREEDY
+    TextModelNG::SetLineBreakStrategy(frameNode, LINE_BREAK_STRATEGY_TYPES[0]);
+}
+
+ArkUI_Int32 GetTextLineBreakStrategy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextModelNG::GetLineBreakStrategy(frameNode));
+}
+
+void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
+}
+
+ArkUI_Uint32 GetTextSelectedBackgroundColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
+    return TextModelNG::GetSelectedBackgroundColor(frameNode).GetValue();
+}
+
+void ResetTextSelectedBackgroundColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetSelectedBackgroundColor(frameNode);
+}
+
+void SetTextContentWithStyledString(ArkUINodeHandle node, ArkUI_StyledString* styledString)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(styledString);
+    TextModelNG::SetTextContentWithStyledString(frameNode, styledString);
+}
+
+void ResetTextContentWithStyledString(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextContentWithStyledString(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -865,10 +983,38 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextFontFeature,
         SetTextLineSpacing,
         GetTextLineSpacing,
-        ResetTextLineSpacing
+        ResetTextLineSpacing,
+        GetTextFontFeature,
+        GetTextDetectEnable,
+        SetTextDataDetectorConfig,
+        GetTextDataDetectorConfig,
+        ResetTextDataDetectorConfig,
+        SetLineBreakStrategy,
+        ResetLineBreakStrategy,
+        GetTextLineBreakStrategy,
+        SetTextSelectedBackgroundColor,
+        GetTextSelectedBackgroundColor,
+        ResetTextSelectedBackgroundColor,
+        SetTextContentWithStyledString,
+        ResetTextContentWithStyledString
     };
 
     return &modifier;
+}
+
+void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDetectResultUpdate = [node, extraParam](const std::string& str) {
+        ArkUINodeEvent event;
+        event.kind = TEXT_INPUT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.textInputEvent.subKind = ON_DETECT_RESULT_UPDATE;
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
+        SendArkUIAsyncEvent(&event);
+    };
+    TextModelNG::SetOnDetectResultUpdate(frameNode, std::move(onDetectResultUpdate));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

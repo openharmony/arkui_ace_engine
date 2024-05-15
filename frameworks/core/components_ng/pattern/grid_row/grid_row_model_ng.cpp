@@ -47,6 +47,13 @@ void GridRowModelNG::Create(const RefPtr<V2::GridContainerSize>& col, const RefP
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction);
 }
 
+RefPtr<FrameNode> GridRowModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::GRID_ROW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridRowLayoutPattern>(); });
+    return frameNode;
+}
+
 void GridRowModelNG::SetOnBreakPointChange(std::function<void(const std::string)>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -73,5 +80,25 @@ void GridRowModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign alignItem)
     CHECK_NULL_VOID(layoutPriority);
     layoutPriority->UpdateAlignItems(alignItem);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem, frameNode);
+}
+
+void GridRowModelNG::SetGutter(FrameNode* frameNode, const RefPtr<V2::Gutter>& gutter)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *gutter, frameNode);
+}
+
+void GridRowModelNG::SetColumns(FrameNode* frameNode, const RefPtr<V2::GridContainerSize>& col)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, *col, frameNode);
+}
+
+void GridRowModelNG::SetBreakpoints(FrameNode* frameNode, const RefPtr<V2::BreakPoints>& breakpoints)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, *breakpoints, frameNode);
+}
+
+void GridRowModelNG::SetDirection(FrameNode* frameNode, V2::GridRowDirection direction)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridRowLayoutProperty, Direction, direction, frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_select_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/select/select_model.h"
@@ -82,6 +83,7 @@ void JSSelect::Create(const JSCallbackInfo& info)
             params[i] = { value, icon };
         }
         SelectModel::GetInstance()->Create(params);
+        JSSelectTheme::ApplyTheme();
     }
 }
 

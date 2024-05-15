@@ -229,7 +229,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         AceEngine::InitJsDumpHeadSignal();
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
-    // TODO: now choose pipeline using param set as package name, later enable for all.
+    // now choose pipeline using param set as package name, later enable for all.
     auto apiCompatibleVersion = abilityContext->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = abilityContext->GetApplicationInfo()->apiReleaseType;
     auto apiTargetVersion = abilityContext->GetApplicationInfo()->apiTargetVersion;
@@ -418,9 +418,10 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             if (rsUiDirector) {
                 rsUiDirector->SetUITaskRunner(
                     [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
-                        const std::function<void()>& task) {
+                        const std::function<void()>& task, uint32_t delay) {
                         ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIAbilityInitRosenBackend");
+                        taskExecutor->PostDelayedTask(
+                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
                     }, id);
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);

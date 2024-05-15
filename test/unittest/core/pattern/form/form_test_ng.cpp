@@ -881,6 +881,13 @@ HWTEST_F(FormTestNg, formModelNG, TestSize.Level1)
     formPattern->isLoaded_ = true;
     formModelNG.SetVisibility(VisibleType::GONE);
     ASSERT_EQ(property->GetVisibility(), VisibleType::GONE);
+
+    /**
+     * @tc.steps: step5. Test RequestPublishFormWithSnapshot in form_model_ng
+     */
+    AAFwk::Want want;
+    int64_t formId;
+    ASSERT_EQ(formModelNG.RequestPublishFormWithSnapshot(want, formId), 1);
 }
 
 /**
@@ -1080,7 +1087,7 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
     ASSERT_NE(externalRenderContext, nullptr);
     auto renderContext = host->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, true);
+    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, true, false);
     ASSERT_EQ(host->GetLastChild(), nullptr);
 }
 } // namespace OHOS::Ace::NG

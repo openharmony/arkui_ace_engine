@@ -318,11 +318,11 @@ bool RosenRenderSurface::CompareBufferSize(int32_t width, int32_t height,
         || (abs(height - bufferHeight) < PERMITTED_DIFFERENCE && abs(width - bufferWidth) < PERMITTED_DIFFERENCE)) {
         failTimes_ = 0;
     } else {
+        failTimes_++;
         if (failTimes_ <= FAILED_LIMIT) {
             pipeline->SetIsFreezeFlushMessage(true);
             return false;
         }
-        failTimes_++;
     }
     return true;
 }
@@ -393,9 +393,12 @@ void RosenRenderSurface::PostRenderOnlyTaskToUI()
     CHECK_NULL_VOID(container);
     auto context = container->GetPipelineContext();
     CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIMarkNeedRenderOnly");
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    if (uiTaskExecutor.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        uiTaskExecutor.PostTask(task, "ArkUIMarkNeedRenderOnly");
+    }
 }
 
 void RosenRenderSurface::ConsumeXComponentBuffer()

@@ -15,6 +15,7 @@
 
 #include "grid_test_ng.h"
 
+#include "core/components_ng/pattern/grid/grid_layout_info.h"
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -497,10 +498,13 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithoutAnimation00
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -626,7 +630,9 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithAnimation001, 
     Dimension offsetY;
     ScrollState scrollState;
     auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
-        offsetY = offset; scrollState = state; isOnScrollCallBack = true;
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
     };
     auto onScrollStart = [&isOnScrollStartCallBack]() { isOnScrollStartCallBack = true; };
     auto onScrollStop = [&isOnScrollStopCallBack]() { isOnScrollStopCallBack = true; };
@@ -650,13 +656,18 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithAnimation001, 
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: OnScroll OnScrollStart and onScrollStop call back functions should be triggered
      */
-    pattern_->AnimateTo(-5*ITEM_HEIGHT, 1.f, Curves::LINEAR, false);
-    pattern_->StopAnimate(); pattern_->SetScrollAbort(false); pattern_->OnScrollEndCallback();
-    pattern_->UpdateCurrentOffset(-5*ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    pattern_->AnimateTo(-5 * ITEM_HEIGHT, 1.f, Curves::LINEAR, false);
+    pattern_->StopAnimate();
+    pattern_->SetScrollAbort(false);
+    pattern_->OnScrollEndCallback();
+    pattern_->UpdateCurrentOffset(-5 * ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
 
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
-    EXPECT_FALSE(isOnReachStartCallBack); EXPECT_FALSE(isOnReachEndCallBack);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnScrollStartCallBack);
+    EXPECT_TRUE(isOnScrollStopCallBack);
+    EXPECT_FALSE(isOnReachStartCallBack);
+    EXPECT_FALSE(isOnReachEndCallBack);
 }
 
 /**
@@ -679,7 +690,9 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithAnimation002, 
     Dimension offsetY;
     ScrollState scrollState;
     auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
-        offsetY = offset; scrollState = state; isOnScrollCallBack = true;
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
     };
     auto onScrollStart = [&isOnScrollStartCallBack]() { isOnScrollStartCallBack = true; };
     auto onScrollStop = [&isOnScrollStopCallBack]() { isOnScrollStopCallBack = true; };
@@ -704,16 +717,19 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithAnimation002, 
      *                   five kinds of call back functions is triggered or not.
      * @tc.expected:All call back functions except onReachStart should be triggered
      */
-    pattern_->AnimateTo(-20*ITEM_HEIGHT, 1.f, Curves::LINEAR, false);
+    pattern_->AnimateTo(-20 * ITEM_HEIGHT, 1.f, Curves::LINEAR, false);
     pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
-    pattern_->UpdateCurrentOffset(-20*ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    pattern_->UpdateCurrentOffset(-20 * ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
 
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 20);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
-    EXPECT_FALSE(isOnReachStartCallBack); EXPECT_TRUE(isOnReachEndCallBack);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnScrollStartCallBack);
+    EXPECT_TRUE(isOnScrollStopCallBack);
+    EXPECT_FALSE(isOnReachStartCallBack);
+    EXPECT_TRUE(isOnReachEndCallBack);
 }
 
 /**
@@ -814,7 +830,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithoutAnimation
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
-   /**
+    /**
      * @tc.steps: step2. Scroll to grid's end position without animation, and check the
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: Only onScroll and onReachEnd should be triggered
@@ -848,7 +864,9 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithAnimation001
     Dimension offsetY;
     ScrollState scrollState;
     auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
-        offsetY = offset; scrollState = state; isOnScrollCallBack = true;
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
     };
     auto onScrollStart = [&isOnScrollStartCallBack]() { isOnScrollStartCallBack = true; };
     auto onScrollStop = [&isOnScrollStopCallBack]() { isOnScrollStopCallBack = true; };
@@ -873,15 +891,18 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithAnimation001
      *                   five kinds of call back functions are triggered or not.
      * @tc.expected: OnScroll OnScrollStart and onScrollStop call back functions should be triggered
      */
-    pattern_->AnimateTo(-5*ITEM_WIDTH, 1.f, Curves::LINEAR, false);
+    pattern_->AnimateTo(-5 * ITEM_WIDTH, 1.f, Curves::LINEAR, false);
     pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
-    pattern_->UpdateCurrentOffset(-5*ITEM_WIDTH, SCROLL_FROM_ANIMATION);
+    pattern_->UpdateCurrentOffset(-5 * ITEM_WIDTH, SCROLL_FROM_ANIMATION);
 
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
-    EXPECT_FALSE(isOnReachStartCallBack); EXPECT_FALSE(isOnReachEndCallBack);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnScrollStartCallBack);
+    EXPECT_TRUE(isOnScrollStopCallBack);
+    EXPECT_FALSE(isOnReachStartCallBack);
+    EXPECT_FALSE(isOnReachEndCallBack);
 }
 
 /**
@@ -904,7 +925,9 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithAnimation002
     Dimension offsetY;
     ScrollState scrollState;
     auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
-        offsetY = offset; scrollState = state; isOnScrollCallBack = true;
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
     };
     auto onScrollStart = [&isOnScrollStartCallBack]() { isOnScrollStartCallBack = true; };
     auto onScrollStop = [&isOnScrollStopCallBack]() { isOnScrollStopCallBack = true; };
@@ -929,15 +952,18 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithAnimation002
      *                   five kinds of call back functions is triggered or not.
      * @tc.expected:All call back functions except onReachStart should be triggered
      */
-    pattern_->AnimateTo(-10*ITEM_WIDTH, 1.f, Curves::LINEAR, false);
+    pattern_->AnimateTo(-10 * ITEM_WIDTH, 1.f, Curves::LINEAR, false);
     pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
-    pattern_->UpdateCurrentOffset(-10*ITEM_WIDTH, SCROLL_FROM_ANIMATION);
+    pattern_->UpdateCurrentOffset(-10 * ITEM_WIDTH, SCROLL_FROM_ANIMATION);
 
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
-    EXPECT_FALSE(isOnReachStartCallBack); EXPECT_TRUE(isOnReachEndCallBack);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnScrollStartCallBack);
+    EXPECT_TRUE(isOnScrollStopCallBack);
+    EXPECT_FALSE(isOnReachStartCallBack);
+    EXPECT_TRUE(isOnReachEndCallBack);
 }
 
 /**
@@ -1017,7 +1043,9 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation002, 
     Dimension offsetY;
     ScrollState scrollState;
     auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
-        offsetY = offset; scrollState = state; isOnScrollCallBack = true;
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
     };
     auto onScrollStart = [&isOnScrollStartCallBack]() { isOnScrollStartCallBack = true; };
     auto onScrollStop = [&isOnScrollStopCallBack]() { isOnScrollStopCallBack = true; };
@@ -1044,8 +1072,11 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation002, 
     auto controller = pattern_->positionController_;
     controller->JumpTo(19, false, ScrollAlign::END, 3);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isOnScrollCallBack); EXPECT_FALSE(isOnScrollStartCallBack); EXPECT_FALSE(isOnScrollStopCallBack);
-    EXPECT_FALSE(isOnReachStartCallBack); EXPECT_TRUE(isOnReachEndCallBack);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_FALSE(isOnScrollStartCallBack);
+    EXPECT_FALSE(isOnScrollStopCallBack);
+    EXPECT_FALSE(isOnReachStartCallBack);
+    EXPECT_TRUE(isOnReachEndCallBack);
 }
 
 /**
@@ -1068,7 +1099,9 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithAnimation001, Tes
     Dimension offsetY;
     ScrollState scrollState;
     auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
-        offsetY = offset; scrollState = state; isOnScrollCallBack = true;
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
     };
     auto onScrollStart = [&isOnScrollStartCallBack]() { isOnScrollStartCallBack = true; };
     auto onScrollStop = [&isOnScrollStopCallBack]() { isOnScrollStopCallBack = true; };
@@ -1094,15 +1127,18 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithAnimation001, Tes
      * @tc.expected: OnScroll OnScrollStart and onScrollStop call back functions should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->AnimateTo(Dimension(-5*ITEM_HEIGHT, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
+    controller->AnimateTo(Dimension(-5 * ITEM_HEIGHT, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
     pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
-    pattern_->UpdateCurrentOffset(-5*ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(-5 * ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
 
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
-    EXPECT_FALSE(isOnReachStartCallBack); EXPECT_FALSE(isOnReachEndCallBack);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnScrollStartCallBack);
+    EXPECT_TRUE(isOnScrollStopCallBack);
+    EXPECT_FALSE(isOnReachStartCallBack);
+    EXPECT_FALSE(isOnReachEndCallBack);
 }
 
 /**
@@ -1125,7 +1161,9 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithAnimation002, Tes
     Dimension offsetY;
     ScrollState scrollState;
     auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
-        offsetY = offset; scrollState = state; isOnScrollCallBack = true;
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
     };
     auto onScrollStart = [&isOnScrollStartCallBack]() { isOnScrollStartCallBack = true; };
     auto onScrollStop = [&isOnScrollStopCallBack]() { isOnScrollStopCallBack = true; };
@@ -1151,15 +1189,18 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithAnimation002, Tes
      * @tc.expected:All call back functions except onReachStart should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->AnimateTo(Dimension(-10*ITEM_HEIGHT, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
+    controller->AnimateTo(Dimension(-10 * ITEM_HEIGHT, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
     pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
-    pattern_->UpdateCurrentOffset(-10*ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(-10 * ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
 
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
-    EXPECT_FALSE(isOnReachStartCallBack); EXPECT_TRUE(isOnReachEndCallBack);
+    EXPECT_TRUE(isOnScrollCallBack);
+    EXPECT_TRUE(isOnScrollStartCallBack);
+    EXPECT_TRUE(isOnScrollStopCallBack);
+    EXPECT_FALSE(isOnReachStartCallBack);
+    EXPECT_TRUE(isOnReachEndCallBack);
 }
 
 /**
@@ -1183,7 +1224,9 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation001
     Dimension offsetY;
     ScrollState scrollState;
     auto onScroll = [&offsetY, &scrollState, &isOnScrollCallBack](Dimension offset, ScrollState state) {
-        offsetY = offset; scrollState = state; isOnScrollCallBack = true;
+        offsetY = offset;
+        scrollState = state;
+        isOnScrollCallBack = true;
     };
     auto onScrollStart = [&isOnScrollStartCallBack]() { isOnScrollStartCallBack = true; };
     auto onScrollStop = [&isOnScrollStopCallBack]() { isOnScrollStopCallBack = true; };
@@ -1422,10 +1465,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset * 2;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1484,10 +1530,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset * 2;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1548,10 +1597,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll003, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset * 2;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1612,10 +1664,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll004, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1676,10 +1731,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll005, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;
@@ -1740,10 +1798,13 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll006, TestSize.Level1
     Dimension willScrollOffset;
     ScrollState willScrollState;
     auto onWillScroll = [&willScrollOffset, &willScrollState, &isOnWillScrollCallBack](
-                            Dimension offset, ScrollState state) {
+                            Dimension offset, ScrollState state, ScrollSource source) {
         willScrollOffset = offset;
         willScrollState = state;
         isOnWillScrollCallBack = true;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
     };
     Dimension didScrollOffset;
     ScrollState didScrollState;

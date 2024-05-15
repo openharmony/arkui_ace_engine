@@ -37,7 +37,7 @@ public:
 #endif
 
     // decode image using ImageFramework, return true if process is successful.
-    RefPtr<CanvasImage> MakePixmapImage();
+    RefPtr<CanvasImage> MakePixmapImage(AIImageQuality imageQuality = AIImageQuality::NONE);
 
 private:
 #ifndef USE_ROSEN_DRAWING
@@ -47,6 +47,19 @@ private:
     static std::shared_ptr<RSImage> ForceResizeImage(const std::shared_ptr<RSImage>& image, const RSImageInfo& info);
     std::shared_ptr<RSImage> ResizeDrawingImage();
 #endif
+    std::string GetResolutionQuality(AIImageQuality imageQuality)
+    {
+        switch (imageQuality) {
+            case AIImageQuality::NONE:
+                return "LOW";
+            case AIImageQuality::NORMAL:
+                return "MEDIUM";
+            case AIImageQuality::HIGH:
+                return "HIGH";
+            default:
+                return "LOW";
+        }
+    }
 
     RefPtr<CanvasImage> QueryCompressedCache();
 #ifndef USE_ROSEN_DRAWING

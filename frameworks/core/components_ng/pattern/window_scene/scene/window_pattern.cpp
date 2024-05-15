@@ -223,8 +223,6 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
             imageCache->ClearCacheImage(
                 ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.second, snapshotSize.first)));
             imageCache->ClearCacheImage(sourceInfo.GetKey());
-        } else {
-            snapshotNode_->GetPattern<ImagePattern>()->SetSyncLoad(true);
         }
     }
     imageLayoutProperty->UpdateImageFit(ImageFit::COVER_TOP_LEFT);

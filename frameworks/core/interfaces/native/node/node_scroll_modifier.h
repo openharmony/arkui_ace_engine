@@ -22,7 +22,11 @@ const ArkUIScrollModifier* GetScrollModifier();
 
 void SetOnScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollFrameBegin(ArkUINodeHandle node, void* extraParam);
+void SetScrollOnWillScroll(ArkUINodeHandle node, void* extraParam);
+void SetScrollOnDidScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollStart(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollStop(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollEdge(ArkUINodeHandle node, void* extraParam);
+void SetOnScrollReachStart(ArkUINodeHandle node, void* extraParam);
+void SetOnScrollReachEnd(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

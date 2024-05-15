@@ -78,6 +78,7 @@ void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 
 void RadioPattern::SetBuilderState()
 {
+    CHECK_NULL_VOID(builderChildNode_);
     auto renderContext = builderChildNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateOpacity(0);
@@ -95,12 +96,19 @@ void RadioPattern::UpdateIndicatorType()
     } else {
         ImageNodeCreate();
     }
-    if (radioPaintProperty->HasRadioCheck()) {
-        if (!radioPaintProperty->GetRadioCheckValue()) {
-            SetBuilderState();
-        }
-    } else {
+    CHECK_NULL_VOID(builderChildNode_);
+    auto renderContext = builderChildNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformScale({ INDICATOR_MAX_SCALE, INDICATOR_MAX_SCALE });
+    renderContext->UpdateOpacity(1);
+    if (!radioModifier_) {
+        radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
+    }
+    if (!radioPaintProperty->HasRadioCheck()) {
         radioPaintProperty->UpdateRadioCheck(false);
+    }
+    if (!radioPaintProperty->GetRadioCheckValue()) {
+        radioModifier_->InitOpacityScale(false);
         SetBuilderState();
     }
 }
@@ -108,7 +116,8 @@ void RadioPattern::UpdateIndicatorType()
 void RadioPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    FireBuilder();
+    if (!makeFunc_.has_value() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateIndicatorType();
     }
     UpdateState();
@@ -152,7 +161,6 @@ void RadioPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
-    FireBuilder();
 }
 
 void RadioPattern::InitFocusEvent()
@@ -183,13 +191,43 @@ void RadioPattern::InitFocusEvent()
 void RadioPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(radioModifier_);
-    radioModifier_->SetIsFocused(true);
+    AddIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(true);
 }
 
 void RadioPattern::HandleBlurEvent()
 {
     CHECK_NULL_VOID(radioModifier_);
-    radioModifier_->SetIsFocused(false);
+    RemoveIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(false);
+}
+
+void RadioPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void RadioPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void RadioPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    CHECK_NULL_VOID(radioModifier_);
+    radioModifier_->SetIsFocused(isFocusAcitve);
 }
 
 void RadioPattern::ImageNodeCreate()
@@ -206,6 +244,7 @@ void RadioPattern::ImageNodeCreate()
         CHECK_NULL_VOID(node);
         builderChildNode_ = AceType::DynamicCast<FrameNode>(node);
     }
+    CHECK_NULL_VOID(builderChildNode_);
     auto radioPaintProperty = host->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(radioPaintProperty);
     auto imageProperty = builderChildNode_->GetLayoutProperty<ImageLayoutProperty>();
@@ -530,7 +569,6 @@ void RadioPattern::UpdateState()
     }
     preCheck_ = check;
     isGroupChanged_ = false;
-    FireBuilder();
 }
 
 void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
@@ -559,6 +597,7 @@ void RadioPattern::startEnterAnimation()
     AnimationOption delayOption;
     delayOption.SetCurve(springCurve);
     delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION);
+    CHECK_NULL_VOID(builderChildNode_);
     auto renderContext = builderChildNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateOpacity(INDICATOR_MIN_OPACITY);
@@ -585,6 +624,7 @@ void RadioPattern::startExitAnimation()
         DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
     AnimationOption delayOption;
     delayOption.SetCurve(springCurve);
+    CHECK_NULL_VOID(builderChildNode_);
     auto renderContext = builderChildNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     AnimationUtils::Animate(
@@ -672,8 +712,8 @@ void RadioPattern::InitializeParam(
     CHECK_NULL_VOID(radioTheme);
     defaultWidth = radioTheme->GetWidth();
     defaultHeight = radioTheme->GetHeight();
-    horizontalPadding = radioTheme->GetHotZoneHorizontalPadding();
-    verticalPadding = radioTheme->GetHotZoneVerticalPadding();
+    horizontalPadding = radioTheme->GetDefaultPaddingSize();
+    verticalPadding = radioTheme->GetDefaultPaddingSize();
 }
 
 CalcSize RadioPattern::GetChildContentSize()
@@ -898,13 +938,14 @@ void RadioPattern::SetRadioChecked(bool check)
 
 void RadioPattern::FireBuilder()
 {
-    CHECK_NULL_VOID(makeFunc_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChildAtIndex(0);
-    customNode_ = BuildContentModifierNode();
-    CHECK_NULL_VOID(customNode_);
-    host->AddChild(customNode_, 0);
+    host->RemoveChildAndReturnIndex(customNode_);
+    if (makeFunc_.has_value()) {
+        customNode_ = BuildContentModifierNode();
+        CHECK_NULL_VOID(customNode_);
+        host->AddChild(customNode_, 0);
+    }
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
 }
 

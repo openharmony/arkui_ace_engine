@@ -23,6 +23,16 @@ namespace OHOS::Ace {
 struct TextRange {
     int32_t start = -1;
     int32_t end = -1;
+
+    bool operator==(const TextRange& other) const
+    {
+        return this->start == other.start && this->end == other.end;
+    }
+
+    bool operator!=(const TextRange& other) const
+    {
+        return this->start != other.start || this->end != other.end;
+    }
 };
 
 } // namespace OHOS::Ace

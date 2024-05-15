@@ -16,6 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H
 
+#include <optional>
+
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -57,6 +59,47 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSFontSpan);
     RefPtr<FontSpan> fontSpan_;
+};
+
+class JSParagraphStyleSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSParagraphStyleSpan, AceType)
+
+public:
+    JSParagraphStyleSpan() = default;
+    ~JSParagraphStyleSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSParagraphStyleSpan* paragraphStyleSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<ParagraphStyleSpan> ParseJsParagraphStyleSpan(const JSRef<JSObject>& obj);
+    static void ParseJsTextAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseJsTextIndent(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseJsMaxLines(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseJsTextOverflow(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseJsWordBreak(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseJsLeadingMargin(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
+        std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin);
+    void GetTextAlign(const JSCallbackInfo& info);
+    void SetTextAlign(const JSCallbackInfo& info);
+    void SetTextIndent(const JSCallbackInfo& info);
+    void GetTextIndent(const JSCallbackInfo& info);
+    void SetMaxLines(const JSCallbackInfo& info);
+    void GetMaxLines(const JSCallbackInfo& info);
+    void SetOverflow(const JSCallbackInfo& info);
+    void GetOverflow(const JSCallbackInfo& info);
+    void SetWordBreak(const JSCallbackInfo& info);
+    void GetWordBreak(const JSCallbackInfo& info);
+    void SetLeadingMargin(const JSCallbackInfo& info);
+    void GetLeadingMargin(const JSCallbackInfo& info);
+
+    static bool IsPixelMap(const JSRef<JSVal>& jsValue);
+
+    RefPtr<ParagraphStyleSpan>& GetParagraphStyleSpan();
+    void SetParagraphStyleSpan(const RefPtr<ParagraphStyleSpan>& paragraphStyleSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSParagraphStyleSpan);
+    RefPtr<ParagraphStyleSpan> paragraphStyleSpan_;
 };
 
 class JSDecorationSpan : public virtual AceType {
@@ -164,6 +207,27 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSTextShadowSpan);
     RefPtr<TextShadowSpan> textShadowSpan_;
+};
+
+class JSLineHeightSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSLineHeightSpan, AceType)
+
+public:
+    JSLineHeightSpan() = default;
+    ~JSLineHeightSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSLineHeightSpan* textShadowSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<LineHeightSpan> ParseJSLineHeightSpan(const JSRef<JSObject>& obj);
+    void GetLineHeight(const JSCallbackInfo& info);
+    void SetLineHeight(const JSCallbackInfo& info);
+
+    RefPtr<LineHeightSpan>& GetLineHeightSpan();
+    void SetLineHeightSpan(const RefPtr<LineHeightSpan>& lineHeightSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSLineHeightSpan);
+    RefPtr<LineHeightSpan> lineHeightSpan_;
 };
 
 class JSImageAttachment : public virtual AceType {

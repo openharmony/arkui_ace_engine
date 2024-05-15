@@ -21,6 +21,7 @@
 #include "testing_point.h"
 #include "testing_rect.h"
 #include "testing_round_rect.h"
+#include "testing_matrix.h"
 
 namespace OHOS::Ace::Testing {
 enum class TestingPathDirection {
@@ -112,6 +113,13 @@ public:
         float distance, TestingPoint& position, TestingPoint& tangent, bool forceClosed) const
     {
         return false;
+    }
+
+    virtual void Transform(const TestingMatrix& matrix) {}
+
+    virtual std::string ConvertToSVGString()
+    {
+        return "";
     }
 };
 } // namespace OHOS::Ace::Testing

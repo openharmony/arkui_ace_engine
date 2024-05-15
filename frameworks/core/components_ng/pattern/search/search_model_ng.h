@@ -82,6 +82,7 @@ public:
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
     static void SetIcon(FrameNode* frameNode, const std::optional<std::string>& icon);
+    static void SetCaretPosition(FrameNode* frameNode, const int32_t& value);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetInputFilter(
         FrameNode* frameNode, const std::string& value, const std::function<void(const std::string&)>& onError);
@@ -123,6 +124,15 @@ public:
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
                                     std::function<void(const std::string&, NG::TextCommonEvent&)>&& func);
+    static void SetMaxLength(FrameNode* frameNode, uint32_t value);
+    static void ResetMaxLength(FrameNode* frameNode);
+    static void SetType(FrameNode* frameNode, TextInputType value);
+    static void SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func);
+    static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
+    static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
+    static void SetShowCounter(FrameNode* frameNode, bool value);
+    static void SetCounterType(FrameNode* frameNode, int32_t value);
+    static void SetShowCounterBorder(FrameNode* frameNode, bool value);
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);

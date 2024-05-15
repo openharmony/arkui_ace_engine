@@ -34,6 +34,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SHEET_HALF_SIZE = 2;
+constexpr Dimension WINDOW_EDGE_SPACE = 6.0_vp;
 } // namespace
 
 void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -136,6 +137,8 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(parent);
         auto parentOffset = parent->GetPaintRectOffset();
         OffsetF popupStyleSheetOffset = GetPopupStyleSheetOffset();
+        // need to subtract the SheetWrapper relative to the upper left corner of the window,
+        // which is the offset of the upper left corner of the bubble relative to the SheetWrapper
         sheetOffsetX_ = popupStyleSheetOffset.GetX() - parentOffset.GetX();
         sheetOffsetY_ = popupStyleSheetOffset.GetY() - parentOffset.GetY();
     }
@@ -146,6 +149,7 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     positionOffset.SetY(0.0f);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    // This step is only to determine the position of x, because y is to be done by the bit movement effect
     geometryNode->SetMarginFrameOffset(positionOffset);
     OffsetF translate(0.0f, 0.0f);
     if (sheetType_ == SheetType::SHEET_POPUP) {
@@ -158,21 +162,133 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
+// Get the offset of the popupSheet relative to the upper left corner of the window
 OffsetF SheetPresentationLayoutAlgorithm::GetPopupStyleSheetOffset()
 {
-    OffsetF sheetOffset;
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_RETURN(targetNode, OffsetF());
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, OffsetF());
     auto targetSize = geometryNode->GetFrameSize();
     auto targetOffset = targetNode->GetPaintRectOffset();
-    auto targetSpace = SHEET_TARGET_SPACE.ConvertToPx();
-    float offsetX = targetOffset.GetX() + (targetSize.Width() - sheetWidth_) / SHEET_HALF_SIZE;
-    float offsetY = targetOffset.GetY() + targetSize.Height() + targetSpace;
-    sheetOffset.SetX(offsetX);
-    sheetOffset.SetY(offsetY);
-    return sheetOffset;
+    return GetOffsetInAvoidanceRule(targetSize, targetOffset);
+}
+
+OffsetF SheetPresentationLayoutAlgorithm::GetOffsetInAvoidanceRule(const SizeF& targetSize, const OffsetF& targetOffset)
+{
+    // The current default Placement is Placement::BOTTOM
+    auto placement = Placement::BOTTOM;
+    auto tartgetPlacement = AvoidanceRuleOfPlacement(placement, targetSize, targetOffset);
+    auto offsetFunc = getOffsetFunc_[tartgetPlacement];
+    CHECK_NULL_RETURN(offsetFunc, OffsetF());
+    return (this->*offsetFunc)(targetSize, targetOffset);
+}
+
+Placement SheetPresentationLayoutAlgorithm::AvoidanceRuleOfPlacement(
+    const Placement& currentPlacement, const SizeF& targetSize, const OffsetF& targetOffset)
+{
+    Placement targetPlacement = currentPlacement;
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Init PopupSheet placement: %{public}s",
+        PlacementUtils::ConvertPlacementToString(targetPlacement).c_str());
+    // Step1: Determine the direction
+    static std::map<Placement, std::vector<Placement>> DIRECTIONS_STATES = {
+        { Placement::BOTTOM,
+            {
+                Placement::BOTTOM,
+            } },
+    };
+    auto& directionVec = DIRECTIONS_STATES[targetPlacement];
+    for (auto placement : directionVec) {
+        auto& placementFunc = directionCheckFunc_[placement];
+        if (placementFunc == nullptr) {
+            continue;
+        }
+        if ((this->*placementFunc)(targetSize, targetOffset)) {
+            targetPlacement = placement;
+            break;
+        }
+    }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "After step1, placement: %{public}s",
+        PlacementUtils::ConvertPlacementToString(targetPlacement).c_str());
+    // Step2: Determine the Placement in that direction
+    static std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
+        { Placement::BOTTOM,
+            {
+                Placement::BOTTOM,
+                Placement::BOTTOM_RIGHT,
+                Placement::BOTTOM_LEFT,
+            } },
+    };
+    auto& placementVec = PLACEMENT_STATES[targetPlacement];
+    for (auto placement : placementVec) {
+        auto& placementFunc = placementCheckFunc_[placement];
+        if (placementFunc == nullptr) {
+            continue;
+        }
+        if ((this->*placementFunc)(targetSize, targetOffset)) {
+            targetPlacement = placement;
+            break;
+        }
+    }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "After step2, placement: %{public}s",
+        PlacementUtils::ConvertPlacementToString(targetPlacement).c_str());
+    return targetPlacement;
+}
+
+bool SheetPresentationLayoutAlgorithm::CheckDirectionBottom(const SizeF& targetSize, const OffsetF& targetOffset)
+{
+    // Generalized bottom direction,
+    // determine whether the space below the component is enough to place the sheet of size
+    return true;
+}
+
+bool SheetPresentationLayoutAlgorithm::CheckPlacementBottom(const SizeF& targetSize, const OffsetF& targetOffset)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    return GreatOrEqual(
+        windowGlobalRect.Width() - WINDOW_EDGE_SPACE.ConvertToPx(),
+        targetOffset.GetX() + targetSize.Width() / SHEET_HALF_SIZE + sheetWidth_ / SHEET_HALF_SIZE) &&
+        LessOrEqual(
+            WINDOW_EDGE_SPACE.ConvertToPx(),
+            targetOffset.GetX() + targetSize.Width() / SHEET_HALF_SIZE - sheetWidth_ / SHEET_HALF_SIZE);
+}
+
+bool SheetPresentationLayoutAlgorithm::CheckPlacementBottomLeft(const SizeF& targetSize, const OffsetF& targetOffset)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    return LessOrEqual(WINDOW_EDGE_SPACE.ConvertToPx(), targetOffset.GetX()) &&
+           GreatOrEqual(windowGlobalRect.Width() - WINDOW_EDGE_SPACE.ConvertToPx(), targetOffset.GetX() + sheetWidth_);
+}
+
+bool SheetPresentationLayoutAlgorithm::CheckPlacementBottomRight(const SizeF& targetSize, const OffsetF& targetOffset)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    return LessOrEqual(WINDOW_EDGE_SPACE.ConvertToPx(), targetOffset.GetX() + targetSize.Width() - sheetWidth_) &&
+           GreatOrEqual(
+               windowGlobalRect.Width() - WINDOW_EDGE_SPACE.ConvertToPx(), targetOffset.GetX() + targetSize.Width());
+}
+
+OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottom(const SizeF& targetSize, const OffsetF& targetOffset)
+{
+    arrowOffsetX_ = sheetWidth_ / SHEET_HALF_SIZE;
+    return OffsetF(targetOffset.GetX() + (targetSize.Width() - sheetWidth_) / SHEET_HALF_SIZE,
+        targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
+}
+
+OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottomLeft(const SizeF& targetSize, const OffsetF& targetOffset)
+{
+    arrowOffsetX_ = targetSize.Width() / SHEET_HALF_SIZE;
+    return OffsetF(targetOffset.GetX(), targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
+}
+
+OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottomRight(const SizeF& targetSize, const OffsetF& targetOffset)
+{
+    arrowOffsetX_ = sheetWidth_ - targetSize.Width() / SHEET_HALF_SIZE;
+    return OffsetF(targetOffset.GetX() + targetSize.Width() - sheetWidth_,
+        targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
 }
 
 float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& maxSize) const

@@ -30,6 +30,7 @@ public:
      * @param wrapper The LayoutWrapper of Grid.
      * @param idx The index of the item.
      * @return The size of the item.
+     * IMPORTANT: Output assumes [row] represents mainSize and [column] represents crossSize.
      */
     static GridItemSize GetItemSize(const GridLayoutInfo* info, const LayoutWrapper* wrapper, int32_t idx);
 };

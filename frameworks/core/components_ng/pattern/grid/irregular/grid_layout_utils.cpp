@@ -24,15 +24,15 @@ GridItemSize GridLayoutUtils::GetItemSize(const GridLayoutInfo* info, const Layo
     if (opts.irregularIndexes.find(idx) != opts.irregularIndexes.end()) {
         if (!opts.getSizeByIndex) {
             // default irregular size = [1, full cross length]
-            return { 1, info->crossCount_ };
-        }
-
-        size = opts.getSizeByIndex(idx);
-
-        // assume [row] represents mainLength and [column] represents crossLength in this class, so flip sides if
-        // horizontal
-        if (info->axis_ == Axis::HORIZONTAL) {
-            std::swap(size.rows, size.columns);
+            size.rows = 1;
+            size.columns = info->crossCount_;
+        } else {
+            size = opts.getSizeByIndex(idx);
+            // assume [row] represents mainLength and [column] represents crossLength in this class, so flip sides if
+            // horizontal
+            if (info->axis_ == Axis::HORIZONTAL) {
+                std::swap(size.rows, size.columns);
+            }
         }
     }
 

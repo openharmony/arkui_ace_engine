@@ -98,6 +98,12 @@ var WordBreak;
   WordBreak[WordBreak["BREAK_WORD"] = 2] = "break-word";
 })(WordBreak || (WordBreak = {}));
 
+var DpiFollowStrategy ;
+(function (DpiFollowStrategy ) {
+  DpiFollowStrategy [DpiFollowStrategy ["FOLLOW_HOST_DPI"] = 0] = "follow-host-dpi";
+  DpiFollowStrategy [DpiFollowStrategy ["FOLLOW_UI_EXTENSION_ABILITY_DPI"] = 1] = "follow-ui-extension-ability-dpi";
+})(DpiFollowStrategy  || (DpiFollowStrategy  = {}));
+
 var EllipsisMode;
 (function (EllipsisMode) {
   EllipsisMode[EllipsisMode["START"] = 0] = "start";
@@ -190,6 +196,13 @@ var ImageFit;
   ImageFit[ImageFit["None"] = 5] = "None";
   ImageFit[ImageFit["ScaleDown"] = 6] = "ScaleDown";
 })(ImageFit || (ImageFit = {}));
+
+var DynamicRangeMode ;
+(function (DynamicRangeMode ) {
+  DynamicRangeMode [DynamicRangeMode ["HIGH"] = 0] = "HIGH";
+  DynamicRangeMode [DynamicRangeMode ["CONSTRAINT"] = 1] = "CONSTRAINT";
+  DynamicRangeMode [DynamicRangeMode ["STANDARD"] = 2] = "STANDARD";
+})(DynamicRangeMode  || (DynamicRangeMode  = {}));
 
 var ImageRepeat;
 (function (ImageRepeat) {
@@ -447,6 +460,18 @@ var ScrollState;
   ScrollState[ScrollState["Scroll"] = 1] = "Scroll";
   ScrollState[ScrollState["Fling"] = 2] = "Fling";
 })(ScrollState || (ScrollState = {}));
+
+var ScrollSource;
+(function (ScrollSource) {
+  ScrollSource[ScrollSource["DRAG"] = 0] = "DRAG";
+  ScrollSource[ScrollSource["FLING"] = 1] = "FLING";
+  ScrollSource[ScrollSource["EDGE_EFFECT"] = 2] = "EDGE_EFFECT";
+  ScrollSource[ScrollSource["OTHER_USER_INPUT"] = 3] = "OTHER_USER_INPUT";
+  ScrollSource[ScrollSource["SCROLL_BAR"] = 4] = "SCROLL_BAR";
+  ScrollSource[ScrollSource["SCROLL_BAR_FLING"] = 5] = "SCROLL_BAR_FLING";
+  ScrollSource[ScrollSource["SCROLLER"] = 6] = "SCROLLER";
+  ScrollSource[ScrollSource["SCROLLER_ANIMATION"] = 7] = "SCROLLER_ANIMATION";
+})(ScrollSource || (ScrollSource = {}));
 
 var TouchType;
 (function (TouchType) {
@@ -819,6 +844,8 @@ var IndexerAlign;
 (function (IndexerAlign) {
   IndexerAlign[IndexerAlign["Left"] = 0] = "Left";
   IndexerAlign[IndexerAlign["Right"] = 1] = "Right";
+  IndexerAlign[IndexerAlign["START"] = 2] = "START";
+  IndexerAlign[IndexerAlign["END"] = 3] = "END";
 })(IndexerAlign || (IndexerAlign = {}));
 
 var DialogAlignment;
@@ -933,6 +960,11 @@ var NavigationTitleMode;
   NavigationTitleMode[NavigationTitleMode["Mini"] = 2] = "Mini";
 })(NavigationTitleMode || (NavigationTitleMode = {}));
 
+let BarStyle;
+(function (BarStyle) {
+  BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
+  BarStyle[BarStyle.STACK = 1] = "STACK";
+})(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
   NavigationMode[NavigationMode["Stack"] = 0] = "Stack";
@@ -1051,6 +1083,9 @@ var SourceTool;
   SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
   SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
+  SourceTool[SourceTool["MOUSE"] = 7] = "MOUSE";
+  SourceTool[SourceTool["TOUCHPAD"] = 9] = "TOUCHPAD";
+  SourceTool[SourceTool["JOYSTICK"] = 10] = "JOYSTICK";
 })(SourceTool || (SourceTool = {}));
 
 var KeySource;
@@ -1138,6 +1173,12 @@ var RenderExitReason;
   RenderExitReason[RenderExitReason["ProcessExitUnknown"] = 4] = "ProcessExitUnknown";
 })(RenderExitReason || (RenderExitReason = {}));
 
+var RenderProcessNotRespondingReason;
+(function (RenderProcessNotRespondingReason) {
+  RenderProcessNotRespondingReason[RenderProcessNotRespondingReason["INPUT_TIMEOUT"] = 0] = "INPUT_TIMEOUT";
+  RenderProcessNotRespondingReason[RenderProcessNotRespondingReason["NAVIGATION_COMMIT_TIMEOUT"] = 1] = "NAVIGATION_COMMIT_TIMEOUT";
+})(RenderProcessNotRespondingReason || (RenderProcessNotRespondingReason = {}));
+
 var SslError;
 (function (SslError) {
   SslError[SslError["Invalid"] = 0] = "Invalid";
@@ -1206,6 +1247,111 @@ var SymbolEffectStrategy;
   SymbolEffectStrategy[SymbolEffectStrategy["SCALE"] = 1] = "SCALE";
   SymbolEffectStrategy[SymbolEffectStrategy["HIERARCHICAL"] = 2] = "HIERARCHICAL";
 })(SymbolEffectStrategy || (SymbolEffectStrategy = {}));
+
+var EffectDirection;
+(function (EffectDirection) {
+  EffectDirection[EffectDirection["DOWN"] = 0] = "DOWN";
+  EffectDirection[EffectDirection["UP"] = 1] = "UP";
+})(EffectDirection || (EffectDirection = {}));
+
+var EffectScope;
+(function (EffectScope) {
+  EffectScope[EffectScope["LAYER"] = 0] = "LAYER";
+  EffectScope[EffectScope["WHOLE"] = 1] = "WHOLE";
+})(EffectScope || (EffectScope = {}));
+
+var EffectFillStyle;
+(function (EffectFillStyle) {
+  EffectFillStyle[EffectFillStyle["CUMULATIVE"] = 0] = "CUMULATIVE";
+  EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
+})(EffectFillStyle || (EffectFillStyle = {}));
+
+class SymbolEffect {
+}
+
+class ScaleSymbolEffect extends SymbolEffect {
+  constructor(scope, direction) {
+    super();
+    this.type = "ScaleSymbolEffect";
+    this.scope = scope;
+    this.direction = direction;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+  direction(value) {
+    this.direction = value;
+    return this;
+  }
+}
+
+class HierarchicalSymbolEffect extends SymbolEffect {
+  constructor(fillStyle) {
+    super();
+    this.type = "HierarchicalSymbolEffect";
+    this.fillStyle = fillStyle;
+  }
+}
+
+class AppearSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "AppearSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+class DisappearSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "DisappearSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class BounceSymbolEffect extends SymbolEffect {
+  constructor(scope, direction) {
+    super();
+    this.type = "BounceSymbolEffect";
+    this.scope = scope;
+    this.direction = direction;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+  direction(value) {
+    this.direction = value;
+    return this;
+  }
+}
+
+class ReplaceSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "ReplaceSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class PulseSymbolEffect extends SymbolEffect {
+  constructor() {
+    super();
+    this.type = "PulseSymbolEffect";
+  }
+}
 
 var RichEditorSpanType;
 (function (RichEditorSpanType) {
@@ -2563,6 +2709,7 @@ var XComponentType;
   XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
   XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
   XComponentType[XComponentType["NODE"] = 3] = "NODE";
+  XComponentType[XComponentType["PLATFORM_VIEW"] = 999] = "PLATFORM_VIEW";
 })(XComponentType || (XComponentType = {}));
 
 var NestedScrollMode;
@@ -2765,6 +2912,8 @@ var DragPreviewMode;
 (function (DragPreviewMode) {
   DragPreviewMode["AUTO"] = 1;
   DragPreviewMode["DISABLE_SCALE"] = 2;
+  DragPreviewMode["ENABLE_DEFAULT_SHADOW"] = 3;
+  DragPreviewMode["ENABLE_DEFAULT_RADIUS"] = 4;
 })(DragPreviewMode || (DragPreviewMode = {}));
 
 var FoldStatus;
@@ -2902,6 +3051,7 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
   StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
   StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
+  StyledStringKey[StyledStringKey["LINE_HEIGHT"] = 5] = "LINE_HEIGHT";
   StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
@@ -2919,3 +3069,16 @@ let FocusPriority;
   FocusPriority[FocusPriority["PRIOR"] = 2000] = "PRIOR";
   FocusPriority[FocusPriority["PREVIOUS"] = 3000] = "PREVIOUS";
 })(FocusPriority || (FocusPriority = {}));
+var SubMenuExpandingMode;
+(function (SubMenuExpandingMode) {
+  SubMenuExpandingMode[SubMenuExpandingMode["SIDE_EXPAND"] = 0] = "SIDE";
+  SubMenuExpandingMode[SubMenuExpandingMode["EMBEDDED_EXPAND"] = 1] = "EMBEDDED";
+  SubMenuExpandingMode[SubMenuExpandingMode["STACK_EXPAND"] = 2] = "STACK";
+})(SubMenuExpandingMode || (SubMenuExpandingMode = {}));
+
+var ViewportFit;
+(function (ViewportFit) {
+  ViewportFit[ViewportFit["AUTO"] = 0] = "AUTO";
+  ViewportFit[ViewportFit["CONTAINS"] = 1] = "CONTAINS";
+  ViewportFit[ViewportFit["COVER"] = 2] = "COVER";
+})(ViewportFit || (ViewportFit = {}));

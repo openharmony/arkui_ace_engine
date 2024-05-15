@@ -33,6 +33,17 @@ public:
     ~SizeT() = default;
     SizeT(T width, T height) : width_(width), height_(height) {}
 
+    SizeT(T crossSize, T mainSize, Axis axis)
+    {
+        if (axis == Axis::HORIZONTAL) {
+            width_ = mainSize;
+            height_ = crossSize;
+        } else { // Axis::VERTICAL and others
+            width_ = crossSize;
+            height_ = mainSize;
+        }
+    }
+
     void Reset()
     {
         width_ = 0;
