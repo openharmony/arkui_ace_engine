@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LOADINGPROGRESS_SIZE = 24;
 const DEFAULT_MARGIN = 16;
 const ITEM_SPACE = 4;
@@ -79,7 +80,7 @@ export class SwipeRefresher extends ViewPU {
           LoadingProgress.create();
           LoadingProgress.height(24);
           LoadingProgress.width(24);
-          LoadingProgress.margin({ right: 4 });
+          LoadingProgress.margin({ end: LengthMetrics.vp(4) });
           t || LoadingProgress.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }))
