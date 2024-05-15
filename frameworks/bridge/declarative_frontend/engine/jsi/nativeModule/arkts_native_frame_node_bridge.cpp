@@ -908,6 +908,10 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
         panda::FunctionRef::New(vm, Framework::JsStopPropagation));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getHistoricalPoints"),
         panda::FunctionRef::New(vm, Framework::JsGetHistoricalPoints));
+    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
+    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
         panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
     eventObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
