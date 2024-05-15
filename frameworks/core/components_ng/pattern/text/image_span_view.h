@@ -36,6 +36,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static ImageSourceInfo GetImageSpanSrc(FrameNode* frameNode);
     static ImageFit GetObjectFit(FrameNode* frameNode);
+    static void SetAlt(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
     static VerticalAlign GetVerticalAlign(FrameNode* frameNode);
     static void SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyle& style);
     static TextBackgroundStyle GetSpanTextBackgroundStyle(FrameNode* frameNode);

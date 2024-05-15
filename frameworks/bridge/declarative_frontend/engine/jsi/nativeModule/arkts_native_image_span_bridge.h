@@ -29,6 +29,8 @@ public:
     static ArkUINativeModuleValue ResetTextBackgroundStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetBaselineOffset(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetBaselineOffset(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetAlt(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAlt(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 
