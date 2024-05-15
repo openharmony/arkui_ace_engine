@@ -17,6 +17,7 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
@@ -804,6 +805,38 @@ ArkUINativeModuleValue ImageBridge::ResetImageTransition(ArkUIRuntimeCallInfo* r
     } else {
         CommonBridge::ResetTransitionPassThrough(runtimeCallInfo);
     }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::EnableAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(INDEX_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> enableValue = runtimeCallInfo->GetCallArgRef(1);
+
+    if (enableValue->IsBoolean()) {
+        bool enable = enableValue->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getImageModifier()->enableAnalyzer(nativeNode, enable);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::AnalyzerConfig(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(INDEX_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> configValue = runtimeCallInfo->GetCallArgRef(1);
+    JSValueWrapper valueWrapper = configValue;
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, panda::NativePointerRef::New(vm, nullptr));
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    Framework::ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    GetArkUINodeModifiers()->getImageModifier()->analyzerConfig(nativeNode, nativeValue);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -651,6 +651,20 @@ void GetImageResizable(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_In
         arrayValue[NUM_3] = resizable.bottom.Value();
     }
 }
+
+void EnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::EnableAnalyzer(frameNode, enable);
+}
+
+void AnalyzerConfig(ArkUINodeHandle node, void* config)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetImageAnalyzerConfig(frameNode, config);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -667,7 +681,7 @@ const ArkUIImageModifier* GetImageModifier()
         ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality, ResetEnhancedImageQuality,
         GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
         GetImageDraggable, GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor,
-        SetPixelMap, SetPixelMapArray, SetResourceSrc };
+        SetPixelMap, SetPixelMapArray, SetResourceSrc, EnableAnalyzer, AnalyzerConfig };
     return &modifier;
 }
 

@@ -741,5 +741,19 @@ ImageResizableSlice ImageModelNG::GetResizableSlice(FrameNode *frameNode)
     CHECK_NULL_RETURN(renderProperty, resizable);
     return renderProperty->GetImageResizableSlice().value_or(resizable);
 }
+
+void ImageModelNG::EnableAnalyzer(FrameNode* frameNode, bool isEnableAnalyzer)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->EnableAnalyzer(isEnableAnalyzer);
+}
+
+void ImageModelNG::SetImageAnalyzerConfig(FrameNode* frameNode, void* config)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->SetImageAnalyzerConfig(config);
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP
