@@ -41,13 +41,16 @@ public:
     virtual ~UIExtensionModel() = default;
 
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
-        const RefPtr<NG::FrameNode>& placeholderNode = nullptr, bool transferringCaller = false);
+        const RefPtr<NG::FrameNode>& placeholderNode = nullptr,
+        bool transferringCaller = false, bool densityDpi = false);
     // for Embedded Component
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, NG::SessionType sessionType);
     // for DynamicComponent
     virtual void Create();
     virtual void InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime);
+    virtual void InitializeIsolatedComponent(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime);
     virtual void SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged);
 
     virtual void SetOnRemoteReady(std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onRemoteReady);

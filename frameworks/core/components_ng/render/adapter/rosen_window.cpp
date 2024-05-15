@@ -86,10 +86,12 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     }
     rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
     rsUIDirector_->Init();
-    rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
+    rsUIDirector_->SetUITaskRunner(
+        [taskExecutor, id](const std::function<void()>& task, uint32_t delay) {
         ContainerScope scope(id);
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRosenWindowRenderServiceTask");
+        taskExecutor->PostDelayedTask(
+            task, TaskExecutor::TaskType::UI, delay, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
     }, id);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
@@ -107,12 +109,12 @@ void RosenWindow::Init()
     }
 }
 
-void RosenWindow::FlushFrameRate(int32_t rate)
+void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped)
 {
     if (!rsWindow_ || rate < 0) {
         return;
     }
-    rsWindow_->FlushFrameRate(rate);
+    rsWindow_->FlushFrameRate(rate, isAnimatorStopped);
 }
 
 void RosenWindow::RequestFrame()
@@ -125,19 +127,19 @@ void RosenWindow::RequestFrame()
         isRequestVsync_ = true;
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = GetSysTimestamp();
-    #ifdef VSYNC_TIMEOUT_CHECK
+#ifdef VSYNC_TIMEOUT_CHECK
         if (taskExecutor) {
             auto windowId = rsWindow_->GetWindowId();
             auto instanceId = Container::CurrentIdSafely();
             auto task = [windowId, instanceId, timeStamp = lastRequestVsyncTime_]() {
-                LOGE("VsyncCallback not executed!");
+                LOGE("ArkUI request vsync，but no vsync was received within 3 seconds");
                 EventReport::SendVsyncException(VsyncExcepType::UI_VSYNC_TIMEOUT, windowId, instanceId, timeStamp);
             };
             onVsyncEventCheckTimer_.Reset(task);
             taskExecutor->PostDelayedTask(onVsyncEventCheckTimer_, TaskExecutor::TaskType::JS,
-                                          VSYNC_TASK_DELAY_MILLISECOND, "ArkUIVsyncTimeoutCheck");
+                VSYNC_TASK_DELAY_MILLISECOND, "ArkUIVsyncTimeoutCheck");
         }
-    #endif
+#endif
     }
     if (taskExecutor) {
         taskExecutor->PostDelayedTask(

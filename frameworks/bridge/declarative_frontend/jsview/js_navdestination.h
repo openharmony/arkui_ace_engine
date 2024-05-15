@@ -40,6 +40,7 @@ public:
     static void SetWillShow(const JSCallbackInfo& info);
     static void SetWillHide(const JSCallbackInfo& info);
     static void SetWillDisAppear(const JSCallbackInfo& info);
+    static void SetIgnoreLayoutSafeArea(const JSCallbackInfo& info);
 
 private:
     static void CreateForPartialUpdate(const JSCallbackInfo& info);

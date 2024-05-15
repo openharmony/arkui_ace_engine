@@ -2517,4 +2517,62 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
     width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize);
     EXPECT_EQ(width, SHEET_POPUP_WIDTH.ConvertToPx());
 }
+
+/**
+ * @tc.name: GetSheetType001
+ * @tc.desc: Test SheetPresentationPattern::GetSheetType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetSheetType001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create builder.
+     */
+    CreateSheetBuilder();
+
+    /**
+     * @tc.steps: step3. create sheet node and get sheet node, get pattern.
+     * @tc.expected: related function is called.
+     */
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(topSheetNode == nullptr);
+    auto sheetNodeLayoutProperty = topSheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    auto style = sheetNodeLayoutProperty->GetSheetStyle();
+    EXPECT_FALSE(style->sheetType.has_value());
+
+    /**
+     * @tc.steps: step4. Change the sheetType.
+     * @tc.expected: the sheetType is updated successfully
+     */
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(sheetNode == nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOM);
+    sheetNodeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    style = sheetNodeLayoutProperty->GetSheetStyle();
+    EXPECT_TRUE(style->sheetType.has_value());
+    EXPECT_EQ(style->sheetType.value(), SheetType::SHEET_BOTTOM);
+}
 }

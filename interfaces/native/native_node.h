@@ -1485,6 +1485,10 @@ typedef enum {
 
     NODE_FOREGROUND_BLUR_STYLE,
 
+    NODE_LAYOUT_RECT,
+
+    NODE_FOCUS_ON_TOUCH,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -1843,6 +1847,19 @@ typedef enum {
      *
      */
     NODE_TEXT_SELECTED_BACKGROUND_COLOR,
+
+    /**
+    * @brief The text component uses a formatted string object to set text content properties,
+    * and supports property setting, property reset, and property acquisition interfaces.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .object indicates ArkUI_StyledString formatted string data. The parameter type is {@link ArkUI_StyledString}. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .object indicates ArkUI_StyledString formatted string data. The parameter type is {@link ArkUI_StyledString}. \n
+    */
+    NODE_TEXT_CONTENT_WITH_STYLED_STRING,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -1876,6 +1893,7 @@ typedef enum {
      *
      */
     NODE_SPAN_TEXT_BACKGROUND_STYLE,
+    NODE_SPAN_BASELINE_OFFSET,
     /**
      * @brief Defines the image source of the image span.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -5286,6 +5304,24 @@ typedef enum {
     NODE_SWIPER_EVENT_ON_GESTURE_SWIPE,
 
     /**
+     * @brief 定义ARKUI_NODE_SWIPER监听Swiper页面滑动事件。
+     * 使用说明 ：\n
+     * 1、设置{@link ArkUI_SwiperDisplayModeType}属性为ARKUI_SWIPER_DISPLAY_MODE_AUTO_LINEAR时，该接口不生效。\n
+     * 2、循环场景下，设置prevMargin和nextMargin属性，使得Swiper前后端显示同一页面时，该接口不生效。\n
+     * 3、在页面滑动过程中，会对视窗内所有页面逐帧触发ContentDidScrollCallback回调。\n
+     * 例如，当视窗内有下标为0、1的两个页面时，会每帧触发两次index值分别为0和1的回调。\n
+     * 4、设置displayCount属性的swipeByGroup参数为true时，若同组中至少有一个页面在视窗内时，\n
+     * 则会对同组中所有页面触发回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含4个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：Swiper组件的索引，和onChange事件中的index值变化保持一致。\n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：视窗内某个页面的索引。\n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>：页面相对于Swiper主轴起始位置（selectedIndex对应页面的起始位置）的移动比例。\n
+     * <b>ArkUI_NodeComponentEvent.data[3].f32</b>：主轴方向上页面的长度。\n
+     */
+    NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL,
+
+    /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component scrolls.
      *
      * Notes for triggering the event:\n
@@ -5318,7 +5354,6 @@ typedef enum {
      * needs to scroll based on the real-world situation and return the result in this parameter. \n
      */
     NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN,
-
 
     /**
      * @brief Define the enumeration value of the pre sliding trigger event for the scrolling container component.

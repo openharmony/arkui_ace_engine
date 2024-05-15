@@ -217,7 +217,7 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
         result += item;
         result += ",";
     }
-    result = result.substr(0, result.length() - 1);
+    result = result.substr(0, static_cast<int32_t>(result.length()) - 1);
     return result;
 }
 
@@ -1153,6 +1153,9 @@ void TextFieldPattern::HandleBlurEvent()
     isFocusedBeforeClick_ = false;
     magnifierController_->UpdateShowMagnifier();
     CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
+    if (GetIsPreviewText()) {
+        FinishTextPreviewOperation();
+    }
     StopTwinkling();
     if ((customKeyboard_ && isCustomKeyboardAttached_)) {
         CloseKeyboard(true);
@@ -1164,9 +1167,6 @@ void TextFieldPattern::HandleBlurEvent()
     }
 #endif
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
-    if (GetIsPreviewText()) {
-        FinishTextPreview();
-    }
     NotifyOnEditChanged(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -1360,8 +1360,9 @@ void TextFieldPattern::HandleOnPaste()
         textfield->ResetObscureTickCountDown();
         textfield->selectController_->UpdateCaretIndex(newCaretPosition);
         if (layoutProperty->HasMaxLength()) {
-            textfield->showCountBorderStyle_ = (originLength - (end - start) + pasteData.length()) >
-                                               layoutProperty->GetMaxLengthValue(Infinity<uint32_t>());
+            int32_t sum = originLength - (end - start) + static_cast<int32_t>(pasteData.length());
+            textfield->showCountBorderStyle_ = sum >
+                static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
             textfield->HandleCountStyle();
         }
         textfield->CloseSelectOverlay(true);
@@ -1565,12 +1566,12 @@ void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
 void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
 {
     scrollable_ = false;
-    SetScrollEnable(scrollable_);
+    SetScrollEnabled(scrollable_);
     // limit move when preview text is shown
     auto touchOffset = info.GetTouches().front().GetLocalLocation();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
-        float offsetY = IsTextArea() ? GetTextRect().GetX() : contentRect_.GetX();
+        float offsetY = IsTextArea() ? GetTextRect().GetY() : contentRect_.GetY();
         std::vector<RectF> previewTextRects = GetPreviewTextRects();
         if (previewTextRects.empty()) {
             TAG_LOGI(ACE_TEXT_FIELD, "preview text rect error");
@@ -2311,7 +2312,7 @@ void TextFieldPattern::ProcessScroll()
         SetScrollBar(DisplayMode::OFF);
         if (!GetScrollableEvent()) {
             AddScrollEvent();
-            SetScrollEnable(false);
+            SetScrollEnabled(false);
         }
     }
 }
@@ -2572,12 +2573,10 @@ bool TextFieldPattern::IsDisabled()
 
 void TextFieldPattern::ProcessInnerPadding()
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
     BorderWidthProperty currentBorderWidth;
@@ -2617,9 +2616,12 @@ void TextFieldPattern::ProcessNumberOfLines()
     CHECK_NULL_VOID(layoutProperty && layoutProperty->HasNumberOfLines());
     auto numberOfLines = layoutProperty->GetNumberOfLines().value();
     CHECK_NULL_VOID(numberOfLines > 0);
-    auto lineHeight = PreferredLineHeight(false);
-    auto lineSpacing = layoutProperty->HasLineSpacing() ? layoutProperty->GetLineSpacing().value().ConvertToPx() : 0.f;
-    auto contentHeight = numberOfLines * lineHeight + (numberOfLines - 1) * lineSpacing;
+    auto lineHeight = layoutProperty->GetLineHeight().value_or(0.0_vp).ConvertToPx();
+    if (LessOrEqual(lineHeight, 0.f)) {
+        lineHeight = PreferredLineHeight(false);
+    }
+    auto lineSpacing = layoutProperty->GetLineSpacing().value_or(0.0_vp).ConvertToPx();
+    auto contentHeight = numberOfLines * lineHeight + numberOfLines * lineSpacing;
     auto height = contentHeight + GetVerticalPaddingAndBorderSum();
 
     // get previously user defined ideal width
@@ -2834,8 +2836,14 @@ void TextFieldPattern::InitMouseEvent()
     };
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
     inputHub->AddOnHoverEvent(hoverEvent_);
+    InitPanEvent();
+}
 
-    auto gestureHub = tmpHost->GetOrCreateGestureEventHub();
+void TextFieldPattern::InitPanEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (!boxSelectPanEvent_) {
         auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
@@ -2847,10 +2855,15 @@ void TextFieldPattern::InitMouseEvent()
     }
     PanDirection panDirection = { .type = PanDirection::ALL };
     gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetPanEventType(GestureTypeName::TEXTFIELD_BOXSELECT);
     gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
                                                  const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
             gestureInfo->GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+            return GestureJudgeResult::REJECT;
+        }
+        if (gestureInfo->GetType() == GestureTypeName::TEXTFIELD_BOXSELECT &&
+            gestureInfo->GetInputEventType() != InputEventType::MOUSE_BUTTON) {
             return GestureJudgeResult::REJECT;
         }
         return GestureJudgeResult::CONTINUE;
@@ -2873,7 +2886,7 @@ void TextFieldPattern::OnHover(bool isHover)
     } else {
         int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
-        windowId = GetSCBSystemWindowId();
+        windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         pipeline->FreeMouseStyleHoldNode(frameId);
@@ -2885,7 +2898,7 @@ void TextFieldPattern::RestoreDefaultMouseState()
 {
     int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
-    windowId = GetSCBSystemWindowId();
+    windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
@@ -2905,7 +2918,7 @@ void TextFieldPattern::ChangeMouseState(
     auto y = location.GetY();
     int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
-    windowId = GetSCBSystemWindowId();
+    windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
     if (GreatNotEqual(x, 0) && LessNotEqual(x, frameRect_.Width()) && GreatNotEqual(y, 0) &&
         LessNotEqual(y, frameRect_.Height())) {
@@ -2934,7 +2947,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
     int32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
-    windowId = GetSCBSystemWindowId();
+    windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
     if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover() || scrollBar->InBarRectRegion(point))) {
         pipeline->SetMouseStyleHoldNode(frameId);
@@ -2970,7 +2983,7 @@ void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleRightMousePressEvent(MouseInfo& info)
 {
-    if (IsSelected()) {
+    if (IsSelected() || GetIsPreviewText()) {
         return;
     }
     auto focusHub = GetFocusHub();
@@ -2982,6 +2995,9 @@ void TextFieldPattern::HandleRightMousePressEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleRightMouseReleaseEvent(MouseInfo& info)
 {
+    if (GetIsPreviewText()) {
+        return;
+    }
     auto focusHub = GetFocusHub();
     if (focusHub->IsCurrentFocus()) {
         OffsetF rightClickOffset = OffsetF(
@@ -3013,7 +3029,7 @@ void TextFieldPattern::HandleLeftMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
 {
-    if (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if ((IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) || GetIsPreviewText()) {
         blockPress_ = true;
         return;
     }
@@ -3419,8 +3435,9 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
         caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
     }
     if (layoutProperty->HasMaxLength()) {
-        showCountBorderStyle_ = (originLength + StringUtils::ToWstring(insertValue).length()) >
-                                layoutProperty->GetMaxLengthValue(Infinity<uint32_t>());
+        int32_t sum = originLength + static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
+        showCountBorderStyle_ = sum >
+            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
         HandleCountStyle();
     }
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
@@ -4033,6 +4050,7 @@ void TextFieldPattern::HandleCounterBorder()
     } else {
         if (IsUnderlineMode()) {
             ApplyUnderlineTheme();
+            UpdateCounterMargin();
         } else {
             SetThemeBorderAttr();
         }
@@ -4576,7 +4594,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 }
 
 void TextFieldPattern::SetSelectionFlag(
-    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
 {
     if (!HasFocus() || GetIsPreviewText()) {
         return;
@@ -4590,8 +4608,13 @@ void TextFieldPattern::SetSelectionFlag(
         cursorVisible_ = false;
         showSelect_ = true;
         HandleSetSelection(selectionStart, selectionEnd, false);
-        selectController_->MoveFirstHandleToContentRect(selectionStart);
-        selectController_->MoveSecondHandleToContentRect(selectionEnd);
+        if (isForward) {
+            selectController_->MoveSecondHandleToContentRect(selectionEnd);
+            selectController_->MoveFirstHandleToContentRect(selectionStart, false);
+        } else {
+            selectController_->MoveFirstHandleToContentRect(selectionStart);
+            selectController_->MoveSecondHandleToContentRect(selectionEnd);
+        }
     }
     if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
@@ -5019,9 +5042,9 @@ void TextFieldPattern::CheckScrollable()
         } else {
             scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());
         }
-        SetScrollEnable(scrollable_);
+        SetScrollEnabled(scrollable_);
     } else {
-        SetScrollEnable(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
+        SetScrollEnabled(GreatNotEqual(textRect_.Width(), contentRect_.Width()));
     }
 }
 
@@ -5346,7 +5369,7 @@ void TextFieldPattern::ProcessInlinePaddingAndMargin()
     }
     MarginProperty margin;
     margin.bottom = CalcLength(userMargin.bottom->GetDimension() + userPadding.bottom->GetDimension());
-    margin.right = CalcLength(userMargin.right->GetDimension() + userPadding.bottom->GetDimension());
+    margin.right = CalcLength(userMargin.right->GetDimension() + userPadding.right->GetDimension());
     margin.left = CalcLength(userMargin.left->GetDimension() + userPadding.left->GetDimension());
     margin.top = CalcLength(userMargin.top->GetDimension() + userPadding.top->GetDimension());
     layoutProperty->UpdateMargin(margin);
@@ -5385,8 +5408,6 @@ void TextFieldPattern::ApplyInlineTheme()
     renderContext->UpdateBorderColor(inlineBorderColor);
     layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) });
     ProcessInnerPadding();
-    textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
-    textRect_.SetTop(GetPaddingTop() + GetBorderTop());
     ProcessInlinePaddingAndMargin();
 }
 
@@ -5527,7 +5548,7 @@ void TextFieldPattern::SetAccessibilityAction()
                                                                              int32_t end, bool isForward) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->SetSelectionFlag(start, end, std::nullopt);
+        pattern->SetSelectionFlag(start, end, std::nullopt, isForward);
     });
 
     accessibilityProperty->SetActionCopy([weakPtr = WeakClaim(this)]() {
@@ -6120,7 +6141,7 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
         selectController_->UpdateSecondHandleOffset();
         if (!selectOverlay_->IsSingleHandle()) {
             selectController_->UpdateFirstHandleOffset();
-            selectController_->UpdateCaretOffset();
+            selectController_->UpdateCaretOffset(TextAffinity::DOWNSTREAM, false);
             selectOverlay_->UpdateAllHandlesOffset();
         } else {
             auto carectOffset = selectController_->GetCaretRect().GetOffset() +
@@ -6816,8 +6837,9 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     selectController_->UpdateCaretIndex(start + caretMoveLength);
 
     if (layoutProperty->HasMaxLength()) {
-        showCountBorderStyle_ = (originLength + StringUtils::ToWstring(info.text).length()) >
-            layoutProperty->GetMaxLengthValue(Infinity<uint32_t>());
+        int32_t sum = originLength + static_cast<int32_t>(StringUtils::ToWstring(info.text).length());
+        showCountBorderStyle_ = sum >
+            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
         HandleCountStyle();
     }
 
@@ -6951,12 +6973,12 @@ void TextFieldPattern::ReceivePreviewTextStyle(const std::string& style)
 void TextFieldPattern::CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR)
 {
     float offsetX = IsTextArea() ? contentRect_.GetX() : GetTextRect().GetX();
-    float offsetY = IsTextArea() ? GetTextRect().GetX() : contentRect_.GetX();
+    float offsetY = IsTextArea() ? GetTextRect().GetY() : contentRect_.GetY();
     std::vector<RectF> previewTextRects = GetPreviewTextRects();
     if (GreatNotEqual(touchOffset.GetY(), previewTextRects.back().Bottom() + offsetY)) {
         limitL = previewTextRects.back().Left() + offsetX + MINIMAL_OFFSET;
         limitR = previewTextRects.back().Right() + offsetX - MINIMAL_OFFSET;
-    } else if (GreatNotEqual(touchOffset.GetY(), previewTextRects.front().Top() + offsetY)) {
+    } else if (LessNotEqual(touchOffset.GetY(), previewTextRects.front().Top() + offsetY)) {
         limitL = previewTextRects.front().Left() + offsetX + MINIMAL_OFFSET;
         limitR = previewTextRects.front().Right() + offsetX - MINIMAL_OFFSET;
     } else {

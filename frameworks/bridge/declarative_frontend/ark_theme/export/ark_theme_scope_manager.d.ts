@@ -13,26 +13,18 @@
  * limitations under the License.
  */
 
-declare type WithThemeOptions = Object
 declare type Theme = Object
-declare type ThemeInternal = Object
 declare type CustomThemeInternal = Object
 declare type ViewPuInternal = Object
-declare type ArkThemeScope = Object
 
 declare class ArkThemeScopeManager {
     static getInstance() : ArkThemeScopeManager;
     setDefaultTheme(customTheme: CustomThemeInternal): void;
-    lastLocalThemeScope(): ArkThemeScope;
     getFinalTheme(elmtId: number): Theme;
-    onComponentCreateEnter(componentName: string, elmtId: number, isFirstRender: boolean, ownerComponentId: number): void;
+    onComponentCreateEnter(componentName: string, elmtId: number, isFirstRender: boolean, ownerComponent: ViewPuInternal): void;
     onComponentCreateExit(elmtId: number): void;
-    onScopeEnter(withThemeId: number, withThemeOptions: WithThemeOptions, theme: ThemeInternal): void;
-    onScopeExit(): void;
     onViewPUCreate(ownerComponent: ViewPuInternal): void;
     onViewPUDelete(ownerComponent: ViewPuInternal): void;
     onIfElseBranchUpdateEnter(): void;
     onIfElseBranchUpdateExit(removedElmtIds: number[]): void;
-    onDeepRenderScopeEnter(themeScope: ArkThemeScope): boolean;
-    onDeepRenderScopeExit(): void;
 }

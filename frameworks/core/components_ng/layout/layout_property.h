@@ -266,7 +266,7 @@ public:
 
     LayoutConstraintF CreateContentConstraint() const;
 
-    PaddingPropertyF CreatePaddingWithoutBorder(bool useRootConstraint = true);
+    PaddingPropertyF CreatePaddingWithoutBorder(bool useRootConstraint = true, bool roundPixel = true);
     PaddingPropertyF CreatePaddingAndBorder();
     PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
         float borderHorizontalDefault, float borderVerticalDefault);

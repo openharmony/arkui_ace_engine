@@ -18,7 +18,7 @@
 
 #include <mutex>
 
-#include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
+#include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
 
 namespace OHOS::Ace {
 class CanvasModel {

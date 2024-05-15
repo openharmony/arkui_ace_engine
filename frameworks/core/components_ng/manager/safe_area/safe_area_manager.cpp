@@ -22,8 +22,27 @@
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
 {
-    // cutout regions currently not adjacent to edges, so ignore it.
-    return false;
+    // cutout regions adjacent to edges.
+    auto cutoutArea = safeArea;
+
+    if (cutoutArea.top_.IsValid()) {
+        cutoutArea.top_.start = 0;
+    }
+    if (safeArea.bottom_.IsValid()) {
+        cutoutArea.bottom_.end = PipelineContext::GetCurrentRootHeight();
+    }
+    if (cutoutArea.left_.IsValid()) {
+        cutoutArea.left_.start = 0;
+    }
+    if (cutoutArea.right_.IsValid()) {
+        cutoutArea.right_.end = PipelineContext::GetCurrentRootWidth();
+    }
+
+    if (cutoutSafeArea_ == cutoutArea) {
+        return false;
+    }
+    cutoutSafeArea_ = cutoutArea;
+    return true;
 }
 
 bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
@@ -76,6 +95,11 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
         res.bottom_ = res.bottom_.Combine(keyboardInset_);
     }
     return res;
+}
+
+bool SafeAreaManager::IsSafeAreaValid() const
+{
+    return !(ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_));
 }
 
 bool SafeAreaManager::SetIsFullScreen(bool value)
@@ -182,12 +206,13 @@ void SafeAreaManager::ExpandSafeArea()
     ACE_LAYOUT_SCOPED_TRACE("ExpandSafeArea node count %zu", needExpandNodes_.size());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
     bool isFocusOnPage = pipeline->CheckPageFocus();
     auto iter = needExpandNodes_.begin();
     while (iter != needExpandNodes_.end()) {
         auto frameNode = (*iter).Upgrade();
         if (frameNode) {
-            frameNode->SaveGeoState();
+            manager->AddGeoRestoreNode(frameNode);
             frameNode->ExpandSafeArea(isFocusOnPage);
         }
         ++iter;

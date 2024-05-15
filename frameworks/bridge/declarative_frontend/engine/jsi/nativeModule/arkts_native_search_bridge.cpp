@@ -33,6 +33,12 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
+constexpr int PARAM_ARR_LENGTH_1 = 1;
+constexpr int PARAM_ARR_LENGTH_2 = 2;
+constexpr uint32_t ILLEGAL_VALUE = 0;
+constexpr uint32_t DEFAULT_MODE = -1;
+const int32_t MINI_VALID_VALUE = 1;
+const int32_t MAX_VALID_VALUE = 100;
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 
@@ -968,6 +974,405 @@ ArkUINativeModuleValue SearchBridge::ResetInputFilter(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     std::string inputFilter;
     NG::SearchModelNG::SetInputFilter(frameNode, inputFilter, nullptr);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetMaxLength(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsNumber() && secondArg->Int32Value(vm) >= 0) {
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchMaxLength(nativeNode, secondArg->Int32Value(vm));
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchMaxLength(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetMaxLength(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchMaxLength(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetType(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsNumber()) {
+        int32_t value = secondArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchType(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchType(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetType(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchType(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetOnEditChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnEditChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(bool)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](bool isInEditStatus) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+            panda::BooleanRef::New(vm, isInEditStatus) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchOnEditChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetOnEditChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnEditChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnSubmitWithEvent(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const std::string&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::string& info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+            panda::StringRef::NewFromUtf8(vm, info.c_str()) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchOnSubmitWithEvent(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetOnSubmit(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnSubmitWithEvent(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnCopy(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const std::string&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::string& copyStr) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+            panda::StringRef::NewFromUtf8(vm, copyStr.c_str()) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchOnCopy(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetOnCopy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnCopy(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetOnCut(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnCut(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const std::string&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::string& cutStr) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+            panda::StringRef::NewFromUtf8(vm, cutStr.c_str()) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchOnCut(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetOnCut(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnCut(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnPaste(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const std::string&, NG::TextCommonEvent&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::string& val, NG::TextCommonEvent& info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        auto eventObject = panda::ObjectRef::New(vm);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
+            panda::FunctionRef::New(vm, Framework::JsPreventDefault));
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
+            panda::StringRef::NewFromUtf8(vm, val.c_str()), eventObject };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+    };
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchOnPaste(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetOnPaste(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnPaste(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const std::string&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::string& info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+            panda::StringRef::NewFromUtf8(vm, info.c_str()) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchOnChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetOnTextSelectionChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnTextSelectionChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(int32_t, int32_t)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](int32_t selectionStart, int selectionEnd) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::NumberRef> startParam = panda::NumberRef::New(vm, selectionStart);
+        panda::Local<panda::NumberRef> endParam = panda::NumberRef::New(vm, selectionEnd);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { startParam, endParam };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+    };
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchOnTextSelectionChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetOnTextSelectionChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnTextSelectionChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetOnContentScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnContentScroll(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(float, float)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](float totalOffsetX, float totalOffsetY) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
+            panda::NumberRef::New(vm, totalOffsetX), panda::NumberRef::New(vm, totalOffsetY) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+    };
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchOnContentScroll(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetOnContentScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchOnContentScroll(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetShowCounter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> showCounterArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> highlightBorderArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> thresholdArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto showCounter = false;
+    if (showCounterArg->IsBoolean()) {
+        showCounter = showCounterArg->BooleaValue();
+    }
+    auto highlightBorder = true;
+    if (highlightBorderArg->IsBoolean()) {
+        highlightBorder = highlightBorderArg->BooleaValue();
+    }
+    auto thresholdValue = DEFAULT_MODE;
+    if (thresholdArg->IsNumber()) {
+        thresholdValue = thresholdArg->Int32Value(vm);
+        if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
+            thresholdValue = ILLEGAL_VALUE;
+            showCounter = false;
+        }
+    }
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchShowCounter(
+        nativeNode, static_cast<int32_t>(showCounter), thresholdValue, static_cast<int32_t>(highlightBorder));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetShowCounter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchShowCounter(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

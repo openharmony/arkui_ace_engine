@@ -318,7 +318,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        FocusPattern focusPattern = { FocusType::NODE, true };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
         focusPattern.SetIsFocusActiveWhenFocused(true);
         return focusPattern;
     }
@@ -807,7 +807,7 @@ public:
     std::string GetShowPasswordIconString() const;
     int32_t GetNakedCharPosition() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd,
-        const std::optional<SelectionOptions>& options = std::nullopt);
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
     void HandleBlurEvent();
     void HandleFocusEvent();
     void SetFocusStyle();
@@ -1195,7 +1195,7 @@ public:
 
     float GetPreviewUnderlineWidth() const
     {
-        return static_cast<float>(previewUnderlineWidth_.Value());
+        return static_cast<float>(previewUnderlineWidth_.ConvertToPx());
     }
 
     void ReceivePreviewTextStyle(const std::string& style) override;
@@ -1363,6 +1363,8 @@ private:
         CHECK_NULL_RETURN(cleanNodeArea, false);
         return cleanNodeArea->IsShow();
     }
+
+    void InitPanEvent();
 
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
@@ -1597,7 +1599,7 @@ private:
 
     bool isFocusBGColorSet_ = false;
     bool isFocusTextColorSet_ = false;
-    Dimension previewUnderlineWidth_ = 2.0_px;
+    Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText = true;
     bool hasPreviewText = false;
     std::queue<PreviewTextInfo> previewTextOperation;

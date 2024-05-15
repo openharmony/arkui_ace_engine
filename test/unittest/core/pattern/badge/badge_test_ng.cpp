@@ -730,6 +730,35 @@ HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BadgePatternTest010
+ * @tc.desc: test SetSizeInit
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgePatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create badge and get frameNode.
+     */
+    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    RefPtr<FrameNode> frameNode = obj.first;
+    BadgeModelNG badge = obj.second;
+
+    /**
+     * @tc.steps: step2. get layoutproperty
+     * @tc.expected: step2. related function is called.
+     */
+    auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(badgeLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. call SetIsDefault with badgeLayoutProperty.
+     */
+    badgeLayoutProperty->SetIsDefault(true, true);
+    EXPECT_EQ(badgeLayoutProperty->GetFontSizeIsDefault(), true);
+    EXPECT_EQ(badgeLayoutProperty->GetBadgeSizeIsDefault(), true);
+}
+
+/**
  * @tc.name: BadgeAccessibilityPropertyTestNg001
  * @tc.desc: Test Text property for BadgeValue of Badge.
  * @tc.type: FUNC
@@ -784,5 +813,116 @@ HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg003, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto badgeAccessibilityProperty = frameNode->GetAccessibilityProperty<BadgeAccessibilityProperty>();
     EXPECT_EQ(badgeAccessibilityProperty->GetText(), "");
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg001
+ * @tc.desc: Test badge layout in the upper right corner.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg001, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badge.Create(badgeParameters);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
+    ASSERT_NE(badgePattern, nullptr);
+    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
+    RefPtr<BadgeLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    RefPtr<BadgeLayoutProperty> layoutProperty = AceType::MakeRefPtr<BadgeLayoutProperty>();
+    layoutProperty->UpdateBadgePosition(BadgePosition::RIGHT_TOP);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    layoutProperty->UpdateIsPositionXy(false);
+    layoutAlgorithm->hasFontSize_ = true;
+    badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg002
+ * @tc.desc: Test the layout on the right side of the badge.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg002, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badge.Create(badgeParameters);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
+    ASSERT_NE(badgePattern, nullptr);
+    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
+    RefPtr<BadgeLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    RefPtr<BadgeLayoutProperty> layoutProperty = AceType::MakeRefPtr<BadgeLayoutProperty>();
+    layoutProperty->UpdateBadgePosition(BadgePosition::RIGHT);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    layoutProperty->UpdateIsPositionXy(false);
+    layoutAlgorithm->hasFontSize_ = true;
+    badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
+}
+
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg003
+ * @tc.desc: Test the layout on the left side of the badge.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg003, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badge.Create(badgeParameters);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
+    ASSERT_NE(badgePattern, nullptr);
+    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
+    RefPtr<BadgeLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    RefPtr<BadgeLayoutProperty> layoutProperty = AceType::MakeRefPtr<BadgeLayoutProperty>();
+    layoutProperty->UpdateBadgePosition(BadgePosition::LEFT);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    layoutProperty->UpdateIsPositionXy(false);
+    layoutAlgorithm->hasFontSize_ = true;
+    badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
 }
 } // namespace OHOS::Ace::NG

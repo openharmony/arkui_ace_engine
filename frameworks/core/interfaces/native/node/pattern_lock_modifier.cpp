@@ -155,6 +155,51 @@ void ResetPatternLockPathColor(ArkUINodeHandle node)
     PatternLockModelNG::SetPathColor(frameNode, pathColor);
 }
 
+void SetPatternLockActiveCircleColor(ArkUINodeHandle node, uint32_t value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetActiveCircleColor(frameNode, Color(value));
+}
+
+void ResetPatternLockActiveCircleColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetActiveCircleColor(frameNode, Color::TRANSPARENT);
+}
+
+void SetPatternLockActiveCircleRadius(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetActiveCircleRadius(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+}
+
+void ResetPatternLockActiveCircleRadius(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto patternLockTheme = GetTheme<V2::PatternLockTheme>();
+    CHECK_NULL_VOID(patternLockTheme);
+    CalcDimension radius = patternLockTheme->GetCircleRadius();
+    PatternLockModelNG::SetActiveCircleRadius(frameNode, Dimension(0.0f, DimensionUnit::VP));
+}
+
+void SetPatternLockEnableWaveEffect(ArkUINodeHandle node, uint32_t value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetEnableWaveEffect(frameNode, static_cast<bool>(value));
+}
+
+void ResetPatternLockEnableWaveEffect(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetEnableWaveEffect(frameNode, true);
+}
+
 namespace NodeModifier {
 const ArkUIPatternLockModifier* GetPatternLockModifier()
 {
@@ -164,7 +209,9 @@ const ArkUIPatternLockModifier* GetPatternLockModifier()
         SetPatternLockSideLength, ResetPatternLockSideLength, SetPatternLockAutoReset,
         ResetPatternLockAutoReset, SetPatternLockPathStrokeWidth, ResetPatternLockPathStrokeWidth,
         SetPatternLockRegularColor, ResetPatternLockRegularColor, SetPatternLockPathColor,
-        ResetPatternLockPathColor
+        ResetPatternLockPathColor, SetPatternLockActiveCircleColor, ResetPatternLockActiveCircleColor,
+        SetPatternLockActiveCircleRadius, ResetPatternLockActiveCircleRadius, SetPatternLockEnableWaveEffect,
+        ResetPatternLockEnableWaveEffect
     };
     return &modifier;
 }

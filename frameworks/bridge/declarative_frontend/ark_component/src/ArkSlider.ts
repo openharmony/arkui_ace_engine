@@ -84,6 +84,14 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     modifierWithKey(this._modifiersWithKeys, StepSizeModifier.identity, StepSizeModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<SliderConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
+  slideRange(value: ValidSlideRange): this {
+    modifierWithKey(this._modifiersWithKeys, ValidSlideRangeModifier.identity, ValidSlideRangeModifier, value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<SliderConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, false);
@@ -346,6 +354,24 @@ class TrackThicknessModifier extends ModifierWithKey<Length> {
       getUINativeModule().slider.resetThickness(node);
     } else {
       getUINativeModule().slider.setThickness(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ValidSlideRangeModifier extends ModifierWithKey<ValidSlideRange> {
+  constructor(value: ValidSlideRange) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('slideRange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.resetValidSlideRange(node);
+    } else {
+      getUINativeModule().slider.setValidSlideRange(node, this.value);
     }
   }
 

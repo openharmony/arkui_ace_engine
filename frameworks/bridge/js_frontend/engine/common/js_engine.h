@@ -285,6 +285,12 @@ public:
 
     virtual void SetContext(int32_t instanceId, NativeReference* context) {}
 
+    virtual void SetPkgNameList(const std::map<std::string, std::string>& map) {}
+
+    virtual void SetPkgAliasList(const std::map<std::string, std::string>& map) {}
+
+    virtual void SetpkgContextInfoList(const std::map<std::string, std::vector<std::vector<std::string>>>& map) {}
+
     bool IsDebugVersion() const
     {
         return isDebugVersion_;
@@ -379,6 +385,22 @@ public:
                 drawEvents_.erase(componentId);
             }
         }
+    }
+
+    bool IsLayoutCallBackFuncExist(const std::string& componentId) const
+    {
+        if (layoutEvents_.find(componentId) != layoutEvents_.end()) {
+            return true;
+        }
+        return false;
+    }
+
+    bool IsDrawCallBackFuncExist(const std::string& componentId) const
+    {
+        if (drawEvents_.find(componentId) != drawEvents_.end()) {
+            return true;
+        }
+        return false;
     }
 
     virtual void RunNativeEngineLoop();

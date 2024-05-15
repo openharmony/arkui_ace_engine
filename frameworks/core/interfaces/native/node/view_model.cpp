@@ -482,8 +482,12 @@ ArkUI_CharPtr GetName(void* nativePtr)
 void DisposeNode(void* nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
-    auto* frameNode = reinterpret_cast<UINode*>(nativePtr);
-    frameNode->DecRefCount();
+    auto* uiNode = reinterpret_cast<UINode*>(nativePtr);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    if (frameNode) {
+        frameNode->SetExtensionHandler(nullptr);
+    }
+    uiNode->DecRefCount();
 }
 
 void AddChild(void* parentNode, void* childNode)
@@ -505,7 +509,8 @@ void RemoveChild(void* parentNode, void* childNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-    parent->RemoveChild(AceType::Claim(child));
+    child->MarkRemoving();
+    parent->RemoveChild(AceType::Claim(child), true);
 }
 
 void InsertChildAt(void* parentNode, void* childNode, int32_t position)

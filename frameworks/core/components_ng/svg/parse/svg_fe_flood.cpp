@@ -18,8 +18,8 @@
 #include "2d_graphics/include/effect/shader_effect.h"
 
 #include "base/utils/utils.h"
-#include "core/components/declaration/svg/svg_fe_flood_declaration.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -54,11 +54,11 @@ void SvgFeFlood::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
 bool SvgFeFlood::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgFeFloodAttribute&)> attrs[] = {
-        { DOM_SVG_FE_FLOOD_COLOR,
+        { SVG_FE_FLOOD_COLOR,
             [](const std::string& val, SvgFeFloodAttribute& attr) {
                 attr.floodColor = SvgAttributesParser::GetColor(val);
             } },
-        { DOM_SVG_FE_FLOOD_OPACITY,
+        { SVG_FE_FLOOD_OPACITY,
             [](const std::string& val, SvgFeFloodAttribute& attr) {
                 attr.floodOpacity = SvgAttributesParser::ParseDouble(val);
             } },

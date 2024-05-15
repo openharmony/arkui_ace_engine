@@ -257,6 +257,9 @@ float TitleBarLayoutAlgorithm::WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>
     CHECK_NULL_RETURN(titleBarGeo, afterAvoidWidth);
 
     auto avoidArea = titlebarRect.GetX() + titleBarGeo->GetFrameSize().Width() - appBarOffset.GetX();
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        avoidArea = appBarOffset.GetX() + appBarSize.Width();
+    }
     auto buttonTop = appBarOffset.GetY() + appBarSize.Height();
     if (LessOrEqual(titlebarRect.GetY(), buttonTop) && GreatOrEqual(avoidArea, 0.0)) {
         afterAvoidWidth = afterAvoidWidth - avoidArea;

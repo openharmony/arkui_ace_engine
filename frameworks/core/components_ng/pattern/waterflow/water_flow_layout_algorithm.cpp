@@ -99,6 +99,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CreateIdealSize(layoutProperty->GetLayoutConstraint().value(), axis, layoutProperty->GetMeasureType(), true);
     if (NearZero(GetCrossAxisSize(idealSize, axis))) {
         TAG_LOGI(AceLogTag::ACE_WATERFLOW, "cross size is 0, skip measure");
+        skipMeasure_ = true;
         return;
     }
     auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(idealSize, axis));
@@ -164,8 +165,12 @@ void WaterFlowLayoutAlgorithm::MeasureForAnimation(LayoutWrapper* layoutWrapper)
             layoutInfo_.targetIndex_.reset();
             break;
         }
+        auto itemCrossPosition = itemsCrossPosition_.find(position.crossIndex);
+        if (itemCrossPosition == itemsCrossPosition_.end()) {
+            break;
+        }
         itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-            { itemsCrossSize_.at(position.crossIndex), mainSize_, axis_ }, layoutProperty, itemWrapper));
+            { itemCrossPosition->second, mainSize_, axis_ }, layoutProperty, itemWrapper));
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         auto itemHeight = GetMainAxisSize(itemSize, axis_);
         auto item = layoutInfo_.items_[0][position.crossIndex].find(currentIndex);
@@ -189,6 +194,10 @@ void WaterFlowLayoutAlgorithm::MeasureForAnimation(LayoutWrapper* layoutWrapper)
 
 void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    if (skipMeasure_) {
+        skipMeasure_ = false;
+        return;
+    }
     layoutWrapper->RemoveAllChildInRenderTree();
 
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -206,9 +215,12 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (item.first < layoutInfo_.startIndex_ || item.first > layoutInfo_.endIndex_) {
                 continue;
             }
-
+            auto itemCrossPosition = itemsCrossPosition_.find(mainPositions.first);
+            if (itemCrossPosition == itemsCrossPosition_.end()) {
+                return;
+            }
             auto currentOffset = childFrameOffset;
-            auto crossOffset = itemsCrossPosition_.at(mainPositions.first);
+            auto crossOffset = itemCrossPosition->second;
             auto mainOffset = item.second.first + layoutInfo_.currentOffset_;
             if (isRtl) {
                 crossOffset = crossSize - crossOffset - itemsCrossSize_.at(mainPositions.first);
@@ -291,9 +303,12 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
         if (!itemWrapper) {
             break;
         }
-
+        auto itemCrossSize = itemsCrossSize_.find(position.crossIndex);
+        if (itemCrossSize == itemsCrossSize_.end()) {
+            break;
+        }
         itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-            { itemsCrossSize_.at(position.crossIndex), mainSize_, axis_ }, layoutProperty, itemWrapper));
+            { itemCrossSize->second, mainSize_, axis_ }, layoutProperty, itemWrapper));
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         auto itemHeight = GetMainAxisSize(itemSize, axis_);
         auto item = layoutInfo_.items_[0][position.crossIndex].find(currentIndex);
@@ -359,6 +374,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         // lazyforeach
         for (auto i = oldStart; i >= layoutInfo_.startIndex_; i--) {
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(i));
+            CHECK_NULL_VOID(itemWrapper);
             auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
             float crossSize = itemsCrossSize_.at(layoutInfo_.GetCrossIndex(i));
             itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(

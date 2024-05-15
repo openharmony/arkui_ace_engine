@@ -77,6 +77,7 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
     selectOverlayContentModifier_->SetInnerHandleColor(textOverlayTheme->GetHandleColorInner());
     selectOverlayContentModifier_->SetHandleRadius(textOverlayTheme->GetHandleDiameter().ConvertToPx() / 2.0f);
+    selectOverlayContentModifier_->SetHandleStrokeWidth(textOverlayTheme->GetHandleDiameterStrokeWidth().ConvertToPx());
     selectOverlayContentModifier_->SetInnerHandleRadius(
         textOverlayTheme->GetHandleDiameterInner().ConvertToPx() / 2.0f);
 

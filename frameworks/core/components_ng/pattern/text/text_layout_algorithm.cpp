@@ -450,7 +450,13 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    auto && paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    auto contentParagraph = pattern->GetTextContentParagraph();
+    RefPtr<Paragraph> paragraph;
+    if (contentParagraph) {
+        paragraph = Paragraph::Create(contentParagraph.value());
+    } else {
+        paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    }
     CHECK_NULL_RETURN(paragraph, false);
     paragraph->PushStyle(textStyle);
     if (pattern->NeedShowAIDetect()) {

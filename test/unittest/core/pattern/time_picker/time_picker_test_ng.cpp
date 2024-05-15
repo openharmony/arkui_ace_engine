@@ -44,6 +44,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -136,7 +137,7 @@ constexpr int32_t CHILD_WITH_AMPM_SIZE = 3;
 const double YOFFSET_START1 = 0.0;
 const double YOFFSET_END1 = 1000.0;
 const double TIME_PLUS = 1 * 100.0;
-const SizeF TEST_FRAME_SIZE { 20, 50 };
+const SizeF TEST_FRAME_SIZE { 20, 30 };
 constexpr double COLUMN_VELOCITY = 2000.0;
 const double FONT_SIZE_5 = 5.0;
 const double FONT_SIZE_10 = 10.0;
@@ -1663,7 +1664,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern006, TestSize.Level1)
     ASSERT_NE(timePickerRowPattern, nullptr);
 
     timePickerRowPattern->SetHour24(false);
-    frameNode->GetChildren().front()->children_.clear();
+    frameNode->RemoveChildAtIndex(0);
     timePickerRowPattern->HandleHourColumnBuilding();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     EXPECT_EQ(allChildNode["amPm"].Upgrade(), nullptr);
@@ -2865,5 +2866,50 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus00
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow004
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow004, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 3, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE1));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 } // namespace OHOS::Ace::NG

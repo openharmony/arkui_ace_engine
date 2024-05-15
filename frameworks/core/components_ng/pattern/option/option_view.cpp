@@ -132,15 +132,17 @@ RefPtr<FrameNode> OptionView::CreateSymbol(
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    if (symbolApply != nullptr) {
-        symbolApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
-    }
     props->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
+    props->UpdateFontSize(theme->GetEndIconWidth());
+    props->UpdateSymbolColorList({theme->GetMenuIconColor()});
     props->UpdateAlignment(Alignment::CENTER_LEFT);
     MarginProperty margin;
     margin.right = CalcLength(theme->GetIconContentPadding());
     props->UpdateMargin(margin);
+    if (symbolApply != nullptr) {
+        symbolApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
+    }
     iconNode->MountToParent(parent, 0);
     iconNode->MarkModifyDone();
     return iconNode;

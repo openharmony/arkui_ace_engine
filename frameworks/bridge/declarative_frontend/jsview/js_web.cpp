@@ -1834,6 +1834,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onRenderProcessNotResponding", &JSWeb::OnRenderProcessNotResponding);
     JSClass<JSWeb>::StaticMethod("onRenderProcessResponding", &JSWeb::OnRenderProcessResponding);
     JSClass<JSWeb>::StaticMethod("selectionMenuOptions", &JSWeb::SelectionMenuOptions);
+    JSClass<JSWeb>::StaticMethod("onViewportFitChanged", &JSWeb::OnViewportFitChanged);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2203,7 +2204,30 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     auto result = func->Call(webviewController, 1, argv);
             };
         }
-        
+        auto fileSelectorShowFromUserFunction = controller->GetProperty("fileSelectorShowFromUserWeb");
+        std::function<void(const std::shared_ptr<BaseEventInfo>&)> fileSelectorShowFromUserCallback = nullptr;
+        if (fileSelectorShowFromUserFunction->IsFunction()) {
+            fileSelectorShowFromUserCallback = [webviewController = controller,
+                func = JSRef<JSFunc>::Cast(fileSelectorShowFromUserFunction)]
+                (const std::shared_ptr<BaseEventInfo>& info) {
+                    auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info.get());
+                    JSRef<JSObject> obj = JSRef<JSObject>::New();
+                    JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
+                    auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
+                    fileSelectorParam->SetParam(*eventInfo);
+                    obj->SetPropertyObject("fileparam", paramObj);
+
+                    JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
+                    auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
+
+                    fileSelectorResult->SetResult(*eventInfo);
+
+                    obj->SetPropertyObject("fileresult", resultObj);
+                    JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
+                    auto result = func->Call(webviewController, 1, argv);
+                };
+        }
+
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
         WebModel::GetInstance()->Create(
@@ -2213,6 +2237,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
+        WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
         if (!cmdLine.empty()) {
@@ -4728,4 +4753,34 @@ void JSWeb::SelectionMenuOptions(const JSCallbackInfo& args)
     }
     WebModel::GetInstance()->SetSelectionMenuOptions(std::move(optionParam));
 }
+
+JSRef<JSVal> ViewportFitChangedToJSValue(const ViewportFitChangedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("viewportFit", eventInfo.GetViewportFit());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnViewportFitChanged(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ViewportFitChangedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ViewportFitChangedToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<ViewportFitChangedEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetViewportFitChangedId(jsCallback);
+}
+
 } // namespace OHOS::Ace::Framework

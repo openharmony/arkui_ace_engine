@@ -25,7 +25,7 @@ public:
     void Create(const MenuItemProperties& props) override;
     void SetSelected(bool isSelected = false) override;
     void SetSelectIcon(bool isShow = false) override;
-    void SetSelectIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& menuSymbol) override;
+    void SetSelectIconSymbol(std::function<void(WeakPtr<NG::FrameNode>)> &&symbolApply) override;
     void SetSelectIconSrc(const std::string& src) override;
     void SetOnChange(std::function<void(bool)>&& onChange) override;
     void SetFontSize(const Dimension& fontSize) override;

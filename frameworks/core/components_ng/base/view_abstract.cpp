@@ -1002,6 +1002,13 @@ void ViewAbstract::SetFocusOnTouch(bool isSet)
     focusHub->SetIsFocusOnTouch(isSet);
 }
 
+void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->GetFocusBox().SetStyle(style);
+}
+
 void ViewAbstract::SetDefaultFocus(bool isSet)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
@@ -4319,5 +4326,13 @@ NG::RectF ViewAbstract::GetLayoutRect(FrameNode* frameNode)
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, NG::RectF());
     return layoutProperty->GetLayoutRect().value_or(NG::RectF());
+}
+
+bool ViewAbstract::GetFocusOnTouch(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsFocusOnTouch().value_or(false);
 }
 } // namespace OHOS::Ace::NG

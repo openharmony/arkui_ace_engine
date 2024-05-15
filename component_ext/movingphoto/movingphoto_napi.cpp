@@ -159,6 +159,24 @@ napi_value JsOnStop(napi_env env, napi_callback_info info)
     return ExtNapiUtils::CreateNull(env);
 }
 
+napi_value JsOnPause(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value thisVal = nullptr;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
+    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+    if (!ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_function)) {
+        return ExtNapiUtils::CreateNull(env);
+    }
+    auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, argv[0]);
+    auto onPause = [asyncEvent]() {
+        asyncEvent->Call(0, nullptr);
+    };
+    NG::MovingPhotoModelNG::GetInstance()->SetOnPause(std::move(onPause));
+    return ExtNapiUtils::CreateNull(env);
+}
+
 napi_value JsOnFinish(napi_env env, napi_callback_info info)
 {
     size_t argc = MAX_ARG_NUM;
@@ -203,6 +221,7 @@ napi_value InitView(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("objectFit", JsObjectFit),
         DECLARE_NAPI_FUNCTION("onStart", JsOnStart),
         DECLARE_NAPI_FUNCTION("onStop", JsOnStop),
+        DECLARE_NAPI_FUNCTION("onPause", JsOnPause),
         DECLARE_NAPI_FUNCTION("onFinish", JsOnFinish),
         DECLARE_NAPI_FUNCTION("onError", JsOnError),
     };

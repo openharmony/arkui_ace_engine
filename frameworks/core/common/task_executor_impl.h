@@ -62,9 +62,10 @@ private:
     TaskExecutor::Task WrapTaskWithCustomWrapper(
         TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc = nullptr) const;
     bool PostTaskToTaskRunner(const RefPtr<TaskRunnerAdapter>& taskRunner, TaskExecutor::Task&& task,
-        uint32_t delayTime, const std::string& name) const;
+        uint32_t delayTime, const std::string& name, PriorityType priorityType = PriorityType::LOW) const;
     void SetThreadPriority(int32_t priority) const;
-    bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name) const final;
+    bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const final;
     Task WrapTaskWithTraceId(Task&& task, int32_t id) const final;
 
 #ifdef ACE_DEBUG

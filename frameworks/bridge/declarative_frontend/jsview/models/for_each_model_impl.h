@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class ACE_EXPORT ForEachModelImpl : public ForEachModel{
+class ACE_EXPORT ForEachModelImpl : public ForEachModel {
 public:
     virtual ~ForEachModelImpl() override = default;
 
@@ -39,6 +39,6 @@ public:
     void CreateNewChildFinish(const std::string& id) override;
     void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override {};
 };
-} 
+}  // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_FOREACH_MODEL_IMPL_H

@@ -153,7 +153,7 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto contentRect = textPattern->GetTextContentRect();
-    auto contentOffset = textPattern->GetTextPaintOffset() + contentRect.GetOffset();
+    auto contentOffset = GetPaintOffsetWithoutTransform() + contentRect.GetOffset();
     auto handleOffset = handleRect.GetOffset();
     if (!selectTextUseTopHandle) {
         bool isUseHandleTop = (isFirst != IsHandleReverse());
@@ -311,7 +311,7 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
     }
 }
 
-void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
+void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     if (reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER || reason == CloseReason::CLOSE_REASON_TOOL_BAR) {
         auto textPattern = GetPattern<TextPattern>();

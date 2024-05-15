@@ -474,6 +474,24 @@ bool JsiCallbackInfo::GetStringArg(size_t index, std::string& value) const
     return true;
 }
 
+bool JsiCallbackInfo::GetDoubleArrayArg(size_t index, std::vector<double>& valueArr) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsArray(info_->GetVM())) {
+        return false;
+    }
+    auto arrayRef = Local<ArrayRef>(arg);
+    int32_t length = arrayRef->Length(info_->GetVM());
+    valueArr.reserve(length);
+    for (int32_t i = 0; i < length; ++i) {
+        auto jsDouble = panda::ArrayRef::GetValueAt(info_->GetVM(), arrayRef, i);
+        if (!jsDouble.IsEmpty() && jsDouble->IsNumber()) {
+            valueArr.emplace_back(jsDouble->ToNumber(info_->GetVM())->Value());
+        }
+    }
+    return true;
+}
+
 // -----------------------
 // Implementation of JsiString
 // -----------------------

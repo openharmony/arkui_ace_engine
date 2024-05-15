@@ -40,7 +40,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   constructor(subscribeMe?: IPropertySubscriber, info?: PropertyInfo) {
     super();
     this.subscribers_ = new Set<number>();
-    this.id_ = SubscriberManager.MakeId();
+    this.id_ = SubscriberManager.MakeStateVariableId();
     SubscriberManager.Add(this);
     if (subscribeMe) {
       this.subscribers_.add(subscribeMe.id__());

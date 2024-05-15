@@ -2101,7 +2101,6 @@ size_t RenderList::GetNearChildByPosition(double mainOffset) const
 
     for (auto& child : items_) {
         auto childMainOffset = GetMainAxis(child->GetPosition());
-
         if (childMainOffset > mainOffset) {
             return prevIndex;
         }
@@ -2511,7 +2510,6 @@ void RenderList::CreateDragDropRecognizer()
 
             auto targetRenderlist = renderList->FindTargetRenderNode<V2::RenderList>(pipelineContext, info);
             auto preTargetRenderlist = renderList->GetPreTargetRenderList();
-
             if (preTargetRenderlist == targetRenderlist) {
                 if (targetRenderlist && targetRenderlist->GetOnItemDragMove()) {
                     Point point = info.GetGlobalPoint() - targetRenderlist->GetGlobalOffset();
@@ -2570,7 +2568,6 @@ void RenderList::CreateDragDropRecognizer()
         ACE_DCHECK(renderList->GetPreTargetRenderList() ==
                    renderList->FindTargetRenderNode<V2::RenderList>(pipelineContext, info));
         auto targetRenderlist = renderList->GetPreTargetRenderList();
-
         if (!targetRenderlist) {
             (renderList->GetOnItemDrop())(dragInfo, static_cast<int32_t>(renderList->selectedItemIndex_), -1, true);
             renderList->SetPreTargetRenderList(nullptr);

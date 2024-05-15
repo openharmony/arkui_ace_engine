@@ -20,7 +20,6 @@
 #include "include/effects/SkGradientShader.h"
 
 #include "base/utils/utils.h"
-#include "core/components/declaration/svg/svg_declaration.h"
 
 namespace OHOS::Ace::NG {
 void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
@@ -61,7 +60,7 @@ void SvgGraphic::UpdateGradient(const Size& viewPort)
         auto gradientInfo = LinearGradientInfo();
         gradientInfo.x1 = linearGradient.x1 ? ConvertDimensionToPx(linearGradient.x1.value(), width) : 0.0;
         gradientInfo.y1 = linearGradient.y1 ? ConvertDimensionToPx(linearGradient.y1.value(), height) : 0.0;
-        gradientInfo.x2 = linearGradient.y1
+        gradientInfo.x2 = linearGradient.x2
                               ? ConvertDimensionToPx((linearGradient.x2 ? linearGradient.x2.value() : 1.0_pct), width)
                               : 0.0;
         gradientInfo.y2 = linearGradient.y2 ? ConvertDimensionToPx(linearGradient.y2.value(), height) : 0.0;

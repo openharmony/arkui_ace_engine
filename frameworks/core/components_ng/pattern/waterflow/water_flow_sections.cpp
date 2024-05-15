@@ -19,11 +19,11 @@ namespace OHOS::Ace::NG {
 void WaterFlowSections::ChangeData(
     int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
 {
-    if (static_cast<size_t>(start) + 1 == sections_.size() && deleteCount == 1 && newSections.size() == 1) {
+    if (deleteCount == 1 && newSections.size() == 1) {
         // prepare for checking special case
-        prevSections_ = sections_;
+        prevSection_ = {sections_[start], start};
     } else {
-        prevSections_.clear();
+        prevSection_ = std::nullopt;
     }
 
     TAG_LOGI(AceLogTag::ACE_WATERFLOW,
@@ -47,19 +47,15 @@ void WaterFlowSections::ChangeData(
 
 bool WaterFlowSections::IsSpecialUpdate() const
 {
-    if (sections_.empty()) {
+    if (sections_.empty() || !prevSection_) {
         return false;
     }
-    if (prevSections_.size() != sections_.size()) {
+    const int32_t start = prevSection_->second;
+    if (start >= static_cast<int32_t>(sections_.size())) {
         return false;
     }
-    for (size_t i = 0; i < sections_.size() - 1; ++i) {
-        if (sections_[i] != prevSections_[i]) {
-            return false;
-        }
-    }
-    const auto& cur = sections_.back();
-    const auto& prev = prevSections_.back();
+    const auto& cur = sections_[start];
+    const auto& prev = prevSection_->first;
     return cur.itemsCount != prev.itemsCount && cur.crossCount == prev.crossCount &&
            cur.columnsGap == prev.columnsGap && cur.rowsGap == prev.rowsGap && cur.margin == prev.margin;
 }
