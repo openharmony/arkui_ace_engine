@@ -397,8 +397,10 @@ abstract class ViewPU extends PUV2ViewBase
       this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
         const child = weakRefChild.deref();
         if (child) {
-          if (child instanceof ViewPU && !child.hasBeenRecycled_) {
-            child.forceCompleteRerender(true);
+          if (child instanceof ViewPU) {
+            if (!child.hasBeenRecycled_) {
+              child.forceCompleteRerender(true);
+            }
           } else {
             throw new Error('forceCompleteRerender not implemented for ViewV2, yet');
           }
@@ -840,8 +842,10 @@ abstract class ViewPU extends PUV2ViewBase
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
-        if (child instanceof ViewPU && !child.hasBeenRecycled_) {
-          child.aboutToReuseInternal();
+        if (child instanceof ViewPU) {
+          if (!child.hasBeenRecycled_) {
+            child.aboutToReuseInternal();
+          }
         } else {
           // FIXME fix for mixed V2 - V3 Hierarchies
           throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
@@ -859,8 +863,10 @@ abstract class ViewPU extends PUV2ViewBase
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
-        if (child instanceof ViewPU && !child.hasBeenRecycled_) {
-          child.aboutToRecycleInternal();
+        if (child instanceof ViewPU) {
+          if (!child.hasBeenRecycled_) {
+            child.aboutToRecycleInternal();
+          }
         } else {
           // FIXME fix for mixed V2 - V3 Hierarchies
           throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
