@@ -111,6 +111,11 @@ const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] =
     { OHOS::NWeb::CursorType::CT_MIDDLE_PANNING_HORIZONTAL, MouseFormat::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST },
 };
 
+constexpr Dimension OPTION_MARGIN = 8.0_vp;
+constexpr Dimension CALIBERATE_X = 4.0_vp;
+constexpr Color SELECTED_OPTION_FONT_COLOR = Color(0xff0a59f7);
+constexpr Color SELECTED_OPTION_BACKGROUND_COLOR = Color(0x19254FF7);
+
 bool ParseDateTimeJson(const std::string& timeJson, NWeb::DateTime& result)
 {
     auto sourceJson = JsonUtil::ParseJsonString(timeJson);
@@ -2969,6 +2974,13 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
     CHECK_NULL_VOID(callback);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
     auto id = host->GetId();
     std::vector<SelectParam> selectParam;
     for (auto& item : params->GetMenuItems()) {
@@ -2977,27 +2989,22 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
         });
     }
     auto menu = MenuView::Create(selectParam, id, host->GetTag());
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(menu);
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
     auto destructor = [weak = WeakClaim(this), id]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto pipeline = NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
+        auto manager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
         pattern->SetSelectPopupMenuShowing(false);
-        overlayManager->DeleteMenu(id);
+        manager->DeleteMenu(id);
     };
-    CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(destructor);
 
-    WebPattern::RegisterSelectPopupCallback(menu, callback, params);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
+    WebPattern::InitSelectPopupMenuView(menu, callback, params, context->GetDipScale());
     menuWrapperPattern->RegisterMenuDisappearCallback([weak = WeakClaim(this), callback]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -3005,6 +3012,7 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
         pattern->SetSelectPopupMenuShowing(false);
     });
     auto offset = GetSelectPopupPostion(params->GetSelectMenuBound());
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnSelectPopupMenu offset:(%{public}f, %{public}f)", offset.GetX(), offset.GetY());
     selectPopupMenuShowing_ = true;
     overlayManager->ShowMenu(id, offset, menu);
 }
@@ -3196,34 +3204,83 @@ bool WebPattern::ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDa
 
 void WebPattern::OnDateTimeChooserClose() {}
 
-void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
-    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
-    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params)
+void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNode>>& options,
+    const std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback>& callback,
+    const std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam>& params,
+    const double& dipScale)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
-    CHECK_NULL_VOID(menuContainer);
-    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
-    for (auto && option : options) {
+    int32_t optionIndex = -1;
+    int32_t width = params->GetSelectMenuBound() ? params->GetSelectMenuBound()->GetWidth() : 0;
+    auto items = params->GetMenuItems();
+    int32_t selectedIndex = params->GetSelectedItem();
+    TAG_LOGD(AceLogTag::ACE_WEB, "InitSelectPopupMenuViewOption selectedIndex:%{public}d", selectedIndex);
+
+    for (auto &&option : options) {
+        optionIndex++;
+        CHECK_NULL_VOID(option);
+        auto optionPattern = option->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        auto optionPaintProperty = option->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(optionPaintProperty);
+        if (width > OPTION_MARGIN.ConvertToPx()) {
+            optionPattern->SetHasOptionWidth(true);
+            optionPattern->SetIsWidthModifiedBySelect(true);
+            optionPaintProperty->UpdateSelectModifiedWidth(width - OPTION_MARGIN.ConvertToPx());
+        }
+        optionPattern->SetFontSize(Dimension(params->GetItemFontSize() * dipScale));
+        if (selectedIndex == optionIndex) {
+            optionPattern->SetFontColor(SELECTED_OPTION_FONT_COLOR);
+            optionPattern->SetBgColor(SELECTED_OPTION_BACKGROUND_COLOR);
+            optionPattern->UpdateNextNodeDivider(false);
+            optionPaintProperty->UpdateNeedDivider(false);
+        }
+        auto hub = option->GetEventHub<OptionEventHub>();
+        CHECK_NULL_VOID(hub);
+        if (optionIndex >= 0 && optionIndex < items.size()) {
+            hub->SetEnabled(items[optionIndex]->GetIsEnabled());
+            auto focusHub = option->GetFocusHub();
+            if (focusHub) {
+                hub->SetEnabled(items[optionIndex]->GetIsEnabled());
+            }
+        }
         auto selectCallback = [callback](int32_t index) {
             std::vector<int32_t> indices { static_cast<int32_t>(index) };
             callback->Continue(indices);
         };
-        auto optionNode = AceType::DynamicCast<FrameNode>(option);
-        if (optionNode) {
-            auto hub = optionNode->GetEventHub<OptionEventHub>();
-            auto optionPattern = optionNode->GetPattern<OptionPattern>();
-            if (!hub || !optionPattern) {
-                continue;
-            }
-            hub->SetOnSelect(std::move(selectCallback));
-            optionPattern->SetFontSize(Dimension(params->GetItemFontSize() * pipeline->GetDipScale()));
-            optionNode->MarkModifyDone();
-        }
+        hub->SetOnSelect(std::move(selectCallback));
+        option->MarkModifyDone();
     }
+}
+
+void WebPattern::InitSelectPopupMenuView(RefPtr<FrameNode>& menuWrapper,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+    const double& dipScale)
+{
+    auto menu = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+
+    int32_t width = params->GetSelectMenuBound() ? params->GetSelectMenuBound()->GetWidth() : 0;
+    if (width > OPTION_MARGIN.ConvertToPx()) {
+        auto menuLayoutProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuLayoutProperty);
+        menuPattern->SetHasOptionWidth(true);
+        menuPattern->SetIsWidthModifiedBySelect(true);
+        menuLayoutProperty->UpdateSelectMenuModifiedWidth(width);
+
+        auto scroll = AceType::DynamicCast<FrameNode>(menu->GetFirstChild());
+        CHECK_NULL_VOID(scroll);
+        auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+        CHECK_NULL_VOID(scrollPattern);
+        scrollPattern->SetIsWidthModifiedBySelect(true);
+        auto scrollLayoutProps = scroll->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_VOID(scrollLayoutProps);
+        scrollLayoutProps->UpdateScrollWidth(width);
+    }
+
+    InitSelectPopupMenuViewOption(menuPattern->GetOptions(), callback, params, dipScale);
 }
 
 OffsetF WebPattern::GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound)
@@ -3232,6 +3289,9 @@ OffsetF WebPattern::GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelect
     if (bound) {
         offset.AddX(bound->GetX());
         offset.AddY(bound->GetY() + bound->GetHeight());
+    }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        offset.AddX(-CALIBERATE_X.ConvertToPx());
     }
     return offset;
 }
