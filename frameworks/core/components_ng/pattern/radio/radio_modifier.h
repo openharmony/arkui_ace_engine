@@ -81,6 +81,7 @@ public:
     void PaintOutRingCircle(
         RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset, RSPen outPen) const;
     void PaintIndicator(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
+    void PaintUnselectedRadio(RSCanvas& canvas, float outCircleRadius, float centerX, float centerY) const;
     void PaintUnselectedIndicator(RSCanvas& canvas, float outCircleRadius, float centerX, float centerY) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;
 
