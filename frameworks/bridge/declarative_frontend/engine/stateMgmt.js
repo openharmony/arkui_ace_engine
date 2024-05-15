@@ -5425,9 +5425,9 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 copy = new Map();
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
-                obj.forEach((mapKey) => {
+                obj.forEach((mapValue, mapKey) => {
                     stack.push({ name: mapKey });
-                    copy.set(mapKey, getDeepCopyOfObjectRecursive(obj.get(mapKey)));
+                    copy.set(mapKey, getDeepCopyOfObjectRecursive(mapValue));
                     stack.pop();
                 });
             }
