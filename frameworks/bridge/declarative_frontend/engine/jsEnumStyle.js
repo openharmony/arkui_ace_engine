@@ -100,8 +100,8 @@ var WordBreak;
 
 var DpiFollowStrategy;
 (function (DpiFollowStrategy) {
-  DpiFollowStrategy[DpiFollowStrategy ["FOLLOW_HOST_DPI"] = 0] = "follow-host-dpi";
-  DpiFollowStrategy[DpiFollowStrategy ["FOLLOW_UI_EXTENSION_ABILITY_DPI"] = 1] = "follow-ui-extension-ability-dpi";
+  DpiFollowStrategy[DpiFollowStrategy["FOLLOW_HOST_DPI"] = 0] = "follow-host-dpi";
+  DpiFollowStrategy[DpiFollowStrategy["FOLLOW_UI_EXTENSION_ABILITY_DPI"] = 1] = "follow-ui-extension-ability-dpi";
 })(DpiFollowStrategy || (DpiFollowStrategy = {}));
 
 var EllipsisMode;
