@@ -885,6 +885,8 @@ typedef enum {
     ARKUI_SLIDER_STYLE_OUT_SET = 0,
     /** The slider is in the slider track. */
     ARKUI_SLIDER_STYLE_IN_SET,
+    /** No slider. */
+    ARKUI_SLIDER_STYLE_NONE,
 } ArkUI_SliderStyle;
 
 /**
