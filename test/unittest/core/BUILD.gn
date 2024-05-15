@@ -69,6 +69,7 @@ group("linux_core_unittest") {
     # "pattern/bubble:bubble_test_ng",
     "pattern/button:button_test_ng",
     "pattern/calendar:calendar_test_ng",
+    "pattern/canvas:canvas_test_ng",
 
     # "pattern/calendar_picker:calendar_picker_test_ng",
 
