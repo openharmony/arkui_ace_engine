@@ -512,7 +512,9 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
         AddAfterLayoutTaskForExportTexture();
     }
     host->MarkNeedSyncRenderTree();
-    AddAfterLayoutTaskForRotation();
+    if (type_ == XComponentType::SURFACE) {
+        AddAfterLayoutTaskForRotation();
+    }
 }
 
 void XComponentPattern::DumpInfo()
