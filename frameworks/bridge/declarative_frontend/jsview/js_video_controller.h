@@ -37,6 +37,7 @@ public:
     void SetCurrentTime(const JSCallbackInfo& args);
     void RequestFullscreen(const JSCallbackInfo& args);
     void ExitFullscreen(const JSCallbackInfo& args);
+    void Reset(const JSCallbackInfo& args);
 
     RefPtr<VideoControllerV2> GetController() const
     {
