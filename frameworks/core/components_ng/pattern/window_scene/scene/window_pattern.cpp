@@ -119,11 +119,11 @@ void WindowPattern::OnAttachToFrameNode()
             (session_->GetScenePersistence()->IsSnapshotExisted() ||
             session_->GetScenePersistence()->IsSavingSnapshot())) {
             CreateSnapshotNode();
-            host->AddChild(snapshotNode_);
+            AddChild(host, snapshotNode_, snapshotNodeName_);
             return;
         }
         CreateStartingNode();
-        host->AddChild(startingNode_);
+        AddChild(host, startingNode_, startingNodeName_);
         return;
     }
 
@@ -131,21 +131,21 @@ void WindowPattern::OnAttachToFrameNode()
         (session_->GetScenePersistence()->IsSnapshotExisted() ||
         session_->GetScenePersistence()->IsSavingSnapshot())) {
         CreateSnapshotNode();
-        host->AddChild(snapshotNode_);
+        AddChild(host, snapshotNode_, snapshotNodeName_);
         return;
     }
 
     if (session_->GetShowRecent()) {
         CreateStartingNode();
-        host->AddChild(startingNode_);
+        AddChild(host, startingNode_, startingNodeName_);
         return;
     }
 
-    host->AddChild(contentNode_);
+    AddChild(host, contentNode_, contentNodeName_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode && !surfaceNode->IsBufferAvailable()) {
         CreateStartingNode();
-        host->AddChild(startingNode_);
+        AddChild(host, startingNode_, startingNodeName_);
         surfaceNode->SetBufferAvailableCallback(callback_);
     }
 }
@@ -448,15 +448,17 @@ void WindowPattern::SetWindowSceneConsumed(int32_t action)
     }
 }
 
-void WindowPattern::AddOrRemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& aimChild,
-    bool addFlag, const std::string& nodeType, int32_t index)
+void WindowPattern::AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
+    const std::string& nodeType, int32_t index)
 {
-    if (addFlag) {
-        host->AddChild(aimChild, index);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene AddChild %{public}s", nodeType.c_str());
-    } else {
-        host->RemoveChild(aimChild);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene RemoveChild %{public}s", nodeType.c_str());
-    }
+    host->AddChild(child, index);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene AddChild %{public}s", nodeType.c_str());
+}
+
+void WindowPattern::RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
+    const std::string& nodeType, int32_t index)
+{
+    host->RemoveChild(child);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene RemoveChild %{public}s", nodeType.c_str());
 }
 } // namespace OHOS::Ace::NG

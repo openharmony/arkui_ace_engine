@@ -55,8 +55,10 @@ protected:
     void CreateStartingNode();
     void CreateContentNode();
     void CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
-    void AddOrRemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& aimChild,
-        bool addFlag, const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
+    void AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
+        const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
+    void RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
+        const std::string& nodeType);
 
     virtual void OnActivation() {}
     virtual void OnConnect() {}
