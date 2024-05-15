@@ -351,27 +351,8 @@ SizeF BubbleLayoutAlgorithm::GetPopupMaxWidthAndHeight(bool showInSubWindow, con
     return SizeF(popupMaxWidth, popupMaxHeight);
 }
 
-void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
-    RefPtr<FrameNode> bubbleNode, bool showInSubWindow)
+void BubbleLayoutAlgorithm::SetBubbleRadius()
 {
-    enableArrow_ = bubbleProp->GetEnableArrow().value_or(false);
-    auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
-    CHECK_NULL_VOID(bubblePattern);
-    auto bubblePaintProperty = bubbleNode->GetPaintProperty<BubbleRenderProperty>();
-    CHECK_NULL_VOID(bubblePaintProperty);
-    bool UseArrowOffset = bubblePaintProperty->GetArrowOffset().has_value();
-    if (!bubblePattern->IsExiting()) {
-        InitTargetSizeAndPosition(showInSubWindow);
-        InitCaretTargetSizeAndPosition();
-        // subtract the global offset of the overlay node,
-        // because the final node position is set relative to the overlay node.
-        auto overlayGlobalOffset = bubbleNode->GetOffsetRelativeToWindow();
-        targetOffset_ -= overlayGlobalOffset;
-    }
-    childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
-    auto childShowWidth = childSize_.Width() - BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
-    auto childShowHeight = childSize_.Height() - BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
-    childSize_ = SizeF(childShowWidth, childShowHeight);
     auto littleSide = childSize_.Height() > childSize_.Width() ? childSize_.Width() : childSize_.Height();
     auto littleSideHalf = littleSide / HALF;
     if (borderRadius_.Unit() == DimensionUnit::PERCENT) {
@@ -386,6 +367,32 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
     borderRadius_.SetValue(radiusPx);
     borderRadius_.SetUnit(DimensionUnit::PX);
     border_.SetBorderRadius(Radius(borderRadius_));
+}
+
+void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
+    RefPtr<FrameNode> bubbleNode, bool showInSubWindow)
+{
+    enableArrow_ = bubbleProp->GetEnableArrow().value_or(false);
+    auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(bubblePattern);
+    auto bubblePaintProperty = bubbleNode->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_VOID(bubblePaintProperty);
+    bool UseArrowOffset = bubblePaintProperty->GetArrowOffset().has_value();
+    if (!bubblePattern->IsExiting()) {
+        InitTargetSizeAndPosition(showInSubWindow);
+        if (isCaretMode_) {
+            InitCaretTargetSizeAndPosition();
+        }
+        // subtract the global offset of the overlay node,
+        // because the final node position is set relative to the overlay node.
+        auto overlayGlobalOffset = bubbleNode->GetOffsetRelativeToWindow();
+        targetOffset_ -= overlayGlobalOffset;
+    }
+    childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
+    auto childShowWidth = childSize_.Width() - BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
+    auto childShowHeight = childSize_.Height() - BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
+    childSize_ = SizeF(childShowWidth, childShowHeight);
+    SetBubbleRadius();
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         childOffset_ = GetChildPosition(childSize_, bubbleProp, UseArrowOffset); // bubble's offset
         placement_ = arrowPlacement_;
@@ -520,6 +527,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     userSetTargetSpace_ = layoutProp->GetTargetSpace().value_or(Dimension(0.0f));
     targetSpace_ = layoutProp->GetTargetSpace().value_or(popupTheme->GetTargetSpace());
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
+    isCaretMode_ = layoutProp->GetIsCaretMode().value_or(true);
     auto height = layoutProp->GetArrowHeight().value_or(DEFAULT_BUBBLE_ARROW_HEIGHT);
     auto width = layoutProp->GetArrowWidth().value_or(DEFAULT_BUBBLE_ARROW_WIDTH);
     calculateArrowPoint(height, width);

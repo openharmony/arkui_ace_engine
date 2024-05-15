@@ -470,6 +470,16 @@ public:
         return transitionEffects_;
     }
 
+    void SetIsCaretMode (bool isCaretMode)
+    {
+        isCaretMode_ = isCaretMode;
+    }
+
+    bool IsCaretMode() const
+    {
+        return isCaretMode_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -484,6 +494,7 @@ private:
     bool setErrorRadius_ = false;
     bool focusable_ = false;
     bool interactiveDismiss_ = true;
+    bool isCaretMode_ = true;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
