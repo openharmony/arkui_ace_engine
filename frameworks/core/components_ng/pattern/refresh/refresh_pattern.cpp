@@ -1168,7 +1168,7 @@ bool RefreshPattern::HandleScrollVelocity(float velocity)
             return true;
         }
     }
-    if (Positive(scrollOffset_)) {
+    if (Positive(scrollOffset_) || Positive(velocity)) {
         HandleDragEnd(velocity);
         result = true;
     } else if (parent && ((Negative(velocity) && nestedScroll.forward == NestedScrollMode::SELF_FIRST) ||
