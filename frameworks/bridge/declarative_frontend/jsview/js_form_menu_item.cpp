@@ -99,7 +99,7 @@ void JSFormMenuItem::JsOnClick(const JSCallbackInfo& info)
     auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[NUM_CALL_0]));
     RefPtr<JsFunction> jsCallBackFunc = nullptr;
     if (!info[ NUM_FUN_4]->IsUndefined() && info[ NUM_FUN_4]->IsFunction()) {
-        jsCallBackFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[ NUM_FUN_4]));
+        jsCallBackFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[NUM_FUN_4]));
     }
 
     std::string compId;
