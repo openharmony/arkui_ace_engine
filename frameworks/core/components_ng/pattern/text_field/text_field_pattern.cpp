@@ -6881,9 +6881,26 @@ std::vector<RectF> TextFieldPattern::GetPreviewTextRects() const
     if (!GetIsPreviewText()) {
         return {};
     }
+    std::vector<RectF> boxes;
     std::vector<RectF> previewTextRects;
-    CHECK_NULL_RETURN(paragraph_, previewTextRects);
-    paragraph_->GetRectsForRange(GetPreviewTextStart(), GetPreviewTextEnd(), previewTextRects);
+    CHECK_NULL_RETURN(paragraph_, boxes);
+    paragraph_->GetRectsForRange(GetPreviewTextStart(), GetPreviewTextEnd(), boxes);
+    if (boxes.empty()) {
+        return {};
+    }
+    RectF linerRect(boxes.front().GetOffset(), SizeF(0, boxes.front().GetSize().Height()));
+    float checkedTop = boxes.front().Top();
+
+    for (const auto& drawRect : boxes) {
+        if (drawRect.Top() == checkedTop) {
+            linerRect += SizeF(drawRect.GetSize().Width(), 0);
+        } else {
+            previewTextRects.emplace_back(linerRect);
+            checkedTop = drawRect.Top();
+            linerRect = drawRect;
+        }
+    }
+    previewTextRects.emplace_back(linerRect);
     return previewTextRects;
 }
 
