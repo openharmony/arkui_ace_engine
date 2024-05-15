@@ -266,6 +266,20 @@ abstract class ViewPU extends PUV2ViewBase
     return result;
   }
 
+   /**
+   * Indicate if this @Component is allowed to freeze by calling with freezeState=true
+   * Called with value of the @Component decorator 'freezeWhenInactive' parameter
+   * or depending how UI compiler works also with 'undefined'
+   * @param freezeState only value 'true' will be used, otherwise inherits from parent
+   * if not parent, set to false.
+   */
+   protected initAllowComponentFreeze(freezeState: boolean | undefined): void {
+    // set to true if freeze parameter set for this @Component to true
+    // otherwise inherit from parent @Component (if it exists).
+    this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
+    stateMgmtConsole.debug(`${this.debugInfo__()}: @Component freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
+  }
+
   /**
  * ArkUI engine will call this function when the corresponding CustomNode's active status change.
  * @param active true for active, false for inactive

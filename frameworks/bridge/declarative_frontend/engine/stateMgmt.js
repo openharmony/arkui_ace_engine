@@ -4002,19 +4002,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     isViewActive() {
         return this.isActive_;
     }
-    /**
-     * Indicate if this @Component is allowed to freeze by calling with freezeState=true
-     * Called with value of the @Component decorator 'freezeWhenInactive' parameter
-     * or depending how UI compiler works also with 'undefined'
-     * @param freezeState only value 'true' will be used, otherwise inherits from parent
-     *      if not parent, set to false.
-     */
-    initAllowComponentFreeze(freezeState) {
-        // set to true if freeze parameter set for this @Component to true
-        // otherwise inherit from parent @Component (if it exists).
-        this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
-        
-    }
     dumpReport() {
         stateMgmtConsole.warn(`Printing profiler information`);
         stateMgmtProfiler.report();
@@ -6085,6 +6072,19 @@ class ViewPU extends PUV2ViewBase {
         return result;
     }
     /**
+    * Indicate if this @Component is allowed to freeze by calling with freezeState=true
+    * Called with value of the @Component decorator 'freezeWhenInactive' parameter
+    * or depending how UI compiler works also with 'undefined'
+    * @param freezeState only value 'true' will be used, otherwise inherits from parent
+    * if not parent, set to false.
+    */
+    initAllowComponentFreeze(freezeState) {
+        // set to true if freeze parameter set for this @Component to true
+        // otherwise inherit from parent @Component (if it exists).
+        this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
+        
+    }
+    /**
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
    * @param active true for active, false for inactive
    */
@@ -7436,9 +7436,8 @@ class ObserveV2 {
             weakMonitor = this.id2cmp_[watchId];
             if (weakMonitor && 'deref' in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV2) {
                 if (((monitorTarget = monitor.getTarget()) instanceof ViewV2) && !monitorTarget.isViewActive()) {
-                    // FIXME @Component freeze enable
                     // monitor notifyChange delayed if target is a View that is not active
-                    // monitorTarget addDelayedMonitorIds watchId
+                    monitorTarget.addDelayedMonitorIds(watchId);
                 }
                 else {
                     monitor.notifyChange();
@@ -7466,9 +7465,9 @@ class ObserveV2 {
                     // FIXME need to call syncInstanceId before update?
                     view.UpdateElement(elmtId);
                 }
-                else {
-                    // FIXME @Component freeze
-                    //....
+                else if (view instanceof ViewV2) {
+                    // schedule delayed update once the view gets active
+                    view.scheduleDelayedUpdate(elmtId);
                 }
             } // if ViewV2 or ViewPU
         });
@@ -7490,8 +7489,9 @@ class ObserveV2 {
                 if (view.isViewActive()) {
                     view.uiNodeNeedUpdateV3(elmtId);
                 }
-                else {
-                    // FIXME delayed update
+                else if (view instanceof ViewV2) {
+                    // schedule delayed update once the view gets active
+                    view.scheduleDelayedUpdate(elmtId);
                 }
             }
         });
@@ -8353,6 +8353,10 @@ class ViewV2 extends PUV2ViewBase {
         super(parent, elmtId, extraInfo);
         // Set of elmtIds that need re-render
         this.dirtDescendantElementIds_ = new Set();
+        // Set of elements for delayed update
+        this.elmtIdsDelayedUpdate = new Set();
+        this.monitorIdsDelayedUpdate = new Set();
+        this.computedIdsDelayedUpdate = new Set();
         /**
        * on first render create a new Instance of Repeat
        * on re-render connect to existing instance
@@ -8374,12 +8378,24 @@ class ViewV2 extends PUV2ViewBase {
         };
         
     }
-    finalizeConstruction() {
+    /**
+     * The `freezeState` parameter determines whether this @ComponentV2 is allowed to freeze, when inactive
+     * Its called with value of the `freezeWhenInactive` parameter from the @ComponentV2 decorator,
+     * or it may be called with `undefined` depending on how the UI compiler works.
+     *
+     * @param freezeState Only the value `true` will be used to set the freeze state,
+     * otherwise it inherits from its parent instance if its freezeState is true
+     */
+    finalizeConstruction(freezeState) {
         ProviderConsumerUtilV2.setupConsumeVarsV2(this);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
         // Always use ID_REFS in ViewV2
         this[ObserveV2.ID_REFS] = {};
+        // set to true if freeze parameter set for this @ComponentV2 to true
+        // otherwise inherit from its parentComponent (if it exists).
+        this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
+        
     }
     debugInfo__() {
         return `@ComponentV2 '${this.constructor.name}'[${this.id__()}]`;
@@ -8503,6 +8519,10 @@ class ViewV2 extends PUV2ViewBase {
             return;
         }
         
+        if (!this.isActive_) {
+            this.scheduleDelayedUpdate(elmtId);
+            return;
+        }
         if (!this.dirtDescendantElementIds_.size) { //  && !this runReuse_) {
             // mark ComposedElement dirty when first elmtIds are added
             // do not need to do this every time
@@ -8595,8 +8615,91 @@ class ViewV2 extends PUV2ViewBase {
         }
         return retVal;
     }
+    /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
+        once the view gets active
+    */
+    scheduleDelayedUpdate(elmtId) {
+        this.elmtIdsDelayedUpdate.add(elmtId);
+    }
+    // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
+    // monitor fireChange will be triggered for all these watchIds once this view gets active
+    addDelayedMonitorIds(watchId) {
+        
+        this.monitorIdsDelayedUpdate.add(watchId);
+    }
+    addDelayedComputedIds(watchId) {
+        
+        this.computedIdsDelayedUpdate.add(watchId);
+    }
     setActiveInternal(newState) {
-        stateMgmtConsole.error('ViewV2: setActiveInternal is unimplemented');
+        
+        if (!this.isCompFreezeAllowed()) {
+            
+            
+            return;
+        }
+        
+        this.isActive_ = newState;
+        if (this.isActive_) {
+            this.onActiveInternal();
+        }
+        else {
+            this.onInactiveInternal();
+        }
+        
+    }
+    onActiveInternal() {
+        if (!this.isActive_) {
+            return;
+        }
+        
+        this.performDelayedUpdate();
+        // Set 'isActive_' state for all descendant child Views
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (childView) {
+                childView.setActiveInternal(this.isActive_);
+            }
+        }
+    }
+    onInactiveInternal() {
+        if (this.isActive_) {
+            return;
+        }
+        
+        // Set 'isActive_' state for all descendant child Views
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (childView) {
+                childView.setActiveInternal(this.isActive_);
+            }
+        }
+    }
+    performDelayedUpdate() {
+        
+        if (this.computedIdsDelayedUpdate.size) {
+            // exec computed functions
+            ObserveV2.getObserve().updateDirtyComputedProps([...this.computedIdsDelayedUpdate]);
+        }
+        if (this.monitorIdsDelayedUpdate.size) {
+            // exec monitor functions
+            ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
+        }
+        if (this.elmtIdsDelayedUpdate.size) {
+            // update re-render of updated element ids once the view gets active
+            if (this.dirtDescendantElementIds_.size === 0) {
+                this.dirtDescendantElementIds_ = new Set(this.elmtIdsDelayedUpdate);
+            }
+            else {
+                this.elmtIdsDelayedUpdate.forEach((element) => {
+                    this.dirtDescendantElementIds_.add(element);
+                });
+            }
+        }
+        this.markNeedUpdate();
+        this.elmtIdsDelayedUpdate.clear();
+        this.monitorIdsDelayedUpdate.clear();
+        
     }
     /*
       findProvidePU finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:

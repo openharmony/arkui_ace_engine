@@ -28,12 +28,26 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // Set of elmtIds that need re-render
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
+    // Set of elements for delayed update
+    private elmtIdsDelayedUpdate: Set<number> = new Set();
+    private monitorIdsDelayedUpdate: Set<number> = new Set();
+    private computedIdsDelayedUpdate: Set<number> = new Set();
+
     constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
         super(parent, elmtId, extraInfo);
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 
-    protected finalizeConstruction(): void {
+
+    /**
+     * The `freezeState` parameter determines whether this @ComponentV2 is allowed to freeze, when inactive
+     * Its called with value of the `freezeWhenInactive` parameter from the @ComponentV2 decorator,
+     * or it may be called with `undefined` depending on how the UI compiler works.
+     *
+     * @param freezeState Only the value `true` will be used to set the freeze state,
+     * otherwise it inherits from its parent instance if its freezeState is true
+     */
+    protected finalizeConstruction(freezeState?: boolean | undefined): void {
 
         ProviderConsumerUtilV2.setupConsumeVarsV2(this);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
@@ -41,6 +55,12 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         // Always use ID_REFS in ViewV2
         this[ObserveV2.ID_REFS] = {};
+
+        // set to true if freeze parameter set for this @ComponentV2 to true
+        // otherwise inherit from its parentComponent (if it exists).
+        this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
+        stateMgmtConsole.debug(`${this.debugInfo__()}: @ComponentV2 freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
+
     }
 
     public debugInfo__(): string {
@@ -187,6 +207,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         stateMgmtProfiler.begin(`ViewV2.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
 
+        if(!this.isActive_) {
+            this.scheduleDelayedUpdate(elmtId);
+            return;
+        }
+
         if (!this.dirtDescendantElementIds_.size) { //  && !this runReuse_) {
             // mark ComposedElement dirty when first elmtIds are added
             // do not need to do this every time
@@ -291,8 +316,101 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return retVal;
     }
 
+    /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
+        once the view gets active
+    */
+    public scheduleDelayedUpdate(elmtId: number) : void {
+        this.elmtIdsDelayedUpdate.add(elmtId);
+    }
+
+    // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
+    // monitor fireChange will be triggered for all these watchIds once this view gets active
+    public addDelayedMonitorIds(watchId: number) {
+        stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedMonitorIds called for watchId: ${watchId}`);
+        this.monitorIdsDelayedUpdate.add(watchId);
+    }
+
+    public addDelayedComputedIds(watchId: number) {
+        stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedComputedIds called for watchId: ${watchId}`);
+        this.computedIdsDelayedUpdate.add(watchId);
+    }
+
     public setActiveInternal(newState: boolean): void {
-        stateMgmtConsole.error('ViewV2: setActiveInternal is unimplemented');
+        stateMgmtProfiler.begin("ViewV2.setActive");
+
+        if (!this.isCompFreezeAllowed()) {
+            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive. Component freeze state is ${this.isCompFreezeAllowed()} - ignoring`);
+            stateMgmtProfiler.end();
+            return;
+        }
+      
+        stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
+        this.isActive_ = newState;
+        if (this.isActive_) {
+          this.onActiveInternal()
+        } else {
+          this.onInactiveInternal();
+        }
+        stateMgmtProfiler.end();
+    }
+
+    private onActiveInternal(): void {
+        if (!this.isActive_) {
+          return;
+        }
+
+        stateMgmtConsole.debug(`${this.debugInfo__()}: onActiveInternal`);
+        this.performDelayedUpdate();
+
+        // Set 'isActive_' state for all descendant child Views
+        for (const child of this.childrenWeakrefMap_.values()) {
+          const childView: IView | undefined = child.deref();
+          if (childView) {
+            childView.setActiveInternal(this.isActive_);
+          }
+        }
+    }
+
+    private onInactiveInternal(): void {
+        if (this.isActive_) {
+          return;
+        }
+        stateMgmtConsole.debug(`${this.debugInfo__()}: onInactiveInternal`);
+
+        // Set 'isActive_' state for all descendant child Views
+        for (const child of this.childrenWeakrefMap_.values()) {
+          const childView: IView | undefined = child.deref();
+          if (childView) {
+            childView.setActiveInternal(this.isActive_);
+          }
+        }
+    }
+
+    private performDelayedUpdate(): void {
+        stateMgmtProfiler.begin("ViewV2: performDelayedUpdate");
+        if(this.computedIdsDelayedUpdate.size) {
+            // exec computed functions
+            ObserveV2.getObserve().updateDirtyComputedProps([...this.computedIdsDelayedUpdate]);
+        }
+        if(this.monitorIdsDelayedUpdate.size) {
+          // exec monitor functions
+          ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
+        }
+        if(this.elmtIdsDelayedUpdate.size) {
+          // update re-render of updated element ids once the view gets active
+          if(this.dirtDescendantElementIds_.size === 0) {
+            this.dirtDescendantElementIds_ = new Set(this.elmtIdsDelayedUpdate);
+          }
+          else {
+            this.elmtIdsDelayedUpdate.forEach((element) => {
+              this.dirtDescendantElementIds_.add(element);
+            });
+          }
+        }
+        this.markNeedUpdate();
+        this.elmtIdsDelayedUpdate.clear();
+        this.monitorIdsDelayedUpdate.clear();
+        stateMgmtProfiler.end();
     }
 
     /*
