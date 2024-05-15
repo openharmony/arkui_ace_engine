@@ -36,13 +36,15 @@ public:
         const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isAsyncModalBinding = false);
 
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, const RefPtr<NG::FrameNode>& placeholderNode = nullptr,
-        bool transferringCaller = false) override;
+        bool transferringCaller = false, bool densityDpi = true) override;
     // for Embedded Component
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) override;
     // for dynamic component
     void Create() override;
     void InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime) override;
+    void InitializeIsolatedComponent(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime) override;
     void SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged) override;
 
     void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;

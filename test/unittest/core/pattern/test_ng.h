@@ -47,6 +47,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
+    void CreateDone(const RefPtr<FrameNode>& frameNode);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
 
@@ -193,6 +194,11 @@ public:
     float GetChildHeight(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
         return GetChildRect(frameNode, index).Height();
+    }
+
+    void ClearOldNodes()
+    {
+        ElementRegister::GetInstance()->Clear();
     }
 
     ElementIdType GetElmtId()

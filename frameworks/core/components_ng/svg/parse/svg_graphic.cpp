@@ -20,7 +20,6 @@
 #include "include/effects/SkGradientShader.h"
 
 #include "base/utils/utils.h"
-#include "core/components/declaration/svg/svg_declaration.h"
 
 namespace OHOS::Ace::NG {
 void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)

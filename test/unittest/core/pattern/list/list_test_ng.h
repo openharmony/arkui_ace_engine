@@ -108,7 +108,6 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void ClearOldList();
     void GetList();
     ListModelNG CreateList();
     ListItemModelNG CreateListItem(V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
@@ -116,7 +115,6 @@ public:
     ListItemGroupModelNG CreateListItemGroup(V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE);
     void CreateListItemGroups(
         int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE);
-    void CreateDone();
 
     void CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize);
     void CreateGroupChildrenMainSize(int32_t groupNumber);

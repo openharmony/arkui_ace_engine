@@ -145,7 +145,6 @@ constexpr uint32_t DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX = 4;
 constexpr uint32_t DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX = 5;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
-const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
 
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
@@ -1565,12 +1564,26 @@ bool RosenRenderContext::GetPixelMap(const std::shared_ptr<Media::PixelMap>& pix
     return rsCanvasDrawingNode->GetPixelmap(pixelMap, drawCmdList, rect);
 }
 
+template<typename ModifierName, typename T>
+void RosenRenderContext::SetAnimatableProperty(std::shared_ptr<ModifierName>& modifier, const T& value)
+{
+    if (modifier) {
+        auto property = std::static_pointer_cast<Rosen::RSAnimatableProperty<T>>(modifier->GetProperty());
+        CHECK_NULL_VOID(property);
+        property->Set(value);
+    } else {
+        auto property = std::make_shared<Rosen::RSAnimatableProperty<T>>(value);
+        modifier = std::make_shared<ModifierName>(property);
+        rsNode_->AddModifier(modifier);
+    }
+}
+
 void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
 {
     CHECK_NULL_VOID(rsNode_);
     auto curScale = rsNode_->GetStagingProperties().GetScale();
     hasScales_ = !NearEqual(curScale, Vector2f(1.0f, 1.0f)) && !NearEqual(scale, VectorF(1.0f, 1.0f));
-    rsNode_->SetScale(scale.x, scale.y);
+    SetAnimatableProperty<Rosen::RSScaleModifier, Rosen::Vector2f>(scaleXYUserModifier_, { scale.x, scale.y });
     RequestNextFrame();
 }
 
@@ -1599,7 +1612,9 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
 {
     CHECK_NULL_VOID(rsNode_);
     auto translateVec = MarshallTranslate(translate);
-    rsNode_->SetTranslate(translateVec.x, translateVec.y, translateVec.z);
+    SetAnimatableProperty<Rosen::RSTranslateModifier, Rosen::Vector2f>(
+        translateXYUserModifier_, { translateVec.x, translateVec.y });
+    SetAnimatableProperty<Rosen::RSTranslateZModifier, float>(translateZUserModifier_, translateVec.z);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
     RequestNextFrame();
 }
@@ -2083,14 +2098,9 @@ void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double 
 void RosenRenderContext::ScaleAnimation(const AnimationOption& option, double begin, double end)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetScale(begin);
+    SetScale(begin, begin);
     AnimationUtils::Animate(
-        option,
-        [rsNode = rsNode_, endScale = end]() {
-            CHECK_NULL_VOID(rsNode);
-            rsNode->SetScale(endScale);
-        },
-        option.GetOnFinishEvent());
+        option, [this, end]() { SetScale(end, end); }, option.GetOnFinishEvent());
 }
 
 void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
@@ -3617,14 +3627,12 @@ void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
     float scaleEnd = hoverColorTo;
     int32_t themeDuration = appTheme->GetHoverDuration();
 
-    rsNode_->SetScale(scaleStart);
+    SetScale(scaleStart, scaleStart);
     Rosen::RSAnimationTimingProtocol protocol;
     protocol.SetDuration(themeDuration);
     RSNode::Animate(protocol, Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f),
-        [rsNode = rsNode_, scaleEnd]() {
-            if (rsNode) {
-                rsNode->SetScale(scaleEnd);
-            }
+        [this, scaleEnd]() {
+            SetScale(scaleEnd, scaleEnd);
         });
     isHoveredScale_ = isHovered;
 }
@@ -4462,6 +4470,10 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         option.SetDelay(transition->GetDelay());
     } else {
         effect = GetDefaultPageTransition(type);
+        const RefPtr<InterpolatingSpring> springCurve =
+            AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
+        const float defaultAmplitudePx = 0.005f;
+        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
         option.SetCurve(springCurve);
         option.SetDuration(DEFAULT_ANIMATION_DURATION);
 #ifdef QUICK_PUSH_TRANSITION
@@ -5661,7 +5673,7 @@ void RosenRenderContext::SetRenderFrameOffset(const OffsetF& offset)
 void RosenRenderContext::SetScale(float scaleX, float scaleY)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetScale(scaleX, scaleY);
+    SetAnimatableProperty<Rosen::RSScaleModifier, Rosen::Vector2f>(scaleXYUserModifier_, { scaleX, scaleY });
 }
 
 void RosenRenderContext::SetBackgroundColor(uint32_t colorValue)
@@ -5691,7 +5703,9 @@ void RosenRenderContext::SetOpacity(float opacity)
 void RosenRenderContext::SetTranslate(float translateX, float translateY, float translateZ)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetTranslate(translateX, translateY, translateZ);
+    SetAnimatableProperty<Rosen::RSTranslateModifier, Rosen::Vector2f>(
+        translateXYUserModifier_, { translateX, translateY });
+    SetAnimatableProperty<Rosen::RSTranslateZModifier, float>(translateZUserModifier_, translateZ);
 }
 
 void RosenRenderContext::SetTransitionInCallback(std::function<void()>&& callback)

@@ -420,7 +420,8 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
                     [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
                         const std::function<void()>& task) {
                         ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask");
+                        taskExecutor->PostTask(
+                            task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask", PriorityType::HIGH);
                     }, id);
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);

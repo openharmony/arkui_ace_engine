@@ -302,7 +302,8 @@ ArkUI_Int32 SetNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
-    auto totalChildCount = frameNode->TotalChildCount();
+    auto hasFooter = WaterFlowModelNG::hasFooter(frameNode);
+    auto totalChildCount = hasFooter ? frameNode->TotalChildCount() - 1 : frameNode->TotalChildCount();
     if (totalChildCount > 0) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_CHILD_NODE_EXIST;
     }
@@ -444,16 +445,14 @@ void SetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWa
         section.margin = paddings;
         if (sectionData.onGetItemMainSizeByIndex) {
             section.onGetItemMainSizeByIndex = [sectionData](int32_t value) -> float {
-                // 假设onGetItemMainSizeByIndex是一个返回float的函数指针
+                // onGetItemMainSizeByIndex是一个返回float的函数指针
                 using FuncType = float (*)(int32_t);
                 FuncType func = reinterpret_cast<FuncType>(sectionData.onGetItemMainSizeByIndex);
                 float result = func(value);
-                // 注意：这里不再检查result是否为nullptr，因为func应该返回一个float
                 return result;
             };
         } else {
-            // 如果没有提供回调函数，则设置一个默认行为
-            section.onGetItemMainSizeByIndex = [](int32_t) { return 0.0f; };
+            section.onGetItemMainSizeByIndex = nullptr;
         }
     }
 

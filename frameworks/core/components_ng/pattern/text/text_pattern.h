@@ -507,6 +507,8 @@ public:
         selectionMenuMap_.clear();
     }
 
+    virtual const std::list<RefPtr<UINode>>& GetAllChildren() const;
+
     void HandleSelectionChange(int32_t start, int32_t end);
 
     CopyOptions GetCopyOptions() const
@@ -592,6 +594,16 @@ public:
         return childNodes_;
     }
 
+    void SetTextContentParagraph(void* paragraph)
+    {
+        textParagraph_ = paragraph;
+    }
+
+    const std::optional<void*>& GetTextContentParagraph()
+    {
+        return textParagraph_;
+    }
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -671,6 +683,7 @@ protected:
     std::string textForDisplay_;
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
+    mutable std::list<RefPtr<UINode>> childNodes_;
     float baselineOffset_ = 0.0f;
     int32_t placeholderCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
@@ -700,6 +713,7 @@ private:
     bool IsShowHandle();
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick);
+    void CollectTextSpanNodes(const RefPtr<SpanNode>& child, bool& isSpanHasClick);
     void UpdateContainerChildren(const RefPtr<UINode>& parent, const RefPtr<UINode>& child);
     RefPtr<RenderContext> GetRenderContext();
     void ProcessBoundRectByTextShadow(RectF& rect);
@@ -776,12 +790,12 @@ private:
     int32_t dragRecordSize_ = -1;
     RefPtr<TextController> textController_;
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
-    std::list<RefPtr<UINode>> childNodes_;
     bool isShowMenu_ = true;
     RefPtr<TextSelectOverlay> selectOverlay_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
     std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder_;
     bool isDetachFromMainTree_ = false;
+    std::optional<void*> textParagraph_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

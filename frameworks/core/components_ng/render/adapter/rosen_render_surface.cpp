@@ -393,9 +393,12 @@ void RosenRenderSurface::PostRenderOnlyTaskToUI()
     CHECK_NULL_VOID(container);
     auto context = container->GetPipelineContext();
     CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI, "ArkUIMarkNeedRenderOnly");
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    if (uiTaskExecutor.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        uiTaskExecutor.PostTask(task, "ArkUIMarkNeedRenderOnly");
+    }
 }
 
 void RosenRenderSurface::ConsumeXComponentBuffer()

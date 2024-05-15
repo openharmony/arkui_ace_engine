@@ -112,7 +112,7 @@ void JSRefresh::SetPullDownRatio(const JSCallbackInfo& info)
 
     auto args = info[0];
     std::optional<float> pulldownRatio = std::nullopt;
-    if (!args->IsNumber()) {
+    if (!args->IsNumber() || std::isnan(args->ToNumber<float>())) {
         RefreshModel::GetInstance()->SetPullDownRatio(pulldownRatio);
         return;
     }

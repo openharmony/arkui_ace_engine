@@ -1066,5 +1066,33 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_GetDrawableDescriptorFromResourceNapiValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_StyledString_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_StyledString_Destroy"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_StyledString_PushTextStyle"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_StyledString_AddText"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_StyledString_PopTextStyle"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_StyledString_CreateTypography"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_StyledString_AddPlaceholder"
     }
 ]

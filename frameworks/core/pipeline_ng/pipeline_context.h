@@ -719,6 +719,10 @@ public:
         return isFreezeFlushMessage_;
     }
     bool IsContainerModalVisible() override;
+    void SetDoKeyboardAvoidAnimate(bool isDoKeyboardAvoidAnimate)
+    {
+        isDoKeyboardAvoidAnimate_ = isDoKeyboardAvoidAnimate;
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -751,6 +755,8 @@ protected:
     void OriginalAvoidanceLogic(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     RefPtr<FrameNode> GetContainerModalNode();
+    void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
+        const std::function<void()>& func);
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -943,6 +949,7 @@ private:
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
     bool lastAnimationStatus_ = true;
+    bool isDoKeyboardAvoidAnimate_ = true;
 };
 } // namespace OHOS::Ace::NG
 

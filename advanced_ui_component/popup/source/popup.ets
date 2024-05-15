@@ -188,6 +188,7 @@ export struct PopupComponent {
   @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State secondButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
+  @State closeButtonFillColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
   private listener = mediaquery.matchMediaSync('(orientation: landscape)')
 
   private getIconWidth(): Dimension {
@@ -256,7 +257,7 @@ export struct PopupComponent {
   }
 
   private getCloseButtonFillColor(): ResourceColor {
-    return this.theme.closeButton.fillColor
+    return this.closeButtonFillColorWithTheme;
   }
 
   private getCloseButtonHoverColor(): ResourceColor {
@@ -403,7 +404,7 @@ export struct PopupComponent {
     this.theme.button.fontColor = theme.colors.fontEmphasize;
     this.theme.message.fontColor = theme.colors.fontSecondary;
     this.theme.message.plainFontColor = theme.colors.fontPrimary;
-    this.theme.closeButton.fillColor = theme.colors.iconSecondary;
+    this.closeButtonFillColorWithTheme = theme.colors.iconSecondary;
   }
 
   aboutToAppear() {

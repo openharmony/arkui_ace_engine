@@ -1232,6 +1232,18 @@ class ArkTextBackGroundStyle {
   }
 }
 
+class ArkScrollOffsetOptions {
+  xOffset: Dimension;
+  yOffset: Dimension;
+  constructor() {
+    this.xOffset = undefined;
+    this.yOffset = undefined;
+  }
+  isEqual(another: ArkScrollOffsetOptions): boolean {
+    return this.xOffset === another.xOffset && this.yOffset === another.yOffset;
+  }
+}
+
 class ArkWaterFlowEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;

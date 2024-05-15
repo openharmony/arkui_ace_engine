@@ -117,13 +117,17 @@ public:
     void FireOnReceiveCallback(const AAFwk::WantParams& params);
     void SetOnErrorCallback(
         const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
-    void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message);
+    virtual void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message);
     void SetSyncCallbacks(const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
     void FireSyncCallbacks();
     void SetAsyncCallbacks(const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
     void FireAsyncCallbacks();
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
+    void DispatchFollowHostDensity(bool densityDpi);
+    void OnDpiConfigurationUpdate() override;
+    void SetDensityDpi(bool densityDpi);
+    bool GetDensityDpi();
 
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
@@ -165,6 +169,7 @@ protected:
     ComponentType componentType_ = ComponentType::UI_EXTENSION;
     int32_t uiExtensionId_ = 0;
     int32_t instanceId_ = Container::CurrentId();
+    std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
 
 private:
     enum class AbilityState {
@@ -218,7 +223,6 @@ private:
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
     std::function<void(int32_t, const RefPtr<WantWrap>&)> onTerminatedCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
-    std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void()> bindModalCallback_;
@@ -235,6 +239,7 @@ private:
     bool isModal_ = false;
     bool isAsyncModalBinding_ = false;
     bool isShowPlaceholder_ = false;
+    bool densityDpi_ = false;
     int32_t callbackId_ = 0;
     RectF displayArea_;
     bool isKeyAsync_ = false;

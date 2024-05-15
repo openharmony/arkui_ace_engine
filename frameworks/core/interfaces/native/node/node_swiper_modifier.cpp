@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/node_swiper_modifier.h"
 
 #include <vector>
+#include "node_model.h"
 
 #include "base/error/error_code.h"
 #include "base/geometry/axis.h"
@@ -32,6 +33,7 @@
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1093,11 +1095,13 @@ void SetSwiperOnContentDidScroll(ArkUINodeHandle node, void* extraParam)
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
         event.componentAsyncEvent.subKind = ON_SWIPER_DID_CONTENT_SCROLL;
         event.componentAsyncEvent.data[NUM_0].i32 = selectedIndex;
         event.componentAsyncEvent.data[NUM_1].i32 = index;
         event.componentAsyncEvent.data[NUM_2].f32 = position;
-        event.componentAsyncEvent.data[NUM_3].f32 = mainAxisLength;
+        event.componentAsyncEvent.data[NUM_3].f32 = mainAxisLength / density;
         SendArkUIAsyncEvent(&event);
     };
     SwiperModelNG::SetOnContentDidScroll(frameNode, std::move(onEvent));

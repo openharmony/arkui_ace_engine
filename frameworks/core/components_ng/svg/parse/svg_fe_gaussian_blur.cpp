@@ -18,24 +18,9 @@
 #include "include/effects/SkImageFilters.h"
 
 #include "base/utils/utils.h"
-#include "frameworks/core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-std::vector<double> ParseVecDouble(const std::string& value)
-{
-    if (value.empty()) {
-        return {};
-    }
-    std::vector<double> parsedValues;
-    StringUtils::StringSplitter(value, ' ', parsedValues);
-    if (parsedValues.empty()) {
-        StringUtils::StringSplitter(value, ',', parsedValues);
-    }
-    return parsedValues;
-}
-};
-
 RefPtr<SvgNode> SvgFeGaussianBlur::Create()
 {
     return AceType::MakeRefPtr<SvgFeGaussianBlur>();
@@ -57,7 +42,7 @@ void SvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFil
 bool SvgFeGaussianBlur::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgFeGaussianBlurAttribute&)> attrs[] = {
-        { DOM_SVG_FE_EDGE_MODE, [](const std::string& val, SvgFeGaussianBlurAttribute& attr) { 
+        { SVG_FE_EDGE_MODE, [](const std::string& val, SvgFeGaussianBlurAttribute& attr) { 
             static const LinearMapNode<SvgFeEdgeMode> EDGE_MODE_TABLE[] = {
                 { "duplicate", SvgFeEdgeMode::EDGE_DUPLICATE },
                 { "none", SvgFeEdgeMode::EDGE_NONE },
@@ -68,9 +53,9 @@ bool SvgFeGaussianBlur::ParseAndSetSpecializedAttr(const std::string& name, cons
                 attr.edgeMode = EDGE_MODE_TABLE[inIndex].value;
             }
         } },
-        { DOM_SVG_FE_STD_DEVIATION, [](const std::string& val, SvgFeGaussianBlurAttribute& attr) {
-            auto vectorRes = ParseVecDouble(val);
-            if (vectorRes.empty() || vectorRes.size() > 2) {
+        { SVG_FE_STD_DEVIATION, [](const std::string& val, SvgFeGaussianBlurAttribute& attr) {
+            std::vector<float> vectorRes;
+            if (!StringUtils::ParseStringToArray(val, vectorRes)) {
                 return;
             }
             attr.stdDeviationX = vectorRes[0];

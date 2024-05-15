@@ -271,7 +271,8 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
         selection.SetResultObjectList(result);
         return selection;
     }
-    for (const auto& uinode : childNodes_) {
+    const auto& children = GetAllChildren();
+    for (const auto& uinode : children) {
         if (uinode->GetTag() == V2::IMAGE_ETS_TAG) {
             ResultObject resultObject = GetImageResultObject(uinode, index, realStart, realEnd);
             if (!resultObject.valueString.empty() || resultObject.valuePixelMap) {
@@ -1534,6 +1535,11 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
     };
 }
 
+const std::list<RefPtr<UINode>>& TextPattern::GetAllChildren() const
+{
+    return childNodes_;
+}
+
 std::string TextPattern::GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const
 {
     if (start < 0 || end > static_cast<int32_t>(value.length()) || start >= end) {
@@ -2262,14 +2268,7 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
             childNodes_.push_back(current.node);
         } else if (spanNode && tag != V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            spanNode->CleanSpanItemChildren();
-            UpdateChildProperty(spanNode);
-            spanNode->MountToParagraph();
-            textForDisplay_.append(spanNode->GetSpanItem()->content);
-            dataDetectorAdapter_->textForAI_.append(spanNode->GetSpanItem()->content);
-            if (spanNode->GetSpanItem()->onClick) {
-                isSpanHasClick = true;
-            }
+            CollectTextSpanNodes(spanNode, isSpanHasClick);
             childNodes_.push_back(current.node);
         } else if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             placeholderCount_++;
@@ -2296,6 +2295,18 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
             nodes.push({ .node = *iter, .containerSpanNode = containerSpanNode });
         }
+    }
+}
+
+void TextPattern::CollectTextSpanNodes(const RefPtr<SpanNode>& spanNode, bool& isSpanHasClick)
+{
+    spanNode->CleanSpanItemChildren();
+    UpdateChildProperty(spanNode);
+    spanNode->MountToParagraph();
+    textForDisplay_.append(spanNode->GetSpanItem()->content);
+    dataDetectorAdapter_->textForAI_.append(spanNode->GetSpanItem()->content);
+    if (spanNode->GetSpanItem()->onClick) {
+        isSpanHasClick = true;
     }
 }
 
@@ -3093,6 +3104,7 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     imageNode->MarkModifyDone();
     imageItem->imageNodeId = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
+    childNodes_.emplace_back(imageNode);
 }
 
 ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
@@ -3128,6 +3140,7 @@ void TextPattern::ProcessSpanString()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     textForDisplay_.clear();
+    childNodes_.clear();
     dataDetectorAdapter_->textForAI_.clear();
     host->Clean();
 

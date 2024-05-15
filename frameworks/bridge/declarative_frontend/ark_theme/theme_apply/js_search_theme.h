@@ -46,6 +46,24 @@ public:
         SearchModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
         ViewAbstractModel::GetInstance()->SetBackgroundColor(themeColors.value().CompBackgroundTertiary());
     }
+
+    static bool ObtainCancelIconColor(Color &color)
+    {
+        if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
+            color = themeColors->IconSecondary();
+            return true;
+        }
+        return false;
+    }
+
+    static bool ObtainSearchButtonFontColor(Color &color)
+    {
+        if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
+            color = themeColors->FontEmphasize();
+            return true;
+        }
+        return false;
+    }
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_SEARCH_THEME_H

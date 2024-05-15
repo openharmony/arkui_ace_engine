@@ -634,4 +634,10 @@ void WaterFlowModelNG::SetWaterflowFooter(FrameNode* frameNode, FrameNode* foote
     pattern->AddFooter(AceType::Claim<UINode>(footerNode));
 }
 
+bool WaterFlowModelNG::hasFooter(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->hasFooter();
+}
 } // namespace OHOS::Ace::NG
