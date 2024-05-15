@@ -2495,6 +2495,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     }
     if (pipeline) {
         pipeline->FlushUITasks();
+        pipeline->FlushMessages();
     }
 
     isDragging_ = false;
