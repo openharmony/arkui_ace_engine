@@ -42,6 +42,7 @@ constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t MULTIPLE_2 = 2;
 constexpr float MAX_SEARCH_BUTTON_RATE = 0.4f;
+constexpr float AGING_MIN_SCALE = 1.75f;
 } // namespace
 
 bool SearchLayoutAlgorithm::IsFixedHeightMode(LayoutWrapper* layoutWrapper)
@@ -166,7 +167,9 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto textFieldHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
-    SetTextFieldLayoutConstraintHeight(childLayoutConstraint, textFieldHeight, layoutWrapper);
+    if (LessNotEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        SetTextFieldLayoutConstraintHeight(childLayoutConstraint, textFieldHeight, layoutWrapper);
+    }
     textFieldWrapper->Measure(childLayoutConstraint);
     textFieldSizeMeasure_ = textFieldGeometryNode->GetFrameSize();
 }
