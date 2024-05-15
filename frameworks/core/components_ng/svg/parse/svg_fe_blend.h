@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_BLEND_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_BLEND_H
 
-#include "core/components/declaration/svg/svg_fe_blend_declaration.h"
 #include "core/components_ng/svg/parse/svg_fe.h"
 
 namespace OHOS::Ace::NG {

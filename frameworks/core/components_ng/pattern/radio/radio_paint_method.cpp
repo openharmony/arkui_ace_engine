@@ -339,6 +339,7 @@ void RadioModifier::PaintUnselectedIndicator(
 void RadioModifier::PaintIndicator(
     RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& contentOffset) const
 {
+    DrawFocusBoard(canvas, contentSize, contentOffset);
     DrawTouchAndHoverBoard(canvas, contentSize, contentOffset);
     float outCircleRadius = contentSize.Width() / CALC_RADIUS;
     float centerX = contentOffset.GetX() + outCircleRadius;

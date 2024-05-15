@@ -13,20 +13,15 @@
  * limitations under the License.
  */
 
+import { Theme } from '@ohos.arkui.theme';
+
 export enum ItemState {
   ENABLE = 1,
   DISABLE = 2,
   ACTIVATE = 3,
 }
 
-const PUBLIC_MORE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAAIGNIUk0AAHomAACAhAAA" +
-  "+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzA" +
-  "AAOxAAADsQBlSsOGwAAAYFJREFUeNrt3CFLQ1EUB/CpCwYRo8G4j2IwCNrUYjH4AfwcfgBBwWZRMNgtFqPdILJgEhGDweAZvDjmJnfv3I" +
-  "3fD/5l3DfOfWdv23vhdDoAAAAAAAAwzxam9L5rkePIdmSjee05chu5iHxXej5ar3saDdiJXDabGaYfOYg8VHbyU+peKryJvch1ZHnEmtXIY" +
-  "eQ+8lrJyU+re7HgJtYj52Ou7Uau/thwW1LrLtmAk8jKBOsH37FHFTQgte6SDdht6ZjSUusu2YBeS8eUllr3YvLmuzP6971bYwP6/zjmpYKT" +
-  "mVp3yQbctXRMaal1l2zAaeRngvUfkbMKGpBad8kbsffIZ2RrzPX7kacKGpBad+k74cfmE7I54ur6au4obyr6UU2re1oP43rNDc6wh1qDS/6t0" +
-  "n83s1o3AAAAAAAAAAAAAEAysyKS6zYrIrlusyKS6zYrwqyIdGZFJDMrIplZETPIrIh5qdusCLMi0pkVkcysiAqYFVEJsyIAAAAAAAAAKOYXUlF" +
-  "8EUcdfbsAAAAASUVORK5CYII=";
+const PUBLIC_MORE: Resource = $r('sys.media.ohos_ic_public_more');
 
 interface MenuController {
   value: string;
@@ -54,17 +49,29 @@ export struct ToolBar {
   @State menuContent: MenuController[] = [];
   toolBarItemBackground: Resource[] = []
   @State itemBackground: Resource = $r('sys.color.ohos_id_color_toolbar_bg')
+  @State iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
+  @State iconActivePrimaryColor: ResourceColor = $r('sys.color.icon_emphasize');
+  @State fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
+  @State fontActivatedPrimaryColor: ResourceColor = $r('sys.color.font_emphasize');
+
+  onWillApplyTheme(theme: Theme) {
+    this.iconPrimaryColor = theme.colors.iconPrimary;
+    this.iconActivePrimaryColor = theme.colors.iconEmphasize;
+    this.fontPrimaryColor = theme.colors.fontPrimary;
+    this.fontActivatedPrimaryColor = theme.colors.fontEmphasize;
+  }
+
   @Builder MoreTabBuilder(index: number) {
     Column() {
       Image(PUBLIC_MORE)
         .width(24)
         .height(24)
-        .fillColor($r('sys.color.ohos_id_color_toolbar_icon'))
+        .fillColor(this.iconPrimaryColor)
         .margin({ top: 8, bottom: 2 })
         .objectFit(ImageFit.Contain)
         .bindMenu(this.menuContent, { offset: { x: 5, y : -10 } })
       Text(this.moreText)
-        .fontColor($r('sys.color.ohos_id_color_toolbar_text'))
+        .fontColor(this.fontPrimaryColor)
         .fontSize($r('sys.float.ohos_id_text_size_caption'))
         .fontWeight(FontWeight.Medium)
     }.width('100%').height('100%')
@@ -78,13 +85,13 @@ export struct ToolBar {
         .width(24)
         .height(24)
         .fillColor(this.activateIndex === index && !(this.toolBarList[index]?.state === 2)
-          ? $r('sys.color.ohos_id_color_text_primary_activated') : $r('sys.color.ohos_id_color_primary'))
+          ? this.iconActivePrimaryColor : this.iconPrimaryColor)
         .opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1)
         .margin({ top: 8, bottom: 2 })
         .objectFit(ImageFit.Contain)
       Text(this.toolBarList[index]?.content)
         .fontColor(this.activateIndex === index && !(this.toolBarList[index]?.state === 2)
-          ? $r('sys.color.ohos_id_color_toolbar_text_actived') : $r('sys.color.ohos_id_color_toolbar_text'))
+          ? this.fontActivatedPrimaryColor : this.fontPrimaryColor)
         .fontSize($r('sys.float.ohos_id_text_size_caption'))
         .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
         .minFontSize(9)

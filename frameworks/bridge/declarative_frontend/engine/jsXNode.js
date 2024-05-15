@@ -666,7 +666,7 @@ class FrameNode {
     }
     disposeTree() {
         let parent = this.getParent();
-        if (parent?.getNodeType() == "NodeContainer") {
+        if (parent?.getNodeType() === "NodeContainer") {
             getUINativeModule().nodeContainer.clean(parent?.getNodePtr());
         }
         else {
@@ -1117,6 +1117,16 @@ const __creatorMap__ = new Map([
                 return new ArkProgressComponent(node, type);
             });
         }],
+    ["Scroll", (context) => {
+            return new TypedFrameNode(context, "Scroll", (node, type) => {
+                return new ArkScrollComponent(node, type);
+            });
+        }],
+    ["RelativeContainer", (context) => {
+            return new TypedFrameNode(context, "RelativeContainer", (node, type) => {
+                return new ArkRelativeContainerComponent(node, type);
+            });
+        }],
     ["List", (context) => {
             return new TypedFrameNode(context, "List", (node, type) => {
                 return new ArkListComponent(node, type);
@@ -1125,6 +1135,16 @@ const __creatorMap__ = new Map([
     ["ListItem", (context) => {
             return new TypedFrameNode(context, "ListItem", (node, type) => {
                 return new ArkListItemComponent(node, type);
+            });
+        }],
+    ["Divider", (context) => {
+        return new TypedFrameNode(context, "Divider", (node, type) => {
+            return new ArkDividerComponent(node, type);
+            });
+        }],
+    ["LoadingProgress", (context) => {
+        return new TypedFrameNode(context, "LoadingProgress", (node, type) => {
+            return new ArkLoadingProgressComponent(node, type);
             });
         }],
 ]);
@@ -1818,7 +1838,7 @@ function borderRadiuses(all) {
  * limitations under the License.
  */
 class XComponentNode extends FrameNode {
-    constructor(uiContext, options, id, type, libraryname) {
+    constructor(uiContext, options, id, type, libraryname, controller) {
         super(uiContext, 'XComponentNode');
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         this.xcomponentNode_ = getUINativeModule().xcomponentNode;
@@ -1826,7 +1846,7 @@ class XComponentNode extends FrameNode {
         const surfaceId = options.surfaceId;
         const selfIdealWidth = options.selfIdealSize.width;
         const selfIdealHeight = options.selfIdealSize.height;
-        this.nativeModule_ = this.xcomponentNode_.create(elmtId, id, type, this.renderType_, surfaceId, selfIdealWidth, selfIdealHeight, libraryname);
+        this.nativeModule_ = this.xcomponentNode_.create(elmtId, id, type, this.renderType_, surfaceId, selfIdealWidth, selfIdealHeight, libraryname, controller);
         this.xcomponentNode_.registerOnCreateCallback(this.nativeModule_, this.onCreate);
         this.xcomponentNode_.registerOnDestroyCallback(this.nativeModule_, this.onDestroy);
         this.nodePtr_ = this.xcomponentNode_.getFrameNode(this.nativeModule_);

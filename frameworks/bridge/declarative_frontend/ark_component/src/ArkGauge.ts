@@ -53,6 +53,10 @@ class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     modifierWithKey(this._modifiersWithKeys, GaugeIndicatorModifier.identity, GaugeIndicatorModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<DataPanelConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<GaugeConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, false);

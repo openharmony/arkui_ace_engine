@@ -200,12 +200,10 @@ void FormPattern::HandleUnTrustForm()
     }
 
     isUnTrust_ = true;
-    UpdateBackgroundColorWhenUnTrustForm();
-    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
-    layoutProperty->UpdateVisibility(visible);
     isLoaded_ = true;
+    if (!isJsCard_) {
+        LoadFormSkeleton();
+    }
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
@@ -1345,6 +1343,7 @@ void FormPattern::OnActionEvent(const std::string& action)
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 auto eventAction = JsonUtil::ParseJsonString(action);
+                TAG_LOGI(AceLogTag::ACE_FORM, "UI task execute begin.");
                 pattern->FireOnRouterEvent(eventAction);
             }, "ArkUIFormFireRouterEvent");
         }

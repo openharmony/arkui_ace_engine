@@ -67,7 +67,6 @@ constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
-constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
 constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
@@ -143,8 +142,8 @@ void JSNavigation::ParseBarItems(
         }
 
         auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
-        if (!itemSymbolIconObject->IsUndefined()) {
-            std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
+        if (itemSymbolIconObject->IsObject()) {
+            std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
             SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
             toolBarItem.iconSymbol = iconSymbol;
         }
@@ -182,8 +181,8 @@ void JSNavigation::ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& t
     std::string icon;
     std::string activeIcon;
     auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
-    if (!itemSymbolIconObject->IsUndefined()) {
-        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
+    if (itemSymbolIconObject->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
         SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
         toolBarItem.iconSymbol = iconSymbol;
     }
@@ -193,8 +192,8 @@ void JSNavigation::ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& t
     }
 
     auto itemActiveSymbolIconObject = itemObject->GetProperty("activeSymbolIcon");
-    if (!itemActiveSymbolIconObject->IsUndefined()) {
-        std::function<void(WeakPtr<NG::FrameNode>)> activeSymbol;
+    if (itemActiveSymbolIconObject->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> activeSymbol = nullptr;
         SetSymbolOptionApply(info, activeSymbol, itemActiveSymbolIconObject);
         toolBarItem.activeIconSymbol = activeSymbol;
     }
@@ -266,11 +265,13 @@ void JSNavigation::Create(const JSCallbackInfo& info)
         if (!info[0]->IsObject()) {
             return;
         }
-        newObj = JSRef<JSObject>::Cast(info[0]);
-        auto value = newObj->GetProperty("type");
-        if (value->ToString() != "NavPathStack") {
+        // instance of NavPathStack
+        JSValueWrapper valueWrapper = info[0].Get().GetLocalHandle();
+        if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
             return;
         }
+        newObj = JSRef<JSObject>::Cast(info[0]);
     }
 
     NavigationModel::GetInstance()->Create();
@@ -455,11 +456,12 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
     nameList.emplace_back(bundleName);
     nameList.emplace_back(moduleName);
 
-    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol;
-    if (src.empty() && pixMap == nullptr) {
-        SetSymbolOptionApply(info, iconSymbol, info[0]);
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+    if (info[0]->IsObject()) {
+        if (src.empty() && pixMap == nullptr) {
+            SetSymbolOptionApply(info, iconSymbol, info[0]);
+        }
     }
-
     NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, noPixMap, pixMap, nameList);
 }
 
@@ -688,6 +690,11 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        NavigationModel::GetInstance()->SetMinNavBarWidth(NG::DEFAULT_MIN_NAV_BAR_WIDTH);
+        NavigationModel::GetInstance()->SetMaxNavBarWidth(NG::DEFAULT_MAX_NAV_BAR_WIDTH);
+        return;
+    }
     if (!info[0]->IsArray()) {
         return;
     }
@@ -696,18 +703,18 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
     JSRef<JSVal> max = rangeArray->GetValueAt(1);
 
     CalcDimension minNavBarWidth;
-
     CalcDimension maxNavBarWidth;
-    ParseJsDimensionVp(max, maxNavBarWidth);
-
-    if (!ParseJsDimensionVp(min, minNavBarWidth)) {
-        minNavBarWidth.SetValue(DEFAULT_MIN_NAV_BAR_WIDTH.Value());
+    if (min->IsNull() || min->IsUndefined() || !ParseJsDimensionVp(min, minNavBarWidth)) {
+        minNavBarWidth = NG::DEFAULT_MIN_NAV_BAR_WIDTH;
     }
     if (LessNotEqual(minNavBarWidth.Value(), 0.0)) {
         minNavBarWidth.SetValue(0);
     }
     NavigationModel::GetInstance()->SetMinNavBarWidth(minNavBarWidth);
 
+    if (max->IsNull() || max->IsUndefined() || !ParseJsDimensionVp(max, maxNavBarWidth)) {
+        maxNavBarWidth = NG::DEFAULT_MAX_NAV_BAR_WIDTH;
+    }
     if (LessNotEqual(maxNavBarWidth.Value(), 0.0)) {
         maxNavBarWidth.SetValue(0);
     }

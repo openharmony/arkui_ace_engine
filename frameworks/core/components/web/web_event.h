@@ -49,6 +49,12 @@ enum class RenderProcessNotRespondingReason {
     NAVIGATION_COMMIT_TIMEOUT,
 };
 
+enum class ViewportFit {
+    AUTO,
+    CONTAINS,
+    COVER,
+};
+
 class WebConsoleLog : public AceType {
     DECLARE_ACE_TYPE(WebConsoleLog, AceType)
 public:
@@ -1858,6 +1864,23 @@ class ACE_EXPORT RenderProcessRespondingEvent : public BaseEventInfo {
 public:
     RenderProcessRespondingEvent() : BaseEventInfo("RenderProcessRespondingEvent") {}
     ~RenderProcessRespondingEvent() = default;
+};
+
+class ACE_EXPORT ViewportFitChangedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ViewportFitChangedEvent, BaseEventInfo);
+
+public:
+    ViewportFitChangedEvent(int32_t viewportFit)
+        : BaseEventInfo("ViewportFitChangedEvent"), viewportFit_(viewportFit) {}
+    ~ViewportFitChangedEvent() = default;
+
+    int32_t GetViewportFit() const
+    {
+        return viewportFit_;
+    }
+
+private:
+    int32_t viewportFit_;
 };
 
 } // namespace OHOS::Ace

@@ -30,6 +30,7 @@
 #include "adapter/preview/entrance/ace_container.h"
 #include "adapter/preview/entrance/event_dispatcher.h"
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
+#include "adapter/preview/external/ability/stage/stage_context.h"
 #include "adapter/preview/inspector/inspector_client.h"
 #include "core/common/resource/resource_configuration.h"
 #include "frameworks/base/utils/utils.h"
@@ -208,6 +209,10 @@ void AceAbility::InitEnv()
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
     if (runArgs_.projectModel == ProjectModel::STAGE) {
+        auto pkgcontextinfo = Referenced::MakeRefPtr<StagePkgContextInfo>();
+        pkgcontextinfo->SetPkgNameList(runArgs_.packageNameList);
+        pkgcontextinfo->SetPkgContextInfoAndAliasMap(runArgs_.pkgContextInfoJsonStringMap);
+        container->SetPkgContextInfo(pkgcontextinfo);
         if (runArgs_.formsEnabled) {
             container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
         } else {
@@ -230,7 +235,7 @@ void AceAbility::InitEnv()
         auto func = [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(id);
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask");
+            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask", PriorityType::HIGH);
         };
         director->SetUITaskRunner(func, id);
         director->Init();

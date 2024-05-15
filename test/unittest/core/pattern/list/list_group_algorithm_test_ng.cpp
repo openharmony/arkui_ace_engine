@@ -39,7 +39,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem001, Te
     // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
     // FrameNode = 2 * 3
     CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
-    CreateDone();
+    CreateDone(frameNode_);
 
     /* *
      * @tc.steps: step2. get child frame node from index
@@ -97,7 +97,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem002, Te
     // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
     // FrameNode = 2 * 3
     CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
-    CreateDone();
+    CreateDone(frameNode_);
 
     /* *
      * @tc.steps: step2. get child frame node from index
@@ -163,7 +163,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_Layout, TestSize.Level
     // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
     // FrameNode = 2 * 3
     CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
-    CreateDone();
+    CreateDone(frameNode_);
 
     /* *
      * @tc.steps: step2. get child frame node from index

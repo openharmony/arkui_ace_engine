@@ -91,6 +91,9 @@ void PatternLockModifier::CreateProperties()
     hoverIndex_ = AceType::MakeRefPtr<PropertyInt>(-1);
     connectedLineTailPoint_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     canceledLineTailPoint_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
+    activeCircleColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::BLACK));
+    activeBackgroundRadius_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
+    enableWaveEffect_ = AceType::MakeRefPtr<PropertyBool>(false);
 }
 
 void PatternLockModifier::AttachProperties()
@@ -113,6 +116,9 @@ void PatternLockModifier::AttachProperties()
     AttachProperty(hoverIndex_);
     AttachProperty(connectedLineTailPoint_);
     AttachProperty(canceledLineTailPoint_);
+    AttachProperty(activeCircleColor_);
+    AttachProperty(activeBackgroundRadius_);
+    AttachProperty(enableWaveEffect_);
 }
 
 PatternLockModifier::PatternLockModifier()
@@ -357,7 +363,7 @@ void PatternLockModifier::PaintLockCircle(RSCanvas& canvas, const OffsetF& offse
     auto selectedColor = selectedColor_->Get();
     auto circleRadius = circleRadius_->Get();
     auto pointAnimateColor = pointAnimateColor_->Get();
-    auto pathColor = pathColor_->Get();
+    auto activeCircleColor = activeCircleColor_->Get();
 
     OffsetF cellcenter = GetCircleCenterByXY(offset, x, y);
     float offsetX = cellcenter.GetX();
@@ -365,7 +371,7 @@ void PatternLockModifier::PaintLockCircle(RSCanvas& canvas, const OffsetF& offse
 
     auto index = (x - 1) * PATTERN_LOCK_COL_COUNT + y - 1;
     if (CheckChoosePoint(x, y)) {
-        PaintCircle(canvas, offsetX, offsetY, GetBackgroundCircleRadius(index), ToRSColor(pathColor));
+        PaintCircle(canvas, offsetX, offsetY, GetBackgroundCircleRadius(index), ToRSColor(activeCircleColor));
         PaintLightRing(canvas, offsetX, offsetY, GetLightRingCircleRadius(index), GetLightRingAlphaF(index));
         const int32_t lastIndexFir = 1;
         CheckIsHoverAndPaint(canvas, offsetX, offsetY, GetActiveCircleRadius(index), index);
@@ -578,6 +584,24 @@ void PatternLockModifier::SetHoverIndex(int32_t hoverIndex)
     hoverIndex_->Set(hoverIndex);
 }
 
+void PatternLockModifier::SetActiveCircleColor(const LinearColor& activeCircleColor)
+{
+    CHECK_NULL_VOID(activeCircleColor_);
+    activeCircleColor_->Set(activeCircleColor);
+}
+
+void PatternLockModifier::SetActiveBackgroundRadius(float activeBackgroundRadius)
+{
+    CHECK_NULL_VOID(activeBackgroundRadius_);
+    activeBackgroundRadius_->Set(activeBackgroundRadius);
+}
+
+void PatternLockModifier::SetEnableWaveEffect(bool enableWaveEffect)
+{
+    CHECK_NULL_VOID(enableWaveEffect_);
+    enableWaveEffect_->Set(enableWaveEffect);
+}
+
 void PatternLockModifier::StartChallengeResultAnimate()
 {
     if (!challengeResult_.has_value()) {
@@ -592,6 +616,7 @@ void PatternLockModifier::StartChallengeResultAnimate()
     } else if (challengeResult_.value() == NG::PatternLockChallengeResult::WRONG) {
         pointAnimateColor_->Set(LinearColor(wrongColor_->Get()));
         auto pathColor = pathColor_->Get();
+        auto activeCircleColor = activeCircleColor_->Get();
         AnimationOption option = AnimationOption();
         option.SetDuration(WRONG_ANIMATION_DURATION_FLASH_TWICE);
         option.SetCurve(Curves::SHARP);
@@ -601,12 +626,15 @@ void PatternLockModifier::StartChallengeResultAnimate()
             modifier->pointAnimateColor_->Set(
                 LinearColor(modifier->wrongColor_->Get().BlendOpacity(FLASH_POINT_OPACITY)));
             modifier->SetPathColor(LinearColor(modifier->pathColor_->Get().BlendOpacity(FLASH_POINT_OPACITY)));
+            modifier->SetActiveCircleColor(
+                LinearColor(modifier->activeCircleColor_->Get().BlendOpacity(FLASH_POINT_OPACITY)));
         };
-        auto brighteningAnimation = [weak = WeakClaim(this), pathColor]() {
+        auto brighteningAnimation = [weak = WeakClaim(this), pathColor, activeCircleColor]() {
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
             modifier->pointAnimateColor_->Set(LinearColor(modifier->wrongColor_->Get()));
             modifier->SetPathColor(pathColor);
+            modifier->SetActiveCircleColor(activeCircleColor);
         };
         AnimationUtils::OpenImplicitAnimation(option, Curves::SHARP, nullptr);
         AnimationUtils::AddKeyFrame(((float)WRONG_ANIMATION_DURATION_DIMMING / WRONG_ANIMATION_DURATION_FLASH_TWICE),
@@ -667,14 +695,19 @@ void PatternLockModifier::SetHoverRadiusScale(float scale)
 
 void PatternLockModifier::SetBackgroundCircleRadius(int32_t index)
 {
+    auto backgroundCircleRadius = GetBackgroundCircleRadius(index);
     if (index < static_cast<int32_t>(backgroundCircleRadius_.size()) && index >= 0) {
-        backgroundCircleRadius_.at(index)->Set(0.0f);
-        AnimationOption option = AnimationOption();
-        auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(
-            BACKGROUND_RADIUS_SPRING_RESPONSE, BACKGROUND_RADIUS_SPRING_DAMPING);
-        option.SetCurve(curve);
-        AnimationUtils::Animate(option,
-            [&]() { backgroundCircleRadius_.at(index)->Set(circleRadius_->Get() * scaleBackgroundCircleRadius_); });
+        if (enableWaveEffect_->Get()) {
+            backgroundCircleRadius_.at(index)->Set(0.0f);
+            AnimationOption option = AnimationOption();
+            auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(
+                BACKGROUND_RADIUS_SPRING_RESPONSE, BACKGROUND_RADIUS_SPRING_DAMPING);
+            option.SetCurve(curve);
+            AnimationUtils::Animate(option,
+                [&]() { backgroundCircleRadius_.at(index)->Set(backgroundCircleRadius); });
+        } else {
+            backgroundCircleRadius_.at(index)->Set(backgroundCircleRadius);
+        }
     }
 }
 
@@ -682,6 +715,12 @@ float PatternLockModifier::GetBackgroundCircleRadius(int32_t index) const
 {
     if ((index >= PATTERN_LOCK_POINT_COUNT || index < 0)) {
         return 0;
+    }
+    auto activeBackgroundRadius = activeBackgroundRadius_->Get();
+    if (Positive(activeBackgroundRadius)) {
+        backgroundCircleRadius_.at(index)->Set(activeBackgroundRadius);
+    } else {
+        backgroundCircleRadius_.at(index)->Set(circleRadius_->Get() * scaleBackgroundCircleRadius_);
     }
     return backgroundCircleRadius_.at(index)->Get();
 }
@@ -805,8 +844,10 @@ void PatternLockModifier::StartConnectedCircleAnimate(int32_t x, int32_t y)
     auto index = (x - 1) * PATTERN_LOCK_COL_COUNT + y - 1;
     SetBackgroundCircleRadius(index);
     SetActiveCircleRadius(index);
-    SetLightRingCircleRadius(index);
-    SetLightRingAlphaF(index);
+    if (enableWaveEffect_->Get()) {
+        SetLightRingCircleRadius(index);
+        SetLightRingAlphaF(index);
+    }
 }
 
 void PatternLockModifier::StartConnectedLineAnimate(int32_t x, int32_t y)

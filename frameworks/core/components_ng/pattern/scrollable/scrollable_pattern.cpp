@@ -619,13 +619,6 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     CHECK_NULL_VOID(scrollBar_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gestureHub = GetGestureHub();
-    auto inputHub = GetInputHub();
-    CHECK_NULL_VOID(gestureHub);
-    CHECK_NULL_VOID(inputHub);
-    scrollBar_->SetGestureEvent();
-    scrollBar_->SetMouseEvent();
-    scrollBar_->SetHoverEvent();
     scrollBar_->SetAxis(axis_);
     scrollBar_->SetMarkNeedRenderFunc([weak = AceType::WeakClaim(AceType::RawPtr(host))]() {
         auto host = weak.Upgrade();
@@ -664,6 +657,25 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     };
     scrollBar_->SetScrollPageCallback(std::move(scrollPageCallback));
 
+    auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        return pattern->NotifyFRCSceneInfo(SCROLL_BAR_DRAG_SCENE, velocity, sceneStatus);
+    };
+    scrollBar_->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
+    InitScrollBarGestureEvent();
+    InitScrollBarMouseEvent();
+}
+
+void ScrollablePattern::InitScrollBarGestureEvent()
+{
+    auto gestureHub = GetGestureHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto inputHub = GetInputHub();
+    CHECK_NULL_VOID(inputHub);
+    scrollBar_->SetGestureEvent();
+    scrollBar_->SetMouseEvent();
+    scrollBar_->SetHoverEvent();
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
     inputHub->AddOnHoverEvent(scrollBar_->GetHoverEvent());
@@ -700,14 +712,6 @@ void ScrollablePattern::RegisterScrollBarEventTask()
             CHECK_NULL_RETURN(scrollBar, false);
             return scrollBar->InBarRectRegion(Point(point.GetX(), point.GetY()));
         });
-
-    auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        return pattern->NotifyFRCSceneInfo(SCROLL_BAR_DRAG_SCENE, velocity, sceneStatus);
-    };
-    scrollBar_->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
-    InitScrollBarMouseEvent();
 }
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)

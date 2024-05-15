@@ -689,7 +689,7 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
     SetSelectedValues(selectedValues, values, index, isHasSelectAttr, resultStr);
 
     if (!jsRangeValue->GetValueAt(selectedValues[index])->IsObject()) {
-        return false;
+        return true;
     }
     auto jsObj = JSRef<JSObject>::Cast(jsRangeValue->GetValueAt(selectedValues[index]));
     auto getChildren = jsObj->GetProperty("children");

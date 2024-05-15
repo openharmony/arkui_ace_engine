@@ -651,6 +651,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 
 void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
+    CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBackgroundColor(frameNode, color);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color, frameNode);
 }
@@ -877,6 +878,10 @@ void TextFieldModelNG::SetBackBorder()
     if (renderContext->HasBorderWidth()) {
         ACE_UPDATE_PAINT_PROPERTY(
             TextFieldPaintProperty, BorderWidthFlagByUser, renderContext->GetBorderWidth().value());
+    }
+    if (renderContext->HasBorderStyle()) {
+        ACE_UPDATE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderStyleFlagByUser, renderContext->GetBorderStyle().value());
     }
 }
 
@@ -1828,6 +1833,45 @@ void TextFieldModelNG::ResetNumberOfLines(FrameNode* frameNode)
     if (textFieldLayoutProperty) {
         textFieldLayoutProperty->ResetNumberOfLines();
     }
+}
+
+void TextFieldModelNG::SetBorderWidth(FrameNode* frameNode, NG::BorderWidthProperty borderWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderWidthFlagByUser, borderWidth, frameNode);
+}
+
+void TextFieldModelNG::SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderRadiusFlagByUser, borderRadius, frameNode);
+}
+
+void TextFieldModelNG::SetBorderColor(FrameNode* frameNode, NG::BorderColorProperty borderColors)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetBorderColor(frameNode, borderColors);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderColorFlagByUser, borderColors, frameNode);
+}
+
+void TextFieldModelNG::SetBorderStyle(FrameNode* frameNode, NG::BorderStyleProperty borderStyles)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetBorderStyle(frameNode, borderStyles);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderStyleFlagByUser, borderStyles, frameNode);
+}
+
+void TextFieldModelNG::SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin)
+{
+    CHECK_NULL_VOID(frameNode);
+    MarginProperty userMargin;
+    userMargin.top = margin.top;
+    userMargin.bottom = margin.bottom;
+    userMargin.left = margin.left;
+    userMargin.right = margin.right;
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin, frameNode);
 }
 
 } // namespace OHOS::Ace::NG

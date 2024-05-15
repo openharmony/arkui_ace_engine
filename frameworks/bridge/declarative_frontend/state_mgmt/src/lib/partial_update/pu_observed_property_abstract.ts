@@ -29,7 +29,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     static readonly delay_notification_pending = 2;
   };
   
-  private owningView_ : ViewPU = undefined;
+  private owningView_ : ViewPU;
   
   // PU code stores object references to dependencies directly as class variable
   // SubscriberManager is not used for lookup in PU code path to speedup updates
@@ -45,7 +45,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
     super(subscriber, viewName);
-    Object.defineProperty(this, 'owningView_', {writable: true, enumerable: false});
+    Object.defineProperty(this, 'owningView_', {writable: true, enumerable: false, value: undefined});
     Object.defineProperty(this, 'subscriberRefs_',
       {writable: true, enumerable: false, value: new Set<IPropertySubscriber>()});
     if(subscriber) {
@@ -63,7 +63,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     this.owningView_ = undefined;
   }
 
-  private decoratorInfo_: string = '';
+  private decoratorInfo_?: string;
 
   public setDecoratorInfo(decorate: string) {
     this.decoratorInfo_ = decorate;

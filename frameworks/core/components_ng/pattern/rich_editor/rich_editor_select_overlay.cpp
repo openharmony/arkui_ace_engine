@@ -50,6 +50,10 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetFirstHandleInfo()
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = pattern->textSelector_.firstHandle;
     handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+
+    auto localPaintRect = handleInfo.paintRect;
+    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+    SetTransformPaintInfo(handleInfo, localPaintRect);
     return handleInfo;
 }
 
@@ -60,6 +64,10 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetSecondHandleInfo()
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = pattern->textSelector_.secondHandle;
     handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+
+    auto localPaintRect = handleInfo.paintRect;
+    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+    SetTransformPaintInfo(handleInfo, localPaintRect);
     return handleInfo;
 }
 
@@ -111,13 +119,27 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     CHECK_NULL_VOID(!pattern->spans_.empty());
     TextSelectOverlay::OnHandleMove(handleRect, isFirst);
     auto parentGlobalOffset = pattern->GetParentGlobalOffset();
-    auto localOffset = handleRect.GetOffset() - parentGlobalOffset;
+    if (hasTransform_) {
+        parentGlobalOffset = GetPaintOffsetWithoutTransform();
+    }
+    auto localOffset = handleRect.GetOffset() - parentGlobalOffset; // original offset
+
+    // update moving handle offset
+    auto movingHandleOffset = pattern->ConvertTouchOffsetToTextOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+    auto movingHandleOffsetF = OffsetF(movingHandleOffset.GetX(), movingHandleOffset.GetY());
+    GetLocalPointWithTransform(movingHandleOffsetF); // do affine transformation
+    pattern->SetMovingHandleOffset(movingHandleOffsetF);
+
     auto contentRect = pattern->GetContentRect();
     auto caretRect = pattern->GetCaretRect();
     float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
     float y = std::clamp(localOffset.GetY(), contentRect.Top(), contentRect.Bottom() - caretRect.Height());
     localOffset = OffsetF(x, y);
-    pattern->magnifierController_->SetLocalOffset(localOffset);
+
+    auto magnifierLocalOffset = localOffset;
+    GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
+    pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
+
     if (isFirst) {
         pattern->textSelector_.firstHandle.SetOffset(localOffset);
     } else {
@@ -190,7 +212,14 @@ RectF RichEditorSelectOverlay::GetSelectArea()
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, {});
-    return pattern->GetSelectArea();
+    auto intersectRect = pattern->GetSelectArea();
+
+    if (hasTransform_) {
+        auto textPaintOffset = GetPaintOffsetWithoutTransform();
+        intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
+        GetGlobalRectWithTransform(intersectRect);
+    }
+    return intersectRect;
 }
 
 void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag)
@@ -238,7 +267,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     selectInfo.menuInfo.editorType = static_cast<int32_t>(pattern->GetEditorType());
     selectInfo.callerFrameNode = pattern->GetHost();
     selectInfo.isNewAvoid = true;
-    selectInfo.selectArea = pattern->GetSelectArea();
+    selectInfo.selectArea = GetSelectArea();
     selectInfo.checkIsTouchInHostArea =
     [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const PointF& touchPoint) -> bool {
         auto pattern = weak.Upgrade();
@@ -252,6 +281,12 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     selectInfo.recreateOverlay = requestCode == REQUEST_RECREATE;
     CheckEditorTypeChange(selectInfo, pattern->GetEditorType());
     pattern->CopySelectionMenuParams(selectInfo, responseType);
+    if (hasTransform_) {
+        selectInfo.callerNodeInfo = {
+            .paintFrameRect = GetPaintRectWithTransform(),
+            .paintOffset = GetPaintRectOffsetWithTransform()
+        };
+    }
 }
 
 void RichEditorSelectOverlay::CheckEditorTypeChange(SelectOverlayInfo& selectInfo, TextSpanType selectType)

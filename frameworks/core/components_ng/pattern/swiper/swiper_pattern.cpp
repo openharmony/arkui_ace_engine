@@ -74,6 +74,7 @@ constexpr Dimension SWIPER_GUTTER = 16.0_vp;
 constexpr float PX_EPSILON = 0.01f;
 constexpr float FADE_DURATION = 500.0f;
 constexpr float SPRING_DURATION = 600.0f;
+constexpr float DEFAULT_MINIMUM_AMPLITUDE_PX = 1.0f;
 constexpr int32_t INDEX_DIFF_TWO = 2;
 constexpr int32_t FIRST_CAPTURE_DELAY_TIME = 30;
 const std::string SWIPER_DRAG_SCENE = "swiper_drag_scene";
@@ -890,8 +891,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
         auto iter = itemPosition_.find(targetIndexValue);
         if (iter != itemPosition_.end()) {
-            float targetPos = 0.0f;
-            targetPos = iter->second.startPos;
+            float targetPos = iter->second.startPos + IgnoreBlankOffset(false);
             auto context = PipelineContext::GetCurrentContext();
             auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
             auto lastItemIndex = Positive(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx())
@@ -906,8 +906,8 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             }
             bool isNeedPlayTranslateAnimation =
                 translateAnimationIsRunning_ ||
-                (IsLoop() && itemPosition_.find(lastItemIndex) == itemPosition_.end()) || isNeedBackwardTranslate;
-            targetPos += IgnoreBlankOffset(false);
+                (IsLoop() && itemPosition_.find(lastItemIndex) == itemPosition_.end()) || isNeedBackwardTranslate ||
+                AutoLinearAnimationNeedReset(targetPos);
             if (context && !isNeedPlayTranslateAnimation && !SupportSwiperCustomAnimation()) {
                 // displayCount is auto, loop is false, if the content width less than windows size
                 // need offset to keep right aligned
@@ -918,20 +918,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                     ? CalculateVisibleSize() - iter->second.endPos + iter->second.startPos : 0.0;
                 targetPos -= offset;
 
-                auto nextIndex = iter->first;
-                auto stopAutoPlay = false;
-                if (AutoLinearAnimationNeedReset(targetPos)) {
-                    auto firstItem = GetFirstItemInfoInVisibleArea();
-                    nextIndex = firstItem.first;
-                    targetPos = firstItem.second.startPos;
-                    stopAutoPlay = true;
-                    autoLinearReachBoundary = true;
-                }
                 context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
-                                                nextIndex, stopAutoPlay]() {
+                                                nextIndex = iter->first]() {
                     auto swiper = weak.Upgrade();
                     CHECK_NULL_VOID(swiper);
-                    swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, stopAutoPlay);
+                    swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, false);
                     swiper->PlayIndicatorTranslateAnimation(-targetPos, nextIndex);
                 });
             } else {
@@ -944,6 +935,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                 (targetIndexValue - firstItem.first) * (placeItemWidth_.value() + GetItemSpace());
             PlayTranslateAnimation(
                 currentOffset_, currentOffset_ - targetPos, targetIndexValue, false, velocity_.value_or(0.0f));
+        } else {
+            // AutoLinear Mode
+            PlayTranslateAnimation(currentOffset_, currentOffset_ - swiperLayoutAlgorithm->GetTargetStartPos(),
+                targetIndexValue, false, velocity_.value_or(0.0f));
         }
         velocity_.reset();
         pauseTargetIndex_ = targetIndex_;
@@ -2735,7 +2730,15 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     AnimationOption option;
     option.SetDuration(GetDuration());
     motionVelocity_ = velocity / translate;
-    option.SetCurve(GetCurveIncludeMotion());
+    auto curve = GetCurveIncludeMotion();
+    auto minimumAmplitudeRatio = DEFAULT_MINIMUM_AMPLITUDE_PX / translate;
+    if (InstanceOf<InterpolatingSpring>(curve) &&
+        LessNotEqualCustomPrecision(
+            minimumAmplitudeRatio, InterpolatingSpring::DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO)) {
+        auto interpolatingSpring = AceType::DynamicCast<InterpolatingSpring>(curve);
+        interpolatingSpring->UpdateMinimumAmplitudeRatio(minimumAmplitudeRatio);
+    }
+    option.SetCurve(curve);
     option.SetFinishCallbackType(GetFinishCallbackType());
     OffsetF offset;
     if (GetDirection() == Axis::HORIZONTAL) {

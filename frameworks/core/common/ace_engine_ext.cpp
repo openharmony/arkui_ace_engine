@@ -18,11 +18,10 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
-
 AceEngineExt& AceEngineExt::GetInstance()
 {
     static AceEngineExt instance;
-    return instance;    
+    return instance;
 }
 
 void AceEngineExt::DragStartExt()

@@ -26,6 +26,7 @@ public:
     virtual ~BadgeModel() = default;
 
     virtual void Create(BadgeParameters& badgeParameters) = 0;
+    virtual void SetIsDefault(bool isDefaultFontSize, bool isDefaultBadgeSize) = 0;
 
 private:
     static std::unique_ptr<BadgeModel> instance_;

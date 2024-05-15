@@ -30,6 +30,7 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -67,6 +68,7 @@ const InspectorFilter filter;
 constexpr int32_t TARGET_ID = 3;
 constexpr MenuType TYPE = MenuType::MENU;
 constexpr int32_t SELECTED_INDEX = 10;
+constexpr int32_t DEFAULT_SYMBOL_ID = 983242;
 constexpr float CURRENT_OFFSET = -0.5f;
 const std::string EMPTY_TEXT = "";
 const std::string TEXT_TAG = "text";
@@ -2614,7 +2616,10 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.Level1)
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
 
     EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -2654,7 +2659,11 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.Level1)
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
 
     EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -2668,7 +2677,7 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.Level1)
     auto imageLayoutProperty = selectIconNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
     auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
-    ASSERT_FALSE(sourceInfo.has_value());
+    ASSERT_TRUE(sourceInfo.has_value());
 }
 
 /**
@@ -2700,7 +2709,11 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNgAddSelectIcon004, TestSize.Level1)
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
     EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -3418,6 +3431,98 @@ HWTEST_F(MenuTestNg, MenuItemViewTestNgCreate002, TestSize.Level1)
     ASSERT_TRUE(itemProperty->GetLabel().has_value());
     EXPECT_EQ(itemProperty->GetLabel().value(), "label");
 }
+
+/**
+ * @tc.name: MenuItemViewTestNgCreate003
+ * @tc.desc: Verify GetStartSymbol.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemViewTestNgCreate003, TestSize.Level1)
+{
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    MenuItemModelInstance.Create(itemOption);
+    MenuItemModelInstance.SetSelected(false);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
+    EXPECT_EQ(leftRow->GetChildren().size(), 0u);
+    auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
+    EXPECT_EQ(rightRow->GetChildren().size(), 0u);
+
+    auto symbolNode = FrameNode::CreateFrameNode(
+        V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(symbolNode, nullptr);
+    auto property = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    uint32_t symbolId = menuTheme->GetSymbolId();
+    ASSERT_NE(symbolId, 0);
+    property->UpdateSymbolSourceInfo(SymbolSourceInfo(symbolId));
+    auto symbolProps = symbolNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(symbolProps, nullptr);
+    EXPECT_EQ(symbolProps->GetStartSymbol(), nullptr);
+    EXPECT_EQ(symbolProps->GetEndSymbol(), nullptr);
+    leftRow = symbolNode;
+    rightRow = symbolNode;
+    EXPECT_NE(symbolProps->GetStartSymbol(), nullptr);
+    EXPECT_NE(symbolProps->GetEndSymbol(), nullptr);
+}
+
+/**
+ * @tc.name: MenuItemViewTestNgCreate004
+ * @tc.desc: Verify GetSelectIconSymbol.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemViewTestNgCreate004, TestSize.Level1)
+{
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    MenuItemModelInstance.Create(itemOption);
+    MenuItemModelInstance.SetSelected(false);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
+    EXPECT_EQ(leftRow->GetChildren().size(), 0u);
+    auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
+    EXPECT_EQ(rightRow->GetChildren().size(), 0u);
+
+    auto symbolNode = FrameNode::CreateFrameNode(
+        V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(symbolNode, nullptr);
+    auto property = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    uint32_t symbolId = menuTheme->GetSymbolId();
+    ASSERT_NE(symbolId, 0);
+    auto symbolProps = symbolNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    MenuItemModelInstance.SetSelected(true);
+
+    property->UpdateSymbolSourceInfo(SymbolSourceInfo(symbolId));
+    EXPECT_EQ(leftRow, symbolNode);
+    property->UpdateSymbolSourceInfo(SymbolSourceInfo(DEFAULT_SYMBOL_ID));
+    EXPECT_NE(leftRow, symbolNode);
+}
+
 
 /**
  * @tc.name: MenuItemViewTestNgSetSelectIcon001

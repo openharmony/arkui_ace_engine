@@ -32,6 +32,7 @@ constexpr Dimension SHEET_CLOSE_ICON_HEIGHT = 40.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_IMAGE_HEIGHT = 18.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_IMAGE_WIDTH = 18.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_TITLE_SPACE = 32.0_vp;
+constexpr Dimension SHEET_CLOSE_ICON_TITLE_SPACE_NEW = 8.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_RADIUS = 20.0_vp;
 constexpr Dimension SHEET_DRAG_BAR_WIDTH = 64.0_vp;
 constexpr Dimension SHEET_DRAG_BAR_HEIGHT = 16.0_vp;

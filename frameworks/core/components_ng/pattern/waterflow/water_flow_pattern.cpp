@@ -295,9 +295,9 @@ void WaterFlowPattern::CheckScrollable()
 {
     auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    SetScrollEnable(IsScrollable());
+    SetScrollEnabled(IsScrollable());
     if (!layoutProperty->GetScrollEnabled().value_or(IsScrollable())) {
-        SetScrollEnable(false);
+        SetScrollEnabled(false);
     }
 }
 

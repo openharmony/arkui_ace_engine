@@ -1446,14 +1446,10 @@ void XComponentPattern::EnableAnalyzer(bool enable)
         return;
     }
 
-    if (imageAnalyzerManager_) {
-        return;
-    }
-
+    CHECK_NULL_VOID(!imageAnalyzerManager_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::CANVAS);
-    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::XCOMPONENT);
 }
 
 void XComponentPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
@@ -1494,6 +1490,7 @@ void XComponentPattern::CreateAnalyzerOverlay()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->SetOverlayNode(nullptr);
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto pixelMap = context->GetThumbnailPixelMap();

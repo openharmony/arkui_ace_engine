@@ -381,7 +381,7 @@ void JSText::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    if (!ParseLengthMetricsToDimension(args, value)) {
+    if (!ParseLengthMetricsToPositiveDimension(args, value)) {
         value.Reset();
     }
     if (value.IsNegative()) {
@@ -884,9 +884,6 @@ void JSText::JsClip(const JSCallbackInfo& info)
 void JSText::SetFontFeature(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        return;
-    }
-    if (!info[0]->IsString()) {
         return;
     }
 

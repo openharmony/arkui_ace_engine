@@ -289,6 +289,11 @@ public:
         isFrameAnimation_ = isFrameAnimation;
     }
 
+    float GetTargetStartPos() const
+    {
+        return targetStartPos_;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
@@ -369,6 +374,8 @@ private:
     bool isMeasureOneMoreItem_ = false;
     bool isFrameAnimation_ = false;
     std::set<int32_t> measuredItems_;
+    // only be used in AutoLinear mode
+    float targetStartPos_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

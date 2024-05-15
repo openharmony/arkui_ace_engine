@@ -883,6 +883,8 @@ declare class ArkScrollComponent extends ArkComponent implements ScrollAttribute
     friction(value: number | Resource): ScrollAttribute;
     scrollSnap(value: ScrollSnapOptions): ScrollAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
+    initialOffset(value: OffsetOptions): this;
+    flingSpeedLimit(value: number): this;
 }
 declare class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1503,6 +1505,9 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
         data: RenderProcessNotRespondingData;
     }) => void): this;
     onRenderProcessResponding(callback: () => void): this;
+    onViewportFitChanged(callback: (event: {
+        viewportFit: ViewportFit;
+    }) => void): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;

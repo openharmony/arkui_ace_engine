@@ -441,10 +441,10 @@ void GridPattern::CheckScrollable()
         }
     }
 
-    SetScrollEnable(scrollable_);
+    SetScrollEnabled(scrollable_);
 
     if (!gridLayoutProperty->GetScrollEnabled().value_or(scrollable_)) {
-        SetScrollEnable(false);
+        SetScrollEnabled(false);
     }
 }
 

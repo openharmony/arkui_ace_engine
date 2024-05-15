@@ -1632,8 +1632,8 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         manager->ScrollTextFieldToSafeArea();
         FlushUITasks();
     };
-    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
-    Animate(option, option.GetCurve(), func);
+    FlushUITasks();
+    DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 }
 
 void PipelineContext::OriginalAvoidanceLogic(
@@ -1685,8 +1685,8 @@ void PipelineContext::OriginalAvoidanceLogic(
         manager->ScrollTextFieldToSafeArea();
         FlushUITasks();
     };
-    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
-    Animate(option, option.GetCurve(), func);
+    FlushUITasks();
+    DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
@@ -1759,9 +1759,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         manager->ScrollTextFieldToSafeArea();
         context->FlushUITasks();
     };
-    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
+    FlushUITasks();
     SetIsLayouting(true);
-    Animate(option, option.GetCurve(), func);
+    DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
@@ -3559,6 +3559,17 @@ RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
     return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
 }
 
+void PipelineContext::DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig,
+    float keyboardHeight, const std::function<void()>& func)
+{
+    if (isDoKeyboardAvoidAnimate_) {
+        AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
+        Animate(option, option.GetCurve(), func);
+    } else {
+        func();
+    }
+}
+
 Dimension PipelineContext::GetCustomTitleHeight()
 {
     auto containerModal = GetContainerModalNode();
@@ -3680,21 +3691,24 @@ void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
     auto windowManager = GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     auto mode = windowManager->GetWindowMode();
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto percent = SystemProperties::GetDarkModeBrightnessPercent();
+    auto stage = stageManager_->GetStageNode();
+    CHECK_NULL_VOID(stage);
+    auto renderContext = stage->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    CalcDimension dimension;
+    dimension.SetValue(1);
     if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
-        mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
-        auto percent = SystemProperties::GetDarkModeBrightnessPercent();
-        auto stage = stageManager_->GetStageNode();
-        CHECK_NULL_VOID(stage);
-        auto renderContext = stage->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        CalcDimension dimension;
+        mode != WindowMode::WINDOW_MODE_FULLSCREEN && !container->IsUIExtensionWindow()) {
         if (!isFocus && mode == WindowMode::WINDOW_MODE_FLOATING) {
             dimension.SetValue(1 + percent.second);
         } else {
             dimension.SetValue(1 + percent.first);
         }
-        renderContext->UpdateFrontBrightness(dimension);
     }
+    renderContext->UpdateFrontBrightness(dimension);
 }
 
 bool PipelineContext::IsContainerModalVisible()

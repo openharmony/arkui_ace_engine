@@ -341,12 +341,13 @@ void UpdateBarItemPattern(const RefPtr<BarItemNode>& barItemNode, const BarItem&
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    CHECK_NULL_VOID(barItemPattern);
     if (barItem.status == NG::NavToolbarItemStatus::ACTIVE &&
         ((barItem.activeIcon.has_value() && !barItem.activeIcon.value().empty()) ||
             (barItem.activeIconSymbol.has_value() && barItem.activeIconSymbol.value() != nullptr)) &&
         ((barItem.icon.has_value() && !barItem.icon.value().empty()) ||
             (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr))) {
-        if (barItem.iconSymbol.has_value()) {
+        if (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr) {
             barItemPattern->SetInitialIconSymbol(barItem.iconSymbol.value());
         } else if (barItem.icon.has_value()) {
             ImageSourceInfo initialIconInfo(barItem.icon.value());
@@ -354,7 +355,7 @@ void UpdateBarItemPattern(const RefPtr<BarItemNode>& barItemNode, const BarItem&
             barItemPattern->SetInitialIconImageSourceInfo(initialIconInfo);
         }
 
-        if (barItem.activeIconSymbol.has_value()) {
+        if (barItem.activeIconSymbol.has_value() && barItem.activeIconSymbol.value() != nullptr) {
             barItemPattern->SetActiveIconSymbol(barItem.activeIconSymbol.value());
         } else if (barItem.activeIcon.has_value()) {
             ImageSourceInfo activeIconInfo(barItem.activeIcon.value());
@@ -677,7 +678,8 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         navBarNode->SetNavBarContentNode(navBarContentNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+                .edges = SAFE_AREA_EDGE_ALL };
             navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
     }
@@ -729,7 +731,8 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         navigationGroupNode->SetDividerNode(dividerNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+                .edges = SAFE_AREA_EDGE_ALL };
             dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
 
@@ -1540,6 +1543,9 @@ void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& va
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->SetUserSetNavBarWidthFlag(true);
+    if (navigationPattern->GetInitNavBarWidth() != value) {
+        navigationPattern->SetInitNavBarWidth(value);
+    }
 }
 
 void NavigationModelNG::SetNavBarPosition(FrameNode* frameNode, NG::NavBarPosition mode)
@@ -1553,8 +1559,9 @@ void NavigationModelNG::SetUsrNavigationMode(FrameNode* frameNode, NavigationMod
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, UsrNavigationMode, mode, frameNode);
 }
 
-void NavigationModelNG::SetBackButtonIcon(
-    FrameNode* frameNode, const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+void NavigationModelNG::SetBackButtonIcon(FrameNode* frameNode,
+    const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src, bool noPixMap,
+    RefPtr<PixelMap>& pixMap)
 {
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1573,6 +1580,7 @@ void NavigationModelNG::SetBackButtonIcon(
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
     titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
+    titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarNode->MarkModifyDone();
 }
 

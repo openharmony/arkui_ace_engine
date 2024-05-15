@@ -652,6 +652,16 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkProgressComponent(node, type);
       })
     }],
+    ["Scroll", (context: UIContext) => {
+      return new TypedFrameNode(context, "Scroll", (node: NodePtr, type: ModifierType) => {
+        return new ArkScrollComponent(node, type);
+      })
+    }],
+    ["RelativeContainer", (context: UIContext) => {
+      return new TypedFrameNode(context, "RelativeContainer", (node: NodePtr, type: ModifierType) => {
+        return new ArkRelativeContainerComponent(node, type);
+          })
+    }],
     ["List", (context: UIContext) => {
       return new TypedFrameNode(context, "List", (node: NodePtr, type: ModifierType) => {
         return new ArkListComponent(node, type);
@@ -660,6 +670,16 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
     ["ListItem", (context: UIContext) => {
       return new TypedFrameNode(context, "ListItem", (node: NodePtr, type: ModifierType) => {
         return new ArkListItemComponent(node, type);
+      })
+    }],
+    ["Divider", (context: UIContext) => {
+      return new TypedFrameNode(context, "Divider", (node: NodePtr, type: ModifierType) => {
+        return new ArkDividerComponent(node, type);
+      })
+    }],
+    ["LoadingProgress", (context: UIContext) => {
+      return new TypedFrameNode(context, "LoadingProgress", (node: NodePtr, type: ModifierType) => {
+        return new ArkLoadingProgressComponent(node, type);
       })
     }],
   ]

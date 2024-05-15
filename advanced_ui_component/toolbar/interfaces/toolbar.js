@@ -37,21 +37,15 @@ let __decorate = this && this.__decorate || function (e, t, o, r) {
   return i > REFLECT_MAX_COUNT && a && Object.defineProperty(t, o, a), a;
 };
 export let ItemState;
-!function(e) {
-  e[e.ENABLE = 1] = 'ENABLE';
-  e[e.DISABLE = 2] = 'DISABLE';
-  e[e.ACTIVATE = 3] = 'ACTIVATE';
-}(ItemState || (ItemState = {}));
-const PUBLIC_MORE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAA' +
-  'IGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IAr' +
-  's4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAYFJREFUeNrt3CFLQ1EUB/CpCwYRo8' +
-  'G4j2IwCNrUYjH4AfwcfgBBwWZRMNgtFqPdILJgEhGDweAZvDjmJnfv3I3fD/5l3DfOfWdv23vhdDoAAAAAAAAwzxa' +
-  'm9L5rkePIdmSjee05chu5iHxXej5ar3saDdiJXDabGaYfOYg8VHbyU+peKryJvch1ZHnEmtXIYeQ+8lrJyU+re7Hg' +
-  'JtYj52Ou7Uau/thwW1LrLtmAk8jKBOsH37FHFTQgte6SDdht6ZjSUusu2YBeS8eUllr3YvLmuzP6971bYwP6/zjmpY' +
-  'KTmVp3yQbctXRMaal1l2zAaeRngvUfkbMKGpBad8kbsffIZ2RrzPX7kacKGpBad+k74cfmE7I54ur6au4obyr6UU2r' +
-  'e1oP43rNDc6wh1qDS/6t0n83s1o3AAAAAAAAAAAAAEAysyKS6zYrIrlusyKS6zYrwqyIdGZFJDMrIplZETPIrIh5qdu' +
-  'sCLMi0pkVkcysiAqYFVEJsyIAAAAAAAAAKOYXUlF8EUcdfbsAAAAASUVORK5CYII=';
-let ToolBarOption = class {
+(function (j3) {
+  j3[j3['ENABLE'] = 1] = 'ENABLE';
+  j3[j3['DISABLE'] = 2] = 'DISABLE';
+  j3[j3['ACTIVATE'] = 3] = 'ACTIVATE';
+})(ItemState || (ItemState = {}));
+
+const PUBLIC_MORE = { id: -1, type: 20000, params: ['sys.media.ohos_ic_public_more'], bundleName: '', moduleName: '' };
+
+let ToolBarOption = class ToolBarOption {
   constructor() {
     this.content = '';
     this.action = undefined;
@@ -59,22 +53,28 @@ let ToolBarOption = class {
     this.state = 1;
   }
 };
-ToolBarOption = __decorate([Observed], ToolBarOption);
 
+ToolBarOption = __decorate([
+  Observed
+], ToolBarOption);
 export { ToolBarOption };
-let ToolBarOptions = class extends Array {
+let ToolBarOptions = class ToolBarOptions extends Array {
 };
-ToolBarOptions = __decorate([Observed], ToolBarOptions);
-
+ToolBarOptions = __decorate([
+  Observed
+], ToolBarOptions);
 export { ToolBarOptions };
 
 export class ToolBar extends ViewPU {
-  constructor(e, t, o, r = -1) {
-    super(e, o, r);
-    this.__toolBarList = new SynchedPropertyNesedObjectPU(t.toolBarList, this, 'toolBarList');
+  constructor(d3, e3, f3, g3 = -1, h3 = undefined, i3) {
+    super(d3, f3, g3, i3);
+    if (typeof h3 === 'function') {
+      this.paramsGenerator_ = h3;
+    }
+    this.__toolBarList = new SynchedPropertyNesedObjectPU(e3.toolBarList, this, 'toolBarList');
     this.controller = new TabsController();
-    this.__activateIndex = new SynchedPropertySimpleOneWayPU(t.activateIndex, this, 'activateIndex');
-    this.__moreText = new SynchedPropertySimpleOneWayPU(t.moreText, this, 'moreText');
+    this.__activateIndex = new SynchedPropertySimpleOneWayPU(e3.activateIndex, this, 'activateIndex');
+    this.__moreText = new SynchedPropertySimpleOneWayPU(e3.moreText, this, 'moreText');
     this.__menuContent = new ObservedPropertyObjectPU([], this, 'menuContent');
     this.toolBarItemBackground = [];
     this.__itemBackground = new ObservedPropertyObjectPU({
@@ -84,31 +84,88 @@ export class ToolBar extends ViewPU {
       bundleName: '',
       moduleName: '',
     }, this, 'itemBackground');
-    this.setInitiallyProvidedValue(t);
+    this.__iconPrimaryColor = new ObservedPropertyObjectPU({
+      id: -1,
+      type: 10001,
+      params: ['sys.color.icon_primary'],
+      bundleName: '',
+      moduleName: '',
+    }, this, 'iconPrimaryColor');
+    this.__iconActivePrimaryColor = new ObservedPropertyObjectPU({
+      id: -1,
+      type: 10001,
+      params: ['sys.color.icon_emphasize'],
+      bundleName: '',
+      moduleName: '',
+    }, this, 'iconActivePrimaryColor');
+    this.__fontPrimaryColor = new ObservedPropertyObjectPU({
+      id: -1,
+      type: 10001,
+      params: ['sys.color.font_primary'],
+      bundleName: '',
+      moduleName: '',
+    }, this, 'fontPrimaryColor');
+    this.__fontActivatedPrimaryColor = new ObservedPropertyObjectPU({
+      id: -1,
+      type: 10001,
+      params: ['sys.color.font_emphasize'],
+      bundleName: '',
+      moduleName: '',
+    }, this, 'fontActivatedPrimaryColor');
+    this.setInitiallyProvidedValue(e3);
+    this.finalizeConstruction();
   }
 
-  setInitiallyProvidedValue(e) {
-    this.__toolBarList.set(e.toolBarList);
-    void 0 !== e.controller && (this.controller = e.controller);
-    void 0 !== e.activateIndex ? this.__activateIndex.set(e.activateIndex) : this.__activateIndex.set(-1);
-    void 0 !== e.moreText ? this.__moreText.set(e.moreText) : this.__moreText.set("更多");
-    void 0 !== e.menuContent && (this.menuContent = e.menuContent);
-    void 0 !== e.toolBarItemBackground && (this.toolBarItemBackground = e.toolBarItemBackground);
-    void 0 !== e.itemBackground && (this.itemBackground = e.itemBackground);
+  setInitiallyProvidedValue(c3) {
+    this.__toolBarList.set(c3.toolBarList);
+    if (c3.controller !== undefined) {
+      this.controller = c3.controller;
+    }
+    if (c3.activateIndex === undefined) {
+      this.__activateIndex.set(-1);
+    }
+    if (c3.moreText === undefined) {
+      this.__moreText.set('更多');
+    }
+    if (c3.menuContent !== undefined) {
+      this.menuContent = c3.menuContent;
+    }
+    if (c3.toolBarItemBackground !== undefined) {
+      this.toolBarItemBackground = c3.toolBarItemBackground;
+    }
+    if (c3.itemBackground !== undefined) {
+      this.itemBackground = c3.itemBackground;
+    }
+    if (c3.iconPrimaryColor !== undefined) {
+      this.iconPrimaryColor = c3.iconPrimaryColor;
+    }
+    if (c3.iconActivePrimaryColor !== undefined) {
+      this.iconActivePrimaryColor = c3.iconActivePrimaryColor;
+    }
+    if (c3.fontPrimaryColor !== undefined) {
+      this.fontPrimaryColor = c3.fontPrimaryColor;
+    }
+    if (c3.fontActivatedPrimaryColor !== undefined) {
+      this.fontActivatedPrimaryColor = c3.fontActivatedPrimaryColor;
+    }
   }
 
-  updateStateVars(e) {
-    this.__toolBarList.set(e.toolBarList);
-    this.__activateIndex.reset(e.activateIndex);
-    this.__moreText.reset(e.moreText)
+  updateStateVars(b3) {
+    this.__toolBarList.set(b3.toolBarList);
+    this.__activateIndex.reset(b3.activateIndex);
+    this.__moreText.reset(b3.moreText);
   }
 
-  purgeVariableDependenciesOnElmtId(e) {
-    this.__toolBarList.purgeDependencyOnElmtId(e);
-    this.__activateIndex.purgeDependencyOnElmtId(e);
-    this.__moreText.purgeDependencyOnElmtId(e);
-    this.__menuContent.purgeDependencyOnElmtId(e);
-    this.__itemBackground.purgeDependencyOnElmtId(e);
+  purgeVariableDependenciesOnElmtId(a3) {
+    this.__toolBarList.purgeDependencyOnElmtId(a3);
+    this.__activateIndex.purgeDependencyOnElmtId(a3);
+    this.__moreText.purgeDependencyOnElmtId(a3);
+    this.__menuContent.purgeDependencyOnElmtId(a3);
+    this.__itemBackground.purgeDependencyOnElmtId(a3);
+    this.__iconPrimaryColor.purgeDependencyOnElmtId(a3);
+    this.__iconActivePrimaryColor.purgeDependencyOnElmtId(a3);
+    this.__fontPrimaryColor.purgeDependencyOnElmtId(a3);
+    this.__fontActivatedPrimaryColor.purgeDependencyOnElmtId(a3);
   }
 
   aboutToBeDeleted() {
@@ -117,6 +174,10 @@ export class ToolBar extends ViewPU {
     this.__moreText.aboutToBeDeleted();
     this.__menuContent.aboutToBeDeleted();
     this.__itemBackground.aboutToBeDeleted();
+    this.__iconPrimaryColor.aboutToBeDeleted();
+    this.__iconActivePrimaryColor.aboutToBeDeleted();
+    this.__fontPrimaryColor.aboutToBeDeleted();
+    this.__fontActivatedPrimaryColor.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -129,242 +190,196 @@ export class ToolBar extends ViewPU {
     return this.__activateIndex.get();
   }
 
-  set activateIndex(e) {
-    this.__activateIndex.set(e);
+  set activateIndex(z2) {
+    this.__activateIndex.set(z2);
   }
 
   get moreText() {
-    return this.__moreText.get()
+    return this.__moreText.get();
   }
 
-  set moreText(e) {
-    this.__moreText.set(e)
+  set moreText(y2) {
+    this.__moreText.set(y2);
   }
 
   get menuContent() {
     return this.__menuContent.get();
   }
 
-  set menuContent(e) {
-    this.__menuContent.set(e);
+  set menuContent(x2) {
+    this.__menuContent.set(x2);
   }
 
   get itemBackground() {
     return this.__itemBackground.get();
   }
 
-  set itemBackground(e) {
-    this.__itemBackground.set(e);
+  set itemBackground(w2) {
+    this.__itemBackground.set(w2);
   }
 
-  MoreTabBuilder(e, t = null) {
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+  get iconPrimaryColor() {
+    return this.__iconPrimaryColor.get();
+  }
+
+  set iconPrimaryColor(v2) {
+    this.__iconPrimaryColor.set(v2);
+  }
+
+  get iconActivePrimaryColor() {
+    return this.__iconActivePrimaryColor.get();
+  }
+
+  set iconActivePrimaryColor(u2) {
+    this.__iconActivePrimaryColor.set(u2);
+  }
+
+  get fontPrimaryColor() {
+    return this.__fontPrimaryColor.get();
+  }
+
+  set fontPrimaryColor(t2) {
+    this.__fontPrimaryColor.set(t2);
+  }
+
+  get fontActivatedPrimaryColor() {
+    return this.__fontActivatedPrimaryColor.get();
+  }
+
+  set fontActivatedPrimaryColor(s2) {
+    this.__fontActivatedPrimaryColor.set(s2);
+  }
+
+  onWillApplyTheme(r2) {
+    this.iconPrimaryColor = r2.colors.iconPrimary;
+    this.iconActivePrimaryColor = r2.colors.iconEmphasize;
+    this.fontPrimaryColor = r2.colors.fontPrimary;
+    this.fontActivatedPrimaryColor = r2.colors.fontEmphasize;
+  }
+
+  MoreTabBuilder(g2, h2 = null) {
+    this.observeComponentCreation2((p2, q2) => {
       Column.create();
       Column.width('100%');
       Column.height('100%');
       Column.padding({ left: 4, right: 4 });
-      Column.borderRadius({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_corner_radius_clicked'],
-        bundleName: '',
-        moduleName: '',
-      });
-      t || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      Column.borderRadius({ id: -1, type: 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
+        bundleName: '', moduleName: '' });
+    }, Column);
+    this.observeComponentCreation2((n2, o2) => {
       Image.create(PUBLIC_MORE);
-      Image.width(IMAGE_SIZE_WIDTH_HEIGHT);
-      Image.height(IMAGE_SIZE_WIDTH_HEIGHT);
-      Image.fillColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_toolbar_icon'],
-        bundleName: '',
-        moduleName: '',
-      });
+      Image.width(24);
+      Image.height(24);
+      Image.fillColor(ObservedObject.GetRawObject(this.iconPrimaryColor));
       Image.margin({ top: 8, bottom: 2 });
       Image.objectFit(ImageFit.Contain);
       Image.bindMenu(ObservedObject.GetRawObject(this.menuContent), { offset: { x: 5, y: -10 } });
-      t || Image.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    }, Image);
+    this.observeComponentCreation2((l2, m2) => {
       Text.create(this.moreText);
-      Text.fontColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_toolbar_text'],
-        bundleName: '',
-        moduleName: '',
-      });
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_caption'],
-        bundleName: '',
-        moduleName: '',
-      });
+      Text.fontColor(ObservedObject.GetRawObject(this.fontPrimaryColor));
+      Text.fontSize({ id: -1, type: 10002, params: ['sys.float.ohos_id_text_size_caption'],
+        bundleName: '', moduleName: '' });
       Text.fontWeight(FontWeight.Medium);
-      t || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
+    }, Text);
     Text.pop();
     Column.pop();
   }
 
-  TabBuilder(e, t = null) {
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
+  TabBuilder(r1, s1 = null) {
+    this.observeComponentCreation2((a2, b2) => {
       Column.create();
       Column.width('100%');
       Column.height('100%');
-      Column.focusable(!(ITEM_DISABLE_STATE === this.toolBarList[e]?.state));
-      Column.focusOnTouch(!(ITEM_DISABLE_STATE === this.toolBarList[e]?.state));
+      Column.focusable(!(this.toolBarList[r1]?.state === 2));
+      Column.focusOnTouch(!(this.toolBarList[r1]?.state === 2));
       Column.padding({ left: 4, right: 4 });
       Column.borderRadius({
-        id: -1,
-        type: 10002,
+        id: -1, type: 10002,
         params: ['sys.float.ohos_id_corner_radius_clicked'],
-        bundleName: '',
-        moduleName: '',
-      });
+        bundleName: '', moduleName: '' });
       Column.backgroundColor(ObservedObject.GetRawObject(this.itemBackground));
-      Column.onClick((() => {
-        let toolBar = this.toolBarList[e];
-        if (ITEM_DISABLE_ACTIVATE === toolBar.state) {
-          this.activateIndex === e ? this.activateIndex = -1 : this.activateIndex = e;
+      Column.onClick(() => {
+        let f2 = this.toolBarList[r1];
+        if (f2.state === ItemState.ACTIVATE) {
+          if (this.activateIndex === r1)
+            this.activateIndex = -1;
+          else {
+            this.activateIndex = r1;
+          }
         }
-        if (ITEM_DISABLE_STATE !== toolBar.state) {
-          toolBar.action && toolBar.action();
+        if (!(f2.state === ItemState.DISABLE)) {
+          f2.action && f2.action();
         }
-      }));
-      Column.onHover((t => {
-        this.toolBarItemBackground[e] = t ? ITEM_DISABLE_STATE === this.toolBarList[e]?.state ? {
-          id: -1,
-          type: 10001,
-          params: ['sys.color.ohos_id_color_toolbar_bg'],
-          bundleName: '',
-          moduleName: '',
-        } : {
-          id: -1,
-          type: 10001,
-          params: ['sys.color.ohos_id_color_hover'],
-          bundleName: '',
-          moduleName: '',
-        } : {
-          id: -1,
-          type: 10001,
-          params: ['sys.color.ohos_id_color_toolbar_bg'],
-          bundleName: '',
-          moduleName: '',
-        };
-        this.itemBackground = this.toolBarItemBackground[e];
-      }));
+      });
+      Column.onHover((e2) => {
+        if (e2) {
+          this.toolBarItemBackground[r1] = (this.toolBarList[r1]?.state === ItemState.DISABLE) ?
+            { id: -1, type: 10001,
+              params: ['sys.color.ohos_id_color_toolbar_bg'],
+              bundleName: '', moduleName: '' } :
+            { id: -1, type: 10001, params: ['sys.color.ohos_id_color_hover'],
+              bundleName: '', moduleName: '' };
+        }
+        else {
+          this.toolBarItemBackground[r1] = { id: -1, type: 10001, params: ['sys.color.ohos_id_color_toolbar_bg'],
+            bundleName: '', moduleName: '' };
+        }
+        this.itemBackground = this.toolBarItemBackground[r1];
+      });
       ViewStackProcessor.visualState('pressed');
-      Column.backgroundColor(ITEM_DISABLE_STATE === this.toolBarList[e]?.state ? this.toolBarItemBackground[e] : {
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_click_effect'],
-        bundleName: '',
-        moduleName: '',
-      });
-      ViewStackProcessor.visualState('normal');
-      Column.backgroundColor(this.toolBarItemBackground[e]);
+      Column.backgroundColor((this.toolBarList[r1]?.state === ItemState.DISABLE) ?
+      this.toolBarItemBackground[r1] : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'],
+          'bundleName': '', 'moduleName': '' });
+      ViewStackProcessor.visualState("normal");
+      Column.backgroundColor(this.toolBarItemBackground[r1]);
       ViewStackProcessor.visualState();
-      o || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Image.create(this.toolBarList[e]?.icon);
-      Image.width(IMAGE_SIZE_WIDTH_HEIGHT);
-      Image.height(IMAGE_SIZE_WIDTH_HEIGHT);
-      Image.fillColor(this.activateIndex === e && ITEM_DISABLE_STATE !== this.toolBarList[e]?.state ? {
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_text_primary_activated'],
-        bundleName: '',
-        moduleName: '',
-      } : {
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_primary'],
-        bundleName: '',
-        moduleName: '',
-      });
-      Image.opacity(ITEM_DISABLE_STATE === this.toolBarList[e]?.state ? DISABLE_OPACITY : 1);
+    }, Column);
+    this.observeComponentCreation2((y1, z1) => {
+      Image.create(this.toolBarList[r1]?.icon);
+      Image.width(24);
+      Image.height(24);
+      Image.fillColor(this.activateIndex === r1 && !(this.toolBarList[r1]?.state === 2)
+        ? this.iconActivePrimaryColor : this.iconPrimaryColor);
+      Image.opacity((this.toolBarList[r1]?.state === 2) ? 0.4 : 1);
       Image.margin({ top: 8, bottom: 2 });
       Image.objectFit(ImageFit.Contain);
-      o || Image.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
-      Text.create(this.toolBarList[e]?.content);
-      Text.fontColor(this.activateIndex === e && ITEM_DISABLE_STATE !== this.toolBarList[e]?.state ? {
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_toolbar_text_actived'],
-        bundleName: '',
-        moduleName: '',
-      } : {
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_toolbar_text'],
-        bundleName: '',
-        moduleName: '',
-      });
-      Text.fontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_caption'],
-        bundleName: '',
-        moduleName: '',
-      });
-      Text.maxFontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_caption'],
-        bundleName: '',
-        moduleName: '',
-      });
-      Text.minFontSize(TEXT_MIN_SIZE);
+    }, Image);
+    this.observeComponentCreation2((w1, x1) => {
+      Text.create(this.toolBarList[r1]?.content);
+      Text.fontColor(this.activateIndex === r1 && !(this.toolBarList[r1]?.state === 2)
+        ? this.fontActivatedPrimaryColor : this.fontPrimaryColor);
+      Text.fontSize({ id: -1, type: 10002, params: ['sys.float.ohos_id_text_size_caption'],
+        bundleName: '', moduleName: '' });
+      Text.maxFontSize({ id: -1, type: 10002, params: ['sys.float.ohos_id_text_size_caption'],
+        bundleName: '', moduleName: '' });
+      Text.minFontSize(9);
       Text.fontWeight(FontWeight.Medium);
-      Text.maxLines(TEXT_MAX_LINES);
+      Text.maxLines(2);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.opacity(ITEM_DISABLE_STATE === this.toolBarList[e]?.state ? DISABLE_OPACITY : 1);
-      o || Text.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
+      Text.opacity((this.toolBarList[r1]?.state === 2) ? 0.4 : 1);
+    }, Text);
     Text.pop();
     Column.pop();
   }
 
   refreshData() {
     this.menuContent = [];
-    for (let e = 0; e < this.toolBarList.length; e++) {
-      if (e >= TOOLBAR_LIST_NORMORL && this.toolBarList.length > TOOLBAR_LIST_LENGTH) {
-        this.menuContent[e - TOOLBAR_LIST_NORMORL] = {
-          value: this.toolBarList[e].content,
-          action: this.toolBarList[e].action
+    for (let q1 = 0; q1 < this.toolBarList.length; q1++) {
+      if (q1 >= 4 && this.toolBarList.length > 5) {
+        this.menuContent[q1 - 4] = {
+          value: this.toolBarList[q1].content,
+          action: this.toolBarList[q1].action,
         };
-      } else {
-        this.toolBarItemBackground[e] = {
-          id: -1,
-          type: 10001,
+      }
+      else {
+        this.toolBarItemBackground[q1] = { id: -1, type: 10001,
           params: ['sys.color.ohos_id_color_toolbar_bg'],
-          bundleName: '',
-          moduleName: '',
-        };
+          bundleName: '', moduleName: '' };
         this.menuContent = [];
       }
     }
-    return !0;
+    return true;
   }
 
   aboutToAppear() {
@@ -372,114 +387,93 @@ export class ToolBar extends ViewPU {
   }
 
   initialRender() {
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    this.observeComponentCreation2((o1, p1) => {
       Column.create();
-      t || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    }, Column);
+    this.observeComponentCreation2((m1, n1) => {
       Divider.create();
       Divider.width('100%');
       Divider.height(1);
-      t || Divider.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    }, Divider);
+    this.observeComponentCreation2((k1, l1) => {
       Column.create();
       Column.width('100%');
-      t || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    }, Column);
+    this.observeComponentCreation2((g1, h1) => {
       Tabs.create({ barPosition: BarPosition.End, controller: this.controller });
-      Tabs.vertical(!1);
+      Tabs.vertical(false);
       Tabs.constraintSize({ minHeight: 56, maxHeight: 56 });
       Tabs.barMode(BarMode.Fixed);
-      Tabs.onChange((e => {
-      }));
-      Tabs.width('100%');
-      Tabs.padding({ left: this.toolBarList.length < 5 ? 24: 0, right: this.toolBarList.length < 5 ? 24: 0})
-      Tabs.backgroundColor({
-        id: -1,
-        type: 10001,
-        params: ['sys.color.ohos_id_color_toolbar_bg'],
-        bundleName: '',
-        moduleName: ''
+      Tabs.onChange((j1) => {
       });
-      t || Tabs.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      Tabs.width('100%');
+      Tabs.padding({ left: this.toolBarList.length < 5 ? 24 : 0, right: this.toolBarList.length < 5 ? 24 : 0 });
+      Tabs.backgroundColor({
+        id: -1, type: 10001,
+        params: ['sys.color.ohos_id_color_toolbar_bg'],
+        bundleName: '', moduleName: '',
+      });
+    }, Tabs);
+    this.observeComponentCreation2((n, o) => {
       ForEach.create();
-      this.forEachUpdateFunction(e, this.toolBarList, ((e, t) => {
-        this.observeComponentCreation(((e, o) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
+      const p = (r, s) => {
+        const t = r;
+        this.observeComponentCreation2((v, w) => {
           If.create();
-          this.toolBarList.length <= TOOLBAR_LIST_LENGTH ? this.ifElseBranchUpdateFunction(0, (() => {
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              TabContent.create();
-              TabContent.tabBar({
-                builder: () => {
-                  this.TabBuilder.call(this, t);
-                }
-              });
-              TabContent.enabled(!(ITEM_DISABLE_STATE === this.toolBarList[t]?.state));
-              TabContent.focusOnTouch(!(ITEM_DISABLE_STATE === this.toolBarList[t]?.state));
-              o || TabContent.pop();
-              ViewStackProcessor.StopGetAccessRecording();
-            }));
-            TabContent.pop();
-          })) : t < TOOLBAR_LIST_NORMORL && this.ifElseBranchUpdateFunction(1, (() => {
-            this.observeComponentCreation(((e, o) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(e);
-              TabContent.create();
-              TabContent.tabBar({
-                builder: () => {
-                  this.TabBuilder.call(this, t);
-                }
-              });
-              TabContent.enabled(!(ITEM_DISABLE_STATE === this.toolBarList[t]?.state));
-              TabContent.focusOnTouch(!(ITEM_DISABLE_STATE === this.toolBarList[t]?.state));
-              o || TabContent.pop();
-              ViewStackProcessor.StopGetAccessRecording();
-            }));
-            TabContent.pop();
-          }));
-          o || If.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
+          if (this.toolBarList.length <= 5) {
+            this.ifElseBranchUpdateFunction(0, () => {
+              this.observeComponentCreation2((e1, f1) => {
+                TabContent.create();
+                TabContent.tabBar({ builder: () => {
+                  this.TabBuilder.call(this, s);
+                } });
+                TabContent.enabled(!(this.toolBarList[s]?.state === 2));
+                TabContent.focusOnTouch(!(this.toolBarList[s]?.state === 2));
+              }, TabContent);
+              TabContent.pop();
+            });
+          }
+          else if (s < 4) {
+            this.ifElseBranchUpdateFunction(1, () => {
+              this.observeComponentCreation2((a1, b1) => {
+                TabContent.create();
+                TabContent.tabBar({ builder: () => {
+                  this.TabBuilder.call(this, s);
+                } });
+                TabContent.enabled(!(this.toolBarList[s]?.state === 2));
+                TabContent.focusOnTouch(!(this.toolBarList[s]?.state === 2));
+              }, TabContent);
+              TabContent.pop();
+            });
+          }
+          else {
+            this.ifElseBranchUpdateFunction(2, () => {
+            });
+          }
+        }, If);
         If.pop();
-      }), void 0, !0, !1);
-      t || ForEach.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
+      };
+      this.forEachUpdateFunction(n, this.toolBarList, p, undefined, true, false);
+    }, ForEach);
     ForEach.pop();
-    this.observeComponentCreation(((e, t) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    this.observeComponentCreation2((g, h) => {
       If.create();
-      this.refreshData() && this.toolBarList.length > TOOLBAR_LIST_LENGTH ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((e, t) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(e);
-          TabContent.create();
-          TabContent.tabBar({
-            builder: () => {
-              this.MoreTabBuilder.call(this, TOOLBAR_LIST_NORMORL);
-            }
-          });
-          t || TabContent.pop();
-          ViewStackProcessor.StopGetAccessRecording();
-        }));
-        TabContent.pop();
-      })) : If.branchId(1);
-      t || If.pop();
-      ViewStackProcessor.StopGetAccessRecording();
-    }));
+      if (this.refreshData() && this.toolBarList.length > 5) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation2((l, m) => {
+            TabContent.create();
+            TabContent.tabBar({ builder: () => {
+              this.MoreTabBuilder.call(this, 4);
+            } });
+          }, TabContent);
+          TabContent.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+        });
+      }
+    }, If);
     If.pop();
     Tabs.pop();
     Column.pop();

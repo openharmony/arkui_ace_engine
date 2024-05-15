@@ -52,6 +52,7 @@ struct WebEvent : Event {
     EventMarker nativeEmbedGestureEventId;
     EventMarker renderProcessNotRespondingId;
     EventMarker renderProcessRespondingId;
+    EventMarker viewportFitChangedId;
 };
 
 struct WebMethod : Method {
@@ -378,6 +379,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.renderProcessRespondingId;
+    }
+
+    void SetViewportFitChangedId(const EventMarker& viewportFitChangedId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.viewportFitChangedId = viewportFitChangedId;
+    }
+
+    const EventMarker& GetViewportFitChangedId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.viewportFitChangedId;
     }
 
 protected:

@@ -133,4 +133,7 @@ void PatternLockModelImpl::SetStrokeWidth(const Dimension& lineWidth)
     }
 }
 
+void PatternLockModelImpl::SetActiveCircleColor(const Color& activeCircleColor) {};
+void PatternLockModelImpl::SetActiveCircleRadius(const Dimension& activeCircleRadius) {};
+void PatternLockModelImpl::SetEnableWaveEffect(bool enableWaveEffect) {};
 } // namespace OHOS::Ace::Framework
