@@ -999,6 +999,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         container->SetToken(token);
     }
 
+    if (appInfo) {
+        container->SetApiTargetVersion(appInfo->apiTargetVersion);
+    }
+
     // Mark the relationship between windowId and containerId, it is 1:1
     if (window) {
         SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
@@ -1503,6 +1507,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetBundleName(hapModuleInfo->bundleName);
     container->SetModuleName(hapModuleInfo->moduleName);
     container->SetIsModule(hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
+    container->SetApiTargetVersion(apiTargetVersion);
 
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
