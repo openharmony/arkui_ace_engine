@@ -45,7 +45,9 @@
 namespace OHOS::Ace::NG {
 RefPtr<FocusManager> FocusHub::GetFocusManager() const
 {
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto context = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(context, nullptr);
     auto focusManager = context->GetOrCreateFocusManager();
     return focusManager;
@@ -167,6 +169,10 @@ void FocusHub::DumpFocusNodeTree(int32_t depth)
         if (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PREVIOUS)) {
             information += (" previous-focus-in-" + focusScopeId_);
         }
+        auto focusMgr = GetFocusManager();
+        if (focusMgr && focusMgr == this) {
+            information += " [Painted]";
+        }
         DumpLog::GetInstance().Print(depth, information, 0);
     }
 }
@@ -195,6 +201,10 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
         if (!focusScopeId_.empty()) {
             information += GetIsFocusGroup() ? " GroupId:" : " ScopeId:";
             information += focusScopeId_;
+        }
+        auto focusMgr = GetFocusManager();
+        if (focusMgr && focusMgr == this) {
+            information += " [Painted]";
         }
         DumpLog::GetInstance().Print(depth, information, static_cast<int32_t>(focusNodes.size()));
     }
@@ -1431,6 +1441,9 @@ bool FocusHub::PaintAllFocusState()
     }
     if (onPaintFocusStateCallback_) {
         return onPaintFocusStateCallback_();
+    }
+    if (focusStyleType_ != FocusStyleType::NONE) {
+        return false;
     }
 
     // Force paint focus box for the component on the tail of focus-chain.
