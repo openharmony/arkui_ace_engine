@@ -1224,7 +1224,7 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
         props->UpdateImageSourceInfo(imageSourceInfo);
         UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
     } else {
-        auto props = selectIcon_->GetLayoutProperty<TextLayoutProperty>();
+        auto props = iconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateSymbolColorList({selectTheme->GetMenuIconColor()});
         props->UpdateFontSize(selectTheme->GetEndIconWidth());
