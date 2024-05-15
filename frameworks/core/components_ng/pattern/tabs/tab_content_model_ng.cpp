@@ -102,7 +102,7 @@ RefPtr<FrameNode> TabContentModelNG::CreateFrameNode(int32_t nodeId)
     layout->UpdateIcon("");
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->SetTabBar(text, "", nullptr);
+    pattern->SetTabBar(text, "", std::nullopt, nullptr);
     return frameNode;
 }
 
@@ -625,7 +625,7 @@ void TabContentModelNG::SetTabBarBuilder(FrameNode* node, TabBarBuilderFunc&& bu
     CHECK_NULL_VOID(node);
     auto frameNodePattern = node->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetTabBar("", "", std::move(builder));
+    frameNodePattern->SetTabBar("", "", std::nullopt, std::move(builder));
 }
 
 void TabContentModelNG::SetTabBarLabel(FrameNode* node, const std::string& label)
@@ -633,6 +633,6 @@ void TabContentModelNG::SetTabBarLabel(FrameNode* node, const std::string& label
     CHECK_NULL_VOID(node);
     auto frameNodePattern = node->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetTabBar(label, "", nullptr);
+    frameNodePattern->SetTabBar(label, "", std::nullopt, nullptr);
 }
 } // namespace OHOS::Ace::NG
