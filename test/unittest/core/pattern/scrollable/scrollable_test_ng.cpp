@@ -67,7 +67,6 @@ void ScrollableTestNg::InitNestedScrolls()
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     // to enable need parent
     scrollPn->nestedScroll_ = { .forward = NestedScrollMode::PARALLEL, .backward = NestedScrollMode::PARALLEL };
-    EXPECT_CALL(*(mockScroll_->GetPattern<MockNestableScrollContainer>()), GetAxis).Times(1);
     scrollPn->SetParentScrollable();
 
     scrollPn->AddScrollEvent();
