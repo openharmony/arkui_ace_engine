@@ -643,10 +643,7 @@ template("declarative_js_engine") {
           include_dirs +=
               [ "//commonlibrary/ets_utils/js_concurrent_module/common" ]
 
-          sources += [
-            "jsview/js_dynamic_component.cpp",
-            "jsview/js_isolated_component.cpp",
-          ]
+          sources += [ "jsview/js_dynamic_component.cpp" ]
         }
       }
     }
@@ -917,10 +914,7 @@ template("declarative_js_engine_ng") {
         include_dirs =
             [ "//commonlibrary/ets_utils/js_concurrent_module/common" ]
 
-        sources += [
-          "jsview/js_dynamic_component.cpp",
-          "jsview/js_isolated_component.cpp",
-        ]
+        sources += [ "jsview/js_dynamic_component.cpp" ]
       }
     }
 

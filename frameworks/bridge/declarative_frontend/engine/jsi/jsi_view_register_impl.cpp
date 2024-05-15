@@ -87,7 +87,6 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
-#include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
@@ -814,7 +813,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "WindowScene", JSWindowScene::JSBind },
 #if defined(DYNAMIC_COMPONENT_SUPPORT)
     { "DynamicComponent", JSDynamicComponent::JSBind },
-    { "IsolatedComponent", JSIsolatedComponent::JSBind },
 #endif
 #endif
     { "RichEditor", JSRichEditor::JSBind },

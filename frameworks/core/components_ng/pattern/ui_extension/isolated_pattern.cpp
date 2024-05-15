@@ -15,18 +15,12 @@
 
 #include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 
-#include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "core/event/key_event.h"
 #include "core/event/pointer_event.h"
 #include "display_manager.h"
 #include "session/host/include/session.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr char RESOURCE_PATH[] = "resourcePath";
-constexpr char ABC_PATH[] = "abcPath";
-constexpr char ENTRY_POINT[] = "entryPoint";
-}
 IsolatedPattern::IsolatedPattern() : UIExtensionPattern()
 {
     UIEXT_LOGI("The IsolatedPattern is created.");
@@ -41,54 +35,11 @@ void IsolatedPattern::InitializeDynamicComponent(
     const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
     componentType_ = ComponentType::DYNAMIC;
-    if (hapPath.empty() || abcPath.empty() || entryPoint.empty() || runtime == nullptr) {
-        UIEXT_LOGE("The param empty.");
-        return;
-    }
-
-    curIsolatedInfo_.abcPath = abcPath;
-    curIsolatedInfo_.reourcePath = hapPath;
-    curIsolatedInfo_.entryPoint = entryPoint;
-    InitializeRender(runtime);
-}
-
-void IsolatedPattern::InitializeIsolatedComponent(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
-{
-    componentType_ = ComponentType::DYNAMIC;
-    auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
-    auto resourcePath = want.GetStringParam(RESOURCE_PATH);
-    auto abcPath = want.GetStringParam(ABC_PATH);
-    auto entryPoint = want.GetStringParam(ENTRY_POINT);
-    if (resourcePath.empty() || abcPath.empty() || entryPoint.empty() || runtime == nullptr) {
-        UIEXT_LOGE("The param empty.");
-        return;
-    }
-
-    curIsolatedInfo_.abcPath = abcPath;
-    curIsolatedInfo_.reourcePath = resourcePath;
-    curIsolatedInfo_.entryPoint = entryPoint;
-    InitializeRender(runtime);
-}
-
-void IsolatedPattern::InitializeRender(void* runtime)
-{
     if (!dynamicComponentRenderer_) {
         ContainerScope scope(instanceId_);
-        dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(),
-            curIsolatedInfo_.reourcePath, curIsolatedInfo_.abcPath, curIsolatedInfo_.entryPoint, runtime);
+        dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(), hapPath, abcPath, entryPoint, runtime);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
         dynamicComponentRenderer_->CreateContent();
-    }
-}
-
-void IsolatedPattern::FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message)
-{
-    UIEXT_LOGI("The OnError code: %{public}d, name: %{public}s, message: %{public}s.",
-        code, name.c_str(), message.c_str());
-    if (onErrorCallback_) {
-        ContainerScope scope(instanceId_);
-        onErrorCallback_(code, name, message);
-        return;
     }
 }
 

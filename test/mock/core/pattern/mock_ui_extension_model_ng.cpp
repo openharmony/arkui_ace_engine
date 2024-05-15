@@ -36,10 +36,6 @@ void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<NG::FrameNode>&
     const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {}
 
-void UIExtensionModelNG::InitializeIsolatedComponent(
-    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
-{}
-
 void UIExtensionModelNG::SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged) {}
 
 void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease) {}
