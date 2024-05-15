@@ -14,6 +14,7 @@
  */
 
 #include "node_extened.h"
+
 #include "base/utils/utils.h"
 
 #ifdef __cplusplus
@@ -188,8 +189,7 @@ ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context)
 
 ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType indicatorType)
 {
-    if (indicatorType != ARKUI_SWIPER_INDICATOR_TYPE_DOT &&
-        indicatorType != ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
+    if (indicatorType != ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
         return nullptr;
     }
     ArkUI_SwiperIndicator* indicator = new ArkUI_SwiperIndicator;
@@ -203,7 +203,7 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
         indicator->itemHeight = ArkUI_OptionalFloat { 0, 0.0f };
         indicator->selectedItemWidth = ArkUI_OptionalFloat { 0, 0.0f };
         indicator->selectedItemHeight = ArkUI_OptionalFloat { 0, 0.0f };
-        indicator->maskValue = ArkUI_OptionalInt { 0, 0};
+        indicator->maskValue = ArkUI_OptionalInt { 0, 0 };
         indicator->colorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->selectedColorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
     } else {

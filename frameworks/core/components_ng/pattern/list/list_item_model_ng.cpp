@@ -196,4 +196,44 @@ void ListItemModelNG::SetSelectable(FrameNode* frameNode, bool selectable)
     pattern->SetSelectable(selectable);
 }
 
+void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, OnDeleteEvent&& onDelete,
+    OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (isStartArea) {
+        const auto startNode = AceType::Claim<UINode>(buildNode);
+        pattern->SetStartNode(startNode);
+
+        eventHub->SetStartOnDelete(std::move(onDelete));
+        eventHub->SetOnEnterStartDeleteArea(std::move(onEnterDeleteArea));
+        eventHub->SetOnExitStartDeleteArea(std::move(onExitDeleteArea));
+        eventHub->SetStartOnStateChange(std::move(onStateChange));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length, frameNode);
+    } else {
+        const auto endNode = AceType::Claim<UINode>(buildNode);
+        pattern->SetEndNode(endNode);
+
+        eventHub->SetEndOnDelete(std::move(onDelete));
+        eventHub->SetOnEnterEndDeleteArea(std::move(onEnterDeleteArea));
+        eventHub->SetOnExitEndDeleteArea(std::move(onExitDeleteArea));
+        eventHub->SetEndOnStateChange(std::move(onStateChange));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, frameNode);
+    }
+}
+
+void ListItemModelNG::SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,
+    std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOffsetChangeCallBack(std::move(onOffsetChangeFunc));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

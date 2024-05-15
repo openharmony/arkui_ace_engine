@@ -64,6 +64,8 @@ struct _ArkUIXComponentController;
 struct _ArkUINodeAdapter;
 struct _ArkUINodeContent;
 struct ArkUI_WaterFlowSectionOption;
+struct ArkUI_ListItemSwipeActionOption;
+struct ArkUI_ListItemSwipeActionItem;
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
@@ -84,6 +86,8 @@ struct ArkUICanvasArcOptions {
     ArkUI_Bool counterclockwise;
 };
 typedef ArkUI_WaterFlowSectionOption* ArkUIWaterFlowSectionOption;
+typedef ArkUI_ListItemSwipeActionOption* ArkUIListItemSwipeActionOptionHandle;
+typedef ArkUI_ListItemSwipeActionItem* ArkUIListItemSwipeActionItemHandle;
 
 struct ArkUIRect {
     ArkUI_Float32 x;
@@ -2074,6 +2078,8 @@ struct ArkUIListItemModifier {
     void (*resetListItemSelected)(ArkUINodeHandle node);
     void (*setSelectable)(ArkUINodeHandle node, ArkUI_Bool selectable);
     void (*resetSelectable)(ArkUINodeHandle node);
+    void (*setListItemSwipeAction)(ArkUINodeHandle node, ArkUIListItemSwipeActionOptionHandle option);
+    void (*resetListItemSwipeAction)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollBarModifier {

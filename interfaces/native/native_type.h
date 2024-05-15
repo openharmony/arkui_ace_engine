@@ -126,6 +126,20 @@ typedef struct {
 typedef struct ArkUI_WaterFlowSectionOption ArkUI_WaterFlowSectionOption;
 
 /**
+ * @brief Define the configuration information of the Item within the ListitemSwipeActionOption method.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_ListItemSwipeActionItem ArkUI_ListItemSwipeActionItem;
+
+/**
+ * @brief Define the configuration information for the ListitemSwipeActionOption method.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_ListItemSwipeActionOption ArkUI_ListItemSwipeActionOption;
+
+/**
  * @brief 指定设置在相对容器中子组件的对齐规则。
  *
  * @since 12
@@ -1750,6 +1764,24 @@ typedef enum {
     ARKUI_SWIPER_INDICATOR_TYPE_DIGIT,
 } ArkUI_SwiperIndicatorType;
 
+typedef enum {
+    /** In the folded state, when the ListItem slides in the opposite direction to the main axis,
+     * the operation item is hidden.*/
+    ARKUI_LIST_ITEM_SWIPE_ACTION_STATE_COLLAPSED = 0,
+    /** In the folded state, when the ListItem slides in the opposite direction to the spindle,
+     * the operation item is displayed.*/
+    ARKUI_LIST_ITEM_SWIPE_ACTION_STATE_EXPANDED,
+    /** Long distance state, the state of deleting a ListItem after it enters the long distance deletion area.*/
+    ARKUI_LIST_ITEM_SWIPE_ACTION_STATE_ACTIONING,
+} ArkUI_ListItemSwipeActionState;
+
+typedef enum {
+    /** The ListItem can continue to be scratched after the distance exceeds the size of the scratched component.*/
+    ARKUI_LIST_ITEM_SWIPE_EDGE_EFFECT_SPRING = 0,
+    /** The sliding distance of the ListItem cannot exceed the size of the scratched component.*/
+    ARKUI_LIST_ITEM_SWIPE_EDGE_EFFECT_NONE,
+} ArkUI_ListItemSwipeEdgeEffect;
+
 /**
 * @brief Creates a size constraint.
 *
@@ -2663,6 +2695,155 @@ void OH_ArkUI_SwiperIndicator_SetSelectedColor(ArkUI_SwiperIndicator* indicator,
  * @since 12
 */
 uint32_t OH_ArkUI_SwiperIndicator_GetSelectedColor(ArkUI_SwiperIndicator* indicator);
+
+/**
+ * @brief Create a configuration item for the ListitemSwipeActionItem interface settings.
+ *
+ * @return List Item SwipeActionItem configuration item instance.
+ * @since 12
+*/
+ArkUI_ListItemSwipeActionItem* OH_ArkUI_ListItemSwipeActionItem_Create();
+
+/**
+* @brief Destroy the ListitemSwipeActionItem instance.
+*
+* @param item List Item SwipeActionItem instance to be destroyed.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionItem_Dispose(ArkUI_ListItemSwipeActionItem* item);
+
+/**
+* @brief Set the layout content of ListItem SwipeActionItem.
+*
+* @param item List Item SwipeActionItem instance.
+* @param node Layout information.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionItem_SetContent(ArkUI_ListItemSwipeActionItem* item, ArkUI_NodeHandle node);
+
+/**
+* @brief Set the threshold for long-distance sliding deletion distance of components.
+*
+* @param item List Item SwipeActionItem instance.
+* @param distance Component long-distance sliding deletion distance threshold.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionItem_SetActionAreaDistance(ArkUI_ListItemSwipeActionItem* item, float distance);
+
+/**
+* @brief Obtain the threshold for long-distance sliding deletion distance of components.
+*
+* @param item List Item SwipeActionItem instance.
+* @return Component long-distance sliding deletion distance threshold. Return value on exception: 0.
+* @since 12
+*/
+float OH_ArkUI_ListItemSwipeActionItem_GetActionAreaDistance(ArkUI_ListItemSwipeActionItem* item);
+
+/**
+* @brief Set the event to be called when a sliding entry enters the deletion area.
+*
+* @param item List Item SwipeActionItem instance.
+* @param callback Callback Events.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionItem_SetOnEnterActionArea(ArkUI_ListItemSwipeActionItem* item, void (*callback)());
+
+/**
+* @brief Set the event to be called when a component enters the long-range deletion area and deletes a ListItem.
+*
+* @param item List Item SwipeActionItem instance.
+* @param callback Callback Events.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionItem_SetOnAction(ArkUI_ListItemSwipeActionItem* item, void (*callback)());
+
+/**
+* @brief Set the event to be called when a sliding entry exits the deletion area.
+*
+* @param item List Item SwipeActionItem instance.
+* @param callback Callback Events.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionItem_SetOnExitActionArea(ArkUI_ListItemSwipeActionItem* item, void (*callback)());
+
+/**
+* @brief Set the event triggered when the sliding state of a list item changes.
+*
+* @param item List Item SwipeActionItem instance.
+* @param callback Callback Events.
+*        swipeActionState The changed state.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionItem_SetOnStateChange(
+    ArkUI_ListItemSwipeActionItem* item, void (*callback)(ArkUI_ListItemSwipeActionState swipeActionState));
+
+/**
+ * @brief Create a configuration item for the ListitemSwipeActionOption interface settings.
+ *
+ * @return List Item SwipeActionOption configuration item instance.
+ * @since 12
+*/
+ArkUI_ListItemSwipeActionOption* OH_ArkUI_ListItemSwipeActionOption_Create();
+
+/**
+* @brief Destroy the ListitemSwipeActionOption instance.
+*
+* @param option List Item SwipeActionOption instance to be destroyed.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionOption_Dispose(ArkUI_ListItemSwipeActionOption* option);
+
+/**
+* @brief Set the layout content on the left (vertical layout) or top (horizontal layout)
+* of the ListItem SwipeActionItem.
+*
+* @param option List Item SwipeActionItem instance.
+* @param builder Layout information.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionOption_SetStart(
+    ArkUI_ListItemSwipeActionOption* option, ArkUI_ListItemSwipeActionItem* item);
+
+/**
+* @brief Set the layout content on the right (vertical layout) or bottom (horizontal layout)
+* of the ListItem SwipeActionItem.
+*
+* @param option List Item SwipeActionItem instance.
+* @param builder Layout information.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionOption_SetEnd(
+    ArkUI_ListItemSwipeActionOption* option, ArkUI_ListItemSwipeActionItem* item);
+
+/**
+* @brief Set the sliding effect.
+*
+* @param option List Item SwipeActionItem instance.
+* @param edgeEffect Sliding effect.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionOption_SetEdgeEffect(
+    ArkUI_ListItemSwipeActionOption* option, ArkUI_ListItemSwipeEdgeEffect edgeEffect);
+
+/**
+* @brief Get the sliding effect.
+*
+* @param option List Item SwipeActionItem instance.
+* @return Sliding effect. The default return value is ARKUI-LIST-ITEM-SWIPE-EDGE-EFFECT SPRING.
+* @since 12
+*/
+int32_t OH_ArkUI_ListItemSwipeActionOption_GetEdgeEffect(ArkUI_ListItemSwipeActionOption* option);
+
+/**
+* @brief The event called when the sliding operation offset changes.
+*
+* @param option List Item SwipeActionItem instance.
+* @param callback Callback Events.
+*        offset Slide offset.
+* @since 12
+*/
+void OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChange(
+    ArkUI_ListItemSwipeActionOption* option, void (*callback)(float offset));
 #ifdef __cplusplus
 };
 #endif
