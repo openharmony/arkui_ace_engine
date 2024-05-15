@@ -723,7 +723,9 @@ ImageRenderMode ImageModelNG::GetImageRenderMode(FrameNode* frameNode)
 
 bool ImageModelNG::GetIsAnimation()
 {
-    return GetImagePattern()->GetIsAnimation();
+    auto pattern = GetImagePattern();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetIsAnimation();
 }
 
 RefPtr<ImagePattern> ImageModelNG::GetImagePattern()
