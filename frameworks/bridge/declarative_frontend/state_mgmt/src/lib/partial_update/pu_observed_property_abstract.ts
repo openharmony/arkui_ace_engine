@@ -566,11 +566,13 @@ class PropertyDependencies {
     return dependentElmtIds;
   }
 
-  public dumpInfoDependencies(owningView: ViewPU|undefined = undefined, dumpDependantElements): string {
+  public dumpInfoDependencies(owningView: ViewPU | undefined = undefined, dumpDependantElements): string {
     const formatElmtId = owningView ? (elmtId => owningView.debugInfoElmtId(elmtId)) : (elmtId => elmtId);
     let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${Array.from(this.propertyDependencies_).map(formatElmtId).join(', ')}`;
     const arr = Array.from(this.propertyDependencies_).map(formatElmtId);
-    if (dumpDependantElements) return (arr.length > 1 ? arr.join(', ') : arr[0]);
+    if (dumpDependantElements) {
+      return (arr.length > 1 ? arr.join(', ') : arr[0]);
+    }
     this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
       result += `  property '@Track ${propertyName}' change affects elmtIds: ${Array.from(propertyElmtId).map(formatElmtId).join(', ')}`;
     });
