@@ -421,7 +421,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
                         const std::function<void()>& task, uint32_t delay) {
                         ContainerScope scope(id);
                         taskExecutor->PostDelayedTask(
-                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask");
+                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
                     }, id);
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);

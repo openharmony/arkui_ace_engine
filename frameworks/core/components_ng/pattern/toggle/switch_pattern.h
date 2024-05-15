@@ -163,8 +163,10 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
-    void HandleFocusEvent();
-    void HandleBlurEvent();
+    void HandleFocusEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
+        const RefPtr<SwitchTheme>& switchTheme);
+    void HandleBlurEvent(const RefPtr<SwitchPaintProperty>& switchPaintProperty,
+        const RefPtr<SwitchTheme>& switchTheme);
     float GetSwitchWidth() const;
     float GetSwitchContentOffsetX() const;
 
@@ -209,6 +211,8 @@ private:
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
     bool enabled_ = true;
+    bool isBgColorUnselectFocus_ = false;
+    bool isPointColorUnselectFocus_ = false;
 
     float width_ = 0.0f;
     float height_ = 0.0f;

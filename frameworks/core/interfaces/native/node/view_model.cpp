@@ -482,8 +482,12 @@ ArkUI_CharPtr GetName(void* nativePtr)
 void DisposeNode(void* nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
-    auto* frameNode = reinterpret_cast<UINode*>(nativePtr);
-    frameNode->DecRefCount();
+    auto* uiNode = reinterpret_cast<UINode*>(nativePtr);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    if (frameNode) {
+        frameNode->SetExtensionHandler(nullptr);
+    }
+    uiNode->DecRefCount();
 }
 
 void AddChild(void* parentNode, void* childNode)

@@ -35,13 +35,14 @@ void StackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 {
     // update child position.
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetLayoutDirection();
     if (layoutDirection == TextDirection::AUTO) {
         layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
-    MinusPaddingToSize(padding, size);
+    auto contentSize = frameSize;
+    MinusPaddingToSize(padding, contentSize);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
@@ -54,18 +55,19 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto translate =
-            CalculateStackAlignment(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
+            CalculateStackAlignment(contentSize, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
         if (layoutDirection == TextDirection::RTL) {
-            translate.SetX(size.Width() - translate.GetX() - child->GetGeometryNode()->GetMarginFrameSize().Width());
+            translate.SetX(
+                frameSize.Width() - translate.GetX() - child->GetGeometryNode()->GetMarginFrameSize().Width());
         }
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
     }
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     if (content) {
-        auto translate = CalculateStackAlignment(size, content->GetRect().GetSize(), align) + paddingOffset;
+        auto translate = CalculateStackAlignment(contentSize, content->GetRect().GetSize(), align) + paddingOffset;
         if (layoutDirection == TextDirection::RTL) {
-            translate.SetX(size.Width() - translate.GetX() - content->GetRect().GetSize().Width());
+            translate.SetX(frameSize.Width() - translate.GetX() - content->GetRect().GetSize().Width());
         }
         content->SetOffset(translate);
     }

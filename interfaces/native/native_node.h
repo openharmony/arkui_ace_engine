@@ -1485,6 +1485,10 @@ typedef enum {
 
     NODE_FOREGROUND_BLUR_STYLE,
 
+    NODE_LAYOUT_RECT,
+
+    NODE_FOCUS_ON_TOUCH,
+
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -1876,6 +1880,7 @@ typedef enum {
      *
      */
     NODE_SPAN_TEXT_BACKGROUND_STYLE,
+    NODE_SPAN_BASELINE_OFFSET,
     /**
      * @brief Defines the image source of the image span.
      * This attribute can be set, reset, and obtained as required through APIs.

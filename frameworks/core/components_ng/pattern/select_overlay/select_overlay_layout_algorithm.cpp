@@ -496,6 +496,9 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(float menuWidth, floa
                                                                                       : offsetUnderSelectArea;
         }
     }
+    if (hasKeyboard && GreatNotEqual(offsetY, bottomLimitOffsetY)) {
+        offsetY = bottomLimitOffsetY;
+    }
     return OffsetF(positionX, offsetY);
 }
 } // namespace OHOS::Ace::NG

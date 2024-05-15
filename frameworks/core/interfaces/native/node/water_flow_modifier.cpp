@@ -302,7 +302,8 @@ ArkUI_Int32 SetNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
-    auto totalChildCount = frameNode->TotalChildCount();
+    auto hasFooter = WaterFlowModelNG::hasFooter(frameNode);
+    auto totalChildCount = hasFooter ? frameNode->TotalChildCount() - 1 : frameNode->TotalChildCount();
     if (totalChildCount > 0) {
         return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_CHILD_NODE_EXIST;
     }
@@ -441,6 +442,7 @@ void SetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWa
         paddings.bottom = std::optional<CalcLength>(sectionData.margin[1]);
         paddings.left = std::optional<CalcLength>(sectionData.margin[2]);
         paddings.right = std::optional<CalcLength>(sectionData.margin[3]);
+        section.margin = paddings;
     }
 
     waterFlowSections->ChangeData(start, 0, newSections);

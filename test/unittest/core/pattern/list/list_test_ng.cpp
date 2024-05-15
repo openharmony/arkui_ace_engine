@@ -60,12 +60,7 @@ void ListTestNg::TearDown()
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-    ClearOldList();  // Each testcase will create new list at begin
-}
-
-void ListTestNg::ClearOldList()
-{
-    ElementRegister::GetInstance()->Clear(); // Will create new list after clear
+    ClearOldNodes();  // Each testcase will create new list at begin
 }
 
 void ListTestNg::GetList()
@@ -134,19 +129,6 @@ ListItemGroupModelNG ListTestNg::CreateListItemGroup(V2::ListItemGroupStyle list
     ListItemGroupModelNG groupModel;
     groupModel.Create(listItemGroupStyle);
     return groupModel;
-}
-
-void ListTestNg::CreateDone()
-{
-    auto& elementsStack = ViewStackProcessor::GetInstance()->elementsStack_;
-    while (elementsStack.size() > 1) {
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-    ViewStackProcessor::GetInstance()->Finish();
-    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
 }
 
 void ListTestNg::CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize)

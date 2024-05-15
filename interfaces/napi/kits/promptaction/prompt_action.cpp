@@ -432,7 +432,7 @@ bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context,
 }
 
 bool ParseButtonsPara(napi_env env, std::shared_ptr<PromptAsyncContext>& context,
-    int32_t maxButtonNum, bool isAddCancelButton)
+    int32_t maxButtonNum, bool isShowActionMenu)
 {
     bool isBool = false;
     napi_valuetype valueType = napi_undefined;
@@ -443,8 +443,11 @@ bool ParseButtonsPara(napi_env env, std::shared_ptr<PromptAsyncContext>& context
         if (!ParseButtons(env, context, SHOW_DIALOG_BUTTON_NUM_MAX, primaryButtonNum)) {
             return false;
         }
+    } else if (isShowActionMenu) {
+        DeleteContextAndThrowError(env, context, "The type of the button parameters is incorrect.");
+        return false;
     }
-    if (isAddCancelButton) {
+    if (isShowActionMenu) {
         ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
             .textColor = "", .isPrimary = primaryButtonNum == 0 ? true : false};
         context->buttons.emplace_back(buttonInfo);
@@ -1124,7 +1127,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             GetNapiDialogbackgroundBlurStyleProps(env, asyncContext, backgroundBlurStyle);
             backgroundColor = GetColorProps(env, asyncContext->backgroundColorApi);
             shadowProps = GetShadowProps(env, asyncContext);
-            if (!ParseButtonsPara(env, asyncContext, SHOW_DIALOG_BUTTON_NUM_MAX, true)) {
+            if (!ParseButtonsPara(env, asyncContext, SHOW_DIALOG_BUTTON_NUM_MAX, false)) {
                 return nullptr;
             }
             napi_typeof(env, asyncContext->autoCancel, &valueType);
@@ -1345,15 +1348,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 return nullptr;
             }
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
-            bool isBool = false;
-            int32_t primaryButtonNum = 0;
-            napi_is_array(env, asyncContext->buttonsNApi, &isBool);
-            napi_typeof(env, asyncContext->buttonsNApi, &valueType);
-            if (valueType != napi_object || !isBool) {
-                DeleteContextAndThrowError(env, asyncContext, "The type of the button parameters is incorrect.");
-                return nullptr;
-            }
-            if (!ParseButtons(env, asyncContext, SHOW_ACTION_MENU_BUTTON_NUM_MAX, primaryButtonNum)) {
+            if (!ParseButtonsPara(env, asyncContext, SHOW_ACTION_MENU_BUTTON_NUM_MAX, true)) {
                 return nullptr;
             }
             napi_typeof(env, asyncContext->showInSubWindow, &valueType);

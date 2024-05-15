@@ -47,7 +47,7 @@ void ListSwipeTestNg::CreateWithSwipe(bool isStartNode, V2::SwipeEdgeEffect swip
             CreateItemWithSwipe(nullptr, endFunc, swipeEdgeEffect);
         }
     }
-    CreateDone();
+    CreateDone(frameNode_);
 }
 
 void ListSwipeTestNg::CreateWithSwipeAction(
@@ -68,7 +68,7 @@ void ListSwipeTestNg::CreateWithSwipeAction(
     }
     ViewStackProcessor::GetInstance()->Pop();
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    CreateDone();
+    CreateDone(frameNode_);
 }
 
 /**
@@ -347,7 +347,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem003, TestSize.Level1)
      * @tc.steps: step4. Swipe end fast
      * @tc.expected: swiperIndex_ change to SWIPER_END
      */
-    ClearOldList();
+    ClearOldNodes();
     CreateWithSwipe(false, V2::SwipeEdgeEffect::None);
     listItem = GetChildFrameNode(frameNode_, listItemIndex);
     listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, listItemIndex);
@@ -1199,7 +1199,7 @@ HWTEST_F(ListSwipeTestNg, SwiperItem021, TestSize.Level1)
     auto endFunc = GetDefaultSwiperBuilder(END_NODE_LEN);
     ListModelNG model = CreateList();
     CreateItemWithSwipe(startFunc, endFunc, V2::SwipeEdgeEffect::None);
-    CreateDone();
+    CreateDone(frameNode_);
     auto childNode = GetChildFrameNode(frameNode_, 0);
     auto childPattern = childNode->GetPattern<ListItemPattern>();
     auto childLayoutProperty = childNode->GetLayoutProperty<ListItemLayoutProperty>();

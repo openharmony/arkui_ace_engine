@@ -124,6 +124,7 @@ public:
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) = 0;
     virtual void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const = 0;
     virtual bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const = 0;
+    virtual void SetDensityDpiImpl(bool densityDpi) = 0;
 
     // The interface to send the data for ArkTS
     virtual void SendDataAsync(const AAFwk::WantParams& params) const = 0;

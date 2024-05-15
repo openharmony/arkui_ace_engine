@@ -36,7 +36,7 @@ public:
         const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isAsyncModalBinding = false);
 
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, const RefPtr<NG::FrameNode>& placeholderNode = nullptr,
-        bool transferringCaller = false) override;
+        bool transferringCaller = false, bool densityDpi = true) override;
     // for Embedded Component
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) override;
     // for dynamic component

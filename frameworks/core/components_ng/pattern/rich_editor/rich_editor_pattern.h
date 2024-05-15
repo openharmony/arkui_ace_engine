@@ -624,6 +624,8 @@ public:
         showSelect_ = isShowSelect;
     }
 
+    const std::list<RefPtr<UINode>>& GetAllChildren() const override;
+
     void OnVirtualKeyboardAreaChanged() override;
 
     void SetCaretColor(const Color& caretColor)
@@ -666,7 +668,13 @@ public:
 
     OffsetF GetCaretOffset() const override
     {
-        return GetCaretRect().GetOffset();
+        // only used in magnifier, return position of the handle that is currently moving
+        return movingHandleOffset_;
+    }
+
+    void SetMovingHandleOffset(const OffsetF& handleOffset)
+    {
+        movingHandleOffset_ = handleOffset;
     }
 
     OffsetF GetParentGlobalOffset() const override
@@ -685,6 +693,7 @@ public:
     }
 
     OffsetF GetTextPaintOffset() const override;
+    OffsetF GetPaintRectGlobalOffset() const;
 
     float GetCrossOverHeight() const;
 
@@ -709,6 +718,7 @@ protected:
 private:
     friend class RichEditorSelectOverlay;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
+    Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
     void HandleOnCut() override;
@@ -873,6 +883,8 @@ private:
     float MoveTextRect(float offset);
     void MoveCaretToContentRect(bool downStreamFirst = true);
     void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
+    void MoveCaretToContentRect(float offset, int32_t source);
+    bool IsCaretInContentArea();
     bool IsTextArea() const override
     {
         return true;
@@ -1007,6 +1019,9 @@ private:
     int32_t richEditorInstanceId_ = -1;
     bool contentChange_ = false;
     PreviewTextRecord previewTextRecord_;
+    float lastFontScale_ = -1;
+    bool isCaretInContentArea_ = false;
+    OffsetF movingHandleOffset_;
 };
 } // namespace OHOS::Ace::NG
 

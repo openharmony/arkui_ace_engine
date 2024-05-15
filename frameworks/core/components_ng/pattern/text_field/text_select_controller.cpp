@@ -363,7 +363,7 @@ void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
     }
 }
 
-void TextSelectController::MoveFirstHandleToContentRect(int32_t index)
+void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool moveHandle)
 {
     CaretMetricsF firstHandleMetrics;
     firstHandleInfo_.index = index;
@@ -376,11 +376,11 @@ void TextSelectController::MoveFirstHandleToContentRect(int32_t index)
     firstHandleInfo_.rect = firstHandle;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
-    UpdateCaretOffset();
+    UpdateCaretOffset(TextAffinity::DOWNSTREAM, moveHandle);
     UpdateSecondHandleOffset();
 }
 
-void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
+void TextSelectController::MoveSecondHandleToContentRect(int32_t index, bool moveHandle)
 {
     CaretMetricsF secondHandleMetrics;
     secondHandleInfo_.index = index;
@@ -393,7 +393,7 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
     secondHandleInfo_.rect = secondHandle;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
-    UpdateCaretOffset();
+    UpdateCaretOffset(TextAffinity::DOWNSTREAM, moveHandle);
     UpdateFirstHandleOffset();
 }
 

@@ -402,11 +402,16 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
 
         // set caret color
         Color caretColor;
-        auto caretColorProp = paramObject->GetProperty("color");
-        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() || !ParseJsColor(caretColorProp, caretColor)) {
-            caretColor = theme->GetCursorColor();
+        if (!paramObject->HasProperty("color")) {
+            return;
+        } else {
+            auto caretColorProp = paramObject->GetProperty("color");
+            if (caretColorProp->IsUndefined() || caretColorProp->IsNull()
+                || !ParseJsColor(caretColorProp, caretColor)) {
+                caretColor = theme->GetCursorColor();
+            }
+            TextFieldModel::GetInstance()->SetCaretColor(caretColor);
         }
-        TextFieldModel::GetInstance()->SetCaretColor(caretColor);
     }
 }
 
@@ -1568,7 +1573,7 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
 void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseLengthMetricsToDimension(info[0], value)) {
+    if (!ParseLengthMetricsToPositiveDimension(info[0], value)) {
         value.Reset();
     }
     if (value.IsNegative()) {

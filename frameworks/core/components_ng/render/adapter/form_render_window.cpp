@@ -101,7 +101,8 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
         ContainerScope scope(id);
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask");
+        taskExecutor->PostDelayedTask(
+            task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask", PriorityType::HIGH);
     }, id);
 #else
     taskExecutor_ = nullptr;

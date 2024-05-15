@@ -1343,6 +1343,7 @@ void FormPattern::OnActionEvent(const std::string& action)
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 auto eventAction = JsonUtil::ParseJsonString(action);
+                TAG_LOGI(AceLogTag::ACE_FORM, "UI task execute begin.");
                 pattern->FireOnRouterEvent(eventAction);
             }, "ArkUIFormFireRouterEvent");
         }

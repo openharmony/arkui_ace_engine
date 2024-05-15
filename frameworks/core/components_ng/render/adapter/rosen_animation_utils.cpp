@@ -65,8 +65,8 @@ std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
             onFinish();
             return;
         }
-        taskExecutor->PostTask(
-            [onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI, "ArkUIAnimationGetWrappedCallback");
+        taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI,
+            "ArkUIAnimationGetWrappedCallback", PriorityType::HIGH);
     };
     return wrappedOnFinish;
 }

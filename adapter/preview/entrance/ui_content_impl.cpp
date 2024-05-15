@@ -315,7 +315,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
             const std::function<void()>& task, uint32_t delay) {
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(id);
-            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask");
+            taskExecutor->PostDelayedTask(
+                task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
         };
         director->SetUITaskRunner(func, id);
         director->Init();

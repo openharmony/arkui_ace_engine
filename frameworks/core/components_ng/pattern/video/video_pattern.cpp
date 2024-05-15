@@ -1692,9 +1692,10 @@ void VideoPattern::EnableAnalyzer(bool enable)
         return;
     }
 
-    if (!imageAnalyzerManager_) {
-        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::VIDEO_CUSTOM);
-    }
+    CHECK_NULL_VOID(!imageAnalyzerManager_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::VIDEO_CUSTOM);
 }
 
 void VideoPattern::SetImageAnalyzerConfig(void* config)
@@ -1743,6 +1744,7 @@ void VideoPattern::CreateAnalyzerOverlay()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->SetOverlayNode(nullptr);
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto nailPixelMap = context->GetThumbnailPixelMap();

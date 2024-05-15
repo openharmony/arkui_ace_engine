@@ -16,6 +16,7 @@
 #include "core/components_ng/event/focus_hub.h"
 
 #include <cinttypes>
+#include <cstdint>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -1407,8 +1408,7 @@ void FocusHub::RaiseZIndex()
     CHECK_NULL_VOID(frameNode);
     const auto& target = frameNode->GetRenderContext();
     if (target && !target->HasZIndex()) {
-        int32_t FOCUS_STATE_ZINDEX = 100; // default focus zIndex
-        target->UpdateZIndex(FOCUS_STATE_ZINDEX);
+        target->UpdateZIndex(INT32_MAX); // default focus zIndex
         isRaisedZIndex_ = true;
     }
 }
@@ -1697,9 +1697,9 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
 
 bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const
 {
-    auto childGeometryNode = childNode->GetGeometryNode();
-    CHECK_NULL_RETURN(childGeometryNode, false);
-    rect = childGeometryNode->GetFrameRect();
+    auto frameNode = childNode->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    rect = frameNode->GetPaintRectWithTransform();
     return true;
 }
 

@@ -18,7 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
-#include "frameworks/core/components/declaration/svg/svg_mask_declaration.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -107,27 +107,27 @@ double SvgMask::ParseUnitsAttr(const Dimension& attr, double value)
 bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgMaskAttribute&)> attrs[] = {
-        { DOM_SVG_HEIGHT,
+        { SVG_HEIGHT,
             [](const std::string& val, SvgMaskAttribute& attr) {
                 attr.height = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_MASK_CONTENT_UNITS,
+        { SVG_MASK_CONTENT_UNITS,
             [](const std::string& val, SvgMaskAttribute& attr) {
                 attr.maskContentUnits = val;
             } },
-        { DOM_SVG_MASK_UNITS,
+        { SVG_MASK_UNITS,
             [](const std::string& val, SvgMaskAttribute& attr) {
                 attr.maskUnits = val;
             } },
-        { DOM_SVG_WIDTH,
+        { SVG_WIDTH,
             [](const std::string& val, SvgMaskAttribute& attr) {
                 attr.width = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_X,
+        { SVG_X,
             [](const std::string& val, SvgMaskAttribute& attr) {
                 attr.x = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_Y,
+        { SVG_Y,
             [](const std::string& val, SvgMaskAttribute& attr) {
                 attr.y = SvgAttributesParser::ParseDimension(val);
             } },

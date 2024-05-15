@@ -226,6 +226,13 @@ export class PopupComponent extends ViewPU {
             "bundleName": "",
             "moduleName": ""
         }, this, "secondButtonBackgroundColor");
+        this.__closeButtonFillColorWithTheme = new ObservedPropertyObjectPU({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.icon_secondary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        }, this, 'closeButtonFillColorWithTheme');
         this.listener = mediaquery.matchMediaSync('(orientation: landscape)');
         this.setInitiallyProvidedValue(a1);
     }
@@ -284,6 +291,9 @@ export class PopupComponent extends ViewPU {
         }
         if (a1.secondButtonBackgroundColor !== undefined) {
             this.secondButtonBackgroundColor = a1.secondButtonBackgroundColor;
+        }
+        if (a1.closeButtonFillColorWithTheme !== undefined) {
+            this.closeButtonFillColorWithTheme = a1.closeButtonFillColorWithTheme;
         }
         if (a1.listener !== undefined) {
             this.listener = a1.listener;
@@ -456,6 +466,14 @@ export class PopupComponent extends ViewPU {
         this.__secondButtonBackgroundColor.set(y);
     }
 
+    get closeButtonFillColorWithTheme() {
+        return this.__closeButtonFillColorWithTheme.get();
+    }
+
+    set closeButtonFillColorWithTheme(i6) {
+        this.__closeButtonFillColorWithTheme.set(i6);
+    }
+
     getIconWidth() {
         var d, e;
         return (e = (d = this.icon) === null || d === void 0 ? void 0 : d.width) !== null && e !== void 0 ? e : this.theme.icon.size.width;
@@ -531,7 +549,7 @@ export class PopupComponent extends ViewPU {
     }
 
     getCloseButtonFillColor() {
-        return this.theme.closeButton.fillColor;
+        return this.closeButtonFillColorWithTheme;
     }
 
     getCloseButtonHoverColor() {
@@ -688,7 +706,7 @@ export class PopupComponent extends ViewPU {
         this.theme.button.fontColor = o10.colors.fontEmphasize;
         this.theme.message.fontColor = o10.colors.fontSecondary;
         this.theme.message.plainFontColor = o10.colors.fontPrimary;
-        this.theme.closeButton.fillColor = o10.colors.iconSecondary;
+        this.closeButtonFillColorWithTheme = o10.colors.iconSecondary;
     }
 
     aboutToAppear() {

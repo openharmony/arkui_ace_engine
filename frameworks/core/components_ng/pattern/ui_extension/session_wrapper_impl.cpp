@@ -615,6 +615,17 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
     session_->NotifyOccupiedAreaChangeInfo(info);
     return true;
 }
+
+void SessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
+{
+    CHECK_NULL_VOID(session_);
+    if (isDensityDpi) {
+        float density = PipelineBase::GetCurrentDensity();
+        session_->NotifyDensityFollowHost(isDensityDpi, density);
+        return;
+    }
+    session_->NotifyDensityFollowHost(isDensityDpi);
+}
 /***************************** End: The interface to control the display area and the avoid area **********************/
 
 /************************************************ Begin: The interface to send the data for ArkTS *********************/
