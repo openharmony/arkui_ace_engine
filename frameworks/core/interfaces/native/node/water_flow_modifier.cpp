@@ -443,6 +443,17 @@ void SetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWa
         paddings.left = std::optional<CalcLength>(sectionData.margin[2]);
         paddings.right = std::optional<CalcLength>(sectionData.margin[3]);
         section.margin = paddings;
+        if (sectionData.onGetItemMainSizeByIndex) {
+            section.onGetItemMainSizeByIndex = [sectionData](int32_t value) -> float {
+                // onGetItemMainSizeByIndex是一个返回float的函数指针
+                using FuncType = float (*)(int32_t);
+                FuncType func = reinterpret_cast<FuncType>(sectionData.onGetItemMainSizeByIndex);
+                float result = func(value);
+                return result;
+            };
+        } else {
+            section.onGetItemMainSizeByIndex = nullptr;
+        }
     }
 
     waterFlowSections->ChangeData(start, 0, newSections);
