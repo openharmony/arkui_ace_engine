@@ -87,12 +87,12 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
     rsUIDirector_->Init();
     rsUIDirector_->SetUITaskRunner(
-        [taskExecutor, id](const std::function<void()>& task) {
-            ContainerScope scope(id);
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostTask(
-                task, TaskExecutor::TaskType::UI, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
-        }, id);
+        [taskExecutor, id](const std::function<void()>& task, uint32_t delay) {
+        ContainerScope scope(id);
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostDelayedTask(
+            task, TaskExecutor::TaskType::UI, delay, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
+    }, id);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
         CHECK_NULL_VOID(self);
