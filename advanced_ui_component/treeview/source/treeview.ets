@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { Theme } from '@ohos.arkui.theme';
+
 const IMAGE_NODE_HEIGHT: number = 24
 const IMAGE_NODE_WIDTH: number = 24
 const ITEM_WIDTH: number = 0
@@ -142,29 +144,29 @@ interface nodeItem {
   inputText: InputText;
   mainTitleNode: MainTitleNode;
   imageCollapse?: ImageNode;
-  fontColor?: Resource;
+  fontColor?: ResourceColor;
 }
 
 interface status {
-  normal: Resource;
-  hover: Resource;
-  press: Resource;
-  selected: string;
-  highLight?: Resource;
+  normal: ResourceColor;
+  hover: ResourceColor;
+  press: ResourceColor;
+  selected: ResourceColor;
+  highLight?: ResourceColor;
 }
 
 interface nodeBorder {
   borderWidth: Resource | number;
-  borderColor: Resource;
+  borderColor: ResourceColor;
   borderRadius: Resource;
 }
 
 interface popUpInfo {
   popUpIsShow: boolean;
   popUpEnableArrow: boolean;
-  popUpColor?: Resource;
+  popUpColor?: ResourceColor;
   popUpText?: string | Resource;
-  popUpTextColor?: Resource;
+  popUpTextColor?: ResourceColor;
 }
 
 interface borderWidth {
@@ -173,7 +175,7 @@ interface borderWidth {
 }
 
 interface textSetting {
-  fontColor: Resource;
+  fontColor: ResourceColor;
   fontSize: Resource;
   fontWeight: FontWeight;
 }
@@ -224,7 +226,7 @@ interface dragPopup {
   height: string;
   shadow: shadow;
   borderRadius: Resource;
-  fontColor: Resource;
+  fontColor: ResourceColor;
   fontSize: Resource;
   fontWeight: FontWeight;
   imageOpacity: Resource;
@@ -246,8 +248,8 @@ interface flagLine {
 }
 
 interface subTitleStyle {
-  normalFontColor: Resource;
-  highLightFontColor: Resource;
+  normalFontColor: ResourceColor;
+  highLightFontColor: ResourceColor;
   fontSize: Resource;
   fontWeight: FontWeight;
   margin: padding;
@@ -266,18 +268,30 @@ let emptyNodeInfo: NodeParam = {
   currentNodeId: -1,
 }
 
+class TreeViewTheme {
+  public itemSelectedBgColor: ResourceColor = '#1A0A59F7';
+  public primaryTitleFontColor: ResourceColor = $r('sys.color.ohos_id_color_primary');
+  public secondaryTitleFontColor: ResourceColor = $r('sys.color.ohos_id_color_secondary');
+  public primaryTitleActiveFontColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary_activated');
+  public itemPressedBgColor: ResourceColor = $r('sys.color.ohos_id_color_click_effect');
+  public itemHoverBgColor: ResourceColor = $r('sys.color.ohos_id_color_hover');
+  public borderFocusedColor: ResourceColor = $r('sys.color.ohos_id_color_focused_outline');
+  public leftIconColor: ResourceColor = $r('sys.color.icon_secondary');
+  public leftIconActiveColor: ResourceColor = $r('sys.color.icon_secondary');
+  public arrowIconColor: ResourceColor = $r('sys.color.icon_tertiary');
+}
+
 @Observed
 export class NodeInfo {
   private childNodeInfo: childNodeInfo;
   imageSource: Resource | string | undefined = '';
   private parentNodeId: number;
   private currentNodeId: number;
-  fontColor: string | Resource = '';
   private nodeHeight: Resource | number;
   private nodeLevel: number;
   private nodeItem: nodeItem;
   private nodeLeftPadding: number;
-  private nodeColor: Resource | string;
+  private nodeColor: ResourceColor;
   private nodeIsShow: boolean;
   private status: status;
   private nodeBorder: nodeBorder;
@@ -298,6 +312,8 @@ export class NodeInfo {
   private isHighLight: boolean = false;
   private flagLineLeftMargin: number;
   private isModify: boolean = false;
+  public treeViewTheme: TreeViewTheme = new TreeViewTheme();
+  public fontColor: ResourceColor = '';
 
   constructor(node: NodeItem) {
     this.childNodeInfo = node.getChildNodeInfo();
@@ -331,13 +347,14 @@ export class NodeInfo {
     this.isSelected = false;
     this.status = {
       normal: $r('sys.color.ohos_id_color_background_transparent'),
-      hover: $r('sys.color.ohos_id_color_hover'),
-      press: $r('sys.color.ohos_id_color_click_effect'),
-      selected: COLOR_SELECT,
+      hover: this.treeViewTheme.itemHoverBgColor,
+      press: this.treeViewTheme.itemPressedBgColor,
+      selected: this.treeViewTheme.itemSelectedBgColor,
       highLight: $r('sys.color.ohos_id_color_activated')
     };
-    this.nodeBorder = { borderWidth: BORDER_WIDTH_NONE,
-      borderColor: $r('sys.color.ohos_id_color_focused_outline'),
+    this.nodeBorder = {
+      borderWidth: BORDER_WIDTH_NONE,
+      borderColor: this.treeViewTheme.borderFocusedColor,
       borderRadius: $r('sys.float.ohos_id_corner_radius_clicked')
     };
     this.flagLineLeftMargin = node.nodeLevel * 12 + 8;
@@ -345,7 +362,7 @@ export class NodeInfo {
     this.nodeParam = node.data;
   }
 
-  setFontColor(color: string | Resource) {
+  setFontColor(color: ResourceColor) {
     this.fontColor = color
   }
 
@@ -365,7 +382,7 @@ export class NodeInfo {
     this.popUpInfo.popUpEnableArrow = popUpEnableArrow;
   }
 
-  setPopUpColor(color: Resource) {
+  setPopUpColor(color: ResourceColor) {
     this.popUpInfo.popUpColor = color;
   }
 
@@ -373,7 +390,7 @@ export class NodeInfo {
     this.popUpInfo.popUpText = text;
   }
 
-  setPopUpTextColor(popUpTextColor: Resource) {
+  setPopUpTextColor(popUpTextColor: ResourceColor) {
     this.popUpInfo.popUpTextColor = popUpTextColor;
   }
 
@@ -412,14 +429,14 @@ export class NodeInfo {
     }
   }
 
-  setNodeColor(nodeColor: Resource | string | undefined): void {
+  setNodeColor(nodeColor: ResourceColor | undefined): void {
     if (nodeColor === undefined) {
       return;
     }
     this.nodeColor = nodeColor;
   }
 
-  getNodeColor(): Resource | string {
+  getNodeColor(): ResourceColor {
     return this.nodeColor;
   }
 
@@ -767,7 +784,7 @@ export class TreeListener {
           try {
             cbs_once[i](argument);
           } catch (e) {
-            new Error(e);
+            throw new Error('once function callbacks error.');
           }
         }
         this._once_events[event] = null;
@@ -779,7 +796,7 @@ export class TreeListener {
           try {
             cbs_on[i](argument);
           } catch (e) {
-            new Error(e);
+            throw new Error('on function callbacks error.');
           }
         }
       }
@@ -873,7 +890,8 @@ export struct TreeView {
   @State touchCount: number = 0;
   @State dropSelectedIndex: number = 0;
   @State viewLastIndex: number = -1;
-  @State listItemBgColor: Resource = $r('sys.color.ohos_id_color_background_transparent');
+  @State listItemBgColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
+  @Provide treeViewTheme: TreeViewTheme = new TreeViewTheme();
 
   @Builder
   NullBuilder() {
@@ -895,6 +913,20 @@ export struct TreeView {
   };
   private readonly textInputPadding: itemPadding =
     { left: '0vp', right: '0vp', top: '0vp', bottom: '0vp' }
+
+  onWillApplyTheme(theme: Theme) {
+    this.treeViewTheme.itemSelectedBgColor = theme.colors.interactiveSelect;
+    this.treeViewTheme.itemPressedBgColor = theme.colors.interactivePressed;
+    this.treeViewTheme.itemHoverBgColor = theme.colors.interactiveHover;
+    this.treeViewTheme.primaryTitleFontColor = theme.colors.fontPrimary;
+    this.treeViewTheme.secondaryTitleFontColor = theme.colors.fontSecondary;
+    this.treeViewTheme.primaryTitleActiveFontColor = theme.colors.interactiveActive;
+    this.treeViewTheme.borderFocusedColor = theme.colors.interactiveFocus;
+    this.treeViewTheme.leftIconColor = theme.colors.iconSecondary;
+    this.treeViewTheme.leftIconActiveColor = theme.colors.interactiveActive;
+    this.treeViewTheme.arrowIconColor = theme.colors.iconTertiary;
+    this.treeController.treeViewTheme = this.treeViewTheme;
+  }
 
   aboutToAppear(): void {
     if (this.treeController !== null) {
@@ -959,15 +991,21 @@ export struct TreeView {
         this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth1 :
         this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth2 })
     }
-    .constraintSize({ minWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.minWidth,
-      maxWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.maxWidth })
+    .constraintSize({
+      minWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.minWidth,
+      maxWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.maxWidth,
+    })
     .height(this.listNodeDataSource.getDragPopupPara().height)
     .backgroundColor(this.listNodeDataSource.getDragPopupPara().backgroundColor)
-    .padding({ left: this.listNodeDataSource.getDragPopupPara().padding.left,
-      right: this.listNodeDataSource.getDragPopupPara().padding.right })
-    .shadow({ radius: $r('sys.float.ohos_id_corner_radius_default_m'),
+    .padding({
+      left: this.listNodeDataSource.getDragPopupPara().padding.left,
+      right: this.listNodeDataSource.getDragPopupPara().padding.right,
+    })
+    .shadow({
+      radius: $r('sys.float.ohos_id_corner_radius_default_m'),
       color: SHADOW_COLOR,
-      offsetY: 0 })
+      offsetY: 0,
+    })
     .borderRadius(this.listNodeDataSource.getDragPopupPara().borderRadius) // need to doubleCheck.
   }
 
@@ -978,9 +1016,9 @@ export struct TreeView {
     this.setImageSources(this.viewLastIndex, InteractionStatus.Normal);
 
     this.nodeList[this.viewLastIndex].setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
-    this.nodeList[this.viewLastIndex].fontColor = $r('sys.color.ohos_id_color_primary');
+    this.nodeList[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
     this.listNodeDataSource.listNode[this.viewLastIndex].setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
-    this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = $r('sys.color.ohos_id_color_primary');
+    this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
     this.listNodeDataSource.listNode[this.viewLastIndex].setIsSelected(false);
     this.listNodeDataSource.setImageSource(this.viewLastIndex, InteractionStatus.Normal);
   }
@@ -1273,7 +1311,7 @@ export struct TreeView {
       this.listNodeDataSource.setIsInnerDrag(false);
       this.listNodeDataSource.notifyDataReload();
 
-      this.listNodeDataSource.listNode[currentFocusIndex].fontColor = $r('sys.color.ohos_id_color_text_primary_activated');
+      this.listNodeDataSource.listNode[currentFocusIndex].fontColor = this.treeViewTheme.primaryTitleActiveFontColor;
       if (this.viewLastIndex !== -1 && currentNodeIndex !== this.viewLastIndex) {
         this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
           .mainTitleNode?.setMainTitleSelected(false);
@@ -1282,7 +1320,7 @@ export struct TreeView {
       }
 
       if (this.listNodeDataSource.listNode[this.viewLastIndex] !== null) {
-        this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = $r('sys.color.ohos_id_color_text_primary');
+        this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
       }
 
       this.listNodeDataSource.lastIndex = this.viewLastIndex;
@@ -1301,7 +1339,7 @@ export struct TreeView {
         this.listNodeDataSource.listNode[this.viewLastIndex].setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
       }
 
-      this.viewLastIndex = currentFocusIndex;
+      this.listNodeDataSource.lastIndex = currentFocusIndex;
     })
   }
 }
@@ -1544,6 +1582,7 @@ export class TreeController {
   private listNodeUtils: ListNodeUtils = new ListNodeUtils();
   private listNodeDataSource: ListNodeDataSource = new ListNodeDataSource();
   private initBuild: boolean = true;
+  public treeViewTheme: TreeViewTheme = new TreeViewTheme();
 
   public getListNodeDataSource(): ListNodeDataSource {
     return this.listNodeDataSource;
@@ -1624,8 +1663,8 @@ export class TreeController {
 
     this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, this.listNodeDataSource.getLastIndex());
     this.listNodeDataSource.setItemVisibilityOnEdit(this.listNodeDataSource.getLastIndex(), MenuOperation.COMMIT_NODE);
-    this.listNodeDataSource.listNode[this.listNodeDataSource.getLastIndex()].setFontColor($r('sys.color.ohos_id_color_text_primary'));
-
+    this.listNodeDataSource.listNode[this.listNodeDataSource.getLastIndex()]
+      .setFontColor(this.treeViewTheme.primaryTitleFontColor);
     let newNodeIndex: number = findCurrentNodeIndex(this.listNodeDataSource, newNodeId);
     this.listNodeDataSource.setClickIndex(newNodeIndex);
     this.listNodeDataSource.handleEvent(Event.TOUCH_UP, newNodeIndex);
@@ -1842,6 +1881,7 @@ class ListNodeDataSource extends BasicDataSource {
   private currentFocusNodeId: number = this.INITIAL_INVALID_VALUE;
   private lastFocusNodeId: number = this.INITIAL_INVALID_VALUE;
   private addFocusNodeId: number = this.INITIAL_INVALID_VALUE;
+  public treeViewTheme: TreeViewTheme = new TreeViewTheme();
   readonly FLAG_LINE: flagLine = {
     flagLineHeight: FLAG_LINE_HEIGHT,
     flagLineColor: $r('sys.color.ohos_id_color_emphasize'),
@@ -1868,20 +1908,20 @@ class ListNodeDataSource extends BasicDataSource {
       offsetY: SHADOW_OFFSETY,
     },
     borderRadius: $r('sys.float.ohos_id_corner_radius_clicked'),
-    fontColor: $r('sys.color.ohos_id_color_primary'),
+    fontColor: this.treeViewTheme.primaryTitleFontColor,
     fontSize: $r('sys.float.ohos_id_text_size_body1'),
     fontWeight: FontWeight.Regular,
     imageOpacity: $r('sys.float.ohos_id_alpha_content_fourth')
   };
   private readonly subTitle: subTitleStyle = {
-    normalFontColor: $r('sys.color.ohos_id_color_secondary'),
+    normalFontColor: this.treeViewTheme.secondaryTitleFontColor,
     highLightFontColor: $r('sys.color.ohos_id_color_primary_contrary'),
     fontSize: $r('sys.float.ohos_id_text_size_body2'),
     fontWeight: FontWeight.Regular,
     margin: { left: '4vp', right: '24' }
   }
 
-  public changeNodeColor(index: number, color: Resource | string | undefined): void {
+  public changeNodeColor(index: number, color: ResourceColor | undefined): void {
     this.listNode[index].setNodeColor(color);
     this.listNode[index].setNodeBorder(false);
   }
@@ -2184,7 +2224,7 @@ class ListNodeDataSource extends BasicDataSource {
         this.isTouchDown = false;
         let nodeInfo: NodeInfo = this.listNode[index];
         this.setImageSource(index, InteractionStatus.Selected);
-        nodeInfo.setFontColor($r('sys.color.ohos_id_color_primary'));
+        nodeInfo.setFontColor(this.treeViewTheme.primaryTitleFontColor);
         this.lastIndex = index;
         this.changeNodeColor(index, nodeInfo.getNodeStatus().selected);
         this.notifyDataChange(lazyForEachIndex);
@@ -2230,8 +2270,10 @@ class ListNodeDataSource extends BasicDataSource {
   private notificationNodeInfo(addNodeId: number, operation: MenuOperation | undefined) {
     if (operation === MenuOperation.MODIFY_NODE) {
       let modifyNodeInfo: NodeInfo = this.listNode[this.modifyNodeIndex];
-      let backParamModify: CallbackParam = { currentNodeId: modifyNodeInfo.getNodeCurrentNodeId(),
-        parentNodeId: modifyNodeInfo.getNodeParentNodeId() }
+      let backParamModify: CallbackParam = {
+        currentNodeId: modifyNodeInfo.getNodeCurrentNodeId(),
+        parentNodeId: modifyNodeInfo.getNodeParentNodeId(),
+      }
       this.appEventBus.emit(TreeListenType.NODE_MODIFY, backParamModify);
     } else if (operation === MenuOperation.ADD_NODE) {
       let addNodeInfo: NodeInfo = this.listNode[addNodeId];
@@ -2241,8 +2283,10 @@ class ListNodeDataSource extends BasicDataSource {
         addNodeInfo.getNodeItem().imageNode?.selectedSource : undefined;
       let editIcon: Resource | string | undefined = (addNodeInfo.getNodeItem().imageNode !== undefined) ?
         addNodeInfo.getNodeItem().imageNode?.editSource : undefined;
-      let callbackParam: CallbackParam = { currentNodeId: addNodeInfo.getNodeCurrentNodeId(),
-        parentNodeId: addNodeInfo.getNodeParentNodeId() }
+      let callbackParam: CallbackParam = {
+        currentNodeId: addNodeInfo.getNodeCurrentNodeId(),
+        parentNodeId: addNodeInfo.getNodeParentNodeId(),
+      }
       this.appEventBus.emit(TreeListenType.NODE_ADD, callbackParam);
     }
   }
@@ -2977,7 +3021,7 @@ class ListNodeDataSource extends BasicDataSource {
   }
 
   public getSubTitleFontColor(isHighLight: boolean) {
-    return isHighLight ? this.subTitle.highLightFontColor : this.subTitle.normalFontColor;
+    return isHighLight ? this.subTitle.highLightFontColor : this.treeViewTheme.secondaryTitleFontColor;
   }
 
   private getChildIndex(rearParentNodeId: number, rearCurrentNodeId: number) {
@@ -3030,6 +3074,7 @@ export struct TreeViewInner {
   @State index: number = -1;
   @State lastIndex: number = -1;
   @State count: number = 0;
+  @Consume treeViewTheme: TreeViewTheme;
   @BuilderParam private listTreeViewMenu: () => void;
   private readonly MAX_CN_LENGTH: number = 254;
   private readonly MAX_EN_LENGTH: number = 255;
@@ -3062,7 +3107,7 @@ export struct TreeViewInner {
   }
 
   @Builder
-  popupForShowTitle(text: string | Resource | undefined, backgroundColor: Resource, fontColor: Resource) {
+  popupForShowTitle(text: string | Resource | undefined, backgroundColor: ResourceColor, fontColor: ResourceColor) {
     Row() {
       Text(text).fontSize($r('sys.float.ohos_id_text_size_body2')).fontWeight('regular').fontColor(fontColor)
     }
@@ -3105,6 +3150,8 @@ export struct TreeViewInner {
                     .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
                       this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
                     .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
+                    .fillColor(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
+                    this.treeViewTheme.leftIconColor : this.treeViewTheme.leftIconActiveColor)
                 }
                 .focusable(true)
                 .backgroundColor(COLOR_IMAGE_ROW)
@@ -3117,7 +3164,8 @@ export struct TreeViewInner {
                   Text(this.item.getNodeItem().mainTitleNode?.title)
                     .maxLines(1)// max line
                     .fontSize(this.item.getNodeItem().mainTitleNode?.size)
-                    .fontColor(this.item.fontColor)
+                    .fontColor(this.item.getIsSelected() ?
+                    this.treeViewTheme.primaryTitleActiveFontColor : this.treeViewTheme.primaryTitleFontColor)
                     .margin({ right: this.item.getNodeItem().mainTitleNode?.itemRightMargin })
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                     .fontWeight(this.item.getNodeItem().mainTitleNode?.weight)
@@ -3134,8 +3182,10 @@ export struct TreeViewInner {
                       .backgroundColor(this.item.getNodeItem().inputText?.backgroundColor)
                       .enterKeyType(EnterKeyType.Done)
                       .focusable(true)
-                      .padding({ left: this.textInputPadding.left, right: this.textInputPadding.right,
-                        top: this.textInputPadding.top, bottom: this.textInputPadding.bottom })
+                      .padding({
+                        left: this.textInputPadding.left, right: this.textInputPadding.right,
+                        top: this.textInputPadding.top, bottom: this.textInputPadding.bottom,
+                      })
                       .onChange((value: string) => {
                         let thisIndex: number = findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId());
                         let res: string = '';
@@ -3188,7 +3238,8 @@ export struct TreeViewInner {
                 Row() {
                   Text(this.listNodeDataSource.getSubtitle(this.item.getCurrentNodeId()))
                     .fontSize(this.listNodeDataSource.getSubTitlePara().fontSize)
-                    .fontColor(this.listNodeDataSource.getSubTitleFontColor(this.item.getIsHighLight() || this.item.getIsModify()))
+                    .fontColor(this.item.getIsHighLight() || this.item.getIsModify() ?
+                    $r('sys.color.ohos_id_color_primary_contrary') : this.treeViewTheme.secondaryTitleFontColor)
                     .fontWeight(this.listNodeDataSource.getSubTitlePara().fontWeight)
                 }
                 .focusable(true)
@@ -3239,7 +3290,7 @@ export struct TreeViewInner {
         .opacity(this.listNodeDataSource.getListItemOpacity(this.item))
         .onHover((isHover: boolean) => {
           if (isHover) {
-            this.item.setNodeColor($r('sys.color.ohos_id_color_hover'))
+            this.item.setNodeColor(this.treeViewTheme.itemHoverBgColor)
           } else {
             this.item.setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
           }
@@ -3251,32 +3302,31 @@ export struct TreeViewInner {
             return;
           }
 
+          let thisIndex: number = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
           this.listNodeDataSource.setClickIndex(this.index);
           let currentId: number = this.item.getNodeCurrentNodeId();
 
           if (event.type === TouchType.Down) {
-            this.item.setNodeColor($r('sys.color.ohos_id_color_click_effect'));
+            this.item.setNodeColor(this.treeViewTheme.itemPressedBgColor);
           }
 
           else if (event.type === TouchType.Up) {
             this.item.setNodeColor(COLOR_SELECT);
-            this.item.fontColor = $r('sys.color.ohos_id_color_text_primary_activated');
             if (this.item.getNodeItem().imageNode !== null) {
               this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.Selected);
-              this.listNodeDataSource.setImageSource(this.index, InteractionStatus.Selected);
               this.item.imageSource = this.item.getNodeItem().imageNode?.source;
             }
 
             this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true)
-            this.lastIndex = this.index;
             let callParam: CallbackParam = { currentNodeId: currentId };
             this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
           }
 
-          if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
+          if (this.listNodeDataSource.getLastIndex() !== -1 && thisIndex !== this.listNodeDataSource.getLastIndex()) {
             this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, this.listNodeDataSource.getLastIndex());
             this.listNodeDataSource.setItemVisibilityOnEdit(this.listNodeDataSource.getLastIndex(), MenuOperation.COMMIT_NODE);
           }
+          this.lastIndex = thisIndex;
           this.count--;
         })
         /* backgroundColor when editing and in other states. */
@@ -3320,7 +3370,7 @@ export struct TreeViewInner {
           .border({
             radius: $r('sys.float.ohos_id_corner_radius_clicked'),
             width: FLAG_NUMBER,
-            color: $r('sys.color.ohos_id_color_focused_outline'),
+            color: this.treeViewTheme.borderFocusedColor,
             style: BorderStyle.Solid
           })
         },
@@ -3581,6 +3631,7 @@ class MainTitleNode extends NodeBaseInfo {
   private mainTitleName: ResourceStr;
   mainTitleSetting: textSetting;
   private showPopUpTimeout: number;
+  public treeViewTheme: TreeViewTheme = new TreeViewTheme();
 
   constructor(mainTitleName: ResourceStr) {
     super();
@@ -3589,7 +3640,7 @@ class MainTitleNode extends NodeBaseInfo {
     this.itemHeight = ITEM_HEIGHT;
     this.rightMargin = $r('sys.float.ohos_id_text_paragraph_margin_xs');
     this.mainTitleSetting = {
-      fontColor: $r('sys.color.ohos_id_color_primary'),
+      fontColor: this.treeViewTheme.primaryTitleFontColor,
       fontSize: $r('sys.float.ohos_id_text_size_body1'),
       fontWeight: FontWeight.Normal,
     };
@@ -3599,13 +3650,13 @@ class MainTitleNode extends NodeBaseInfo {
   setMainTitleSelected(isSelected: boolean): void {
     if (isSelected) {
       this.mainTitleSetting = {
-        fontColor: $r('sys.color.ohos_id_color_text_primary_activated'),
+        fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
         fontSize: $r('sys.float.ohos_id_text_size_body1'),
         fontWeight: FontWeight.Regular,
       };
     } else {
       this.mainTitleSetting = {
-        fontColor: $r('sys.color.ohos_id_color_primary'),
+        fontColor: this.treeViewTheme.primaryTitleFontColor,
         fontSize: $r('sys.float.ohos_id_text_size_body1'),
         fontWeight: FontWeight.Normal,
       };
@@ -3628,7 +3679,7 @@ class MainTitleNode extends NodeBaseInfo {
     return this.showPopUpTimeout;
   }
 
-  get color(): Resource {
+  get color(): ResourceColor {
     return this.mainTitleSetting.fontColor;
   }
 
@@ -3642,13 +3693,17 @@ class MainTitleNode extends NodeBaseInfo {
 
   setMainTitleHighLight(isHighLight: boolean): void {
     if (isHighLight) {
-      this.mainTitleSetting = { fontColor: $r('sys.color.ohos_id_color_primary_contrary'),
+      this.mainTitleSetting = {
+        fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
         fontSize: $r('sys.float.ohos_id_text_size_body1'),
-        fontWeight: FontWeight.Regular };
+        fontWeight: FontWeight.Regular,
+      };
     } else {
-      this.mainTitleSetting = { fontColor: $r('sys.color.ohos_id_color_primary'),
+      this.mainTitleSetting = {
+        fontColor: this.treeViewTheme.primaryTitleFontColor,
         fontSize: $r('sys.float.ohos_id_text_size_body1'),
-        fontWeight: FontWeight.Normal };
+        fontWeight: FontWeight.Normal,
+      };
     }
   }
 }
@@ -3659,6 +3714,7 @@ export class InputText extends NodeBaseInfo {
   private statusColor: Resource = $r('sys.color.ohos_id_color_background');
   private editItemColor: Resource = $r('sys.color.ohos_id_color_emphasize');
   private radius: Resource = $r('sys.float.ohos_id_corner_radius_default_xs');
+  public treeViewTheme: TreeViewTheme = new TreeViewTheme();
 
   constructor() {
     super();
@@ -3666,13 +3722,13 @@ export class InputText extends NodeBaseInfo {
     this.itemHeight = ITEM_HEIGHT_INPUT;
     this.rightMargin = $r('sys.float.ohos_id_text_paragraph_margin_xs');
     this.inputTextSetting = {
-      fontColor: $r('sys.color.ohos_id_color_text_primary'),
+      fontColor: this.treeViewTheme.primaryTitleFontColor,
       fontSize: $r('sys.float.ohos_id_text_size_body1'),
       fontWeight: FontWeight.Normal,
     };
   }
 
-  get color(): Resource {
+  get color(): ResourceColor {
     return this.inputTextSetting.fontColor;
   }
 
