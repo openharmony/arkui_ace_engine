@@ -569,7 +569,6 @@ void VideoPattern::checkNeedAutoPlay()
 {
     if (isStop_) {
         isStop_ = false;
-        Start();
     }
     if (dragEndAutoPlay_) {
         dragEndAutoPlay_ = false;
