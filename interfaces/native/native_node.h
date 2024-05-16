@@ -1490,6 +1490,43 @@ typedef enum {
     NODE_FOCUS_ON_TOUCH,
 
     /**
+     * @brief 边框宽度属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * 1: .value[0].f32：统一设置四条边的边框宽度，单位为百分比。 \n
+     * 2: .value[0].f32：设置上边框的边框宽度，单位为百分比。 \n
+     * .value[1].f32：设置右边框的边框宽度，单位为百分比。 \n
+     * .value[2].f32：设置下边框的边框宽度，单位为百分比。 \n
+     * .value[3].f32：设置左边框的边框宽度，单位为百分比。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：设置上边框的边框宽度，单位为百分比。 \n
+     * .value[1].f32：设置右边框的边框宽度，单位为百分比。 \n
+     * .value[2].f32：设置下边框的边框宽度，单位为百分比。 \n
+     * .value[3].f32：设置左边框的边框宽度，单位为百分比。 \n
+     *
+     */
+    NODE_BORDER_WIDTH_PERCENT,
+    /**
+     * @brief 边框圆角属性，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * 1: .value[0].f32：统一设置四条边的边框圆角半径，单位为百分比。 \n
+     * 2: .value[0].f32：设置左上角圆角半径，单位为百分比。 \n
+     * .value[1].f32：设置右上角圆角半径，单位为百分比。 \n
+     * .value[2].f32：设置左下角圆角半径，单位为百分比。 \n
+     * .value[3].f32：设置右下角圆角半径，单位为百分比。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].f32：设置左上角圆角半径，单位为百分比。 \n
+     * .value[1].f32：设置右上角圆角半径，单位为百分比。 \n
+     * .value[2].f32：设置左下角圆角半径，单位为百分比。 \n
+     * .value[3].f32：设置右下角圆角半径，单位为百分比。 \n
+     *
+     */
+    NODE_BORDER_RADIUS_PERCENT,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
