@@ -98,11 +98,11 @@ var WordBreak;
   WordBreak[WordBreak["BREAK_WORD"] = 2] = "break-word";
 })(WordBreak || (WordBreak = {}));
 
-var DpiFollowStrategy ;
-(function (DpiFollowStrategy ) {
-  DpiFollowStrategy [DpiFollowStrategy ["FOLLOW_HOST_DPI"] = 0] = "follow-host-dpi";
-  DpiFollowStrategy [DpiFollowStrategy ["FOLLOW_UI_EXTENSION_ABILITY_DPI"] = 1] = "follow-ui-extension-ability-dpi";
-})(DpiFollowStrategy  || (DpiFollowStrategy  = {}));
+var DpiFollowStrategy;
+(function (DpiFollowStrategy) {
+  DpiFollowStrategy[DpiFollowStrategy["FOLLOW_HOST_DPI"] = 0] = "follow-host-dpi";
+  DpiFollowStrategy[DpiFollowStrategy["FOLLOW_UI_EXTENSION_ABILITY_DPI"] = 1] = "follow-ui-extension-ability-dpi";
+})(DpiFollowStrategy || (DpiFollowStrategy = {}));
 
 var EllipsisMode;
 (function (EllipsisMode) {
@@ -2709,6 +2709,7 @@ var XComponentType;
   XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
   XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
   XComponentType[XComponentType["NODE"] = 3] = "NODE";
+  XComponentType[XComponentType["PLATFORM_VIEW"] = 999] = "PLATFORM_VIEW";
 })(XComponentType || (XComponentType = {}));
 
 var NestedScrollMode;

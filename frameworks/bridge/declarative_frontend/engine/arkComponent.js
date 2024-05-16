@@ -11839,6 +11839,61 @@ class TextInputPaddingModifier extends ModifierWithKey {
   }
 }
 TextInputPaddingModifier.identity = Symbol('textInputPadding');
+
+class TextInputTextModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetText(node);
+    } else {
+      getUINativeModule().textInput.setText(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputTextModifier.identity = Symbol('textInputText');
+
+class TextInputPlaceholderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetPlaceholder(node);
+    } else {
+      getUINativeModule().textInput.setPlaceholder(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputPlaceholderModifier.identity = Symbol('textInputPlaceholder');
+
+class TextInputControllerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetController(node);
+    } else {
+      getUINativeModule().textInput.setController(node, this.value);
+    }
+  }
+
+}
+TextInputControllerModifier.identity = Symbol('textInputController');
+
+
 class TextInputContentTypeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12042,6 +12097,30 @@ class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      this.setPlaceholder(value[0].placeholder);
+      this.setText(value[0].text);
+      this.setController(value[0].controller);
+    }
+    return this;
+  }
+  setText(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputTextModifier.identity,
+      TextInputTextModifier, value);
+    return this;
+  }
+  setPlaceholder(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputPlaceholderModifier.identity,
+      TextInputPlaceholderModifier, value);
+    return this;
+  }
+  setController(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputControllerModifier.identity,
+      TextInputControllerModifier, value);
+    return this;
+  }
+
   cancelButton(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputCancelButtonModifier.identity, TextInputCancelButtonModifier, value);
     return this;
@@ -16162,6 +16241,10 @@ class ArkSliderComponent extends ArkComponent {
     this.setContentModifier(value);
     return this;
   }
+  slideRange(value) {
+    modifierWithKey(this._modifiersWithKeys, ValidSlideRangeModifier.identity, ValidSlideRangeModifier, value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, false);
@@ -16419,6 +16502,22 @@ class TrackThicknessModifier extends ModifierWithKey {
   }
 }
 TrackThicknessModifier.identity = Symbol('sliderTrackThickness');
+class ValidSlideRangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.resetValidSlideRange(node);
+    } else {
+      getUINativeModule().slider.setValidSlideRange(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ValidSlideRangeModifier.identity = Symbol('slideRange');
 // @ts-ignore
 if (globalThis.Slider !== undefined) {
   globalThis.Slider.attributeModifier = function (modifier) {

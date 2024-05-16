@@ -461,6 +461,47 @@ ArkUINativeModuleValue SliderBridge::ResetBlockStyle(ArkUIRuntimeCallInfo* runti
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SliderBridge::SetValidSlideRange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsObject()) {
+        GetArkUINodeModifiers()->getSliderModifier()->resetSliderValidSlideRange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    float from = std::numeric_limits<float>::infinity();
+    float to = std::numeric_limits<float>::infinity();
+    auto jsObj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
+    auto fromType = jsObj->GetProperty("from");
+    if (!fromType->IsEmpty() && fromType->IsNumber()) {
+        from = fromType->ToNumber<float>();
+    }
+    auto toType = jsObj->GetProperty("to");
+    if (!toType->IsEmpty() && toType->IsNumber()) {
+        to = toType->ToNumber<float>();
+    }
+    if ((std::isinf(from) && std::isinf(to)) || std::isnan(from) || std::isnan(to)) {
+        GetArkUINodeModifiers()->getSliderModifier()->resetSliderValidSlideRange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    SliderModelNG::SetValidSlideRange(frameNode, from, to);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::ResetValidSlideRange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSliderModifier()->resetSliderValidSlideRange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue SliderBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

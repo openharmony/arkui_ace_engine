@@ -311,10 +311,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
         director->SetRSSurfaceNode(window->GetSurfaceNode());
         auto container = AceContainer::GetContainerInstance(id);
         CHECK_NULL_VOID(container);
-        auto func = [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
+        auto func = [taskExecutor = container->GetTaskExecutor(), id](
+            const std::function<void()>& task, uint32_t delay) {
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(id);
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask", PriorityType::HIGH);
+            taskExecutor->PostDelayedTask(
+                task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
         };
         director->SetUITaskRunner(func, id);
         director->Init();

@@ -186,7 +186,7 @@ void RadioModifier::UpdateIndicatorAnimation(bool isCheck)
     delayOption.SetCurve(springCurve);
     delayOption.SetDelay(DEFAULT_INDICATOR_ANIMATION_DURATION);
     delayOption.SetDuration(DEFAULT_INDICATOR_ANIMATION_DURATION);
-    if (isOnAnimationFlag_->Get()) {
+    if (isCheck) {
         AnimationUtils::Animate(
             delayOption,
             [&]() {
@@ -339,6 +339,7 @@ void RadioModifier::PaintUnselectedIndicator(
 void RadioModifier::PaintIndicator(
     RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& contentOffset) const
 {
+    DrawFocusBoard(canvas, contentSize, contentOffset);
     DrawTouchAndHoverBoard(canvas, contentSize, contentOffset);
     float outCircleRadius = contentSize.Width() / CALC_RADIUS;
     float centerX = contentOffset.GetX() + outCircleRadius;

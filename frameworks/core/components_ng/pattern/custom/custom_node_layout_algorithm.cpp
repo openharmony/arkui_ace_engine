@@ -60,6 +60,12 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
     }
+    {
+        auto customNode = DynamicCast<CustomNodeBase>(layoutWrapper->GetHostNode());
+        if (customNode) {
+            customNode->FireRecycleRenderFunc();
+        }
+    }
 
     // call js measure
     if (!host->FireOnMeasure(layoutWrapper)) {

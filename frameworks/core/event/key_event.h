@@ -515,7 +515,11 @@ struct KeyEvent final {
  
     bool IsExactlyKey(const std::vector<KeyCode>& expectCodes) const
     {
-        return (expectCodes.size() != pressedCodes.size()) ? false : IsKey(expectCodes);
+        auto pressedKeysCnt = pressedCodes.size();
+        if (std::find(pressedCodes.begin(), pressedCodes.end(), KeyCode::KEY_FN) != pressedCodes.end()) {
+            --pressedKeysCnt;
+        }
+        return (expectCodes.size() != pressedKeysCnt) ? false : IsKey(expectCodes);
     }
 
     bool IsKey(const std::vector<KeyCode>& expectCodes) const

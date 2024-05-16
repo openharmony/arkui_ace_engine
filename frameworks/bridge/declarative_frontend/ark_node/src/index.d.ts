@@ -52,7 +52,8 @@ declare interface Size {
 declare enum XComponentType {
   SURFACE = 0,
   COMPONENT,
-  TEXTURE
+  TEXTURE,
+  PLATFORM_VIEW = 999
 }
 
 declare interface XComponentController { }
@@ -117,6 +118,7 @@ declare class ArkComponent {
   setNodePtr(noed: NodePtr);
   initialize(...args: Object[]);
 }
+declare class ArkTextInputComponent extends ArkComponent {}
 
 declare class ArkTextComponent extends ArkComponent {}
 

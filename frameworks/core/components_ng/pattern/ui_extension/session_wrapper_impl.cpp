@@ -622,9 +622,7 @@ void SessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
     if (isDensityDpi) {
         float density = PipelineBase::GetCurrentDensity();
         session_->NotifyDensityFollowHost(isDensityDpi, density);
-        return;
     }
-    session_->NotifyDensityFollowHost(isDensityDpi);
 }
 /***************************** End: The interface to control the display area and the avoid area **********************/
 

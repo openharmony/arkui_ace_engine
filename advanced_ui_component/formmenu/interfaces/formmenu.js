@@ -36,11 +36,11 @@ async function querySnapshot(want, componentId) {
     let uint8Arr = new Uint8Array(arrayBuffer);
     let pixelStr = base64Helper.encodeToStringSync(uint8Arr);
     !want.parameters && (want.parameters = {});
-    want.parameters['ohos.extra.param.key.add_form_to_host_snapshot'] = pixelStr;
     want.parameters['ohos.extra.param.key.add_form_to_host_width'] = compInfo.size.width;
     want.parameters['ohos.extra.param.key.add_form_to_host_height'] = compInfo.size.height;
     want.parameters['ohos.extra.param.key.add_form_to_host_screenx'] = compInfo.screenOffset.x;
     want.parameters['ohos.extra.param.key.add_form_to_host_screeny'] = compInfo.screenOffset.y;
+    want.parameters['ohos.extra.param.key.add_form_to_host_snapshot'] = pixelStr;
   } catch (err) {
     hilog.error(0x3900, tag, 'get pixelmap string error:' + err);
   }
@@ -66,7 +66,7 @@ export async function AddFormMenuItem(want, componentId, options = {}) {
         'moduleName': ''
       },
       content: {
-        'id': 125832715,
+        'id': 125832726,
         'type': 10003,
         params: ['sys.string.ohos_add_form_to_desktop'],
         'bundleName': '',
@@ -74,7 +74,6 @@ export async function AddFormMenuItem(want, componentId, options = {}) {
       }
     });
     FormMenuItem.onAppear(async () => {
-      hilog.info(0x3900, tag, 'enter FormMenuItem.onAppear:');
       await querySnapshot(want, componentId);
       FormMenuItem.onClick(() => { }, want, componentId, options?.formBindingData, options?.callback);
     });

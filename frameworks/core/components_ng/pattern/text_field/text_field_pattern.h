@@ -318,7 +318,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        FocusPattern focusPattern = { FocusType::NODE, true };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
         focusPattern.SetIsFocusActiveWhenFocused(true);
         return focusPattern;
     }

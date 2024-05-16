@@ -54,6 +54,7 @@ ohos_shared_library("ace_ndk") {
     "node/drawable_descriptor.cpp",
     "node/event_converter.cpp",
     "node/gesture_impl.cpp",
+    "node/list_option.cpp",
     "node/native_impl.cpp",
     "node/native_node_extented.cpp",
     "node/native_node_napi.cpp",

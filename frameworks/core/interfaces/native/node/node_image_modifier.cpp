@@ -17,6 +17,7 @@
 #include <cstdint>
 
 #include "base/utils/utils.h"
+#include "core/common/card_scope.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_theme.h"
@@ -58,6 +59,20 @@ constexpr int32_t DEFAULT_FALSE = 0;
 const std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::RIGHT,
     ResizableOption::BOTTOM, ResizableOption::LEFT };
 std::string g_strValue;
+
+enum class ResourceType : uint32_t {
+    COLOR = 10001,
+    FLOAT,
+    STRING,
+    PLURAL,
+    BOOLEAN,
+    INTARRAY,
+    INTEGER,
+    PATTERN,
+    STRARRAY,
+    MEDIA = 20000,
+    RAWFILE = 30000
+};
 
 bool SetCalcDimension(std::optional<CalcDimension>& optDimension, const ArkUIStringAndFloat* options,
     ArkUI_Int32 optionsLength, ArkUI_Int32 offset)
@@ -111,6 +126,54 @@ const char* GetImageSrc(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, nullptr);
     g_strValue = ImageModelNG::GetSrc(frameNode).GetSrc();
     return g_strValue.c_str();
+}
+
+RefPtr<ThemeConstants> GetThemeConstants(const char* bundleName, const char* moduleName)
+{
+    auto cardId = CardScope::CurrentId();
+    if (cardId != INVALID_CARD_ID) {
+        auto container = Container::Current();
+        auto weak = container->GetCardPipeline(cardId);
+        auto cardPipelineContext = weak.Upgrade();
+        CHECK_NULL_RETURN(cardPipelineContext, nullptr);
+        auto cardThemeManager = cardPipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(cardThemeManager, nullptr);
+        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    return themeManager->GetThemeConstants(bundleName, moduleName);
+}
+
+void SetImageResource(
+    ArkUINodeHandle node, int id, int type, const char* name, const char* bundleName, const char* moduleName)
+{
+    auto themeConstants = GetThemeConstants(bundleName, moduleName);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!themeConstants) {
+        return;
+    }
+    std::optional<std::string> src;
+    if (type == static_cast<int32_t>(ResourceType::RAWFILE)) {
+        src = themeConstants->GetRawfile(name);
+    }
+    if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
+        if (id == -1) {
+            src = themeConstants->GetMediaPathByName(name);
+        } else {
+            src = themeConstants->GetMediaPath(id);
+        }
+    }
+    if (!src.has_value()) {
+        return;
+    }
+
+    ImageModelNG::InitImage(frameNode, src.value());
 }
 
 void SetCopyOption(ArkUINodeHandle node, ArkUI_Int32 copyOption)
@@ -670,18 +733,20 @@ void AnalyzerConfig(ArkUINodeHandle node, void* config)
 namespace NodeModifier {
 const ArkUIImageModifier* GetImageModifier()
 {
-    static const ArkUIImageModifier modifier = { SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption,
-        SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad,
-        ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize,
-        ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
-        SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
-        ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
-        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
-        ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
-        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality, ResetEnhancedImageQuality,
-        GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
-        GetImageDraggable, GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor,
-        SetPixelMap, SetPixelMapArray, SetResourceSrc, EnableAnalyzer, AnalyzerConfig };
+    static const ArkUIImageModifier modifier = { SetImageSrc, SetImageShowSrc, SetImageResource, SetCopyOption,
+        ResetCopyOption, SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode,
+        ResetRenderMode, SetSyncLoad, ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize,
+        ResetFitOriginalSize, SetSourceSize, ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection,
+        SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation, ResetImageInterpolation,
+        SetColorFilter, ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad, SetImageObjectFit,
+        ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable,
+        ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder, ResetImageBorder,
+        SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
+        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality,
+        ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
+        GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
+        GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
+        EnableAnalyzer, AnalyzerConfig };
     return &modifier;
 }
 

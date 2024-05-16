@@ -140,6 +140,7 @@ public:
     static void SetBuilderFunc(FrameNode* frameNode, SliderMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, double value, int32_t mode);
     static Dimension GetThickness(FrameNode* frameNode);
+    static RefPtr<SliderModel::SliderValidRange> GetValidSlideRange(FrameNode* frameNode);
 
 private:
     void SetSliderValue(float value);

@@ -366,7 +366,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
         }
         JSRef<JSVal> enableDensityDPI = obj->GetProperty("dpiFollowStrategy");
         if (enableDensityDPI->IsNumber()) {
-            densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? false :  true;
+            densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
         }
         do {
             JSRef<JSVal> componentContent = obj->GetProperty("placeholder");

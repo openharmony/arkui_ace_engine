@@ -77,16 +77,6 @@ RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
     buttonNode->GetLayoutProperty()->UpdateBorderWidth(counterTheme->GetBorderWidth());
     buttonNode->GetRenderContext()->UpdateBorderStyle(counterTheme->GetBorderStyle());
     buttonNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());
-    auto buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
-    if (symbol.compare(sub) == 0) {
-        BorderRadiusProperty subButtonBorder { counterTheme->GetBorderRadius().radiusTopLeft.value(), 0.0_vp, 0.0_vp,
-            counterTheme->GetBorderRadius().radiusBottomLeft.value() };
-        buttonLayoutProperty->UpdateBorderRadius(subButtonBorder);
-    } else {
-        BorderRadiusProperty addButtonBorder { 0.0_vp, counterTheme->GetBorderRadius().radiusTopRight.value(),
-            counterTheme->GetBorderRadius().radiusBottomRight.value(), 0.0_vp };
-        buttonLayoutProperty->UpdateBorderRadius(addButtonBorder);
-    }
     buttonNode->MarkModifyDone();
 
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
