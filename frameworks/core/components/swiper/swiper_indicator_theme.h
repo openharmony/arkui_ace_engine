@@ -132,6 +132,12 @@ public:
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
             theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
+            ParsePattern2(themeConstants, theme, swiperPattern);
+        }
+
+        void ParsePattern2(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwiperIndicatorTheme>& theme,
+            const RefPtr<ThemeStyle> swiperPattern) const
+        {
             theme->focusedBorderWidth_ = SWIPER_FOCUSED_BORDER_WIDTH;
             theme->hoverArrowBackgroundColor_ =
                 swiperPattern->GetAttr<Color>(ARROW_COLOR_BOARDCOLOR_HOVER, Color::TRANSPARENT);

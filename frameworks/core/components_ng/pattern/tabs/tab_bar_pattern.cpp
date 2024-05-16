@@ -1335,7 +1335,6 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
             MaskAnimationFinish(host, unselectedIndex, false);
         }
     });
-
     AnimationUtils::AddKeyFrame(HALF_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
         selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
         auto tabBar = weak.Upgrade();
@@ -1346,7 +1345,6 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
                 INVALID_RATIO, false);
         }
     });
-
     AnimationUtils::AddKeyFrame(FULL_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
         selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
         auto tabBar = weak.Upgrade();
@@ -1357,7 +1355,6 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
                 HALF_MASK_RADIUS_RATIO, false);
         }
     });
-
     AnimationUtils::CloseImplicitAnimation();
 }
 
@@ -2284,7 +2281,6 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& i
         return;
     }
     indicatorStyle = indicatorStyles_[indicator_];
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
@@ -2293,11 +2289,9 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& i
     if (NonPositive(indicatorStyle.width.Value())) {
         indicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(indicator_).Width());
     }
-
     if ((!isTouchingSwiper_ && !isAnimating_) || axis_ != Axis::HORIZONTAL) {
         return;
     }
-
     if (LessOrEqual(turnPageRate_, 0.0f)) {
         turnPageRate_ = 0.0f;
     }
