@@ -217,7 +217,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         } else {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
-        tabBarPattern->AddTabBarItemType(tabContentId, true);
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), true);
         tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
     }
@@ -234,9 +234,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         auto id = tabContentPattern->GetId();
         columnNode->UpdateInspectorId(id);
     } else {
-        auto deviceType = SystemProperties::GetDeviceType();
-        auto tabBarItemPadding = deviceType == DeviceType::PHONE ? tabTheme->GetSubTabHorizontalPadding()
-                                                                 : tabTheme->GetSubtabLandscapeHorizontalPadding();
+        auto tabBarItemPadding = tabTheme->GetSubTabItemPadding();
         layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
             CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding) });
     }
@@ -412,7 +410,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
     iconNode->MarkModifyDone();
-    tabBarPattern->AddTabBarItemType(tabContentId, false);
+    tabBarPattern->AddTabBarItemType(columnNode->GetId(), false);
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

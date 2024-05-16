@@ -562,6 +562,14 @@ void ScrollModelNG::SetInitialOffset(const OffsetT<CalcDimension>& offset)
     pattern->SetInitialOffset(offset);
 }
 
+void ScrollModelNG::SetInitialOffset(FrameNode* frameNode, const OffsetT<CalcDimension>& offset)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetInitialOffset(offset);
+}
+
 void ScrollModelNG::SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy>& proxy)
 {
     CHECK_NULL_VOID(frameNode);

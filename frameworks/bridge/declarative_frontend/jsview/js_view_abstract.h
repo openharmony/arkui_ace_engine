@@ -433,7 +433,7 @@ public:
     static void JsBackgroundImageResizable(const JSCallbackInfo& info);
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
     static void SetSymbolOptionApply(const JSCallbackInfo& info,
-        std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSObject> modifierObj);
+        std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj);
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);

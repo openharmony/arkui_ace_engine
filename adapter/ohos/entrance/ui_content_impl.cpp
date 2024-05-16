@@ -999,6 +999,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         container->SetToken(token);
     }
 
+    if (appInfo) {
+        container->SetApiTargetVersion(appInfo->apiTargetVersion);
+    }
+
     // Mark the relationship between windowId and containerId, it is 1:1
     if (window) {
         SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
@@ -1503,6 +1507,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetBundleName(hapModuleInfo->bundleName);
     container->SetModuleName(hapModuleInfo->moduleName);
     container->SetIsModule(hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
+    container->SetApiTargetVersion(apiTargetVersion);
 
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
@@ -1550,9 +1555,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             if (rsUiDirector) {
                 ACE_SCOPED_TRACE("OHOS::Rosen::RSUIDirector::Create()");
                 rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
+                    [taskExecutor = container->GetTaskExecutor(), id](
+                        const std::function<void()>& task, uint32_t delay) {
                         ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask");
+                        taskExecutor->PostDelayedTask(
+                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
                     }, id);
                 auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context != nullptr) {

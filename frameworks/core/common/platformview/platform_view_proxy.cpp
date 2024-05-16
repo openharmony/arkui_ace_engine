@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LISTITEM_MODIFIER_H
-#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LISTITEM_MODIFIER_H
 
-#include "core/interfaces/native/node/node_api.h"
+#include "core/common/platformview/platform_view_proxy.h"
 
-namespace OHOS::Ace::NG::NodeModifier {
-const ArkUIListItemModifier* GetListItemModifier();
+namespace OHOS::Ace {
+
+PlatformViewProxy::PlatformViewProxy() = default;
+
+PlatformViewProxy::~PlatformViewProxy() = default;
+
+void PlatformViewProxy::SetDelegate(std::unique_ptr<PlatformView>&& delegate)
+{
+    delegate_ = std::move(delegate);
 }
 
-#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LISTITEM_MODIFIER_H
+RefPtr<NG::PlatformViewInterface> PlatformViewProxy::Attach(const std::string& id)
+{
+    if (!delegate_) {
+        return nullptr;
+    }
+    return delegate_->Attach(id);
+}
+
+} // namespace OHOS::Ace

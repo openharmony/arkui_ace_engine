@@ -965,6 +965,20 @@ class TextInputContentTypeModifier extends ModifierWithKey<ContentType> {
       getUINativeModule().textInput.setContentType(node, this.value);
     }
   }
+
+class TextInputTextModifier extends ModifierWithKey<ResourceStr> {
+  constructor(value: ResourceStr) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputText');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetText(node);
+    } else {
+      getUINativeModule().textInput.setText(node, this.value!);
+    }
+  }
+
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
@@ -1132,6 +1146,7 @@ class TextInputBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiu
   }
 }
   
+
 class TextInputBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
@@ -1145,10 +1160,24 @@ class TextInputBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
 
+class TextInputPlaceholderModifier extends ModifierWithKey<ResourceStr> {
+  constructor(value: ResourceStr) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputPlaceholder');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetPlaceholder(node);
+    } else {
+      getUINativeModule().textInput.setPlaceholder(node, this.value!);
+    }
+  }
+
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
 
 class TextInputMarginModifier extends ModifierWithKey<ArkPadding> {
   constructor(value: ArkPadding) {
@@ -1170,11 +1199,54 @@ class TextInputMarginModifier extends ModifierWithKey<ArkPadding> {
       !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
       !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
   }
+
+class TextInputControllerModifier extends ModifierWithKey<TextInputController> {
+  constructor(value: TextInputController) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputController');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetController(node);
+    } else {
+      getUINativeModule().textInput.setController(node, this.value!);
+    }
+  }
+
+}
+
+interface TextInputParam {
+  placeholder?: ResourceStr;
+  text?: ResourceStr;
+  controller?: TextInputController;
 }
 
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): TextInputAttribute {
+    if (value[0] !== undefined) {
+      this.setPlaceholder((value[0] as TextInputParam).placeholder);
+      this.setText((value[0] as TextInputParam).text);
+      this.setController((value[0] as TextInputParam).controller);
+    }
+    return this;
+  }
+  setText(value: ResourceStr): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputTextModifier.identity,
+      TextInputTextModifier, value);
+    return this;
+  }
+  setPlaceholder(value: ResourceStr): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputPlaceholderModifier.identity,
+      TextInputPlaceholderModifier, value);
+    return this;
+  }
+  setController(value: TextInputController): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputControllerModifier.identity,
+      TextInputControllerModifier, value);
+    return this;
   }
   cancelButton(value: { style?: CancelButtonStyle, icon?: IconOptions }): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputCancelButtonModifier.identity,

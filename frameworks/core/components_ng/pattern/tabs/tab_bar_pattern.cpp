@@ -1669,11 +1669,6 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
 {
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
-    if (tabBarPattern->IsContainsBuilder()) {
-        return;
-    }
     auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator));
     CHECK_NULL_VOID(columnNode);
     auto selectedColumnId = columnNode->GetId();
@@ -1684,6 +1679,11 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
     int32_t index = 0;
     for (const auto& columnNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(columnNode);
+        auto iter = tabBarType_.find(columnNode->GetId());
+        if (iter != tabBarType_.end() && iter->second) {
+            index++;
+            continue;
+        }
         auto textNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -2105,7 +2105,10 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
     OffsetF indicatorOffset = { currentIndicatorOffset_, tabBarItemRect.GetY() };
     GetIndicatorStyle(indicatorStyle, indicatorOffset);
     indicatorOffset.AddX(-indicatorStyle.width.ConvertToPx() / HALF_OF_WIDTH);
-    auto hasIndicator = selectedModes_[indicator_] == SelectedMode::INDICATOR && !NearZero(tabBarItemRect.Height());
+    auto hasIndicator = std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::SUBTABBATSTYLE) ==
+        static_cast<int32_t>(tabBarStyles_.size()) &&
+        std::count(selectedModes_.begin(), selectedModes_.end(), SelectedMode::INDICATOR) ==
+        static_cast<int32_t>(selectedModes_.size()) && !NearZero(tabBarItemRect.Height());
     return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, bgColor, indicatorStyle,
         indicatorOffset, hasIndicator);
 }
@@ -2180,9 +2183,17 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& i
         nextIndex >= static_cast<int32_t>(indicatorStyles_.size())) {
         return;
     }
+    CalculateIndicatorStyle(swiperStartIndex_, nextIndex, indicatorStyle, indicatorOffset);
+}
 
-    indicatorStyle = indicatorStyles_[swiperStartIndex_];
-    auto startItemRect = layoutProperty->GetIndicatorRect(swiperStartIndex_);
+void TabBarPattern::CalculateIndicatorStyle(
+    int32_t startIndex, int32_t nextIndex, IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset)
+{
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    indicatorStyle = indicatorStyles_[startIndex];
+    auto startItemRect = layoutProperty->GetIndicatorRect(startIndex);
     if (NonPositive(indicatorStyle.width.Value())) {
         indicatorStyle.width = Dimension(startItemRect.Width());
     }
@@ -2191,17 +2202,15 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& i
     if (NonPositive(nextIndicatorStyle.width.Value())) {
         nextIndicatorStyle.width = Dimension(nextItemRect.Width());
     }
-    indicatorStyle.width =
-        Dimension(indicatorStyle.width.ConvertToPx() +
-                  (nextIndicatorStyle.width.ConvertToPx() - indicatorStyle.width.ConvertToPx()) * turnPageRate_);
-    indicatorStyle.marginTop = Dimension(
-        indicatorStyle.marginTop.ConvertToPx() +
+
+    indicatorStyle.width = Dimension(indicatorStyle.width.ConvertToPx() +
+        (nextIndicatorStyle.width.ConvertToPx() - indicatorStyle.width.ConvertToPx()) * turnPageRate_);
+    indicatorStyle.marginTop = Dimension(indicatorStyle.marginTop.ConvertToPx() +
         (nextIndicatorStyle.marginTop.ConvertToPx() - indicatorStyle.marginTop.ConvertToPx()) * turnPageRate_);
-    indicatorStyle.height =
-        Dimension(indicatorStyle.height.ConvertToPx() +
-                  (nextIndicatorStyle.height.ConvertToPx() - indicatorStyle.height.ConvertToPx()) * turnPageRate_);
+    indicatorStyle.height = Dimension(indicatorStyle.height.ConvertToPx() +
+        (nextIndicatorStyle.height.ConvertToPx() - indicatorStyle.height.ConvertToPx()) * turnPageRate_);
     LinearColor color = LinearColor(indicatorStyle.color) +
-                        (LinearColor(nextIndicatorStyle.color) - LinearColor(indicatorStyle.color)) * turnPageRate_;
+        (LinearColor(nextIndicatorStyle.color) - LinearColor(indicatorStyle.color)) * turnPageRate_;
     indicatorStyle.color = color.ToColor();
     indicatorOffset.SetY(startItemRect.GetY() + (nextItemRect.GetY() - startItemRect.GetY()) * turnPageRate_);
 }

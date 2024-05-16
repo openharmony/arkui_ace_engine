@@ -187,8 +187,8 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].nodeY = fingureIterator == fingureEnd ? 0.0f : fingureIterator->localLocation_.GetY();
         points[i].windowX = fingureIterator == fingureEnd ? 0.0f : fingureIterator->globalLocation_.GetX();
         points[i].windowY = fingureIterator == fingureEnd ? 0.0f : fingureIterator->globalLocation_.GetY();
-        points[i].screenX = fingureIterator == fingureEnd ? 0.0f : touchPoint.screenX;
-        points[i].screenY = fingureIterator == fingureEnd ? 0.0f : touchPoint.screenY;
+        points[i].screenX = touchPoint.screenX;
+        points[i].screenY = touchPoint.screenY;
         points[i].contactAreaWidth = touchPoint.size;
         points[i].contactAreaHeight = touchPoint.size;
         points[i].pressure = touchPoint.force;
@@ -209,16 +209,16 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
     touchEvent.action = static_cast<int32_t>(tempTouchEvent.type);
     touchEvent.sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
     touchEvent.timeStamp = tempTouchEvent.time.time_since_epoch().count();
-    touchEvent.actionTouchPoint.nodeX = info.GetLocalLocation().GetX();
-    touchEvent.actionTouchPoint.nodeY = info.GetLocalLocation().GetY();
-    touchEvent.actionTouchPoint.windowX = info.GetGlobalLocation().GetX();
-    touchEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY();
-    touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
-    touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
     touchEvent.actionTouchPoint.pressure = tempTouchEvent.force;
     ConvertTouchPointsToPoints(info, tempTouchEvent.pointers, points);
     if (tempTouchEvent.pointers.size() > 0) {
         touchEvent.touchPointes = &(points[0]);
+        touchEvent.actionTouchPoint.nodeX = touchEvent.touchPointes[0].nodeX;
+        touchEvent.actionTouchPoint.nodeY = touchEvent.touchPointes[0].nodeY;
+        touchEvent.actionTouchPoint.windowX = touchEvent.touchPointes[0].windowX;
+        touchEvent.actionTouchPoint.windowY = touchEvent.touchPointes[0].windowY;
+        touchEvent.actionTouchPoint.screenX = touchEvent.touchPointes[0].screenX;
+        touchEvent.actionTouchPoint.screenY = touchEvent.touchPointes[0].screenY;
     }
     touchEvent.touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
     tempTouchEvent.pointers.size() : MAX_POINTS;

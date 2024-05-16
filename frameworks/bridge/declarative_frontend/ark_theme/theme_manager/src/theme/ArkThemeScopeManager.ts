@@ -20,47 +20,47 @@ class ArkThemeScopeManager {
     /**
      * Theme Scopes are in constructed process.
      */
-    private localThemeScopes: ArkThemeScope[] = []
+    private localThemeScopes: ArkThemeScope[] = [];
 
     /**
      * All existing theme scopes
      */
-    private themeScopes: ArkThemeScope[] = []
+    private themeScopes: ArkThemeScope[] = [];
 
     /**
      * Temporary link to the theme scope for If container branches update
      */
-    private ifElseScope: ArkThemeScope = undefined
+    private ifElseScope: ArkThemeScope = undefined;
 
     /**
      * Last handled CustomComponent
      */
-    private handledOwnerComponentId: number
+    private handledOwnerComponentId: number;
 
     /**
      * Rendering state of the handled component
      */
-    private handledIsFirstRender: boolean
+    private handledIsFirstRender: boolean;
 
     /**
      * Color Mode of the handled component
      */
-    private handledColorMode: ThemeColorMode
+    private handledColorMode: ThemeColorMode;
 
     /**
      * Theme update listeners
      */
-    private listeners: ViewPuInternal[] = []
+    private listeners: ViewPuInternal[] = [];
 
     /**
      * The System Theme
      */
-    private static SystemTheme = new ArkSystemTheme()
+    private static SystemTheme = new ArkSystemTheme();
 
     /**
      * The default Theme
      */
-    private defaultTheme: ThemeInternal | undefined = undefined
+    private defaultTheme: ThemeInternal | undefined = undefined;
 
     /**
      * Handle component before rendering
@@ -71,47 +71,47 @@ class ArkThemeScopeManager {
      * @param ownerComponent CustomComponent which defines component
      */
     onComponentCreateEnter(componentName: string, elmtId: number, isFirstRender: boolean, ownerComponent: ViewPuInternal) {
-        this.handledIsFirstRender = isFirstRender
-        this.handledOwnerComponentId = ownerComponent.id__()
+        this.handledIsFirstRender = isFirstRender;
+        this.handledOwnerComponentId = ownerComponent.id__();
 
         // no need to handle render for WithTheme container
         if (this.themeScopes.length === 0 || componentName === 'WithTheme') {
-            return
+            return;
         }
 
-        const scopesLength = this.localThemeScopes.length
-        let scope: ArkThemeScope = undefined
+        const scopesLength = this.localThemeScopes.length;
+        let scope: ArkThemeScope = undefined;
 
         // we need to keep component to the theme scope before first render
         if (isFirstRender) {
             if (scopesLength > 0) {
                 // keep component to the top of constructed scopes
-                scope = this.localThemeScopes[scopesLength - 1]
-                scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName)
+                scope = this.localThemeScopes[scopesLength - 1];
+                scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
             } else {
                 // keep component to the same scope as is used by CustomComponen that defines component
-                const parentScope = ownerComponent.themeScope_
+                const parentScope = ownerComponent.themeScope_;
                 if (parentScope) {
-                    parentScope.addComponentToScope(elmtId, ownerComponent.id__(), componentName)
-                    scope = parentScope
+                    parentScope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
+                    scope = parentScope;
                 }
             }
             // if component didn`t hit any theme scope then we have to use SystemTheme
         }
 
         if (scope === undefined) {
-            scope = this.scopeForElmtId(elmtId)
+            scope = this.scopeForElmtId(elmtId);
         }
         // keep color mode for handled container
-        this.handledColorMode = scope?.colorMode()
+        this.handledColorMode = scope?.colorMode();
         // trigger for enter local color mode for the component before rendering
         if (this.handledColorMode === ThemeColorMode.LIGHT || this.handledColorMode === ThemeColorMode.DARK) {
-            this.onEnterLocalColorMode(this.handledColorMode)
+            this.onEnterLocalColorMode(this.handledColorMode);
         }
 
         if (componentName === 'If') {
             // If container branch update happened. Keep temporary scope
-            this.ifElseScope = isFirstRender === true ? undefined : scope
+            this.ifElseScope = isFirstRender === true ? undefined : scope;
         }
     }
 
@@ -123,7 +123,7 @@ class ArkThemeScopeManager {
     onComponentCreateExit(elmtId: number) {
         // trigger for exit local color mode for the component after rendering
         if (this.handledColorMode === ThemeColorMode.LIGHT || this.handledColorMode === ThemeColorMode.DARK) {
-            this.onExitLocalColorMode()
+            this.onExitLocalColorMode();
         }
     }
 
@@ -136,18 +136,18 @@ class ArkThemeScopeManager {
     onScopeEnter(withThemeId: number, withThemeOptions: WithThemeOptions, theme: ThemeInternal) {
         if (this.handledIsFirstRender === true) {
             // create theme scope
-            let themeScope = new ArkThemeScope(this.handledOwnerComponentId, withThemeId, withThemeOptions, theme)
+            let themeScope = new ArkThemeScope(this.handledOwnerComponentId, withThemeId, withThemeOptions, theme);
             // keep created scope to the array of the scopes under construction
-            this.localThemeScopes.push(themeScope)
+            this.localThemeScopes.push(themeScope);
             // keep created scope to the array of all theme scopes
-            this.themeScopes.push(themeScope)
+            this.themeScopes.push(themeScope);
         } else {
             // retrieve existing theme scope by WithTheme elmtId
-            const scope = this.themeScopes.find(item => item.getWithThemeId() === withThemeId)
+            const scope = this.themeScopes.find(item => item.getWithThemeId() === withThemeId);
             // update WithTheme options
-            scope.updateWithThemeOptions(withThemeOptions, theme)
+            scope.updateWithThemeOptions(withThemeOptions, theme);
             // re-render all components from the scope
-            this.forceRerenderScope(scope)
+            this.forceRerenderScope(scope);
         }
     }
 
@@ -157,7 +157,7 @@ class ArkThemeScopeManager {
     onScopeExit() {
         // remove top theme scope from the array of scopes under construction
         if (this.handledIsFirstRender === true) {
-            this.localThemeScopes.pop()
+            this.localThemeScopes.pop();
         }
     }
 
@@ -167,8 +167,8 @@ class ArkThemeScopeManager {
      * @param ownerComponent theme scope changes listener
      */
     onViewPUCreate(ownerComponent: ViewPuInternal) {
-        this.subscribeListener(ownerComponent)
-        ownerComponent.themeScope_ = this.scopeForElmtId(ownerComponent.id__())
+        this.subscribeListener(ownerComponent);
+        ownerComponent.themeScope_ = this.scopeForElmtId(ownerComponent.id__());
     }
 
     /**
@@ -178,22 +178,22 @@ class ArkThemeScopeManager {
      */
     onViewPUDelete(ownerComponent: ViewPuInternal) {
         // unsubscribe
-        this.unsubscribeListener(ownerComponent)
+        this.unsubscribeListener(ownerComponent);
 
         // remove scopes that are related to CustomComponent
-        const ownerComponentId: number = ownerComponent.id__()
+        const ownerComponentId: number = ownerComponent.id__();
         this.themeScopes = this.themeScopes.filter((scope) => {
             if (scope.getOwnerComponentId() === ownerComponentId) {
-                const index = this.localThemeScopes.indexOf(scope)
+                const index = this.localThemeScopes.indexOf(scope);
                 if (index !== -1) {
-                    this.localThemeScopes.splice(index, 1)
+                    this.localThemeScopes.splice(index, 1);
                 }
                 // @ts-ignore
                 WithTheme.removeThemeInNative(scope.getWithThemeId());
-                return false
+                return false;
             }
-            return true
-        })
+            return true;
+        });
     }
 
     /**
@@ -201,9 +201,9 @@ class ArkThemeScopeManager {
      */
     onIfElseBranchUpdateEnter() {
         if (!this.ifElseScope) {
-            return
+            return;
         }
-        this.localThemeScopes.push(this.ifElseScope)
+        this.localThemeScopes.push(this.ifElseScope);
     }
 
     /**
@@ -213,14 +213,14 @@ class ArkThemeScopeManager {
      */
     onIfElseBranchUpdateExit(removedElmtIds: number[]) {
         if (!this.ifElseScope) {
-            return
+            return;
         }
         if (removedElmtIds && this.ifElseScope) {
-            removedElmtIds.forEach(elmtId => this.ifElseScope.removeComponentFromScope(elmtId))
+            removedElmtIds.forEach(elmtId => this.ifElseScope.removeComponentFromScope(elmtId));
         }
 
-        this.ifElseScope = undefined
-        this.localThemeScopes.pop()
+        this.ifElseScope = undefined;
+        this.localThemeScopes.pop();
     }
 
     /**
@@ -231,17 +231,17 @@ class ArkThemeScopeManager {
      */
     onDeepRenderScopeEnter(themeScope: ArkThemeScope): boolean {
         if (themeScope) {
-            this.localThemeScopes.push(themeScope)
-            return true
+            this.localThemeScopes.push(themeScope);
+            return true;
         }
-        return false
+        return false;
     }
 
     /**
      * End of deep rendering with theme scope
      */
     onDeepRenderScopeExit() {
-        this.localThemeScopes.pop()
+        this.localThemeScopes.pop();
     }
 
     /**
@@ -251,9 +251,9 @@ class ArkThemeScopeManager {
      */
     private subscribeListener(listener: ViewPuInternal) {
         if (this.listeners.includes(listener)) {
-            return
+            return;
         }
-        this.listeners.push(listener)
+        this.listeners.push(listener);
     }
 
     /**
@@ -276,8 +276,8 @@ class ArkThemeScopeManager {
      * or previously set Default Theme or 'undefined' (in case of necessary to use the native theme)
      */
     themeForElmtId(elmtId: number): Theme {
-        const scope = this.scopeForElmtId(elmtId)
-        return scope?.getTheme() ?? this.defaultTheme
+        const scope = this.scopeForElmtId(elmtId);
+        return scope?.getTheme() ?? this.defaultTheme;
     }
 
     /**
@@ -288,7 +288,7 @@ class ArkThemeScopeManager {
      * or previously set Default Theme or System Theme
      */
     getFinalTheme(elmtId: number): Theme {
-        return this.themeForElmtId(elmtId) ?? ArkThemeScopeManager.SystemTheme
+        return this.themeForElmtId(elmtId) ?? ArkThemeScopeManager.SystemTheme;
     }
 
     /**
@@ -301,12 +301,12 @@ class ArkThemeScopeManager {
         // fast way to get theme scope for the first rendered component
         if (this.handledIsFirstRender) {
             if (this.localThemeScopes.length > 0) { // current cunstructed scope
-                return this.localThemeScopes[this.localThemeScopes.length - 1]
+                return this.localThemeScopes[this.localThemeScopes.length - 1];
             }
         }
 
         // common way to get scope for the component
-        return this.themeScopes.find(item => item.isComponentInScope(elmtId))
+        return this.themeScopes.find(item => item.isComponentInScope(elmtId));
     }
 
     /**
@@ -316,9 +316,9 @@ class ArkThemeScopeManager {
      */
     lastLocalThemeScope(): ArkThemeScope {
         if (this.localThemeScopes.length > 0) {
-            return this.localThemeScopes[this.localThemeScopes.length - 1]
+            return this.localThemeScopes[this.localThemeScopes.length - 1];
         }
-        return undefined
+        return undefined;
     }
 
     /**
@@ -327,14 +327,14 @@ class ArkThemeScopeManager {
      * @param colorMode local color mode
      */
     onEnterLocalColorMode(colorMode: ThemeColorMode) {
-        getUINativeModule().resource.updateColorMode(colorMode)
+        getUINativeModule().resource.updateColorMode(colorMode);
     }
 
     /**
      * Exit from the local color mode scope
      */
     onExitLocalColorMode() {
-        getUINativeModule().resource.restore()
+        getUINativeModule().resource.restore();
     }
 
     /**
@@ -345,12 +345,12 @@ class ArkThemeScopeManager {
      */
     private forceRerenderScope(scope: ArkThemeScope) {
         if (scope === undefined) {
-            return
+            return;
         }
-        const components = scope.componentsInScope()
+        const components = scope.componentsInScope();
         if (components) {
             components.forEach((item) => {
-                this.notifyScopeThemeChanged(item, scope)
+                this.notifyScopeThemeChanged(item, scope);
             })
         }
     }
@@ -366,23 +366,23 @@ class ArkThemeScopeManager {
             if (listenerId === item.owner) {
                 if (scope.isColorModeChanged()) {
                     // we need to redraw all nodes if developer set new local colorMode
-                    listener.forceRerenderNode(item.elmtId)
+                    listener.forceRerenderNode(item.elmtId);
                 } else {
                     // take whitelist info from cache item
-                    let isInWhiteList = item.isInWhiteList
+                    let isInWhiteList = item.isInWhiteList;
                     if (isInWhiteList === undefined) {
                         // if whitelist info is undefined we have check whitelist directly
-                        isInWhiteList = ArkThemeWhiteList.isInWhiteList(item.name)
+                        isInWhiteList = ArkThemeWhiteList.isInWhiteList(item.name);
                         // keep result in cache item for the next checks
-                        item.isInWhiteList = isInWhiteList
+                        item.isInWhiteList = isInWhiteList;
                     }
                     if (isInWhiteList === true) {
                         // redraw node only if component within whitelist
-                        listener.forceRerenderNode(item.elmtId)
+                        listener.forceRerenderNode(item.elmtId);
                     }
                 }
             } else if (listenerId === item.elmtId) {
-                listener.onWillApplyTheme(scope?.getTheme() ?? this.defaultTheme ?? ArkThemeScopeManager.SystemTheme)
+                listener.onWillApplyTheme(scope?.getTheme() ?? this.defaultTheme ?? ArkThemeScopeManager.SystemTheme);
             }
         })
     }
@@ -394,7 +394,7 @@ class ArkThemeScopeManager {
      */
     makeTheme(customTheme: CustomThemeInternal): ThemeInternal {
         if (customTheme === undefined) {
-            return this.defaultTheme ?? ArkThemeScopeManager.SystemTheme
+            return this.defaultTheme ?? ArkThemeScopeManager.SystemTheme;
         }
         // create Theme based on Custom Theme tokens and Baseline Theme
         // and return this instance
@@ -403,7 +403,7 @@ class ArkThemeScopeManager {
             customTheme.colors,
             customTheme.shapes,
             customTheme.typography
-        )
+        );
     }
 
     /**
@@ -413,10 +413,10 @@ class ArkThemeScopeManager {
      *              If theme is 'undefined' then the native system theme will be used as default one.
      */
     setDefaultTheme(customTheme: CustomThemeInternal) {
-        this.defaultTheme = ArkThemeScopeManager.SystemTheme
-        this.defaultTheme = this.makeTheme(customTheme)
-        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme, 0) // 0 means default Theme scope id
-        this.notifyGlobalThemeChanged()
+        this.defaultTheme = ArkThemeScopeManager.SystemTheme;
+        this.defaultTheme = this.makeTheme(customTheme);
+        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme, 0); // 0 means default Theme scope id
+        this.notifyGlobalThemeChanged();
     }
 
     /**
@@ -425,23 +425,23 @@ class ArkThemeScopeManager {
     private notifyGlobalThemeChanged() {
         this.listeners.forEach(listener => {
             if (listener.parent_ === undefined) {
-                listener.onGlobalThemeChanged()
+                listener.onGlobalThemeChanged();
             }
         })
     }
 
     getWithThemeIdForElmtId(elmtId: number): number {
-        return this.scopeForElmtId(elmtId)?.getWithThemeId() ?? 0
+        return this.scopeForElmtId(elmtId)?.getWithThemeId() ?? 0;
     }
 
     private static instance: ArkThemeScopeManager | undefined = undefined
     static getInstance() : ArkThemeScopeManager {
         if (!ArkThemeScopeManager.instance) {
-            ArkThemeScopeManager.instance = new ArkThemeScopeManager()
+            ArkThemeScopeManager.instance = new ArkThemeScopeManager();
             PUV2ViewBase.setArkThemeScopeManager(ArkThemeScopeManager.instance);
         }
         return ArkThemeScopeManager.instance;
     }
 }
 
-globalThis.themeScopeMgr = ArkThemeScopeManager.getInstance()
+globalThis.themeScopeMgr = ArkThemeScopeManager.getInstance();

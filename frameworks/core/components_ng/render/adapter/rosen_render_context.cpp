@@ -145,7 +145,6 @@ constexpr uint32_t DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX = 4;
 constexpr uint32_t DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX = 5;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
-const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
 
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
@@ -378,6 +377,8 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         AddFrameNodeInfoToRsNode();
         return;
     }
+
+    patternType_ = param->patternType;
 
     // create proper RSNode base on input
     switch (param->type) {
@@ -4471,6 +4472,10 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         option.SetDelay(transition->GetDelay());
     } else {
         effect = GetDefaultPageTransition(type);
+        const RefPtr<InterpolatingSpring> springCurve =
+            AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
+        const float defaultAmplitudePx = 0.005f;
+        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
         option.SetCurve(springCurve);
         option.SetDuration(DEFAULT_ANIMATION_DURATION);
 #ifdef QUICK_PUSH_TRANSITION
@@ -5593,6 +5598,17 @@ void RosenRenderContext::MarkNewFrameAvailable(void* nativeWindow)
     rsSurfaceNode->MarkUiFrameAvailable(true);
 #endif
 #if defined(IOS_PLATFORM)
+#if defined(PLATFORM_VIEW_SUPPORTED)
+    if (patternType_ == PatternType::PLATFORM_VIEW) {
+        RSSurfaceExtConfig config = {
+            .type = RSSurfaceExtType::SURFACE_PLATFORM_TEXTURE,
+            .additionalData = nativeWindow,
+        };
+        rsSurfaceNode->SetSurfaceTexture(config);
+        rsSurfaceNode->MarkUiFrameAvailable(true);
+        return;
+    }
+#endif
     RSSurfaceExtConfig config = {
         .type = RSSurfaceExtType::SURFACE_TEXTURE,
         .additionalData = nativeWindow,

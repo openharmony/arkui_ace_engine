@@ -376,9 +376,13 @@ public:
     void FireOnDeleteComplete(const RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
-    bool SymbolSpanUpdateStyle(
-        RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
+    void SetSelectSpanStyle(int32_t start, int32_t end, RefPtr<SpanNode>& target, KeyCode code, bool isStart);
+    void GetSelectSpansPositionInfo(
+        int32_t start, int32_t end, SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
+    void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
+    bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
+    struct UpdateSpanStyle GetUpdateSpanStyle();
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style);
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
@@ -783,6 +787,7 @@ private:
     void ClearDragDropEvent();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
     void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
+    void ResetDragSpanItems();
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)

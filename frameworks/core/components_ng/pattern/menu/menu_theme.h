@@ -49,7 +49,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->symbolId_ = themeConstants->GetSymbolByName("checkmark");
+            theme->symbolId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }

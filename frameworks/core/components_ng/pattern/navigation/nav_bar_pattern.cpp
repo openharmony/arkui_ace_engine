@@ -74,6 +74,7 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
         overlayManager->ShowMenu(id, OffsetF(0.0f, 0.0f), menu);
 
         auto symbol = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
+        CHECK_NULL_VOID(symbol);
         auto symbolProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolProperty);
         auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());

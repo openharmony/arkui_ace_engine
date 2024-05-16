@@ -80,13 +80,13 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(listLayoutProperty);
 
+    axis_ = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     // Pre-recycle
     ScrollableUtils::RecycleItemsOutOfBoundary(axis_, -currentDelta_, GetStartIndex(), GetEndIndex(), layoutWrapper);
 
     const auto& layoutConstraint = listLayoutProperty->GetLayoutConstraint().value();
 
     // calculate idealSize and set FrameSize
-    axis_ = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto startOffset = listLayoutProperty->GetContentStartOffset().value_or(0.0f);
     contentStartOffset_ = std::max(PipelineBase::Vp2PxWithCurrentDensity(startOffset), 0.0);
     auto endOffset = listLayoutProperty->GetContentEndOffset().value_or(0.0f);
@@ -1276,7 +1276,7 @@ void ListLayoutAlgorithm::LayoutItem(RefPtr<LayoutWrapper>& wrapper, int32_t ind
     auto layoutDirection = wrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     if (layoutDirection == TextDirection::RTL) {
         if (axis_ == Axis::VERTICAL) {
-            auto size = wrapper->GetGeometryNode()->GetFrameSize();
+            auto size = wrapper->GetGeometryNode()->GetMarginFrameSize();
             offset = offset + OffsetF(crossSize - crossOffset - size.Width(), pos.startPos + chainOffset);
         } else {
             offset = offset + OffsetF(contentMainSize_ - pos.endPos - chainOffset, crossOffset);

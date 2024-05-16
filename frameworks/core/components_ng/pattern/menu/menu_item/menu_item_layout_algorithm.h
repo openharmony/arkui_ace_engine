@@ -44,6 +44,7 @@ private:
     void CheckNeedExpandContent(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight,
         float minItemHeight, float expandableHeight);
+    void UpdateOverlay(RefPtr<FrameNode> frameNode);
 
     float horInterval_ = 0.0f;
     float idealWidth_ = 0.0f;

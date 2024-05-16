@@ -135,6 +135,14 @@ void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& fra
     pattern->InitializeDynamicComponent(hapPath, abcPath, entryPoint, runtime);
 }
 
+void UIExtensionModelNG::InitializeIsolatedComponent(
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
+{
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitializeIsolatedComponent(wantWrap, runtime);
+}
+
 void UIExtensionModelNG::SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -191,6 +199,7 @@ void UIExtensionModelNG::SetOnError(
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetOnErrorCallback(std::move(onError));
 }
 } // namespace OHOS::Ace::NG

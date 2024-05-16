@@ -170,8 +170,25 @@ SrcType ImageSourceInfo::ResolveSrcType() const
 
 void ImageSourceInfo::GenerateCacheKey()
 {
+    auto colorMode = GetColorModeToString();
     auto name = ToString() + AceApplicationInfo::GetInstance().GetAbilityName() + bundleName_ + moduleName_;
-    cacheKey_ = std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_));
+    cacheKey_ =
+        std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_)) + colorMode;
+}
+
+const std::string ImageSourceInfo::GetColorModeToString()
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    switch (colorMode) {
+        case ColorMode::LIGHT:
+            return "LIGHT";
+        case ColorMode::DARK:
+            return "DARK";
+        case ColorMode::COLOR_MODE_UNDEFINED:
+            return "COLOR_MODE_UNDEFINED";
+        default:
+            return "LIGHT";
+    }
 }
 
 void ImageSourceInfo::SetFillColor(const Color& color)

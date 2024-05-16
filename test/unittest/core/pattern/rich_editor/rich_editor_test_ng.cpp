@@ -1220,6 +1220,11 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete002, TestSize.Level1)
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    ClearSpan();
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    richEditorPattern->DeleteBackward(6);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 }
 
 /**

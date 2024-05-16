@@ -2564,6 +2564,14 @@ void ResetFocusOnTouch(ArkUINodeHandle node)
     bool focusOnTouch = false;
     ViewAbstract::SetFocusOnTouch(frameNode, focusOnTouch);
 }
+
+ArkUI_Bool GetFocusOnTouch(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(ViewAbstract::GetFocusOnTouch(frameNode));
+}
+
 void SetFocusable(ArkUINodeHandle node, ArkUI_Bool focusable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5345,7 +5353,7 @@ const ArkUICommonModifier* GetCommonModifier()
         SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
         SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
         ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap, SetLayoutRect, GetLayoutRect,
-        ResetLayoutRect };
+        ResetLayoutRect, GetFocusOnTouch };
 
     return &modifier;
 }
@@ -5474,22 +5482,29 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         Offset globalOffset = info.GetGlobalLocation();
         Offset localOffset = info.GetLocalLocation();
         Offset screenOffset = info.GetScreenLocation();
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
         //x
-        event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()) : localOffset.GetX();
         //y
-        event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+        event.componentAsyncEvent.data[1].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()) : localOffset.GetY();
         //timestamp
         event.componentAsyncEvent.data[2].f32 = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
         //source
         event.componentAsyncEvent.data[3].i32 = static_cast<int32_t>(info.GetSourceDevice());
         //windowX
-        event.componentAsyncEvent.data[4].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX());
+        event.componentAsyncEvent.data[4].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()) : globalOffset.GetX();
         //windowY
-        event.componentAsyncEvent.data[5].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY());
+        event.componentAsyncEvent.data[5].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()) : globalOffset.GetY();
         //displayX
-        event.componentAsyncEvent.data[6].f32 = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX());
+        event.componentAsyncEvent.data[6].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()) : screenOffset.GetX();
         //displayY
-        event.componentAsyncEvent.data[7].f32 = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY());
+        event.componentAsyncEvent.data[7].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
 
         SendArkUIAsyncEvent(&event);
     };

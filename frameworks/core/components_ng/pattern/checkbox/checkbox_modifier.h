@@ -82,8 +82,6 @@ public:
                 isSelect_->Get() ? LinearColor(Color::TRANSPARENT) : LinearColor(inactiveColor_));
             animatableShadowColor_->Set(
                 isSelect_->Get() ? LinearColor(shadowColor_) : LinearColor(shadowColor_.BlendOpacity(0)));
-            opacityScale_->Set(isSelect_->Get() ? 1.0f : 0.0f);
-            borderOpacityScale_->Set(isSelect_->Get() ? 0.0f : 1.0f);
         });
     }
 
@@ -266,8 +264,6 @@ private:
     RefPtr<PropertyBool> isFocused_;
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
-    RefPtr<AnimatablePropertyFloat> opacityScale_;
-    RefPtr<AnimatablePropertyFloat> borderOpacityScale_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxModifier);
 };

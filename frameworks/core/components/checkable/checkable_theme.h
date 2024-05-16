@@ -200,6 +200,16 @@ public:
         return sizeFocusBg_;
     }
 
+    const Color& GetFocusedRingUnchecked() const
+    {
+        return focusedRingUnchecked_;
+    }
+
+    const Color& GetFocusedBgUnchecked() const
+    {
+        return focusedBgUnchecked_;
+    }
+
 protected:
     CheckableTheme() = default;
 
@@ -209,6 +219,8 @@ protected:
     Color inactivePointColor_;
     Color focusColor_;
     Color hoverColor_;
+    Color focusedRingUnchecked_;
+    Color focusedBgUnchecked_;
     Color clickEffectColor_;
     Color shadowColor_;
     Color focusBoardColor_;
@@ -469,6 +481,8 @@ public:
             theme->shadowWidth_ = radioPattern->GetAttr<Dimension>("radio_shadow_width", 0.0_vp);
             theme->pointColor_ = radioPattern->GetAttr<Color>("fg_color_checked", Color::RED);
             theme->activeColor_ = radioPattern->GetAttr<Color>("bg_color_checked", Color::RED);
+            theme->focusedRingUnchecked_ = radioPattern->GetAttr<Color>("focused_ring_unchecked", Color::TRANSPARENT);
+            theme->focusedBgUnchecked_ = radioPattern->GetAttr<Color>("focused_bg_unchecked", Color::TRANSPARENT);
             theme->inactiveColor_ = radioPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
             theme->inactivePointColor_ = radioPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
             theme->focusColor_ = radioPattern->GetAttr<Color>("bg_focus_outline_color", Color::RED);

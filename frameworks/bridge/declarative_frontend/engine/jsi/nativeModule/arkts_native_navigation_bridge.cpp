@@ -352,8 +352,14 @@ ArkUINativeModuleValue NavigationBridge::SetBackButtonIcon(ArkUIRuntimeCallInfo*
     std::string bundleName;
     std::string moduleName;
     Framework::JSViewAbstract::GetJsMediaBundleInfo(info[1], bundleName, moduleName);
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+    if (info[1]->IsObject()) {
+        if (src.empty() && pixMap == nullptr) {
+            Framework::JSViewAbstract::SetSymbolOptionApply(info, iconSymbol, info[1]);
+        }
+    }
 
-    NavigationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
+    NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, noPixMap, pixMap);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -366,8 +372,9 @@ ArkUINativeModuleValue NavigationBridge::ResetBackButtonIcon(ArkUIRuntimeCallInf
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     bool noPixMap = false;
     RefPtr<PixelMap> pixMap = nullptr;
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
     std::string src;
-    NavigationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
+    NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, noPixMap, pixMap);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
