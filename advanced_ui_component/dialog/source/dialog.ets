@@ -60,7 +60,7 @@ const VERSION_TWELVE: number = 50000012
 @CustomDialog
 export struct TipsDialog {
   controller: CustomDialogController;
-  imageRes: Resource | null = null;
+  imageRes: Resource | ResourceStr | PixelMap | null = null;
   @State imageSize?: SizeOptions = { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE };
   title?: ResourceStr | null = null;
   content?: ResourceStr | null = null;
