@@ -30,6 +30,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -134,6 +135,7 @@ void SwitchPattern::HandleBlurEvent(const RefPtr<SwitchPaintProperty>& switchPai
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(switchModifier_);
+    RemoveIsFocusActiveUpdateEvent();
     switchModifier_->SetIsFocused(false);
     if (isBgColorUnselectFocus_) {
         isBgColorUnselectFocus_ = false;
@@ -152,6 +154,8 @@ void SwitchPattern::HandleFocusEvent(const RefPtr<SwitchPaintProperty>& switchPa
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(switchModifier_);
+    AddIsFocusActiveUpdateEvent();
+
     switchModifier_->SetIsFocused(true);
     Color bgColor = switchTheme->GetInactiveColor();
     if (!isOn_.value_or(false)) {
@@ -170,6 +174,33 @@ void SwitchPattern::HandleFocusEvent(const RefPtr<SwitchPaintProperty>& switchPa
     }
 }
 
+void SwitchPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void SwitchPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void SwitchPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    CHECK_NULL_VOID(switchModifier_);
+    switchModifier_->SetIsFocused(isFocusAcitve);
+}
 void SwitchPattern::UpdateSwitchPaintProperty()
 {
     auto host = GetHost();
