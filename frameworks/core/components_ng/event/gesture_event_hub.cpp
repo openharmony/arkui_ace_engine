@@ -687,7 +687,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
     if (GetTextDraggable() && !GetIsTextDraggable()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, forbidden drag");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Text category component does not meet the drag condition, forbidden drag.");
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -860,7 +860,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             pixelMap = pixelMap_;
         }
     } else {
-        CHECK_NULL_VOID(pixelMap_);
+        if (pixelMap_ == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Thumbnail pixelMap is empty.");
+            return;
+        }
         if (pixelMap == nullptr) {
             pixelMap = pixelMap_;
         }
@@ -933,8 +936,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             dragEventActuator_->SetIsNotInPreviewState(true);
         }
     }
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, animation is %{public}d, pixelMap scale is %{public}f",
-        overlayManager->GetIsOnAnimation(), scale);
     RefPtr<PixelMap> pixelMapDuplicated = pixelMap;
 #if defined(PIXEL_MAP_SUPPORTED)
     pixelMapDuplicated = PixelMap::CopyPixelMap(pixelMap);
@@ -971,10 +972,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         summarys += str;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG,
-        "Start drag, pixelMap width %{public}d height %{public}d, udkey %{public}s, recordsSize %{public}d, "
-        "pointerId %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s",
-        width, height, udKey.c_str(), recordsSize, info.GetPointerId(), info.GetTargetDisplayId(), windowId,
-        summarys.c_str());
+        "Start drag, frameNode is %{public}s, id is %{public}s, pixelMap width %{public}d height %{public}d, "
+        "scale is %{public}f, udkey %{public}s, recordsSize %{public}d, pointerId %{public}d, "
+        "displayId %{public}d, windowId %{public}d, summary %{public}s.",
+        frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str(), width, height, scale, udKey.c_str(),
+        recordsSize, info.GetPointerId(), info.GetTargetDisplayId(), windowId, summarys.c_str());
     dragDropManager->PushGatherPixelMap(dragData, scale, width, height);
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
