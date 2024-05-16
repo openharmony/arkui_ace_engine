@@ -441,8 +441,8 @@ export struct ConfirmDialog {
   content?: ResourceStr = ''
   checkTips?: ResourceStr = ''
   @State isChecked?: boolean = false
-  primaryButton?: ButtonOptions = { value: "" }
-  secondaryButton?: ButtonOptions = { value: "" }
+  primaryButton?: ButtonOptions = { value: '' }
+  secondaryButton?: ButtonOptions = { value: '' }
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State buttonFontColorWithTheme: ResourceColor = $r('sys.color.font_emphasize');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
