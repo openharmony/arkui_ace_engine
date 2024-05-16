@@ -113,6 +113,8 @@ public:
     static void SetPixelMap(FrameNode* frameNode, void* drawableDescriptor);
     static void SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor);
     static void SetResource(FrameNode* frameNode, void* resource);
+    static void EnableAnalyzer(FrameNode* frameNode, bool isEnableAnalyzer);
+    static void SetImageAnalyzerConfig(FrameNode* frameNode, void* config);
 private:
     RefPtr<ImagePattern> GetImagePattern();
 };

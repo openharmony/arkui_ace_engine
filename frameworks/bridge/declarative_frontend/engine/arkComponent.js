@@ -6037,6 +6037,36 @@ class ImageSrcModifier extends ModifierWithKey {
 }
 ImageSrcModifier.identity = Symbol('imageShowSrc');
 
+class ImageEnableAnalyzerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.enableAnalyzer(node, "");
+    }
+    else {
+      getUINativeModule().image.enableAnalyzer(node, this.value);
+    }
+  }
+}
+ImageSrcModifier.identity = Symbol('enableAnalyzer');
+
+class ImageAnalyzerConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.analyzerConfig(node, "");
+    }
+    else {
+      getUINativeModule().image.analyzerConfig(node, this.value);
+    }
+  }
+}
+ImageSrcModifier.identity = Symbol('analyzerConfig');
+
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6144,6 +6174,16 @@ class ArkImageComponent extends ArkComponent {
   enhancedImageQuality(value) {
     modifierWithKey(
       this._modifiersWithKeys, ImageEnhancedImageQualityModifier.identity, ImageEnhancedImageQualityModifier, value);
+    return this;
+  }
+  enableAnalyzer(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageEnableAnalyzerModifier.identity, ImageEnableAnalyzerModifier, value);
+    return this;
+  }
+  analyzerConfig(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value);
     return this;
   }
 }

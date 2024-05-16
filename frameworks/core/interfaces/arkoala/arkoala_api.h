@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 100
+#define ARKUI_FULL_API_VERSION 101
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 100
+#define ARKUI_NODE_API_VERSION 101
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -1705,6 +1705,8 @@ struct ArkUIImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* drawableDescriptor);
     void (*setPixelMapArray)(ArkUINodeHandle node, void* animatedDrawableDescriptor);
     void (*setResourceSrc)(ArkUINodeHandle node, void* resource);
+    void (*enableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*analyzerConfig)(ArkUINodeHandle node, void* config);
 };
 
 struct ArkUIColumnModifier {
