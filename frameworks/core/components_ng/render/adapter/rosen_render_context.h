@@ -571,6 +571,7 @@ private:
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
     RefPtr<CanvasImage> bdImage_;
 
+    PatternType patternType_ = PatternType::DEFAULT;
     std::shared_ptr<Rosen::RSNode> rsNode_;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;

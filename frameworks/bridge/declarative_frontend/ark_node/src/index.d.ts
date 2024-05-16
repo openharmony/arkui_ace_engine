@@ -52,7 +52,8 @@ declare interface Size {
 declare enum XComponentType {
   SURFACE = 0,
   COMPONENT,
-  TEXTURE
+  TEXTURE,
+  PLATFORM_VIEW = 999
 }
 
 declare abstract class ViewPU {

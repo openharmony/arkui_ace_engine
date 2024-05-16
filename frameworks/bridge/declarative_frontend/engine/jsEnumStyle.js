@@ -2551,6 +2551,7 @@ var XComponentType;
   XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
   XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
   XComponentType[XComponentType["NODE"] = 3] = "NODE";
+  XComponentType[XComponentType["PLATFORM_VIEW"] = 999] = "PLATFORM_VIEW";
 })(XComponentType || (XComponentType = {}));
 
 var NestedScrollMode;
