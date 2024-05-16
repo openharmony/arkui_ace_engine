@@ -1833,7 +1833,7 @@ void RichEditorPattern::SetAccessibilityAction()
     textAccessibilityProperty->SetActionSetIndex([weakPtr = WeakClaim(this)](int32_t index) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->SetCaretPosition(index);
+        pattern->SetCaretOffset(index);
     });
 
     textAccessibilityProperty->SetActionGetIndex([weakPtr = WeakClaim(this)]() -> int32_t {
