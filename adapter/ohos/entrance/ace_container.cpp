@@ -935,9 +935,19 @@ void AceContainer::InitializeCallback()
         auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
                                        const PointerEvent& pointerEvent, const DragEventAction& action) {
             ContainerScope scope(id);
-            context->GetTaskExecutor()->PostTask(
-                [context, pointerEvent, action]() { context->OnDragEvent(pointerEvent, action); },
-                TaskExecutor::TaskType::UI, "ArkUIAceContainerDragEvent");
+            CHECK_NULL_VOID(context);
+            auto callback = [context, pointerEvent, action]() {
+                context->OnDragEvent(pointerEvent, action);
+            };
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+            if (uiTaskRunner.IsRunOnCurrentThread()) {
+                callback();
+                return;
+            }
+            taskExecutor->PostTask(
+                callback, TaskExecutor::TaskType::UI, "ArkUIAceContainerDragEvent", PriorityType::VIP);
         };
         aceView_->RegisterDragEventCallback(dragEventCallback);
     }
