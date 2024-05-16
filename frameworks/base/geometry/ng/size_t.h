@@ -681,31 +681,32 @@ public:
         return isModified;
     }
 
-    void UpdateMin(const SizeT<T>& minSize)
+    void UpdateMin(const SizeT<T>& minSize, bool forceOverwriteInvalidValue = false)
     {
-        if (NonNegative(minSize.Width()) && width_) {
+        if (NonNegative(minSize.Width()) && (width_ || forceOverwriteInvalidValue)) {
             width_ = width_.value_or(0) > minSize.Width() ? width_ : minSize.Width();
         }
-        if (NonNegative(minSize.Height()) && height_) {
+        if (NonNegative(minSize.Height()) && (height_ || forceOverwriteInvalidValue)) {
             height_ = height_.value_or(0) > minSize.Height() ? height_ : minSize.Height();
         }
     }
 
-    void UpdateMax(const SizeT<T>& maxSize)
+    void UpdateMax(const SizeT<T>& maxSize, bool forceOverwriteInvalidValue = false)
     {
-        if (NonNegative(maxSize.Width()) && width_) {
+        if (NonNegative(maxSize.Width()) && (width_ || forceOverwriteInvalidValue)) {
             width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
         }
-        if (NonNegative(maxSize.Height()) && height_) {
+        if (NonNegative(maxSize.Height()) && (height_ || forceOverwriteInvalidValue)) {
             height_ = height_.value_or(0) < maxSize.Height() ? Height() : maxSize.Height();
         }
     }
 
-    void Constrain(const SizeT<T>& minSize, const SizeT<T>& maxSize, bool version10OrLarger = false)
+    void Constrain(const SizeT<T>& minSize, const SizeT<T>& maxSize, bool version10OrLarger = false,
+        bool forceOverwriteInvalidValue = false)
     {
         if (version10OrLarger) {
-            UpdateMax(maxSize);
-            UpdateMin(minSize);
+            UpdateMax(maxSize, forceOverwriteInvalidValue);
+            UpdateMin(minSize, forceOverwriteInvalidValue);
             return;
         }
         UpdateMin(minSize);
