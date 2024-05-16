@@ -854,6 +854,20 @@ public:
         UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
     }
 
+    // Notified by render context when any transform attributes updated,
+    // this flag will be used to refresh the transform matrix cache if it's dirty
+    void NotifyTransformInfoChanged()
+    {
+        isLocalRevertMatrixAvailable_ = false;
+    }
+
+    // this method will check the cache state and return the cached revert matrix preferentially,
+    // but the caller can pass in true to forcible refresh the cache
+    Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
+
+    // apply the matrix to the given point specified by dst
+    static void MapPointTo(PointF& dst, Matrix4& matrix);
+
 protected:
     void DumpInfo() override;
 
@@ -1014,6 +1028,10 @@ private:
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
     Matrix4 localMat_ = Matrix4::CreateIdentity();
+    // this is just used for the hit test process of event handling, do not used for other purpose
+    Matrix4 localRevertMatrix_ = Matrix4::CreateIdentity();
+    // control the localMat_ and localRevertMatrix_ available or not, set to false when any transform info is set
+    bool isLocalRevertMatrixAvailable_ = false;
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
