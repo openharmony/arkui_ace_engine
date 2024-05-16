@@ -260,7 +260,7 @@ void WindowScene::BufferAvailableCallback()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        host->RemoveChild(self->startingNode_);
+        self->RemoveChild(host, self->startingNode_, self->startingNodeName_);
         self->startingNode_.Reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
@@ -287,9 +287,9 @@ void WindowScene::OnActivation()
             self->destroyed_ = false;
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
-            host->RemoveChild(self->startingNode_);
-            host->RemoveChild(self->contentNode_);
-            host->RemoveChild(self->snapshotNode_);
+            self->RemoveChild(host, self->startingNode_, self->startingNodeName_);
+            self->RemoveChild(host, self->contentNode_, self->contentNodeName_);
+            self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
             self->startingNode_.Reset();
             self->contentNode_.Reset();
             self->snapshotNode_.Reset();
@@ -300,18 +300,18 @@ void WindowScene::OnActivation()
             self->session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT && self->snapshotNode_) {
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
-            host->RemoveChild(self->snapshotNode_);
+            self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
             self->snapshotNode_.Reset();
             self->session_->SetNeedSnapshot(true);
             self->CreateStartingNode();
-            host->AddChild(self->startingNode_);
+            self->AddChild(host, self->startingNode_, self->startingNodeName_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else if (self->session_->GetSessionState() != Rosen::SessionState::STATE_DISCONNECT && self->startingNode_) {
             auto surfaceNode = self->session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
-            host->AddChild(self->contentNode_, 0);
+            self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         }
@@ -341,7 +341,7 @@ void WindowScene::OnConnect()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        host->AddChild(self->contentNode_, 0);
+        self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
         self->contentNode_->ForceSyncGeometryNode();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
@@ -367,10 +367,10 @@ void WindowScene::OnForeground()
         CHECK_NULL_VOID(self->snapshotNode_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        host->RemoveChild(self->snapshotNode_);
+        self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
         self->snapshotNode_.Reset();
         self->session_->SetNeedSnapshot(true);
-        host->AddChild(self->contentNode_, 0);
+        self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
@@ -396,10 +396,10 @@ void WindowScene::OnDisconnect()
         if (!self->snapshotNode_ && !self->startingNode_) {
             if (snapshot) {
                 self->CreateSnapshotNode(snapshot);
-                host->AddChild(self->snapshotNode_);
+                self->AddChild(host, self->snapshotNode_, self->snapshotNodeName_);
             } else {
                 self->CreateStartingNode();
-                host->AddChild(self->startingNode_);
+                self->AddChild(host, self->startingNode_, self->startingNodeName_);
             }
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
