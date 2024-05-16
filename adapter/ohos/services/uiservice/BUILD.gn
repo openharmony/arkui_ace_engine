@@ -64,6 +64,7 @@ template("uiservice_static") {
     ]
     external_deps = [
       "ability_base:want",
+      "access_token:libtokenid_sdk",
       "c_utils:utils",
       "eventhandler:libeventhandler",
       "hilog:libhilog",
