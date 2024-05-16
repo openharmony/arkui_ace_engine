@@ -47,6 +47,7 @@ public:
     enum class SliderInteraction {
         SLIDE_AND_CLICK,
         SLIDE_ONLY,
+        SLIDE_AND_CLICK_UP,
     };
 
     class SliderValidRange final : public AceType {
