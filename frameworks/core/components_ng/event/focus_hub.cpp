@@ -2306,20 +2306,23 @@ void FocusHub::SetFocusScopePriority(const std::string& focusScopeId, const uint
         focusPriority_ = FocusPriority::AUTO;
         return;
     }
+    if (!focusScopeId_.empty() && focusScopeId_ != focusScopeId && focusManager) {
+        focusManager->RemoveScopePriorityNode(focusScopeId_, AceType::Claim(this));
+    }
 
     if (focusPriority == static_cast<uint32_t>(FocusPriority::PRIOR)) {
         focusPriority_ = FocusPriority::PRIOR;
         if (focusManager) {
-            focusManager->AddScopePriorityNode(focusScopeId_, AceType::Claim(this), false);
+            focusManager->AddScopePriorityNode(focusScopeId, AceType::Claim(this), false);
         }
     } else if (focusPriority == static_cast<uint32_t>(FocusPriority::PREVIOUS)) {
         focusPriority_ = FocusPriority::PREVIOUS;
         if (focusManager) {
-            focusManager->AddScopePriorityNode(focusScopeId_, AceType::Claim(this), true);
+            focusManager->AddScopePriorityNode(focusScopeId, AceType::Claim(this), true);
         }
     } else {
-        if (focusPriority_ != FocusPriority::AUTO && focusManager) {
-            focusManager->RemoveScopePriorityNode(focusScopeId_, AceType::Claim(this));
+        if (focusScopeId_ == focusScopeId && focusPriority_ != FocusPriority::AUTO && focusManager) {
+            focusManager->RemoveScopePriorityNode(focusScopeId, AceType::Claim(this));
         }
         focusPriority_ = FocusPriority::AUTO;
     }
