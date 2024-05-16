@@ -1471,8 +1471,6 @@ UpdateSpanStyle RichEditorPattern::GetUpdateSpanStyle()
 
 void RichEditorPattern::SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle)
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "typingStyle=%{public}s, textStyle=%{public}s",
-        typingStyle.ToString().c_str(), textStyle.ToString().c_str());
     typingStyle_ = typingStyle;
     typingTextStyle_ = textStyle;
 }
