@@ -91,7 +91,9 @@ void JSPatternLock::JSBind(BindingTarget globalObj)
         "activeCircleRadius", &JSPatternLock::SetActiveCircleRadius, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("enableWaveEffect", &JSPatternLock::SetEnableWaveEffect, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("onDotConnect", &JSPatternLock::SetDotConnect);
+    JSClass<JSPatternLock>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSPatternLock>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSPatternLock>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSPatternLock>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSPatternLock>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSPatternLock>::InheritAndBind<JSViewAbstract>(globalObj);

@@ -347,7 +347,9 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("aspectRatio", &JSButton::JsAspectRatio);
     JSClass<JSButton>::StaticMethod("borderRadius", &JSButton::JsRadius);
     JSClass<JSButton>::StaticMethod("border", &JSButton::JsBorder);
+    JSClass<JSButton>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSButton>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSButton>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSButton>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSButton>::StaticMethod("size", &JSButton::JsSize);
     JSClass<JSButton>::StaticMethod("padding", &JSButton::JsPadding);

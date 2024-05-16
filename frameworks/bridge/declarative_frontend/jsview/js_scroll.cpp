@@ -355,7 +355,9 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSScroll>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSScroll>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSScroll>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSScroll>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSScroll>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSScroll>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSScroll>::StaticMethod("edgeEffect", &JSScroll::SetEdgeEffect, opt);
     JSClass<JSScroll>::StaticMethod("scrollBar", &JSScroll::SetScrollBar, opt);

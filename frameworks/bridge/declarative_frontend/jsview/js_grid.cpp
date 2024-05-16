@@ -349,7 +349,9 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("columnsGap", &JSGrid::SetColumnsGap, opt);
     JSClass<JSGrid>::StaticMethod("rowsGap", &JSGrid::SetRowsGap, opt);
     JSClass<JSGrid>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSGrid>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSGrid>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSGrid>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSGrid>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSGrid>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGrid>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

@@ -411,4 +411,40 @@ void EventHub::ClearInnerOnSizeChanged()
 {
     onSizeChangedInnerCallbacks_.clear();
 }
+
+void EventHub::SetOnAttach(std::function<void()>&& onAttach)
+{
+    onAttach_ = std::move(onAttach);
+}
+
+void EventHub::ClearOnAttach()
+{
+    onAttach_ = nullptr;
+}
+
+void EventHub::FireOnAttach()
+{
+    if (onAttach_) {
+        auto onAttach = onAttach_;
+        onAttach();
+    }
+}
+
+void EventHub::SetOnDetach(std::function<void()>&& onDetach)
+{
+    onDetach_ = std::move(onDetach);
+}
+
+void EventHub::ClearOnDetach()
+{
+    onDetach_ = nullptr;
+}
+
+void EventHub::FireOnDetach()
+{
+    if (onDetach_) {
+        auto onDetach = onDetach_;
+        onDetach();
+    }
+}
 } // namespace OHOS::Ace::NG
