@@ -1,0 +1,606 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "gtest/gtest.h"
+
+#define private public
+#define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_paint_property.h"
+#include "core/components_ng/pattern/radio/radio_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+
+using namespace testing;
+using namespace testing::ext;
+using RadioBuilderFunc = std::function<void()>;
+namespace OHOS::Ace::NG {
+namespace {
+const std::string NAME = "radio";
+const std::string VALUE = "radio";
+const std::string NAME1 = "radio1";
+const std::string GROUP_NAME = "radioGroup";
+const std::string GROUP_NAME1 = "radioGroup1";
+const std::string GROUP_NAME_CHANGE = "radioGroupChange";
+
+constexpr bool CHECKED = true;
+constexpr int BIG_INT = 100000000;
+constexpr int NEGATIVE_BIG_INT = -100000000;
+constexpr int CHILD_NODE_ID = 100;
+constexpr int NEGATIVE_CHILD_NODE_ID = -10;
+const std::optional<int32_t> INDICATOR_TYPE_TICK = 0;
+} // namespace
+
+class RadioNodeTestNg : public testing::Test {
+public:
+};
+
+/**
+ * @tc.name: RadioNodeTest001
+ * @tc.desc: Test customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", 1, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ(1, buildNode->GetId());
+}
+
+/**
+ * @tc.name: RadioNodeTest002
+ * @tc.desc: Test customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ(NEGATIVE_CHILD_NODE_ID, buildNode->GetId());
+}
+
+/**
+ * @tc.name: RadioNodeTest003
+ * @tc.desc: Test customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", 0, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ(0, buildNode->GetId());
+}
+
+/**
+ * @tc.name: RadioNodeTest004
+ * @tc.desc: Test customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", BIG_INT, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ(BIG_INT, buildNode->GetId());
+}
+
+/**
+ * @tc.name: RadioNodeTest005
+ * @tc.desc: Test customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_BIG_INT, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ(NEGATIVE_BIG_INT, buildNode->GetId());
+}
+
+/**
+ * @tc.name: RadioNodeTest006
+ * @tc.desc: Test customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ("", buildNode->GetHostTag());
+}
+
+/**
+ * @tc.name: RadioNodeTest007
+ * @tc.desc: Test customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to radioModelNG builderFunc
+     */
+    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ("child", buildNode->GetHostTag());
+}
+
+/**
+ * @tc.name: RadioNodeTest008
+ * @tc.desc: Test UseContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Set parameters to radioModelNG builderFunc
+     */
+    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), nullptr);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step4. Test customNode
+     */
+    auto isUsed = pattern->UseContentModifier();
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ(false, isUsed);
+}
+
+/**
+ * @tc.name: RadioNodeTest009
+ * @tc.desc: Test UseContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to radioModelNG builderFunc
+     */
+    pattern->SetBuilderFunc(nullptr);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step3. Test UseContentModifier
+     */
+    auto isUsed = pattern->UseContentModifier();
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ(false, isUsed);
+}
+
+/**
+ * @tc.name: RadioNodeTest010
+ * @tc.desc: Test UseContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to radioModelNG builderFunc
+     */
+    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ("child", buildNode->GetHostTag());
+    /**
+     * @tc.steps: step6. change builder func nullptr
+     */
+    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), nullptr);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step7. Test UseContentModifier
+     */
+    auto isUsed = pattern->UseContentModifier();
+    /**
+     * @tc.expected: isUsed is false
+     */
+    EXPECT_EQ(false, isUsed);
+}
+
+/**
+ * @tc.name: RadioNodeTest011
+ * @tc.desc: Test UseContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(NEGATIVE_BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to radioModelNG builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ("child", buildNode->GetHostTag());
+    /**
+     * @tc.steps: step6. change builder func nullptr
+     */
+    pattern->SetBuilderFunc(nullptr);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step7. Test UseContentModifier
+     */
+    auto isUsed = pattern->UseContentModifier();
+    /**
+     * @tc.expected: isUsed is false
+     */
+    EXPECT_EQ(false, isUsed);
+}
+}
