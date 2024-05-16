@@ -101,7 +101,7 @@ public:
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
     LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
-    void SetFocusedAndSelectedColor(PaintWrapper* paintWrapper);
+    void SetFocusedAndSelectedColor(ContentProperty& contentProperty);
     // Update property
     void UpdateShrinkPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
