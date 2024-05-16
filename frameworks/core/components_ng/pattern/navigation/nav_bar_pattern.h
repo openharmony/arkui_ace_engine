@@ -157,6 +157,7 @@ public:
     {
         return titleMode_ == NavigationTitleMode::FREE;
     }
+    OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

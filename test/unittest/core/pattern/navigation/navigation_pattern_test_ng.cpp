@@ -1044,15 +1044,23 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNGTest002, TestSize.Level1)
     NG::BarItem bar;
     std::vector<NG::BarItem> toolBarItems;
     std::vector<std::string> nameList;
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        EXPECT_NE(node, nullptr);
+    };
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = onApply;
+    ImageOption imageOption;
     nameList.push_back("");
     nameList.push_back("");
+    imageOption.isValidImage = true;
+    imageOption.noPixMap = true;
     toolBarItems.push_back(bar);
     navigationModel.Create();
     navigationModel.SetNavigationStack();
     navigationModel.SetTitleHeight(SPLIT_WIDTH);
     navigationModel.SetSubtitle("navigationModel");
     navigationModel.SetHideNavBar(true);
-    navigationModel.SetBackButtonIcon(nullptr, "navigationModel", true, pixMap, nameList);
+    navigationModel.SetBackButtonIcon(iconSymbol, "navigationModel", imageOption, pixMap, nameList);
     navigationModel.SetHideBackButton(true);
     navigationModel.NeedSetItems();
     navigationModel.SetToolBarItems(std::move(toolBarItems));
@@ -1073,6 +1081,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNGTest002, TestSize.Level1)
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
+    ASSERT_NE(titleBarLayoutProperty->GetBackIconSymbol(), nullptr);
     EXPECT_EQ(titleBarLayoutProperty->GetTitleHeight(), SPLIT_WIDTH);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     ASSERT_NE(navBarLayoutProperty, nullptr);
@@ -2216,5 +2225,53 @@ HWTEST_F(NavigationPatternTestNg, NavigationInterceptionTest005, TestSize.Level1
     });
     const int32_t stackWidth = 500;
     NavigationPatternTestNg::RunMeasureAndLayout(layoutWrapper, stackWidth);
+}
+
+/**
+ * @tc.name: NavigationSetSymbolMenusTest001
+ * @tc.desc: Test the SetMenuItems function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationSetSymbolMenusTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize navigation with BarItem in active status.
+     */
+    NavigationModelNG navigationModel;
+    NG::BarItem bar;
+    bar.text = "text";
+    bar.icon = "icon";
+    bar.action = []() {};
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        EXPECT_NE(node, nullptr);
+    };
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = onApply;
+    bar.iconSymbol = iconSymbol;
+    std::vector<NG::BarItem> toolBarItems;
+    toolBarItems.push_back(bar);
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetMenuItems(std::move(toolBarItems));
+
+    /**
+     * @tc.steps: step2. obtain navigation nodes.
+     * @tc.expected: nodes are not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarPattern, nullptr);
+
+    auto navBarMenus = navBarPattern->GetTitleBarMenuItems();
+    ASSERT_NE(navBarMenus.size(), 0);
+
+    auto navBarItem = navBarMenus.front();
+    ASSERT_NE(navBarItem.iconSymbol, nullptr);
 }
 } // namespace OHOS::Ace::NG

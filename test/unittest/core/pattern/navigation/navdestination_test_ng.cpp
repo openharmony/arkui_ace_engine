@@ -147,10 +147,18 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest005, TestSize.Level1)
     bool noPixMap = true;
     RefPtr<PixelMap> pixMap = nullptr;
     std::vector<std::string> nameList;
+    ImageOption imageOption;
     nameList.push_back("");
     nameList.push_back("");
+    imageOption.noPixMap = noPixMap;
+    imageOption.isValidImage = true;
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+    };
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = onApply;
     navDestinationModelNG.Create(std::move(builderFunc));
-    navDestinationModelNG.SetBackButtonIcon(nullptr, imageSource, noPixMap, pixMap, nameList);
+    navDestinationModelNG.SetBackButtonIcon(iconSymbol, imageSource, imageOption, pixMap, nameList);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
@@ -161,6 +169,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest005, TestSize.Level1)
     ASSERT_NE(titleBarLayoutProperty, nullptr);
     ASSERT_EQ(titleBarLayoutProperty->GetPixelMap(), nullptr);
     ASSERT_TRUE(titleBarLayoutProperty->GetNoPixMap());
+    ASSERT_NE(titleBarLayoutProperty->GetBackIconSymbol(), nullptr);
     ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
     ASSERT_EQ(imageSourceInfo.GetSrc(), imageSource);
 }

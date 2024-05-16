@@ -170,25 +170,31 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
     auto noPixMap = ParseJsMedia(info[0], src);
 
     RefPtr<PixelMap> pixMap = nullptr;
+    auto isValidImage = false;
 #if defined(PIXEL_MAP_SUPPORTED)
     if (!noPixMap) {
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
+    if (noPixMap || pixMap != nullptr) {
+        isValidImage = true;
+    }
     std::vector<std::string> nameList;
+    NG::ImageOption imageOption;
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     nameList.emplace_back(bundleName);
     nameList.emplace_back(moduleName);
+    imageOption.noPixMap = noPixMap;
+    imageOption.isValidImage = isValidImage;
     std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
-    if (info[0]->IsObject()) {
-        if (src.empty() && pixMap == nullptr) {
-            SetSymbolOptionApply(info, iconSymbol, info[0]);
-        }
+    auto isSymbol = info[0]->IsObject() && src.empty() && pixMap == nullptr;
+    if (isSymbol) {
+        SetSymbolOptionApply(info, iconSymbol, info[0]);
     }
 
-    NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, noPixMap, pixMap, nameList);
+    NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
 }
 
 void JSNavDestination::SetOnShown(const JSCallbackInfo& info)

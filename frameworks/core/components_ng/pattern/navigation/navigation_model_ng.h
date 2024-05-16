@@ -39,9 +39,8 @@ public:
     void SetSubtitle(const std::string& subtitle) override;
     void SetHideTitleBar(bool hideTitleBar) override;
     void SetHideNavBar(bool hideNavBar) override;
-    void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
-        const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
-        const std::vector<std::string>& nameList) override;
+    void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,
+        const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
@@ -76,7 +75,7 @@ public:
     static void SetNavBarPosition(FrameNode* frameNode, NG::NavBarPosition mode);
     static void SetUsrNavigationMode(FrameNode* frameNode, NavigationMode mode);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
-        const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap);
+        const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap);
     static void SetHideNavBar(FrameNode* frameNode, bool hideNavBar);
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
     static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
