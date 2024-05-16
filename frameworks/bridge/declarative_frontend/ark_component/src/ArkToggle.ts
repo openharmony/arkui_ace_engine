@@ -282,7 +282,7 @@ class ToggleSwitchStyleModifier extends ModifierWithKey<SwitchStyle> {
         this.stageValue.unselectedColor === this.value.unselectedColor &&
         this.stageValue.pointColor === this.value.pointColor &&
         this.stageValue.trackBorderRadius === this.value.trackBorderRadius);
-    } else if (isResource(this.stageValue) && isResource(this.value)){
+    } else if (isResource(this.stageValue) && isResource(this.value)) {
       return !(isResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) && 
       isResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) && 
       isResourceEqual(this.stageValue.pointColor, this.value.pointColor) &&
@@ -301,7 +301,7 @@ globalThis.Toggle.attributeModifier = function (modifier: ArkComponent): void {
   });
 };
 // @ts-ignore
-globalThis.Toggle.contentModifier = function (modifier) {
+globalThis.Toggle.contentModifier = function (modifier): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
