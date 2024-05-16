@@ -933,10 +933,17 @@ ArkUINativeModuleValue TextBridge::SetLineSpacing(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextModifier()->setTextLineSpacing(
-        nativeNode, static_cast<int32_t>(secondArg->Int32Value(vm)), static_cast<int8_t>(thirdArg->Int32Value(vm)));
+    CalcDimension value;
+    if (!ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, value)) {
+        GetArkUINodeModifiers()->getTextModifier()->resetTextLineSpacing(nativeNode);
+    } else {
+        if (value.IsNegative()) {
+            value.Reset();
+        }
+        GetArkUINodeModifiers()->getTextModifier()->setTextLineSpacing(
+            nativeNode, value.Value(), static_cast<int>(value.Unit()));
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
