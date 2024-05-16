@@ -171,5 +171,6 @@ group("linux_core_unittest") {
     "property:core_property_unittest",
     "render:core_render_unittest",
     "syntax:core_syntax_unittest",
+    "pattern/movingphoto:movingphoto_test_ng",
   ]
 }

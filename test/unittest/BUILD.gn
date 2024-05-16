@@ -331,6 +331,7 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/base/utils/time_util.cpp",
     "$ace_root/frameworks/base/utils/utils.cpp",
+    "$ace_root/frameworks/base/resource/data_provider_manager.cpp",
   ]
 
   deps = [
@@ -1061,6 +1062,10 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
+    "$ace_root/component_ext/movingphoto/movingphoto_pattern.cpp",
+    "$ace_root/component_ext/movingphoto/movingphoto_node.cpp",
+    "$ace_root/component_ext/movingphoto/movingphoto_model_ng.cpp",
+    "$ace_root/component_ext/movingphoto/movingphoto_layout_algorithm.cpp",
   ]
 
   deps = [
