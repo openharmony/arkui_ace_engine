@@ -1780,10 +1780,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
         Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
     });
 #endif
-    auto context = runtimeContext_.lock();
-    if (context != nullptr) {
-        targetVersion_ = context->GetApplicationInfo()->apiTargetVersion;
-    }
 }
 
 void AceContainer::SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow)

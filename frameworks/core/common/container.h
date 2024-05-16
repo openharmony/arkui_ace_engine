@@ -516,6 +516,16 @@ public:
     template<ContainerType type>
     static int32_t GenerateId();
 
+    int32_t GetApiTargetVersion() const
+    {
+        return apiTargetVersion_;
+    }
+
+    void SetApiTargetVersion(int32_t apiTargetVersion)
+    {
+        apiTargetVersion_ = apiTargetVersion % 1000;
+    }
+
 private:
     static bool IsIdAvailable(int32_t id);
 
@@ -542,6 +552,7 @@ private:
     bool isModule_ = false;
     std::shared_ptr<NG::DistributedUI> distributedUI_;
     RefPtr<NG::AppBarView> appBar_;
+    int32_t apiTargetVersion_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 
