@@ -343,7 +343,11 @@ void ListItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     OffsetF gestureOffset(info.GetOffsetX(), info.GetOffsetY());
     OffsetF realOffset = gestureOffset + dragOffset_;
     if (lanes_ == 1) {
-        realOffset.SetX(dragOffset_.GetX());
+        if (axis_ == Axis::VERTICAL) {
+            realOffset.SetX(dragOffset_.GetX());
+        } else {
+            realOffset.SetY(dragOffset_.GetY());
+        }
     }
     SetPosition(realOffset);
 
