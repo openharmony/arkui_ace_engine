@@ -2736,6 +2736,18 @@ class SharedTransitionModifier extends ModifierWithKey<ArkSharedTransition> {
   }
 }
 
+class SystemBarEffectModifier extends ModifierWithKey<null> {
+  constructor(value: null) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('systemBarEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (!reset) {
+      getUINativeModule().common.setSystemBarEffect(node, true);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -3944,6 +3956,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     property.value = value;
     modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
     return this;
+  }
+
+  systemBarEffect(value:null):this {
+    modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
   }
 }
 

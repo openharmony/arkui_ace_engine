@@ -2099,6 +2099,11 @@ void ViewAbstract::SetSystemBarEffect(bool systemBarEffect)
     ACE_UPDATE_RENDER_CONTEXT(SystemBarEffect, systemBarEffect);
 }
 
+void ViewAbstract::SetSystemBarEffect(FrameNode *frameNode, bool enable)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(SystemBarEffect, enable, frameNode);
+}
+
 void ViewAbstract::SetHueRotate(float hueRotate)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

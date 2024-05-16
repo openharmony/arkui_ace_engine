@@ -3765,6 +3765,9 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
     return this;
   }
+  systemBarEffect() {
+    modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
+  }
 }
 const isNull = (val) => typeof val === 'object' && val === null;
 const isArray = (val) => Array.isArray(val);
@@ -25086,6 +25089,18 @@ class ArkSymbolGlyphComponent extends ArkComponent {
     return this;
   }
 }
+
+class SystemBarEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.setSystemBarEffect(node, true);
+    }
+  }
+}
+SystemBarEffectModifier.identity = Symbol('systemBarEffect');
 
 // @ts-ignore
 if (globalThis.SymbolGlyph !== undefined) {

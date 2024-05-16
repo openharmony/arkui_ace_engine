@@ -181,6 +181,7 @@ public:
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color &value);
     static void SetSystemBarEffect(bool systemBarEffect);
+    static void SetSystemBarEffect(FrameNode *frameNode, bool enable);
 
     // gradient
     static void SetLinearGradient(const NG::Gradient &gradient);
