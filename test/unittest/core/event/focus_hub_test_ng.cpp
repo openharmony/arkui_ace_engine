@@ -3537,4 +3537,124 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0102, TestSize.Level1)
     ASSERT_NE(listFocusHub, nullptr);
     ASSERT_FALSE(focusHub->ScrollByOffsetToParent(listNode));
 }
+
+/**
+ * @tc.name: FocusHubTestNg0103
+ * @tc.desc: Test the function AcceptFocusOfPriorityChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0103, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->AddChild(child);
+    frameNode->AddChild(child2);
+
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+    parentFocusHub->SetFocusScopeId("scope1", false);
+
+    auto child2FocusHub = child2->GetOrCreateFocusHub();
+    ASSERT_NE(child2FocusHub, nullptr);
+    child2FocusHub->SetFocusScopePriority("scope1", 2000);
+    EXPECT_TRUE(parentFocusHub->AcceptFocusOfPriorityChild());
+    EXPECT_EQ(parentFocusHub->lastWeakFocusNode_.Upgrade(), child2FocusHub);
+}
+
+/**
+ * @tc.name: FocusHubTestNg0104
+ * @tc.desc: Test the function AcceptFocusOfPriorityChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0104, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->AddChild(child);
+    frameNode->AddChild(child2);
+
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+    parentFocusHub->SetFocusScopeId("scope1", true);
+
+    auto child2FocusHub = child2->GetOrCreateFocusHub();
+    ASSERT_NE(child2FocusHub, nullptr);
+    child2FocusHub->SetFocusScopePriority("scope1", 2000);
+    EXPECT_TRUE(parentFocusHub->AcceptFocusOfPriorityChild());
+    EXPECT_EQ(parentFocusHub->lastWeakFocusNode_.Upgrade(), child2FocusHub);
+
+    auto childFocusHub = child->GetOrCreateFocusHub();
+    ASSERT_NE(childFocusHub, nullptr);
+    childFocusHub->SetFocusScopePriority("scope1", 3000);
+    EXPECT_TRUE(parentFocusHub->AcceptFocusOfPriorityChild());
+    EXPECT_EQ(parentFocusHub->lastWeakFocusNode_.Upgrade(), childFocusHub);
+}
+
+/**
+ * @tc.name: FocusHubTestNg0105
+ * @tc.desc: Test the function RequestFocusByPriorityInScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0105, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->AddChild(child);
+    frameNode->AddChild(child2);
+
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+    parentFocusHub->SetFocusScopeId("scope1", false);
+
+    auto child2FocusHub = child2->GetOrCreateFocusHub();
+    ASSERT_NE(child2FocusHub, nullptr);
+    child2FocusHub->SetFocusScopePriority("scope1", 2000);
+    EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
+    EXPECT_TRUE(child2FocusHub->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: FocusHubTestNg0106
+ * @tc.desc: Test the function RequestFocusByPriorityInScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0106, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->AddChild(child);
+    frameNode->AddChild(child2);
+
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+    parentFocusHub->SetFocusScopeId("scope1", true);
+
+    auto child2FocusHub = child2->GetOrCreateFocusHub();
+    ASSERT_NE(child2FocusHub, nullptr);
+    child2FocusHub->SetFocusScopePriority("scope1", 2000);
+    EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
+    EXPECT_TRUE(child2FocusHub->IsCurrentFocus());
+
+    auto childFocusHub = child->GetOrCreateFocusHub();
+    ASSERT_NE(childFocusHub, nullptr);
+    childFocusHub->SetFocusScopePriority("scope1", 3000);
+    EXPECT_TRUE(parentFocusHub->RequestFocusByPriorityInScope());
+    EXPECT_TRUE(childFocusHub->IsCurrentFocus());
+}
 } // namespace OHOS::Ace::NG
