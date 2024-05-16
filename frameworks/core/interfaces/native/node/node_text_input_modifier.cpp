@@ -28,6 +28,7 @@
 #include "core/interfaces/native/node/node_api.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "interfaces/native/node/node_model.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1863,10 +1864,12 @@ void SetOnTextInputContentSizeChange(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_TEXT_INPUT_CONTENT_SIZE_CHANGE;
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
         //0 width
-        event.componentAsyncEvent.data[0].f32 = width;
+        event.componentAsyncEvent.data[0].f32 = NearEqual(density, 0.0) ? 0.0f : width / density;
         //1 height
-        event.componentAsyncEvent.data[1].f32 = height;
+        event.componentAsyncEvent.data[1].f32 = NearEqual(density, 0.0) ? 0.0f : height / density;
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnContentSizeChange(frameNode, std::move(onChange));
