@@ -1,25 +1,26 @@
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 const display = requireNapi('display');
 const hilog = requireNapi('hilog');
 const measure = requireNapi('measure');
 const resourceManager = requireNapi('resourceManager');
-const resourceManager = requireNapi('bundleManager');
+const bundleManager = requireNapi('bundleManager');
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
 }
 
@@ -59,34 +60,34 @@ const VERSION_TWELVE = 50000012;
 export class TipsDialog extends ViewPU {
     constructor(f21, g21, h21, i21 = -1, j21 = undefined, k21) {
         super(f21, h21, i21, k21);
-        if (typeof j21 === "function") {
+        if (typeof j21 === 'function') {
             this.paramsGenerator_ = j21;
         }
         this.controller = undefined;
         this.imageRes = null;
         this.__imageSize =
-            new ObservedPropertyObjectPU({ width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE }, this, "imageSize");
+            new ObservedPropertyObjectPU({ width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE }, this, 'imageSize');
         this.title = null;
         this.content = null;
         this.checkAction = undefined;
         this.checkTips = null;
-        this.__isChecked = new ObservedPropertySimplePU(false, this, "isChecked");
+        this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
         this.primaryButton = null;
         this.secondaryButton = null;
         this.buttons = undefined;
-        this.__imageSizeHeight = new ObservedPropertySimplePU(0, this, "imageSizeHeight");
-        this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, "textAlignment");
+        this.__imageSizeHeight = new ObservedPropertySimplePU(0, this, 'imageSizeHeight');
+        this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlignment');
         this.marginOffset = 0;
-        this.__checkBoxHeight = new ObservedPropertySimplePU(0, this, "checkBoxHeight");
+        this.__checkBoxHeight = new ObservedPropertySimplePU(0, this, 'checkBoxHeight');
         this.buttonHeight = 0;
         this.contentScroller = new Scroller();
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "fontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
         this.theme = new CustomThemeImpl({});
         this.setInitiallyProvidedValue(g21);
         this.finalizeConstruction();
@@ -238,7 +239,7 @@ export class TipsDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, p20, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/Dialog.ets", line: 85, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 85, col: 5 });
                     ViewPU.create(r20);
                     let s20 = () => {
                         return {
@@ -254,7 +255,7 @@ export class TipsDialog extends ViewPU {
                 } else {
                     this.updateStateVarsOfChildByElmtId(p20, {});
                 }
-            }, { name: "CustomDialogComponent" });
+            }, { name: 'CustomDialogComponent' });
         }
     }
 
@@ -271,11 +272,11 @@ export class TipsDialog extends ViewPU {
                         Column.create();
                         Column.padding({
                             top: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.padding_level8'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             }
                         });
                         Column.constraintSize({
@@ -311,11 +312,11 @@ export class TipsDialog extends ViewPU {
             Row.create();
             Row.padding({
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level8'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             });
             Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
@@ -335,11 +336,11 @@ export class TipsDialog extends ViewPU {
             });
             Checkbox.margin({
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level4'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             });
         }, Checkbox);
@@ -347,11 +348,11 @@ export class TipsDialog extends ViewPU {
         this.observeComponentCreation2((l19, m19) => {
             Text.create(g19);
             Text.fontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_M'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
@@ -386,11 +387,11 @@ export class TipsDialog extends ViewPU {
             Image.size(ObservedObject.GetRawObject(this.imageSize));
             Image.objectFit(ImageFit.Contain);
             Image.borderRadius({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.corner_radius_level6'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Image.constraintSize({
                 maxWidth: '100%',
@@ -409,11 +410,11 @@ export class TipsDialog extends ViewPU {
             Column.create();
             Column.margin({
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level8'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             });
         }, Column);
@@ -425,22 +426,22 @@ export class TipsDialog extends ViewPU {
                         Row.create();
                         Row.padding({
                             bottom: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.padding_level8'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             }
                         });
                     }, Row);
                     this.observeComponentCreation2((o18, p18) => {
                         Text.create(this.title);
                         Text.fontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.Title_S'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.fontWeight(FontWeight.Medium);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
@@ -448,18 +449,18 @@ export class TipsDialog extends ViewPU {
                         Text.maxLines(CONTENT_MAX_LINES);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.minFontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.Body_L'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.maxFontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.Title_S'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.width('100%');
                     }, Text);
@@ -484,11 +485,11 @@ export class TipsDialog extends ViewPU {
                         Text.focusable(true);
                         Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
                         Text.fontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.Body_L'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.fontWeight(FontWeight.Medium);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
@@ -519,11 +520,11 @@ export class TipsDialog extends ViewPU {
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.initButtons();
         this.initMargin();
@@ -533,22 +534,22 @@ export class TipsDialog extends ViewPU {
         let m17 = measure.measureTextSize({
             textContent: this.content,
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             constraintWidth: l17,
         });
         let n17 = measure.measureTextSize({
             textContent: this.content,
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
         });
         if (this.getTextHeight(m17) <= this.getTextHeight(n17)) {
@@ -598,7 +599,7 @@ export class TipsDialog extends ViewPU {
 export class SelectDialog extends ViewPU {
     constructor(z16, a17, b17, c17 = -1, d17 = undefined, e17) {
         super(z16, b17, c17, e17);
-        if (typeof d17 === "function") {
+        if (typeof d17 === 'function') {
             this.paramsGenerator_ = d17;
         }
         this.title = '';
@@ -610,19 +611,19 @@ export class SelectDialog extends ViewPU {
         this.contentPadding = undefined;
         this.contentBuilder = this.buildContent;
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "fontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
         this.__dividerColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.comp_divider'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "dividerColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'dividerColorWithTheme');
         this.theme = new CustomThemeImpl({});
         this.controller = new CustomDialogController({
             builder: () => {
@@ -633,7 +634,7 @@ export class SelectDialog extends ViewPU {
                     },
                     buttons: this.buttons,
                 }, undefined, -1, () => {
-                }, { page: "library/src/main/ets/components/mainpage/Dialog.ets", line: 289, col: 14 });
+                }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 289, col: 14 });
                 f17.setController(this.controller);
                 ViewPU.create(f17);
                 let g17 = () => {
@@ -746,25 +747,25 @@ export class SelectDialog extends ViewPU {
                         Row.create();
                         Row.padding({
                             left: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.padding_level12'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             },
                             right: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.padding_level12'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             },
                             bottom: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.padding_level4'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             }
                         });
                         Row.width('100%');
@@ -772,11 +773,11 @@ export class SelectDialog extends ViewPU {
                     this.observeComponentCreation2((l16, m16) => {
                         Text.create(this.content);
                         Text.fontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.Body_M'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.fontWeight(FontWeight.Regular);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
@@ -825,18 +826,18 @@ export class SelectDialog extends ViewPU {
                             Column.create();
                             Column.padding({
                                 left: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level6'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 },
                                 right: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level6'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 }
                             });
                         }, Column);
@@ -844,27 +845,27 @@ export class SelectDialog extends ViewPU {
                             Button.createWithChild();
                             Button.type(ButtonType.Normal);
                             Button.borderRadius({
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.corner_radius_level8'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             });
                             Button.buttonStyle(ButtonStyleMode.TEXTUAL);
                             Button.padding({
                                 left: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level6'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 },
                                 right: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level6'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 }
                             });
                             Button.onClick(() => {
@@ -878,29 +879,29 @@ export class SelectDialog extends ViewPU {
                             Row.clip(false);
                             Row.padding({
                                 top: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level4'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 },
                                 bottom: {
-                                    "id": -1,
-                                    "type": 10002,
+                                    'id': -1,
+                                    'type': 10002,
                                     params: ['sys.float.padding_level4'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
                                 }
                             });
                         }, Row);
                         this.observeComponentCreation2((p15, q15) => {
                             Text.create(q14.title);
                             Text.fontSize({
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.Body_L'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
                             });
                             Text.fontWeight(FontWeight.Medium);
                             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
@@ -932,18 +933,18 @@ export class SelectDialog extends ViewPU {
                                         Divider.color(ObservedObject.GetRawObject(this.dividerColorWithTheme));
                                         Divider.padding({
                                             left: {
-                                                "id": -1,
-                                                "type": 10002,
+                                                'id': -1,
+                                                'type': 10002,
                                                 params: ['sys.float.padding_level6'],
-                                                "bundleName": "__harDefaultBundleName__",
-                                                "moduleName": "__harDefaultModuleName__"
+                                                'bundleName': '__harDefaultBundleName__',
+                                                'moduleName': '__harDefaultModuleName__'
                                             },
                                             right: {
-                                                "id": -1,
-                                                "type": 10002,
+                                                'id': -1,
+                                                'type': 10002,
                                                 params: ['sys.float.padding_level6'],
-                                                "bundleName": "__harDefaultBundleName__",
-                                                "moduleName": "__harDefaultModuleName__"
+                                                'bundleName': '__harDefaultBundleName__',
+                                                'moduleName': '__harDefaultModuleName__'
                                             }
                                         });
                                     }, Divider);
@@ -983,7 +984,7 @@ export class SelectDialog extends ViewPU {
                         contentAreaPadding: this.contentPadding,
                         theme: this.theme,
                     }, undefined, y13, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/Dialog.ets", line: 384, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 384, col: 5 });
                     ViewPU.create(a14);
                     let b14 = () => {
                         return {
@@ -1001,26 +1002,26 @@ export class SelectDialog extends ViewPU {
                 } else {
                     this.updateStateVarsOfChildByElmtId(y13, {});
                 }
-            }, { name: "CustomDialogComponent" });
+            }, { name: 'CustomDialogComponent' });
         }
     }
 
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.dividerColorWithTheme = this.theme?.colors?.compDivider ?
         this.theme.colors.compDivider : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.comp_divider'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.initContentPadding();
         this.initButtons();
@@ -1029,35 +1030,35 @@ export class SelectDialog extends ViewPU {
     initContentPadding() {
         this.contentPadding = {
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             }
         };
         if (!this.title && !this.confirm) {
             this.contentPadding = {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level12'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level12'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             };
             return;
@@ -1065,21 +1066,21 @@ export class SelectDialog extends ViewPU {
         if (!this.title) {
             this.contentPadding = {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level12'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             };
         } else if (!this.confirm) {
             this.contentPadding = {
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level12'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             };
         }
@@ -1100,30 +1101,30 @@ export class SelectDialog extends ViewPU {
 export class ConfirmDialog extends ViewPU {
     constructor(r13, s13, t13, u13 = -1, v13 = undefined, w13) {
         super(r13, t13, u13, w13);
-        if (typeof v13 === "function") {
+        if (typeof v13 === 'function') {
             this.paramsGenerator_ = v13;
         }
         this.controller = undefined;
         this.title = '';
         this.content = '';
         this.checkTips = '';
-        this.__isChecked = new ObservedPropertySimplePU(false, this, "isChecked");
-        this.primaryButton = { value: "" };
-        this.secondaryButton = { value: "" };
+        this.__isChecked = new ObservedPropertySimplePU(false, this, 'isChecked');
+        this.primaryButton = { value: '' };
+        this.secondaryButton = { value: '' };
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "fontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
         this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_emphasize'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "buttonFontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'buttonFontColorWithTheme');
         this.theme = new CustomThemeImpl({});
         this.setInitiallyProvidedValue(s13);
         this.finalizeConstruction();
@@ -1212,41 +1213,41 @@ export class ConfirmDialog extends ViewPU {
             Column.create();
             Column.backgroundBlurStyle(BlurStyle.Thick);
             Column.borderRadius({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_corner_radius_dialog'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Column.margin({
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_dialog_margin_start'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_dialog_margin_end'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_dialog_margin_bottom'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 }
             });
             Column.backgroundColor({
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.ohos_id_color_dialog_bg'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
         }, Column);
         this.observeComponentCreation2((g13, h13) => {
@@ -1257,11 +1258,11 @@ export class ConfirmDialog extends ViewPU {
         this.observeComponentCreation2((e13, f13) => {
             Text.create(this.title);
             Text.fontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_size_dialog_tittle'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.fontWeight(FontWeight.Medium);
             Text.maxLines(CONTENT_MAX_LINES);
@@ -1293,22 +1294,22 @@ export class ConfirmDialog extends ViewPU {
                         Text.focusable(true);
                         Text.defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value));
                         Text.fontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.ohos_id_text_size_body1'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Text.fontWeight(FontWeight.Medium);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.maxLines(CONTENT_MAX_LINES);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.minFontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.ohos_id_text_size_body3'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                     }, Text);
                     Text.pop();
@@ -1347,11 +1348,11 @@ export class ConfirmDialog extends ViewPU {
         this.observeComponentCreation2((j12, k12) => {
             Text.create(this.checkTips);
             Text.fontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_size_body2'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
@@ -1382,21 +1383,21 @@ export class ConfirmDialog extends ViewPU {
                     this.observeComponentCreation2((e12, f12) => {
                         Button.createWithLabel(this.primaryButton.value);
                         Button.fontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.ohos_id_text_size_button1'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Button.fontWeight(FontWeight.Medium);
                         Button.layoutWeight(1);
                         Button.defaultFocus(true);
                         Button.backgroundColor(this.primaryButton.background ? this.primaryButton.background : {
-                            "id": -1,
-                            "type": 10001,
+                            'id': -1,
+                            'type': 10001,
                             params: ['sys.color.ohos_id_color_background_transparent'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Button.fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor :
                         this.buttonFontColorWithTheme);
@@ -1433,11 +1434,11 @@ export class ConfirmDialog extends ViewPU {
                                     Divider.width(DIVIDER_WIDTH);
                                     Divider.height(DIVIDER_HEIGHT);
                                     Divider.color({
-                                        "id": -1,
-                                        "type": 10001,
+                                        'id': -1,
+                                        'type': 10001,
                                         params: ['sys.color.ohos_id_color_list_separator'],
-                                        "bundleName": "__harDefaultBundleName__",
-                                        "moduleName": "__harDefaultModuleName__"
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
                                     });
                                     Divider.vertical(true);
                                 }, Divider);
@@ -1463,21 +1464,21 @@ export class ConfirmDialog extends ViewPU {
                     this.observeComponentCreation2((h11, i11) => {
                         Button.createWithLabel(this.secondaryButton.value);
                         Button.fontSize({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.ohos_id_text_size_button1'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Button.fontWeight(FontWeight.Medium);
                         Button.layoutWeight(1);
                         Button.defaultFocus(true);
                         Button.backgroundColor(this.secondaryButton.background ? this.secondaryButton.background : {
-                            "id": -1,
-                            "type": 10001,
+                            'id': -1,
+                            'type': 10001,
                             params: ['sys.color.ohos_id_color_background_transparent'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Button.fontColor(this.secondaryButton.fontColor ?
                         this.secondaryButton.fontColor : this.buttonFontColorWithTheme);
@@ -1503,19 +1504,19 @@ export class ConfirmDialog extends ViewPU {
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
         this.theme.colors.fontEmphasize : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_emphasize'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
     }
 
@@ -1527,7 +1528,7 @@ export class ConfirmDialog extends ViewPU {
 export class AlertDialog extends ViewPU {
     constructor(k10, l10, m10, n10 = -1, o10 = undefined, p10) {
         super(k10, m10, n10, p10);
-        if (typeof o10 === "function") {
+        if (typeof o10 === 'function') {
             this.paramsGenerator_ = o10;
         }
         this.controller = undefined;
@@ -1537,15 +1538,15 @@ export class AlertDialog extends ViewPU {
         this.primaryButton = null;
         this.secondaryButton = null;
         this.buttons = undefined;
-        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, "textAlign");
+        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlign');
         this.contentScroller = new Scroller();
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "fontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
         this.theme = new CustomThemeImpl({});
         this.setInitiallyProvidedValue(l10);
         this.finalizeConstruction();
@@ -1636,7 +1637,7 @@ export class AlertDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, y9, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/Dialog.ets", line: 606, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 606, col: 5 });
                     ViewPU.create(a10);
                     let b10 = () => {
                         return {
@@ -1654,7 +1655,7 @@ export class AlertDialog extends ViewPU {
                 } else {
                     this.updateStateVarsOfChildByElmtId(y9, {});
                 }
-            }, { name: "CustomDialogComponent" });
+            }, { name: 'CustomDialogComponent' });
         }
     }
 
@@ -1672,21 +1673,21 @@ export class AlertDialog extends ViewPU {
             Text.focusable(true);
             Text.defaultFocus(!(this.primaryButton || this.secondaryButton));
             Text.fontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.fontWeight(this.getFontWeight());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.margin({
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level8'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             });
             Text.width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`);
@@ -1708,11 +1709,11 @@ export class AlertDialog extends ViewPU {
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.initButtons();
     }
@@ -1721,22 +1722,22 @@ export class AlertDialog extends ViewPU {
         let g9 = measure.measureTextSize({
             textContent: this.content,
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             constraintWidth: f9,
         });
         let h9 = measure.measureTextSize({
             textContent: this.content,
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
         });
         if (this.getTextHeight(g9) <= this.getTextHeight(h9)) {
@@ -1783,7 +1784,7 @@ export class AlertDialog extends ViewPU {
 export class CustomContentDialog extends ViewPU {
     constructor(y8, z8, a9, b9 = -1, c9 = undefined, d9) {
         super(y8, a9, b9, d9);
-        if (typeof c9 === "function") {
+        if (typeof c9 === 'function') {
             this.paramsGenerator_ = c9;
         }
         this.controller = undefined;
@@ -1851,7 +1852,7 @@ export class CustomContentDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, o8, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/Dialog.ets", line: 710, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 710, col: 5 });
                     ViewPU.create(q8);
                     let r8 = () => {
                         return {
@@ -1870,7 +1871,7 @@ export class CustomContentDialog extends ViewPU {
                 } else {
                     this.updateStateVarsOfChildByElmtId(o8, {});
                 }
-            }, { name: "CustomDialogContentComponent" });
+            }, { name: 'CustomDialogContentComponent' });
         }
     }
 
@@ -1882,7 +1883,7 @@ export class CustomContentDialog extends ViewPU {
 class CustomDialogContentComponent extends ViewPU {
     constructor(h8, i8, j8, k8 = -1, l8 = undefined, m8) {
         super(h8, j8, k8, m8);
-        if (typeof l8 === "function") {
+        if (typeof l8 === 'function') {
             this.paramsGenerator_ = l8;
         }
         this.controller = undefined;
@@ -1893,24 +1894,24 @@ class CustomDialogContentComponent extends ViewPU {
         this.contentAreaPadding = undefined;
         this.keyIndex = 0;
         this.__primaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "primaryTitleFontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'primaryTitleFontColorWithTheme');
         this.__secondaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_secondary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "secondaryTitleFontColorWithTheme");
-        this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU('', this, "buttonFontColorWithTheme");
-        this.__errorButtonFontColorWithTheme = new ObservedPropertyObjectPU('', this, "errorButtonFontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'secondaryTitleFontColorWithTheme');
+        this.__buttonFontColorWithTheme = new ObservedPropertyObjectPU('', this, 'buttonFontColorWithTheme');
+        this.__errorButtonFontColorWithTheme = new ObservedPropertyObjectPU('', this, 'errorButtonFontColorWithTheme');
         this.theme = new CustomThemeImpl({});
         this.titleHeight = 0;
-        this.__contentMaxHeight = new ObservedPropertySimplePU('', this, "contentMaxHeight");
+        this.__contentMaxHeight = new ObservedPropertySimplePU('', this, 'contentMaxHeight');
         this.setInitiallyProvidedValue(i8);
         this.finalizeConstruction();
     }
@@ -2069,18 +2070,18 @@ class CustomDialogContentComponent extends ViewPU {
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTitleFontColorWithTheme));
             Text.textAlign(this.getTitleTextAlign());
             Text.maxFontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Title_S'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.minFontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.maxLines(TITLE_MAX_LINES);
             Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
@@ -2099,11 +2100,11 @@ class CustomDialogContentComponent extends ViewPU {
                     this.observeComponentCreation2((c7, d7) => {
                         Divider.create();
                         Divider.margin({
-                            "id": -1,
-                            "type": 10002,
+                            'id': -1,
+                            'type': 10002,
                             params: ['sys.float.padding_level1'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__'
                         });
                         Divider.color(Color.Transparent);
                     }, Divider);
@@ -2125,18 +2126,18 @@ class CustomDialogContentComponent extends ViewPU {
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTitleFontColorWithTheme));
             Text.textAlign(this.getTitleTextAlign());
             Text.maxFontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Subtitle_S'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.minFontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_S'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.maxLines(TITLE_MAX_LINES);
             Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
@@ -2236,35 +2237,35 @@ class CustomDialogContentComponent extends ViewPU {
                                 this.observeComponentCreation2((e5, f5) => {
                                     Divider.create();
                                     Divider.width({
-                                        "id": -1,
-                                        "type": 10002,
+                                        'id': -1,
+                                        'type': 10002,
                                         params: ['sys.float.alert_divider_width'],
-                                        "bundleName": "__harDefaultBundleName__",
-                                        "moduleName": "__harDefaultModuleName__"
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
                                     });
                                     Divider.height({
-                                        "id": -1,
-                                        "type": 10002,
+                                        'id': -1,
+                                        'type': 10002,
                                         params: ['sys.float.alert_divider_height'],
-                                        "bundleName": "__harDefaultBundleName__",
-                                        "moduleName": "__harDefaultModuleName__"
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
                                     });
                                     Divider.color(this.getDividerColor());
                                     Divider.vertical(true);
                                     Divider.margin({
                                         left: {
-                                            "id": -1,
-                                            "type": 10002,
+                                            'id': -1,
+                                            'type': 10002,
                                             params: ['sys.float.alert_button_horizontal_space'],
-                                            "bundleName": "__harDefaultBundleName__",
-                                            "moduleName": "__harDefaultModuleName__"
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__'
                                         },
                                         right: {
-                                            "id": -1,
-                                            "type": 10002,
+                                            'id': -1,
+                                            'type': 10002,
                                             params: ['sys.float.alert_button_horizontal_space'],
-                                            "bundleName": "__harDefaultBundleName__",
-                                            "moduleName": "__harDefaultModuleName__"
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__'
                                         },
                                     });
                                 }, Divider);
@@ -2332,11 +2333,11 @@ class CustomDialogContentComponent extends ViewPU {
                                 this.observeComponentCreation2((u3, v3) => {
                                     Row.create();
                                     Row.height({
-                                        "id": -1,
-                                        "type": 10002,
+                                        'id': -1,
+                                        'type': 10002,
                                         params: ['sys.float.alert_button_vertical_space'],
-                                        "bundleName": "__harDefaultBundleName__",
-                                        "moduleName": "__harDefaultModuleName__"
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__'
                                     });
                                 }, Row);
                                 Row.pop();
@@ -2366,19 +2367,19 @@ class CustomDialogContentComponent extends ViewPU {
         this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
         this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
         this.theme.colors.fontSecondary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_secondary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
         this.theme.colors.fontEmphasize : '';
@@ -2394,11 +2395,11 @@ class CustomDialogContentComponent extends ViewPU {
             if (this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === ButtonStyleMode.TEXTUAL ||
                 this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
                 return {
-                    "id": -1,
-                    "type": 10001,
+                    'id': -1,
+                    'type': 10001,
                     params: ['sys.color.alert_divider_color'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 };
             }
         }
@@ -2429,100 +2430,100 @@ class CustomDialogContentComponent extends ViewPU {
             return {
                 top: 0,
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: 0,
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
         } else if (this.primaryTitle || this.secondaryTitle) {
             return {
                 top: 0,
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
         } else if (this.buttons && this.buttons.length > 0) {
             return {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: 0,
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
         } else {
             return {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_content_default_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
         }
@@ -2531,19 +2532,19 @@ class CustomDialogContentComponent extends ViewPU {
     getTitleAreaMinHeight() {
         if (this.secondaryTitle) {
             return {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_title_secondary_height'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         } else if (this.primaryTitle) {
             return {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_title_primary_height'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         } else {
             return 0;
@@ -2554,50 +2555,50 @@ class CustomDialogContentComponent extends ViewPU {
         if (this.primaryTitle || this.secondaryTitle) {
             return {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_title_padding_top'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_title_padding_right'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_title_padding_left'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_title_padding_bottom'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
         }
         return {
             top: 0,
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_title_padding_right'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_title_padding_left'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             bottom: 0,
         };
@@ -2614,63 +2615,63 @@ class CustomDialogContentComponent extends ViewPU {
         if (this.isVerticalAlignButton()) {
             return {
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_button_top_padding'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_right_padding_vertical'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_left_padding_vertical'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.alert_button_bottom_padding_vertical'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__'
                 },
             };
         }
         return {
             top: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_button_top_padding'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_right_padding_horizontal'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_left_padding_horizontal'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             bottom: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.alert_button_bottom_padding_horizontal'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
         };
     }
@@ -2712,7 +2713,7 @@ class CustomDialogContentComponent extends ViewPU {
 export class CustomDialogComponent extends ViewPU {
     constructor(x2, y2, z2, a3 = -1, b3 = undefined, c3) {
         super(x2, z2, a3, c3);
-        if (typeof b3 === "function") {
+        if (typeof b3 === 'function') {
             this.paramsGenerator_ = b3;
         }
         this.controller = undefined;
@@ -2722,7 +2723,7 @@ export class CustomDialogComponent extends ViewPU {
         this.buttons = undefined;
         this.contentAreaPadding = undefined;
         this.screenWidth = 0;
-        this.__columnModifier = new ObservedPropertyObjectPU(new ColumnModifier(), this, "columnModifier");
+        this.__columnModifier = new ObservedPropertyObjectPU(new ColumnModifier(), this, 'columnModifier');
         this.isFirstInit = true;
         this.theme = new CustomThemeImpl({});
         this.targetSdk = VERSION_TWELVE;
@@ -2824,7 +2825,7 @@ export class CustomDialogComponent extends ViewPU {
                         contentAreaPadding: this.contentAreaPadding,
                         theme: this.theme,
                     }, undefined, g2, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/Dialog.ets", line: 1136, col: 9 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 1136, col: 9 });
                     ViewPU.create(i2);
                     let j2 = () => {
                         return {
@@ -2843,7 +2844,7 @@ export class CustomDialogComponent extends ViewPU {
                 } else {
                     this.updateStateVarsOfChildByElmtId(g2, {});
                 }
-            }, { name: "CustomDialogContentComponent" });
+            }, { name: 'CustomDialogContentComponent' });
         }
         Column.pop();
         Column.pop();
@@ -2894,41 +2895,41 @@ class ColumnModifier {
         }
         w1.backgroundBlurStyle(BlurStyle.Thick);
         w1.borderRadius({
-            "id": -1,
-            "type": 10002,
+            'id': -1,
+            'type': 10002,
             params: ['sys.float.ohos_id_corner_radius_dialog'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
         });
         w1.margin({
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_dialog_margin_start'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_dialog_margin_end'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
             bottom: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_dialog_margin_bottom'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             },
         });
         w1.backgroundColor({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_dialog_bg'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
         });
     }
 }
@@ -2987,25 +2988,25 @@ function resolveKeyEvent(j1, k1) {
 export class LoadingDialog extends ViewPU {
     constructor(d1, e1, f1, g1 = -1, h1 = undefined, i1) {
         super(d1, f1, g1, i1);
-        if (typeof h1 === "function") {
+        if (typeof h1 === 'function') {
             this.paramsGenerator_ = h1;
         }
         this.controller = undefined;
         this.content = '';
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.font_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "fontColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'fontColorWithTheme');
         this.__loadingProgressIconColorWithTheme = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.icon_secondary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "loadingProgressIconColorWithTheme");
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+        }, this, 'loadingProgressIconColorWithTheme');
         this.theme = new CustomThemeImpl({});
         this.setInitiallyProvidedValue(e1);
         this.finalizeConstruction();
@@ -3078,7 +3079,7 @@ export class LoadingDialog extends ViewPU {
                         },
                         theme: this.theme,
                     }, undefined, p, () => {
-                    }, { page: "library/src/main/ets/components/mainpage/Dialog.ets", line: 1293, col: 7 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 1293, col: 7 });
                     ViewPU.create(r);
                     let s = () => {
                         return {
@@ -3093,7 +3094,7 @@ export class LoadingDialog extends ViewPU {
                 } else {
                     this.updateStateVarsOfChildByElmtId(p, {});
                 }
-            }, { name: "CustomDialogComponent" });
+            }, { name: 'CustomDialogComponent' });
         }
         Column.pop();
     }
@@ -3109,11 +3110,11 @@ export class LoadingDialog extends ViewPU {
         this.observeComponentCreation2((h, i) => {
             Text.create(this.content);
             Text.fontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.Body_L'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             });
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
@@ -3138,19 +3139,19 @@ export class LoadingDialog extends ViewPU {
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.font_primary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
         this.loadingProgressIconColorWithTheme = this.theme?.colors?.iconSecondary ?
         this.theme.colors.iconSecondary : {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.icon_secondary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
     }
 
