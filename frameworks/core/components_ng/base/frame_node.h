@@ -838,6 +838,8 @@ public:
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
 
+    void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
+
     void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
     {
         SetSkipSyncGeometryNode();
@@ -929,7 +931,7 @@ private:
 
     int32_t GetNodeExpectedRate();
 
-    void RecordExposureIfNeed(const std::string& inspectorId);
+    void RecordExposureInner();
 
     OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
 

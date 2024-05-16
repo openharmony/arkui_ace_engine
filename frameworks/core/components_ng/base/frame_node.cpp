@@ -3564,34 +3564,50 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end)
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
     renderContext_->UpdateNodeName(id);
+    auto parent = GetAncestorNodeOfFrame();
+    if (parent && parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
     if (Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
         if (exposureProcessor_) {
             return;
         }
         auto* context = GetContext();
-        if (context) {
-            context->AddAfterRenderTask([weak = WeakClaim(this), inspectorId = id]() {
-                auto host = weak.Upgrade();
-                CHECK_NULL_VOID(host);
-                host->RecordExposureIfNeed(inspectorId);
-            });
-        }
-    }
-    auto parent = GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID(parent);
-    if (parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
-        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        CHECK_NULL_VOID(context);
+        context->AddAfterRenderTask([weak = WeakClaim(this), inspectorId = id]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            auto pageUrl = Recorder::GetPageUrlByNode(host);
+            host->exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(pageUrl, inspectorId);
+            if (!host->exposureProcessor_->IsNeedRecord()) {
+                return;
+            }
+            host->RecordExposureInner();
+        });
     }
 }
 
-void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
+void FrameNode::SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor)
 {
-    auto pageUrl = Recorder::GetPageUrlByNode(Claim(this));
-    exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(pageUrl, inspectorId);
-    if (!exposureProcessor_->IsNeedRecord()) {
+    if (exposureProcessor_ && exposureProcessor_->isListening()) {
         return;
+    } else {
+        exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(processor);
+        exposureProcessor_->SetContainerId(processor->GetContainerId());
     }
+    exposureProcessor_->OnVisibleChange(true, "");
+    RecordExposureInner();
+}
+
+void FrameNode::RecordExposureInner()
+{
     auto pipeline = GetContext();
+    if (!pipeline) {
+        auto piplineRef = PipelineContext::GetContextByContainerId(exposureProcessor_->GetContainerId());
+        if (!piplineRef) {
+            pipeline = piplineRef.GetRawPtr();
+        }
+    }
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(RawPtr(exposureProcessor_)), weakNode = WeakClaim(this)](
                         bool visible, double ratio) {
@@ -3605,8 +3621,9 @@ void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
             processor->OnVisibleChange(visible);
         }
     };
-    std::vector<double> ratios = {exposureProcessor_->GetRatio()};
+    std::vector<double> ratios = { exposureProcessor_->GetRatio() };
     pipeline->AddVisibleAreaChangeNode(Claim(this), ratios, callback, false);
+    exposureProcessor_->SetListenState(true);
 }
 
 void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList)
