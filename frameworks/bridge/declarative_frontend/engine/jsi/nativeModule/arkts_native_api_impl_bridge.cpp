@@ -944,6 +944,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextShadow));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetContent));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextController"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetTextController));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextShadow"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetTextShadow));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeightAdaptivePolicy"),
