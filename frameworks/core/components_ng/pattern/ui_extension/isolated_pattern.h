@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_ISOLATED_PATTERN_H
 
 #include "core/common/dynamic_component_renderer.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 
 namespace OHOS::Ace::NG {
 struct IsolatedInfo {
@@ -26,8 +26,8 @@ struct IsolatedInfo {
     std::string entryPoint;
 };
 
-class IsolatedPattern : public UIExtensionPattern {
-    DECLARE_ACE_TYPE(IsolatedPattern, UIExtensionPattern);
+class IsolatedPattern : public PlatformPattern {
+    DECLARE_ACE_TYPE(IsolatedPattern, PlatformPattern);
 
 public:
     IsolatedPattern();
@@ -53,8 +53,6 @@ public:
         onSizeChanged_ = std::move(callback);
     }
 
-    void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message) override;
-
 protected:
     virtual void DispatchPointerEvent(
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
@@ -62,10 +60,13 @@ protected:
 
 private:
     void InitializeRender(void* runtime);
+    int32_t ApplyIsolatedId();
 
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     std::function<void(int32_t, int32_t)> onSizeChanged_;
     IsolatedInfo curIsolatedInfo_;
+
+    static int32_t isolatedIdGenerator_; // only run on JS thread, and do not require mutex
     ACE_DISALLOW_COPY_AND_MOVE(IsolatedPattern);
 };
 } // namespace OHOS::Ace::NG
