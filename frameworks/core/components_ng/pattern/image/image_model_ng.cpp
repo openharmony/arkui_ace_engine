@@ -748,6 +748,7 @@ void ImageModelNG::EnableAnalyzer(FrameNode* frameNode, bool isEnableAnalyzer)
 {
     CHECK_NULL_VOID(frameNode);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
     imagePattern->EnableAnalyzer(isEnableAnalyzer);
 }
 
@@ -755,6 +756,7 @@ void ImageModelNG::SetImageAnalyzerConfig(FrameNode* frameNode, void* config)
 {
     CHECK_NULL_VOID(frameNode);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
     imagePattern->SetImageAnalyzerConfig(config);
 }
 } // namespace OHOS::Ace::NG
