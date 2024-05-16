@@ -224,12 +224,9 @@ void RadioModifier::PaintRadio(
     float outCircleRadius = contentSize.Width() / CALC_RADIUS;
     float centerX = contentOffset.GetX() + outCircleRadius;
     float centerY = contentOffset.GetY() + outCircleRadius;
-    RSPen pen;
     RSPen outPen;
     RSBrush brush;
     RSBrush shadowBrush;
-    pen.SetAntiAlias(true);
-    pen.SetWidth(borderWidth_);
     outPen.SetAntiAlias(true);
     brush.SetAntiAlias(true);
     shadowBrush.SetAntiAlias(true);
@@ -252,21 +249,45 @@ void RadioModifier::PaintRadio(
         PaintRingCircle(canvas, contentSize, contentOffset, brush);
         PaintOutRingCircle(canvas, contentSize, contentOffset, outPen);
     } else if (uiStatus_->Get() == static_cast<int32_t>(UIStatus::UNSELECTED)) {
-        auto alphaCalculate = static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA;
-        if (!enabled_->Get()) {
+        PaintUnselectedRadio(canvas, outCircleRadius, centerX, centerY);
+    }
+}
+
+void RadioModifier::PaintUnselectedRadio(RSCanvas& canvas, float outCircleRadius, float centerX, float centerY) const
+{
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetWidth(borderWidth_);
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    auto alphaCalculate = static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
+    if (!enabled_->Get()) {
+        if (isFocused_->Get()) {
+            brush.SetColor(ToRSColor(radioTheme->GetFocusedBgUnchecked().BlendOpacity(alphaCalculate)));
+            pen.SetColor(ToRSColor(radioTheme->GetFocusedRingUnchecked().BlendOpacity(alphaCalculate)));
+        } else {
             brush.SetColor(ToRSColor(inactivePointColor_.BlendOpacity(alphaCalculate)));
             pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(alphaCalculate)));
+        }
+    } else {
+        if (isFocused_->Get()) {
+            brush.SetColor(ToRSColor(radioTheme->GetFocusedBgUnchecked()));
+            pen.SetColor(ToRSColor(radioTheme->GetFocusedRingUnchecked()));
         } else {
             brush.SetColor(ToRSColor(inactivePointColor_));
             pen.SetColor(ToRSColor(inactiveColor_->Get()));
         }
-        canvas.AttachBrush(brush);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_);
-        canvas.DetachBrush();
-        canvas.AttachPen(pen);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_ / CALC_RADIUS);
-        canvas.DetachPen();
     }
+    canvas.AttachBrush(brush);
+    canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_);
+    canvas.DetachBrush();
+    canvas.AttachPen(pen);
+    canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_ / CALC_RADIUS);
+    canvas.DetachPen();
 }
 
 void RadioModifier::PaintRingCircle(
@@ -320,12 +341,26 @@ void RadioModifier::PaintUnselectedIndicator(
     pen.SetWidth(borderWidth_);
     brush.SetAntiAlias(true);
     auto alphaCalculate = static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
     if (!enabled_->Get()) {
-        brush.SetColor(ToRSColor(inactivePointColor_.BlendOpacity(alphaCalculate)));
-        pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(alphaCalculate)));
+        if (isFocused_->Get()) {
+            brush.SetColor(ToRSColor(radioTheme->GetFocusedBgUnchecked().BlendOpacity(alphaCalculate)));
+            pen.SetColor(ToRSColor(radioTheme->GetFocusedRingUnchecked().BlendOpacity(alphaCalculate)));
+        } else {
+            brush.SetColor(ToRSColor(inactivePointColor_.BlendOpacity(alphaCalculate)));
+            pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(alphaCalculate)));
+        }
     } else {
-        brush.SetColor(ToRSColor(inactivePointColor_));
-        pen.SetColor(ToRSColor(inactiveColor_->Get()));
+        if (isFocused_->Get()) {
+            brush.SetColor(ToRSColor(radioTheme->GetFocusedBgUnchecked()));
+            pen.SetColor(ToRSColor(radioTheme->GetFocusedRingUnchecked()));
+        } else {
+            brush.SetColor(ToRSColor(inactivePointColor_));
+            pen.SetColor(ToRSColor(inactiveColor_->Get()));
+        }
     }
     canvas.AttachBrush(brush);
     canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_);
