@@ -43,6 +43,9 @@ bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
 {
     auto reverse = layoutProperty->GetReverseValue(false);
     auto direction = layoutProperty->GetLayoutDirection();
+    if (direction == TextDirection::AUTO) {
+        return AceApplicationInfo::GetInstance().IsRightToLeft() ? !reverse : reverse;
+    }
     return direction == TextDirection::RTL ? !reverse : reverse;
 }
 } // namespace
