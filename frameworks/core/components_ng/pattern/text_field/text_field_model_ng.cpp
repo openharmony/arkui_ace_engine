@@ -748,23 +748,8 @@ void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     if (pattern) {
+        pattern->SetCustomKeyboard(std::move(buildFunc));
         pattern->SetCustomKeyboardOption(supportAvoidance);
-        // create customKeyboard node
-        if (buildFunc) {
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            buildFunc();
-            auto customKeyboard = NG::ViewStackProcessor::GetInstance()->Finish();
-            if (customKeyboard == nullptr) {
-                // should show custom keyboard, create empty node as replacement
-                auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-                ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::KEYBOARD_ETS_TAG, frameNode->GetId());
-                auto emptyNode = FrameNode::CreateFrameNode(V2::KEYBOARD_ETS_TAG,
-                    nodeId, AceType::MakeRefPtr<KeyboardPattern>(frameNode->GetId()));
-                emptyNode->MarkModifyDone();
-                customKeyboard = emptyNode;
-            }
-            pattern->SetCustomKeyboard(customKeyboard);
-        }
     }
 }
 
@@ -1662,7 +1647,7 @@ void TextFieldModelNG::SetCustomKeyboard(FrameNode* frameNode, FrameNode* custom
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     if (pattern) {
-        pattern->SetCustomKeyboard(AceType::Claim<UINode>(customKeyboard));
+        pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
         pattern->SetCustomKeyboardOption(supportAvoidance);
     }
 }
