@@ -16,11 +16,23 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_INFO_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_INFO_H
 
+#include <memory>
+
+#include "testing_bitmap.h"
+#include "testing_color_space.h"
+
 namespace OHOS::Ace::Testing {
 class TestingImageInfo {
 public:
     TestingImageInfo() = default;
+    TestingImageInfo(int width, int height, ColorType colorType, AlphaType alphaType,
+        std::shared_ptr<TestingColorSpace> colorSpace = nullptr)
+    {}
     ~TestingImageInfo() = default;
+    int32_t GetBytesPerPixel() const
+    {
+        return 0;
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_INFO_H

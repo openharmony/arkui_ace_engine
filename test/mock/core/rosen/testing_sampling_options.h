@@ -17,9 +17,35 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_SAMPLING_OPTIONS_H
 
 namespace OHOS::Ace::Testing {
+enum class FilterMode {
+    NEAREST,
+    LINEAR,
+};
+
+enum class MipmapMode {
+    NONE,
+    NEAREST,
+    LINEAR,
+};
+
+struct TestingCubicResampler {
+    float cubicCoffB = 0;
+    float cubicCoffC = 0;
+    static constexpr TestingCubicResampler Mitchell()
+    {
+        return { 1 / 3.0f, 1 / 3.0f };
+    }
+    static constexpr TestingCubicResampler CatmullRom()
+    {
+        return { 0.0f, 1 / 2.0f };
+    }
+};
+
 class TestingSamplingOptions {
 public:
     TestingSamplingOptions() = default;
+    TestingSamplingOptions(FilterMode fm, MipmapMode mm) {}
+    TestingSamplingOptions(const TestingCubicResampler& c) {}
     ~TestingSamplingOptions() = default;
 };
 } // namespace OHOS::Ace::Testing
