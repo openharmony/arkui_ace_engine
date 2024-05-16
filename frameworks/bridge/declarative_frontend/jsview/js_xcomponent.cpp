@@ -43,6 +43,11 @@ XComponentType ConvertToXComponentType(const std::string& type)
     if (type == "node") {
         return XComponentType::NODE;
     }
+#ifdef PLATFORM_VIEW_SUPPORTED
+    if (type == "platform_view") {
+        return XComponentType::PLATFORM_VIEW;
+    }
+#endif
     return XComponentType::SURFACE;
 }
 } // namespace
