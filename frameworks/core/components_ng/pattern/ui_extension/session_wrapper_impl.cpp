@@ -136,7 +136,9 @@ void SessionWrapperImpl::InitAllCallback()
                 [weak, errcode] {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    pattern->FireOnErrorCallback(static_cast<int32_t>(errcode), START_FAIL_NAME, START_FAIL_MESSAGE);
+                    int32_t code = pattern->IsCompatibleOldVersion()
+                        ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_FOREGROUND_FAILED;
+                    pattern->FireOnErrorCallback(code, START_FAIL_NAME, START_FAIL_MESSAGE);
                 },
                 TaskExecutor::TaskType::UI, "ArkUIUIExtensionForegroundError");
         }
@@ -147,8 +149,10 @@ void SessionWrapperImpl::InitAllCallback()
                 [weak, errcode] {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    int32_t code = pattern->IsCompatibleOldVersion()
+                        ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_BACKGROUND_FAILED;
                     pattern->FireOnErrorCallback(
-                        static_cast<int32_t>(errcode), BACKGROUND_FAIL_NAME, BACKGROUND_FAIL_MESSAGE);
+                        code, BACKGROUND_FAIL_NAME, BACKGROUND_FAIL_MESSAGE);
                 },
                 TaskExecutor::TaskType::UI, "ArkUIUIExtensionBackgroundError");
         }
@@ -159,8 +163,10 @@ void SessionWrapperImpl::InitAllCallback()
                 [weak, errcode] {
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
+                    int32_t code = pattern->IsCompatibleOldVersion()
+                        ? static_cast<int32_t>(errcode) : ERROR_CODE_UIEXTENSION_DESTRUCTION_FAILED;
                     pattern->FireOnErrorCallback(
-                        static_cast<int32_t>(errcode), TERMINATE_FAIL_NAME, TERMINATE_FAIL_MESSAGE);
+                        code, TERMINATE_FAIL_NAME, TERMINATE_FAIL_MESSAGE);
                 },
                 TaskExecutor::TaskType::UI, "ArkUIUIExtensionDestructionError");
         }
@@ -172,7 +178,7 @@ void SessionWrapperImpl::InitAllCallback()
             [weak, code, want, sessionType]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                if (sessionType == SessionType::UI_EXTENSION_ABILITY) {
+                if (sessionType == SessionType::UI_EXTENSION_ABILITY && pattern->IsCompatibleOldVersion()) {
                     pattern->FireOnResultCallback(code, want);
                 } else {
                     pattern->FireOnTerminatedCallback(code, MakeRefPtr<WantWrapOhos>(want));
@@ -463,7 +469,7 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnDisconnect(isAbnormal);
-            if (sessionType == SessionType::UI_EXTENSION_ABILITY) {
+            if (sessionType == SessionType::UI_EXTENSION_ABILITY && pattern->IsCompatibleOldVersion()) {
                 pattern->FireOnReleaseCallback(static_cast<int32_t>(isAbnormal));
                 return;
             }
