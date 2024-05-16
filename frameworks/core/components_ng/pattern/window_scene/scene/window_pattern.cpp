@@ -132,7 +132,7 @@ void WindowPattern::OnAttachToFrameNode()
         (session_->GetScenePersistence()->IsSnapshotExisted() ||
         session_->GetScenePersistence()->IsSavingSnapshot())) {
         CreateSnapshotNode();
-        AddChild(host, snapshotNode_, snapshotNodeName_);
+        AddChild(host, snapshotNode_, snapshotNodeName_, 0);
         return;
     }
 
