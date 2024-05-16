@@ -52,6 +52,7 @@ public:
     }
 
 private:
+    void PaintCustomSpan(DrawingContext& drawingContext);
     const ParagraphManager* pManager_;
     WeakPtr<OHOS::Ace::NG::Pattern> pattern_;
     RefPtr<PropertyFloat> richTextRectX_;
