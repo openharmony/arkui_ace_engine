@@ -48,6 +48,11 @@ void TextClockModelNG::SetFormat(const std::string& format)
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format);
 }
 
+void TextClockModelNG::IsDefaultFormat(bool isDefaultFormat)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, IsDefaultFormat, isDefaultFormat);
+}
+
 void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, value);

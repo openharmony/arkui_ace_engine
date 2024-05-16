@@ -240,6 +240,7 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     if (!info[0]->IsString()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
+            TextClockModel::GetInstance()->IsDefaultFormat(true);
         } else {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
         }
@@ -250,6 +251,7 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (format.length() == 0) {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
+            TextClockModel::GetInstance()->IsDefaultFormat(true);
             return;
         }
     } else {
