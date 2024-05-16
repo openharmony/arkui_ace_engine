@@ -2140,6 +2140,10 @@ struct ArkUITabsModifier {
 struct ArkUIStepperItemModifier {
     void (*setNextLabel)(ArkUINodeHandle node, ArkUI_CharPtr rightLabel);
     void (*resetNextLabel)(ArkUINodeHandle node);
+    void (*setPrevLabel)(ArkUINodeHandle node, ArkUI_CharPtr rightLabel);
+    void (*resetPrevLabel)(ArkUINodeHandle node);
+    void (*setStatus)(ArkUINodeHandle node, ArkUI_CharPtr labelStatus);
+    void (*resetStatus)(ArkUINodeHandle node);
 };
 
 struct ArkUITabContentModifier {

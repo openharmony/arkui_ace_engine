@@ -3075,6 +3075,14 @@ void ArkUINativeModule::RegisterStepperItemAttributes(Local<panda::ObjectRef> ob
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::SetNextLabel));
     stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNextLabel"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::ResetNextLabel));
+    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPrevLabel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::SetPrevLabel));
+    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPrevLabel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::ResetPrevLabel));
+    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStatus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::SetStatus));
+    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStatus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::ResetStatus));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stepperItem"), stepperItem);
 }
 
