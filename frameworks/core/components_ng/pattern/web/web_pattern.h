@@ -723,6 +723,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
+    double GetNewScale(double& scale);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -826,6 +827,11 @@ private:
     std::unordered_map<int32_t, bool> naitve_map_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
     bool embedNeedKeyboard_ = false;
+    double startPinchScale_ = -1.0;
+    double preScale_ = -1.0;
+    double pageScale_ = 1.0;
+    int32_t pinchIndex_ = 0;
+    bool zoomOutSwitch_ = false;
 };
 } // namespace OHOS::Ace::NG
 

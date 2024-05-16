@@ -184,7 +184,11 @@ constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
 const std::vector<std::string> SYNC_RENDER_SLIDE {V2::LIST_ETS_TAG, V2::SCROLL_ETS_TAG};
 
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
-constexpr double DEFAULT_PINCH_DISTANCE = 1.0;
+constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
+constexpr double DEFAULT_PINCH_SCALE = 1.0;
+constexpr double DEFAULT_PINCH_SCALE_MAX = 5.0;
+constexpr double DEFAULT_PINCH_SCALE_MIN = 0.32;
+constexpr int32_t PINCH_INDEX_ONE = 1;
 
 WebPattern::WebPattern() = default;
 
@@ -423,7 +427,17 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
     if (pinchGesture_) {
         return;
     }
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->startPinchScale_ = event.GetScale();
+        pattern->preScale_ = event.GetScale();
+        pattern->pinchIndex_ = 0;
+        pattern->zoomOutSwitch_ = false;
+        TAG_LOGI(AceLogTag::ACE_WEB, "InitPinchEvent StartScale: %{public}lf", pattern->startPinchScale_);
+
+        return;
+    };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         ACE_SCOPED_TRACE("WebPattern::InitPinchEvent actionUpdateTask");
         auto pattern = weak.Upgrade();
@@ -446,13 +460,85 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
 {
     CHECK_NULL_VOID(delegate_);
 
-    double scale = event.GetScale();
-    double centerX =  event.GetPinchCenter().GetX();
-    double centerY =  event.GetPinchCenter().GetY();
-    TAG_LOGI(AceLogTag::ACE_WEB,
-        "HandleScaleGestureChange scale: %{public}lf centerX: %{public}lf centerY: %{public}lf",
-        scale, centerX, centerY);
-    delegate_->ScaleGestureChange(scale, centerX, centerY);
+    double curScale = event.GetScale();
+    if (std::fabs(curScale - preScale_) <= std::numeric_limits<double>::epsilon()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "HandleScaleGestureChange curScale == preScale");
+        return;
+    }
+
+    pinchIndex_++;
+
+    double scale = 0.0;
+    // zoom out
+    if (curScale - preScale_ >= 0) {
+        if (preScale_ >= DEFAULT_PINCH_SCALE) {
+            scale = curScale;
+            // Prevent shaking in index 1
+            if (pinchIndex_ == PINCH_INDEX_ONE) {
+                pageScale_ = scale;
+            }
+        } else {
+            // The scale is from 0.4 to 0.5, and for Chrome, the scale conversion should be from 1.0 to 1.1
+            if (pageScale_ < DEFAULT_PINCH_SCALE) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange Switch from zoomin to zoomout.");
+                // must be chrome page scale form 0.4 to 1
+                scale = DEFAULT_PINCH_SCALE;
+                // reset
+                startPinchScale_ = preScale_;
+                pageScale_ = scale;
+                zoomOutSwitch_ = true;
+            } else {
+                scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
+                zoomOutSwitch_ = false;
+            }
+        }
+        // zoom in
+    } else {
+        // When zooming in from a scale less than 1,
+        // the current scale must be greater than the previous scale value
+        if (zoomOutSwitch_) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange the current scale must be greater "
+                                         "than the previous scale value, ignore data.");
+            return;
+        }
+        scale = curScale;
+    }
+
+    double newScale = GetNewScale(scale);
+
+    double centerX = event.GetPinchCenter().GetX();
+    double centerY = event.GetPinchCenter().GetY();
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "HandleScaleGestureChange curScale:%{public}lf pageScale: %{public}lf newScale: %{public}lf centerX: "
+        "%{public}lf centerY: %{public}lf",
+        curScale, scale, newScale, centerX, centerY);
+    delegate_->ScaleGestureChange(newScale, centerX, centerY);
+
+    preScale_ = curScale;
+    pageScale_ = scale;
+}
+
+double WebPattern::GetNewScale(double& scale)
+{
+    double newScale = 0.0;
+    if (scale >= DEFAULT_PINCH_SCALE) {
+        // In order to achieve a sequence similar to scale, eg. 1.1, 1.2, 1.3
+        newScale = scale / pageScale_;
+        // scale max
+        if (newScale > DEFAULT_PINCH_SCALE_MAX) {
+            newScale = DEFAULT_PINCH_SCALE_MAX;
+            scale = DEFAULT_PINCH_SCALE_MAX;
+        }
+    } else {
+        newScale = scale;
+        // scale min
+        if (newScale < DEFAULT_PINCH_SCALE_MIN) {
+            newScale = DEFAULT_PINCH_SCALE_MIN;
+            scale = DEFAULT_PINCH_SCALE_MIN;
+        }
+    }
+
+    return newScale;
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
