@@ -73,7 +73,10 @@ bool HoursWestIsValid(int32_t hoursWest)
 
 float GetHoursWest(float hoursWest)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    RefPtr<Container> container = Container::Current();
+    CHECK_NULL_RETURN(container, int32_t(hoursWest));
+    auto apiTargetVersion = container->GetApiTargetVersion();
+    if (apiTargetVersion >= static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN)) {
         for (float i : HOURS_WEST) {
             if (NearEqual(hoursWest, i)) {
                 return hoursWest;
