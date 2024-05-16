@@ -461,6 +461,7 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         }
     }
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
+    dumpInfo_.wrapperRect = wrapperRect_;
 }
 
 void MenuLayoutAlgorithm::InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
