@@ -1115,6 +1115,35 @@ abstract class ViewPU extends PUV2ViewBase
     return retVaL;
   }
 
+
+
+  /**
+    * onDumpInspetor is invoked by native side to create Inspector tree including state variables
+    * @returns dump info
+    */
+  protected onDumpInspetor(): string {
+    let res: DumpInfo = new DumpInfo();
+    res.viewInfo = { componentName: this.constructor.name, id: this.id__() };
+    Object.getOwnPropertyNames(this)
+      .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
+      .forEach((varName) => {
+        const prop: any = Reflect.get(this, varName);
+        if ('debugInfoDecorator' in prop) {
+          const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
+          let observedPropertyInfo: ObservedPropertyInfo = {
+            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+            value: typeof observedProp.getUnmonitored() !== 'object' ? observedProp.getUnmonitored() : ObservedObject.GetRawObject(observedProp.getUnmonitored()),
+            dependentElementIds: observedProp.debugInfoDependentElmtIds(),
+            owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
+          };
+          res.observedPropertiesInfo.push(observedPropertyInfo);
+        }
+      });
+    return JSON.stringify(res);
+  }
+
+
+
   /**
    * on first render create a new Instance of Repeat
    * on re-render connect to existing instance

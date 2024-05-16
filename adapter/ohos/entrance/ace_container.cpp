@@ -25,7 +25,6 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "auto_fill_manager.h"
-#include "base/json/json_util.h"
 #include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
@@ -43,6 +42,7 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/i18n/localization.h"
+#include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -59,6 +59,7 @@
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_application_info.h"
@@ -1749,6 +1750,19 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
 
     aceView_->Launch();
 
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    if (declarativeFrontend) {
+        auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(declarativeFrontend->GetJsEngine());
+        if (jsEngine) {
+            // register state profiler callback
+            jsEngine->JsStateProfilerResgiter();
+        }
+    }
+
     if (!isSubContainer_) {
         // Only MainWindow instance in FA model will be registered to watch dog.
         if (!GetSettings().usingSharedRuntime && !AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint()) {
@@ -1756,11 +1770,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
         }
         frontend_->AttachPipelineContext(pipelineContext_);
     } else {
-#ifdef NG_BUILD
-        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
-#else
-        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-#endif
         if (declarativeFrontend) {
             declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
         }

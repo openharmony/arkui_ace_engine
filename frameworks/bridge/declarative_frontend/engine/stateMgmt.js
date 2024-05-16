@@ -2944,6 +2944,33 @@ class Utils {
     }
 }
 /*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class stateMgmtDFX {
+}
+// enable profile
+stateMgmtDFX.enableProfiler_ = false;
+function setProfilerStatus(profilerStatus) {
+    stateMgmtConsole.warn(`${profilerStatus ? `start` : `stop`} stateMgmt Profiler`);
+    stateMgmtDFX.enableProfiler_ = profilerStatus;
+}
+class DumpInfo {
+    constructor() {
+        this.observedPropertiesInfo = [];
+    }
+}
+/*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -4496,6 +4523,39 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             ? this.info().substring(0, this.info().length - '_prop_fake_state_source___'.length)
             : false;
     }
+    dumpSyncPeers() {
+        let res = [];
+        this.subscriberRefs_.forEach((subscriber) => {
+            var _a, _b;
+            if ('debugInfo' in subscriber) {
+                const observedProp = subscriber;
+                let syncPeer = {
+                    decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+                    value: typeof observedProp.getUnmonitored() !== 'object' ? observedProp.getUnmonitored() : ObservedObject.GetRawObject(observedProp.getUnmonitored()),
+                    dependentElementIds: observedProp.debugInfoDependentElmtIds(),
+                    owningView: { componentName: (_a = observedProp.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = observedProp.owningView_) === null || _b === void 0 ? void 0 : _b.id__() }
+                };
+                res.push(syncPeer);
+            }
+        });
+        return res;
+    }
+    onDumpProfiler() {
+        var _a, _b, _c, _d;
+        let res = new DumpInfo();
+        let observedPropertyInfo = {
+            decorator: this.debugInfoDecorator(), propertyName: this.info(), id: this.id__(),
+            value: typeof this.getUnmonitored() !== 'object' ? this.getUnmonitored() : ObservedObject.GetRawObject(this.getUnmonitored()),
+            dependentElementIds: this.debugInfoDependentElmtIds(),
+            owningView: { componentName: (_a = this.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = this.owningView_) === null || _b === void 0 ? void 0 : _b.id__() },
+            syncPeers: this.dumpSyncPeers()
+        };
+        res.viewInfo = { componentName: (_c = this.owningView_) === null || _c === void 0 ? void 0 : _c.constructor.name, id: (_d = this.owningView_) === null || _d === void 0 ? void 0 : _d.id__() };
+        res.observedPropertiesInfo.push(observedPropertyInfo);
+        if (this.owningView_) {
+            this.owningView_.sendStateInfo(JSON.stringify(res));
+        }
+    }
     /*
       Virtualized version of the subscription mechanism - add subscriber
       Overrides implementation in ObservedPropertyAbstract<T>
@@ -4567,6 +4627,12 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
                 // send viewPropertyHasChanged right away
                 this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
+                // send changed observed property to profiler
+                // only will be true when enable profiler
+                if (stateMgmtDFX.enableProfiler_) {
+                    stateMgmtConsole.warn(`notifyPropertyHasChangedPU in profiler mode`);
+                    this.onDumpProfiler();
+                }
             }
             else {
                 // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
@@ -4593,6 +4659,12 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
                 // send viewPropertyHasChanged right away
                 this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
+                // send changed observed property to profiler
+                // only will be true when enable profiler
+                if (stateMgmtDFX.enableProfiler_) {
+                    stateMgmtConsole.warn(`notifyPropertyHasChangedPU in profiler mode`);
+                    this.onDumpProfiler();
+                }
             }
             else {
                 // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
@@ -5651,9 +5723,6 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
         // unregister from the ObservedObject
         ObservedObject.removeOwningProperty(this.obsObject_, this);
         super.aboutToBeDeleted();
-    }
-    debugInfoDecorator() {
-        return `@ObjectLink (class SynchedPropertyNestedObjectPU)`;
     }
     getUnmonitored() {
         
@@ -6843,6 +6912,30 @@ class ViewPU extends PUV2ViewBase {
             retVaL += `\nTotal: ${counter.total}`;
         }
         return retVaL;
+    }
+    /**
+      * onDumpInspetor is invoked by native side to create Inspector tree including state variables
+      * @returns dump info
+      */
+    onDumpInspetor() {
+        let res = new DumpInfo();
+        res.viewInfo = { componentName: this.constructor.name, id: this.id__() };
+        Object.getOwnPropertyNames(this)
+            .filter((varName) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
+            .forEach((varName) => {
+            const prop = Reflect.get(this, varName);
+            if ('debugInfoDecorator' in prop) {
+                const observedProp = prop;
+                let observedPropertyInfo = {
+                    decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+                    value: typeof observedProp.getUnmonitored() !== 'object' ? observedProp.getUnmonitored() : ObservedObject.GetRawObject(observedProp.getUnmonitored()),
+                    dependentElementIds: observedProp.debugInfoDependentElmtIds(),
+                    owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
+                };
+                res.observedPropertiesInfo.push(observedPropertyInfo);
+            }
+        });
+        return JSON.stringify(res);
     }
 } // class ViewPU
 /*
