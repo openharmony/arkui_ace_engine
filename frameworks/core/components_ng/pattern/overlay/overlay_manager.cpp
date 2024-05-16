@@ -480,16 +480,14 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     option = dialogPattern->GetCloseAnimation().value_or(option);
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
-    option.SetOnFinishEvent([weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), id = Container::CurrentId()] {
-        ContainerScope scope(id);
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->PostDialogFinishEvent(nodeWk);
-        auto node = nodeWk.Upgrade();
-        CHECK_NULL_VOID(node);
-        auto dialogPattern = node->GetPattern<DialogPattern>();
-        dialogPattern->CallDialogDidDisappearCallback();
-    });
+    option.SetOnFinishEvent(
+        [weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), dialogPattern, id = Container::CurrentId()] {
+            ContainerScope scope(id);
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->PostDialogFinishEvent(nodeWk);
+            dialogPattern->CallDialogDidDisappearCallback();
+        });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     option.SetFinishCallbackType(dialogPattern->GetOpenAnimation().has_value()
