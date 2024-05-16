@@ -1255,7 +1255,7 @@ void ResetTextInputTextOverflow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
+    TextFieldModelNG::SetTextOverflow(frameNode, TextOverflow::DEFAULT);
 }
 
 void SetTextInputTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
