@@ -22,7 +22,6 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -68,11 +67,12 @@ void GridTestNg::TearDown()
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
+    ClearOldNodes();  // Each testcase will create new list at begin
 }
 
-void GridTestNg::GetInstance()
+void GridTestNg::GetGrid()
 {
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<GridPattern>();
     eventHub_ = frameNode_->GetEventHub<GridEventHub>();
@@ -80,63 +80,80 @@ void GridTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<GridAccessibilityProperty>();
 }
 
-void GridTestNg::Create(const std::function<void(GridModelNG)>& callback)
+GridModelNG GridTestNg::CreateGrid()
 {
+    ResetElmtId();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     GridModelNG model;
     RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
     RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
     model.Create(positionController, scrollBarProxy);
     ViewAbstract::SetWidth(CalcLength(GRID_WIDTH));
     ViewAbstract::SetHeight(CalcLength(GRID_HEIGHT));
-    if (callback) {
-        callback(model);
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    GetGrid();
+    return model;
 }
 
-void GridTestNg::CreateItem(int32_t itemNumber, float width, float height, GridItemStyle gridItemStyle)
+GridItemModelNG GridTestNg::CreateGridItem(float width, float height, GridItemStyle gridItemStyle)
+{
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    GridItemModelNG itemModel;
+    itemModel.Create(gridItemStyle);
+    if (width == FILL_VALUE) {
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    } else if (width != NULL_VALUE) {
+        ViewAbstract::SetWidth(CalcLength(width));
+    }
+    if (height == FILL_VALUE) {
+        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+    } else if (height != NULL_VALUE) {
+        ViewAbstract::SetHeight(CalcLength(height));
+    }
+    return itemModel;
+}
+
+void GridTestNg::CreateGridItems(int32_t itemNumber, float width, float height, GridItemStyle gridItemStyle)
 {
     for (int32_t i = 0; i < itemNumber; i++) {
-        GridItemModelNG itemModel;
-        itemModel.Create(gridItemStyle);
-        if (width == -2) {
-            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        } else if (width != NULL_VALUE) {
-            ViewAbstract::SetWidth(CalcLength(width));
-        }
-        if (height == -2) {
-            ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
-        } else if (height != NULL_VALUE) {
-            ViewAbstract::SetHeight(CalcLength(height));
-        }
+        CreateGridItem(width, height, gridItemStyle);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+void GridTestNg::CreateFocusableGridItems(int32_t itemNumber, float width, float height, GridItemStyle gridItemStyle)
+{
+    for (int32_t i = 0; i < itemNumber; i++) {
+        CreateGridItem(width, height, gridItemStyle);
         {
             ButtonModelNG buttonModelNG;
             buttonModelNG.CreateWithLabel("label");
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
 
-void GridTestNg::CreateFixedItem(int32_t itemNumber, GridItemStyle gridItemStyle)
+void GridTestNg::CreateFixedItems(int32_t itemNumber, GridItemStyle gridItemStyle)
 {
-    CreateItem(itemNumber, ITEM_WIDTH, ITEM_HEIGHT, gridItemStyle);
+    CreateGridItems(itemNumber, ITEM_WIDTH, ITEM_HEIGHT, gridItemStyle);
 }
 
 void GridTestNg::CreateFixedHeightItems(int32_t itemNumber, float height, GridItemStyle gridItemStyle)
 {
-    CreateItem(itemNumber, -2, height, gridItemStyle);
+    CreateGridItems(itemNumber, FILL_VALUE, height, gridItemStyle);
 }
 
 void GridTestNg::CreateFixedWidthItems(int32_t itemNumber, float width, GridItemStyle gridItemStyle)
 {
-    CreateItem(itemNumber, width, -2, gridItemStyle);
+    CreateGridItems(itemNumber, width, FILL_VALUE, gridItemStyle);
 }
 
 void GridTestNg::CreateBigItem(
     int32_t rowStart, int32_t rowEnd, int32_t colStart, int32_t colEnd, float width, float height)
 {
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     GridItemModelNG itemModel;
     itemModel.Create(GridItemStyle::NONE);
     if (rowStart != NULL_VALUE) {
@@ -158,6 +175,7 @@ void GridTestNg::CreateBigItem(
         ViewAbstract::SetHeight(CalcLength(height));
     }
     ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 }
 
 void GridTestNg::CreateBigColItem(int32_t colStart, int32_t colEnd)

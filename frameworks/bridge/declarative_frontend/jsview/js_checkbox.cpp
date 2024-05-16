@@ -92,9 +92,7 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
         }
     }
     CheckBoxModel::GetInstance()->Create(checkboxName, checkboxGroup, V2::CHECK_BOX_ETS_TAG);
-    if (customBuilderFunc.has_value()) {
-        CheckBoxModel::GetInstance()->SetBuilder(customBuilderFunc);
-    }
+    CheckBoxModel::GetInstance()->SetBuilder(customBuilderFunc);
 
     JSCheckBoxTheme::ApplyTheme();
 }

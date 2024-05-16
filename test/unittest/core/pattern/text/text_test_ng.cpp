@@ -5318,6 +5318,62 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextLayoutAlgorithmTest010
+ * @tc.desc: test text_layout_algorithm.cpp: call GetTextDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlgorithmTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textLayoutProperty);
+    /**
+     * @tc.steps: step2. create textLayoutAlgorithm and call GetTextDirection function.TextDirection::AUTO
+     * @tc.expected: The direction of the return value of GetTextDirection is not equal to TextDirection::RTL
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto direction = textLayoutAlgorithm->GetTextDirection("", AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_NE(direction, TextDirection::RTL);
+}
+
+/**
+ * @tc.name: TextLayoutAlgorithmTest011
+ * @tc.desc: test text_layout_algorithm.cpp: call GetTextDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlgorithmTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textLayoutProperty);
+    /* *
+     * @tc.steps: step2. create textLayoutAlgorithm and call GetTextDirection function.TextDirection::AUTO and set
+     * isRightToLeft_ true
+     * @tc.expected: The direction of the return value of GetTextDirection is not equal to TextDirection::RTL
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto direction = textLayoutAlgorithm->GetTextDirection("", AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(direction, TextDirection::RTL);
+}
+
+/**
  * @tc.name: HandleClickAISpanEvent
  * @tc.desc: test test_pattern.h HandleClickAISpanEvent function with valid textSelector
  * @tc.type: FUNC

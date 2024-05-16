@@ -38,6 +38,7 @@ const std::string FONTWEIGHT = "wght";
 constexpr float DEFAULT_MULTIPLE = 100.0f;
 constexpr uint32_t SCALE_EFFECT = 2;
 constexpr uint32_t NONE_EFFECT = 0;
+constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.2f;
 } // namespace
 
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -732,7 +733,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
             lineSpacingScale = lineSpacing / fontSize;
         } else {
             lineSpacingScale = 1;
-            if (NearZero(lineSpacing) || NearEqual(lineSpacing, fontSize)) {
+            if (NearZero(lineSpacing)) {
                 lineSpacingOnly = false;
             }
         }
@@ -744,7 +745,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     } else if (lineHeightOnly && !lineSpacingOnly) {
         txtStyle.heightScale = lineHeightScale;
     } else if (!lineHeightOnly && lineSpacingOnly) {
-        txtStyle.heightScale = 1 + lineSpacingScale;
+        txtStyle.heightScale = ORIGINAL_LINE_HEIGHT_SCALE + lineSpacingScale;
     } else {
         txtStyle.heightScale = 1;
     }

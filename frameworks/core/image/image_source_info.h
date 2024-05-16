@@ -116,6 +116,8 @@ public:
         return localColorMode_;
     }
 
+    const std::string GetColorModeToString();
+
 private:
     SrcType ResolveSrcType() const;
     void GenerateCacheKey();

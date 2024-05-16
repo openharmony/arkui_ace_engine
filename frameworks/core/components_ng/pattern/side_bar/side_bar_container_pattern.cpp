@@ -983,10 +983,15 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
 
 void SideBarContainerPattern::HandleDragStart()
 {
-    if (sideBarStatus_ != SideBarStatus::SHOW) {
+    if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
         return;
     }
-
+    isInDividerDrag_ = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::RESIZE_LEFT_RIGHT);
     preSidebarWidth_ = realSideBarWidth_;
 }
 
@@ -1053,10 +1058,15 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 
 void SideBarContainerPattern::HandleDragEnd()
 {
-    if (sideBarStatus_ != SideBarStatus::SHOW) {
+    if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
         return;
     }
-
+    isInDividerDrag_ = false;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::DEFAULT);
     preSidebarWidth_ = realSideBarWidth_;
 }
 
@@ -1077,6 +1087,9 @@ void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>&
 
 void SideBarContainerPattern::OnHover(bool isHover)
 {
+    if (isInDividerDrag_) {
+        return;
+    }
     TAG_LOGD(AceLogTag::ACE_SIDEBAR, "sideBarContainer onHover");
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1084,8 +1097,10 @@ void SideBarContainerPattern::OnHover(bool isHover)
     auto minSideBarWidth = layoutProperty->GetMinSideBarWidthValue(DEFAULT_MIN_SIDE_BAR_WIDTH);
     auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidthValue(DEFAULT_MAX_SIDE_BAR_WIDTH);
     if (Negative(dividerStrokeWidth.Value()) || GreatOrEqual(minSideBarWidth.Value(), maxSideBarWidth.Value())) {
+        isDividerDraggable_ = false;
         return;
     }
+    isDividerDraggable_ = true;
 
     MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
     auto pipeline = PipelineContext::GetCurrentContext();

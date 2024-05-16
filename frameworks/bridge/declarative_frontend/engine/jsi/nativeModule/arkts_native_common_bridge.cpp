@@ -6427,4 +6427,21 @@ ArkUINativeModuleValue CommonBridge::GetWindowName(ArkUIRuntimeCallInfo* runtime
     std::string windowName = context->GetWindow()->GetWindowName();
     return panda::StringRef::NewFromUtf8(vm, windowName.c_str());
 }
+
+ArkUINativeModuleValue CommonBridge::SetSystemBarEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> enableArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (enableArg->IsBoolean()) {
+        auto enable = enableArg->ToBoolean(vm);
+        GetArkUINodeModifiers()->getCommonModifier()->setSystemBarEffect(nativeNode, enable->Value());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
 } // namespace OHOS::Ace::NG

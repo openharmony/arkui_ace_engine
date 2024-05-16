@@ -5285,6 +5285,13 @@ void ResetLayoutRect(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     ViewAbstract::ResetLayoutRect(frameNode);
 }
+
+void SetSystemBarEffect(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetSystemBarEffect(frameNode, enable);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -5353,7 +5360,7 @@ const ArkUICommonModifier* GetCommonModifier()
         SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
         SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
         ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap, SetLayoutRect, GetLayoutRect,
-        ResetLayoutRect, GetFocusOnTouch };
+        ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect };
 
     return &modifier;
 }

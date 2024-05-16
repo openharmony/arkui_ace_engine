@@ -421,7 +421,7 @@ public:
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
-    void HandleDraggableFlag(GestureEvent& info, bool& isInterceptEvent);
+    void HandleDraggableFlag(bool isInterceptEvent);
     bool JudgeContentDraggable();
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     OffsetF CalculateEmptyValueCaretRect();

@@ -421,7 +421,7 @@ void TextModelNG::InitText(FrameNode* frameNode, std::string& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
 }
 
-void TextModelNG::InitTextController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase)
+void TextModelNG::InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase)
 {
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>(frameNode);
     CHECK_NULL_VOID(textPattern);
@@ -431,6 +431,13 @@ void TextModelNG::InitTextController(FrameNode* frameNode, const RefPtr<SpanStri
         textPattern->SetSpanItemChildren(spans);
         textPattern->SetSpanStringMode(true);
     }
+}
+
+RefPtr<TextControllerBase> TextModelNG::InitTextController(FrameNode* frameNode)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>(frameNode);
+    CHECK_NULL_RETURN(textPattern, nullptr);
+    return textPattern->GetTextController();
 }
 
 void TextModelNG::SetTextCase(FrameNode* frameNode, Ace::TextCase value)

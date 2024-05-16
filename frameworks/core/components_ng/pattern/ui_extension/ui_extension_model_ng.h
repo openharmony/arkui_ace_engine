@@ -54,6 +54,8 @@ public:
     void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive) override;
     void SetOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError) override;
+    void SetPlatformOnError(std::function<void(
+        int32_t code, const std::string& name, const std::string& message)>&& onError) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_NG_H

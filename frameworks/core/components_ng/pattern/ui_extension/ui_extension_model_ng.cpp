@@ -202,4 +202,14 @@ void UIExtensionModelNG::SetOnError(
     CHECK_NULL_VOID(pattern);
     pattern->SetOnErrorCallback(std::move(onError));
 }
+
+void UIExtensionModelNG::SetPlatformOnError(
+    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnErrorCallback(std::move(onError));
+}
 } // namespace OHOS::Ace::NG

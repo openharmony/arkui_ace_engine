@@ -1414,6 +1414,7 @@ struct ArkUICommonModifier {
     void (*getLayoutRect)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*resetLayoutRect)(ArkUINodeHandle node);
     ArkUI_Bool (*getFocusOnTouch)(ArkUINodeHandle node);
+    void (*setSystemBarEffect)(ArkUINodeHandle node, ArkUI_Bool enable);
 };
 
 struct ArkUICommonShapeModifier {
@@ -2823,6 +2824,8 @@ struct ArkUIWaterFlowModifier {
     void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment);
     void (*setWaterflowFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
     void (*resetWaterflowFooter)(ArkUINodeHandle node);
+    void (*setWaterFlowFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
+    void (*resetWaterFlowFlingSpeedLimit)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {
