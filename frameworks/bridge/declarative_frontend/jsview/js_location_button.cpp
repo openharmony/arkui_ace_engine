@@ -103,12 +103,8 @@ void JsLocationButtonClickFunction::Execute(GestureEvent& info)
         static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     clickEventParam->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     clickEventParam->SetProperty<double>("pressure", info.GetForce());
-    if (info.GetTiltX().has_value()) {
-        clickEventParam->SetProperty<double>("tiltX", info.GetTiltX().value());
-    }
-    if (info.GetTiltY().has_value()) {
-        clickEventParam->SetProperty<double>("tiltY", info.GetTiltY().value());
-    }
+    clickEventParam->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
+    clickEventParam->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     clickEventParam->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     clickEventParam->SetPropertyObject("target", target);
