@@ -132,7 +132,7 @@ void WindowPattern::OnAttachToFrameNode()
         (session_->GetScenePersistence()->IsSnapshotExisted() ||
         session_->GetScenePersistence()->IsSavingSnapshot())) {
         CreateSnapshotNode();
-        AddChild(host, snapshotNode_, snapshotNodeName_, 0);
+        AddChild(host, snapshotNode_, snapshotNodeName_);
         return;
     }
 
@@ -142,7 +142,7 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
-    AddChild(host, contentNode_, contentNodeName_);
+    AddChild(host, contentNode_, contentNodeName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode && !surfaceNode->IsBufferAvailable()) {
         CreateStartingNode();
