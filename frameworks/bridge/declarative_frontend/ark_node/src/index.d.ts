@@ -62,6 +62,9 @@ declare abstract class ViewPU {
   id__(): number;
   aboutToUpdate?: (updateParams: Object) => void;
   updateStateVars(params: {}): void;
+  aboutToReuseInternal(param?: Object): void;
+  aboutToRecycleInternal(): void;
+  updateDirtyElements(): void;
 }
 
 /**
