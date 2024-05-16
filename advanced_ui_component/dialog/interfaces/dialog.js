@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -92,6 +92,7 @@ export class TipsDialog extends ViewPU {
         this.setInitiallyProvidedValue(g21);
         this.finalizeConstruction();
     }
+
     setInitiallyProvidedValue(e21) {
         if (e21.controller !== undefined) {
             this.controller = e21.controller;
@@ -239,7 +240,7 @@ export class TipsDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, p20, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 85, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 84, col: 5 });
                     ViewPU.create(r20);
                     let s20 = () => {
                         return {
@@ -634,7 +635,7 @@ export class SelectDialog extends ViewPU {
                     },
                     buttons: this.buttons,
                 }, undefined, -1, () => {
-                }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 289, col: 14 });
+                }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 288, col: 14 });
                 f17.setController(this.controller);
                 ViewPU.create(f17);
                 let g17 = () => {
@@ -984,7 +985,7 @@ export class SelectDialog extends ViewPU {
                         contentAreaPadding: this.contentPadding,
                         theme: this.theme,
                     }, undefined, y13, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 384, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 383, col: 5 });
                     ViewPU.create(a14);
                     let b14 = () => {
                         return {
@@ -1637,7 +1638,7 @@ export class AlertDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, y9, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 606, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 605, col: 5 });
                     ViewPU.create(a10);
                     let b10 = () => {
                         return {
@@ -1852,7 +1853,7 @@ export class CustomContentDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, o8, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 710, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 709, col: 5 });
                     ViewPU.create(q8);
                     let r8 = () => {
                         return {
@@ -2799,11 +2800,8 @@ export class CustomDialogComponent extends ViewPU {
                 if (!this.isFirstInit) {
                     return;
                 }
-                if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
-                    this.columnModifier.customStyle = s2.width > getNumberByResource('alert_container_max_width');
-                } else {
-                    this.columnModifier.customStyle = s2.width >= this.screenWidth;
-                }
+                this.dialogWidth = s2.width;
+                this.updateCustomStyle();
                 this.isFirstInit = false;
             });
         }, Column);
@@ -2825,7 +2823,7 @@ export class CustomDialogComponent extends ViewPU {
                         contentAreaPadding: this.contentAreaPadding,
                         theme: this.theme,
                     }, undefined, g2, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 1136, col: 9 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 1135, col: 9 });
                     ViewPU.create(i2);
                     let j2 = () => {
                         return {
@@ -2867,7 +2865,6 @@ export class CustomDialogComponent extends ViewPU {
             let y1 = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
             bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
             bundleManager.getBundleInfoForSelf(y1).then((c2) => {
-                console.info('testTag', 'getBundleInfoForSelf successful. Data: %{public}s', JSON.stringify(c2));
                 this.targetSdk = c2.targetVersion;
                 this.updateCustomStyle();
             }).catch((b2) => {
@@ -3079,7 +3076,7 @@ export class LoadingDialog extends ViewPU {
                         },
                         theme: this.theme,
                     }, undefined, p, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 1293, col: 7 });
+                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 1287, col: 7 });
                     ViewPU.create(r);
                     let s = () => {
                         return {

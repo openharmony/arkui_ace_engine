@@ -21,7 +21,6 @@ import measure from '@ohos.measure';
 import resourceManager from '@ohos.resourceManager';
 import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
 import bundleManager from '@ohos.bundle.bundleManager';
-import { generateBarcode } from '@kit.ScanKit';
 
 class CustomThemeImpl implements CustomTheme {
   public colors?: CustomColors;
@@ -1151,11 +1150,8 @@ export struct CustomDialogComponent {
       if (!this.isFirstInit) {
         return;
       }
-      if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
-        this.columnModifier.customStyle = newValue.width > getNumberByResource('alert_container_max_width');
-      } else {
-        this.columnModifier.customStyle = newValue.width >= this.screenWidth;
-      }
+      this.dialogWidth = newValue.width;
+      this.updateCustomStyle();
       this.isFirstInit = false;
     })
   }
@@ -1177,7 +1173,6 @@ export struct CustomDialogComponent {
       let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
       bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
       bundleManager.getBundleInfoForSelf(bundleFlags).then((data) => {
-        console.info('testTag', 'getBundleInfoForSelf successful. Data: %{public}s', JSON.stringify(data));
         this.targetSdk = data.targetVersion;
         this.updateCustomStyle();
       }).catch((err: BusinessError) => {
@@ -1185,8 +1180,7 @@ export struct CustomDialogComponent {
       });
     } catch (error) {
       hilog.error(0x3900, 'Ace', `CustomDialogComponent getDefaultDisplaySync error: ${JSON.stringify(error)}`);
-    }
-    ;
+    };
   }
 }
 
