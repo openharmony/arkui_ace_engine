@@ -1958,6 +1958,7 @@ void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState st
 
 void ScrollablePattern::OnScrollStartRecursive(float position, float velocity)
 {
+    SetIsNestedInterrupt(false);
     HandleScrollImpl(position, SCROLL_FROM_START);
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
@@ -1971,9 +1972,10 @@ void ScrollablePattern::OnScrollEndRecursive(const std::optional<float>& velocit
     OnScrollEnd();
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
-    if (parent && nestedScroll.NeedParent()) {
+    if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(velocity);
     }
+    SetIsNestedInterrupt(false);
 }
 
 float ScrollablePattern::GetVelocity() const

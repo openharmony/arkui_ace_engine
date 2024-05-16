@@ -3542,6 +3542,7 @@ void WebPattern::OnScrollStartRecursive(float position, float velocity)
 void WebPattern::OnScrollStartRecursive(std::vector<float> positions)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStartRecursive");
+    SetIsNestedInterrupt(false);
     auto it = positions.begin();
     for (auto parentMap : parentsMap_) {
         auto parent = parentMap.second.Upgrade();
@@ -3575,6 +3576,7 @@ void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
         }
     }
     isScrollStarted_ = false;
+    SetIsNestedInterrupt(false);
 }
 
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
