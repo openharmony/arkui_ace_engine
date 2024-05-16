@@ -790,7 +790,9 @@ public:
     void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler)
     {
         extensionHandler_ = handler;
-        extensionHandler_->AttachFrameNode(this);
+        if (extensionHandler_) {
+            extensionHandler_->AttachFrameNode(this);
+        }
     }
 
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);

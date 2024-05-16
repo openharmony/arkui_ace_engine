@@ -14,10 +14,10 @@
  */
 
 class ArkThemeScopeItem {
-    elmtId: number
-    owner: number
-    name: string
-    isInWhiteList?: boolean = undefined
+    elmtId: number;
+    owner: number;
+    name: string;
+    isInWhiteList?: boolean = undefined;
 }
 
 class ArkThemeScopeArray extends Array<ArkThemeScopeItem> {
@@ -46,32 +46,32 @@ class ArkThemeScope {
     /**
      * elmtId of the CustomComponent which defines WithTheme container
      */
-    private ownerComponentId: number
+    private ownerComponentId: number;
 
     /**
      * elmtId of the WithTheme container that defines theme scope
      */
-    private withThemeId: number
+    private withThemeId: number;
 
     /**
      * WithTheme container options
      */
-    private withThemeOptions: WithThemeOptions
+    private withThemeOptions: WithThemeOptions;
 
     /**
      * Previous scope color mode before option change
      */
-    private prevColorMode: ThemeColorMode
+    private prevColorMode: ThemeColorMode;
 
     /**
      * elmtIds of the components that are in this theme scope
      */
-    private components: ArkThemeScopeArray
+    private components: ArkThemeScopeArray;
 
     /**
      * Theme instance associated with this Theme Scope
      */
-    private theme: ThemeInternal
+    private theme: ThemeInternal;
 
     /**
      * Initialize Theme Scope
@@ -82,11 +82,11 @@ class ArkThemeScope {
      * @param theme Theme instance associated with this Theme Scope
      */
     constructor(ownerComponentId: number, withThemeId: number, withThemeOptions: WithThemeOptions, theme: ThemeInternal) {
-        this.ownerComponentId = ownerComponentId
-        this.withThemeId = withThemeId
-        this.withThemeOptions = withThemeOptions
-        this.theme = theme
-        this.prevColorMode = this.colorMode()
+        this.ownerComponentId = ownerComponentId;
+        this.withThemeId = withThemeId;
+        this.withThemeOptions = withThemeOptions;
+        this.theme = theme;
+        this.prevColorMode = this.colorMode();
     }
 
     /**
@@ -95,7 +95,7 @@ class ArkThemeScope {
      * @returns elmtId as number
      */
     getOwnerComponentId(): number {
-        return this.ownerComponentId
+        return this.ownerComponentId;
     }
 
     /**
@@ -104,7 +104,7 @@ class ArkThemeScope {
      * @returns elmtId as number
      */
     getWithThemeId(): number {
-        return this.withThemeId
+        return this.withThemeId;
     }
 
     /**
@@ -116,12 +116,12 @@ class ArkThemeScope {
      */
     addComponentToScope(elmtId: number, owner: number, componentName: string) {
         if (this.isComponentInScope(elmtId)) {
-            return
+            return;
         }
         if (!this.components) {
-            this.components = new ArkThemeScopeArray()
+            this.components = new ArkThemeScopeArray();
         }
-        this.components.push({ elmtId: elmtId, owner: owner, name: componentName })
+        this.components.push({ elmtId: elmtId, owner: owner, name: componentName });
     }
 
     /**
@@ -145,7 +145,7 @@ class ArkThemeScope {
      * @returns true if theme scope contains component, otherwise false
      */
     isComponentInScope(elmtId: number): boolean {
-        return this.components && (this.components.binarySearch(elmtId) > -1)
+        return this.components && (this.components.binarySearch(elmtId) > -1);
     }
 
     /**
@@ -154,7 +154,7 @@ class ArkThemeScope {
      * @returns array of elmIds as numbers
      */
     componentsInScope(): Array<ArkThemeScopeItem> {
-        return this.components
+        return this.components;
     }
 
     /**
@@ -163,7 +163,7 @@ class ArkThemeScope {
      * @returns DARK, Light or SYSTEM values
      */
     colorMode(): ThemeColorMode {
-        return this.withThemeOptions.colorMode ?? ThemeColorMode.SYSTEM
+        return this.withThemeOptions.colorMode ?? ThemeColorMode.SYSTEM;
     }
 
     /**
@@ -172,7 +172,7 @@ class ArkThemeScope {
      * @returns CustomTheme instance
      */
     customTheme(): CustomTheme {
-        return this.withThemeOptions.theme ?? {}
+        return this.withThemeOptions.theme ?? {};
     }
 
     /**
@@ -181,7 +181,7 @@ class ArkThemeScope {
      * @returns theme instance
      */
     getTheme(): ThemeInternal {
-        return this.theme
+        return this.theme;
     }
 
     /**
@@ -190,7 +190,7 @@ class ArkThemeScope {
      * @returns WithThemeOptions instance
      */
     options(): WithThemeOptions {
-        return this.withThemeOptions
+        return this.withThemeOptions;
     }
 
     /**
@@ -200,9 +200,9 @@ class ArkThemeScope {
      * @param theme Theme instance associated with this Theme Scope
      */
     updateWithThemeOptions(options: WithThemeOptions, theme: ThemeInternal) {
-        this.prevColorMode = this.colorMode()
-        this.withThemeOptions = options
-        this.theme = theme
+        this.prevColorMode = this.colorMode();
+        this.withThemeOptions = options;
+        this.theme = theme;
     }
 
     /**
@@ -211,6 +211,6 @@ class ArkThemeScope {
      * @returns true if color mode changed, otherwise false
      */
     isColorModeChanged() {
-        return this.prevColorMode !== this.colorMode()
+        return this.prevColorMode !== this.colorMode();
     }
 }

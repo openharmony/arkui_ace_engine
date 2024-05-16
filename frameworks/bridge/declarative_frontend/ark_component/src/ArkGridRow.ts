@@ -153,6 +153,11 @@ class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAt
       this.setColumns((value[0] as GridRowParam).columns);
       this.setBreakpoints((value[0] as GridRowParam).breakpoints);
       this.setDirection((value[0] as GridRowParam).direction);
+    } else {
+      this.setGutter(null);
+      this.setColumns(null);
+      this.setBreakpoints(null);
+      this.setDirection(null);
     }
     return this;
   }

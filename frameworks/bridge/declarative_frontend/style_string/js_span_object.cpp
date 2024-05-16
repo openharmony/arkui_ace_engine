@@ -518,7 +518,7 @@ void JSGestureSpan::JSBind(BindingTarget globalObj)
 RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args)
 {
     GestureStyle gestureInfo;
-    if (args.Length() > 0 && args[0]->IsObject()) {
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
         gestureInfo.onClick = std::nullopt;
         gestureInfo.onLongPress = std::nullopt;
         return AceType::MakeRefPtr<GestureSpan>(gestureInfo);
@@ -731,9 +731,9 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
 {
     ImageSpanAttribute imageStyle;
     auto sizeObj = obj->GetProperty("size");
-    if (sizeObj->IsObject() && sizeObj->IsArray()) {
+    if (sizeObj->IsObject()) {
         ImageSpanSize imageSize;
-        JSRef<JSArray> size = JSRef<JSArray>::Cast(sizeObj);
+        auto size = JSRef<JSObject>::Cast(sizeObj);
         JSRef<JSVal> width = size->GetProperty("width");
         CalcDimension imageSpanWidth;
         if (!width->IsNull() && JSContainerBase::ParseJsDimensionVpNG(width, imageSpanWidth, false) &&
@@ -1204,11 +1204,13 @@ void JSParagraphStyleSpan::ParseJsMaxLines(const JSRef<JSObject>& obj, SpanParag
         return;
     }
     JSRef<JSVal> args = obj->GetProperty("maxLines");
-    int32_t value = Infinity<uint32_t>();
+    int32_t value = Infinity<int32_t>();
     if (args->ToString() != "Infinity") {
         JSContainerBase::ParseJsInt32(args, value);
     }
-    paragraphStyle.maxLines = value;
+    if (!args->IsUndefined()) {
+        paragraphStyle.maxLines = value;
+    }
 }
 
 void JSParagraphStyleSpan::ParseJsTextOverflow(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)

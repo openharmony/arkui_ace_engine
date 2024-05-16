@@ -21,21 +21,6 @@
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-std::vector<double> ParseVecDouble(const std::string& value)
-{
-    if (value.empty()) {
-        return {};
-    }
-    std::vector<double> parsedValues;
-    StringUtils::StringSplitter(value, ' ', parsedValues);
-    if (parsedValues.empty()) {
-        StringUtils::StringSplitter(value, ',', parsedValues);
-    }
-    return parsedValues;
-}
-};
-
 RefPtr<SvgNode> SvgFeGaussianBlur::Create()
 {
     return AceType::MakeRefPtr<SvgFeGaussianBlur>();
@@ -69,7 +54,10 @@ bool SvgFeGaussianBlur::ParseAndSetSpecializedAttr(const std::string& name, cons
             }
         } },
         { SVG_FE_STD_DEVIATION, [](const std::string& val, SvgFeGaussianBlurAttribute& attr) {
-            auto vectorRes = ParseVecDouble(val);
+            std::vector<float> vectorRes;
+            if (!StringUtils::ParseStringToArray(val, vectorRes)) {
+                return;
+            }
             if (vectorRes.empty() || vectorRes.size() > 2) {
                 return;
             }

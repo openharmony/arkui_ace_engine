@@ -95,6 +95,7 @@ public:
     static void SetOnDidScroll(FrameNode* frameNode, NG::ScrollEventWithState&& event);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
+    static void SetInitialOffset(FrameNode* frameNode, const OffsetT<CalcDimension>& offset);
     static void SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy>& proxy);
 };
 

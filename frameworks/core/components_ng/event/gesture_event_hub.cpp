@@ -975,7 +975,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         "pointerId %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s",
         width, height, udKey.c_str(), recordsSize, info.GetPointerId(), info.GetTargetDisplayId(), windowId,
         summarys.c_str());
-    dragDropManager->PushGatherPixelMap(dragData, scale);
+    dragDropManager->PushGatherPixelMap(dragData, scale, width, height);
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         if (dragDropManager->IsNeedDisplayInSubwindow() && subWindowOverlayManager) {

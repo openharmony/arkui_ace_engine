@@ -109,8 +109,9 @@ void WindowPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "[WMSMain] id: %{public}d, state: %{public}u, name: %{public}s, in recents: %{public}d",
-        session_->GetPersistentId(), state, session_->GetSessionInfo().bundleName_.c_str(), session_->GetShowRecent());
+        "[WMSMain] id: %{public}d, node id: %{public}d, state: %{public}u, name: %{public}s, in recents: %{public}d",
+        session_->GetPersistentId(), host->GetId(),
+        state, session_->GetSessionInfo().bundleName_.c_str(), session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         if (!HasStartingPage()) {
             return;
@@ -167,6 +168,9 @@ void WindowPattern::CreateContentNode()
 
 void WindowPattern::CreateStartingNode()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("CreateStartingNode[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
     startingNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
@@ -187,6 +191,9 @@ void WindowPattern::CreateStartingNode()
 
 void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("CreateSnapshotNode[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
     session_->SetNeedSnapshot(false);
     snapshotNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());

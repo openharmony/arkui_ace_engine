@@ -23,7 +23,7 @@ globalThis.LazyForEach.create = function (
     paramUpdateChangedNode: any
 ) {
     // get actual theme scope
-    const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope()
+    const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
 
     // if LazyForEach isn`t in theme scope we shouldn`t use any theme scope for deep render
     if (themeScope === undefined) {
@@ -33,24 +33,24 @@ globalThis.LazyForEach.create = function (
             LazyForEach.createInternal(
                 paramViewId, paramParentView, paramDataSource,
                 paramItemGenerator, paramKeyGenerator, paramUpdateChangedNode
-            )
+            );
         } else {
             // @ts-ignore
             LazyForEach.createInternal(
                 paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator
-            )
+            );
         }
-        return
+        return;
     }
 
     // create wrapper under original itemGenerator to add enter/exit callbacks for ThemeScopeManager
     const itemGeneratorWrapper = _item => {
         const item = _item
         {
-            const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope)
-            paramItemGenerator(item)
+            const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
+            paramItemGenerator(item);
             if (result === true) {
-                ArkThemeScopeManager.getInstance().onDeepRenderScopeExit()
+                ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
             }
         }
     }
@@ -61,11 +61,11 @@ globalThis.LazyForEach.create = function (
         LazyForEach.createInternal(
             paramViewId, paramParentView, paramDataSource,
             itemGeneratorWrapper, paramKeyGenerator, paramUpdateChangedNode
-        )
+        );
     } else {
     // @ts-ignore
         LazyForEach.createInternal(
             paramViewId, paramParentView, paramDataSource, itemGeneratorWrapper, paramKeyGenerator
-        )
+        );
     }
 }

@@ -176,7 +176,7 @@ public:
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, textRect);
         CHECK_NULL_RETURN(pManager_, textRect);
-        if (!renderContext->GetClipEdge().value_or(true) &&
+        if (!renderContext->GetClipEdge().value_or(false) &&
             LessNotEqual(textRect.Width(), pManager_->GetLongestLine())) {
             textRect.SetWidth(pManager_->GetLongestLine());
         }
@@ -594,6 +594,16 @@ public:
         return childNodes_;
     }
 
+    void SetTextContentParagraph(void* paragraph)
+    {
+        textParagraph_ = paragraph;
+    }
+
+    const std::optional<void*>& GetTextContentParagraph()
+    {
+        return textParagraph_;
+    }
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -785,6 +795,7 @@ private:
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
     std::vector<CustomSpanPlaceholderInfo> customSpanPlaceholder_;
     bool isDetachFromMainTree_ = false;
+    std::optional<void*> textParagraph_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

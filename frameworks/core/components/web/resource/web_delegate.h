@@ -533,10 +533,12 @@ public:
     void SetGestureEventResult(bool result) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
+    bool GetEventResult() { return eventResult_; }
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result_;
     bool sendTask_ = false;
+    bool eventResult_ = false;
 };
 
 class WebAvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
@@ -960,7 +962,6 @@ private:
     void UnregisterSurfacePositionChangedCallback();
 
     void NotifyPopupWindowResult(bool result);
-    void IsNativeType(const double& x, const double& y);
 
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
     void SurfaceOcclusionCallback(float visibleRatio);
@@ -971,7 +972,6 @@ private:
     void RegisterAvoidAreaChangeListener();
     void UnregisterAvoidAreaChangeListener();
     void OnSafeInsetsChange();
-    void InitCacheCutoutEdge();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1084,7 +1084,6 @@ private:
     NG::SafeAreaInsets systemSafeArea_;
     NG::SafeAreaInsets cutoutSafeArea_;
     NG::SafeAreaInsets navigationIndicatorSafeArea_;
-    uint32_t cacheCutoutEdge_ = 0;
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
 #endif
 };

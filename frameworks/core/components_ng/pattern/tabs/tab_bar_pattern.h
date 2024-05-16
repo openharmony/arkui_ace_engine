@@ -207,9 +207,9 @@ public:
 
     SelectedMode GetSelectedMode() const;
 
-    void AddTabBarItemType(int32_t tabContentId, bool isBuilder)
+    void AddTabBarItemType(int32_t tabBarItemId, bool isBuilder)
     {
-        tabBarType_.emplace(std::make_pair(tabContentId, isBuilder));
+        tabBarType_.emplace(std::make_pair(tabBarItemId, isBuilder));
     }
 
     bool IsContainsBuilder();
@@ -502,6 +502,8 @@ private:
     void AdjustOffset(double& offset) const;
     void InitTurnPageRateEvent();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
+    void CalculateIndicatorStyle(
+        int32_t startIndex, int32_t nextIndex, IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
     Color GetTabBarBackgroundColor() const;
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);

@@ -191,7 +191,7 @@ public:
 
     void SetIndicatorBuilder(const std::optional<std::function<void()>>& buildFunc)
     {
-        builder_ = buildFunc.value_or(nullptr);
+        builder_ = buildFunc;
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override

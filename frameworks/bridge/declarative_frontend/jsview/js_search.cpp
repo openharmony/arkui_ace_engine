@@ -271,7 +271,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
     // set font color
-    Color fontColor;
+    Color fontColor = theme->GetSearchButtonTextColor();
     if (info[1]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[1]);
 
@@ -287,7 +287,6 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         SearchModel::GetInstance()->SetSearchButtonFontSize(size);
 
         auto fontColorProp = param->GetProperty("fontColor");
-        fontColor = theme->GetSearchButtonTextColor();
         if (fontColorProp->IsUndefined() || fontColorProp->IsNull() || !ParseJsColor(fontColorProp, fontColor)) {
             if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
                 SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);

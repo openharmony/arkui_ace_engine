@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include <string>
 #include "jsnapi_expo.h"
+#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 namespace OHOS::Ace::NG {
 constexpr int16_t DEFAULT_ALPHA = 255;
@@ -473,10 +474,16 @@ ArkUINativeModuleValue TextInputBridge::SetCaretStyle(ArkUIRuntimeCallInfo *runt
     }
     Color color;
     uint32_t caretColor;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color)) {
-        caretColor = color.GetValue();
+    if (!caretColorArg->IsUndefined()) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color)) {
+            caretColor = color.GetValue();
+        } else {
+            caretColor = textFieldTheme->GetCursorColor().GetValue();
+        }
     } else {
-        caretColor = textFieldTheme->GetCursorColor().GetValue();
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaret(
+            nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()));
+        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretStyle(
         nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor);
@@ -1902,6 +1909,82 @@ ArkUINativeModuleValue TextInputBridge::ResetMargin(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputMargin(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetText(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsString()) {
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputTextString(nativeNode, secondArg->ToString(vm)->
+        ToString().c_str());
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputTextString(nativeNode, "");
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextInputBridge::ResetText(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputTextString(nativeNode, "");
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextInputBridge::SetPlaceholder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsString()) {
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputPlaceholderString(nativeNode, secondArg->
+        ToString(vm)->ToString().c_str());
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputPlaceholderString(nativeNode, "");
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextInputBridge::ResetPlaceholder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputPlaceholderString(nativeNode, "");
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextInputBridge::SetController(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    auto nodePtr = GetArkUINodeModifiers()->getTextInputModifier()->getTextInputController(nativeNode);
+    auto node = AceType::Claim(reinterpret_cast<TextFieldController*>(nodePtr));
+
+    OHOS::Ace::Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    OHOS::Ace::Framework::JSTextEditableController* jsController =
+        OHOS::Ace::Framework::JSRef<OHOS::Ace::Framework::JSObject>::Cast(info[1])->Unwrap<OHOS::Ace::Framework::
+        JSTextEditableController>();
+    if (jsController) {
+        jsController->SetController(node);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextInputBridge::ResetController(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     return panda::JSValueRef::Undefined(vm);
 }
 }

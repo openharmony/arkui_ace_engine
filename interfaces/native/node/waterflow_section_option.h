@@ -27,6 +27,7 @@ struct ArkUIWaterFlowSection {
     float columnsGap;
     float rowsGap;
     float margin[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    void* onGetItemMainSizeByIndex;
 };
 
 struct ArkUI_WaterFlowSectionOption {

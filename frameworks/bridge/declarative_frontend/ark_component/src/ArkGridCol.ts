@@ -142,6 +142,13 @@ class ArkGridColComponent extends ArkComponent implements GridColAttribute {
         GridColOffsetModifier, (value[0] as GridColParam).offset);
       modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity,
         GridColOrderModifier, (value[0] as GridColParam).order);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity,
+        GridColSpanModifier, null);
+      modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity,
+        GridColOffsetModifier, null);
+      modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity,
+        GridColOrderModifier, null);
     }
     return this;
   }

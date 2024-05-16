@@ -882,6 +882,21 @@ void ResetTextSelectedBackgroundColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetSelectedBackgroundColor(frameNode);
 }
+
+void SetTextContentWithStyledString(ArkUINodeHandle node, ArkUI_StyledString* styledString)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(styledString);
+    TextModelNG::SetTextContentWithStyledString(frameNode, styledString);
+}
+
+void ResetTextContentWithStyledString(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextContentWithStyledString(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -980,6 +995,8 @@ const ArkUITextModifier* GetTextModifier()
         SetTextSelectedBackgroundColor,
         GetTextSelectedBackgroundColor,
         ResetTextSelectedBackgroundColor,
+        SetTextContentWithStyledString,
+        ResetTextContentWithStyledString
     };
 
     return &modifier;

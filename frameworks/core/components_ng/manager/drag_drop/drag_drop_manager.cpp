@@ -1593,7 +1593,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
         [renderContext, info = info_, newOffset, overlayManager, gatherNodeCenter]() {
             renderContext->UpdateTransformScale({ info.scale, info.scale });
             renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
-            UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, info.scale);
+            UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, info.scale, info.width, info.height);
             UpdateTextNodePosition(info.textNode, newOffset);
         },
         option.GetOnFinishEvent());
@@ -1673,7 +1673,7 @@ void DragDropManager::SetDragBehavior(
 }
 
 void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
-    OffsetF gatherNodeCenter, float scale)
+    OffsetF gatherNodeCenter, float scale, float previewWidth, float previewHeight)
 {
     CHECK_NULL_VOID(overlayManager);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
@@ -1682,6 +1682,7 @@ void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlay
     borderRadius.multiValued = false;
     int i = 0;
     int cnt = static_cast<int>(gatherNodeChildrenInfo.size());
+    scale = scale <= 0.0f ? 1.0f : scale;
     for (const auto& child : gatherNodeChildrenInfo) {
         auto imageNode = child.imageNode.Upgrade();
         CHECK_NULL_VOID(imageNode);
@@ -1690,9 +1691,12 @@ void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlay
         imageContext->UpdatePosition(OffsetT<Dimension>(
             Dimension(gatherNodeCenter.GetX() - child.halfWidth),
             Dimension(gatherNodeCenter.GetY() - child.halfHeight)));
-        if (scale > 0) {
-            imageContext->UpdateTransformScale({ scale, scale });
+        auto updateScale = scale;
+        if (((child.width > previewWidth) || (child.height > previewHeight)) &&
+            !NearZero(child.width) && !NearZero(child.height)) {
+            updateScale *= std::min(previewWidth / child.width, previewHeight / child.height);
         }
+        imageContext->UpdateTransformScale({ updateScale, updateScale });
         imageContext->UpdateBorderRadius(borderRadius);
         auto angle = 0.0f;
         if (i == cnt - FIRST_GATHER_PIXEL_MAP) {
@@ -1781,7 +1785,7 @@ void DragDropManager::GetGatherPixelMap(const RefPtr<PixelMap>& pixelMap)
     gatherPixelMaps_.push_back(pixelMap);
 }
 
-void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale)
+void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale, float previewWidth, float previewHeight)
 {
     for (auto gatherPixelMap : gatherPixelMaps_) {
         RefPtr<PixelMap> pixelMapDuplicated = gatherPixelMap;
@@ -1792,7 +1796,13 @@ void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale)
             pixelMapDuplicated = gatherPixelMap;
         }
 #endif
-        pixelMapDuplicated->Scale(scale, scale, AceAntiAliasingOption::HIGH);
+        auto width = pixelMapDuplicated->GetWidth() * scale;
+        auto height = pixelMapDuplicated->GetHeight() * scale;
+        auto updateScale = scale;
+        if (((width > previewWidth) || (height > previewHeight)) && !NearZero(width) && !NearZero(height)) {
+            updateScale = std::min(previewWidth / width, previewHeight / height);
+        }
+        pixelMapDuplicated->Scale(updateScale, updateScale, AceAntiAliasingOption::HIGH);
         dragData.shadowInfos.push_back({pixelMapDuplicated, 0.0f, 0.0f});
     }
     gatherPixelMaps_.clear();

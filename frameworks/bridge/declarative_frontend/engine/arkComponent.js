@@ -4694,6 +4694,9 @@ class ArkDividerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  initialize(value) {
+    return this;
+  }
   vertical(value) {
     modifierWithKey(this._modifiersWithKeys, DividerVerticalModifier.identity, DividerVerticalModifier, value);
     return this;
@@ -4906,6 +4909,11 @@ class ArkGridRowComponent extends ArkComponent {
       this.setColumns(value[0].columns);
       this.setBreakpoints(value[0].breakpoints);
       this.setDirection(value[0].direction);
+    } else {
+      this.setGutter(null);
+      this.setColumns(null);
+      this.setBreakpoints(null);
+      this.setDirection(null);
     }
     return this;
   }
@@ -5509,9 +5517,13 @@ class ArkGridColComponent extends ArkComponent {
   }
   initialize(value) {
     if (value[0] !== undefined) {
-      modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value.span);
-      modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity, GridColOffsetModifier, value.offset);
-      modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, value.order);
+      modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value[0].span);
+      modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity, GridColOffsetModifier, value[0].offset);
+      modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, value[0].order);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, null);
+      modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity, GridColOffsetModifier, null);
+      modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, null);
     }
     return this;
   }
@@ -7452,21 +7464,181 @@ class SearchInputFilterModifier extends ModifierWithKey {
     }
 }
 SearchInputFilterModifier.identity = Symbol('searchInputFilter');
+class SearchMaxLengthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetMaxLength(node);
+    } else {
+      getUINativeModule().search.setMaxLength(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchMaxLengthModifier.identity = Symbol('searchMaxLength');
+class SearchTypeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetType(node);
+    } else {
+      getUINativeModule().search.setType(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchTypeModifier.identity = Symbol('searchType');
+class SearchOnEditChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetOnEditChange(node);
+    } else {
+      getUINativeModule().search.setOnEditChange(node, this.value);
+    }
+  }
+}
+SearchOnEditChangeModifier.identity = Symbol('searchOnEditChange');
+class SearchOnSubmitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetOnSubmit(node);
+    } else {
+      getUINativeModule().search.setOnSubmit(node, this.value);
+    }
+  }
+}
+SearchOnSubmitModifier.identity = Symbol('searchOnSubmit');
+class SearchOnCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetOnCopy(node);
+    } else {
+      getUINativeModule().search.setOnCopy(node, this.value);
+    }
+  }
+}
+SearchOnCopyModifier.identity = Symbol('searchOnCopy');
+class SearchOnCutModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetOnCut(node);
+    } else {
+      getUINativeModule().search.setOnCut(node, this.value);
+    }
+  }
+}
+SearchOnCutModifier.identity = Symbol('searchOnCut');
+class SearchOnPasteModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  static identity = Symbol('searchOnPaste');
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetOnPaste(node);
+    } else {
+      getUINativeModule().search.setOnPaste(node, this.value);
+    }
+  }
+}
+SearchOnPasteModifier.identity = Symbol('searchOnPaste');
+class SearchOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetOnChange(node);
+    } else {
+      getUINativeModule().search.setOnChange(node, this.value);
+    }
+  }
+}
+SearchOnChangeModifier.identity = Symbol('searchOnChange');
+class SearchOnTextSelectionChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetOnTextSelectionChange(node);
+    } else {
+      getUINativeModule().search.setOnTextSelectionChange(node, this.value);
+    }
+  }
+}
+SearchOnTextSelectionChangeModifier.identity = Symbol('searchOnTextSelectionChange');
+class SearchOnContentScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetOnContentScroll(node);
+    } else {
+      getUINativeModule().search.setOnContentScroll(node, this.value);
+    }
+  }
+}
+SearchOnContentScrollModifier.identity = Symbol('searchOnContentScroll');
+class SearchShowCounterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetShowCounter(node);
+    }
+    else {
+      getUINativeModule().search.setShowCounter(node, this.value.value, this.value.highlightBorder, this.value.thresholdPercentage);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
+      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
+  }
+}
+SearchShowCounterModifier.identity = Symbol('searchShowCounter');
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
   onEditChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnEditChangeModifier.identity, SearchOnEditChangeModifier, callback);
+    return this;
   }
   type(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchTypeModifier.identity, SearchTypeModifier, value);
+    return this;
   }
   maxLength(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchMaxLengthModifier.identity, SearchMaxLengthModifier, value);
+    return this;
   }
   onEditChanged(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnEditChangeModifier.identity, SearchOnEditChangeModifier, callback);
+    return this;
   }
   customKeyboard(event) {
     throw new Error('Method not implemented.');
@@ -7475,28 +7647,43 @@ class ArkSearchComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onContentScroll(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnContentScrollModifier.identity,
+      SearchOnContentScrollModifier, callback);
+    return this;
   }
   onChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnChangeModifier.identity, SearchOnChangeModifier, callback);
+    return this;
   }
   onTextSelectionChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnTextSelectionChangeModifier.identity,
+      SearchOnTextSelectionChangeModifier, callback);
+    return this;
   }
   onCopy(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnCopyModifier.identity, SearchOnCopyModifier, callback);
+    return this;
   }
   onCut(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnCutModifier.identity, SearchOnCutModifier, callback);
+    return this;
   }
   onSubmit(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnSubmitModifier.identity, SearchOnSubmitModifier, callback);
+    return this;
   }
   onPaste(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SearchOnPasteModifier.identity, SearchOnPasteModifier, callback);
+    return this;
   }
   showCounter(value) {
-    throw new Error('Method not implemented.');
+    let arkValue = new ArkTextFieldShowCounter();
+    arkValue.value = value;
+    arkValue.highlightBorder = options?.highlightBorder;
+    arkValue.thresholdPercentage = options?.thresholdPercentage;
+    modifierWithKey(this._modifiersWithKeys, SearchShowCounterModifier.identity,
+      SearchShowCounterModifier, arkValue);
+    return this;
   }
   searchButton(value, option) {
     let searchButton = new ArkSearchButton();
@@ -11612,6 +11799,61 @@ class TextInputPaddingModifier extends ModifierWithKey {
   }
 }
 TextInputPaddingModifier.identity = Symbol('textInputPadding');
+
+class TextInputTextModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetText(node);
+    } else {
+      getUINativeModule().textInput.setText(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputTextModifier.identity = Symbol('textInputText');
+
+class TextInputPlaceholderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetPlaceholder(node);
+    } else {
+      getUINativeModule().textInput.setPlaceholder(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputPlaceholderModifier.identity = Symbol('textInputPlaceholder');
+
+class TextInputControllerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetController(node);
+    } else {
+      getUINativeModule().textInput.setController(node, this.value);
+    }
+  }
+
+}
+TextInputControllerModifier.identity = Symbol('textInputController');
+
+
 class TextInputContentTypeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11815,6 +12057,30 @@ class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      this.setPlaceholder(value[0].placeholder);
+      this.setText(value[0].text);
+      this.setController(value[0].controller);
+    }
+    return this;
+  }
+  setText(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputTextModifier.identity,
+      TextInputTextModifier, value);
+    return this;
+  }
+  setPlaceholder(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputPlaceholderModifier.identity,
+      TextInputPlaceholderModifier, value);
+    return this;
+  }
+  setController(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputControllerModifier.identity,
+      TextInputControllerModifier, value);
+    return this;
+  }
+
   cancelButton(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputCancelButtonModifier.identity, TextInputCancelButtonModifier, value);
     return this;
@@ -13214,6 +13480,16 @@ class ArkScrollSnapOptions {
       && (this.enableSnapToEnd === another.enableSnapToEnd));
   }
 }
+class ArkScrollOffsetOptions {
+  constructor() {
+    this.xOffset = undefined;
+    this.yOffset = undefined;
+  }
+  isEqual(another) {
+    return this.xOffset === another.xOffset && this.yOffset === another.yOffset;
+  }
+}
+
 class ArkGeometryTransition {
   constructor() {
       this.id = undefined;
@@ -13748,6 +14024,9 @@ class ArkLoadingProgressComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  initialize(value) {
+    return this;
+  }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, LoadingProgressColorModifier.identity, LoadingProgressColorModifier, value);
     return this;
@@ -14109,6 +14388,36 @@ class ScrollClipModifier extends ModifierWithKey {
   }
 }
 ScrollClipModifier.identity = Symbol('scrollClip');
+class ScrollInitialOffsetModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetInitialOffset(node);
+    }
+    else {
+      getUINativeModule().scroll.setInitialOffset(node, this.value.xOffset, this.value.yOffset);
+    }
+  }
+  checkObjectDiff() {
+    return !((this.stageValue.xOffset === this.value.xOffset) &&
+    (this.stageValue.yOffset === this.value.yOffset));
+  }
+}
+ScrollInitialOffsetModifier.identity = Symbol('initialOffset');
+
+class ScrollFlingSpeedLimitModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetFlingSpeedLimit(node);
+    } else {
+      getUINativeModule().scroll.setFlingSpeedLimit(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ScrollFlingSpeedLimitModifier.identity = Symbol('flingSpeedLimit');
+
 class ScrollInitializeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14225,6 +14534,23 @@ class ArkScrollComponent extends ArkComponent {
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollClipModifier.identity, ScrollClipModifier, value);
+    return this;
+  }
+  initialOffset(value) {
+    let options = new ArkScrollOffsetOptions();
+    if (value) {
+      if (value.xOffset) {
+        options.xOffset = value.xOffset;
+      }
+      if (value.yOffset) {
+        options.yOffset = value.yOffset;
+      }
+      modifierWithKey(this._modifiersWithKeys, ScrollInitialOffsetModifier.identity, ScrollInitialOffsetModifier, options);
+    }
+    return this;
+  }
+  flingSpeedLimit(value) {
+    modifierWithKey(this._modifiersWithKeys, ScrollFlingSpeedLimitModifier.identity, ScrollFlingSpeedLimitModifier, value);
     return this;
   }
 }
@@ -15875,6 +16201,10 @@ class ArkSliderComponent extends ArkComponent {
     this.setContentModifier(value);
     return this;
   }
+  slideRange(value) {
+    modifierWithKey(this._modifiersWithKeys, ValidSlideRangeModifier.identity, ValidSlideRangeModifier, value);
+    return this;
+  }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, false);
@@ -16132,6 +16462,22 @@ class TrackThicknessModifier extends ModifierWithKey {
   }
 }
 TrackThicknessModifier.identity = Symbol('sliderTrackThickness');
+class ValidSlideRangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.resetValidSlideRange(node);
+    } else {
+      getUINativeModule().slider.setValidSlideRange(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ValidSlideRangeModifier.identity = Symbol('slideRange');
 // @ts-ignore
 if (globalThis.Slider !== undefined) {
   globalThis.Slider.attributeModifier = function (modifier) {
@@ -16290,7 +16636,8 @@ class ArkCheckboxComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   shape(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, CheckBoxShapeModifier.identity, CheckBoxShapeModifier, value);
+    return this;
   }
   width(value) {
     modifierWithKey(this._modifiersWithKeys, CheckboxWidthModifier.identity, CheckboxWidthModifier, value);
@@ -16436,6 +16783,23 @@ class CheckBoxResponseRegionModifier extends ModifierWithKey {
   }
 }
 CheckBoxResponseRegionModifier.identity = Symbol('responseRegion');
+class CheckBoxShapeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().checkbox.resetCheckboxShape(node);
+    } else {
+      getUINativeModule().checkbox.setCheckboxShape(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CheckBoxShapeModifier.identity = Symbol('checkboxShape');
 class CheckBoxSizeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
