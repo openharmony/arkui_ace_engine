@@ -477,7 +477,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         paragraph->Build();
         ApplyIndent(spanParagraphStyle, paragraph, maxWidth);
         UpdateSymbolSpanEffect(frameNode, paragraph, group);
-        if (paraStyle.maxLines != INT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
+        if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
             paragraph->Layout(static_cast<float>(maxWidth));
         }
         paragraphManager_->AddParagraph({ .paragraph = paragraph,

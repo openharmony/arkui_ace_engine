@@ -176,7 +176,7 @@ public:
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, textRect);
         CHECK_NULL_RETURN(pManager_, textRect);
-        if (!renderContext->GetClipEdge().value_or(true) &&
+        if (!renderContext->GetClipEdge().value_or(false) &&
             LessNotEqual(textRect.Width(), pManager_->GetLongestLine())) {
             textRect.SetWidth(pManager_->GetLongestLine());
         }
