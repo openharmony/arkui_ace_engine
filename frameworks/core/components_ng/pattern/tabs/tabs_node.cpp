@@ -156,9 +156,10 @@ Dimension TabsNode::GetBarWidth() const
     }
     auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
-    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_RETURN(tabBarProperty, 0.0_vp);
-    return tabBarProperty->GetTabBarWidth().value_or(0.0_vp);
+    auto geometryNode = tabBarNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0_vp);
+    auto frameSize = geometryNode->GetFrameSize();
+    return Dimension(PipelineBase::Px2VpWithCurrentDensity(frameSize.Width()), DimensionUnit::VP);
 }
 
 bool TabsNode::GetBarAdaptiveHeight() const
@@ -180,9 +181,10 @@ Dimension TabsNode::GetBarHeight() const
     }
     auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
-    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_RETURN(tabBarProperty, 0.0_vp);
-    return tabBarProperty->GetTabBarHeight().value_or(0.0_vp);
+    auto geometryNode = tabBarNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0_vp);
+    auto frameSize = geometryNode->GetFrameSize();
+    return Dimension(PipelineBase::Px2VpWithCurrentDensity(frameSize.Height()), DimensionUnit::VP);
 }
 
 Color TabsNode::GetBarBackgroundColor() const
