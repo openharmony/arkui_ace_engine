@@ -279,10 +279,10 @@ bool PatternLockPattern::CheckAutoReset() const
 
 void PatternLockPattern::OnTouchDown(const TouchLocationInfo& info)
 {
-    auto globalLocationX = static_cast<float>(info.GetGlobalLocation().GetX());
-    auto globalLocationY = static_cast<float>(info.GetGlobalLocation().GetY());
-    globalTouchPoint_.SetX(globalLocationX);
-    globalTouchPoint_.SetY(globalLocationY);
+    auto screenLocationX = static_cast<float>(info.GetScreenLocation().GetX());
+    auto screenLocationY = static_cast<float>(info.GetScreenLocation().GetY());
+    screenTouchPoint_.SetX(screenLocationX);
+    screenTouchPoint_.SetY(screenLocationY);
 
     if (!CheckAutoReset()) {
         return;
@@ -307,10 +307,10 @@ void PatternLockPattern::OnTouchDown(const TouchLocationInfo& info)
 
 void PatternLockPattern::OnTouchMove(const TouchLocationInfo& info)
 {
-    auto globalLocationX = static_cast<float>(info.GetGlobalLocation().GetX());
-    auto globalLocationY = static_cast<float>(info.GetGlobalLocation().GetY());
-    globalTouchPoint_.SetX(globalLocationX);
-    globalTouchPoint_.SetY(globalLocationY);
+    auto screenLocationX = static_cast<float>(info.GetScreenLocation().GetX());
+    auto screenLocationY = static_cast<float>(info.GetScreenLocation().GetY());
+    screenTouchPoint_.SetX(screenLocationX);
+    screenTouchPoint_.SetY(screenLocationY);
     if (!isMoveEventValid_) {
         return;
     }
@@ -662,7 +662,7 @@ void PatternLockPattern::CalculateCellCenter()
     } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        cellCenter_ = globalTouchPoint_ - host->GetTransformRelativeOffset();
+        cellCenter_ = screenTouchPoint_ - host->GetPositionToScreenWithTransform();
     }
 }
 } // namespace OHOS::Ace::NG
