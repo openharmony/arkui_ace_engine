@@ -456,7 +456,7 @@ void WindowPattern::AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNo
 }
 
 void WindowPattern::RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
-    const std::string& nodeType, int32_t index)
+    const std::string& nodeType)
 {
     host->RemoveChild(child);
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene RemoveChild %{public}s", nodeType.c_str());
