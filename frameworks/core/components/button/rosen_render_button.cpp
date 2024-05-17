@@ -762,7 +762,7 @@ void RosenRenderButton::SyncFocusGeometryProperties()
     double focusBorderHeight = boundsSize.Height() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
     double focusBorderWidth = boundsSize.Width() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
     Offset boundsOffset = GetPaintOffset() + Offset(-NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
-                                                 -NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
+                                                    -NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
     boundsOffset += Offset(-NormalizeToPx(FOCUS_PADDING), -NormalizeToPx(FOCUS_PADDING));
     focusBorderWidth += 2 * NormalizeToPx(FOCUS_PADDING);
     focusBorderHeight += 2 *NormalizeToPx(FOCUS_PADDING);

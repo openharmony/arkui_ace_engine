@@ -80,22 +80,22 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define APP_LOGE(fmt, ...) PRINT_APP_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define APP_LOGF(fmt, ...) PRINT_APP_LOG(FATAL, fmt, ##__VA_ARGS__)
 
-#define JSON_STRING_PUT_INT(jsonValue, var) jsonValue->Put(#var, static_cast<int64_t>(var))
-#define JSON_STRING_PUT_BOOL(jsonValue, var) jsonValue->Put(#var, var)
-#define JSON_STRING_PUT_STRING(jsonValue, var) jsonValue->Put(#var, var.c_str())
-#define JSON_STRING_PUT_STRINGABLE(jsonValue, var) jsonValue->Put(#var, var.ToString().c_str())
+#define JSON_STRING_PUT_INT(jsonValue, var) (jsonValue)->Put(#var, static_cast<int64_t>(var))
+#define JSON_STRING_PUT_BOOL(jsonValue, var) (jsonValue)->Put(#var, (var))
+#define JSON_STRING_PUT_STRING(jsonValue, var) (jsonValue)->Put(#var, (var).c_str())
+#define JSON_STRING_PUT_STRINGABLE(jsonValue, var) (jsonValue)->Put(#var, (var).ToString().c_str())
 
 #define JSON_STRING_PUT_OPTIONAL_INT(jsonValue, var)          \
     do {                                                      \
         if (var) {                                            \
-            jsonValue->Put(#var, static_cast<int64_t>(*var)); \
+            (jsonValue)->Put(#var, static_cast<int64_t>(*(var))); \
         }                                                     \
     } while (0)                                               \
 
 #define JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, var) \
     do {                                                \
         if (var) {                                      \
-            jsonValue->Put(#var, var->c_str());         \
+            (jsonValue)->Put(#var, (var)->c_str());         \
         }                                               \
     } while (0)                                         \
 
@@ -103,7 +103,7 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, var) \
     do {                                                    \
         if (var) {                                          \
-            jsonValue->Put(#var, var->ToString().c_str());  \
+            (jsonValue)->Put(#var, (var)->ToString().c_str());  \
         }                                                   \
     } while (0)                                             \
 

@@ -103,7 +103,7 @@ declare class FinalizationRegistry {
 
 declare function getUINativeModule(): any;
 
-declare function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: NodePtr, component: ArkComponent): void
+declare function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: NodePtr, component: ArkComponent): void;
 
 declare interface CommonAttribute { }
 
