@@ -4432,6 +4432,7 @@ void SwiperPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
 
 void SwiperPattern::OnScrollStartRecursive(float position, float velocity)
 {
+    SetIsNestedInterrupt(false);
     if (IsDisableSwipe()) {
         return;
     }
@@ -4462,7 +4463,7 @@ void SwiperPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     if (!AnimationRunning()) {
         HandleDragEnd(velocity.value_or(0.0f));
     }
-
+    SetIsNestedInterrupt(false);
     childScrolling_ = false;
 }
 
@@ -4470,7 +4471,7 @@ void SwiperPattern::NotifyParentScrollEnd()
 {
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
-    if (parent && nestedScroll.NeedParent()) {
+    if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(std::nullopt);
     }
 }
