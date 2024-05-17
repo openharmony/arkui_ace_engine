@@ -1157,7 +1157,7 @@ void TextFieldPattern::HandleBlurEvent()
         FinishTextPreviewOperation();
     }
     StopTwinkling();
-    if ((customKeyboard_ && isCustomKeyboardAttached_)) {
+    if (((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_)) {
         CloseKeyboard(true);
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFile on blur, close custom keyboard");
     }
@@ -2539,7 +2539,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
                 return;
             }
             pattern->ScrollToSafeArea();
-            if (pattern->customKeyboard_) {
+            if (pattern->customKeyboard_ || pattern->customKeyboardBuilder_) {
                 pattern->StartTwinkling();
             }
         },
@@ -3183,7 +3183,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     CHECK_NULL_RETURN(context, false);
 
     if (needShowSoftKeyboard) {
-        if (customKeyboard_) {
+        if (customKeyboard_ || customKeyboardBuilder_) {
             return RequestCustomKeyboard();
         }
     KeyboardContentTypeToInputType();
@@ -3210,7 +3210,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             textConfig.windowId = systemWindowId;
         }
 #endif
-        if (customKeyboard_ && isCustomKeyboardAttached_) {
+        if ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request Softkeyboard, Close CustomKeyboard.");
             CloseCustomKeyboard();
         }
@@ -3322,7 +3322,7 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose, bool isStopTwinkling)
             StopTwinkling();
         }
         CloseSelectOverlay(true);
-        if (customKeyboard_ && isCustomKeyboardAttached_) {
+        if ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
             return CloseCustomKeyboard();
         }
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Request close soft keyboard.");
@@ -3366,7 +3366,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     if (isCustomKeyboardAttached_) {
         return true;
     }
-    CHECK_NULL_RETURN(customKeyboard_, false);
+    CHECK_NULL_RETURN(customKeyboard_ || customKeyboardBuilder_, false);
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -3374,7 +3374,11 @@ bool TextFieldPattern::RequestCustomKeyboard()
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
     overlayManager->SetCustomKeyboardOption(keyboardAvoidance_);
-    overlayManager->BindKeyboardWithNode(customKeyboard_, frameNode->GetId());
+    if (customKeyboardBuilder_) {
+        overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
+    } else {
+        overlayManager->BindKeyboardWithNode(customKeyboard_, frameNode->GetId());
+    }
     isCustomKeyboardAttached_ = true;
     keyboardOverlay_ = overlayManager;
     auto caretHeight = selectController_->GetCaretRect().Height();
@@ -5730,7 +5734,7 @@ void TextFieldPattern::DumpInfo()
                                        .append(std::to_string(textConfig.inputAttribute.enterKeyType)));
 #endif
     DumpLog::GetInstance().AddDesc(textSelector_.ToString());
-    if (customKeyboard_) {
+    if (customKeyboard_ || customKeyboardBuilder_) {
         DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));
@@ -5741,7 +5745,7 @@ void TextFieldPattern::DumpInfo()
 
 void TextFieldPattern::DumpAdvanceInfo()
 {
-    if (customKeyboard_) {
+    if (customKeyboard_ || customKeyboardBuilder_) {
         DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));

@@ -53,10 +53,10 @@ void CheckBoxPattern::SetBuilderNodeHidden()
 
 void CheckBoxPattern::UpdateIndicator()
 {
-    if (builder_.has_value()) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (builder_.has_value() && !UseContentModifier()) {
         LoadBuilder();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
         bool isSelected = false;
@@ -68,6 +68,9 @@ void CheckBoxPattern::UpdateIndicator()
         } else {
             SetBuilderNodeHidden();
         }
+    } else if (builderNode_) {
+        host->RemoveChildAndReturnIndex(builderNode_);
+        builderNode_ = nullptr;
     }
 }
 
@@ -85,27 +88,29 @@ void CheckBoxPattern::OnModifyDone()
     CHECK_NULL_VOID(checkBoxTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    PaddingProperty padding;
-    padding.left = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
-    padding.right = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
-    padding.top = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
-    padding.bottom = CalcLength(checkBoxTheme->GetDefaultPaddingSize());
-    auto& setPadding = layoutProperty->GetPaddingProperty();
-    if (setPadding) {
-        if (setPadding->left.has_value()) {
-            padding.left = setPadding->left;
+    MarginProperty margin;
+    margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+    margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+    margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+    margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+    auto& setMargin = layoutProperty->GetMarginProperty();
+    if (setMargin) {
+        if (setMargin->left.has_value()) {
+            margin.left = setMargin->left;
         }
-        if (setPadding->right.has_value()) {
-            padding.right = setPadding->right;
+        if (setMargin->right.has_value()) {
+            margin.right = setMargin->right;
         }
-        if (setPadding->top.has_value()) {
-            padding.top = setPadding->top;
+        if (setMargin->top.has_value()) {
+            margin.top = setMargin->top;
         }
-        if (setPadding->bottom.has_value()) {
-            padding.bottom = setPadding->bottom;
+        if (setMargin->bottom.has_value()) {
+            margin.bottom = setMargin->bottom;
         }
     }
-    layoutProperty->UpdatePadding(padding);
+    layoutProperty->UpdateMargin(margin);
+    hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
@@ -550,17 +555,16 @@ void CheckBoxPattern::LoadBuilder()
     if (builder_.has_value()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
-        if (!childNode) {
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            builder_.value()();
-            customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-            CHECK_NULL_VOID(customNode);
-            childNode = AceType::DynamicCast<FrameNode>(customNode);
-            CHECK_NULL_VOID(childNode);
-            builderNode_ = childNode;
+        if (builderNode_) {
+            host->RemoveChildAndReturnIndex(builderNode_);
         }
-        childNode->MountToParent(host);
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        builder_.value()();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        CHECK_NULL_VOID(customNode);
+        builderNode_ = AceType::DynamicCast<FrameNode>(customNode);
+        CHECK_NULL_VOID(builderNode_);
+        builderNode_->MountToParent(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
 }
@@ -738,6 +742,25 @@ FocusPattern CheckBoxPattern::GetFocusPattern() const
     FocusPaintParam focusPaintParam;
     focusPaintParam.SetPaintColor(activeColor);
     return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
+}
+
+// Set the default hot zone for the component.
+void CheckBoxPattern::AddHotZoneRect()
+{
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    DimensionRect hotZoneRegion;
+    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
+    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    std::vector<DimensionRect> hotZoneRegions;
+    hotZoneRegions.emplace_back(hotZoneRegion);
+    gestureHub->SetResponseRegion(hotZoneRegions);
 }
 
 void CheckBoxPattern::RemoveLastHotZoneRect() const

@@ -390,8 +390,48 @@ void UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(OptionalSizeF& frameSize,
     }
 }
 
+void UpdateConstraintByRawConstraint(SizeF& validMinSize, SizeF& validMaxSize,
+    const std::unique_ptr<MeasureProperty>& rawConstraint)
+{
+    if (rawConstraint->minSize) {
+        if (!rawConstraint->minSize.value().Width()) {
+            validMinSize.SetWidth(-1.0f);
+        }
+        if (!rawConstraint->minSize.value().Height()) {
+            validMinSize.SetHeight(-1.0f);
+        }
+    } else {
+        validMinSize = SizeF(-1.0f, -1.0f);
+    }
+    if (rawConstraint->maxSize) {
+        if (!rawConstraint->maxSize.value().Width()) {
+            validMaxSize.SetWidth(-1.0f);
+        }
+        if (!rawConstraint->maxSize.value().Height()) {
+            validMaxSize.SetHeight(-1.0f);
+        }
+    } else {
+        validMaxSize = SizeF(-1.0f, -1.0f);
+    }
+}
+
+void ApplyConstraint(OptionalSizeF& idealSize, const LayoutConstraintF& layoutConstraint,
+    const std::unique_ptr<MeasureProperty>& rawConstraint)
+{
+    auto validMinSize = layoutConstraint.minSize;
+    auto validMaxSize = layoutConstraint.maxSize;
+    if (rawConstraint) {
+        UpdateConstraintByRawConstraint(validMinSize, validMaxSize, rawConstraint);
+    }
+    idealSize.Constrain(validMinSize, validMaxSize,
+        PipelineBase::GetCurrentContext() &&
+            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN,
+        rawConstraint != nullptr);
+}
+
 OptionalSizeF CreateIdealSizeByPercentRef(
-    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool needToConstrain)
+    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool needToConstrain,
+    const std::unique_ptr<MeasureProperty>& rawConstraint)
 {
     OptionalSizeF idealSize;
     do {
@@ -436,9 +476,7 @@ OptionalSizeF CreateIdealSizeByPercentRef(
         }
     } while (false);
     if (needToConstrain) {
-        idealSize.Constrain(layoutConstraint.minSize, layoutConstraint.maxSize,
-            PipelineBase::GetCurrentContext() &&
-                PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN);
+        ApplyConstraint(idealSize, layoutConstraint, rawConstraint);
     }
     return idealSize;
 }

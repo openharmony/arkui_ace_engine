@@ -126,6 +126,7 @@ void ImageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     if (IsImageAnimationLayout(layoutWrapper)) {
         PerformImageAnimationLayout(layoutWrapper);
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -139,6 +140,7 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void ImageLayoutAlgorithm::PerformImageAnimationLayout(LayoutWrapper* layoutWrapper)
 {
     // update child position.
+    CHECK_NULL_VOID(layoutWrapper);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
@@ -151,6 +153,9 @@ void ImageLayoutAlgorithm::PerformImageAnimationLayout(LayoutWrapper* layoutWrap
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (!child) {
+            continue;
+        }
         SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
         auto translate = Alignment::GetAlignPosition(size, childSize, align);
         if (!child->GetHostNode() || child->GetHostNode()->GetTag() != V2::IMAGE_ETS_TAG) {

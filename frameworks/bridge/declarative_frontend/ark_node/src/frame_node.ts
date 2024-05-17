@@ -687,6 +687,11 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkLoadingProgressComponent(node, type);
       })
     }],
+    ["Search", (context: UIContext) => {
+      return new TypedFrameNode(context, "Search", (node: NodePtr, type: ModifierType) => {
+        return new ArkSearchComponent(node, type);
+      })
+    }],
   ]
 )
 

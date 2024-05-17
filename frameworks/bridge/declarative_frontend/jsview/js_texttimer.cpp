@@ -113,7 +113,9 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("onTimer", &JSTextTimer::OnTimer);
     JSClass<JSTextTimer>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSTextTimer>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTextTimer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextTimer>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextTimer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextTimer>::StaticMethod("textShadow", &JSTextTimer::SetTextShadow, opt);
     JSClass<JSTextTimer>::InheritAndBind<JSViewAbstract>(globalObj);

@@ -23,8 +23,11 @@
 #include "base/utils/utils.h"
 #include "base/memory/ace_type.h"
 #include "frameworks/core/components_ng/pattern/search/search_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
+#include "frameworks/core/components_ng/pattern/text_field/text_field_model.h"
 
 
 namespace OHOS::Ace::NG {
@@ -41,6 +44,57 @@ const int32_t MINI_VALID_VALUE = 1;
 const int32_t MAX_VALID_VALUE = 100;
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+
+ArkUINativeModuleValue SearchBridge::SetSearchInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> threeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> fourArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> fiveArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    if (!secondArg->IsNull() && !secondArg->IsUndefined() && secondArg->IsString()) {
+        std::string stringValue = secondArg->ToString(vm)->ToString();
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchValue(nativeNode, stringValue.c_str());
+    }
+    if (!threeArg->IsNull() && !threeArg->IsUndefined() && threeArg->IsString()) {
+        std::string stringPlaceholder = threeArg->ToString(vm)->ToString();
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchPlaceholder(nativeNode, stringPlaceholder.c_str());
+    }
+    if (!fourArg->IsNull() && !fourArg->IsUndefined() && fourArg->IsString()) {
+        std::string stringIcon = fourArg->ToString(vm)->ToString();
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchIcon(nativeNode, stringIcon.c_str());
+    }
+    Framework::JSTextEditableController* jsController = nullptr;
+    if (!fiveArg->IsNull() && !fiveArg->IsUndefined()) {
+        Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+        jsController =
+            Framework::JSRef<Framework::JSObject>::Cast(info[4])->Unwrap<Framework::JSTextEditableController>();
+    }
+    auto nodePtr = GetArkUINodeModifiers()->getSearchModifier()->getSearchController(nativeNode);
+    auto node = AceType::Claim(reinterpret_cast<OHOS::Ace::TextFieldControllerBase*>(nodePtr));
+
+    if (jsController) {
+        jsController->SetController(node);
+    }
+    SearchModel::GetInstance()->SetFocusable(true);
+    SearchModel::GetInstance()->SetFocusNode(true);
+    Framework::JSSeacrhTheme::ApplyTheme();
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetSearchInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    SearchModel::GetInstance()->SetFocusable(true);
+    SearchModel::GetInstance()->SetFocusNode(true);
+    Framework::JSSeacrhTheme::ApplyTheme();
+    return panda::JSValueRef::Undefined(vm);
+}
 
 ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {

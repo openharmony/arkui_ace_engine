@@ -293,8 +293,15 @@ bool TextLayoutAlgorithm::CreateParagraph(
     if (pattern->IsSensitiveEnalbe()) {
         UpdateSensitiveContent(content);
     }
+    auto useExternalParagraph = pattern->GetExternalParagraph() && !pattern->NeedShowAIDetect();
+    auto externalParagraphStyle = pattern->GetExternalParagraphStyle();
     // default paragraph style
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
+    if (pattern->GetExternalParagraph()) {
+        if (!useExternalParagraph && externalParagraphStyle) {
+            paraStyle = externalParagraphStyle.value();
+        }
+    }
     if ((Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spans_.empty()) || isSpanStringMode_) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
     }
@@ -304,7 +311,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         return UpdateSymbolTextStyle(textStyle, paraStyle, layoutWrapper, frameNode);
     }
-    if (spans_.empty()) {
+    if (spans_.empty() || useExternalParagraph) {
         // only use for text.
         return UpdateSingleParagraph(layoutWrapper, paraStyle, textStyle, content, maxWidth);
     } else {
@@ -450,10 +457,10 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    auto contentParagraph = pattern->GetTextContentParagraph();
+    auto externalParagraph = pattern->GetExternalParagraph();
     RefPtr<Paragraph> paragraph;
-    if (contentParagraph) {
-        paragraph = Paragraph::Create(contentParagraph.value());
+    if (externalParagraph) {
+        paragraph = Paragraph::Create(externalParagraph.value());
     } else {
         paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     }

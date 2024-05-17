@@ -160,7 +160,9 @@ void JSSideBar::JSBind(BindingTarget globalObj)
     JSClass<JSSideBar>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSideBar>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSideBar>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSSideBar>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSideBar>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSideBar>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSideBar>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSideBar>::InheritAndBind<JSContainerBase>(globalObj);
 }

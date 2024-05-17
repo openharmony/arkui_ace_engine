@@ -12,20 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.h"
-#include "bridge/declarative_frontend/jsview/js_symbol.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/shadow.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/symbol/symbol_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.h"
+
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
+#include "frameworks/base/utils/string_utils.h"
+#include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_symbol.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components/common/properties/shadow.h"
+#include "frameworks/core/components_ng/base/frame_node.h"
+#include "frameworks/core/components_ng/pattern/symbol/symbol_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -184,6 +185,20 @@ ArkUINativeModuleValue SymbolSpanBridge::ResetEffectStrategy(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSymbolSpanModifier()->resetSymbolSpanEffectStrategy(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SymbolSpanBridge::SetId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    uint32_t content = 0;
+    if (ArkTSUtils::ParseJsSymbolId(vm, secondArg, content)) {
+        GetArkUINodeModifiers()->getSymbolSpanModifier()->setSymbolSpanId(nativeNode, content);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

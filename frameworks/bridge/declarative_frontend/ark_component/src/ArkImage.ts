@@ -518,6 +518,34 @@ class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | Drawable
   }
 }
 
+class ImageEnableAnalyzerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableAnalyzer');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.enableAnalyzer(node);
+    } else {
+      getUINativeModule().image.enableAnalyzer(node, this.value!);
+    }
+  }
+}
+
+class ImageAnalyzerConfigModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('analyzerConfig');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.analyzerConfig(node);
+    } else {
+      getUINativeModule().image.analyzerConfig(node, this.value!);
+    }
+  }
+}
+
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -649,6 +677,14 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   enhancedImageQuality(value: ResolutionQuality): this {
     modifierWithKey(
       this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
+    return this;
+  }
+  enableAnalyzer(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ImageEnableAnalyzerModifier.identity, ImageEnableAnalyzerModifier, value);
+    return this;
+  }
+  analyzerConfig(value: object): this {
+    modifierWithKey(this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value);
     return this;
   }
 }

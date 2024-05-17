@@ -113,4 +113,10 @@ void SymbolSpanModelNG::SetSymbolEffect(FrameNode* frameNode, const uint32_t eff
     ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolEffectStrategy, effectStrategy,
         PropertyInfo::SYMBOL_EFFECT_STRATEGY, frameNode);
 }
+
+void SymbolSpanModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(Content, unicode, PropertyInfo::NONE, frameNode);
+}
 } // namespace OHOS::Ace::NG

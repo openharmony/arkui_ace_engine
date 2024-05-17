@@ -141,6 +141,6 @@ void JSIsolatedComponent::JsOnError(const JSCallbackInfo& info)
             auto returnValue = JSRef<JSVal>::Cast(obj);
             func->ExecuteJS(1, &returnValue);
         };
-    UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
+    UIExtensionModel::GetInstance()->SetPlatformOnError(std::move(onError));
 }
 } // namespace OHOS::Ace::Framework

@@ -919,7 +919,6 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
                 TaskExecutor::TaskType::JS, "ArkUIPageRouterErrorCallback");
         };
 
-        CleanPageOverlay();
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
         return;
     }

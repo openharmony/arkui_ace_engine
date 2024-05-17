@@ -14,6 +14,7 @@
  */
 
 import { Theme } from '@ohos.arkui.theme';
+import { LengthMetrics } from '@ohos.arkui.node';
 
 export enum ItemState {
   ENABLE = 1,
@@ -75,7 +76,7 @@ export struct ToolBar {
         .fontSize($r('sys.float.ohos_id_text_size_caption'))
         .fontWeight(FontWeight.Medium)
     }.width('100%').height('100%')
-    .padding({left: 4, right: 4})
+    .padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
   }
 
@@ -103,7 +104,7 @@ export struct ToolBar {
     .width('100%').height('100%')
     .focusable(!(this.toolBarList[index]?.state === 2))
     .focusOnTouch(!(this.toolBarList[index]?.state === 2))
-    .padding({left: 4, right: 4})
+    .padding({ start: LengthMetrics.vp(4), end: LengthMetrics.vp(4) })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .backgroundColor(this.itemBackground)
     .onClick(() => {
@@ -187,7 +188,10 @@ export struct ToolBar {
         .onChange((index: number) => {
         })
         .width('100%')
-        .padding({ left: this.toolBarList.length < 5? 24 : 0, right: this.toolBarList.length < 5? 24 : 0})
+        .padding({
+          start: LengthMetrics.vp(this.toolBarList.length < 5 ? 24 : 0),
+          end: LengthMetrics.vp(this.toolBarList.length < 5 ? 24 : 0)
+        })
         .backgroundColor($r('sys.color.ohos_id_color_toolbar_bg'))
       }.width('100%')
     }

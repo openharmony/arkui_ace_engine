@@ -592,9 +592,9 @@ private:
         std::optional<ModalTransition> modalTransition);
     void HandleModalPop(std::function<void()>&& onWillDisappear, const RefPtr<UINode> rootNode, int32_t targetId);
 
-    bool ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
+    int32_t ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
         bool isBackPressed, bool isPageRouter);
-    bool WebBackward(RefPtr<NG::FrameNode>& overlay);
+    int32_t WebBackward(RefPtr<NG::FrameNode>& overlay);
     void FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode);
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);

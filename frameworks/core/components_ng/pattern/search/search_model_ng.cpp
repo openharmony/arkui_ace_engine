@@ -723,14 +723,8 @@ void SearchModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc, b
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     if (textFieldPattern) {
+        textFieldPattern->SetCustomKeyboard(std::move(buildFunc));
         textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
-        // create customKeyboard node
-        if (buildFunc) {
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            buildFunc();
-            auto customKeyboard = NG::ViewStackProcessor::GetInstance()->Finish();
-            textFieldPattern->SetCustomKeyboard(customKeyboard);
-        }
     }
 }
 
@@ -1901,5 +1895,12 @@ void SearchModelNG::SetShowCounterBorder(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(pattern);
     pattern->SetCounterState(false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, value, textFieldChild);
+}
+
+RefPtr<TextFieldControllerBase> SearchModelNG::GetSearchController(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetSearchController();
 }
 } // namespace OHOS::Ace::NG

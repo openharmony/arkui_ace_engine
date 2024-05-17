@@ -185,7 +185,9 @@ void JSPlugin::JSBind(BindingTarget globalObj)
     JSClass<JSPlugin>::StaticMethod("height", &JSPlugin::JsHeight);
     JSClass<JSPlugin>::StaticMethod("onComplete", &JSPlugin::JsOnComplete);
     JSClass<JSPlugin>::StaticMethod("onError", &JSPlugin::JsOnError);
+    JSClass<JSPlugin>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSPlugin>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSPlugin>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSPlugin>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSPlugin>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSPlugin>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);

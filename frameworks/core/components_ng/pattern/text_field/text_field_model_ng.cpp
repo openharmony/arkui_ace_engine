@@ -748,14 +748,8 @@ void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     if (pattern) {
+        pattern->SetCustomKeyboard(std::move(buildFunc));
         pattern->SetCustomKeyboardOption(supportAvoidance);
-        // create customKeyboard node
-        if (buildFunc) {
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            buildFunc();
-            auto customKeyboard = NG::ViewStackProcessor::GetInstance()->Finish();
-            pattern->SetCustomKeyboard(customKeyboard);
-        }
     }
 }
 
@@ -1653,7 +1647,7 @@ void TextFieldModelNG::SetCustomKeyboard(FrameNode* frameNode, FrameNode* custom
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     if (pattern) {
-        pattern->SetCustomKeyboard(AceType::Claim<UINode>(customKeyboard));
+        pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
         pattern->SetCustomKeyboardOption(supportAvoidance);
     }
 }
@@ -1872,6 +1866,26 @@ void TextFieldModelNG::SetMargin(FrameNode* frameNode, NG::PaddingProperty& marg
     userMargin.left = margin.left;
     userMargin.right = margin.right;
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin, frameNode);
+}
+
+PaddingProperty TextFieldModelNG::GetMargin(FrameNode* frameNode)
+{
+    CalcLength defaultDimen = CalcLength(0, DimensionUnit::VP);
+    NG::PaddingProperty margins;
+    margins.top = std::optional<CalcLength>(defaultDimen);
+    margins.right = std::optional<CalcLength>(defaultDimen);
+    margins.bottom = std::optional<CalcLength>(defaultDimen);
+    margins.left = std::optional<CalcLength>(defaultDimen);
+    auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(textfieldPaintProperty, margins);
+    if (textfieldPaintProperty->HasMarginByUser()) {
+        const auto& property = textfieldPaintProperty->GetMarginByUserValue();
+        margins.top = std::optional<CalcLength>(property.top);
+        margins.right = std::optional<CalcLength>(property.right);
+        margins.bottom = std::optional<CalcLength>(property.bottom);
+        margins.left = std::optional<CalcLength>(property.left);
+    }
+    return margins;
 }
 
 } // namespace OHOS::Ace::NG

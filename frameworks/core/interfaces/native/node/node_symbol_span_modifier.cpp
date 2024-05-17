@@ -12,18 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/interfaces/native/node/node_symbol_span_modifier.h"
+#include "frameworks/core/interfaces/native/node/node_symbol_span_modifier.h"
 
-#include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/common/properties/text_style_parser.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/pipeline/base/element_register.h"
+#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/text_style.h"
+#include "frameworks/core/components/common/properties/text_style_parser.h"
+#include "frameworks/core/components_ng/base/frame_node.h"
+#include "frameworks/core/components_ng/base/view_abstract.h"
 #include "frameworks/core/components_ng/pattern/text/symbol_span_model_ng.h"
+#include "frameworks/core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -130,6 +128,13 @@ void ResetSymbolSpanEffectStrategy(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SymbolSpanModelNG::SetSymbolEffect(frameNode, 0);
 }
+
+void SetSymbolSpanId(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolSpanModelNG::InitialSymbol(frameNode, symbolId);
+}
 }
 
 namespace NodeModifier {
@@ -147,6 +152,7 @@ const ArkUISymbolSpanModifier* GetSymbolSpanModifier()
         ResetSymbolSpanRenderingStrategy,
         SetSymbolSpanEffectStrategy,
         ResetSymbolSpanEffectStrategy,
+        SetSymbolSpanId
     };
 
     return &modifier;

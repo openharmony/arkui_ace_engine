@@ -411,7 +411,9 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSVideo>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSVideo>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSVideo>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSVideo>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSVideo>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSVideo>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSVideo>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     // override method

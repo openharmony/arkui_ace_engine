@@ -1176,6 +1176,18 @@ public:
         return frameCount_;
     }
 
+    virtual void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) {}
+
+    virtual void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type) {}
+
+    virtual void CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action) {}
+
+    virtual void CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action) {}
+
+    virtual void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
+    virtual void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

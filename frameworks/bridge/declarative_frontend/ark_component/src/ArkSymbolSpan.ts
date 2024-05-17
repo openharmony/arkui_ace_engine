@@ -120,10 +120,31 @@ class SymbolSpanRenderingStrategyModifier extends ModifierWithKey<SymbolRenderin
     }
   }
 }
+
+class SymbolSpanIdModifier extends ModifierWithKey<Resource> {
+  constructor(value: Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('symbolSpanId');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().symbolSpan.setId(node, "");
+    }
+    else {
+      getUINativeModule().symbolSpan.setId(node, this.value);
+    }
+  }
+}
   
 class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): SymbolSpanAttribute {
+    if(value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, SymbolSpanIdModifier.identity, SymbolSpanIdModifier, value[0]);
+    }
+    return this;
   }
   fontSize(value: number | string | Resource): SymbolSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SymbolSpanFontSizeModifier.identity,

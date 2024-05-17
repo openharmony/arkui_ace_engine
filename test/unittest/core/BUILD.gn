@@ -29,8 +29,7 @@ group("core_unittest") {
 
     # "manager:core_manager_unittest",
     "pattern:core_pattern_unittest",
-
-    # "pipeline:pipeline_context_test_ng",
+    "pipeline:pipeline_context_test_ng",
     "property:core_property_unittest",
     "render:core_render_unittest",
 
@@ -69,6 +68,7 @@ group("linux_core_unittest") {
     # "pattern/bubble:bubble_test_ng",
     "pattern/button:button_test_ng",
     "pattern/calendar:calendar_test_ng",
+    "pattern/canvas:canvas_test_ng",
 
     # "pattern/calendar_picker:calendar_picker_test_ng",
 

@@ -86,6 +86,12 @@ class BuilderNode {
     dispose() {
         this._JSBuilderNode.dispose();
     }
+    reuse(param) {
+        this._JSBuilderNode.reuse(param);
+    }
+    recycle(){
+        this._JSBuilderNode.recycle();
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -93,6 +99,34 @@ class JSBuilderNode extends BaseNode {
         this.childrenWeakrefMap_ = new Map();
         this.uiContext_ = uiContext;
         this.updateFuncByElmtId = new Map();
+    }
+    reuse(param) {
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                if (child instanceof ViewPU) {
+                    child.aboutToReuseInternal(param);
+                }
+                else {
+                    // FIXME fix for mixed V2 - V3 Hierarchies
+                    throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
+                }
+            } // if child
+        });
+    }
+    recycle(){
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                if (child instanceof ViewPU) {
+                    child.aboutToRecycleInternal();
+                }
+                else {
+                    // FIXME fix for mixed V2 - V3 Hierarchies
+                    throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
+                }
+            } // if child
+        });
     }
     getCardId() {
         return -1;
@@ -1152,6 +1186,11 @@ const __creatorMap__ = new Map([
             return new ArkLoadingProgressComponent(node, type);
             });
         }],
+    ["Search", (context) => {
+        return new TypedFrameNode(context, "Search", (node, type) => {
+            return new ArkSearchComponent(node, type);
+            });
+        }],
 ]);
 class TypedNode {
     static createNode(context, type) {
@@ -1918,6 +1957,12 @@ class ComponentContent extends Content {
     }
     getNodePtr() {
         return this.builderNode_.getNodePtr();
+    }
+    reuse(param) {
+        this.builderNode_.reuse(param);
+    }
+    recycle(){
+        this.builderNode_.recycle();
     }
 }
 /*

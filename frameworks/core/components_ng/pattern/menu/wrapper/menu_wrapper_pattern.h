@@ -284,6 +284,7 @@ public:
         dumpInfo_.targetNode = dumpInfo.targetNode;
         dumpInfo_.targetOffset = dumpInfo.targetOffset;
         dumpInfo_.targetSize = dumpInfo.targetSize;
+        dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
         dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
         dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
         dumpInfo_.top = dumpInfo.top;
@@ -303,6 +304,18 @@ public:
     {
         hasCustomRadius_ = hasCustomRadius;
     }
+
+    RefPtr<FrameNode> GetLastTouchItem()
+    {
+        return lastTouchItem_;
+    }
+
+    void SetLastTouchItem(const RefPtr<FrameNode>& lastTouchItem)
+    {
+        lastTouchItem_ = lastTouchItem;
+    }
+
+    RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
 
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
@@ -325,6 +338,9 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
+    void InitPanRecognizer();
+    void HandleInteraction(const TouchEventInfo& info);
+    RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
 
     void HideMenu(const RefPtr<FrameNode>& menu);
 
@@ -334,6 +350,8 @@ private:
     std::function<void()> aboutToDisappearCallback_ = nullptr;
     std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
     RefPtr<TouchEventImpl> onTouch_;
+    RefPtr<FrameNode> lastTouchItem_ = nullptr;
+    RefPtr<FrameNode> currentTouchItem_ = nullptr;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
 

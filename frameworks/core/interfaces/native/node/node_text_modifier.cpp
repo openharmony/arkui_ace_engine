@@ -918,8 +918,8 @@ void SetTextDataDetectorConfigWithEvent(ArkUINodeHandle node, ArkUI_CharPtr type
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string strValue = types;
-    std::function<void(const std::string&)>* onResult = nullptr; 
-    if (callback){
+    std::function<void(const std::string&)>* onResult = nullptr;
+    if (callback) {
         onResult = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
     }
     TextModelNG::SetTextDetectConfig(frameNode, strValue, std::move(*onResult));

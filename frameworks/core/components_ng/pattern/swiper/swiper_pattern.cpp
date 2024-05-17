@@ -2450,8 +2450,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
         isTouchPad_ = true;
     }
-    auto mainSize = CalculateVisibleSize();
-    ProcessDelta(mainDelta, mainSize, mainDeltaSum_);
+    ProcessDelta(mainDelta, contentMainSize_, mainDeltaSum_);
     mainDeltaSum_ += mainDelta;
 
     PointF dragPoint(static_cast<float>(info.GetGlobalLocation().GetX()),

@@ -591,7 +591,6 @@ class TextContentModifier extends ModifierWithKey<string | Resource> {
   }
 }
 
-
 class TextSelectionModifier extends ModifierWithKey<ArkSelection> {
   constructor(value: ArkSelection) {
     super(value);
@@ -657,12 +656,28 @@ class TextOnTextSelectionChangeModifier extends ModifierWithKey<(selectionStart:
   }
 }
 
+class TextControllerModifier extends ModifierWithKey<TextOptions> {
+  constructor(value: TextOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textController');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.setTextController(node, '');
+    }
+    else {
+      getUINativeModule().text.setTextController(node, this.value);
+    }
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   initialize(value: Object[]) {
     modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, value[0]);
+    modifierWithKey(this._modifiersWithKeys, TextControllerModifier.identity, TextControllerModifier, value[1]);
     return this;
   }
   enableDataDetector(value: boolean): this {

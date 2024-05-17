@@ -219,7 +219,9 @@ void JSFlexImpl::JSBind(BindingTarget globalObj)
     JSClass<JSFlexImpl>::StaticMethod("justifyContent", &JSFlex::SetJustifyContent, opt);
     JSClass<JSFlexImpl>::StaticMethod("alignItems", &JSFlex::SetAlignItems, opt);
     JSClass<JSFlexImpl>::StaticMethod("alignContent", &JSFlex::SetAlignContent, opt);
+    JSClass<JSFlexImpl>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSFlexImpl>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSFlexImpl>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSFlexImpl>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSFlexImpl>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSFlexImpl>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
