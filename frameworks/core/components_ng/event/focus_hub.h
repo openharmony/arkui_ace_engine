@@ -543,6 +543,8 @@ public:
     }
     bool IsCurrentFocusWholePath();
 
+    bool HasFocusedChild();
+
     void ClearUserOnFocus()
     {
         if (focusCallbackEvents_ && focusCallbackEvents_->onFocusCallback_) {
