@@ -195,6 +195,22 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     }
 }
 
+void TextSelectController::UpdateSelectPragraphByOffset(const Offset& localOffset)
+{
+    CHECK_NULL_VOID(paragraph_ && !contentController_->IsEmpty());
+
+    auto range = GetSelectParagraphByOffset(localOffset);
+    int32_t start = range.first;
+    int32_t end = range.second;
+    UpdateHandleIndex(start, end);
+    if (IsSelected()) {
+        MoveFirstHandleToContentRect(GetFirstHandleIndex());
+        MoveSecondHandleToContentRect(GetSecondHandleIndex());
+    } else {
+        MoveCaretToContentRect(GetCaretIndex());
+    }
+}
+
 std::pair<int32_t, int32_t> TextSelectController::GetSelectRangeByOffset(const Offset& localOffset)
 {
     std::pair<int32_t, int32_t> err(-1, -1);
@@ -224,6 +240,36 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectRangeByOffset(const O
         end = std::min(static_cast<int32_t>(contentController_->GetWideText().length()),
             pos + GetGraphemeClusterLength(contentController_->GetWideText(), pos, true));
     }
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
+    }
+    return { start, end };
+}
+
+std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(const Offset& localOffset)
+{
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
+    std::pair<int32_t, int32_t> err(-1, -1);
+    CHECK_NULL_RETURN(paragraph_ && !contentController_->IsEmpty(), err);
+    int32_t start = 0;
+    int32_t end = 0;
+    auto pos = ConvertTouchOffsetToPosition(localOffset, true);
+    // Ensure that the end is selected.
+    if (pos >= static_cast<int32_t>(paragraph_->GetParagraphText().length())) {
+        pos -= 1;
+    }
+
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, err);
+    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textFiled, err);
+    bool smartSelect = false;
+    if (!textFiled->IsUsingMouse()) {
+        smartSelect = AdjustWordSelection(pos, start, end, localOffset);
+    }
+    
+    GetSubParagraphByOffset(pos, start, end);
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_TEXT,
@@ -238,6 +284,34 @@ bool TextSelectController::IsLineBreakOrEndOfParagraph(int32_t pos) const
     auto data = contentController_->GetWideText();
     CHECK_NULL_RETURN(data[pos] == WIDE_NEWLINE[0], false);
     return true;
+}
+
+void TextSelectController::GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end)
+{
+    auto data = contentController_->GetWideText();
+    bool leftContinue = true;
+    bool rightContinue = true;
+    int32_t offset = 0;
+    if (pos <= 0) {
+        leftContinue = false;
+        start = 0;
+    }
+    while (leftContinue || rightContinue) {
+        if (leftContinue) {
+            if (data[pos - offset] == WIDE_NEWLINE[0] || pos - offset < 0) {
+                start = pos - offset + 1;
+                leftContinue = false;
+            }
+        }
+        if (rightContinue) {
+            if (data[pos + offset] == WIDE_NEWLINE[0] ||
+                pos + offset >= static_cast<int32_t>(contentController_->GetWideText().length())) {
+                end = pos + offset;
+                rightContinue = false;
+            }
+        }
+        offset ++;
+    }
 }
 
 int32_t TextSelectController::GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev)
