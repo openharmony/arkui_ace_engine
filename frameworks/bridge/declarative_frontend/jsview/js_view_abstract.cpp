@@ -8122,6 +8122,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("focusScopeId", &JSViewAbstract::JsFocusScopeId);
     JSClass<JSViewAbstract>::StaticMethod("focusScopePriority", &JSViewAbstract::JsFocusScopePriority);
 
+    JSClass<JSViewAbstract>::StaticMethod("visualEffect", &JSViewAbstract::JsVisualEffect);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundFilter", &JSViewAbstract::JsBackgroundFilter);
+    JSClass<JSViewAbstract>::StaticMethod("foregroundFilter", &JSViewAbstract::JsForegroundFilter);
+    JSClass<JSViewAbstract>::StaticMethod("compositingFilter", &JSViewAbstract::JsCompositingFilter);
+
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
 
@@ -9856,6 +9861,42 @@ int32_t JSViewAbstract::ParseJsPropertyId(const JSRef<JSVal>& jsValue)
         }
     }
     return resId;
+}
+
+void JSViewAbstract::JsVisualEffect(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto visualEffect = CreateRSEffectFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetVisualEffect(visualEffect);
+}
+
+void JSViewAbstract::JsBackgroundFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto backgroundFilter = CreateRSFilterFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetBackgroundFilter(backgroundFilter);
+}
+
+void JSViewAbstract::JsForegroundFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto foregroundFilter = CreateRSFilterFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetForegroundFilter(foregroundFilter);
+}
+
+void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto compositingFilter = CreateRSFilterFromNapiValue(info[0]);
+    ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resource)
