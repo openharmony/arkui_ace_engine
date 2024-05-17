@@ -44,7 +44,9 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/pipeline/base/element_register.h"
+#if defined(OHOS_PLATFORM)
 #include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -991,7 +993,7 @@ void JSViewPartialUpdate::JSGetStateProfilerStatus(const JSCallbackInfo& info)
 
 void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
 {
-#if defined(PREVIEW)
+#if defined(PREVIEW) || !defined(OHOS_PLATFORM)
     return;
 #else
     ContainerScope scope(GetInstanceId());
