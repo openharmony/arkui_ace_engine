@@ -56,10 +56,15 @@ int32_t UIServiceMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Me
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParcel& reply)
+bool UIServiceMgrStub::IsSystemApp()
 {
     uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx)) {
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
+}
+
+int32_t UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
@@ -80,8 +85,7 @@ int32_t UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParc
 
 int32_t UIServiceMgrStub::UnregisterCallBackInner(MessageParcel& data, MessageParcel& reply)
 {
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx)) {
+    if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
@@ -95,8 +99,7 @@ int32_t UIServiceMgrStub::UnregisterCallBackInner(MessageParcel& data, MessagePa
 
 int32_t UIServiceMgrStub::PushInner(MessageParcel& data, MessageParcel& reply)
 {
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx)) {
+    if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
@@ -115,8 +118,7 @@ int32_t UIServiceMgrStub::PushInner(MessageParcel& data, MessageParcel& reply)
 
 int32_t UIServiceMgrStub::RequestInner(MessageParcel& data, MessageParcel& reply)
 {
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx)) {
+    if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
@@ -132,8 +134,7 @@ int32_t UIServiceMgrStub::RequestInner(MessageParcel& data, MessageParcel& reply
 
 int32_t UIServiceMgrStub::ReturnRequestInner(MessageParcel& data, MessageParcel& reply)
 {
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx)) {
+    if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
