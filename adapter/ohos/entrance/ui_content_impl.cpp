@@ -2040,7 +2040,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
         task();
     } else {
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
+        AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
+        viewportConfigMgr_->UpdateConfig(aceViewportConfig, container, std::move(task), "ArkUIUpdateViewportConfig");
     }
 }
 
