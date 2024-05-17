@@ -202,10 +202,6 @@ void MovingPhotoPattern::UpdateImageNode()
     CHECK_NULL_VOID(image);
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->HasMovingPhotoUri() || layoutProperty->GetMovingPhotoUri().value() == uri_) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto is null or has not changed.");
-        return;
-    }
     if (!layoutProperty->HasImageSourceInfo()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "image info is null.");
         auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
