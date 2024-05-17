@@ -17,19 +17,19 @@
 #include "napi/native_node_api.h"
 #include "native_engine/native_engine.h"
 
-extern const char _binary_fullscreenlaunchcomponent_abc_start[];
-extern const char _binary_fullscreenlaunchcomponent_abc_end[];
+extern const char _binary_fullscreenlaunchcomponent_preview_abc_start[];
+extern const char _binary_fullscreenlaunchcomponent_preview_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default"))) 
 void NAPI_arkui_advanced_FullScreenLaunchComponent_GetABCCode(const char** buf, int* buflen)
 {
     if (buf != nullptr) {
-        *buf = _binary_fullscreenlaunchcomponent_abc_start;
+        *buf = _binary_fullscreenlaunchcomponent_preview_abc_start;
     }
     if (buflen != nullptr) {
-        *buflen = _binary_fullscreenlaunchcomponent_abc_end - 
-            _binary_fullscreenlaunchcomponent_abc_start;
+        *buflen = _binary_fullscreenlaunchcomponent_preview_abc_end - \
+            _binary_fullscreenlaunchcomponent_preview_abc_start;
     }
 }
 
