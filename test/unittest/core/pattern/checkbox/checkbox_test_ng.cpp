@@ -895,31 +895,31 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
 
-    PaddingProperty padding;
-    padding.left = CalcLength(CHECK_MARK_SIZE.ConvertToPx());
-    layoutProperty->UpdatePadding(padding); // GetMarginProperty
+    MarginProperty margin;
+    margin.left = CalcLength(CHECK_MARK_SIZE.ConvertToPx());
+    layoutProperty->UpdateMargin(margin); // GetMarginProperty
 
     checkBoxPattern->OnModifyDone();
-    EXPECT_EQ(layoutProperty->GetPaddingProperty()->left.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
-    EXPECT_EQ(layoutProperty->GetPaddingProperty()->right.value(),
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
         CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetPaddingProperty()->top.value(),
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
         CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
-    EXPECT_EQ(layoutProperty->GetPaddingProperty()->bottom.value(),
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
         CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
 
-    PaddingProperty padding1;
-    padding1.right = CalcLength(CHECK_MARK_SIZE.ConvertToPx());
-    layoutProperty->UpdatePadding(padding1); // GetMarginProperty
+    MarginProperty margin1;
+    margin1.right = CalcLength(CHECK_MARK_SIZE.ConvertToPx());
+    layoutProperty->UpdateMargin(margin1); // GetMarginProperty
 
     checkBoxPattern->OnModifyDone();
-    EXPECT_EQ(layoutProperty->GetPaddingProperty()->left.value(),
-        CalcLength(checkBoxTheme->GetDefaultPaddingSize()));
-    EXPECT_EQ(layoutProperty->GetPaddingProperty()->right.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
-    EXPECT_EQ(layoutProperty->GetPaddingProperty()->top.value(),
-        CalcLength(checkBoxTheme->GetDefaultPaddingSize()));
-    EXPECT_EQ(layoutProperty->GetPaddingProperty()->bottom.value(),
-        CalcLength(checkBoxTheme->GetDefaultPaddingSize()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
+        CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
+        CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
+        CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
 }
 
 /**
@@ -974,6 +974,12 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest027, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     bool result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(result);
+    /**
+     * cover method AddHotZoneRect
+     */
+    pattern->AddHotZoneRect();
+    EXPECT_EQ(pattern->hotZoneOffset_.GetX(), 0.0f);
+    EXPECT_EQ(pattern->hotZoneSize_.Width(), 80.0f);
     /**
      * cover method RemoveLastHotZoneRect
      */
