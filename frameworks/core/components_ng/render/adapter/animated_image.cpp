@@ -308,10 +308,6 @@ AnimatedPixmap::AnimatedPixmap(
 {
     // resizing to a size >= 0.7 [~= sqrt(2) / 2] intrinsic size takes 2x longer to decode while memory usage is 1/2.
     // 0.7 is the balance point.
-    auto intrSize = src_->GetImageSize();
-    if (intrSize.first * RESIZE_THRESHOLD >= size_.width || intrSize.second * RESIZE_THRESHOLD >= size_.height) {
-        size_.forceResize = true;
-    }
 }
 
 RefPtr<PixelMap> AnimatedPixmap::GetPixelMap() const
@@ -322,6 +318,13 @@ RefPtr<PixelMap> AnimatedPixmap::GetPixelMap() const
 
 void AnimatedPixmap::DecodeImpl(uint32_t idx)
 {
+    if (intrSizeInitial_) {
+        auto intrSize = src_->GetImageSize();
+        if (intrSize.first * RESIZE_THRESHOLD >= size_.width || intrSize.second * RESIZE_THRESHOLD >= size_.height) {
+            size_.forceResize = true;
+        }
+        intrSizeInitial_ = false;
+    }
     RefPtr<PixelMap> frame;
     if (size_.forceResize) {
         frame = src_->CreatePixelMap(idx, { size_.width, size_.height });
