@@ -5859,6 +5859,11 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
     if (errCode == AUTO_FILL_FAILED) {
         return;
     }
+
+    if (RequestKeyboard(false, true, true)) {
+       NotifyOnEditChanged(true);
+    }
+
 #if defined(ENABLE_STANDARD_INPUT)
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "fillContent is : %{private}s", fillContent.c_str());
     std::unordered_map<std::string, MiscServices::PrivateDataValue> userNamesOrPassWordMap;
@@ -5895,9 +5900,6 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
         break;
     }
 #endif
-    if (RequestKeyboard(false, true, true)) {
-        NotifyOnEditChanged(true);
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
