@@ -125,8 +125,7 @@ public:
             V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str(), filter);
         json->PutExtAttr("textOverflow",
             V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
-        json->PutExtAttr("textIndent",
-            std::to_string(static_cast<int32_t>(GetTextIndent().value_or(0.0_vp).Value())).c_str(), filter);
+        json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);

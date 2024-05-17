@@ -1200,6 +1200,9 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
         textFieldLayoutProperty->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
     json->PutExtAttr("maxFontSize",
         textFieldLayoutProperty->GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("inputFilter", textFieldLayoutProperty->GetInputFilterValue("").c_str(), filter);
+    json->PutExtAttr("textIndent",
+        textFieldLayoutProperty->GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -1336,6 +1339,9 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json, const
     auto caretWidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
     cursorJson->Put("width", caretWidth.ToString().c_str());
     json->PutExtAttr("caretStyle", cursorJson, filter);
+    auto selectedBackgroundColor = textFieldPaintProperty->GetSelectedBackgroundColor().value_or(Color());
+    json->PutExtAttr("selectedBackgroundColor",
+        selectedBackgroundColor.ColorToString().c_str(), filter);
 }
 
 void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
