@@ -1170,7 +1170,7 @@ void ParseBlurOption(const EcmaVM* vm, const Local<JSValueRef> blurOptionsArg, B
         Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(blurOptionsArg);
         auto grey1 = params->GetValueAt(vm, blurOptionsArg, 0)->Uint32Value(vm);
         auto grey2 = params->GetValueAt(vm, blurOptionsArg, 1)->Uint32Value(vm);
-        std::vector<float> greyVec(2); // 2 number
+        std::vector<float> greyVec(2);
         greyVec[0] = grey1;
         greyVec[1] = grey2;
         blurOption.grayscale = greyVec;
@@ -1182,7 +1182,7 @@ void ParseDynamicBrightnessOption(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
     ArkUI_Float32& saturation, std::vector<float>& posRGB, std::vector<float>& negRGB, ArkUI_Float32& fraction) 
 {   
     Local<JSValueRef> rateArg = runtimeCallInfo->GetCallArgRef(1);         
-    Local<JSValueRef> lightUpDegreeArg = runtimeCallInfo->GetCallArgRef(2); 
+    Local<JSValueRef> lightUpDegreeArg = runtimeCallInfo->GetCallArgRef(2);
     Local<JSValueRef> cubicCoeffArg = runtimeCallInfo->GetCallArgRef(3);
     Local<JSValueRef> quadCoeffArg = runtimeCallInfo->GetCallArgRef(4);
     Local<JSValueRef> saturationArg = runtimeCallInfo->GetCallArgRef(5);
@@ -5675,7 +5675,7 @@ Local<panda::ObjectRef> CommonBridge::CreateEventTargetObject(EcmaVM* vm, const 
 
     const char* keysOfGlobalOffset[] = { "x", "y" };
     Local<JSValueRef> valuesOfGlobalOffset[] = { panda::NumberRef::New(
-                                                     vm, (origin.GetX() + localOffset.GetX()).ConvertToVp()),
+        vm, (origin.GetX() + localOffset.GetX()).ConvertToVp()),
         panda::NumberRef::New(vm, (origin.GetY() + localOffset.GetY()).ConvertToVp()) };
     auto globalOffset = panda::ObjectRef::NewWithNamedProperties(
         vm, ArraySize(keysOfGlobalOffset), keysOfGlobalOffset, valuesOfGlobalOffset);
@@ -5699,7 +5699,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAreaObject(EcmaVM* vm, const RectF& 
     auto offset = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfOffset), keysOfOffset, valuesOfOffset);
     const char* keysOfGlobalOffset[] = { "x", "y" };
     Local<JSValueRef> valuesOfGlobalOffset[] = { panda::NumberRef::New(
-                                                     vm, (localOffset.GetX() + origin.GetX()) / density),
+        vm, (localOffset.GetX() + origin.GetX()) / density),
         panda::NumberRef::New(vm, (localOffset.GetY() + origin.GetY()) / density) };
     auto globalOffset = panda::ObjectRef::NewWithNamedProperties(
         vm, ArraySize(keysOfGlobalOffset), keysOfGlobalOffset, valuesOfGlobalOffset);
@@ -5769,7 +5769,7 @@ void CommonBridge::GetLongPressGestureValue(
     if (!repeatArg.IsNull() && !repeatArg->IsUndefined()) {
         repeat = repeatArg->ToBoolean(vm)->Value();
     }
-    Local<JSValueRef> durationArg = runtimeCallInfo->GetCallArgRef(argNumber + 2);
+    Local<JSValueRef> durationArg = runtimeCallInfo->GetCallArgRef(argNumber + NUM_2);
     if (!durationArg.IsNull() && !durationArg->IsUndefined()) {
         auto durationValue = static_cast<int32_t>(durationArg->ToNumber(vm)->Value());
         duration = durationValue <= 0 ? DEFAULT_LONG_PRESS_DURATION : durationValue;
