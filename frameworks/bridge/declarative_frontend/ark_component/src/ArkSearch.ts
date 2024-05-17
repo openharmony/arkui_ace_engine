@@ -618,9 +618,41 @@ class SearchShowCounterModifier extends ModifierWithKey<ArkTextFieldShowCounter>
   }
 }
 
+class SearchInitializeModifier extends ModifierWithKey<SearchParam> {
+  constructor(value: SearchParam) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchInitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSearchInitialize(node);
+    } else {
+      getUINativeModule().search.setSearchInitialize(node, this.value.value,
+        this.value.placeholder, this.value.icon, this.value.controller);
+    }
+  }
+}
+
+interface SearchParam {
+  value?: string;
+  placeholder?: ResourceStr;
+  icon?: string;
+  controller?: SearchController
+}
+
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): SearchAttribute {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, SearchInitializeModifier.identity,
+        SearchInitializeModifier, (value[0] as SearchParam));
+    } else {
+      modifierWithKey(this._modifiersWithKeys, SearchInitializeModifier.identity,
+        SearchInitializeModifier, null);
+    }
+    return this;
   }
   onEditChange(callback: (isEditing: boolean) => void): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchOnEditChangeModifier.identity,

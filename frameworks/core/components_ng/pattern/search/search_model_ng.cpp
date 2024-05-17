@@ -1911,4 +1911,11 @@ void SearchModelNG::SetShowCounterBorder(FrameNode* frameNode, bool value)
     pattern->SetCounterState(false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, value, textFieldChild);
 }
+
+RefPtr<TextFieldControllerBase> SearchModelNG::GetSearchController(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetSearchController();
+}
 } // namespace OHOS::Ace::NG
