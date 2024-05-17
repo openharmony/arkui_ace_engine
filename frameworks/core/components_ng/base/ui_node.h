@@ -639,6 +639,22 @@ public:
         }
     }
 
+    virtual void SetOnNodeDestroyCallback(std::function<void(int32_t)>&& destroyCallback)
+    {
+        destroyCallback_ = std::move(destroyCallback);
+    }
+
+    virtual bool HasOnNodeDestroyCallback()
+    {
+        return destroyCallback_ != nullptr;
+    }
+
+    virtual void FireOnNodeDestroyCallback()
+    {
+        CHECK_NULL_VOID(destroyCallback_);
+        destroyCallback_(GetId());
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -740,7 +756,7 @@ private:
     std::string debugLine_;
     std::string viewId_;
     void* externalData_ = nullptr;
-
+    std::function<void(int32_t)> destroyCallback_;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
