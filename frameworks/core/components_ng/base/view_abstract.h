@@ -140,6 +140,12 @@ public:
     static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
     static void SetBorderImageSource(const std::string &bdImageSrc);
 
+    // visual
+    static void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect);
+    static void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter);
+    static void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter);
+    static void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter);
+
     // outer border
     static void SetOuterBorderRadius(const BorderRadiusProperty& value);
     static void SetOuterBorderRadius(const Dimension& value);

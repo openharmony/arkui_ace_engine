@@ -2231,6 +2231,38 @@ void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
     ACE_UPDATE_RENDER_CONTEXT(BorderImageGradient, gradient);
 }
 
+void ViewAbstract::SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(VisualEffect, visualEffect);
+}
+
+void ViewAbstract::SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundFilter, backgroundFilter);
+}
+
+void ViewAbstract::SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundFilter, foregroundFilter);
+}
+
+void ViewAbstract::SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(CompositingFilter, compositingFilter);
+}
+
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
