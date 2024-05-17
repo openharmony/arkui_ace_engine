@@ -97,6 +97,7 @@ public:
     virtual void SetMenuBackgroundColor(const Color& color);
     virtual void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize);
+    virtual void SetLayoutDirection(TextDirection value);
     virtual ControlSize GetControlSize();
 private:
     static std::unique_ptr<SelectModel> instance_;
