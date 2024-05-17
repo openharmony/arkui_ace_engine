@@ -584,6 +584,11 @@ template("ace_core_source_set") {
       ]
     }
 
+    if (defined(config.use_platform_font) && config.use_platform_font) {
+      defines += [ "USE_PLATFORM_FONT" ]
+      sources += [ "common/font/font_platform_proxy.cpp" ]
+    }
+
     # arkoala C interface
     deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
 
@@ -1019,6 +1024,11 @@ template("ace_core_ng_source_set") {
         config.enable_image_compression) {
       deps += [ "//third_party/opencl-headers:libcl" ]
       defines += [ "ENABLE_OPENCL" ]
+    }
+
+    if (defined(config.use_platform_font) && config.use_platform_font) {
+      defines += [ "USE_PLATFORM_FONT" ]
+      sources += [ "common/font/font_platform_proxy.cpp" ]
     }
 
     cflags_cc = []

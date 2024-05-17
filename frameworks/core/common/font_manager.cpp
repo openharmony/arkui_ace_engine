@@ -27,11 +27,8 @@
 #include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_config.h"
 #endif
 #endif
-#ifdef ANDROID_PLATFORM
-#include "adapter/android/capability/java/jni/font/system_font_manager.h"
-#endif
-#ifdef IOS_PLATFORM
-#include "adapter/ios/capability/font/system_font_manager.h"
+#ifdef USE_PLATFORM_FONT
+#include "core/common/font/font_platform_proxy.h"
 #endif
 
 namespace OHOS::Ace {
@@ -81,6 +78,12 @@ bool FontManager::IsDefaultFontChanged()
 
 void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
 {
+#ifdef USE_PLATFORM_FONT
+    auto fontPlatform = FontPlatformProxy::GetInstance().GetFontPlatform();
+    if (fontPlatform) {
+        fontPlatform->GetSystemFontList(fontList);
+    }
+#else
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
     Rosen::TextEngine::FontParser fontParser;
@@ -93,9 +96,6 @@ void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
     }
 #endif
 #endif
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-    Platform::SystemFontManager systemFontManager;
-    systemFontManager.GetSystemFontList(fontList);
 #endif
 }
 
@@ -145,6 +145,12 @@ void FontManager::GetUIFontConfig(FontConfigJsonInfo& info)
 bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
 {
     bool isGetFont = false;
+#ifdef USE_PLATFORM_FONT
+    auto fontPlatform = FontPlatformProxy::GetInstance().GetFontPlatform();
+    if (fontPlatform) {
+        isGetFont = fontPlatform->GetSystemFont(fontName, fontInfo);
+    }
+#else
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
     Rosen::TextEngine::FontParser fontParser;
@@ -167,9 +173,6 @@ bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
     }
 #endif
 #endif
-#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
-    Platform::SystemFontManager systemFontManager;
-    return systemFontManager.GetSystemFont(fontName, fontInfo);
 #endif
     return isGetFont;
 }
