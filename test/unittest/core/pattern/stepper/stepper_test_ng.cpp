@@ -1235,4 +1235,51 @@ HWTEST_F(StepperTestNg, StepperAccessibilityPropertyGetSupportAction001, TestSiz
     }
     EXPECT_EQ(actions, expectActions);
 }
+/**
+ * @tc.name: StepperAlgorithmTest004
+ * @tc.desc: test Stepper pattern algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperAlgorithmTest004, TestSize.Level1)
+{
+    auto stepperFrameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    ASSERT_NE(stepperFrameNode, nullptr);
+    auto stepperPattern = stepperFrameNode->GetPattern<StepperPattern>();
+    ASSERT_NE(stepperPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        stepperFrameNode, AceType::MakeRefPtr<GeometryNode>(), stepperFrameNode->GetLayoutProperty());
+    auto stepperLayoutAlgorithm = AceType::DynamicCast<StepperLayoutAlgorithm>(stepperPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(stepperLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(stepperLayoutAlgorithm));
+    auto rightButtonHeight =
+        stepperLayoutAlgorithm->CaluateButtonHeight(AccessibilityManager::RawPtr(layoutWrapper), true);
+    EXPECT_EQ(rightButtonHeight, 0);
+}
+/**
+ * @tc.name: StepperAlgorithmTest005
+ * @tc.desc: test Stepper pattern algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperAlgorithmTest005, TestSize.Level1)
+{
+    auto stepperFrameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    ASSERT_NE(stepperFrameNode, nullptr);
+    auto stepperPattern = stepperFrameNode->GetPattern<StepperPattern>();
+    ASSERT_NE(stepperPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        stepperFrameNode, AceType::MakeRefPtr<GeometryNode>(), stepperFrameNode->GetLayoutProperty());
+    auto stepperLayoutAlgorithm = AceType::DynamicCast<StepperLayoutAlgorithm>(stepperPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(stepperLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(stepperLayoutAlgorithm));
+    auto leftButtonHeight =
+        stepperLayoutAlgorithm->CaluateButtonHeight(AccessibilityManager::RawPtr(layoutWrapper), false);
+    EXPECT_EQ(leftButtonHeight, 0);
+}
+
 } // namespace OHOS::Ace::NG
