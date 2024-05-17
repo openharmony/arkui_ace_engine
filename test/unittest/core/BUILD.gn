@@ -29,8 +29,7 @@ group("core_unittest") {
 
     # "manager:core_manager_unittest",
     "pattern:core_pattern_unittest",
-
-    # "pipeline:pipeline_context_test_ng",
+    "pipeline:pipeline_context_test_ng",
     "property:core_property_unittest",
     "render:core_render_unittest",
 
