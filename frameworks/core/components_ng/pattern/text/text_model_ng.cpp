@@ -23,6 +23,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -966,10 +967,29 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    if (value) {
-        textPattern->SetTextContentParagraph(value->paragraph);
+    std::list<RefPtr<SpanItem>> spanItems;
+    if (!value) {
+        textPattern->SetExternalParagraph(nullptr);
+        textPattern->SetExternalSpanItem(spanItems);
+        textPattern->SetExternalParagraphStyle(std::nullopt);
     } else {
-        textPattern->SetTextContentParagraph(nullptr);
+        textPattern->SetExternalParagraph(value->paragraph);
+#ifdef USE_GRAPHIC_TEXT_GINE
+        auto position = 0;
+        for (const auto& item : value->items) {
+            auto spanItem = SpanModelNG::CreateSpanItem(item);
+            if (spanItem) {
+                auto wSpanContent = StringUtils::ToWstring(spanItem->content);
+                auto intervalStart = position;
+                position += wSpanContent.length();
+                auto intervalEnd = position;
+                spanItem->interval = { intervalStart, intervalEnd };
+                spanItems.emplace_back(spanItem);
+            }
+        }
+        textPattern->SetExternalSpanItem(spanItems);
+        textPattern->SetExternalParagraphStyle(SpanModelNG::CreateParagraphStyle(value));
+#endif
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }

@@ -3197,4 +3197,14 @@ Offset TextPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
     selectOverlay_->RevertLocalPointWithTransform(localPoint);
     return Offset(localPoint.GetX(), localPoint.GetY());
 }
+
+void TextPattern::SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans)
+{
+    isSpanStringMode_ = !spans.empty();
+    spans_ = spans;
+    ProcessSpanString();
+    auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateContent(textForDisplay_);
+}
 } // namespace OHOS::Ace::NG

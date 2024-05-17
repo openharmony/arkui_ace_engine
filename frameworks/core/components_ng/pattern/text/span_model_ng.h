@@ -84,6 +84,7 @@ public:
 #ifdef USE_GRAPHIC_TEXT_GINE
     // impl in render/adapter/span_model_adapter.cpp
     static RefPtr<SpanItem> CreateSpanItem(ArkUI_SpanItem* item);
+    static ParagraphStyle CreateParagraphStyle(ArkUI_StyledString* styledString);
 #endif
 };
 } // namespace OHOS::Ace::NG
