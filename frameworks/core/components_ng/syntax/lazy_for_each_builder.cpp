@@ -288,8 +288,8 @@ namespace OHOS::Ace::NG {
     std::pair<int32_t, std::list<RefPtr<UINode>>> LazyForEachBuilder::OnDatasetChange(
         std::list<V2::Operation> DataOperations)
     {
-        int32_t initialIndex = GetTotalCount();
-        decltype(cachedItems_) cachedTemp(std::move(cachedItems_));
+        totalCountForDataset_ = GetTotalCount();
+        int32_t initialIndex = totalCountForDataset_;
         std::map<int32_t, LazyForEachChild> expiringTempItem_;
         for (auto& [key, cacheChild] : expiringItem_) {
             expiringTempItem_.try_emplace(cacheChild.first, LazyForEachChild(key, cacheChild.second));
@@ -301,11 +301,12 @@ namespace OHOS::Ace::NG {
         }
 
         for (auto operation : DataOperations) {
-            bool isReload = ClassifyOperation(operation, initialIndex, cachedTemp, expiringTemp);
+            bool isReload = ClassifyOperation(operation, initialIndex, cachedItems_, expiringTemp);
             if (isReload) {
                 return std::pair(initialIndex, std::move(nodeList));
             }
         }
+        decltype(cachedItems_) cachedTemp(std::move(cachedItems_));
         std::map<int32_t, int32_t> indexChangedMap;
         CollectIndexChangedCount(indexChangedMap);
         RepairDatasetItems(cachedTemp, cachedItems_, indexChangedMap);
@@ -399,6 +400,10 @@ namespace OHOS::Ace::NG {
     void LazyForEachBuilder::OperateAdd(V2::Operation& operation, int32_t& initialIndex)
     {
         OperationInfo itemInfo;
+        if (operation.index >= totalCountForDataset_) {
+            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Add(%{public}d) Operation is out of range", operation.index);
+            return;
+        }
         auto indexExist = operationList_.find(operation.index);
         if (indexExist == operationList_.end()) {
             itemInfo.changeCount = operation.count;
@@ -419,6 +424,10 @@ namespace OHOS::Ace::NG {
     void LazyForEachBuilder::OperateDelete(V2::Operation& operation, int32_t& initialIndex)
     {
         OperationInfo itemInfo;
+        if (operation.index >= totalCountForDataset_) {
+            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Delete(%{public}d) Operation is out of range", operation.index);
+            return;
+        }
         auto indexExist = operationList_.find(operation.index);
         if (indexExist == operationList_.end()) {
             itemInfo.changeCount = -operation.count;
@@ -443,6 +452,10 @@ namespace OHOS::Ace::NG {
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp)
     {
         OperationInfo itemInfo;
+        if (operation.index >= totalCountForDataset_) {
+            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Change(%{public}d) Operation is out of range", operation.index);
+            return;
+        }
         auto indexExist = operationList_.find(operation.index);
         if (indexExist == operationList_.end()) {
             itemInfo.isChanged = true;
@@ -470,6 +483,12 @@ namespace OHOS::Ace::NG {
     {
         OperationInfo fromInfo;
         OperationInfo toInfo;
+        if (operation.coupleIndex.first >= totalCountForDataset_ ||
+            operation.coupleIndex.second >= totalCountForDataset_) {
+            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Move(%{public}d, %{public}d) Operation is out of range",
+                operation.coupleIndex.first, operation.coupleIndex.second);
+            return;
+        }
         auto fromIndexExist = operationList_.find(operation.coupleIndex.first);
         auto toIndexExist = operationList_.find(operation.coupleIndex.second);
         if (fromIndexExist == operationList_.end()) {
@@ -508,6 +527,12 @@ namespace OHOS::Ace::NG {
     {
         OperationInfo startInfo;
         OperationInfo endInfo;
+        if (operation.coupleIndex.first >= totalCountForDataset_ ||
+            operation.coupleIndex.second >= totalCountForDataset_) {
+            TAG_LOGE(AceLogTag::ACE_LAZY_FOREACH, "Exchange(%{public}d, %{public}d) Operation is out of range",
+                operation.coupleIndex.first, operation.coupleIndex.second);
+            return;
+        }
         auto startIndexExist = operationList_.find(operation.coupleIndex.first);
         auto endIndexExist = operationList_.find(operation.coupleIndex.second);
         if (startIndexExist == operationList_.end()) {
@@ -578,6 +603,40 @@ namespace OHOS::Ace::NG {
             }
             cachedItems_.erase(index);
         }
+    }
+
+    bool LazyForEachBuilder::PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint,
+        bool canRunLongPredictTask)
+    {
+        ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
+        outOfBoundaryNodes_.clear();
+        if (itemConstraint && !canRunLongPredictTask) {
+            return false;
+        }
+        auto count = OnGetTotalCount();
+        std::unordered_map<std::string, LazyForEachCacheChild> cache;
+        std::set<int32_t> idleIndexes;
+        if (startIndex_ != -1 && endIndex_ != -1) {
+            CheckCacheIndex(idleIndexes, count);
+        }
+
+        ProcessCachedIndex(cache, idleIndexes);
+
+        bool result = true;
+        result = ProcessPreBuildingIndex(cache, deadline, itemConstraint, canRunLongPredictTask, idleIndexes);
+        if (!result) {
+            expiringItem_.swap(cache);
+            return result;
+        }
+
+        for (auto index : idleIndexes) {
+            result = PreBuildByIndex(index, cache, deadline, itemConstraint, canRunLongPredictTask);
+            if (!result) {
+                break;
+            }
+        }
+        expiringItem_.swap(cache);
+        return result;
     }
 
     void LazyForEachBuilder::RecordOutOfBoundaryNodes(int32_t index)
