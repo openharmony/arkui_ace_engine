@@ -57,6 +57,33 @@ public:
         targetNode->MarkModifyDone();
         return true;
     }
+
+    static bool ObtainSelectedTextStyle(NG::PickerTextStyle& textStyle)
+    {
+        if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
+            textStyle.textColor = themeColors.value().FontEmphasize();
+            return true;
+        }
+        return false;
+    }
+
+     static bool ObtainDisappearTextStyle(NG::PickerTextStyle& textStyle)
+    {
+        if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
+            textStyle.textColor = themeColors.value().FontPrimary();
+            return true;
+        }
+        return false;
+    }
+
+     static bool ObtainNormalTextStyle(NG::PickerTextStyle& textStyle)
+    {
+        if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
+            textStyle.textColor = themeColors.value().FontPrimary();
+            return true;
+        }
+        return false;
+    }
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_TIMEPICKER_THEME_H

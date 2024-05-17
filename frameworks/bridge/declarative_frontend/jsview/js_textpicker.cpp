@@ -966,7 +966,11 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
-    TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    if (JSTextPickerTheme::ObtainDisappearTextStyle(textStyle)) {
+        TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    } else {
+        TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    }
 }
 
 void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
@@ -977,7 +981,11 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
-    TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    if (JSTextPickerTheme::ObtainNormalTextStyle(textStyle)) {
+        TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    } else {
+        TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    }
 }
 
 void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
@@ -988,7 +996,11 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle);
     }
-    TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    if (!JSTextPickerTheme::ObtainSelectedTextStyle(textStyle)) {
+        TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    } else {
+        TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    }
 }
 
 void JSTextPicker::ProcessCascadeSelected(
