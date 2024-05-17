@@ -992,7 +992,6 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
             " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->isDragEndMenuShow_ = false;
         TAG_LOGI(AceLogTag::ACE_WEB,
             "DragDrop event WebEventHub onDragLeaveId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
             info->GetX(), info->GetY(), pattern->GetWebId());
@@ -1246,7 +1245,6 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
 {
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
-    isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1360,6 +1358,9 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
+    if (isReceivedArkDrag_) {
+        return;
+    }
     CloseContextSelectionMenu();
 }
 
@@ -2560,6 +2561,9 @@ void WebPattern::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, i
 
 void WebPattern::SelectCancel() const
 {
+    if (isReceivedArkDrag_) {
+        return;
+    }
     CHECK_NULL_VOID(menuCallback_);
     menuCallback_->Cancel();
 }
@@ -2665,16 +2669,8 @@ void WebPattern::DragDropSelectionMenu()
     if (!isDragEndMenuShow_ || IsImageDrag()) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto focusHub = eventHub->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsCurrentFocus()) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event web page has lost focus, no need to draw menu handles");
-        return;
-    }
+    CHECK_NULL_VOID(dropParams_);
+    CHECK_NULL_VOID(menuCallback_);
     SelectOverlayInfo selectInfo;
     selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
     selectInfo.firstHandle.isShow = IsTouchHandleShow(startSelectionHandle_);
