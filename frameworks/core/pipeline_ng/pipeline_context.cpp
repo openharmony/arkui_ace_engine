@@ -1490,11 +1490,15 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 void PipelineContext::SyncSafeArea(bool onKeyboard)
 {
     CHECK_NULL_VOID(stageManager_);
-    auto page = stageManager_->GetLastPageWithTransition();
-    if (page) {
-        page->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
+    auto lastPage = stageManager_->GetLastPageWithTransition();
+    auto prevPage = stageManager_->GetPrevPageWithTransition();
+    if (lastPage) {
+        lastPage->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
                                                                                        : PROPERTY_UPDATE_MEASURE);
-        page->GetPattern<PagePattern>()->MarkDirtyOverlay();
+        lastPage->GetPattern<PagePattern>()->MarkDirtyOverlay();
+    }
+    if (prevPage) {
+        prevPage->GetPattern<PagePattern>()->MarkDirtyOverlay();
     }
     SubwindowManager::GetInstance()->MarkDirtyDialogSafeArea();
     if (overlayManager_) {
