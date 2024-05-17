@@ -461,6 +461,10 @@ void WaterFlowLayoutInfo::InitMargins(
         ResetSegmentStartPos();
     }
     int32_t lastItem = static_cast<int32_t>(itemInfos_.size()) - 1;
+    if (GetSegment(lastItem) >= segmentTails_.size()) {
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Section data not initialized before layout");
+        return;
+    }
     if (segmentTails_[GetSegment(lastItem)] == lastItem) {
         SetNextSegmentStartPos(static_cast<int32_t>(itemInfos_.size()) - 1);
     }
