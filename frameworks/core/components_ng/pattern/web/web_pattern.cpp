@@ -4185,11 +4185,14 @@ bool WebPattern::GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t ac
     return true;
 }
 
-void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
+void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent,
+    TouchEventInfo& touchEventInfo, const std::string& embedId)
 {
+    CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto offset = host->GetOffsetRelativeToWindow();
+    auto offset = host->GetTransformRelativeOffset();
+
     TouchEventInfo tempTouchInfo = touchEventInfo_;
     if (touchEvent.type == TouchType::DOWN || touchEvent.type == TouchType::UP) {
         while (!touchEventQueue_.empty()) {
@@ -4199,11 +4202,7 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo&
             touchEventQueue_.pop();
         }
     }
-    if (touchEvent.type == TouchType::CANCEL) {
-        naitve_map_[touchEvent.id] = true;
-    } else {
-        naitve_map_[touchEvent.id] = false;
-    }
+    auto pos = delegate_->GetPosition(embedId);
     touchEventInfo.SetSourceDevice(tempTouchInfo.GetSourceDevice());
     touchEventInfo.SetTarget(tempTouchInfo.GetTarget());
     touchEventInfo.SetForce(tempTouchInfo.GetForce());
@@ -4213,8 +4212,10 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo&
 
     TouchLocationInfo changedInfo("onTouch", touchEvent.id);
     changedInfo.SetLocalLocation(Offset(touchEvent.x, touchEvent.y));
-    changedInfo.SetGlobalLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
-    changedInfo.SetScreenLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
+    changedInfo.SetGlobalLocation(Offset(touchEvent.x + offset.GetX() + pos.GetX(),
+        touchEvent.y + offset.GetY() + pos.GetY()));
+    changedInfo.SetScreenLocation(Offset(touchEvent.x + offset.GetX() + pos.GetX(),
+        touchEvent.y + offset.GetY() + pos.GetY()));
     changedInfo.SetTouchType(touchEvent.type);
 
     SetTouchLocationInfo(touchEvent, changedInfo, tempTouchInfo, touchEventInfo);
@@ -4249,11 +4250,7 @@ void WebPattern::SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchL
             info.SetGlobalLocation(Offset(globalLocation.GetX() - scaleX, globalLocation.GetY() - scaleY));
             info.SetLocalLocation(Offset(localLocation.GetX() - scaleX, localLocation.GetY() - scaleY));
             info.SetScreenLocation(Offset(screenLocation.GetX() - scaleX, screenLocation.GetY() - scaleY));
-            if (naitve_map_[location.GetFingerId()]) {
-                info.SetTouchType(TouchType::CANCEL);
-            } else {
-                info.SetTouchType(location.GetTouchType());
-            }
+            info.SetTouchType(location.GetTouchType());
         }
         touchEventInfo.AddTouchLocationInfo(std::move(info));
     }

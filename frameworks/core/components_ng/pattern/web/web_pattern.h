@@ -469,7 +469,8 @@ public:
     void UpdateJavaScriptOnDocumentEnd();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
-    void SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo);
+    void SetTouchEventInfo(const TouchEvent& touchEvent,
+        TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
@@ -829,7 +830,6 @@ private:
     ReachEdge isFlingReachEdge_ = { false, false };
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
-    std::unordered_map<int32_t, bool> naitve_map_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
     bool embedNeedKeyboard_ = false;
     double startPinchScale_ = -1.0;
