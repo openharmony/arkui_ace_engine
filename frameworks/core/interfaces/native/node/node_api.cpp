@@ -763,9 +763,9 @@ ArkUI_Int32 UnregisterCustomNodeEvent(ArkUINodeHandle node, ArkUI_Int32 eventTyp
 {
     auto companion = ViewModel::GetCompanion(node);
     CHECK_NULL_RETURN(companion, -1);
-    auto originEventType = companion->GetFlags();
+    auto originEventType = static_cast<uint32_t>(companion->GetFlags());
     //check is Contains
-    if ((originEventType & eventType) != eventType) {
+    if ((originEventType & static_cast<uint32_t>(eventType)) != static_cast<uint32_t>(eventType)) {
         return -1;
     }
     companion->SetFlags(static_cast<uint32_t>(originEventType) ^ static_cast<uint32_t>(eventType));

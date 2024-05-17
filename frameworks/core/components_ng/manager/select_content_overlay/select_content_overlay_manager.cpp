@@ -294,11 +294,11 @@ void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
     auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
     CHECK_NULL_VOID(pattern);
     std::optional<SelectHandleInfo> firstHandleInfo;
-    if ((updateFlag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE) {
+    if ((static_cast<uint32_t>(updateFlag) & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE) {
         firstHandleInfo = selectOverlayHolder_->GetFirstHandleInfo();
     }
     std::optional<SelectHandleInfo> secondHandleInfo;
-    if ((updateFlag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
+    if ((static_cast<uint32_t>(updateFlag) & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
         secondHandleInfo = selectOverlayHolder_->GetSecondHandleInfo();
     }
     if (!firstHandleInfo && !secondHandleInfo) {
