@@ -496,6 +496,7 @@ public:
             menuMap_.erase(targetId);
         }
     }
+    void DumpOverlayInfo() const;
 
 private:
     void PopToast(int32_t targetId);
@@ -599,6 +600,16 @@ private:
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
+
+    void DumpPopupMapInfo() const;
+    void DumpMapInfo(
+        std::unordered_map<int32_t, RefPtr<FrameNode>> map, const std::string mapName, bool hasTarget = true) const;
+    void DumpMapInfo(
+        std::unordered_map<int32_t, WeakPtr<FrameNode>> map, const std::string mapName, bool hasTarget = true) const;
+    void DumpMaskNodeIdMapInfo() const;
+    void DumpModalListInfo() const;
+    void DumpEntry(const RefPtr<FrameNode>& targetNode, int32_t targetId, const RefPtr<FrameNode>& node) const;
+    std::string GetMapNodeLog(const RefPtr<FrameNode>& node, bool hasTarget = true) const;
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
