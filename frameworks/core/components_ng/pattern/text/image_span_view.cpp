@@ -51,6 +51,12 @@ void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const Dimension& val
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value, frameNode);
 }
 
+void ImageSpanView::SetAlt(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
+{
+    auto srcInfo = ImageSourceInfo(pixMap);
+    ImageModelNG::SetAlt(frameNode, srcInfo);
+}
+
 void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

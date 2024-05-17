@@ -6563,6 +6563,20 @@ class ImageSpanBaselineOffsetModifier extends ModifierWithKey {
   }
 }
 ImageSpanBaselineOffsetModifier.identity = Symbol('imagespanBaselineOffset');
+class ImageSpanAltModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.resetAlt(node);
+    }
+    else {
+      getUINativeModule().imageSpan.setAlt(node, this.value);
+    }
+  }
+}
+ImageSpanAltModifier.identity = Symbol('imagespanAlt');
 class ArkImageSpanComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6581,6 +6595,10 @@ class ArkImageSpanComponent extends ArkComponent {
   }
   baselineOffset(value) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanBaselineOffsetModifier.identity, ImageSpanBaselineOffsetModifier, value);
+    return this;
+  }
+  alt(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanAltModifier.identity, ImageSpanAltModifier, value);
     return this;
   }
 }

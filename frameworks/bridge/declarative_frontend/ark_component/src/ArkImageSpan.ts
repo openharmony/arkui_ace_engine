@@ -89,6 +89,19 @@ class ImageSpanBaselineOffsetModifier extends ModifierWithKey<LengthMetrics> {
     }
   }
 }
+class ImageSpanAltModifier extends ModifierWithKey<PixelMap> {
+  constructor(value: PixelMap) {
+    super(value);
+  }
+  static identity = Symbol('imageSpanAlt');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageSpan.resetAlt(node);
+    } else {
+      getUINativeModule().imageSpan.setAlt(node, this.value!);
+    }
+  }
+}
 class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -107,6 +120,10 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   }
   baselineOffset(value: LengthMetrics): ImageSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageSpanBaselineOffsetModifier.identity, ImageSpanBaselineOffsetModifier, value);
+    return this;
+  }
+  alt(value: PixelMap): ImageSpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanAltModifier.identity, ImageSpanAltModifier, value);
     return this;
   }
 }
