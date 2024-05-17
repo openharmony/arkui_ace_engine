@@ -117,8 +117,7 @@ RefPtr<FocusView> FocusView::GetCurrentFocusView()
 
 RefPtr<FocusView> FocusView::GetEntryFocusView()
 {
-    auto entryFocusViewName = GetEntryFocusViewName();
-    if (entryFocusViewName.empty()) {
+    if (IsEntryFocusView()) {
         return AceType::Claim(this);
     }
     auto focusViewHub = GetFocusHub();
@@ -130,7 +129,7 @@ RefPtr<FocusView> FocusView::GetEntryFocusView()
             parentFocusHub = parentFocusHub->GetParentFocusHub();
             continue;
         }
-        if (entryFocusViewName == ENTRY_ANY_FOCUSVIEW || entryFocusViewName == parentFocusView->GetFrameName()) {
+        if (parentFocusView->IsEntryFocusView()) {
             return parentFocusView;
         }
         parentFocusHub = parentFocusHub->GetParentFocusHub();

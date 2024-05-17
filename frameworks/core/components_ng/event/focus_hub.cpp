@@ -1850,7 +1850,7 @@ RefPtr<FocusHub> FocusHub::GetChildFocusNodeByType(FocusNodeType nodeType)
             continue;
         }
         auto childFocusView = childFrame->GetPattern<FocusView>();
-        if (childFocusView && childFocusView->IsFocusViewLegal()) {
+        if (childFocusView && childFocusView->IsFocusViewLegal() && childFocusView->IsEntryFocusView()) {
             continue;
         }
         auto findNode = child->GetChildFocusNodeByType(nodeType);
