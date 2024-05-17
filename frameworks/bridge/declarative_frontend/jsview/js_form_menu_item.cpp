@@ -19,6 +19,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_form_menu_item.h"
 #include "bridge/declarative_frontend/jsview/models/form_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/menu_item_model_impl.h"
@@ -104,6 +105,12 @@ void JSFormMenuItem::JsOnClick(const JSCallbackInfo& info)
 
     std::string compId;
     JSViewAbstract::ParseJsString(info[NUM_ID_2], compId);
+    if (compId.empty()) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "JsOnClick compId is empty");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter compId check failed.");
+        return;
+    }
+
     JSRef<JSVal> wantValue = JSRef<JSVal>::Cast(info[NUM_WANT_1]);
     if (wantValue->IsNull()) {
         TAG_LOGI(AceLogTag::ACE_FORM, "JsOnClick wantValue is null");
