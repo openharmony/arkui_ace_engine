@@ -2097,34 +2097,38 @@ const Repeat = (arr, owningView) => {
 *
 * everything in this file is framework internal
 */
+var LogTag;
+(function (LogTag) {
+    LogTag[LogTag["STATE_MGMT"] = 0] = "STATE_MGMT";
+})(LogTag || (LogTag = {}));
 class stateMgmtConsole {
     static log(...args) {
-        aceConsole.log(...args);
+        aceConsole.log(LogTag.STATE_MGMT, ...args);
     }
     static debug(...args) {
-        aceConsole.debug(...args);
+        aceConsole.debug(LogTag.STATE_MGMT, ...args);
     }
     static info(...args) {
-        aceConsole.info(...args);
+        aceConsole.info(LogTag.STATE_MGMT, ...args);
     }
     static warn(...args) {
-        aceConsole.warn(...args);
+        aceConsole.warn(LogTag.STATE_MGMT, ...args);
     }
     static error(...args) {
-        aceConsole.error(...args);
+        aceConsole.error(LogTag.STATE_MGMT, ...args);
     }
     static propertyAccess(...args) {
         // enable for fine grain debugging variable observation
         // aceConsole.error(...args)
     }
     static applicationError(...args) {
-        aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
+        aceConsole.error(LogTag.STATE_MGMT, `FIX THIS APPLICATION ERROR \n`, ...args);
     }
     static applicationWarn(...args) {
-        aceConsole.warn(...args);
+        aceConsole.warn(LogTag.STATE_MGMT, ...args);
     }
     static featureCombinationError(msg) {
-        aceConsole.warn(msg);
+        aceConsole.warn(LogTag.STATE_MGMT, msg);
     }
 }
 class stateMgmtTrace {
