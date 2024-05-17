@@ -852,7 +852,9 @@ void JSList::BindInteractableViewMethods()
     JSClass<JSList>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSList>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSList>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSList>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSList>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSList>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSList>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 }
 

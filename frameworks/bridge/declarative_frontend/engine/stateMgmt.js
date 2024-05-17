@@ -6573,11 +6573,11 @@ class ViewPU extends PUV2ViewBase {
         this.rebuildUpdateFunc(oldElmtId, compilerAssignedUpdateFunc);
         recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
     }
-    aboutToReuseInternal() {
+    aboutToReuseInternal(param) {
         this.runReuse_ = true;
         stateMgmtTrace.scopedTrace(() => {
             if (this.paramsGenerator_ && typeof this.paramsGenerator_ === 'function') {
-                const params = this.paramsGenerator_();
+                const params = param ? param : this.paramsGenerator_();
                 this.updateStateVars(params);
                 this.aboutToReuse(params);
             }

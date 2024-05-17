@@ -89,9 +89,7 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 
     auto frameRect = geometryNode->GetFrameSize();
     CreateDragWindow(info, static_cast<uint32_t>(frameRect.Width()), static_cast<uint32_t>(frameRect.Height()));
-    if (!dragWindow_) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(dragWindow_, nullptr);
     dragWindow_->DrawFrameNode(dragWindowRootNode_);
 #endif
     currentId_ = ++g_proxyId;
@@ -119,6 +117,8 @@ void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width,
         windowX + rect.Left(), windowY + rect.Top(), width, height);
     if (dragWindow_) {
         dragWindow_->SetOffset(rect.Left(), rect.Top());
+    } else {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Create drag window failed!");
     }
 #endif
 }

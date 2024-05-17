@@ -206,6 +206,7 @@ struct MouseEvent final {
             .SetSourceType(sourceType)
             .SetSourceTool(sourceTool)
             .SetPointerEvent(pointerEvent)
+            .SetTouchEventId(touchEventId)
             .SetOriginalId(GetId())
             .SetIsInjected(isInjected);
         event.pointers.emplace_back(std::move(point));

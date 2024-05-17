@@ -127,7 +127,9 @@ void JSColumn::JSBind(BindingTarget globalObj)
     JSClass<JSColumn>::StaticMethod("height", &JSFlex::JsHeight, opt);
     JSClass<JSColumn>::StaticMethod("width", &JSFlex::JsWidth, opt);
     JSClass<JSColumn>::StaticMethod("size", &JSFlex::JsSize, opt);
+    JSClass<JSColumn>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSColumn>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSColumn>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSColumn>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSColumn>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSColumn>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

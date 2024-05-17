@@ -678,9 +678,14 @@ private:
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
     void DelTouchOverlayInfoByTouchId(int32_t touchId);
     std::optional<OffsetF> GetCoordinatePoint();
-    void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
+    static void InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNode>>& options,
+        const std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback>& callback,
+        const std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam>& params,
+        const double& dipScale);
+    static void InitSelectPopupMenuView(RefPtr<FrameNode>& menuWrapper,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
-        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+        const double& dipScale);
     OffsetF GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound);
     void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
     bool GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t accessibilityId) const;

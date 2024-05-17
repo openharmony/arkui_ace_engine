@@ -798,6 +798,11 @@ bool FlexLayoutAlgorithm::MarginOnMainAxisNegative(LayoutWrapper* layoutWrapper)
     return LessNotEqual(margin->top.value_or(0.0f) + margin->bottom.value_or(0.0f), 0.0f);
 }
 
+bool FlexLayoutAlgorithm::CheckSetConstraint(const std::unique_ptr<MeasureProperty>& propertyPtr)
+{
+    return propertyPtr && (propertyPtr->minSize || propertyPtr->maxSize);
+}
+
 void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
@@ -805,11 +810,14 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
      * Obtain the main axis size and cross axis size based on user setting.
      */
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& rawConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+    bool needToConstraint = CheckSetConstraint(rawConstraint);
     const auto& measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
     InitFlexProperties(layoutWrapper);
     Axis axis = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? Axis::HORIZONTAL
                                                                                                : Axis::VERTICAL;
-    auto realSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), axis, measureType).ConvertToSizeT();
+    auto realSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), axis, measureType, needToConstraint,
+        rawConstraint).ConvertToSizeT();
     if (children.empty()) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
         return;

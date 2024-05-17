@@ -818,11 +818,12 @@ abstract class ViewPU extends PUV2ViewBase
     recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
   }
 
-  aboutToReuseInternal() {
+  // param is used by BuilderNode
+  aboutToReuseInternal(param?: Object) {
     this.runReuse_ = true;
     stateMgmtTrace.scopedTrace(() => {
       if (this.paramsGenerator_ && typeof this.paramsGenerator_ === 'function') {
-        const params = this.paramsGenerator_();
+        const params = param ? param : this.paramsGenerator_();
         this.updateStateVars(params);
         this.aboutToReuse(params);
       }

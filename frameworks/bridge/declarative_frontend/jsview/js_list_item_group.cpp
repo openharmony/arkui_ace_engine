@@ -224,7 +224,9 @@ void JSListItemGroup::JSBind(BindingTarget globalObj)
     JSClass<JSListItemGroup>::StaticMethod("aspectRatio", &JSListItemGroup::SetAspectRatio);
     JSClass<JSListItemGroup>::StaticMethod("childrenMainSize", &JSListItemGroup::SetChildrenMainSize);
     JSClass<JSListItemGroup>::StaticMethod("divider", &JSListItemGroup::SetDivider);
+    JSClass<JSListItemGroup>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSListItemGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSListItemGroup>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSListItemGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSListItemGroup>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
 

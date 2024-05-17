@@ -19,7 +19,9 @@ namespace OHOS::Ace {
 class MockAceApplicationInfo : public AceApplicationInfo {
     void SetLocale(const std::string& language, const std::string& countryOrRegion, const std::string& script,
         const std::string& keywordsAndValues) override
-    {}
+    {
+        language_ = language;
+    }
     void ChangeLocale(const std::string& language, const std::string& countryOrRegion) override {}
 
     void SetDebug(bool isDebugVersion, bool needDebugBreakpoint) override {}

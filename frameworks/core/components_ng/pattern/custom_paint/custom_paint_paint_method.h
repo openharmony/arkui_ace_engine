@@ -16,27 +16,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PAINT_METHOD_H
 
-#include "include/core/SkSamplingOptions.h"
-#include "modules/svg/include/SkSVGDOM.h"
-
-#include "rosen_text/typography.h"
-#include "include/core/SkCanvas.h"
-#include "include/core/SkPath.h"
-
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/pattern/custom_paint/canvas_modifier.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
+#ifndef ACE_UNITTEST
 #include "core/image/image_loader.h"
 #include "core/image/image_object.h"
 #include "core/image/image_source_info.h"
+#endif
 #include "core/pipeline_ng/pipeline_context.h"
-
-namespace OHOS::Rosen {
-class RSRecordingCanvas;
-}
 
 namespace OHOS::Ace::NG {
 enum class FilterType {
@@ -57,11 +50,6 @@ struct FilterProperty {
     FilterType filterType_;
     std::string filterParam_;
 };
-
-// BT.709
-constexpr float LUMR = 0.2126f;
-constexpr float LUMG = 0.7152f;
-constexpr float LUMB = 0.0722f;
 
 class CustomPaintPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CustomPaintPaintMethod, NodePaintMethod)
@@ -390,16 +378,20 @@ protected:
     virtual void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) = 0;
     virtual void ImageObjFailed() = 0;
     std::shared_ptr<RSImage> GetImage(const std::string& src);
+#ifndef ACE_UNITTEST
     void GetSvgRect(const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage,
         RSRect* srcRect, RSRect* dstRect);
+#endif
     void DrawSvgImage(const Ace::CanvasImage& canvasImage);
     virtual RSCanvas* GetRawPtrOfRSCanvas() = 0;
     virtual void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
         const RSBrush* brush, const RSPen* pen) = 0;
-    double GetAlignOffset(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
-    OHOS::Rosen::TextAlign GetEffectiveAlign(OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const;
+    double GetAlignOffset(TextAlign align, std::unique_ptr<RSParagraph>& paragraph);
+    RSTextAlign GetEffectiveAlign(RSTextAlign align, RSTextDirection direction) const;
+#ifndef ACE_UNITTEST
     double GetFontBaseline(const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const;
-    double GetFontAlign(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph) const;
+    double GetFontAlign(TextAlign align, std::unique_ptr<RSParagraph>& paragraph) const;
+#endif
     void ResetStates();
     void DrawImageInternal(const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image);
 
@@ -411,15 +403,15 @@ protected:
 
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     std::stack<PaintHolder> saveStates_;
-    std::stack<SkMatrix> matrixStates_;
-    SkMatrix matrix_;
+    std::stack<RSMatrix> matrixStates_;
+    RSMatrix matrix_;
 
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";
     bool antiAlias_ = false;
     Shadow shadow_;
     std::function<void(RSCanvas*, double, double)> canvasCallback_ = nullptr;
-    std::unique_ptr<Rosen::Typography> paragraph_;
+    std::unique_ptr<RSParagraph> paragraph_;
 
     WeakPtr<PipelineBase> context_;
 
@@ -429,17 +421,19 @@ protected:
     RSSamplingOptions sampleOptions_;
     std::shared_ptr<RSCanvas> rsCanvas_;
 
-    sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     Ace::CanvasImage canvasImage_;
     std::string filterParam_ = "";
     std::unique_ptr<Shadow> imageShadow_;
 
+#ifndef ACE_UNITTEST
+    sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     ImageSourceInfo currentSource_;
     ImageSourceInfo loadingSource_;
     ImageObjSuccessCallback imageObjSuccessCallback_;
     UploadSuccessCallback uploadSuccessCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
     FailedCallback failedCallback_;
+#endif
 
     RefPtr<CanvasModifier> contentModifier_;
     std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas_;

@@ -72,7 +72,9 @@ void JSGauge::JSBind(BindingTarget globalObj)
     JSClass<JSGauge>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGauge>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSGauge>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSGauge>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSGauge>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSGauge>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSGauge>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
 
     JSClass<JSGauge>::InheritAndBind<JSViewAbstract>(globalObj);

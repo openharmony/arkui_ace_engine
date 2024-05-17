@@ -14,13 +14,9 @@
  */
 
 #include "core/components_ng/pattern/custom_paint/canvas_modifier.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_ng/render/drawing.h"
 
-#ifdef ENABLE_ROSEN_BACKEND
-#include "pipeline/rs_recording_canvas.h"
-#include "pipeline/rs_paint_filter_canvas.h"
-#endif
+#include "base/utils/utils.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 CanvasModifier::CanvasModifier()
@@ -32,53 +28,10 @@ CanvasModifier::CanvasModifier()
 void CanvasModifier::onDraw(DrawingContext& drawingContext)
 {
     ACE_SCOPED_TRACE("CanvasModifier::onDraw");
-#ifndef USE_ROSEN_DRAWING
-    auto skCanvas = drawingContext.canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
-
-    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    if (!recordingCanvas || !rsRecordingCanvas_) {
-        return;
-    }
-
-    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
-    if (!drawCmdList) {
-        return;
-    }
-
-    auto rsDrawCmdList = recordingCanvas->GetDrawCmdList();
-    CHECK_NULL_VOID(rsDrawCmdList);
-    recordingCanvasDrawSize_.SetWidth(rsDrawCmdList->GetWidth());
-    recordingCanvasDrawSize_.SetHeight(rsDrawCmdList->GetHeight());
-    drawCmdSize_.SetWidth(drawCmdList->GetWidth());
-    drawCmdSize_.SetHeight(drawCmdList->GetHeight());
-    rsDrawCmdList->SetWidth(drawCmdList->GetWidth());
-    rsDrawCmdList->SetHeight(drawCmdList->GetHeight());
-
-    if (needResetSurface_) {
-        CHECK_NULL_VOID(renderContext_.Upgrade());
-        renderContext_.Upgrade()->ResetSurface();
-        needResetSurface_ = false;
-    }
-
-    if (drawCmdList->GetSize() == 0) {
-        return;
-    }
-    auto canvas = std::make_shared<OHOS::Rosen::RSPaintFilterCanvas>(recordingCanvas);
-    CHECK_NULL_VOID(canvas);
-    canvas->SetRecordingState(true);
-    drawCmdList->Playback(*canvas);
-    rsRecordingCanvas_->Clear();
-#else
-    if (!rsRecordingCanvas_) {
-        return;
-    }
-
+    CHECK_NULL_VOID(rsRecordingCanvas_);
     auto& recordingCanvas = drawingContext.canvas;
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
-    if (!drawCmdList) {
-        return;
-    }
-
+    CHECK_NULL_VOID(drawCmdList);
     auto rsDrawCmdList = static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList();
     CHECK_NULL_VOID(rsDrawCmdList);
     recordingCanvasDrawSize_.SetWidth(rsDrawCmdList->GetWidth());
@@ -100,7 +53,6 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
     }
     drawCmdList->Playback(recordingCanvas);
     rsRecordingCanvas_->Clear();
-#endif
 }
 
 std::string CanvasModifier::GetDumpInfo()

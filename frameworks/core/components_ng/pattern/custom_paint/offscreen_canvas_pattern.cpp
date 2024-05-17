@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
-#include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
-
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"

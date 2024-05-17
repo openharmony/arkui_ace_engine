@@ -435,11 +435,23 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
 #endif
 }
 
-void RosenRenderSurface::releaseSurfaceBuffers()
+void RosenRenderSurface::ReleaseSurfaceBuffers()
 {
 #ifdef OHOS_PLATFORM
     CHECK_NULL_VOID(producerSurface_);
     producerSurface_->CleanCache();
+    CHECK_NULL_VOID(consumerSurface_);
+    {
+        std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+        while (availableBuffers_.size() > 1) {
+            auto surfaceNode = availableBuffers_.front();
+            availableBuffers_.pop();
+            if (surfaceNode) {
+                consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
+            }
+        }
+    }
+    consumerSurface_->CleanCache();
 #endif
 }
 

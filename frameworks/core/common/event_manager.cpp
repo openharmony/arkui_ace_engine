@@ -1706,4 +1706,82 @@ void EventManager::CleanGestureEventHub()
     hittedFrameNode_.clear();
 }
 
+void EventManager::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type)
+{
+    CheckAndLogLastReceivedEventInfo(
+        eventId, type == TouchType::DOWN || type == TouchType::UP || type == TouchType::CANCEL);
+}
+
+void EventManager::CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type)
+{
+    CheckAndLogLastConsumedEventInfo(
+        eventId, type == TouchType::DOWN || type == TouchType::UP || type == TouchType::CANCEL);
+}
+
+void EventManager::CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action)
+{
+    CheckAndLogLastReceivedEventInfo(eventId, action == MouseAction::PRESS || action == MouseAction::RELEASE);
+}
+
+void EventManager::CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action)
+{
+    CheckAndLogLastConsumedEventInfo(eventId, action == MouseAction::PRESS || action == MouseAction::RELEASE);
+}
+
+void EventManager::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action)
+{
+    CheckAndLogLastReceivedEventInfo(
+        eventId, action == AxisAction::BEGIN || action == AxisAction::END || action == AxisAction::CANCEL);
+}
+
+void EventManager::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action)
+{
+    CheckAndLogLastConsumedEventInfo(
+        eventId, action == AxisAction::BEGIN || action == AxisAction::END || action == AxisAction::CANCEL);
+}
+
+void EventManager::CheckAndLogLastReceivedEventInfo(int32_t eventId, bool logImmediately)
+{
+    if (logImmediately) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "Received new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
+            lastReceivedEvent_.eventId);
+        return;
+    }
+    auto currentTime = GetSysTimestamp();
+    auto lastLogTimeStamp = lastReceivedEvent_.lastLogTimeStamp;
+    if (lastReceivedEvent_.lastLogTimeStamp != 0 &&
+        (currentTime - lastReceivedEvent_.lastLogTimeStamp) > EVENT_CLEAR_DURATION * TRANSLATE_NS_TO_MS) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "Received new event id=%{public}d has been more than a second since the last one event "
+            "received "
+            "in ace_container, lastEventInfo: id:%{public}d",
+            eventId, lastReceivedEvent_.eventId);
+        lastLogTimeStamp = currentTime;
+    }
+    lastReceivedEvent_ = { eventId, lastLogTimeStamp };
+}
+
+void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately)
+{
+    if (logImmediately) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "Consumed new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
+            lastReceivedEvent_.eventId);
+        return;
+    }
+    auto currentTime = GetSysTimestamp();
+    auto lastLogTimeStamp = lastReceivedEvent_.lastLogTimeStamp;
+    if (lastConsumedEvent_.lastLogTimeStamp != 0 &&
+        (currentTime - lastConsumedEvent_.lastLogTimeStamp) > EVENT_CLEAR_DURATION * TRANSLATE_NS_TO_MS) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "Consumed new event id=%{public}d has been more than a second since the last one event "
+            "markProcessed "
+            "in ace_container, lastEventInfo: id:%{public}d",
+            eventId, lastConsumedEvent_.eventId);
+        lastLogTimeStamp = currentTime;
+    }
+    lastConsumedEvent_ = { eventId, lastLogTimeStamp };
+}
+
 } // namespace OHOS::Ace

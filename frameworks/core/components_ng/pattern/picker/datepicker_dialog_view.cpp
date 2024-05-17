@@ -287,6 +287,9 @@ void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNod
     auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER);
     imageSourceInfo.SetSrc(iconPath);
     imageSourceInfo.SetFillColor(pickerTheme->GetTitleStyle().GetTextColor());
+    auto spinnerRenderProperty = spinnerNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(spinnerRenderProperty);
+    spinnerRenderProperty->UpdateSvgFillColor(pickerTheme->GetTitleStyle().GetTextColor());
 
     auto spinnerLayoutProperty = spinnerNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);

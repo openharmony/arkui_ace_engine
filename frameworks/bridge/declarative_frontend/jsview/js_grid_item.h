@@ -54,9 +54,7 @@ protected:
 #define ACE_DEFINE_SET_GRID_ITEM_SIZE(name)                                      \
     static void SetGridItem##name(const JSCallbackInfo& info)                    \
     {                                                                            \
-        if (info.Length() < 1) {                                                 \
-            return;                                                              \
-        }                                                                        \
+        CHECK_EQUAL_VOID(info.Length() < 1, true);                               \
         if (!JSViewAbstract::Js##name(info[0])) {                                \
             return;                                                              \
         }                                                                        \

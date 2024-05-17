@@ -15,24 +15,19 @@
 
 #include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
 
-#include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 #include "core/components_ng/pattern/custom_paint/canvas_modifier.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "base/log/dump_log.h"
-
-namespace {} // namespace
+#include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
+#include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
+#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
-class RosenRenderContext;
 CanvasPattern::~CanvasPattern()
 {
     if (IsSupportImageAnalyzerFeature()) {
@@ -42,12 +37,13 @@ CanvasPattern::~CanvasPattern()
 
 void CanvasPattern::OnAttachToFrameNode()
 {
+#ifndef ACE_UNITTEST
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderCtx = host->GetRenderContext();
     renderCtx->SetClipToBounds(false);
     renderCtx->SetUsingContentRectForRenderFrame(true);
-    renderCtx->SetFrameGravity(OHOS::Rosen::Gravity::RESIZE_ASPECT_FILL);
+    renderCtx->SetFrameGravity(Rosen::Gravity::RESIZE_ASPECT_FILL);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
@@ -55,6 +51,7 @@ void CanvasPattern::OnAttachToFrameNode()
         contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
     }
     paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context, contentModifier_, host);
+#endif
 }
 
 RefPtr<NodePaintMethod> CanvasPattern::CreateNodePaintMethod()
@@ -380,8 +377,7 @@ std::unique_ptr<Ace::ImageData> CanvasPattern::GetImageData(double left, double 
     if (!host) {
         return paintMethod_->GetImageData(nullptr, left, top, width, height);
     }
-    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(host->GetRenderContext());
-    return paintMethod_->GetImageData(rosenRenderContext, left, top, width, height);
+    return paintMethod_->GetImageData(host->GetRenderContext(), left, top, width, height);
 }
 
 void CanvasPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
@@ -745,8 +741,7 @@ std::string CanvasPattern::ToDataURL(const std::string& args)
     if (!host) {
         return paintMethod_->ToDataURL(nullptr, args);
     }
-    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(host->GetRenderContext());
-    return paintMethod_->ToDataURL(rosenRenderContext, args);
+    return paintMethod_->ToDataURL(host->GetRenderContext(), args);
 }
 
 std::string CanvasPattern::GetJsonData(const std::string& path)

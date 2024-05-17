@@ -66,6 +66,8 @@ public:
     static ArkUINativeModuleValue ResetDynamicRangeMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnhancedImageQuality(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnhancedImageQuality(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue EnableAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue AnalyzerConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

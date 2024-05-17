@@ -59,5 +59,30 @@ void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
     auto clipRect = RSRect(
         clipOffset.GetX(), clipOffset.GetY(), clipOffset.GetX() + size.Width(), clipOffset.GetY() + size.Height());
     drawingContext.canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+    PaintCustomSpan(drawingContext);
+}
+
+void RichEditorContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
+{
+    CHECK_NULL_VOID(pManager_);
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    auto offset = richEditorPattern->GetTextRect().GetOffset();
+    const auto& rectsForPlaceholders = richEditorPattern->GetRectsForPlaceholders();
+    auto customSpanPlaceholderInfo = richEditorPattern->GetCustomSpanPlaceholderInfo();
+    for (auto& customSpanPlaceholder : customSpanPlaceholderInfo) {
+        if (!customSpanPlaceholder.onDraw) {
+            continue;
+        }
+        auto index = customSpanPlaceholder.customSpanIndex;
+        const auto& rect = rectsForPlaceholders.at(index);
+        auto lineMetrics = pManager_->GetLineMetricsByRectF(rect, customSpanPlaceholder.paragraphIndex);
+        CustomSpanOptions customSpanOptions;
+        customSpanOptions.x = static_cast<double>(rect.Left()) + offset.GetX();
+        customSpanOptions.lineTop = lineMetrics.y + offset.GetY();
+        customSpanOptions.lineBottom = customSpanOptions.lineTop + lineMetrics.height;
+        customSpanOptions.baseline = customSpanOptions.lineTop + lineMetrics.ascender;
+        customSpanPlaceholder.onDraw(drawingContext, customSpanOptions);
+    }
 }
 } // namespace OHOS::Ace::NG

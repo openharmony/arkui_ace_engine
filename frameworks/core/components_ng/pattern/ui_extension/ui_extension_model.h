@@ -60,6 +60,8 @@ public:
     virtual void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive);
     virtual void SetOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);
+    virtual void SetPlatformOnError(
+        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);
 
 private:
     static std::unique_ptr<UIExtensionModel> instance_;

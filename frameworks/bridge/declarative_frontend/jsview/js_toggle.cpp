@@ -79,7 +79,9 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSToggle>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSToggle>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSToggle>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSToggle>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSToggle>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSToggle>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSToggle>::InheritAndBind<JSViewAbstract>(globalObj);
 }

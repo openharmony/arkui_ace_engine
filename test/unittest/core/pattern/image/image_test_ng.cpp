@@ -2510,7 +2510,7 @@ HWTEST_F(ImageTestNg, ImagePixelMapListTest0001, TestSize.Level1)
     EXPECT_TRUE(imagePattern->images_.size() == 2);
     EXPECT_EQ(imagePattern->GetIsAnimation(), true);
     EXPECT_EQ(imagePattern->status_, static_cast<Animator::Status>(STATE_START));
-    EXPECT_EQ(imagePattern->durationTotal_, DURATION_DEFAULT);
+    EXPECT_EQ(imagePattern->durationTotal_, 0);
     EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
     EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
 }
