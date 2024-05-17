@@ -208,6 +208,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
         }
         if (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PREVIOUS)) {
             information += (" previous-focus-in-" + focusScopeId_);
+        }
         auto focusMgr = GetFocusManager();
         if (focusMgr && focusMgr == this) {
             information += " [Painted]";
