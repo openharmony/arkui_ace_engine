@@ -486,14 +486,16 @@ export struct ChipComponent {
   }
 
   private getChipNodePadding(): Padding {
-    return (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ? this.theme.chipNode.smallPadding : this.theme.chipNode.normalPadding
+    return (this.isChipSizeEnum() && 
+      this.chipSize === ChipSize.SMALL) ? this.theme.chipNode.smallPadding : this.theme.chipNode.normalPadding
   }
 
   private getChipNodeRadius(): Dimension {
     if (this.chipNodeRadius !== void (0) && this.toVp(this.chipNodeRadius) >= 0) {
       return this.chipNodeRadius as Dimension
     } else {
-      return ((this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ? this.theme.chipNode.smallBorderRadius : this.theme.chipNode.normalBorderRadius)
+      return ((this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ?
+        this.theme.chipNode.smallBorderRadius : this.theme.chipNode.normalBorderRadius)
     }
   }
 
@@ -502,8 +504,7 @@ export struct ChipComponent {
 
     if (this.getChipActive()) {
       currentColor = this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor
-    }
-    else {
+    } else {
       currentColor = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
     }
 
@@ -533,7 +534,8 @@ export struct ChipComponent {
       return this.chipSize === ChipSize.SMALL ? this.theme.chipNode.smallHeight : this.theme.chipNode.normalHeight
     } else {
       this.chipNodeSize = this.chipSize as SizeOptions
-      return (this.chipNodeSize?.height !== void (0) && this.toVp(this.chipNodeSize?.height) >= 0) ? this.toVp(this.chipNodeSize?.height) : this.theme.chipNode.normalHeight
+      return (this.chipNodeSize?.height !== void (0) && this.toVp(this.chipNodeSize?.height) >= 0) ?
+        this.toVp(this.chipNodeSize?.height) : this.theme.chipNode.normalHeight
     }
   }
 
@@ -660,7 +662,8 @@ export struct ChipComponent {
       }
     }
     let constraintWidth: ConstraintSizeOptions = this.getChipConstraintWidth()
-    return Math.min(Math.max(this.getCalculateChipNodeWidth(), constraintWidth.minWidth as number), constraintWidth.maxWidth as number);
+    return Math.min(Math.max(this.getCalculateChipNodeWidth(),
+      constraintWidth.minWidth as number), constraintWidth.maxWidth as number);
   }
 
   private getFocusOverlaySize(): SizeOptions {
@@ -906,8 +909,7 @@ export struct ChipComponent {
     .onHover((isHover: boolean) => {
       if (this.isShowPressedBackGroundColor == false) {
         this.isShowPressedBackGroundColor = true
-      }
-      else {
+      } else {
         this.isShowPressedBackGroundColor = false
       }
 
