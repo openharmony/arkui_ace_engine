@@ -560,7 +560,6 @@ void FocusHub::RefreshFocus()
 
     // lost current focus and request another focus
     auto parent = GetParentFocusHub();
-
     // current node is root node
     if (!parent) {
         LostFocus();
