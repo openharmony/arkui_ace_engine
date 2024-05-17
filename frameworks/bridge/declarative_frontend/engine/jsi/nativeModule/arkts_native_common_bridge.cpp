@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include <utility>
+
+#include "ark_native_engine.h"
+#include "jsnapi_expo.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
@@ -22,9 +26,11 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -6588,4 +6594,52 @@ ArkUINativeModuleValue CommonBridge::SetSystemBarEffect(ArkUIRuntimeCallInfo* ru
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0); // frameCallback
+    if (firstArg->IsNull() || firstArg->IsUndefined() || !firstArg->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameCallback = firstArg->ToObject(vm);
+
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    int64_t delayMillis = 0;
+    if (secondArg->IsNumber()) {
+        delayMillis = secondArg->IntegerValue(vm);
+    }
+
+    FrameCallbackFunc frameCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback),
+                                              delayMillis](int64_t nanoTimestamp) -> void {
+        if (frameCallbackObj->IsNull() || frameCallbackObj->IsUndefined() || !frameCallbackObj->IsObject()) {
+            return;
+        }
+        Local<FunctionRef> onFrameFunc = frameCallbackObj->Get(vm, "onFrame");
+        if (!onFrameFunc->IsFunction()) {
+            return;
+        }
+
+        auto nanoTimestampRef = NumberRef::New(vm, nanoTimestamp);
+        Local<JSValueRef> params[] = { nanoTimestampRef };
+        onFrameFunc->Call(vm, frameCallbackObj.ToLocal(), params, 1);
+    };
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, panda::JSValueRef::Undefined(vm));
+    if (delayMillis <= 0) {
+        context->AddFrameCallback(std::move(frameCallbackFunc));
+    } else {
+        auto taskScheduler = context->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskScheduler, panda::JSValueRef::Undefined(vm));
+        taskScheduler->PostDelayedTask(
+            [context, callbackFunc = std::move(frameCallbackFunc)]() -> void {
+                auto callback = const_cast<FrameCallbackFunc&>(callbackFunc);
+                context->AddFrameCallback(std::move(callback));
+            },
+            TaskExecutor::TaskType::UI, delayMillis, "ArkUIPostFrameCallbackFuncDelayed");
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG
