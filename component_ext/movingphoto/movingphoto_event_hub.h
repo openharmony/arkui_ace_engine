@@ -40,7 +40,8 @@ public:
         onStart_ = std ::move(onStart);
     }
 
-    MovingPhotoEventFunc GetOnStart(){
+    MovingPhotoEventFunc GetOnStart()
+    {
         return onStart_;
     }
 
@@ -70,7 +71,8 @@ public:
         onStop_ = std ::move(onStop);
     }
 
-    MovingPhotoEventFunc GetOnStop(){
+    MovingPhotoEventFunc GetOnStop()
+    {
         return onStop_;
     }
 
@@ -87,7 +89,8 @@ public:
         onFinish_ = std ::move(onFinish);
     }
 
-    MovingPhotoEventFunc GetOnFinish(){
+    MovingPhotoEventFunc GetOnFinish()
+    {
         return onFinish_;
     }
 
@@ -104,7 +107,8 @@ public:
         onError_ = std ::move(onError);
     }
 
-    MovingPhotoEventFunc GetOnError(){
+    MovingPhotoEventFunc GetOnError()
+    {
         return onError_;
     }
 

@@ -15,8 +15,8 @@
 
 #include "gtest/gtest.h"
 
-#define private public
-#define protected public
+#define PRIVATE public
+#define PROTECTED public
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_media_player.h"
@@ -58,7 +58,7 @@ struct TestProperty {
     std::optional<std::string> imageSrc;
     std::optional<bool> muted;
     std::optional<ImageFit> objectFit;
-    std::optional<RefPtr<MovingPhotoController>> movingPhotoController; 
+    std::optional<RefPtr<MovingPhotoController>> movingPhotoController;
 };
 namespace {
     constexpr bool MUTED_VALUE = false;
@@ -67,19 +67,19 @@ namespace {
     const std::string MOVINGPHOTO_IMAGE_SRC = "common/video.mp4";
     constexpr float MAX_WIDTH = 400.0f;
     constexpr float MAX_HEIGHT = 400.0f;
-    constexpr float MOVINGPHOTO_WIDTH = 300.0f;
+    constexpr float MP_WIDTH = 300.0f;
     constexpr float MOVINGPHOTO_HEIGHT = 300.0f;
     constexpr float SCREEN_WIDTH_SMALL = 500.0f;
     constexpr float SCREEN_HEIGHT_SMALL = 1000.0f;
     const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
-    const SizeF MOVINGPHOTO_SIZE(MOVINGPHOTO_WIDTH, MOVINGPHOTO_HEIGHT);
+    const SizeF MOVINGPHOTO_SIZE(MP_WIDTH, MOVINGPHOTO_HEIGHT);
     constexpr int32_t SLIDER_INDEX = 2;
     constexpr int32_t MOVINGPHOTO_NODE_ID_1 = 1;
     constexpr int32_t MOVINGPHOTO_NODE_ID_2 = 2;
-    TestProperty testProperty;
+    TestProperty g_testProperty;
 }
 
-class MovingphotoTestNg:public testing::Test {
+class MovingphotoTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -87,14 +87,14 @@ public:
     void TearDown() {}
 
 protected:
-    static RefPtr<FrameNode> CreateMovingPhotoNode(TestProperty& testProperty);
+    static RefPtr<FrameNode> CreateMovingPhotoNode(TestProperty& g_testProperty);
 };
 
 void MovingphotoTestNg::SetUpTestSuite()
 {
-    testProperty.imageSrc = MOVINGPHOTO_IMAGE_SRC;
-    testProperty.muted = MUTED_VALUE;
-    testProperty.objectFit = MOVINGPHOTO_IMAGE_FIT;
+    g_testProperty.imageSrc = MOVINGPHOTO_IMAGE_SRC;
+    g_testProperty.muted = MUTED_VALUE;
+    g_testProperty.objectFit = MOVINGPHOTO_IMAGE_FIT;
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -113,10 +113,10 @@ void MovingphotoTestNg::SetUp()
     ViewStackProcessor::GetInstance()->ClearStack();
 }
 
-RefPtr<FrameNode> MovingphotoTestNg::CreateMovingPhotoNode(TestProperty& testProperty)
+RefPtr<FrameNode> MovingphotoTestNg::CreateMovingPhotoNode(TestProperty& g_testProperty)
 {
-    if (testProperty.movingPhotoController.has_value()) {
-        MovingPhotoModelNG().Create(testProperty.movingPhotoController.value());
+    if (g_testProperty.movingPhotoController.has_value()) {
+        MovingPhotoModelNG().Create(g_testProperty.movingPhotoController.value());
     } else {
         auto movingPhotoController = AceType::MakeRefPtr<MovingPhotoController>();
         MovingPhotoModelNG().Create(movingPhotoController);
@@ -127,14 +127,14 @@ RefPtr<FrameNode> MovingphotoTestNg::CreateMovingPhotoNode(TestProperty& testPro
     CHECK_NULL_RETURN(movingPhotoPattern, nullptr);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(movingPhotoPattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(true));
-    if (testProperty.imageSrc.has_value()) {
-        MovingPhotoModelNG().SetImageSrc(testProperty.imageSrc.value());
+    if (g_testProperty.imageSrc.has_value()) {
+        MovingPhotoModelNG().SetImageSrc(g_testProperty.imageSrc.value());
     }
-    if (testProperty.muted.has_value()) {
-        MovingPhotoModelNG().SetMuted(testProperty.muted.value());
+    if (g_testProperty.muted.has_value()) {
+        MovingPhotoModelNG().SetMuted(g_testProperty.muted.value());
     }
-    if (testProperty.objectFit.has_value()) {
-        MovingPhotoModelNG().SetObjectFit(testProperty.objectFit.value());
+    if (g_testProperty.objectFit.has_value()) {
+        MovingPhotoModelNG().SetObjectFit(g_testProperty.objectFit.value());
     }
     auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     return AceType::Claim(element);
@@ -147,7 +147,7 @@ RefPtr<FrameNode> MovingphotoTestNg::CreateMovingPhotoNode(TestProperty& testPro
  */
 HWTEST_F(MovingphotoTestNg, MovingPhotoPropertyTest001, TestSize.Level1)
 {
-    auto frameNode = CreateMovingPhotoNode(testProperty);
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
 }
@@ -219,7 +219,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoEventTest003, TestSize.Level1)
      * @tc.steps: step2. set movingphoto event
      * @tc.expected: step2. get movingphoto event right
      */
-    auto onStartEvent =[]() {};
+    auto onStartEvent = []() {};
     movingphoto.SetOnStart(onStartEvent);
     auto onFinishEvent = []() {};
     movingphoto.SetOnFinish(onFinishEvent);
@@ -244,8 +244,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoEventTest003, TestSize.Level1)
     EXPECT_TRUE(onStop_ != nullptr);
     movingPhotoEventHub->FireErrorEvent();
     auto onError_ = movingPhotoEventHub->GetOnError();
-    EXPECT_TRUE(onError_ != nullptr);
-    
+    EXPECT_TRUE(onError_ != nullptr); 
 }
 
 /**
@@ -285,7 +284,6 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoLayoutAlgorithmTest004, TestSize.Level1)
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto movingPhotoPattern = frameNode->GetPattern<MovingPhotoPattern>();
     ASSERT_NE(movingPhotoPattern, nullptr);
-
     auto movingPhotoLayoutAlgorithm = movingPhotoPattern->CreateLayoutAlgorithm();
     EXPECT_NE(movingPhotoLayoutAlgorithm, nullptr);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(movingPhotoLayoutAlgorithm));
@@ -312,7 +310,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoLayoutAlgorithmTest004, TestSize.Level1)
 
 /**
  * @tc.name: MovingPhotoLayoutAlgorithmTest005
- * @tc.desc: Create MovingPhoto, and invoke its Measure and layout function, and test its child/children layout algorithm.
+ * @tc.desc: test its child/children layout algorithm.
  * @tc.type: FUNC
  */
 HWTEST_F(MovingphotoTestNg, MovingPhotoLayoutAlgorithmTest005, TestSize.Level1)
@@ -329,8 +327,6 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoLayoutAlgorithmTest005, TestSize.Level1)
     CHECK_NULL_VOID(frameNodeTemp);
     auto movingPhotoPatternTemp = AceType::DynamicCast<MovingPhotoPattern>(frameNodeTemp->GetPattern());
     CHECK_NULL_VOID(movingPhotoPatternTemp);
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(movingPhotoPatternTemp->mediaPlayer_)), IsMediaPlayerValid())
-        .WillRepeatedly(Return(false));
 
     auto frameNode =AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode, nullptr);
@@ -378,12 +374,12 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoLayoutAlgorithmTest005, TestSize.Level1)
 
     auto layoutWrapperChildren = layoutWrapper.GetAllChildrenWithBuild();
     EXPECT_EQ(layoutWrapperChildren.size(), MOVINGPHOTO_CHILDREN_NUM);
-    for(auto&& child : layoutWrapperChildren){
-        if(child->GetHostTag() == V2::IMAGE_ETS_TAG){
+    for (auto&& child : layoutWrapperChildren){
+        if (child->GetHostTag() == V2::IMAGE_ETS_TAG){
             EXPECT_EQ(child->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0, 0.0));
-        }else if (child->GetHostTag() == V2::ROW_ETS_TAG){
+        } else if (child->GetHostTag() == V2::ROW_ETS_TAG) {
             float const controlBarHeight = 0.0;
-            EXPECT_EQ(child->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0, MOVINGPHOTO_WIDTH - controlBarHeight));
+            EXPECT_EQ(child->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0, MP_WIDTH - controlBarHeight));
         }
     }
 }
@@ -403,7 +399,7 @@ HWTEST_F(MovingphotoTestNg,  MovingPhotoPatternTest006, TestSize.Level1)
      * @tc.steps: step1. Create MovingPhoto
      * @tc.expected: step1. Create MovingPhoto successfully
      */
-    auto frameNode = CreateMovingPhotoNode(testProperty);
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
     auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
@@ -434,7 +430,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest007, TestSize.Level1)
      * @tc.steps: step1. Create MovingPhoto
      * @tc.expected: step1. updateMuted
      */
-    auto frameNode = CreateMovingPhotoNode(testProperty);
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
     auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
@@ -448,7 +444,6 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest007, TestSize.Level1)
         .WillRepeatedly(Return(false));
     pattern->UpdateMuted(MUTED_VALUE);
     EXPECT_EQ(pattern->GetMuted(), MUTED_VALUE);
-
 }
 
 /**
@@ -462,7 +457,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest008, TestSize.Level1)
      * @tc.steps: step1. Create MovingPhoto
      * @tc.expected: step1. Create MovingPhoto successfully
      */
-    auto frameNode = CreateMovingPhotoNode(testProperty);
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
     auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
@@ -496,7 +491,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest009, TestSize.Level1)
      * @tc.steps: step1. Create MovingPhotoNode
      * @tc.expected: step1. Create MovingPhotoNode successfully
      */
-    auto frameNode = CreateMovingPhotoNode(testProperty);
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
     auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
@@ -533,7 +528,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest010, TestSize.Level1)
      * @tc.steps: step1. Create MovingPhoto
      * @tc.expected: step1. Create MovingPhoto successfully
      */
-    auto frameNode = CreateMovingPhotoNode(testProperty);
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
     auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
@@ -619,7 +614,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoFocusTest013, TestSize.Level1)
      * @tc.steps: step1. Create MovingPhoto
      * @tc.expected: step1. Create MovingPhoto successfully
      */
-    auto frameNode = CreateMovingPhotoNode(testProperty);
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
     frameNode->GetOrCreateFocusHub()->currentFocus_ = false;
@@ -643,7 +638,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoFocusTest014, TestSize.Level1)
      * @tc.steps: step1. Create MovingPhoto
      * @tc.expected: step1. Create MovingPhoto successfully
      */
-    auto frameNode = CreateMovingPhotoNode(testProperty);
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
     frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
@@ -675,7 +670,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoFocusTest014, TestSize.Level1)
     layoutConstraint.selfIdealSize.SetSize(MOVINGPHOTO_SIZE);
     auto videoSize1 =
         movingPhotoAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
-    EXPECT_EQ(videoSize1, SizeF(MOVINGPHOTO_WIDTH, MOVINGPHOTO_HEIGHT));
+    EXPECT_EQ(videoSize1, SizeF(MP_WIDTH, MOVINGPHOTO_HEIGHT));
     layoutWrapper.GetGeometryNode()->SetContentSize(videoSize1);
 
     /**
@@ -710,8 +705,9 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoNodeTest015, TestSize.Level1)
     EXPECT_TRUE(movingPhotoNode);
     EXPECT_EQ(movingPhotoNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
 
-    auto secondMovingPhotoNode = MovingPhotoNode::GetOrCreateMovingPhotoNode(V2::MOVING_PHOTO_ETS_TAG, MOVINGPHOTO_NODE_ID_1,
-        [movingPhotoController]() { return AceType::MakeRefPtr<MovingPhotoPattern>(movingPhotoController); });
+    auto secondMovingPhotoNode = MovingPhotoNode::GetOrCreateMovingPhotoNode(V2::MOVING_PHOTO_ETS_TAG, 
+        MOVINGPHOTO_NODE_ID_1, [movingPhotoController]() 
+        { return AceType::MakeRefPtr<MovingPhotoPattern>(movingPhotoController); });
     EXPECT_TRUE(secondMovingPhotoNode);
     EXPECT_EQ(movingPhotoNode->GetTag(), secondMovingPhotoNode->GetTag());
     EXPECT_EQ(movingPhotoNode->GetId(), secondMovingPhotoNode->GetId());
@@ -720,7 +716,8 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoNodeTest015, TestSize.Level1)
      * @tc.steps: step2. Create movingPhoto again
      * @tc.expected: step2. Create movingPhoto node3 successfully
      */
-    auto thirdMovingPhotoNode = MovingPhotoNode::GetOrCreateMovingPhotoNode(V2::MOVING_PHOTO_ETS_TAG, MOVINGPHOTO_NODE_ID_2,
+    auto thirdMovingPhotoNode = MovingPhotoNode::GetOrCreateMovingPhotoNode(V2::MOVING_PHOTO_ETS_TAG,
+        MOVINGPHOTO_NODE_ID_2,
         [movingPhotoController]() { return AceType::MakeRefPtr<MovingPhotoPattern>(movingPhotoController); });
     EXPECT_TRUE(thirdMovingPhotoNode);
     EXPECT_EQ(movingPhotoNode->GetTag(), thirdMovingPhotoNode->GetTag());
@@ -882,4 +879,5 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest020, TestSize.Level1)
     movingphotoPattern->StartPlayback();
     ASSERT_TRUE(movingphotoPattern->GetPlayByController());
 }
-}//namespace OHOS::Ace::NG
+
+} //namespace OHOS::Ace::NG
