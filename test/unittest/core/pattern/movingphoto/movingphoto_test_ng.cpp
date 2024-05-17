@@ -244,7 +244,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoEventTest003, TestSize.Level1)
     EXPECT_TRUE(onStop_ != nullptr);
     movingPhotoEventHub->FireErrorEvent();
     auto onError_ = movingPhotoEventHub->GetOnError();
-    EXPECT_TRUE(onError_ != nullptr); 
+    EXPECT_TRUE(onError_ != nullptr);
 }
 
 /**
@@ -374,8 +374,8 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoLayoutAlgorithmTest005, TestSize.Level1)
 
     auto layoutWrapperChildren = layoutWrapper.GetAllChildrenWithBuild();
     EXPECT_EQ(layoutWrapperChildren.size(), MOVINGPHOTO_CHILDREN_NUM);
-    for (auto&& child : layoutWrapperChildren){
-        if (child->GetHostTag() == V2::IMAGE_ETS_TAG){
+    for (auto&& child : layoutWrapperChildren) {
+        if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             EXPECT_EQ(child->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0.0, 0.0));
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG) {
             float const controlBarHeight = 0.0;
@@ -705,8 +705,8 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoNodeTest015, TestSize.Level1)
     EXPECT_TRUE(movingPhotoNode);
     EXPECT_EQ(movingPhotoNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
 
-    auto secondMovingPhotoNode = MovingPhotoNode::GetOrCreateMovingPhotoNode(V2::MOVING_PHOTO_ETS_TAG, 
-        MOVINGPHOTO_NODE_ID_1, [movingPhotoController]() 
+    auto secondMovingPhotoNode = MovingPhotoNode::GetOrCreateMovingPhotoNode(V2::MOVING_PHOTO_ETS_TAG,
+        MOVINGPHOTO_NODE_ID_1, [movingPhotoController]()
         { return AceType::MakeRefPtr<MovingPhotoPattern>(movingPhotoController); });
     EXPECT_TRUE(secondMovingPhotoNode);
     EXPECT_EQ(movingPhotoNode->GetTag(), secondMovingPhotoNode->GetTag());
