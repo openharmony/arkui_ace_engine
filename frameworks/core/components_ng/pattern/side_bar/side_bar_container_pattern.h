@@ -178,6 +178,7 @@ private:
     void OnUpdateShowDivider(
         const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host);
     void OnUpdateSideBarAndContent(const RefPtr<FrameNode>& host);
+    void OnDividerMouseEvent(MouseInfo& info);
     void OnHover(bool isHover);
     void AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
     SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
@@ -196,6 +197,7 @@ private:
     void SetSideBarMask(bool isWindowFocus) const;
 
     RefPtr<InputEvent> hoverEvent_;
+    RefPtr<InputEvent> dividerMouseEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
     RefPtr<InputEvent> controlButtonHoverEvent_;
     RefPtr<PanEvent> panEvent_;
@@ -220,6 +222,8 @@ private:
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
     bool isWindowFocus_ = true;
+    bool isMousePressing_ = false;
+    bool isResizeMouseStyle_ = false;
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;
