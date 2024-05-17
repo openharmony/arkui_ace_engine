@@ -661,6 +661,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         jsView->jsViewFunction_->ExecuteOnDumpInfo(params);
     };
 
+    auto onDumpInspectorFunc = [weak = AceType::WeakClaim(this)]() -> std::string {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, "");
+        ContainerScope scope(jsView->GetInstanceId());
+        return jsView->jsViewFunction_->ExecuteOnDumpInfo();
+    };
+
     auto getThisFunc = [weak = AceType::WeakClaim(this)]() -> void* {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
@@ -681,6 +688,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         .recycleCustomNodeFunc = recycleCustomNode,
         .setActiveFunc = std::move(setActiveFunc),
         .onDumpInfoFunc = std::move(onDumpInfoFunc),
+        .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
         .getThisFunc = std::move(getThisFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout() ||
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
@@ -1007,9 +1015,10 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
     }
     TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", stateInfo.c_str());
     auto info = JsonUtil::ParseJsonString(stateInfo);
-    info->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
-    info->Put("ProcessID", getpid());
-    info->Put("WindowID", (int32_t)pipeline->GetWindowId());
+    info->Put("timeStamp", GetCurrentTimestamp());
+    info->Put("vsyncID", (int32_t)pipeline->GetFrameCount());
+    info->Put("processID", getpid());
+    info->Put("windowID", (int32_t)pipeline->GetWindowId());
     OHOS::AbilityRuntime::ConnectServerManager::Get().SendArkUIStateProfilerMessage(info->ToString());
 #endif
 }

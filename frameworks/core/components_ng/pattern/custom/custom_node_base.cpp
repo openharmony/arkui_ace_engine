@@ -86,4 +86,9 @@ void CustomNodeBase::SetOnDumpInfoFunc(std::function<void(const std::vector<std:
 {
     onDumpInfoFunc_ = func;
 }
+
+void CustomNodeBase::SetOnDumpInspectorFunc(std::function<std::string()>&& func)
+{
+    onDumpInspectorFunc_ = func;
+}
 } // namespace OHOS::Ace::NG
