@@ -37,6 +37,7 @@
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
+#include "frameworks/core/common/ace_engine.h"
 #ifdef INIT_ICU_DATA_PATH
 #include "unicode/putil.h"
 #endif
@@ -56,6 +57,14 @@ constexpr char ASSET_PATH_SHARE_STAGE[] = "resources\\base\\profile";
 constexpr char DELIMITER[] = "/";
 constexpr char ASSET_PATH_SHARE_STAGE[] = "resources/base/profile";
 #endif
+
+NG::SafeAreaInsets ConvertAvoidArea(const OHOS::Rosen::AvoidArea& avoidArea)
+{
+    return NG::SafeAreaInsets({ avoidArea.leftRect_.posX_, avoidArea.leftRect_.posX_ + avoidArea.leftRect_.width_ },
+        { avoidArea.topRect_.posY_, avoidArea.topRect_.posY_ + avoidArea.topRect_.height_ },
+        { avoidArea.rightRect_.posX_, avoidArea.rightRect_.posX_ + avoidArea.rightRect_.width_ },
+        { avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ });
+}
 
 void SetFontMgrConfig(const std::string& containerSdkPath)
 {
@@ -132,6 +141,82 @@ public:
     }
 
 private:
+    int32_t instanceId_ = -1;
+};
+
+class IIgnoreViewSafeAreaListener  : public OHOS::Rosen::IIgnoreViewSafeAreaListener {
+public:
+    explicit IIgnoreViewSafeAreaListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~IIgnoreViewSafeAreaListener() = default;
+
+    void SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
+    {
+        LOGD("[instanceId_:%{public}d]: SetIgnoreViewSafeArea:%{public}u", instanceId_, ignoreViewSafeArea);
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = container->GetPipelineContext();
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostSyncTask(
+            [&pipelineContext, container, ignoreSafeArea = ignoreViewSafeArea]() {
+                pipelineContext->SetIgnoreViewSafeArea(ignoreSafeArea);
+            },
+            TaskExecutor::TaskType::UI, "ArkUISetIgnoreViewSafeArea");
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
+class AvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
+public:
+    explicit AvoidAreaChangedListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~AvoidAreaChangedListener() = default;
+
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+    {
+        LOGD("Avoid area changed, type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
+             "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
+             "width:%{public}d, height%{public}d",
+            type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
+            (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
+            (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_);
+        auto container = Platform::AceContainer::GetContainerInstance(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto pipeline = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
+            systemSafeArea_ = ConvertAvoidArea(avoidArea);
+        } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+            navigationBar_ = ConvertAvoidArea(avoidArea);
+        } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
+            cutoutSafeArea_ = ConvertAvoidArea(avoidArea);
+        }
+        auto safeArea = systemSafeArea_;
+        auto navSafeArea = navigationBar_;
+        auto cutoutSafeArea = cutoutSafeArea_;
+        ContainerScope scope(instanceId_);
+        taskExecutor->PostTask(
+            [pipeline, safeArea, navSafeArea, cutoutSafeArea, type, avoidArea] {
+                if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
+                    pipeline->UpdateSystemSafeArea(safeArea);
+                } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+                    pipeline->UpdateNavSafeArea(navSafeArea);
+                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT && pipeline->GetUseCutout()) {
+                    pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
+                }
+                // for ui extension component
+                pipeline->UpdateOriginAvoidArea(avoidArea, static_cast<uint32_t>(type));
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidArea");
+    }
+
+private:
+    NG::SafeAreaInsets systemSafeArea_;
+    NG::SafeAreaInsets navigationBar_;
+    NG::SafeAreaInsets cutoutSafeArea_;
     int32_t instanceId_ = -1;
 };
 
@@ -336,6 +421,15 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
     view->NotifySurfaceChanged(deviceWidth_, deviceHeight_);
     view->NotifyDensityChanged(deviceConfig_.density);
+    avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
+    rsWindow_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
+    ignoreViewSafeAreaListener_ = new IIgnoreViewSafeAreaListener(instanceId_);
+    window->RegisterIgnoreViewSafeAreaListener(ignoreViewSafeAreaListener_);
+    OHOS::Rosen::AvoidArea avoidArea;
+    rsWindow_->GetAvoidAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM, avoidArea);
+    avoidAreaChangedListener_->OnAvoidAreaChanged(avoidArea, OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM);
+    rsWindow_->GetAvoidAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, avoidArea);
+    avoidAreaChangedListener_->OnAvoidAreaChanged(avoidArea, OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
     return UIContentErrorCode::NO_ERRORS;
 }
 
