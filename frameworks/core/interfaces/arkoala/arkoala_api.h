@@ -1588,6 +1588,14 @@ struct ArkUITextModifier {
     void (*resetTextSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*setTextContentWithStyledString)(ArkUINodeHandle node, ArkUI_StyledString* styledString);
     void (*resetTextContentWithStyledString)(ArkUINodeHandle node);
+    void (*setTextSelection)(ArkUINodeHandle node, ArkUI_Int32 startIndex, ArkUI_Int32 endIndex);
+    void (*resetTextSelection)(ArkUINodeHandle node);
+    void (*setTextDataDetectorConfigWithEvent)(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback);
+    void (*resetTextDataDetectorConfigWithEvent)(ArkUINodeHandle node);
+    void (*setTextOnCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetTextOnCopy)(ArkUINodeHandle node);
+    void (*setTextOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextOnTextSelectionChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -3280,6 +3288,20 @@ struct ArkUISymbolGlyphModifier {
     void (*setSymbolId)(ArkUINodeHandle node, ArkUI_Uint32 copyOption);
 };
 
+struct ArkUISymbolSpanModifier {
+    void (*setSymbolSpanFontColor)(ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Int32 size);
+    void (*resetSymbolSpanFontColor)(ArkUINodeHandle node);
+    void (*setSymbolSpanFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetSymbolSpanFontSize)(ArkUINodeHandle node);
+    void (*setSymbolSpanFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
+    void (*setSymbolSpanFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
+    void (*resetSymbolSpanFontWeight)(ArkUINodeHandle node);
+    void (*setSymbolSpanRenderingStrategy)(ArkUINodeHandle node, ArkUI_Uint32 renderingStrategy);
+    void (*resetSymbolSpanRenderingStrategy)(ArkUINodeHandle node);
+    void (*setSymbolSpanEffectStrategy)(ArkUINodeHandle node, ArkUI_Uint32 effectStrategy);
+    void (*resetSymbolSpanEffectStrategy)(ArkUINodeHandle node);
+};
+
 struct ArkUITextTimerControllerModifier {
     ArkUINodeHandle (*getTextTimerController)(ArkUINodeHandle node);
     void (*setTextTimerStart)(ArkUINodeHandle node);
@@ -3958,6 +3980,7 @@ struct ArkUINodeModifiers {
     const ArkUIParticleModifier* (*getParticleModifier)();
     const ArkUINodeContentModifier* (*getNodeContentModifier)();
     const ArkUISymbolGlyphModifier* (*getSymbolGlyphModifier)();
+    const ArkUISymbolSpanModifier* (*getSymbolSpanModifier)();
 };
 
 // same as inner defines in property.h

@@ -966,4 +966,37 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
+
+void TextModelNG::SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelection(startIndex, endIndex);
+}
+
+void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value, std::function<void(const std::string&)>&& onResult)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextDetectTypes(value);
+    textPattern->SetOnResult(std::move(onResult));
+}
+
+void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
+void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
+}
 } // namespace OHOS::Ace::NG

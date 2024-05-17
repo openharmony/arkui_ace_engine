@@ -31,6 +31,14 @@
         spanNode->AddPropertyInfo(flag);                                                                         \
     } while (false)
 
+#define ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(name, value, flag, frameNode)                                       \
+    do {                                                                                                         \
+        auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);                                               \
+        CHECK_NULL_VOID(spanNode);                                                                               \
+        spanNode->Update##name(value);                                                                           \
+        spanNode->AddPropertyInfo(flag);                                                                         \
+    } while (false)
+
 namespace OHOS::Ace::NG {
 void SymbolSpanModelNG::Create(const uint32_t& unicode)
 {
@@ -83,5 +91,26 @@ void SymbolSpanModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateFontWeight(value);
     spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
+}
+
+void SymbolSpanModelNG::SetFontColor(FrameNode* frameNode, std::vector<Color>& symbolColor)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolColorList, symbolColor,
+        PropertyInfo::SYMBOL_COLOR, frameNode);
+}
+
+void SymbolSpanModelNG::SetSymbolRenderingStrategy(FrameNode* frameNode, const uint32_t renderingStrategy)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolRenderingStrategy, renderingStrategy,
+        PropertyInfo::SYMBOL_RENDERING_STRATEGY, frameNode);
+}
+
+void SymbolSpanModelNG::SetSymbolEffect(FrameNode* frameNode, const uint32_t effectStrategy)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolEffectStrategy, effectStrategy,
+        PropertyInfo::SYMBOL_EFFECT_STRATEGY, frameNode);
 }
 } // namespace OHOS::Ace::NG
