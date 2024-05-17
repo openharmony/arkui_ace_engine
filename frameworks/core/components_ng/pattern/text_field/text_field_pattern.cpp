@@ -5485,11 +5485,13 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("maxLines",
         GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str(), filter);
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
+    auto underlineColorJsonValue = JsonUtil::Create(true);
+    underlineColorJsonValue->Put("normal", GetNormalUnderlineColorStr().c_str());
+    underlineColorJsonValue->Put("typing", GetTypingUnderlineColorStr().c_str());
+    underlineColorJsonValue->Put("error", GetErrorUnderlineColorStr().c_str());
+    underlineColorJsonValue->Put("disable", GetDisableUnderlineColorStr().c_str());
+    json->PutExtAttr("underlineColor", underlineColorJsonValue->ToString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
-    json->PutExtAttr("normalUnderlineColor", GetNormalUnderlineColorStr().c_str(), filter);
-    json->PutExtAttr("typingUnderlineColor", GetTypingUnderlineColorStr().c_str(), filter);
-    json->PutExtAttr("errorUnderlineColor", GetErrorUnderlineColorStr().c_str(), filter);
-    json->PutExtAttr("disableUnderlineColor", GetDisableUnderlineColorStr().c_str(), filter);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
