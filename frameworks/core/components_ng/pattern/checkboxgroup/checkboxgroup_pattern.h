@@ -96,6 +96,9 @@ public:
         auto geometryNode = dirty->GetGeometryNode();
         offset_ = geometryNode->GetContentOffset();
         size_ = geometryNode->GetContentSize();
+        if (!isUserSetResponseRegion_) {
+            AddHotZoneRect();
+        }
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             UpdateCheckBoxStyle();
         }
@@ -213,6 +216,8 @@ private:
     bool isFirstCreated_ = true;
     bool isUserSetResponseRegion_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    Dimension hotZoneHorizontalPadding_;
+    Dimension hotZoneVerticalPadding_;
     OffsetF offset_;
     SizeF size_;
     OffsetF hotZoneOffset_;
