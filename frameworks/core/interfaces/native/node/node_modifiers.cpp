@@ -230,7 +230,6 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetNodeContentModifier,
     NodeModifier::GetSymbolGlyphModifier,
 };
-
 } // namespace
 
 } // namespace OHOS::Ace::NG

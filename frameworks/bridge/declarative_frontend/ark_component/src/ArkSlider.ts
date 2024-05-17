@@ -390,7 +390,7 @@ globalThis.Slider.attributeModifier = function (modifier: ArkComponent): void {
 };
 
 // @ts-ignore
-globalThis.Slider.contentModifier = function (modifier) {
+globalThis.Slider.contentModifier = function (modifier): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
