@@ -19,7 +19,6 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
-#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -670,27 +669,6 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
     int32_t start = std::max(this->interval.first, interval.first);
     int32_t end = std::min(this->interval.second, interval.second);
     return std::make_optional<std::pair<int32_t, int32_t>>(std::make_pair(start, end));
-}
-
-void ImageSpanNode::DumpInfo()
-{
-    FrameNode::DumpInfo();
-    auto& dumpLog = DumpLog::GetInstance();
-    auto& run = imageSpanItem_->run_;
-    dumpLog.AddDesc("--------------- print run info ---------------");
-    dumpLog.AddDesc(std::string("Width: ").append(std::to_string(run.width)));
-    dumpLog.AddDesc(std::string("Height: ").append(std::to_string(run.height)));
-    dumpLog.AddDesc(std::string("Alignment: ").append(StringUtils::ToString(run.alignment)));
-    dumpLog.AddDesc(std::string("Baseline: ").append(StringUtils::ToString(run.baseline)));
-    dumpLog.AddDesc(std::string("BaselineOffset: ").append(std::to_string(run.baseline_offset)));
-    auto& textStyle = imageSpanItem_->textStyle;
-    dumpLog.AddDesc("--------------- print text style ---------------");
-    dumpLog.AddDesc(std::string("FontSize: ").append(textStyle.GetFontSize().ToString()));
-    dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle.GetLineHeight().ToString()));
-    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle.GetLineSpacing().ToString()));
-    dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
-    dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
-    dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
 }
 
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,

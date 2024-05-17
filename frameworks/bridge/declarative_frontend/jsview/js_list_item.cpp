@@ -386,7 +386,9 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("selected", &JSListItem::SetSelected);
 
     JSClass<JSListItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSListItem>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSListItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSListItem>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSListItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSListItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSListItem>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

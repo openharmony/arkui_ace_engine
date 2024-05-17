@@ -150,7 +150,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    void SetParent(const WeakPtr<UINode>& parent)
+    virtual void SetParent(const WeakPtr<UINode>& parent)
     {
         parent_ = parent;
     }
@@ -577,6 +577,7 @@ public:
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
+    static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
     void AddFlag(uint32_t flag)
     {
@@ -680,6 +681,7 @@ protected:
 
     virtual bool RemoveImmediately() const;
     void ResetParent();
+    static void RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<UINode>& parent);
 
     // update visible change signal to children
     void UpdateChildrenVisible(bool isVisible) const;

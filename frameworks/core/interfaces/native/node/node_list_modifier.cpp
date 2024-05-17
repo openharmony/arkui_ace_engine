@@ -17,6 +17,8 @@
 
 #include <cstdint>
 
+#include "interfaces/native/node/node_model.h"
+
 #include "base/error/error_code.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
@@ -663,14 +665,17 @@ void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam)
                             ScrollSource source) -> ScrollFrameResult {
         ScrollFrameResult scrollRes { .offset = offset };
         ArkUINodeEvent event;
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_WILL_SCROLL;
-        event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
         event.componentAsyncEvent.data[2].i32 = static_cast<int>(source);
         SendArkUIAsyncEvent(&event);
-        scrollRes.offset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
+        scrollRes.offset =
+            Dimension(event.componentAsyncEvent.data[0].f32, usePx ? DimensionUnit::PX : DimensionUnit::VP);
         return scrollRes;
     };
     ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));

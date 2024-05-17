@@ -64,8 +64,8 @@ void MovingPhotoPattern::OnAttachToFrameNode()
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
     renderContextForMediaPlayer_->InitContext(false, param);
-    renderContext->UpdateBackgroundColor(Color::BLACK);
-    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->SetClipToBounds(true);
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -202,10 +202,6 @@ void MovingPhotoPattern::UpdateImageNode()
     CHECK_NULL_VOID(image);
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->HasMovingPhotoUri() || layoutProperty->GetMovingPhotoUri().value() == uri_) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto is null or has not changed.");
-        return;
-    }
     if (!layoutProperty->HasImageSourceInfo()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "image info is null.");
         auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();

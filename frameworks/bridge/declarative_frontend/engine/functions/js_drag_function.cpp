@@ -359,6 +359,7 @@ void JsDragEvent::GetVelocity(const JSCallbackInfo& args)
 void JsDragEvent::Constructor(const JSCallbackInfo& args)
 {
     auto dragEvent = Referenced::MakeRefPtr<JsDragEvent>();
+    CHECK_NULL_VOID(dragEvent);
     dragEvent->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(dragEvent));
 }
@@ -459,6 +460,7 @@ JSRef<JSObject> JsDragFunction::CreateDragEvent(const RefPtr<DragEvent>& info)
 {
     JSRef<JSObject> dragObj = JSClass<JsDragEvent>::NewInstance();
     auto dragEvent = Referenced::Claim(dragObj->Unwrap<JsDragEvent>());
+    CHECK_NULL_RETURN(dragEvent, dragObj);
     dragEvent->SetDragEvent(info);
     auto pasteDataInfo = dragEvent->GetDragEvent()->GetPasteData();
     JSRef<JSObject> pasteData = CreatePasteData(pasteDataInfo);
@@ -470,6 +472,7 @@ JSRef<JSObject> JsDragFunction::CreatePasteData(const RefPtr<PasteData>& info)
 {
     JSRef<JSObject> pasteObj = JSClass<JsPasteData>::NewInstance();
     auto pasteData = Referenced::Claim(pasteObj->Unwrap<JsPasteData>());
+    CHECK_NULL_RETURN(pasteData, pasteObj);
     pasteData->SetPasteData(info);
     return pasteObj;
 }

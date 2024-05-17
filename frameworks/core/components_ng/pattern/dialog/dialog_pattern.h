@@ -106,6 +106,9 @@ public:
 
     std::list<int32_t> GetRouteOfFirstScope() override
     {
+        if (dialogProperties_.type == DialogType::ALERT_DIALOG || dialogProperties_.type == DialogType::ACTION_SHEET) {
+            return { 0 };
+        }
         return { 0, 0 };
     }
 

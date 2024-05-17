@@ -59,7 +59,9 @@ void JSWaterFlowItem::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlowItem>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSWaterFlowItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSWaterFlowItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSWaterFlowItem>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSWaterFlowItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSWaterFlowItem>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSWaterFlowItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWaterFlowItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 

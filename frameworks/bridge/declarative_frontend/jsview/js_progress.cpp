@@ -116,7 +116,9 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSProgress>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSProgress>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSProgress>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSProgress>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSProgress>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSProgress>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSProgress>::StaticMethod("borderColor", &JSProgress::JsBorderColor, opt);
     JSClass<JSProgress>::InheritAndBind<JSViewAbstract>(globalObj);

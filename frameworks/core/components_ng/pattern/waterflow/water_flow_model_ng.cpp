@@ -640,4 +640,9 @@ bool WaterFlowModelNG::hasFooter(FrameNode* frameNode)
     CHECK_NULL_RETURN(pattern, false);
     return pattern->hasFooter();
 }
+
+void WaterFlowModelNG::SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed)
+{
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
+}
 } // namespace OHOS::Ace::NG

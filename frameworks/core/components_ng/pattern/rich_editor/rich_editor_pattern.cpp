@@ -1349,6 +1349,7 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(
     CHECK_NULL_RETURN(pipeline, OffsetF(0, 0));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+    needLineHighest |= IsCustomSpanInCaretPos(position, downStreamFirst);
     auto startOffset = paragraphs_.ComputeCursorOffset(position, selectLineHeight, downStreamFirst, needLineHighest);
     auto children = host->GetChildren();
     if (NearZero(selectLineHeight)) {
@@ -1389,6 +1390,20 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(
     float caretWidth = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretWidth();
     caretOffset.SetX(std::clamp(caretOffset.GetX(), 0.0f, static_cast<float>(frameSize.Width()) - caretWidth));
     return caretOffset;
+}
+
+bool RichEditorPattern::IsCustomSpanInCaretPos(int32_t position, bool downStreamFirst)
+{
+    CHECK_NULL_RETURN((isSpanStringMode_ && styledString_), false);
+    auto start = downStreamFirst ? position : position - 1;
+    start = std::clamp(start, 0, GetTextContentLength());
+    auto lastStyles = styledString_->GetSpans(start, 1);
+    for (auto& style : lastStyles) {
+        if (style && style->GetSpanType() == SpanType::CustomSpan) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool RichEditorPattern::SetCaretPosition(int32_t pos)
@@ -1833,7 +1848,7 @@ void RichEditorPattern::SetAccessibilityAction()
     textAccessibilityProperty->SetActionSetIndex([weakPtr = WeakClaim(this)](int32_t index) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->SetCaretPosition(index);
+        pattern->SetCaretOffset(index);
     });
 
     textAccessibilityProperty->SetActionGetIndex([weakPtr = WeakClaim(this)]() -> int32_t {
@@ -2488,28 +2503,18 @@ bool RichEditorPattern::CloseKeyboard(bool forceClose)
     return false;
 }
 
-void RichEditorPattern::HandleDraggableFlag(GestureEvent& info, bool& isInterceptEvent)
+void RichEditorPattern::HandleDraggableFlag(bool isInterceptEvent)
 {
     auto gestureHub = GetGestureEventHub();
-    if (isSpanStringMode_) {
-        isInterceptEvent = false;
-        if (gestureHub) {
-            gestureHub->SetIsTextDraggable(false);
-        }
+    CHECK_NULL_VOID(gestureHub);
+    if (isInterceptEvent || copyOption_ == CopyOptions::None) {
+        gestureHub->SetIsTextDraggable(false);
         return;
     }
-    if (gestureHub && copyOption_ != CopyOptions::None && BetweenSelectedPosition(info.GetGlobalLocation())) {
-        dragBoxes_ = GetTextBoxes();
-        // prevent long press event from being triggered when dragging
-        bool isContentDraggalbe = JudgeContentDraggable();
-        gestureHub->SetIsTextDraggable(isContentDraggalbe);
-        isInterceptEvent = true;
-    } else {
-        isInterceptEvent = false;
-        if (gestureHub) {
-            gestureHub->SetIsTextDraggable(false);
-        }
-    }
+    dragBoxes_ = GetTextBoxes();
+    // prevent long press event from being triggered when dragging
+    bool isContentDraggalbe = JudgeContentDraggable();
+    gestureHub->SetIsTextDraggable(isContentDraggalbe);
 }
 
 bool RichEditorPattern::JudgeContentDraggable()
@@ -2622,13 +2627,21 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
-    bool isInterceptEvent = false;
-    HandleDraggableFlag(info, isInterceptEvent);
+    bool isInterceptEvent = BetweenSelectedPosition(info.GetGlobalLocation());
+    HandleDraggableFlag(isInterceptEvent);
     // check current is mouse long press
     isInterceptEvent |= (isMousePressed_ && caretUpdateType_== CaretUpdateType::LONG_PRESSED);
-    if (isInterceptEvent) {
-        return;
+
+    // SpanString do not support drag
+    if (isSpanStringMode_) {
+        auto gestureHub = GetGestureEventHub();
+        if (gestureHub) {
+            gestureHub->SetIsTextDraggable(false);
+        }
+        isInterceptEvent = false;
     }
+
+    CHECK_NULL_VOID(!isInterceptEvent);
     HandleDoubleClickOrLongPress(info, host);
 }
 
@@ -5410,7 +5423,10 @@ void RichEditorPattern::ResetAfterPaste()
 void RichEditorPattern::InsertValueByPaste(const std::string& pasteStr)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "InsertValueByPaste");
-    CHECK_NULL_VOID(!isSpanStringMode_);
+    if (isSpanStringMode_) {
+        InsertValueInStyledString(pasteStr);
+        return;
+    }
     InsertValue(pasteStr, false);
 }
 
@@ -5688,7 +5704,7 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
         localOffset = ConvertGlobalToLocalOffset(globalOffset);
     }
     auto eventHub = host->GetEventHub<EventHub>();
-    if (copyOption_ != CopyOptions::None && GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
+    if (GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
         auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
         auto panOffset = OffsetF(localOffset.GetX(), localOffset.GetY()) - GetTextRect().GetOffset() +

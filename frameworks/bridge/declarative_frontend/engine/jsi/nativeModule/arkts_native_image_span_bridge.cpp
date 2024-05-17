@@ -16,6 +16,11 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
+#include "base/image/pixel_map.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/text/image_span_view.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int NUM_0 = 0;
@@ -158,6 +163,30 @@ ArkUINativeModuleValue ImageSpanBridge::ResetBaselineOffset(ArkUIRuntimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanBaselineOffset(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageSpanBridge::SetAlt(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    RefPtr<PixelMap> pixmap = nullptr;
+#if defined (PIXEL_MAP_SUPPORTED)
+    pixmap = Framework::CreatePixelMapFromNapiValue(info[1]);
+#endif
+    if (pixmap) {
+        ImageSpanView::SetAlt(reinterpret_cast<FrameNode*>(nativeNode), pixmap);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageSpanBridge::ResetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

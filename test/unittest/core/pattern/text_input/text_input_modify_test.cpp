@@ -88,8 +88,6 @@ const std::string LOWERCASE_FILTER = "[a-z]";
 const std::string NUMBER_FILTER = "^[0-9]*$";
 const std::string DEFAULT_INPUT_FILTER = "[a-z]";
 const TextAlign DEFAULT_TEXT_ALIGN = TextAlign::LEFT;
-constexpr float CUSTOM_NODE_WIDTH = 100.f;
-constexpr float CUSTOM_NODE_HEIGHT = 10.f;
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;
@@ -120,7 +118,6 @@ protected:
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
     static void ExpectCallParagraphMethods(ExpectParagraphParams params);
     void GetFocus();
-    RefPtr<FrameNode> CreateCustomNode();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<TextFieldPattern> pattern_;
@@ -209,14 +206,6 @@ void TextInputModifyBase::GetFocus()
     focushHub->currentFocus_ = true;
     pattern_->HandleFocusEvent();
     FlushLayoutTask(frameNode_);
-}
-
-RefPtr<FrameNode> TextInputModifyBase::CreateCustomNode()
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CUSTOM_NODE_WIDTH), CalcLength(CUSTOM_NODE_HEIGHT)));
-    return frameNode;
 }
 
 class TextFieldUXTest : public TextInputModifyBase {};
@@ -1062,7 +1051,7 @@ HWTEST_F(TextFieldModifyTest, RequestKeyboard001, TestSize.Level1)
     /**
      * @tc.steps: step2. Set SetCustomKeyboard.
      */
-    pattern_->SetCustomKeyboard(CreateCustomNode());
+    pattern_->SetCustomKeyboard([]() {});
     pattern_->DumpInfo();
     pattern_->DumpAdvanceInfo();
 
@@ -1088,7 +1077,7 @@ HWTEST_F(TextFieldModifyTest, RequestKeyboard002, TestSize.Level1)
     /**
      * @tc.steps: step2. Set SetCustomKeyboard.
      */
-    pattern_->SetCustomKeyboard(CreateCustomNode());
+    pattern_->SetCustomKeyboard([]() {});
     pattern_->RequestCustomKeyboard();
 
     /**

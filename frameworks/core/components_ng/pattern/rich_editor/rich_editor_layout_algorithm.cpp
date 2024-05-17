@@ -122,7 +122,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     res.SetWidth(pManager_->GetMaxWidth());
     res.SetHeight(textHeight);
     res.AddHeight(shadowOffset_);
-    if (!res.IsPositive()) {
+    if (Negative(res.Height()) || Negative(res.Width())) {
         return std::nullopt;
     }
     UpdateRichTextRect(res, textHeight, layoutWrapper);

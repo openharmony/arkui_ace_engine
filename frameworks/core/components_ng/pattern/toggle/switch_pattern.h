@@ -177,6 +177,10 @@ private:
     void InitMouseEvent();
     void InitFocusEvent();
 
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
+
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -227,6 +231,7 @@ private:
     bool isDragEvent_ = false;
     RefPtr<SwitchModifier> switchModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 };
 } // namespace OHOS::Ace::NG
 

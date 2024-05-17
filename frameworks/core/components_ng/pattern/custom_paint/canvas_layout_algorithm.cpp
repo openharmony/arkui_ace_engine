@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/custom_paint/canvas_layout_algorithm.h"
+
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/custom_paint/canvas_layout_algorithm.h"
 #include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -29,8 +30,6 @@ std::optional<SizeF> CanvasLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(pattern, canvasSize);
     if (contentConstraint.selfIdealSize.IsValid()) {
         canvasSize = contentConstraint.selfIdealSize.ConvertToSizeT();
-        pattern->SetCanvasSize(canvasSize);
-        return canvasSize;
     }
     pattern->SetCanvasSize(canvasSize);
     return canvasSize;
