@@ -66,7 +66,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateEventTargetObject(EcmaVM* vm, con
 
     const char* keysOfGlobalOffset[] = { "x", "y" };
     Local<JSValueRef> valuesOfGlobalOffset[] = { panda::NumberRef::New(
-                                                     vm, (origin.GetX() + localOffset.GetX()).ConvertToVp()),
+        vm, (origin.GetX() + localOffset.GetX()).ConvertToVp()),
         panda::NumberRef::New(vm, (origin.GetY() + localOffset.GetY()).ConvertToVp()) };
     auto globalOffset = panda::ObjectRef::NewWithNamedProperties(
         vm, ArraySize(keysOfGlobalOffset), keysOfGlobalOffset, valuesOfGlobalOffset);

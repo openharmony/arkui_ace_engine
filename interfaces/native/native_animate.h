@@ -88,7 +88,7 @@ typedef struct {
 * @return Returns the pointer to the created animation configuration.
 * @since 12
 */
-ArkUI_AnimateOption* OH_ArkUI_AnimateOption_Create();
+ArkUI_AnimateOption* OH_ArkUI_AnimateOption_Create(void);
 
 /**
 * @brief Destroys an animation configuration.

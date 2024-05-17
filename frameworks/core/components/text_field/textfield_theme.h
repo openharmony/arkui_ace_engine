@@ -63,13 +63,13 @@ public:
                 LOGW("find pattern of textfield fail");
                 return;
             }
-            const double defaultErrorAlpha = 0.6;
-            const double defaultUnderlineAlpha = 0.6;
-            const double defaultDisableUnderlineAlpha = 0.4;
-            const Color defaultUnderlineColor = Color(0x33182431);
-            const Color defaultUnderlineTextColor = Color(0x99182431);
-            const Color defaultCounterColor = Color(0x66182431);
-            const Color overCounterColor = Color(0x99FA2A2D);
+            ParsePatternSubFirstPart(pattern, theme);
+            ParsePatternSubSecondPart(pattern, theme);
+            ParsePatternSubThirdPart(pattern, theme);
+        }
+
+        void ParsePatternSubFirstPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
+        {
             theme->padding_ = Edge(pattern->GetAttr<Dimension>("textfield_padding_horizontal", 0.0_vp),
                 pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp),
                 pattern->GetAttr<Dimension>("textfield_padding_horizontal", 0.0_vp),
@@ -109,6 +109,17 @@ public:
             theme->focusPlaceholderColor_ = pattern->GetAttr<Color>("tips_text_color_focused", Color());
             theme->bgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->focusBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
+        }
+
+        void ParsePatternSubSecondPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
+        {
+            const double defaultErrorAlpha = 0.6;
+            const double defaultUnderlineAlpha = 0.6;
+            const double defaultDisableUnderlineAlpha = 0.4;
+            const Color defaultUnderlineColor = Color(0x33182431);
+            const Color defaultUnderlineTextColor = Color(0x99182431);
+            const Color defaultCounterColor = Color(0x66182431);
+            const Color overCounterColor = Color(0x99FA2A2D);
             // color of error border blend 60% opacity
             theme->errorBorderColor_ =
                 pattern->GetAttr<Color>("error_text_border_color", Color())
@@ -144,6 +155,11 @@ public:
             theme->underlineTypingColor_ =
                 pattern->GetAttr<Color>(PATTERN_UNDERLINE_TYPING_COLOR, Color())
                     .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
+        }
+
+        void ParsePatternSubThirdPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
+        {
+            const double defaultErrorAlpha = 0.6;
             theme->textColorDisable_ = pattern->GetAttr<Color>(PATTERN_DISABLED_TEXT_COLOR, Color());
             theme->cursorColor_ = pattern->GetAttr<Color>("cursor_color", Color());
             theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 2.0_vp);
@@ -172,7 +188,6 @@ public:
             theme->showPasswordDirectly_ = StringUtils::StringToInt(showPasswordDirectly);
             auto textfieldShowHandle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
             theme->textfieldShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
-
             theme->textInputBorderColor_ = pattern->GetAttr<Color>("text_input_border_color", Color());
             theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_vp);
             theme->errorTextInputBorderWidth_ = pattern->GetAttr<Dimension>("error_text_input_border_width", 1.0_vp);

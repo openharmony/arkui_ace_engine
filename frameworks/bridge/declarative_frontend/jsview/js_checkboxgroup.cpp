@@ -317,8 +317,8 @@ bool JSCheckboxGroup::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPrope
 
 NG::PaddingProperty JSCheckboxGroup::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding(
-        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    NG::PaddingProperty padding({
+        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
     if (info[0]->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
@@ -360,8 +360,8 @@ NG::PaddingProperty JSCheckboxGroup::GetPadding(const std::optional<CalcDimensio
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right)
 {
-    NG::PaddingProperty padding(
-        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    NG::PaddingProperty padding({
+        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
     if (left.has_value()) {
         if (left.value().Unit() == DimensionUnit::CALC) {
             padding.left = NG::CalcLength(

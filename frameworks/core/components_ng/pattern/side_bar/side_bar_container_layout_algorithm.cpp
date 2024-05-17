@@ -387,7 +387,6 @@ void SideBarContainerLayoutAlgorithm::AutoChangeSideBarWidth(
     const auto& scaleProperty = constraint->scaleProperty;
     auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
     auto dividerStrokeWidthPx = ConvertToPx(dividerStrokeWidth, scaleProperty, parentWidth).value_or(1);
-
     if ((realSideBarWidth_ + minContentWidth_ + dividerStrokeWidthPx) >= parentWidth) {
         realSideBarWidth_ = parentWidth - minContentWidth_ - dividerStrokeWidthPx;
     }

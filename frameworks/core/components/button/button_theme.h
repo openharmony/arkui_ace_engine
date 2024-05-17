@@ -99,6 +99,11 @@ public:
                 buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Value(),
                 buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Unit());
             theme->minFontSize_ = buttonPattern->GetAttr<Dimension>("button_min_font_size", 0.0_fp);
+            ParseAdditionalStylePattern(buttonPattern, theme);
+        }
+        void ParseAdditionalStylePattern(
+            const RefPtr<ThemeStyle>& buttonPattern, const RefPtr<ButtonTheme>& theme) const
+        {
             int32_t maxlines = static_cast<int32_t>(buttonPattern->GetAttr<double>("button_text_max_lines", 0.0));
             theme->textMaxLines_ = maxlines < 0 ? theme->textMaxLines_ : static_cast<uint32_t>(maxlines);
             theme->minCircleButtonDiameter_ = buttonPattern->GetAttr<Dimension>("min_circle_button_diameter", 0.0_vp);

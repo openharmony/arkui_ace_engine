@@ -32,9 +32,7 @@
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::Platform {
-
 AceApplicationInfoImpl::AceApplicationInfoImpl() {}
-
 AceApplicationInfoImpl::~AceApplicationInfoImpl() = default;
 
 void AceApplicationInfoImpl::SetJsEngineParam(const std::string& key, const std::string& value)

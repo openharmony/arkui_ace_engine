@@ -42,10 +42,8 @@ JsiXComponentBridge::~JsiXComponentBridge()
     if (currentContainer) {
         auto taskExecutor = currentContainer->GetTaskExecutor();
         if (taskExecutor) {
-            taskExecutor->PostTask([ renderContext = std::move(renderContext_) ] () mutable {
-                renderContext.reset();
-            },
-            TaskExecutor::TaskType::JS, "ArkUIXComponentRenderContextRelease");
+            taskExecutor->PostTask([renderContext = std::move(renderContext_)]() mutable { renderContext.reset(); },
+                TaskExecutor::TaskType::JS, "ArkUIXComponentRenderContextRelease");
         }
     }
 }
