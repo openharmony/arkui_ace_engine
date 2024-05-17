@@ -107,6 +107,7 @@ group("linux_core_unittest") {
     "pattern/marquee:marquee_test_ng",
     "pattern/menu:menu_test_ng",
     "pattern/movingphoto:movingphoto_test_ng",
+
     # "pattern/navigation:navigation_test_ng",
     "pattern/navigator:navigator_test_ng",
     "pattern/navrouter:navrouter_test_ng",
