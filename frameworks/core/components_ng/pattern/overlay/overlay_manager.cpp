@@ -36,6 +36,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
 #include "core/common/recorder/event_recorder.h"
@@ -49,6 +50,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
@@ -3152,16 +3154,9 @@ void OverlayManager::FireModalPageShow()
 
 void OverlayManager::ModalPageLostFocus(const RefPtr<FrameNode>& node)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    if (container->IsUIExtensionWindow()) {
-        FocusHub::NavCloseKeyboard();
-    } else {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
-        auto textfieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-        CHECK_NULL_VOID(textfieldManager);
-        textfieldManager->ProcessNavKeyboard();
+    auto pattern = node->GetPattern<FocusView>();
+    if (pattern) {
+        pattern->LostViewFocus();
     }
 }
 

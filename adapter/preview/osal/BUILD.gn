@@ -77,6 +77,7 @@ ohos_source_set("preview_osal_source") {
       "frame_report.cpp",
       "image_packer_preview.cpp",
       "image_source_preview.cpp",
+      "input_method_manager_preview.cpp",
       "modal_ui_extension_impl.cpp",
       "mouse_style_ohos.cpp",
       "pixel_map_preview.cpp",
