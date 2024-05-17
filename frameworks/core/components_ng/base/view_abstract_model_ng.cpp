@@ -209,6 +209,9 @@ void BindContextMenuSingle(
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
+    auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetPreviewMode(menuParam.previewMode);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
     auto targetId = targetNode->GetId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
