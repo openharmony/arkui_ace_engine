@@ -88,7 +88,7 @@ void SwiperArrowPattern::OnClick() const
     CHECK_NULL_VOID(swiperLayoutProperty);
     if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL &&
-            AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
             swiperController->ShowNext();
         } else {
             swiperController->ShowPrevious();
@@ -97,7 +97,7 @@ void SwiperArrowPattern::OnClick() const
     }
     if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL &&
-            AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
             swiperController->ShowPrevious();
         } else {
             swiperController->ShowNext();
@@ -317,8 +317,19 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     auto isHoverShow = swiperArrowLayoutProperty->GetHoverShowValue(false);
     auto hostFocusHub = host->GetFocusHub();
     CHECK_NULL_VOID(hostFocusHub);
-    if ((host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG && index_ == 0) ||
-        (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && index_ == TotalCount())) {
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto leftIndex = 0;
+    auto rightIndex = swiperPattern->TotalCount() - swiperPattern->GetDisplayCount();
+    if (swiperArrowLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL &&
+        swiperArrowLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        leftIndex = swiperPattern->TotalCount() - swiperPattern->GetDisplayCount();
+        rightIndex = 0;
+    }
+    if ((host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG && index_ == leftIndex) ||
+        (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && index_ == rightIndex)) {
         if (!swiperArrowLayoutProperty->GetLoopValue(true)) {
             renderContext->SetVisible(false);
             hostFocusHub->SetParentFocusable(false);

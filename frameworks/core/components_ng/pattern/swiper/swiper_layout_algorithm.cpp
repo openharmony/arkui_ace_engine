@@ -979,11 +979,15 @@ void SwiperLayoutAlgorithm::LayoutItem(
             offset += OffsetF(crossOffset, prevMargin_ + spaceWidth_);
         }
     } else {
-        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        CHECK_NULL_VOID(layoutWrapper->GetLayoutProperty());
+        bool isRtl = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
         float offsetPos = isRtl ? contentMainSize_ - pos.second.endPos : pos.second.startPos;
         offset += OffsetF(offsetPos, crossOffset);
-        if (!NearZero(prevMargin_)) {
+        if (!NearZero(prevMargin_) && !isRtl) {
             offset += OffsetF(prevMargin_ + spaceWidth_, crossOffset);
+        }
+        if (!NearZero(prevMargin_) && isRtl) {
+            offset -= OffsetF(prevMargin_ + spaceWidth_, crossOffset);
         }
     }
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
@@ -995,10 +999,6 @@ void SwiperLayoutAlgorithm::CaptureLayout(LayoutWrapper* layoutWrapper)
     if (!hasCachedCapture_ || itemPosition_.empty()) {
         return;
     }
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(hostNode);
-    auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
     auto leftCaptureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_LEFT_CAPTURE_ETS_TAG);
     auto rightCaptureWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_RIGHT_CAPTURE_ETS_TAG);
     if (isCaptureReverse_) {
@@ -1028,8 +1028,16 @@ void SwiperLayoutAlgorithm::CaptureLayout(LayoutWrapper* layoutWrapper)
         leftOffset += OffsetF(0.0f, leftPosition + deltaOffset);
         rightOffset += OffsetF(0.0f, rightPosition + deltaOffset);
     } else {
-        leftOffset += OffsetF(leftPosition + deltaOffset, 0.0f);
-        rightOffset += OffsetF(rightPosition + deltaOffset, 0.0f);
+        bool isRtl = swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        if (isRtl) {
+            leftPosition = contentMainSize_ - itemPosition_.begin()->second.startPos + spaceWidth_;
+            rightPosition = contentMainSize_ - itemPosition_.rbegin()->second.endPos - spaceWidth_ - leftCaptureSize;
+            leftOffset += OffsetF(leftPosition - deltaOffset, 0.0f);
+            rightOffset += OffsetF(rightPosition - deltaOffset, 0.0f);
+        } else {
+            leftOffset += OffsetF(leftPosition + deltaOffset, 0.0f);
+            rightOffset += OffsetF(rightPosition + deltaOffset, 0.0f);
+        }
     }
     leftCaptureWrapper->GetGeometryNode()->SetMarginFrameOffset(leftOffset);
     leftCaptureWrapper->Layout();

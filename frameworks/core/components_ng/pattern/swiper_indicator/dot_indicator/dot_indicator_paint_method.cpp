@@ -58,7 +58,7 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    if (axis_ == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+    if (isHorizontalAndRightToLeft_) {
         currentIndex_ = itemCount_ - 1 - currentIndex_;
     }
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
@@ -192,7 +192,7 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
                     static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
         } else {
             auto mouseClickIndex = mouseClickIndex_.value();
-            if (axis_ == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            if (isHorizontalAndRightToLeft_) {
                 mouseClickIndex = itemCount_ - 1 - mouseClickIndex_.value();
             }
             longPointCenterX_ =
@@ -343,7 +343,6 @@ std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
         CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(turnPageRate_));
     float longPointLeftCenterMoveRate = 0.0f;
     float longPointRightCenterMoveRate = 0.0f;
-    bool isRtl = axis_ == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft();
     if (isPressed_ && touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
         longPointLeftCenterMoveRate = CubicCurve(turnPageRate_ > 0 ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY :
             LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS,
@@ -373,8 +372,7 @@ std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
         longPointRightCenterMoveRate = std::abs(turnPageRate_);
         longPointLeftCenterMoveRate = std::abs(turnPageRate_) * LONG_POINT_TAIL_RATIO;
     }
-
-    if (isRtl && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
+    if (isHorizontalAndRightToLeft_ && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
         return { blackPointCenterMoveRate, longPointRightCenterMoveRate, longPointLeftCenterMoveRate };
     }
@@ -400,7 +398,7 @@ std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
     longPointCenterX.second = starAndEndPointCenter.startLongPointRightCenterX +
         (starAndEndPointCenter.endLongPointRightCenterX - starAndEndPointCenter.startLongPointRightCenterX) *
             longPointRightCenterMoveRate;
-    if (axis_ == Axis::HORIZONTAL && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+    if (isHorizontalAndRightToLeft_) {
         longPointCenterX.first = starAndEndPointCenter.startLongPointLeftCenterX -
         (starAndEndPointCenter.endLongPointLeftCenterX - starAndEndPointCenter.startLongPointLeftCenterX) *
             longPointLeftCenterMoveRate;
