@@ -128,6 +128,20 @@ RefPtr<Modifier> TextFieldPaintMethod::GetOverlayModifier(PaintWrapper* paintWra
     return textFieldOverlayModifier_;
 }
 
+void TextFieldPaintMethod::SetShowUnderlineWidth()
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (textFieldLayoutProperty->HasShowUnderline() && textFieldLayoutProperty->GetShowUnderlineValue()) {
+        textFieldOverlayModifier_->SetUnderlineWidth(textFieldPattern->GetUnderlineWidth());
+        textFieldOverlayModifier_->SetUnderlineColor(textFieldPattern->GetUnderlineColor());
+    } else {
+        textFieldOverlayModifier_->SetUnderlineWidth(0.0f);
+    }
+}
+
 void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -168,14 +182,7 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
     textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
 
-    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    if (textFieldLayoutProperty->HasShowUnderline() && textFieldLayoutProperty->GetShowUnderlineValue()) {
-        textFieldOverlayModifier_->SetUnderlineWidth(textFieldPattern->GetUnderlineWidth());
-        textFieldOverlayModifier_->SetUnderlineColor(textFieldPattern->GetUnderlineColor());
-    } else {
-        textFieldOverlayModifier_->SetUnderlineWidth(0.0f);
-    }
+    SetShowUnderlineWidth();
 
     textFieldOverlayModifier_->SetShowSelect(textFieldPattern->GetShowSelect());
     textFieldOverlayModifier_->SetChangeSelectedRects(textFieldPattern->NeedPaintSelect());
