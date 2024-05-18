@@ -37,7 +37,6 @@
 #define ARKUI_NATIVE_TYPE_H
 
 #include <cstdint>
-#include <stdint.h>
 
 #include "drawable_descriptor.h"
 
@@ -1837,7 +1836,7 @@ typedef enum {
 *
 * @since 12
 */
-ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create();
+ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create(void);
 
 /**
 * @brief Creates a deep copy of a size constraint.
@@ -1989,7 +1988,7 @@ ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context);
 * @return Returns the water flow section configuration.
 * @since 12
 */
-ArkUI_WaterFlowSectionOption* OH_ArkUI_WaterFlowSectionOption_Create();
+ArkUI_WaterFlowSectionOption* OH_ArkUI_WaterFlowSectionOption_Create(void);
 
 /**
 * @brief Destroys the pointer to a water flow section configuration.
@@ -2344,7 +2343,7 @@ int32_t OH_ArkUI_BarrierOption_GetReferencedIdSize(ArkUI_BarrierOption* barrierS
  * @return Alignment rule information.
  * @since 12
  */
-ArkUI_AlignmentRuleOption* OH_ArkUI_AlignmentRuleOption_Create();
+ArkUI_AlignmentRuleOption* OH_ArkUI_AlignmentRuleOption_Create(void);
 
 /**
  * @brief Destroys the alignment rule information of subcomponents in relative containers.
