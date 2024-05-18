@@ -603,7 +603,7 @@ void PipelineBase::PrepareOpenImplicitAnimation()
 
     // flush ui tasks before open implicit animation
     if (!IsLayouting()) {
-        FlushUITasks();
+        FlushUITasks(true);
     }
 #endif
 }
@@ -619,7 +619,7 @@ void PipelineBase::PrepareCloseImplicitAnimation()
     // the animation closure
     if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
         if (!IsLayouting()) {
-            FlushUITasks();
+            FlushUITasks(true);
         } else if (IsLayouting()) {
             LOGW("IsLayouting, prepareCloseImplicitAnimation has tasks not flushed");
         }

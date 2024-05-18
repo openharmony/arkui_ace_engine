@@ -209,7 +209,7 @@ bool UITaskScheduler::NeedAdditionalLayout()
     return ret;
 }
 
-void UITaskScheduler::FlushTask()
+void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("UITaskScheduler::FlushTask");
@@ -219,6 +219,9 @@ void UITaskScheduler::FlushTask()
     }
     if (!afterLayoutTasks_.empty()) {
         FlushAfterLayoutTask();
+    }
+    if (!triggeredByImplicitAnimation && !afterLayoutCallbacksInImplicitAnimationTask_.empty()) {
+        FlushAfterLayoutCallbackInImplicitAnimationTask();
     }
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
@@ -250,9 +253,13 @@ bool UITaskScheduler::isEmpty()
     return dirtyLayoutNodes_.empty() && dirtyRenderNodes_.empty();
 }
 
-void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task)
+void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
-    afterLayoutTasks_.emplace_back(std::move(task));
+    if (isFlushInImplicitAnimationTask) {
+        afterLayoutCallbacksInImplicitAnimationTask_.emplace_back(std::move(task));
+    } else {
+        afterLayoutTasks_.emplace_back(std::move(task));
+    }
 }
 
 void UITaskScheduler::AddPersistAfterLayoutTask(std::function<void()>&& task)
@@ -271,6 +278,17 @@ void UITaskScheduler::FlushAfterLayoutTask()
     }
     // flush correct rect again and flush dirty node again
     FlushPersistAfterLayoutTask();
+}
+
+void UITaskScheduler::FlushAfterLayoutCallbackInImplicitAnimationTask()
+{
+    decltype(afterLayoutCallbacksInImplicitAnimationTask_) tasks(
+        std::move(afterLayoutCallbacksInImplicitAnimationTask_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
 }
 
 void UITaskScheduler::FlushPersistAfterLayoutTask()

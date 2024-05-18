@@ -93,8 +93,13 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
                     Recorder::NodeDataCache::Get().PutMultiple(tabsNode, inspectorId, tabBarText, index);
                 }
             }
-            TabContentChangeEvent eventInfo(index);
-            jsEvent(&eventInfo);
+
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([index, jsEvent]() {
+                TabContentChangeEvent eventInfo(index);
+                jsEvent(&eventInfo);
+            }, true);
         }
     });
 
