@@ -109,8 +109,9 @@ void WindowPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "[WMSMain] id: %{public}d, state: %{public}u, name: %{public}s, in recents: %{public}d",
-        session_->GetPersistentId(), state, session_->GetSessionInfo().bundleName_.c_str(), session_->GetShowRecent());
+        "[WMSMain] id: %{public}d, node id: %{public}d, state: %{public}u, name: %{public}s, in recents: %{public}d",
+        session_->GetPersistentId(), host->GetId(),
+        state, session_->GetSessionInfo().bundleName_.c_str(), session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         if (!HasStartingPage()) {
             return;
@@ -119,11 +120,11 @@ void WindowPattern::OnAttachToFrameNode()
             (session_->GetScenePersistence()->IsSnapshotExisted() ||
             session_->GetScenePersistence()->IsSavingSnapshot())) {
             CreateSnapshotNode();
-            host->AddChild(snapshotNode_);
+            AddChild(host, snapshotNode_, snapshotNodeName_);
             return;
         }
         CreateStartingNode();
-        host->AddChild(startingNode_);
+        AddChild(host, startingNode_, startingNodeName_);
         return;
     }
 
@@ -131,21 +132,21 @@ void WindowPattern::OnAttachToFrameNode()
         (session_->GetScenePersistence()->IsSnapshotExisted() ||
         session_->GetScenePersistence()->IsSavingSnapshot())) {
         CreateSnapshotNode();
-        host->AddChild(snapshotNode_);
+        AddChild(host, snapshotNode_, snapshotNodeName_);
         return;
     }
 
     if (session_->GetShowRecent()) {
         CreateStartingNode();
-        host->AddChild(startingNode_);
+        AddChild(host, startingNode_, startingNodeName_);
         return;
     }
 
-    host->AddChild(contentNode_);
+    AddChild(host, contentNode_, contentNodeName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode && !surfaceNode->IsBufferAvailable()) {
         CreateStartingNode();
-        host->AddChild(startingNode_);
+        AddChild(host, startingNode_, startingNodeName_);
         surfaceNode->SetBufferAvailableCallback(callback_);
     }
 }
@@ -167,6 +168,9 @@ void WindowPattern::CreateContentNode()
 
 void WindowPattern::CreateStartingNode()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("CreateStartingNode[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
     startingNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
@@ -187,6 +191,9 @@ void WindowPattern::CreateStartingNode()
 
 void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("CreateSnapshotNode[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
     session_->SetNeedSnapshot(false);
     snapshotNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -446,5 +453,19 @@ void WindowPattern::SetWindowSceneConsumed(int32_t action)
             pipeline->SetWindowSceneConsumed(false);
         }
     }
+}
+
+void WindowPattern::AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
+    const std::string& nodeType, int32_t index)
+{
+    host->AddChild(child, index);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene AddChild %{public}s", nodeType.c_str());
+}
+
+void WindowPattern::RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
+    const std::string& nodeType)
+{
+    host->RemoveChild(child);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "WindowScene RemoveChild %{public}s", nodeType.c_str());
 }
 } // namespace OHOS::Ace::NG

@@ -722,13 +722,11 @@ HWTEST_F(SliderTestNg, SliderTestNg010, TestSize.Level1)
      * @tc.desc:  when TouchType is DOWN, SourceType is mouse touch.
      */
     TouchLocationInfo LInfo(0);
-    LInfo.touchType_ = TouchType::UP;
+    LInfo.touchType_ = TouchType::DOWN;
     LInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
     TouchEventInfo info("");
     info.SetSourceDevice(SourceType::MOUSE);
     info.changedTouches_.emplace_back(LInfo);
-    sliderPattern->lastTouchLocation_ = Offset(MIN_LABEL, MAX_LABEL);
-    sliderPattern->fingerId_ = LInfo.GetFingerId();
     sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
     /**
      * @tc.cases: case1. mouse down position is outside the block side, UpdateValueByLocalLocation
@@ -772,13 +770,11 @@ HWTEST_F(SliderTestNg, SliderTestNg011, TestSize.Level1)
      * @tc.desc:  when TouchType is DOWN, SourceType is touch.
      */
     TouchLocationInfo LInfo(0);
-    LInfo.touchType_ = TouchType::UP;
+    LInfo.touchType_ = TouchType::DOWN;
     LInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
     TouchEventInfo info("");
     info.SetSourceDevice(SourceType::TOUCH);
     info.changedTouches_.emplace_back(LInfo);
-    sliderPattern->lastTouchLocation_ = Offset(MIN_LABEL, MAX_LABEL);
-    sliderPattern->fingerId_ = LInfo.GetFingerId();
     sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
     sliderPattern->blockHotSize_ = SizeF(MIN_LABEL, MIN_LABEL);
     /**
@@ -3794,13 +3790,11 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode005, TestSize.Level1)
      * @tc.desc:  when TouchType is DOWN, SourceType is mouse touch.
      */
     TouchLocationInfo LInfo(0);
-    LInfo.touchType_ = TouchType::UP;
+    LInfo.touchType_ = TouchType::DOWN;
     LInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
     TouchEventInfo info("");
     info.SetSourceDevice(SourceType::MOUSE);
     info.changedTouches_.emplace_back(LInfo);
-    sliderPattern->lastTouchLocation_ = Offset(MIN_LABEL, MAX_LABEL);
-    sliderPattern->fingerId_ = LInfo.GetFingerId();
     sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
     /**
      * @tc.cases: case1. mouse down position is outside the block side, UpdateValueByLocalLocation
@@ -3912,13 +3906,11 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode007, TestSize.Level1)
      * @tc.desc:  when TouchType is DOWN, SourceType is touch.
      */
     TouchLocationInfo LInfo(0);
-    LInfo.touchType_ = TouchType::UP;
+    LInfo.touchType_ = TouchType::DOWN;
     LInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
     TouchEventInfo info("");
     info.SetSourceDevice(SourceType::TOUCH);
     info.changedTouches_.emplace_back(LInfo);
-    sliderPattern->lastTouchLocation_ = Offset(MIN_LABEL, MAX_LABEL);
-    sliderPattern->fingerId_ = LInfo.GetFingerId();
     sliderPattern->sliderLength_ = MIN_LABEL * MIN_LABEL;
     sliderPattern->blockHotSize_ = SizeF(MIN_LABEL, MIN_LABEL);
     /**
@@ -5217,8 +5209,9 @@ HWTEST_F(SliderTestNg, SliderValidRangeTest003, TestSize.Level1)
         /**
          * @tc.cases: case1. check Slider value after touch down
          */
+        sliderPattern->lastTouchLocation_ = Offset(setValue + touchOffset, MAX_LABEL);
+        sliderPattern->fingerId_ = LInfo.GetFingerId();
         sliderPattern->HandleTouchEvent(infoDown);
-        EXPECT_TRUE(NearEqual(sliderPattern->value_, setValue + touchOffset));
 
         /**
          * @tc.cases: case2. check Slider value after touch up
@@ -5450,5 +5443,26 @@ HWTEST_F(SliderTestNg, SliderValidRangeTest006, TestSize.Level1)
         sliderPattern->UpdateToValidValue();
         EXPECT_TRUE(NearEqual(sliderPattern->value_, endValue));
     }
+}
+
+/**
+ * @tc.name: SliderValidRangeTest007
+ * @tc.desc: Check "GetValidSlideRange" API
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderValidRangeTest007, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetValidSlideRange(MIN_RANGE, MAX_RANGE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto validRange = SliderModelNG::GetValidSlideRange(frameNode.GetRawPtr());
+    EXPECT_TRUE(validRange && validRange->HasValidValues());
+    EXPECT_EQ(validRange->GetFromValue(), MIN_RANGE);
+    EXPECT_EQ(validRange->GetToValue(), MAX_RANGE);
 }
 } // namespace OHOS::Ace::NG

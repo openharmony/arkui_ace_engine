@@ -103,6 +103,9 @@ public:
         auto geometryNode = dirty->GetGeometryNode();
         offset_ = geometryNode->GetContentOffset();
         size_ = geometryNode->GetContentSize();
+        if (!isUserSetResponseRegion_) {
+            AddHotZoneRect();
+        }
         return true;
     }
 
@@ -191,7 +194,7 @@ public:
 
     void SetIndicatorBuilder(const std::optional<std::function<void()>>& buildFunc)
     {
-        builder_ = buildFunc.value_or(nullptr);
+        builder_ = buildFunc;
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -261,6 +264,7 @@ private:
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
@@ -292,8 +296,12 @@ private:
     bool isUserSetResponseRegion_ = false;
     bool focusEventInitialized_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    Dimension hotZoneHorizontalPadding_;
+    Dimension hotZoneVerticalPadding_;
     OffsetF offset_;
     SizeF size_;
+    OffsetF hotZoneOffset_;
+    SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
     RefPtr<FrameNode> builderNode_;

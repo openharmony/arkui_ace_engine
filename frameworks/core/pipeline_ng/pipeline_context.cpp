@@ -2333,6 +2333,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-default") {
         rootNode_->DumpTree(0);
         DumpLog::GetInstance().OutPutDefault();
+    } else if (params[0] == "-overlay") {
+        if (overlayManager_) {
+            overlayManager_->DumpOverlayInfo();
+        }
     }
     return true;
 }
@@ -3719,5 +3723,35 @@ bool PipelineContext::IsContainerModalVisible()
     auto windowManager = GetWindowManager();
     bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     return isShowTitle_ && isFloatingWindow && customTitleSettedShow_;
+}
+
+void PipelineContext::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type)
+{
+    eventManager_->CheckAndLogLastReceivedTouchEventInfo(eventId, type);
+}
+
+void PipelineContext::CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type)
+{
+    eventManager_->CheckAndLogLastReceivedTouchEventInfo(eventId, type);
+}
+
+void PipelineContext::CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action)
+{
+    eventManager_->CheckAndLogLastReceivedMouseEventInfo(eventId, action);
+}
+
+void PipelineContext::CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action)
+{
+    eventManager_->CheckAndLogLastConsumedMouseEventInfo(eventId, action);
+}
+
+void PipelineContext::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action)
+{
+    eventManager_->CheckAndLogLastReceivedAxisEventInfo(eventId, action);
+}
+
+void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action)
+{
+    eventManager_->CheckAndLogLastConsumedAxisEventInfo(eventId, action);
 }
 } // namespace OHOS::Ace::NG

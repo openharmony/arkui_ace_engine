@@ -1158,7 +1158,9 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSRichEditor>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRichEditor>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSRichEditor>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRichEditor>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRichEditor>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSRichEditor>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRichEditor>::StaticMethod("clip", &JSRichEditor::JsClip);
     JSClass<JSRichEditor>::StaticMethod("focusable", &JSRichEditor::JsFocusable);

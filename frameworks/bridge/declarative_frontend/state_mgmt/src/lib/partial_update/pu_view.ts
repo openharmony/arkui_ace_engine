@@ -397,8 +397,10 @@ abstract class ViewPU extends PUV2ViewBase
       this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
         const child = weakRefChild.deref();
         if (child) {
-          if (child instanceof ViewPU && !child.hasBeenRecycled_) {
-            child.forceCompleteRerender(true);
+          if (child instanceof ViewPU) {
+            if (!child.hasBeenRecycled_) {
+              child.forceCompleteRerender(true);
+            }
           } else {
             throw new Error('forceCompleteRerender not implemented for ViewV2, yet');
           }
@@ -816,11 +818,12 @@ abstract class ViewPU extends PUV2ViewBase
     recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
   }
 
-  aboutToReuseInternal() {
+  // param is used by BuilderNode
+  aboutToReuseInternal(param?: Object) {
     this.runReuse_ = true;
     stateMgmtTrace.scopedTrace(() => {
       if (this.paramsGenerator_ && typeof this.paramsGenerator_ === 'function') {
-        const params = this.paramsGenerator_();
+        const params = param ? param : this.paramsGenerator_();
         this.updateStateVars(params);
         this.aboutToReuse(params);
       }
@@ -840,8 +843,10 @@ abstract class ViewPU extends PUV2ViewBase
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
-        if (child instanceof ViewPU && !child.hasBeenRecycled_) {
-          child.aboutToReuseInternal();
+        if (child instanceof ViewPU) {
+          if (!child.hasBeenRecycled_) {
+            child.aboutToReuseInternal();
+          }
         } else {
           // FIXME fix for mixed V2 - V3 Hierarchies
           throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
@@ -859,8 +864,10 @@ abstract class ViewPU extends PUV2ViewBase
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
-        if (child instanceof ViewPU && !child.hasBeenRecycled_) {
-          child.aboutToRecycleInternal();
+        if (child instanceof ViewPU) {
+          if (!child.hasBeenRecycled_) {
+            child.aboutToRecycleInternal();
+          }
         } else {
           // FIXME fix for mixed V2 - V3 Hierarchies
           throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
@@ -1108,6 +1115,35 @@ abstract class ViewPU extends PUV2ViewBase
     }
     return retVaL;
   }
+
+
+
+  /**
+    * onDumpInspetor is invoked by native side to create Inspector tree including state variables
+    * @returns dump info
+    */
+  protected onDumpInspetor(): string {
+    let res: DumpInfo = new DumpInfo();
+    res.viewInfo = { componentName: this.constructor.name, id: this.id__() };
+    Object.getOwnPropertyNames(this)
+      .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
+      .forEach((varName) => {
+        const prop: any = Reflect.get(this, varName);
+        if ('debugInfoDecorator' in prop) {
+          const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
+          let observedPropertyInfo: ObservedPropertyInfo = {
+            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+            value: typeof observedProp.getUnmonitored() !== 'object' ? observedProp.getUnmonitored() : ObservedObject.GetRawObject(observedProp.getUnmonitored()),
+            dependentElementIds: observedProp.debugInfoDependentElmtIds(),
+            owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
+          };
+          res.observedPropertiesInfo.push(observedPropertyInfo);
+        }
+      });
+    return JSON.stringify(res);
+  }
+
+
 
   /**
    * on first render create a new Instance of Repeat

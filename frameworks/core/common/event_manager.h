@@ -59,6 +59,11 @@ struct RectCallback final {
     OutOfRectMouseCallback mouseCallback;
 };
 
+struct MarkProcessedEventInfo {
+    int32_t eventId = -1;
+    int64_t lastLogTimeStamp = 0;
+};
+
 class EventManager : public virtual AceType {
     DECLARE_ACE_TYPE(EventManager, AceType);
 
@@ -247,6 +252,22 @@ public:
     void RecordHitEmptyMessage(
         const TouchEvent& touchPoint, const std::string& resultInfo, const RefPtr<NG::FrameNode>& frameNode);
 
+    void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type);
+
+    void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type);
+
+    void CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action);
+
+    void CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action);
+
+    void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action);
+
+    void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action);
+
+    void CheckAndLogLastReceivedEventInfo(int32_t eventId, bool logImmediately = false);
+
+    void CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately = false);
+
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
@@ -287,6 +308,8 @@ private:
     TimeStamp lastEventTime_;
     std::set<int32_t> downFingerIds_;
     std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
+    MarkProcessedEventInfo lastReceivedEvent_;
+    MarkProcessedEventInfo lastConsumedEvent_;
 };
 
 } // namespace OHOS::Ace

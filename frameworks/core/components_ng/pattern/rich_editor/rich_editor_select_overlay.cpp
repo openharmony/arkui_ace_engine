@@ -83,6 +83,9 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset, contentRect.GetSize());
     auto parent = host->GetAncestorNodeOfFrame();
     visibleContentRect = GetVisibleContentRect();
+    if (visibleContentRect.IsEmpty()) {
+        return false;
+    }
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
     if (IsSingleHandle()) {

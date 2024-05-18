@@ -87,15 +87,13 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     return dragNode;
 }
 
-TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode,
-    float selectedWidth)
+TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode)
 {
     auto dragContext = dragNode->GetRenderContext();
     auto dragPattern = dragNode->GetPattern<TextDragPattern>();
     float textStartX = pattern->GetTextRect().GetX();
     float textStartY = pattern->IsTextArea() ? pattern->GetTextRect().GetY() : pattern->GetTextContentRect().GetY();
     auto contentRect = pattern->GetTextContentRect();
-    float lineHeight = pattern->GetLineHeight();
     float bothOffset = TEXT_DRAG_OFFSET.ConvertToPx() * CONSTANT_HALF;
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
@@ -106,6 +104,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     float rightHandleX = boxLast.Right() + textStartX;
     float rightHandleY = boxLast.Top() + textStartY;
     bool oneLineSelected = (leftHandleY == rightHandleY);
+    float lineHeight = boxFirst.Height();
     if (oneLineSelected) {
         leftHandleX = std::max(leftHandleX, contentRect.Left());
         rightHandleX = std::min(rightHandleX, contentRect.Right());

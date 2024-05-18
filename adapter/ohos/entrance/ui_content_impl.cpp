@@ -728,7 +728,7 @@ napi_value UIContentImpl::GetUINapiContext()
 }
 
 UIContentErrorCode UIContentImpl::Restore(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, ContentInfoType type)
 {
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, contentInfo, storage);
@@ -743,7 +743,7 @@ UIContentErrorCode UIContentImpl::Restore(
     return Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
 }
 
-std::string UIContentImpl::GetContentInfo() const
+std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContent GetContentInfo", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
@@ -997,6 +997,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     if (context) {
         auto token = context->GetToken();
         container->SetToken(token);
+    }
+
+    if (appInfo) {
+        container->SetApiTargetVersion(appInfo->apiTargetVersion);
     }
 
     // Mark the relationship between windowId and containerId, it is 1:1
@@ -1503,6 +1507,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetBundleName(hapModuleInfo->bundleName);
     container->SetModuleName(hapModuleInfo->moduleName);
     container->SetIsModule(hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
+    container->SetApiTargetVersion(apiTargetVersion);
 
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
@@ -1550,10 +1555,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             if (rsUiDirector) {
                 ACE_SCOPED_TRACE("OHOS::Rosen::RSUIDirector::Create()");
                 rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
+                    [taskExecutor = container->GetTaskExecutor(), id](
+                        const std::function<void()>& task, uint32_t delay) {
                         ContainerScope scope(id);
-                        taskExecutor->PostTask(
-                            task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask", PriorityType::HIGH);
+                        taskExecutor->PostDelayedTask(
+                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
                     }, id);
                 auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context != nullptr) {
@@ -2034,7 +2040,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
         task();
     } else {
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
+        AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
+        viewportConfigMgr_->UpdateConfig(aceViewportConfig, container, std::move(task), "ArkUIUpdateViewportConfig");
     }
 }
 

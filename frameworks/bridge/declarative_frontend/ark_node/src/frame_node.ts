@@ -622,6 +622,11 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkGridRowComponent(node, type);
       })
     }],
+    ["TextInput", (context: UIContext) => {
+      return new TypedFrameNode(context, "TextInput", (node: NodePtr, type: ModifierType) => {
+        return new ArkTextInputComponent(node, type);
+      })
+    }],
     ["GridCol", (context: UIContext) => {
       return new TypedFrameNode(context, "GridCol", (node: NodePtr, type: ModifierType) => {
         return new ArkGridColComponent(node, type);
@@ -680,6 +685,11 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
     ["LoadingProgress", (context: UIContext) => {
       return new TypedFrameNode(context, "LoadingProgress", (node: NodePtr, type: ModifierType) => {
         return new ArkLoadingProgressComponent(node, type);
+      })
+    }],
+    ["Search", (context: UIContext) => {
+      return new TypedFrameNode(context, "Search", (node: NodePtr, type: ModifierType) => {
+        return new ArkSearchComponent(node, type);
       })
     }],
   ]

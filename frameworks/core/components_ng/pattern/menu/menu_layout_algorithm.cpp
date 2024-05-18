@@ -428,7 +428,8 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         CreateIdealSize(constraint.value(), Axis::FREE, props->GetMeasureType(MeasureType::MATCH_PARENT), true);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    auto windowGlobalRect = hierarchicalParameters_ ? pipelineContext->GetDisplayAvailableRect()
+                                                    : pipelineContext->GetDisplayWindowRectInfo();
     wrapperRect_.SetRect(0, 0, wrapperIdealSize.Width(), wrapperIdealSize.Height());
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     // system safeArea(AvoidAreaType.TYPE_SYSTEM) only include status bar,now the bottom is 0
@@ -461,6 +462,7 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         }
     }
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
+    dumpInfo_.wrapperRect = wrapperRect_;
 }
 
 void MenuLayoutAlgorithm::InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)

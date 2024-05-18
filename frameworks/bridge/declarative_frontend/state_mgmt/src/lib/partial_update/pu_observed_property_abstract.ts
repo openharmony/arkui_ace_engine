@@ -172,6 +172,38 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       : false;
   }
 
+  public dumpSyncPeers(): ObservedPropertyInfo[] {
+    let res: ObservedPropertyInfo[] = [];
+    this.subscriberRefs_.forEach((subscriber: IPropertySubscriber) => {
+      if ('debugInfo' in subscriber) {
+        const observedProp = subscriber as ObservedPropertyAbstractPU<any>;
+        let syncPeer: ObservedPropertyInfo = {
+          decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+          value: typeof observedProp.getUnmonitored() !== 'object' ? observedProp.getUnmonitored() : ObservedObject.GetRawObject(observedProp.getUnmonitored()),
+          dependentElementIds: observedProp.debugInfoDependentElmtIds(),
+          owningView: { componentName: observedProp.owningView_?.constructor.name, id: observedProp.owningView_?.id__() }
+        };
+        res.push(syncPeer);
+      }
+    });
+    return res;
+  }
+
+  protected onDumpProfiler(): void {
+    let res: DumpInfo = new DumpInfo();
+    let observedPropertyInfo: ObservedPropertyInfo = {
+      decorator: this.debugInfoDecorator(), propertyName: this.info(), id: this.id__(),
+      value: typeof this.getUnmonitored() !== 'object' ? this.getUnmonitored() : ObservedObject.GetRawObject(this.getUnmonitored()),
+      dependentElementIds: this.debugInfoDependentElmtIds(),
+      owningView: { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() }, syncPeers: this.dumpSyncPeers()
+    };
+    res.viewInfo = { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() };
+    res.observedPropertiesInfo.push(observedPropertyInfo);
+    if (this.owningView_) {
+      this.owningView_.sendStateInfo(JSON.stringify(res));
+    }
+  }
+
   /*
     Virtualized version of the subscription mechanism - add subscriber
     Overrides implementation in ObservedPropertyAbstract<T>
@@ -249,6 +281,13 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away
         this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
+
+        // send changed observed property to profiler
+        // only will be true when enable profiler
+        if (stateMgmtDFX.enableProfiler_) {
+          stateMgmtConsole.warn(`notifyPropertyHasChangedPU in profiler mode`);
+          this.onDumpProfiler();
+        }
       } else {
         // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
@@ -275,6 +314,12 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away
         this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
+        // send changed observed property to profiler
+        // only will be true when enable profiler
+        if (stateMgmtDFX.enableProfiler_) {
+          stateMgmtConsole.warn(`notifyPropertyHasChangedPU in profiler mode`);
+          this.onDumpProfiler();
+        }
       } else {
         // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;

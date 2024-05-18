@@ -678,9 +678,14 @@ private:
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
     void DelTouchOverlayInfoByTouchId(int32_t touchId);
     std::optional<OffsetF> GetCoordinatePoint();
-    void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
+    static void InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNode>>& options,
+        const std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback>& callback,
+        const std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam>& params,
+        const double& dipScale);
+    static void InitSelectPopupMenuView(RefPtr<FrameNode>& menuWrapper,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
-        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+        const double& dipScale);
     OffsetF GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound);
     void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
     bool GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t accessibilityId) const;
@@ -723,6 +728,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
+    double GetNewScale(double& scale);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -826,6 +832,11 @@ private:
     std::unordered_map<int32_t, bool> naitve_map_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
     bool embedNeedKeyboard_ = false;
+    double startPinchScale_ = -1.0;
+    double preScale_ = -1.0;
+    double pageScale_ = 1.0;
+    int32_t pinchIndex_ = 0;
+    bool zoomOutSwitch_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -86,10 +86,6 @@ public:
     {
         return defaultHeight_;
     }
-    const Dimension& GetDefaultWidthNG() const
-    {
-        return defaultWidthNG_;
-    }
     double GetRadioInnerSizeRatio() const
     {
         return radioInnerSizeRatio_;
@@ -200,6 +196,16 @@ public:
         return sizeFocusBg_;
     }
 
+    const Color& GetFocusedRingUnchecked() const
+    {
+        return focusedRingUnchecked_;
+    }
+
+    const Color& GetFocusedBgUnchecked() const
+    {
+        return focusedBgUnchecked_;
+    }
+
 protected:
     CheckableTheme() = default;
 
@@ -209,6 +215,8 @@ protected:
     Color inactivePointColor_;
     Color focusColor_;
     Color hoverColor_;
+    Color focusedRingUnchecked_;
+    Color focusedBgUnchecked_;
     Color clickEffectColor_;
     Color shadowColor_;
     Color focusBoardColor_;
@@ -229,8 +237,6 @@ protected:
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
     Dimension focusBoardSize_;
-    Dimension defaultWidthNG_;
-    Dimension defaultHeightNG_;
     double hoverDuration_ = 0.0f;
     double hoverToTouchDuration_ = 0.0f;
     double touchDuration_ = 0.0f;
@@ -275,11 +281,13 @@ public:
             theme->height_ = theme->width_;
             theme->hotZoneHorizontalPadding_ = checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding", 0.0_vp);
             theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size", 0.0_vp);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->defaultPaddingSize_ =
+                    checkboxPattern->GetAttr<Dimension>("checkbox_default_padding_size", 2.0_vp);
+                theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size_twelve", 24.0_vp);
+            }
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             theme->defaultHeight_ = theme->defaultWidth_;
-            theme->defaultWidthNG_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size_twelve", 24.0_vp);
-            theme->defaultHeightNG_ = theme->defaultWidth_;
-            theme->defaultPaddingSize_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_padding_size", 2.0_vp);
             theme->needFocus_ = static_cast<bool>(checkboxPattern->GetAttr<double>("checkbox_need_focus", 0.0));
             theme->backgroundSolid_ =
                 static_cast<bool>(checkboxPattern->GetAttr<double>("checkbox_inactive_background_solid", 0.0));
@@ -469,6 +477,8 @@ public:
             theme->shadowWidth_ = radioPattern->GetAttr<Dimension>("radio_shadow_width", 0.0_vp);
             theme->pointColor_ = radioPattern->GetAttr<Color>("fg_color_checked", Color::RED);
             theme->activeColor_ = radioPattern->GetAttr<Color>("bg_color_checked", Color::RED);
+            theme->focusedRingUnchecked_ = radioPattern->GetAttr<Color>("focused_ring_unchecked", Color::TRANSPARENT);
+            theme->focusedBgUnchecked_ = radioPattern->GetAttr<Color>("focused_bg_unchecked", Color::TRANSPARENT);
             theme->inactiveColor_ = radioPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
             theme->inactivePointColor_ = radioPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
             theme->focusColor_ = radioPattern->GetAttr<Color>("bg_focus_outline_color", Color::RED);

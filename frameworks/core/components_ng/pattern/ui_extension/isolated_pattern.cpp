@@ -27,22 +27,25 @@ constexpr char RESOURCE_PATH[] = "resourcePath";
 constexpr char ABC_PATH[] = "abcPath";
 constexpr char ENTRY_POINT[] = "entryPoint";
 }
-IsolatedPattern::IsolatedPattern() : UIExtensionPattern()
+
+int32_t IsolatedPattern::isolatedIdGenerator_ = 0;
+
+IsolatedPattern::IsolatedPattern()
+    : PlatformPattern(AceLogTag::ACE_ISOLATED_COMPONENT, ++isolatedIdGenerator_)
 {
-    UIEXT_LOGI("The IsolatedPattern is created.");
+    PLATFORM_LOGI("The IsolatedPattern is created.");
 }
 
 IsolatedPattern::~IsolatedPattern()
 {
-    UIEXT_LOGI("The IsolatedPattern is destroyed.");
+    PLATFORM_LOGI("The IsolatedPattern is destroyed.");
 }
 
 void IsolatedPattern::InitializeDynamicComponent(
     const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
-    componentType_ = ComponentType::DYNAMIC;
     if (hapPath.empty() || abcPath.empty() || entryPoint.empty() || runtime == nullptr) {
-        UIEXT_LOGE("The param empty.");
+        PLATFORM_LOGE("The param empty.");
         return;
     }
 
@@ -54,13 +57,12 @@ void IsolatedPattern::InitializeDynamicComponent(
 
 void IsolatedPattern::InitializeIsolatedComponent(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
 {
-    componentType_ = ComponentType::DYNAMIC;
     auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
     auto resourcePath = want.GetStringParam(RESOURCE_PATH);
     auto abcPath = want.GetStringParam(ABC_PATH);
     auto entryPoint = want.GetStringParam(ENTRY_POINT);
     if (resourcePath.empty() || abcPath.empty() || entryPoint.empty() || runtime == nullptr) {
-        UIEXT_LOGE("The param empty.");
+        PLATFORM_LOGE("The param empty.");
         return;
     }
 
@@ -78,17 +80,6 @@ void IsolatedPattern::InitializeRender(void* runtime)
             curIsolatedInfo_.reourcePath, curIsolatedInfo_.abcPath, curIsolatedInfo_.entryPoint, runtime);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
         dynamicComponentRenderer_->CreateContent();
-    }
-}
-
-void IsolatedPattern::FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message)
-{
-    UIEXT_LOGI("The OnError code: %{public}d, name: %{public}s, message: %{public}s.",
-        code, name.c_str(), message.c_str());
-    if (onErrorCallback_) {
-        ContainerScope scope(instanceId_);
-        onErrorCallback_(code, name, message);
-        return;
     }
 }
 

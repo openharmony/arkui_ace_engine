@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_PATTERN_H
 
 #include <cstdint>
+#include <map>
 #include <optional>
 #include <set>
 #include <string>
@@ -78,13 +79,14 @@ struct AutoScrollParam {
     Offset eventOffset;
     bool isFirstRun_ = true;
 };
-enum class RecordType {
-    DEL_FORWARD = 0,
-    DEL_BACKWARD = 1,
-    INSERT = 2,
-    UNDO = 3,
-    REDO = 4,
-    DRAG = 5
+enum class RecordType { DEL_FORWARD = 0, DEL_BACKWARD = 1, INSERT = 2, UNDO = 3, REDO = 4, DRAG = 5 };
+enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
+enum class HandleType { FIRST = 0, SECOND };
+const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
+    {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
+    {{ HandleType::FIRST, SelectorAdjustPolicy::EXCLUDE }, MoveDirection::FORWARD },
+    {{ HandleType::SECOND, SelectorAdjustPolicy::INCLUDE }, MoveDirection::FORWARD },
+    {{ HandleType::SECOND, SelectorAdjustPolicy::EXCLUDE }, MoveDirection::BACKWARD }
 };
 
 class RichEditorPattern
@@ -239,6 +241,7 @@ public:
     {
         uint32_t spanTextLength = 0;
         for (auto& span : spans_) {
+            span->rangeStart = static_cast<int32_t>(spanTextLength);
             spanTextLength += StringUtils::ToWstring(span->content).length();
             span->position = static_cast<int32_t>(spanTextLength);
         }
@@ -360,6 +363,7 @@ public:
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
+    bool IsCustomSpanInCaretPos(int32_t position, bool downStreamFirst);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
     void CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     void CopyTextSpanLineStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
@@ -376,9 +380,13 @@ public:
     void FireOnDeleteComplete(const RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
-    bool SymbolSpanUpdateStyle(
-        RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
+    void SetSelectSpanStyle(int32_t start, int32_t end, RefPtr<SpanNode>& target, KeyCode code, bool isStart);
+    void GetSelectSpansPositionInfo(
+        int32_t start, int32_t end, SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
+    void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
+    bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
+    struct UpdateSpanStyle GetUpdateSpanStyle();
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style);
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
@@ -417,7 +425,7 @@ public:
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
-    void HandleDraggableFlag(GestureEvent& info, bool& isInterceptEvent);
+    void HandleDraggableFlag(bool isInterceptEvent);
     bool JudgeContentDraggable();
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
     OffsetF CalculateEmptyValueCaretRect();
@@ -702,8 +710,11 @@ public:
         return MakeRefPtr<RichEditorAccessibilityProperty>();
     }
 
-    void AdjustSelector(int32_t& index, bool isFirst);
-    void AdjustSelector(int32_t& start, int32_t& end);
+    void AdjustSelector(int32_t& index, HandleType handleType,
+        SelectorAdjustPolicy policy = SelectorAdjustPolicy::INCLUDE);
+    void AdjustSelector(int32_t& start, int32_t& end, SelectorAdjustPolicy policy = SelectorAdjustPolicy::INCLUDE);
+    bool AdjustSelectorForSymbol(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
+    bool AdjustSelectorForEmoji(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
     void UpdateSelector(int32_t start, int32_t end);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
 
@@ -783,6 +794,7 @@ private:
     void ClearDragDropEvent();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
     void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
+    void ResetDragSpanItems();
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)

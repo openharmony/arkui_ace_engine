@@ -1144,6 +1144,7 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
 
 void RefreshPattern::OnScrollStartRecursive(float position, float velocity)
 {
+    SetIsNestedInterrupt(false);
     if (!GetIsFixedNestedScrollMode()) {
         SetParentScrollable();
     }
@@ -1183,9 +1184,10 @@ void RefreshPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     HandleDragEnd(velocity.value_or(0.f));
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
-    if (parent && nestedScroll.NeedParent()) {
+    if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(velocity);
     }
+    SetIsNestedInterrupt(false);
 }
 
 void RefreshPattern::DumpInfo()

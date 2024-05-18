@@ -62,23 +62,23 @@ const VERSION_TWELVE: number = 50000012
 export struct TipsDialog {
   controller: CustomDialogController;
   imageRes: Resource | ResourceStr | PixelMap | null = null;
-  @State imageSize?: SizeOptions = { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE };
+@State imageSize?: SizeOptions = { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE };
   title?: ResourceStr | null = null;
   content?: ResourceStr | null = null;
   checkAction?: (isChecked: boolean) => void;
   checkTips?: ResourceStr | null = null;
-  @State isChecked?: boolean = false;
+@State isChecked?: boolean = false;
   primaryButton?: ButtonOptions | null = null;
   secondaryButton?: ButtonOptions | null = null;
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State imageSizeHeight: number = 0;
-  @State textAlignment: TextAlign = TextAlign.Start;
+@State imageSizeHeight: number = 0;
+@State textAlignment: TextAlign = TextAlign.Start;
   marginOffset: number = 0;
-  @State checkBoxHeight: number = 0;
+@State checkBoxHeight: number = 0;
   buttonHeight: number = 0;
   // the controller of content area scroll
   contentScroller: Scroller = new Scroller();
-  @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+@State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   build() {
@@ -92,7 +92,7 @@ export struct TipsDialog {
     })
   }
 
-  @Builder
+@Builder
   contentBuilder(): void {
     Column() {
       this.imagePart();
@@ -101,10 +101,10 @@ export struct TipsDialog {
         Column() {
           this.textPart();
         }
-        .padding({ top: $r('sys.float.padding_level8') })
-        .constraintSize({
-          maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.imageSizeHeight}vp - ${this.buttonHeight}vp)`
-        })
+      .padding({ top: $r('sys.float.padding_level8') })
+            .constraintSize({
+              maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.imageSizeHeight}vp - ${this.buttonHeight}vp)`
+            })
       }
 
       if (this.checkTips != null) {
@@ -113,70 +113,70 @@ export struct TipsDialog {
     }
   }
 
-  @Builder
+@Builder
   checkBoxPart(content: ResourceStr): void {
     Row() {
       Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
-        .onChange((checked: boolean) => {
-          this.isChecked = checked;
-          if (this.checkAction) {
-            this.checkAction(checked);
-          }
-        })
-        .margin({ right: $r('sys.float.padding_level4') })
+          .onChange((checked: boolean) => {
+            this.isChecked = checked;
+            if (this.checkAction) {
+              this.checkAction(checked);
+            }
+          })
+          .margin({ right: $r('sys.float.padding_level4') })
       Text(content)
-        .fontSize($r('sys.float.Body_M'))
-        .fontWeight(FontWeight.Regular)
-        .fontColor(this.fontColorWithTheme)
-        .maxLines(CONTENT_MAX_LINES)
-        .layoutWeight(1)
-        .focusable(false)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .onClick(() => {
-          this.isChecked = !this.isChecked;
-          if (this.checkAction) {
-            this.checkAction(this.isChecked);
-          }
-        })
+          .fontSize($r('sys.float.Body_M'))
+          .fontWeight(FontWeight.Regular)
+          .fontColor(this.fontColorWithTheme)
+          .maxLines(CONTENT_MAX_LINES)
+          .layoutWeight(1)
+          .focusable(false)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .onClick(() => {
+            this.isChecked = !this.isChecked;
+            if (this.checkAction) {
+              this.checkAction(this.isChecked);
+            }
+          })
     }
     .padding({ top: $r('sys.float.padding_level8') })
-    .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
-    .width('100%')
-    .onAreaChange((oldValue: Area, newValue: Area) => {
-      this.checkBoxHeight = Number(newValue.height);
-    })
+        .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
+        .width('100%')
+        .onAreaChange((oldValue: Area, newValue: Area) => {
+          this.checkBoxHeight = Number(newValue.height);
+        })
   }
 
-  @Builder
+@Builder
   imagePart(): void {
     Column() {
       Image(this.imageRes)
-        .size(this.imageSize)
-        .objectFit(ImageFit.Contain)
-        .borderRadius($r('sys.float.corner_radius_level6'))
-        .constraintSize({
-          maxWidth: '100%',
-          maxHeight:
-          `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
-        })
+          .size(this.imageSize)
+          .objectFit(ImageFit.Contain)
+          .borderRadius($r('sys.float.corner_radius_level6'))
+          .constraintSize({
+            maxWidth: '100%',
+            maxHeight:
+                `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+          })
     }
     .width('100%')
-    .constraintSize({
-      maxHeight:
-      `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
-    })
-    .onAreaChange((oldValue: Area, newValue: Area) => {
-      this.imageSizeHeight = Number(newValue.height);
-    })
+        .constraintSize({
+          maxHeight:
+              `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+        })
+        .onAreaChange((oldValue: Area, newValue: Area) => {
+          this.imageSizeHeight = Number(newValue.height);
+        })
   }
 
-  @Builder
+@Builder
   textPart(): void {
     Scroll(this.contentScroller) {
-      Column() {
-        if (this.title != null) {
-          Row() {
-            Text(this.title)
+    Column() {
+      if (this.title != null) {
+        Row() {
+          Text(this.title)
               .fontSize($r('sys.float.Title_S'))
               .fontWeight(FontWeight.Medium)
               .fontColor(this.fontColorWithTheme)
@@ -186,12 +186,12 @@ export struct TipsDialog {
               .minFontSize($r('sys.float.Body_L'))
               .maxFontSize($r('sys.float.Title_S'))
               .width('100%')
-          }
-          .padding({ bottom: $r('sys.float.padding_level8') })
         }
-        if (this.content != null) {
-          Row() {
-            Text(this.content)
+      .padding({ bottom: $r('sys.float.padding_level8') })
+      }
+      if (this.content != null) {
+        Row() {
+          Text(this.content)
               .focusable(true)
               .defaultFocus(!(this.primaryButton || this.secondaryButton))
               .fontSize($r('sys.float.Body_L'))
@@ -207,58 +207,58 @@ export struct TipsDialog {
               .onAreaChange((oldValue: Area, newValue: Area) => {
                 this.getTextAlign(Number(newValue.width));
               })
-          }
         }
       }
-      .margin({ right: $r('sys.float.padding_level8') })
     }
-    .margin({ right: `${this.marginOffset}vp` })
+  .margin({ right: $r('sys.float.padding_level8') })
   }
+.margin({ right: `${this.marginOffset}vp` })
+}
 
   aboutToAppear() {
     this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-    this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+        this.theme.colors.fontPrimary : $r('sys.color.font_primary');
     this.initButtons();
     this.initMargin();
   }
 
-  private getTextAlign(maxWidth: number): void {
+private getTextAlign(maxWidth: number): void {
     let contentSize: SizeOptions = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: $r('sys.float.Body_L'),
-      constraintWidth: maxWidth,
-    });
-    let oneLineSize: SizeOptions = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: $r('sys.float.Body_L'),
-    });
-    if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
-      this.textAlignment = TextAlign.Center;
-    }
+    textContent: this.content,
+    fontSize: $r('sys.float.Body_L'),
+    constraintWidth: maxWidth,
+  });
+  let oneLineSize: SizeOptions = measure.measureTextSize({
+    textContent: this.content,
+    fontSize: $r('sys.float.Body_L'),
+  });
+  if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
+    this.textAlignment = TextAlign.Center;
   }
+}
 
-  private getTextHeight(textSize: SizeOptions): number {
+private getTextHeight(textSize: SizeOptions): number {
     if (textSize && textSize.height !== null && textSize.height !== undefined) {
       return Number(textSize.height);
     }
     return 0;
   }
 
-  private initButtons(): void {
+private initButtons(): void {
     if (!this.primaryButton && !this.secondaryButton) {
-      return;
-    }
-    this.buttons = [];
-    if (this.primaryButton) {
-      this.buttons.push(this.primaryButton);
-    }
-    if (this.secondaryButton) {
-      this.buttons.push(this.secondaryButton);
-    }
-    this.buttonHeight = this.getButtonsHeight();
+    return;
   }
+  this.buttons = [];
+  if (this.primaryButton) {
+    this.buttons.push(this.primaryButton);
+  }
+  if (this.secondaryButton) {
+    this.buttons.push(this.secondaryButton);
+  }
+  this.buttonHeight = this.getButtonsHeight();
+}
 
-  private getButtonsHeight(): number {
+private getButtonsHeight(): number {
     if (!this.buttons || this.buttons.length === 0) {
       return 0;
     }
@@ -267,7 +267,7 @@ export struct TipsDialog {
     return buttonsHeight;
   }
 
-  private initMargin(): void {
+private initMargin(): void {
     this.marginOffset = 0 - getNumberByResource('padding_level8');
   }
 }
@@ -281,9 +281,9 @@ export struct SelectDialog {
   radioContent: Array<SheetInfo> = [];
   buttons?: ButtonOptions[] = [];
   contentPadding ?: Padding;
-  @BuilderParam contentBuilder: () => void = this.buildContent;
-  @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
-  @State dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');
+@BuilderParam contentBuilder: () => void = this.buildContent;
+@State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+@State dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   controller: CustomDialogController = new CustomDialogController({
     builder: CustomContentDialog({
@@ -297,48 +297,48 @@ export struct SelectDialog {
   // the controller of content list
   contentScroller: Scroller = new Scroller();
 
-  @Styles
+@Styles
   paddingContentStyle() {
-    .padding({
+  .padding({
       left: $r('sys.float.padding_level12'),
       right: $r('sys.float.padding_level12'),
       bottom: $r('sys.float.padding_level4')
     })
   }
 
-  @Styles
+@Styles
   paddingStyle() {
-    .padding({
+  .padding({
       left: $r('sys.float.padding_level6'),
       right: $r('sys.float.padding_level6')
     })
   }
 
-  @Builder
+@Builder
   buildContent(): void {
     Scroll(this.contentScroller) {
-      Column() {
-        if (this.content) {
-          Row() {
-            Text(this.content)
+    Column() {
+      if (this.content) {
+        Row() {
+          Text(this.content)
               .fontSize($r('sys.float.Body_M'))
               .fontWeight(FontWeight.Regular)
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
-          }.paddingContentStyle().width('100%')
-        }
-        List({ space: 1 }) {
-          ForEach(this.radioContent, (item: SheetInfo, index: number) => {
-            ListItem() {
-              Column() {
-                Button() {
-                  Row() {
-                    Text(item.title)
+        }.paddingContentStyle().width('100%')
+      }
+      List({ space: 1 }) {
+        ForEach(this.radioContent, (item: SheetInfo, index: number) => {
+          ListItem() {
+            Column() {
+              Button() {
+                Row() {
+                  Text(item.title)
                       .fontSize($r('sys.float.Body_L'))
                       .fontWeight(FontWeight.Medium)
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
-                    Radio({ value: 'item.title', group: 'radioGroup' })
+                  Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndex === index)
                       .hitTestBehavior(HitTestMode.None)
@@ -350,35 +350,35 @@ export struct SelectDialog {
                           this.contentScroller.scrollEdge(Edge.Bottom);
                         }
                       })
-                  }.constraintSize({ minHeight: LIST_MIN_HEIGHT }).clip(false)
-                  .padding({ top: $r('sys.float.padding_level4'), bottom: $r('sys.float.padding_level4') })
-                }
-                .type(ButtonType.Normal)
-                .borderRadius($r('sys.float.corner_radius_level8'))
-                .buttonStyle(ButtonStyleMode.TEXTUAL)
-                .paddingStyle()
-                .onClick(() => {
-                  item.action && item.action();
-                  this.controller.close();
-                })
+                }.constraintSize({ minHeight: LIST_MIN_HEIGHT }).clip(false)
+                    .padding({ top: $r('sys.float.padding_level4'), bottom: $r('sys.float.padding_level4') })
+              }
+            .type(ButtonType.Normal)
+                  .borderRadius($r('sys.float.corner_radius_level8'))
+                  .buttonStyle(ButtonStyleMode.TEXTUAL)
+                  .paddingStyle()
+                  .onClick(() => {
+                    item.action && item.action();
+                    this.controller.close();
+                  })
 
-                if (index < this.radioContent.length - 1) {
-                  Divider().color(this.dividerColorWithTheme).paddingStyle();
-                }
-              }.paddingStyle()
-            }
-          })
-        }.width('100%').clip(false)
-        .onFocus(() => {
-          if (!this.contentScroller.isAtEnd()) {
-            this.contentScroller.scrollEdge(Edge.Top);
-            focusControl.requestFocus(String(FIRST_ITEM_INDEX));
+              if (index < this.radioContent.length - 1) {
+                Divider().color(this.dividerColorWithTheme).paddingStyle();
+              }
+            }.paddingStyle()
           }
         })
-        .defaultFocus(this.buttons?.length == 0 ? true : false)
-      }
-    }.scrollBar(BarState.Auto)
-  }
+      }.width('100%').clip(false)
+          .onFocus(() => {
+            if (!this.contentScroller.isAtEnd()) {
+              this.contentScroller.scrollEdge(Edge.Top);
+              focusControl.requestFocus(String(FIRST_ITEM_INDEX));
+            }
+          })
+          .defaultFocus(this.buttons?.length == 0 ? true : false)
+    }
+  }.scrollBar(BarState.Auto)
+}
 
   build() {
     CustomDialogComponent({
@@ -395,44 +395,44 @@ export struct SelectDialog {
 
   aboutToAppear(): void {
     this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-    this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+        this.theme.colors.fontPrimary : $r('sys.color.font_primary');
     this.dividerColorWithTheme = this.theme?.colors?.compDivider ?
-    this.theme.colors.compDivider : $r('sys.color.comp_divider');
+        this.theme.colors.compDivider : $r('sys.color.comp_divider');
     this.initContentPadding();
     this.initButtons();
   }
 
-  private initContentPadding(): void {
+private initContentPadding(): void {
     this.contentPadding = {
       left: $r('sys.float.padding_level0'),
       right: $r('sys.float.padding_level0')
     }
 
     if (!this.title && !this.confirm) {
-      this.contentPadding = {
-        top: $r('sys.float.padding_level12'),
-        bottom: $r('sys.float.padding_level12')
-      }
-      return;
+    this.contentPadding = {
+      top: $r('sys.float.padding_level12'),
+      bottom: $r('sys.float.padding_level12')
     }
-
-    if (!this.title) {
-      this.contentPadding = {
-        top: $r('sys.float.padding_level12')
-      }
-    } else if (!this.confirm) {
-      this.contentPadding = {
-        bottom: $r('sys.float.padding_level12')
-      }
-    }
+    return;
   }
 
-  private initButtons(): void {
+  if (!this.title) {
+    this.contentPadding = {
+      top: $r('sys.float.padding_level12')
+    }
+  } else if (!this.confirm) {
+    this.contentPadding = {
+      bottom: $r('sys.float.padding_level12')
+    }
+  }
+}
+
+private initButtons(): void {
     this.buttons = [];
     if (this.confirm) {
-      this.buttons.push(this.confirm);
-    }
+    this.buttons.push(this.confirm);
   }
+}
 }
 
 @CustomDialog
@@ -441,127 +441,127 @@ export struct ConfirmDialog {
   title: ResourceStr = ''
   content?: ResourceStr = ''
   checkTips?: ResourceStr = ''
-  @State isChecked?: boolean = false
+@State isChecked?: boolean = false
   primaryButton?: ButtonOptions = { value: '' }
   secondaryButton?: ButtonOptions = { value: '' }
-  @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
-  @State buttonFontColorWithTheme: ResourceColor = $r('sys.color.font_emphasize');
+@State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+@State buttonFontColorWithTheme: ResourceColor = $r('sys.color.font_emphasize');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   build() {
     Column() {
       Row() {
         Text(this.title)
-          .fontSize($r('sys.float.ohos_id_text_size_dialog_tittle'))
-          .fontWeight(FontWeight.Medium)
-          .maxLines(CONTENT_MAX_LINES)
-          .minFontSize(15)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .fontColor(this.fontColorWithTheme)
-          .textAlign(TextAlign.Start)
-          .width('100%')
+            .fontSize($r('sys.float.ohos_id_text_size_dialog_tittle'))
+            .fontWeight(FontWeight.Medium)
+            .maxLines(CONTENT_MAX_LINES)
+            .minFontSize(15)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .fontColor(this.fontColorWithTheme)
+            .textAlign(TextAlign.Start)
+            .width('100%')
       }.padding({ start: LengthMetrics.vp(24), end: LengthMetrics.vp(24), top: 24 })
-      .constraintSize({ minHeight: 56 })
+          .constraintSize({ minHeight: 56 })
 
       if (this.content) {
         Row() {
           Text(this.content)
-            .focusable(true)
-            .defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value))
-            .fontSize($r('sys.float.ohos_id_text_size_body1'))
-            .fontWeight(FontWeight.Medium)
-            .fontColor(this.fontColorWithTheme)
-            .maxLines(CONTENT_MAX_LINES)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .minFontSize($r('sys.float.ohos_id_text_size_body3'))
+              .focusable(true)
+              .defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value))
+              .fontSize($r('sys.float.ohos_id_text_size_body1'))
+              .fontWeight(FontWeight.Medium)
+              .fontColor(this.fontColorWithTheme)
+              .maxLines(CONTENT_MAX_LINES)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
+              .minFontSize($r('sys.float.ohos_id_text_size_body3'))
         }.padding({ start: LengthMetrics.vp(24), end: LengthMetrics.vp(24), top: 8, bottom: 8 })
-        .width('100%')
-        .constraintSize({ minHeight: 36 })
+            .width('100%')
+            .constraintSize({ minHeight: 36 })
       }
       Row() {
         WithTheme({ theme: this.theme }) {
           Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
-            .onChange((checked: boolean) => {
-              this.isChecked = checked
-            })
-            .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
+              .onChange((checked: boolean) => {
+                this.isChecked = checked
+              })
+              .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
         }
 
         Text(this.checkTips)
-          .fontSize($r('sys.float.ohos_id_text_size_body2'))
-          .fontWeight(FontWeight.Medium)
-          .fontColor(this.fontColorWithTheme)
-          .maxLines(CONTENT_MAX_LINES)
-          .layoutWeight(1)
-          .focusable(false)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .onClick(() => {
-            this.isChecked = !this.isChecked
-          })
+            .fontSize($r('sys.float.ohos_id_text_size_body2'))
+            .fontWeight(FontWeight.Medium)
+            .fontColor(this.fontColorWithTheme)
+            .maxLines(CONTENT_MAX_LINES)
+            .layoutWeight(1)
+            .focusable(false)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .onClick(() => {
+              this.isChecked = !this.isChecked
+            })
       }
-      .height(CHECKBOX_CONTAINER_HEIGHT)
-      .width('100%')
-      .padding({ start: LengthMetrics.vp(24), end: LengthMetrics.vp(24), top: 8, bottom: 8 })
+    .height(CHECKBOX_CONTAINER_HEIGHT)
+          .width('100%')
+          .padding({ start: LengthMetrics.vp(24), end: LengthMetrics.vp(24), top: 8, bottom: 8 })
 
       Row() {
         if (this.primaryButton?.value) {
           Button(this.primaryButton.value)
-            .fontSize($r('sys.float.ohos_id_text_size_button1'))
-            .fontWeight(FontWeight.Medium)
-            .layoutWeight(1)
-            .defaultFocus(true)
-            .backgroundColor(this.primaryButton.background ? this.primaryButton.background :
-            $r('sys.color.ohos_id_color_background_transparent'))
-            .fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor : this.buttonFontColorWithTheme)
-            .onClick(() => {
-              if (this.primaryButton?.action) this.primaryButton.action()
-              this.controller.close()
-            })
+              .fontSize($r('sys.float.ohos_id_text_size_button1'))
+              .fontWeight(FontWeight.Medium)
+              .layoutWeight(1)
+              .defaultFocus(true)
+              .backgroundColor(this.primaryButton.background ? this.primaryButton.background :
+                  $r('sys.color.ohos_id_color_background_transparent'))
+              .fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor : this.buttonFontColorWithTheme)
+              .onClick(() => {
+                if (this.primaryButton?.action) this.primaryButton.action()
+                this.controller.close()
+              })
         }
         if (this.secondaryButton?.value && this.primaryButton?.value) {
           Column() {
             if (!this.secondaryButton.background) {
               Divider()
-                .width(DIVIDER_WIDTH)
-                .height(DIVIDER_HEIGHT)
-                .color($r('sys.color.ohos_id_color_list_separator'))
-                .vertical(true)
+                  .width(DIVIDER_WIDTH)
+                  .height(DIVIDER_HEIGHT)
+                  .color($r('sys.color.ohos_id_color_list_separator'))
+                  .vertical(true)
             }
           }.width(DIVIDER_CONTAINER_WIDTH).alignItems(HorizontalAlign.Center)
         }
         if (this.secondaryButton?.value) {
           Button(this.secondaryButton.value)
-            .fontSize($r('sys.float.ohos_id_text_size_button1'))
-            .fontWeight(FontWeight.Medium)
-            .layoutWeight(1)
-            .defaultFocus(true)
-            .backgroundColor(this.secondaryButton.background ? this.secondaryButton.background :
-            $r('sys.color.ohos_id_color_background_transparent'))
-            .fontColor(this.secondaryButton.fontColor ?
-            this.secondaryButton.fontColor : this.buttonFontColorWithTheme)
-            .onClick(() => {
-              if (this.secondaryButton?.action) this.secondaryButton.action()
-              this.controller.close()
-            })
+              .fontSize($r('sys.float.ohos_id_text_size_button1'))
+              .fontWeight(FontWeight.Medium)
+              .layoutWeight(1)
+              .defaultFocus(true)
+              .backgroundColor(this.secondaryButton.background ? this.secondaryButton.background :
+                  $r('sys.color.ohos_id_color_background_transparent'))
+              .fontColor(this.secondaryButton.fontColor ?
+                  this.secondaryButton.fontColor : this.buttonFontColorWithTheme)
+              .onClick(() => {
+                if (this.secondaryButton?.action) this.secondaryButton.action()
+                this.controller.close()
+              })
         }
       }.width('100%').padding({ start: LengthMetrics.vp(16), end: LengthMetrics.vp(16), top: 16, bottom: 16 })
     }
-    .backgroundBlurStyle(BlurStyle.Thick)
-    .borderRadius($r('sys.float.ohos_id_corner_radius_dialog'))
-    .margin({
-      start: LengthMetrics.vp(getNumberByResource('sys.float.ohos_id_dialog_margin_start')),
-      end: LengthMetrics.vp(getNumberByResource('sys.float.ohos_id_dialog_margin_end')),
-      bottom: $r('sys.float.ohos_id_dialog_margin_bottom')
-    })
-    // 1.backgroundcolor use in blur enable mod mast set this color: colorDialogBgBlur. but now it is not found
-    .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
+  .backgroundBlurStyle(BlurStyle.Thick)
+        .borderRadius($r('sys.float.ohos_id_corner_radius_dialog'))
+        .margin({
+          start: LengthMetrics.vp(getNumberByResource('sys.float.ohos_id_dialog_margin_start')),
+          end: LengthMetrics.vp(getNumberByResource('sys.float.ohos_id_dialog_margin_end')),
+          bottom: $r('sys.float.ohos_id_dialog_margin_bottom')
+        })
+        // 1.backgroundcolor use in blur enable mod mast set this color: colorDialogBgBlur. but now it is not found
+        .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
   }
 
   aboutToAppear(): void {
     this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-    this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+        this.theme.colors.fontPrimary : $r('sys.color.font_primary');
     this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
-    this.theme.colors.fontEmphasize : $r('sys.color.font_emphasize');
+        this.theme.colors.fontEmphasize : $r('sys.color.font_emphasize');
   }
 }
 
@@ -574,10 +574,10 @@ export struct AlertDialog {
   primaryButton?: ButtonOptions | null = null;
   secondaryButton?: ButtonOptions | null = null;
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State textAlign: TextAlign = TextAlign.Start;
+@State textAlign: TextAlign = TextAlign.Start;
   // the controller of content area
   contentScroller: Scroller = new Scroller();
-  @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+@State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   build() {
@@ -593,80 +593,80 @@ export struct AlertDialog {
     })
   }
 
-  @Builder
+@Builder
   AlertDialogContentBuilder(): void {
     Column() {
       Scroll(this.contentScroller) {
         Text(this.content)
-          .focusable(true)
-          .defaultFocus(!(this.primaryButton || this.secondaryButton))
-          .fontSize($r('sys.float.Body_L'))
-          .fontWeight(this.getFontWeight())
-          .fontColor(this.fontColorWithTheme)
-          .margin({ right: $r('sys.float.padding_level8'), })
-          .width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`)
-          .textAlign(this.textAlign)
-          .onAreaChange((oldValue: Area, newValue: Area) => {
-            this.getTextAlign(Number(newValue.width));
-          })
-          .onKeyEvent((event: KeyEvent) => {
-            if (event) {
-              resolveKeyEvent(event, this.contentScroller);
-            }
-          })
+            .focusable(true)
+            .defaultFocus(!(this.primaryButton || this.secondaryButton))
+            .fontSize($r('sys.float.Body_L'))
+            .fontWeight(this.getFontWeight())
+            .fontColor(this.fontColorWithTheme)
+            .margin({ right: $r('sys.float.padding_level8'), })
+            .width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`)
+            .textAlign(this.textAlign)
+            .onAreaChange((oldValue: Area, newValue: Area) => {
+              this.getTextAlign(Number(newValue.width));
+            })
+            .onKeyEvent((event: KeyEvent) => {
+              if (event) {
+                resolveKeyEvent(event, this.contentScroller);
+              }
+            })
       }
-      .width('100%')
+    .width('100%')
     }
     .margin({ right: `${this.getMargin()}vp`, })
   }
 
   aboutToAppear(): void {
     this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-    this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+        this.theme.colors.fontPrimary : $r('sys.color.font_primary');
     this.initButtons();
   }
 
-  private getTextAlign(maxWidth: number): void {
+private getTextAlign(maxWidth: number): void {
     let contentSize: SizeOptions = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: $r('sys.float.Body_L'),
-      constraintWidth: maxWidth,
-    });
-    let oneLineSize: SizeOptions = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: $r('sys.float.Body_L'),
-    });
+    textContent: this.content,
+    fontSize: $r('sys.float.Body_L'),
+    constraintWidth: maxWidth,
+  });
+  let oneLineSize: SizeOptions = measure.measureTextSize({
+    textContent: this.content,
+    fontSize: $r('sys.float.Body_L'),
+  });
 
-    if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
-      this.textAlign = TextAlign.Center;
-    }
+  if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
+    this.textAlign = TextAlign.Center;
   }
+}
 
-  private getTextHeight(textSize: SizeOptions): number {
+private getTextHeight(textSize: SizeOptions): number {
     if (textSize && textSize.height !== null && textSize.height !== undefined) {
       return Number(textSize.height);
     }
     return 0;
   }
 
-  private initButtons(): void {
+private initButtons(): void {
     if (!this.primaryButton && !this.secondaryButton) {
-      return;
-    }
-    this.buttons = [];
-    if (this.primaryButton) {
-      this.buttons.push(this.primaryButton);
-    }
-    if (this.secondaryButton) {
-      this.buttons.push(this.secondaryButton);
-    }
+    return;
   }
+  this.buttons = [];
+  if (this.primaryButton) {
+    this.buttons.push(this.primaryButton);
+  }
+  if (this.secondaryButton) {
+    this.buttons.push(this.secondaryButton);
+  }
+}
 
-  private getMargin(): number {
+private getMargin(): number {
     return 0 - getNumberByResource('padding_level8');
   }
 
-  private getFontWeight(): number {
+private getFontWeight(): number {
     if (this.primaryTitle || this.secondaryTitle) {
       return FontWeight.Regular;
     }
@@ -679,7 +679,7 @@ export struct CustomContentDialog {
   controller: CustomDialogController;
   primaryTitle?: ResourceStr;
   secondaryTitle?: ResourceStr;
-  @BuilderParam contentBuilder: () => void;
+@BuilderParam contentBuilder: () => void;
   contentAreaPadding?: Padding;
   buttons?: ButtonOptions[];
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
@@ -704,22 +704,22 @@ struct CustomDialogContentComponent {
   controller?: CustomDialogController;
   primaryTitle?: ResourceStr;
   secondaryTitle?: ResourceStr;
-  @BuilderParam contentBuilder: () => void = this.defaultContentBuilder;
+@BuilderParam contentBuilder: () => void = this.defaultContentBuilder;
   buttons?: ButtonOptions[];
   contentAreaPadding?: Padding;
   keyIndex: number = 0;
-  @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
-  @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
-  @State buttonFontColorWithTheme: ResourceColor = '';
-  @State errorButtonFontColorWithTheme: ResourceColor = '';
+@State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+@State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
+@State buttonFontColorWithTheme: ResourceColor = '';
+@State errorButtonFontColorWithTheme: ResourceColor = '';
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
-  @Builder
+@Builder
   defaultContentBuilder(): void {
   }
 
   titleHeight: number = 0;
-  @State contentMaxHeight: string = '';
+@State contentMaxHeight: string = '';
 
   build() {
     WithTheme({ theme: this.theme }) {
@@ -731,32 +731,32 @@ struct CustomDialogContentComponent {
         Column() {
           this.contentBuilder();
         }
-        .padding(this.getContentPadding())
-        .constraintSize({ maxHeight: this.contentMaxHeight })
+      .padding(this.getContentPadding())
+            .constraintSize({ maxHeight: this.contentMaxHeight })
 
         // operation area
         this.buildButtons();
       }
-      .width('100%')
+    .width('100%')
     }
   }
 
-  @Builder
+@Builder
   buildTitles(): void {
     Column() {
       Row() {
         Text(this.primaryTitle)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(this.primaryTitleFontColorWithTheme)
-          .textAlign(this.getTitleTextAlign())
-          .maxFontSize($r('sys.float.Title_S'))
-          .minFontSize($r('sys.float.Body_L'))
-          .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%')
+            .fontWeight(FontWeight.Bold)
+            .fontColor(this.primaryTitleFontColorWithTheme)
+            .textAlign(this.getTitleTextAlign())
+            .maxFontSize($r('sys.float.Title_S'))
+            .minFontSize($r('sys.float.Body_L'))
+            .maxLines(TITLE_MAX_LINES)
+            .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .width('100%')
       }
-      .width('100%')
+    .width('100%')
 
       if (this.primaryTitle && this.secondaryTitle) {
         Row() {
@@ -766,80 +766,80 @@ struct CustomDialogContentComponent {
 
       Row() {
         Text(this.secondaryTitle)
-          .fontWeight(FontWeight.Regular)
-          .fontColor(this.secondaryTitleFontColorWithTheme)
-          .textAlign(this.getTitleTextAlign())
-          .maxFontSize($r('sys.float.Subtitle_S'))
-          .minFontSize($r('sys.float.Body_S'))
-          .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%')
+            .fontWeight(FontWeight.Regular)
+            .fontColor(this.secondaryTitleFontColorWithTheme)
+            .textAlign(this.getTitleTextAlign())
+            .maxFontSize($r('sys.float.Subtitle_S'))
+            .minFontSize($r('sys.float.Body_S'))
+            .maxLines(TITLE_MAX_LINES)
+            .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .width('100%')
       }
-      .width('100%')
+    .width('100%')
     }
     .constraintSize({
       minHeight: this.getTitleAreaMinHeight(),
     })
-    .justifyContent(FlexAlign.Center)
-    .width('100%')
-    .padding(this.getTitleAreaPadding())
-    .onAreaChange((oldValue: Area, newValue: Area) => {
-      this.titleHeight = Number(newValue.height);
-      this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
-    });
+        .justifyContent(FlexAlign.Center)
+        .width('100%')
+        .padding(this.getTitleAreaPadding())
+        .onAreaChange((oldValue: Area, newValue: Area) => {
+          this.titleHeight = Number(newValue.height);
+          this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
+        });
   }
 
-  @Builder
+@Builder
   buildButtons(): void {
     Column() {
       this.buildHorizontalAlignButtons();
       this.buildVerticalAlignButtons();
     }
     .width('100%')
-    .padding(this.getOperationAreaPadding());
+        .padding(this.getOperationAreaPadding());
   }
 
-  @Builder
+@Builder
   buildSingleButton(buttonOptions: ButtonOptions): void {
     if (this.isNewPropertiesHighPriority(buttonOptions)) {
-      Button(buttonOptions.value)
+    Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-    } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
-      Button(buttonOptions.value)
+  } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
+    Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .backgroundColor(buttonOptions.background)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-    } else if (buttonOptions.background !== undefined) {
-      Button(buttonOptions.value)
+  } else if (buttonOptions.background !== undefined) {
+    Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .backgroundColor(buttonOptions.background)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-    } else if (buttonOptions.background !== undefined && buttonOptions.fontColor === undefined || '') {
-      Button(buttonOptions.value)
+  } else if (buttonOptions.background !== undefined && buttonOptions.fontColor === undefined || '') {
+    Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .backgroundColor(buttonOptions.background)
         .fontColor(buttonOptions.role === ButtonRole.ERROR ?
-        this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme)
+            this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-    } else {
-      Button(buttonOptions.value)
+  } else {
+    Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-    }
   }
+}
 
-  @Builder
+@Builder
   buildHorizontalAlignButtons(): void {
     if (this.buttons && this.buttons.length > 0 && this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
-      Row() {
-        this.buildSingleButton(this.buttons[0]);
-        if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
-          Divider()
+    Row() {
+      this.buildSingleButton(this.buttons[0]);
+      if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
+        Divider()
             .width($r('sys.float.alert_divider_width'))
             .height($r('sys.float.alert_divider_height'))
             .color(this.getDividerColor())
@@ -848,69 +848,69 @@ struct CustomDialogContentComponent {
               left: $r('sys.float.alert_button_horizontal_space'),
               right: $r('sys.float.alert_button_horizontal_space'),
             });
-          this.buildSingleButton(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
-        }
+        this.buildSingleButton(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
       }
     }
   }
+}
 
-  @Builder
+@Builder
   buildVerticalAlignButtons(): void {
     if (this.buttons && this.isVerticalAlignButton()) {
-      Column() {
-        ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
-          this.buildButtonWithDivider(index);
-        }, (item: ButtonOptions) => item.value.toString());
-      }
+    Column() {
+      ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
+        this.buildButtonWithDivider(index);
+      }, (item: ButtonOptions) => item.value.toString());
     }
   }
+}
 
-  @Builder
+@Builder
   buildButtonWithDivider(index: number): void {
     if (this.buttons && this.buttons[index]) {
-      Row() {
-        this.buildSingleButton(this.buttons[index]);
-      }
+    Row() {
+      this.buildSingleButton(this.buttons[index]);
+    }
 
-      if (index < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
-        Row() {
-        }
-        .height($r('sys.float.alert_button_vertical_space'))
+    if (index < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
+      Row() {
       }
+    .height($r('sys.float.alert_button_vertical_space'))
     }
   }
+}
 
   aboutToAppear(): void {
     if (this.primaryTitle) {
-      this.titleHeight = getNumberByResource('alert_title_primary_height');
-    }
-    if (this.secondaryTitle) {
-      this.titleHeight = getNumberByResource('alert_title_secondary_height');
-    }
-    this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
-    this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
-    this.theme.colors.fontPrimary : $r('sys.color.font_primary');
-    this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
-    this.theme.colors.fontSecondary : $r('sys.color.font_secondary');
-    this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
-    this.theme.colors.fontEmphasize : '';
-    this.errorButtonFontColorWithTheme = this.theme?.colors?.warning ?
-    this.theme.colors.warning : '';
+    this.titleHeight = getNumberByResource('alert_title_primary_height');
   }
+  if (this.secondaryTitle) {
+    this.titleHeight = getNumberByResource('alert_title_secondary_height');
+  }
+  this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
+  this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
+      this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+  this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
+      this.theme.colors.fontSecondary : $r('sys.color.font_secondary');
+  this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
+      this.theme.colors.fontEmphasize : '';
+  this.errorButtonFontColorWithTheme = this.theme?.colors?.warning ?
+      this.theme.colors.warning : '';
+}
 
   /**
    * get divider color
    *
    * @returns divider color
    */
-  private getDividerColor(): ResourceColor {
+private getDividerColor(): ResourceColor {
     if (!this.buttons || this.buttons.length === 0 || !getNumberByResource('dialog_divider_show')) {
       return Color.Transparent;
     }
 
     if (this.buttons[0].buttonStyle === ButtonStyleMode.TEXTUAL || this.buttons[0].buttonStyle === undefined) {
       if (this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === ButtonStyleMode.TEXTUAL ||
-        this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
+          this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
         return $r('sys.color.alert_divider_color');
       }
     }
@@ -922,18 +922,18 @@ struct CustomDialogContentComponent {
    *
    * @returns buttons total height
    */
-  private getButtonsHeight(): number {
+private getButtonsHeight(): number {
     if (!this.buttons || this.buttons.length === 0) {
       return 0;
     }
     let buttonsHeight: number = getNumberByResource('alert_button_top_padding');
     if (this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
       buttonsHeight += BUTTON_DEFAULT_HEIGHT +
-      getNumberByResource('alert_button_bottom_padding_horizontal');
+          getNumberByResource('alert_button_bottom_padding_horizontal');
     } else {
       buttonsHeight += BUTTON_DEFAULT_HEIGHT * this.buttons.length +
-        (this.buttons.length - 1) * getNumberByResource('alert_button_vertical_space') +
-      getNumberByResource('alert_button_bottom_padding_vertical');
+          (this.buttons.length - 1) * getNumberByResource('alert_button_vertical_space') +
+          getNumberByResource('alert_button_bottom_padding_vertical');
     }
 
     return buttonsHeight;
@@ -944,7 +944,7 @@ struct CustomDialogContentComponent {
    *
    * @returns content padding
    */
-  private getContentPadding(): Padding {
+private getContentPadding(): Padding {
     if (this.contentAreaPadding) {
       return this.contentAreaPadding;
     }
@@ -985,7 +985,7 @@ struct CustomDialogContentComponent {
    *
    * @returns min height
    */
-  private getTitleAreaMinHeight(): ResourceStr | number {
+private getTitleAreaMinHeight(): ResourceStr | number {
     if (this.secondaryTitle) {
       return $r('sys.float.alert_title_secondary_height');
     } else if (this.primaryTitle) {
@@ -1000,7 +1000,7 @@ struct CustomDialogContentComponent {
    *
    * @returns padding
    */
-  private getTitleAreaPadding(): Padding {
+private getTitleAreaPadding(): Padding {
     if (this.primaryTitle || this.secondaryTitle) {
       return {
         top: $r('sys.float.alert_title_padding_top'),
@@ -1023,7 +1023,7 @@ struct CustomDialogContentComponent {
    *
    * @returns check result
    */
-  private isVerticalAlignButton(): boolean {
+private isVerticalAlignButton(): boolean {
     if (this.buttons) {
       return this.buttons.length > HORIZON_BUTTON_MAX_COUNT;
     }
@@ -1035,7 +1035,7 @@ struct CustomDialogContentComponent {
    *
    * @returns padding
    */
-  private getOperationAreaPadding(): Padding {
+private getOperationAreaPadding(): Padding {
     if (this.isVerticalAlignButton()) {
       return {
         top: $r('sys.float.alert_button_top_padding'),
@@ -1059,12 +1059,12 @@ struct CustomDialogContentComponent {
    * @param buttonOptions button properties
    * @returns check result
    */
-  private isNewPropertiesHighPriority(buttonOptions: ButtonOptions): boolean {
+private isNewPropertiesHighPriority(buttonOptions: ButtonOptions): boolean {
     if (buttonOptions.role === ButtonRole.ERROR) {
       return true;
     }
     if (buttonOptions.buttonStyle !== undefined &&
-      buttonOptions.buttonStyle !== getNumberByResource('alert_button_style')) {
+        buttonOptions.buttonStyle !== getNumberByResource('alert_button_style')) {
       return true;
     }
     if (buttonOptions.background === undefined && buttonOptions.fontColor === undefined) {
@@ -1077,7 +1077,7 @@ struct CustomDialogContentComponent {
    * get tile TextAlign
    * @returns TextAlign
    */
-  private getTitleTextAlign(): TextAlign {
+private getTitleTextAlign(): TextAlign {
     let textAlign: number = getEnumNumberByResource('alert_title_alignment');
     if (textAlign === TextAlign.Start) {
       return TextAlign.Start;
@@ -1098,11 +1098,11 @@ export struct CustomDialogComponent {
   controller?: CustomDialogController;
   primaryTitle?: ResourceStr;
   secondaryTitle?: ResourceStr;
-  @BuilderParam contentBuilder: () => void;
+@BuilderParam contentBuilder: () => void;
   buttons?: ButtonOptions[];
   contentAreaPadding?: Padding;
   screenWidth: number = 0;
-  @State columnModifier: ColumnModifier = new ColumnModifier();
+@State columnModifier: ColumnModifier = new ColumnModifier();
   isFirstInit: boolean = true;
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   targetSdk: number = VERSION_TWELVE;
@@ -1123,9 +1123,9 @@ export struct CustomDialogComponent {
           theme: this.theme,
         })
       }
-      .attributeModifier(this.columnModifier)
+    .attributeModifier(this.columnModifier)
     }
-    .onAreaChange((oldValue: Area, newValue: Area) => {
+  .onAreaChange((oldValue: Area, newValue: Area) => {
       if (!this.isFirstInit) {
         return;
       }
@@ -1150,7 +1150,7 @@ export struct CustomDialogComponent {
     try {
       this.screenWidth = px2vp(display.getDefaultDisplaySync().width);
       let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
-      bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
+          bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
       bundleManager.getBundleInfoForSelf(bundleFlags).then((data) => {
         this.targetSdk = data.targetVersion;
         this.updateCustomStyle();
@@ -1183,15 +1183,15 @@ class ColumnModifier implements AttributeModifier<ColumnAttribute> {
 
 @Extend(Button)
 function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDialogController) {
-  .onClick(() => {
+.onClick(() => {
     if (buttonOptions.action) {
       buttonOptions.action();
     }
     controller?.close();
   })
-  .defaultFocus(true)
-  .buttonStyle(buttonOptions.buttonStyle ?? getNumberByResource('alert_button_style'))
-  .layoutWeight(BUTTON_LAYOUT_WEIGHT)
+      .defaultFocus(true)
+      .buttonStyle(buttonOptions.buttonStyle ?? getNumberByResource('alert_button_style'))
+      .layoutWeight(BUTTON_LAYOUT_WEIGHT)
 }
 
 /**
@@ -1257,8 +1257,8 @@ function resolveKeyEvent(event: KeyEvent, controller: Scroller) {
 export struct LoadingDialog {
   controller: CustomDialogController;
   content?: ResourceStr = '';
-  @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
-  @State loadingProgressIconColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
+@State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+@State loadingProgressIconColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   build() {
@@ -1273,33 +1273,33 @@ export struct LoadingDialog {
     }
   }
 
-  @Builder
+@Builder
   contentBuilder() {
     Column() {
       Row() {
         Text(this.content)
-          .fontSize($r('sys.float.Body_L'))
-          .fontWeight(FontWeight.Regular)
-          .fontColor(this.fontColorWithTheme)
-          .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)
-          .maxLines(LOADING_MAX_LINES)
-          .focusable(true)
-          .defaultFocus(true)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .fontSize($r('sys.float.Body_L'))
+            .fontWeight(FontWeight.Regular)
+            .fontColor(this.fontColorWithTheme)
+            .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)
+            .maxLines(LOADING_MAX_LINES)
+            .focusable(true)
+            .defaultFocus(true)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
         LoadingProgress()
-          .color(this.loadingProgressIconColorWithTheme)
-          .width(LOADING_PROGRESS_WIDTH)
-          .height(LOADING_PROGRESS_HEIGHT)
-          .margin({ start: LengthMetrics.vp(LOADING_TEXT_MARGIN_LEFT) })
+            .color(this.loadingProgressIconColorWithTheme)
+            .width(LOADING_PROGRESS_WIDTH)
+            .height(LOADING_PROGRESS_HEIGHT)
+            .margin({ start: LengthMetrics.vp(LOADING_TEXT_MARGIN_LEFT) })
       }
-      .constraintSize({ minHeight: LOADING_MIN_HEIGHT })
+    .constraintSize({ minHeight: LOADING_MIN_HEIGHT })
     }
   }
 
   aboutToAppear(): void {
     this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-    this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+        this.theme.colors.fontPrimary : $r('sys.color.font_primary');
     this.loadingProgressIconColorWithTheme = this.theme?.colors?.iconSecondary ?
-    this.theme.colors.iconSecondary : $r('sys.color.icon_secondary');
+        this.theme.colors.iconSecondary : $r('sys.color.icon_secondary');
   }
 }

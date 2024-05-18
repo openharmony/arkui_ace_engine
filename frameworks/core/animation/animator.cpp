@@ -246,10 +246,6 @@ int32_t Animator::GetIteration() const
 void Animator::SetStartDelay(int32_t startDelay)
 {
     CHECK_RUN_ON(UI);
-    if (startDelay < 0) {
-        LOGE("invalid startDelay time, keep the old. id: %{public}d", controllerId_);
-        return;
-    }
     startDelay_ = startDelay;
     for (auto& controller : proxyControllers_) {
         controller->SetStartDelay(startDelay);
@@ -588,7 +584,7 @@ void Animator::OnFrame(int64_t duration)
     for (auto& controller : proxyControllers_) {
         controller->OnFrame(duration);
     }
-    if (duration > INT64_MAX - elapsedTime_) {
+    if (elapsedTime_ > 0 && duration > INT64_MAX - elapsedTime_) {
         LOGW("duration is too big, skip it. id:%{public}d", controllerId_);
         return;
     }

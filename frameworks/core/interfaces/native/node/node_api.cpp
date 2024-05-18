@@ -265,6 +265,8 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
     NodeModifier::SetOnFocus,
     NodeModifier::SetOnTouchIntercept,
+    NodeModifier::SetOnAttach,
+    NodeModifier::SetOnDetach,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -352,6 +354,7 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperAnimationStart,
     NodeModifier::SetSwiperAnimationEnd,
     NodeModifier::SetSwiperGestureSwipe,
+    NodeModifier::SetSwiperOnContentDidScroll,
 };
 
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {

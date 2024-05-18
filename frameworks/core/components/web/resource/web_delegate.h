@@ -972,7 +972,6 @@ private:
     void RegisterAvoidAreaChangeListener();
     void UnregisterAvoidAreaChangeListener();
     void OnSafeInsetsChange();
-    void InitCacheCutoutEdge();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1085,7 +1084,6 @@ private:
     NG::SafeAreaInsets systemSafeArea_;
     NG::SafeAreaInsets cutoutSafeArea_;
     NG::SafeAreaInsets navigationIndicatorSafeArea_;
-    uint32_t cacheCutoutEdge_ = 0;
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
 #endif
 };

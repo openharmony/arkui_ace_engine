@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LISTITEM_MODIFIER_H
-#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LISTITEM_MODIFIER_H
 
-#include "core/interfaces/native/node/node_api.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FONT_FONT_PLATFORM_INTERFACE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FONT_FONT_PLATFORM_INTERFACE_H
 
-namespace OHOS::Ace::NG::NodeModifier {
-const ArkUIListItemModifier* GetListItemModifier();
-}
+#include "base/memory/referenced.h"
+#include "core/common/font/font_platform.h"
 
-#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LISTITEM_MODIFIER_H
+namespace OHOS::Ace {
+
+class FontPlatformInterface {
+public:
+    virtual ~FontPlatformInterface() = default;
+
+    virtual RefPtr<FontPlatform> GetFontPlatform() const = 0;
+};
+
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FONT_FONT_PLATFORM_INTERFACE_H

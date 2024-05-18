@@ -655,9 +655,6 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(buttonNode, nullptr);
     UpdateDialogButtonProperty(buttonNode, index, isVertical, length);
-    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonProp, nullptr);
-    buttonProp->UpdateLabel(params.text);
     // parse button text color and background color
     std::string textColor;
     std::optional<Color> bgColor;
@@ -669,9 +666,6 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
     SetButtonEnabled(buttonNode, params.enabled);
-    auto buttonNodeFocus = buttonNode->GetOrCreateFocusHub();
-    CHECK_NULL_RETURN(buttonNodeFocus, nullptr);
-    buttonNodeFocus->SetIsDefaultFocus(params.defaultFocus);
     auto hub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
     // bind click event
@@ -799,7 +793,6 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
     actionPadding.bottom = CalcLength(dialogTheme_->GetButtonPaddingBottom());
     container->GetLayoutProperty()->UpdatePadding(actionPadding);
     AddButtonAndDivider(buttons, container, isVertical);
-    container->GetOrCreateFocusHub()->SetFocusable(true);
     container->MarkModifyDone();
     buttonContainer_ = container;
     return container;
@@ -834,6 +827,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
+    textNode->GetOrCreateFocusHub()->SetFocusable(true);
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateContent(text);

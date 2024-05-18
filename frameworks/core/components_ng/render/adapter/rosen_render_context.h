@@ -474,7 +474,6 @@ private:
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
-    static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
@@ -597,6 +596,7 @@ private:
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
     RefPtr<CanvasImage> bdImage_;
 
+    PatternType patternType_ = PatternType::DEFAULT;
     std::shared_ptr<Rosen::RSNode> rsNode_;
     bool isHdr_ = false;
     bool isHoveredScale_ = false;

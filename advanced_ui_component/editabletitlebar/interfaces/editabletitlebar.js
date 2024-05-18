@@ -19,6 +19,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 const hilog = requireNapi('hilog');
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const resourceManager = requireNapi('resourceManager');
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 export var EditableLeftIconType;
 (function (h7) {
     h7[h7["Back"] = 0] = "Back";
@@ -213,8 +214,8 @@ export class EditableTitleBar extends ViewPU {
                 minHeight: EditableTitleBar.totalHeight,
             });
             Row.margin({
-                left: EditableTitleBar.leftMargin,
-                right: EditableTitleBar.rightMargin,
+                start: LengthMetrics.vp(EditableTitleBar.leftMargin),
+                end: LengthMetrics.vp(EditableTitleBar.rightMargin),
             });
         }, Row);
         this.observeComponentCreation2((p5, q5) => {
@@ -333,7 +334,7 @@ export class EditableTitleBar extends ViewPU {
                 bottom: { "id": -1, "type": 10002, params: ['sys.float.titlebar_padding_bottom'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
             });
             Column.margin({
-                left: { "id": -1, "type": 10002, params: ['sys.float.titlebar_icon_background_space_horizontal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                start: LengthMetrics.vp(EditableTitleBar.titlePadding),
             });
             Column.alignItems(HorizontalAlign.Start);
             Column.constraintSize({ maxWidth: this.titleMaxWidth });
@@ -662,8 +663,8 @@ class ImageMenuItem extends ViewPU {
             Button.enabled(this.item.isEnabled);
             Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.titlebar_icon_background_shape'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Button.margin({
-                left: this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero :
-                    ImageMenuItem.iconBackgroundSpaceHorizontal,
+                start: LengthMetrics.vp(this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero :
+                    ImageMenuItem.iconBackgroundSpaceHorizontal),
             });
             Button.foregroundColor(this.getFgColor());
             Button.backgroundColor(this.getBgColor());
@@ -739,7 +740,7 @@ class ImageMenuItem extends ViewPU {
         this.observeComponentCreation2((a1, b1) => {
             Stack.create({ alignContent: Alignment.Center });
             Stack.margin({
-                left: ImageMenuItem.iconBackgroundSpaceHorizontal,
+                start: LengthMetrics.vp(ImageMenuItem.iconBackgroundSpaceHorizontal),
             });
         }, Stack);
         this.observeComponentCreation2((y, z) => {

@@ -709,8 +709,12 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_GetSize"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_WaterFlowSectionOption_GetItemCount"
-    },      
+    },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_WaterFlowSectionOption_GetCrossCount"
@@ -726,6 +730,10 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_WaterFlowSectionOption_GetMargin"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndex"
     },
     {
         "first_introduced": "12",
@@ -909,11 +917,11 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_SwiperIndicator_SetLeftPosition"
+        "name": "OH_ArkUI_SwiperIndicator_SetStartPosition"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_SwiperIndicator_GetLeftPosition"
+        "name": "OH_ArkUI_SwiperIndicator_GetStarttPosition"
     },
     {
         "first_introduced": "12",
@@ -925,11 +933,11 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_SwiperIndicator_SetRightPosition"
+        "name": "OH_ArkUI_SwiperIndicator_SetEndPosition"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_SwiperIndicator_GetRightPosition"
+        "name": "OH_ArkUI_SwiperIndicator_GetEndPosition"
     },
     {
         "first_introduced": "12",
@@ -1086,5 +1094,69 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_StyledString_AddPlaceholder"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetContent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetActionAreaDistance"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_GetActionAreaDistance"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnEnterActionArea"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnAction"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnExitActionArea"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionItem_SetOnStateChange"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_SetStart"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_SetEnd"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_SetEdgeEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_GetEdgeEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChange"
     }
 ]

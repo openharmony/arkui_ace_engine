@@ -16,6 +16,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -34,10 +35,28 @@ void ResetHideTitleBar(ArkUINodeHandle node)
     NavDestinationModelNG::SetHideTitleBar(frameNode, false);
 }
 
+void SetNavDestinationMode(ArkUINodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetNavDestinationMode(frameNode, static_cast<NG::NavDestinationMode>(value));
+}
+
+void ResetNavDestinationMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetNavDestinationMode(frameNode, NG::NavDestinationMode::STANDARD);
+}
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
-    static const ArkUINavDestinationModifier modifier = { SetHideTitleBar, ResetHideTitleBar };
+    static const ArkUINavDestinationModifier modifier = {
+        SetHideTitleBar,
+        ResetHideTitleBar,
+        SetNavDestinationMode,
+        ResetNavDestinationMode,
+    };
 
     return &modifier;
 }

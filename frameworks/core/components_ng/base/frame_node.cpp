@@ -428,7 +428,7 @@ FrameNode::~FrameNode()
     if (eventHub_) {
         eventHub_->ClearOnAreaChangedInnerCallbacks();
     }
-    auto pipeline = GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
         pipeline->RemoveVisibleAreaChangeNode(GetId());
@@ -445,6 +445,7 @@ FrameNode::~FrameNode()
             frameRateManager->RemoveNodeRate(GetId());
         }
     }
+    FireOnNodeDestroyCallback();
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -879,12 +880,11 @@ void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
+    eventHub_->FireOnAttach();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
-    if (attachFunc_) {
-        attachFunc_(GetId());
-    }
+
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -980,10 +980,8 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
             focusHub->RemoveSelf();
         }
     }
+    eventHub_->FireOnDetach();
     pattern_->OnDetachFromMainTree();
-    if (detachFunc_) {
-        detachFunc_(GetId());
-    }
     eventHub_->FireOnDisappear();
     renderContext_->OnNodeDisappear(recursive);
 }

@@ -126,8 +126,7 @@ void JSIsolatedComponent::JsOnError(const JSCallbackInfo& info)
     auto execCtx = info.GetExecutionContext();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = Container::CurrentId();
-    auto onError = [execCtx = info.GetExecutionContext(),
-                        func = std::move(jsFunc), instanceId, node = frameNode]
+    auto onError = [execCtx, func = std::move(jsFunc), instanceId, node = frameNode]
         (int32_t code, const std::string& name, const std::string& message) {
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -142,6 +141,6 @@ void JSIsolatedComponent::JsOnError(const JSCallbackInfo& info)
             auto returnValue = JSRef<JSVal>::Cast(obj);
             func->ExecuteJS(1, &returnValue);
         };
-    UIExtensionModel::GetInstance()->SetOnError(std::move(onError));
+    UIExtensionModel::GetInstance()->SetPlatformOnError(std::move(onError));
 }
 } // namespace OHOS::Ace::Framework

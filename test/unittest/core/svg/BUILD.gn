@@ -88,6 +88,7 @@ ohos_unittest("parse_test_ng") {
     "$ace_root/test/mock/core/svg/mock_rosen_svg_painter.cpp",
     "$ace_root/test/mock/core/svg/mock_shared_transition_effect.cpp",
     "parse_test_ng.cpp",
+    "parse_testtwo_ng.cpp",
   ]
   defines = [ "USE_ROSEN_DRAWING" ]
   if (ace_use_rosen_drawing) {

@@ -451,6 +451,8 @@ private:
     RefPtr<FrameNode> GetSecondNode(std::list<RefPtr<UINode>>::iterator& iter);
     void UpdateAllChildNodeForUg();
     void UpdateNodePositionForUg();
+    void MountSecondNode(const RefPtr<FrameNode>& stackSecondNode);
+    void RemoveSecondNode();
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;

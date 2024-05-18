@@ -5285,6 +5285,13 @@ void ResetLayoutRect(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     ViewAbstract::ResetLayoutRect(frameNode);
 }
+
+void SetSystemBarEffect(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetSystemBarEffect(frameNode, enable);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -5353,7 +5360,7 @@ const ArkUICommonModifier* GetCommonModifier()
         SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
         SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
         ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap, SetLayoutRect, GetLayoutRect,
-        ResetLayoutRect, GetFocusOnTouch };
+        ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect };
 
     return &modifier;
 }
@@ -5390,6 +5397,40 @@ void SetOnDisappear(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnDisappear(frameNode, std::move(onDisappear));
+}
+
+void SetOnAttach(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onAttach = [frameNode, nodeId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.nodeId = nodeId;
+        event.componentAsyncEvent.subKind = ON_ATTACH;
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
+}
+
+void SetOnDetach(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onDetach = [frameNode, nodeId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.nodeId = nodeId;
+        event.componentAsyncEvent.subKind = ON_DETACH;
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
 
 void SetOnFocus(ArkUINodeHandle node, void* extraParam)
@@ -5482,22 +5523,29 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         Offset globalOffset = info.GetGlobalLocation();
         Offset localOffset = info.GetLocalLocation();
         Offset screenOffset = info.GetScreenLocation();
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
         //x
-        event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()) : localOffset.GetX();
         //y
-        event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+        event.componentAsyncEvent.data[1].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()) : localOffset.GetY();
         //timestamp
         event.componentAsyncEvent.data[2].f32 = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
         //source
         event.componentAsyncEvent.data[3].i32 = static_cast<int32_t>(info.GetSourceDevice());
         //windowX
-        event.componentAsyncEvent.data[4].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX());
+        event.componentAsyncEvent.data[4].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()) : globalOffset.GetX();
         //windowY
-        event.componentAsyncEvent.data[5].f32 = PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY());
+        event.componentAsyncEvent.data[5].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()) : globalOffset.GetY();
         //displayX
-        event.componentAsyncEvent.data[6].f32 = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX());
+        event.componentAsyncEvent.data[6].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()) : screenOffset.GetX();
         //displayY
-        event.componentAsyncEvent.data[7].f32 = PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY());
+        event.componentAsyncEvent.data[7].f32 =
+            usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
 
         SendArkUIAsyncEvent(&event);
     };
@@ -5728,20 +5776,18 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.kind = MOUSE_INPUT_EVENT;
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
         event.mouseEvent.subKind = ON_MOUSE;
-        event.mouseEvent.actionTouchPoint.nodeX = PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetX());
-        event.mouseEvent.actionTouchPoint.nodeY = PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetY());
+        event.mouseEvent.actionTouchPoint.nodeX = info.GetLocalLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.nodeY = info.GetLocalLocation().GetY() / density;
         event.mouseEvent.button = static_cast<int32_t>(info.GetButton());
         event.mouseEvent.action = static_cast<int32_t>(info.GetAction());
         event.mouseEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
-        event.mouseEvent.actionTouchPoint.windowX = PipelineBase::Px2VpWithCurrentDensity(
-            info.GetGlobalLocation().GetX());
-        event.mouseEvent.actionTouchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(
-            info.GetGlobalLocation().GetY());
-        event.mouseEvent.actionTouchPoint.screenX = PipelineBase::Px2VpWithCurrentDensity(
-            info.GetScreenLocation().GetX());
-        event.mouseEvent.actionTouchPoint.screenY = PipelineBase::Px2VpWithCurrentDensity(
-            info.GetScreenLocation().GetY());
+        event.mouseEvent.actionTouchPoint.windowX = info.GetGlobalLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
+        event.mouseEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnMouse(frameNode, onEvent);

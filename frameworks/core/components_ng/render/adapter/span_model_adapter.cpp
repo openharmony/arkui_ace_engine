@@ -105,6 +105,56 @@ RefPtr<SpanItem> SpanModelNG::CreateSpanItem(ArkUI_SpanItem* item)
     return spanItem;
 }
 
+ParagraphStyle SpanModelNG::CreateParagraphStyle(ArkUI_StyledString* styledString)
+{
+    auto typoStyle = reinterpret_cast<Rosen::TypographyStyle*>(styledString->paragraphStyle);
+    TextDirection textDirection;
+    switch (typoStyle->textDirection) {
+        case Rosen::TextDirection::RTL:
+            textDirection = TextDirection::RTL;
+            break;
+        case Rosen::TextDirection::LTR:
+            textDirection = TextDirection::LTR;
+            break;
+        default:
+            textDirection = TextDirection::LTR;
+            break;
+    }
+    TextAlign textAlign;
+    switch (typoStyle->textAlign) {
+        case Rosen::TextAlign::LEFT:
+            textAlign = TextAlign::LEFT;
+            break;
+        case Rosen::TextAlign::RIGHT:
+            textAlign = TextAlign::RIGHT;
+            break;
+        case Rosen::TextAlign::CENTER:
+            textAlign = TextAlign::CENTER;
+            break;
+        case Rosen::TextAlign::JUSTIFY:
+            textAlign = TextAlign::JUSTIFY;
+            break;
+        case Rosen::TextAlign::START:
+            textAlign = TextAlign::START;
+            break;
+        case Rosen::TextAlign::END:
+            textAlign = TextAlign::END;
+            break;
+        default:
+            textAlign = TextAlign::START;
+            break;
+    }
+    std::u16string ELLIPSIS = u"\u2026";
+    ParagraphStyle style = { .direction = textDirection,
+        .align = textAlign,
+        .maxLines = typoStyle->maxLines,
+        .fontLocale = typoStyle->locale,
+        .wordBreak = static_cast<WordBreak>(typoStyle->wordBreakType),
+        .ellipsisMode = static_cast<EllipsisMode>(typoStyle->ellipsisModal),
+        .lineBreakStrategy = static_cast<LineBreakStrategy>(typoStyle->breakStrategy),
+        .textOverflow = typoStyle->ellipsis == ELLIPSIS ? TextOverflow::ELLIPSIS : TextOverflow::CLIP };
+    return style;
+}
 #endif
 
 } // namespace OHOS::Ace::NG

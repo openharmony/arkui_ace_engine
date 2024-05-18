@@ -520,7 +520,7 @@ export class TipsDialog extends ViewPU {
 
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-        this.theme.colors.fontPrimary : {
+            this.theme.colors.fontPrimary : {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.font_primary'],
@@ -1009,7 +1009,7 @@ export class SelectDialog extends ViewPU {
 
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-        this.theme.colors.fontPrimary : {
+            this.theme.colors.fontPrimary : {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.font_primary'],
@@ -1017,7 +1017,7 @@ export class SelectDialog extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             };
         this.dividerColorWithTheme = this.theme?.colors?.compDivider ?
-        this.theme.colors.compDivider : {
+            this.theme.colors.compDivider : {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.comp_divider'],
@@ -1389,7 +1389,7 @@ export class ConfirmDialog extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         });
                         Button.fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor :
-                        this.buttonFontColorWithTheme);
+                            this.buttonFontColorWithTheme);
                         Button.onClick(() => {
                             if (this.primaryButton?.action) {
                                 this.primaryButton.action();
@@ -1470,7 +1470,7 @@ export class ConfirmDialog extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         });
                         Button.fontColor(this.secondaryButton.fontColor ?
-                        this.secondaryButton.fontColor : this.buttonFontColorWithTheme);
+                            this.secondaryButton.fontColor : this.buttonFontColorWithTheme);
                         Button.onClick(() => {
                             if (this.secondaryButton?.action) {
                                 this.secondaryButton.action();
@@ -1492,7 +1492,7 @@ export class ConfirmDialog extends ViewPU {
 
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-        this.theme.colors.fontPrimary : {
+            this.theme.colors.fontPrimary : {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.font_primary'],
@@ -1500,7 +1500,7 @@ export class ConfirmDialog extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             };
         this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
-        this.theme.colors.fontEmphasize : {
+            this.theme.colors.fontEmphasize : {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.font_emphasize'],
@@ -1697,7 +1697,7 @@ export class AlertDialog extends ViewPU {
 
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-        this.theme.colors.fontPrimary : {
+            this.theme.colors.fontPrimary : {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.font_primary'],
@@ -2190,7 +2190,7 @@ class CustomDialogContentComponent extends ViewPU {
                         __Button__setButtonProperties(i5, this.controller);
                         Button.backgroundColor(i5.background);
                         Button.fontColor(i5.role === ButtonRole.ERROR ?
-                        this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme);
+                            this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                     }, Button);
                     Button.pop();
@@ -2355,7 +2355,7 @@ class CustomDialogContentComponent extends ViewPU {
         }
         this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
         this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
-        this.theme.colors.fontPrimary : {
+            this.theme.colors.fontPrimary : {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.font_primary'],
@@ -2363,7 +2363,7 @@ class CustomDialogContentComponent extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             };
         this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
-        this.theme.colors.fontSecondary : {
+            this.theme.colors.fontSecondary : {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.font_secondary'],
@@ -2371,9 +2371,9 @@ class CustomDialogContentComponent extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             };
         this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
-        this.theme.colors.fontEmphasize : '';
+            this.theme.colors.fontEmphasize : '';
         this.errorButtonFontColorWithTheme = this.theme?.colors?.warning ?
-        this.theme.colors.warning : '';
+            this.theme.colors.warning : '';
     }
 
     getDividerColor() {
@@ -2402,11 +2402,11 @@ class CustomDialogContentComponent extends ViewPU {
         let f3 = getNumberByResource('alert_button_top_padding');
         if (this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
             f3 += BUTTON_DEFAULT_HEIGHT +
-            getNumberByResource('alert_button_bottom_padding_horizontal');
+                getNumberByResource('alert_button_bottom_padding_horizontal');
         } else {
             f3 += BUTTON_DEFAULT_HEIGHT * this.buttons.length +
                 (this.buttons.length - 1) * getNumberByResource('alert_button_vertical_space') +
-            getNumberByResource('alert_button_bottom_padding_vertical');
+                getNumberByResource('alert_button_bottom_padding_vertical');
         }
         return f3;
     }
@@ -2851,7 +2851,7 @@ export class CustomDialogComponent extends ViewPU {
         try {
             this.screenWidth = px2vp(display.getDefaultDisplaySync().width);
             let y1 = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
-            bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
+                bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
             bundleManager.getBundleInfoForSelf(y1).then((c2) => {
                 this.targetSdk = c2.targetVersion;
                 this.updateCustomStyle();
@@ -3123,7 +3123,7 @@ export class LoadingDialog extends ViewPU {
 
     aboutToAppear() {
         this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
-        this.theme.colors.fontPrimary : {
+            this.theme.colors.fontPrimary : {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.font_primary'],
@@ -3131,7 +3131,7 @@ export class LoadingDialog extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             };
         this.loadingProgressIconColorWithTheme = this.theme?.colors?.iconSecondary ?
-        this.theme.colors.iconSecondary : {
+            this.theme.colors.iconSecondary : {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.icon_secondary'],

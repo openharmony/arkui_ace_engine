@@ -693,6 +693,13 @@ RefPtr<BasicShape> SliderModelNG::GetBlockShape(FrameNode* frameNode)
     return value;
 }
 
+RefPtr<SliderModel::SliderValidRange> SliderModelNG::GetValidSlideRange(FrameNode* frameNode)
+{
+    RefPtr<SliderModel::SliderValidRange> value = AceType::MakeRefPtr<SliderModel::SliderValidRange>();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SliderPaintProperty, ValidSlideRange, value, frameNode, value);
+    return value;
+}
+
 Gradient SliderModelNG::CreateSolidGradient(Color value)
 {
     Gradient gradient;
