@@ -1380,7 +1380,6 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     } else {
         TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
     }
-
 }
 
 void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
