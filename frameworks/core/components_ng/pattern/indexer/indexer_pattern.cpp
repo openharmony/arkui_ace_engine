@@ -1021,6 +1021,7 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(letterLayoutProperty);
     letterLayoutProperty->UpdateContent(arrayValue_[childPressIndex_ >= 0 ? childPressIndex_ : selected_].first);
     auto popupTextFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
+    letterLayoutProperty->UpdateMaxLines(1);
     letterLayoutProperty->UpdateFontSize(popupTextFont.GetFontSize());
     letterLayoutProperty->UpdateFontWeight(popupTextFont.GetFontWeight());
     letterLayoutProperty->UpdateFontFamily(popupTextFont.GetFontFamilies());
@@ -1339,9 +1340,7 @@ void IndexerPattern::UpdateBubbleListItem(
         textLayoutProperty->UpdateContent(currentListData.at(i));
         textLayoutProperty->UpdateFontSize(popupItemTextFontSize);
         textLayoutProperty->UpdateFontWeight(popupItemTextFontWeight);
-        if (autoCollapse_) textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextOverflow(autoCollapse_ ? TextOverflow::ELLIPSIS : TextOverflow::NONE);
-        textLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
+        textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextColor(i == popupClickedIndex_ ?
             popupSelectedTextColor : popupUnselectedTextColor);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
