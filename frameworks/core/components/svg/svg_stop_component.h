@@ -34,7 +34,6 @@ public:
 
     ~SvgStopComponent() override = default;
 
-
     const GradientColor& GetGradientColor() const
     {
         return declaration_->GetGradientColor();

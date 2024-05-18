@@ -115,7 +115,6 @@ public:
 
     bool IsRowReverse() const
     {
-        // TODO: not consider rightToLeft
         return direction_ == FlexDirection::ROW_REVERSE;
     }
 
@@ -266,22 +265,22 @@ public:
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
-	
+
     void SetIsWidthModifiedBySelect(bool isModified)
     {
         isWidthModifiedBySelect_ = isModified;
     }
-    
+
     bool IsWidthModifiedBySelect() const
     {
         return isWidthModifiedBySelect_;
     }
-    
+
     void SetIsSelectScroll(bool isSelect)
     {
         isSelectScroll_ = isSelect;
     }
-    
+
     bool IsSelectScroll() const
     {
         return isSelectScroll_;
@@ -384,7 +383,7 @@ private:
     std::pair<bool, bool> enableSnapToSide_ = { true, true };
     Dimension intervalSize_;
     bool scrollSnapUpdate_ = false;
-    
+
     bool isWidthModifiedBySelect_ = false;
     bool isSelectScroll_ = false;
     bool hasOptionWidth_ = false;
