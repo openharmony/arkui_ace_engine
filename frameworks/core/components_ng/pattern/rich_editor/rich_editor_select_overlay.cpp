@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float BOX_EPSILON = 0.5f;
-constexpr float DOUBLE = 2.0f
+constexpr float DOUBLE = 2.0f;
 }
 
 bool RichEditorSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
