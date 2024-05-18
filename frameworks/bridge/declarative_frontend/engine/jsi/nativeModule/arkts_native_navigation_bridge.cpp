@@ -21,6 +21,9 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 namespace OHOS::Ace::NG {} // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
 ArkUINativeModuleValue NavigationBridge::SetHideToolBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -375,6 +378,45 @@ ArkUINativeModuleValue NavigationBridge::ResetBackButtonIcon(ArkUIRuntimeCallInf
     std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
     std::string src;
     NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, noPixMap, pixMap);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::SetIgnoreLayoutSafeArea(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    std::string typeCppStr;
+    std::string edgesCppStr;
+    if (secondArg->IsString()) {
+        typeCppStr = secondArg->ToString(vm)->ToString();
+    } else {
+        //type system
+        typeCppStr = "1";
+    }
+
+    if (thirdArg->IsString()) {
+        edgesCppStr = thirdArg->ToString(vm)->ToString();
+    } else {
+        //edge bottom and top
+        edgesCppStr = "1|2";
+    }
+    const char* typeStr = typeCppStr.c_str();
+    const char* edgesStr = edgesCppStr.c_str();
+    GetArkUINodeModifiers()->getNavigationModifier()->setNavIgnoreLayoutSafeArea(nativeNode, typeStr, edgesStr);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::ResetIgnoreLayoutSafeArea(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetNavIgnoreLayoutSafeArea(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

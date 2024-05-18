@@ -2331,6 +2331,8 @@ struct ArkUINavDestinationModifier {
     void (*resetHideTitleBar)(ArkUINodeHandle node);
     void (*setNavDestinationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
+    void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
+    void (*resetIgnoreLayoutSafeArea)(ArkUINodeHandle node);
 };
 
 struct ArkUITextAreaModifier {
@@ -2919,6 +2921,8 @@ struct ArkUINavigationModifier {
     void (*resetMinNavBarWidth)(ArkUINodeHandle node);
     void (*setNavBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetNavBarWidth)(ArkUINodeHandle node);
+    void (*setNavIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
+    void (*resetNavIgnoreLayoutSafeArea)(ArkUINodeHandle node);
 };
 
 struct ArkUINavRouterModifier {
