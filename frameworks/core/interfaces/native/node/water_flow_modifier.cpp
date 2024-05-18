@@ -633,7 +633,7 @@ void SetOnDidScroll(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto SetOnDidScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) -> void {
+    auto setOnDidScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) -> void {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -644,7 +644,7 @@ void SetOnDidScroll(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
         SendArkUIAsyncEvent(&event);
     };
-    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(SetOnDidScroll));
+    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(setOnDidScroll));
 }
 
 void SetOnWaterFlowScrollStart(ArkUINodeHandle node, void* extraParam)
