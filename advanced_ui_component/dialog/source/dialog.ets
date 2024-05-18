@@ -21,6 +21,7 @@ import measure from '@ohos.measure';
 import resourceManager from '@ohos.resourceManager';
 import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
 import bundleManager from '@ohos.bundle.bundleManager';
+import { LengthMetrics } from '@ohos.arkui.node';
 
 class CustomThemeImpl implements CustomTheme {
   public colors?: CustomColors;
@@ -459,7 +460,7 @@ export struct ConfirmDialog {
           .fontColor(this.fontColorWithTheme)
           .textAlign(TextAlign.Start)
           .width('100%')
-      }.padding({ left: 24, right: 24, top: 24 })
+      }.padding({ start: LengthMetrics.vp(24), end: LengthMetrics.vp(24), top: 24 })
       .constraintSize({ minHeight: 56 })
 
       if (this.content) {
@@ -473,13 +474,7 @@ export struct ConfirmDialog {
             .maxLines(CONTENT_MAX_LINES)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .minFontSize($r('sys.float.ohos_id_text_size_body3'))
-        }
-        .padding({
-          left: 24,
-          right: 24,
-          top: 8,
-          bottom: 8
-        })
+        }.padding({ start: LengthMetrics.vp(24), end: LengthMetrics.vp(24), top: 8, bottom: 8 })
         .width('100%')
         .constraintSize({ minHeight: 36 })
       }
@@ -489,7 +484,7 @@ export struct ConfirmDialog {
             .onChange((checked: boolean) => {
               this.isChecked = checked
             })
-            .margin({ left: 0, right: 8 })
+            .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
         }
 
         Text(this.checkTips)
@@ -506,12 +501,7 @@ export struct ConfirmDialog {
       }
       .height(CHECKBOX_CONTAINER_HEIGHT)
       .width('100%')
-      .padding({
-        left: 24,
-        right: 24,
-        top: 8,
-        bottom: 8
-      })
+      .padding({ start: LengthMetrics.vp(24), end: LengthMetrics.vp(24), top: 8, bottom: 8 })
 
       Row() {
         if (this.primaryButton?.value) {
@@ -524,9 +514,7 @@ export struct ConfirmDialog {
             $r('sys.color.ohos_id_color_background_transparent'))
             .fontColor(this.primaryButton.fontColor ? this.primaryButton.fontColor : this.buttonFontColorWithTheme)
             .onClick(() => {
-              if (this.primaryButton?.action) {
-                this.primaryButton.action()
-              }
+              if (this.primaryButton?.action) this.primaryButton.action()
               this.controller.close()
             })
         }
@@ -552,26 +540,17 @@ export struct ConfirmDialog {
             .fontColor(this.secondaryButton.fontColor ?
             this.secondaryButton.fontColor : this.buttonFontColorWithTheme)
             .onClick(() => {
-              if (this.secondaryButton?.action) {
-                this.secondaryButton.action()
-              }
+              if (this.secondaryButton?.action) this.secondaryButton.action()
               this.controller.close()
             })
         }
-      }
-      .width('100%')
-      .padding({
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: 16
-      })
+      }.width('100%').padding({ start: LengthMetrics.vp(16), end: LengthMetrics.vp(16), top: 16, bottom: 16 })
     }
     .backgroundBlurStyle(BlurStyle.Thick)
     .borderRadius($r('sys.float.ohos_id_corner_radius_dialog'))
     .margin({
-      left: $r('sys.float.ohos_id_dialog_margin_start'),
-      right: $r('sys.float.ohos_id_dialog_margin_end'),
+      start: LengthMetrics.vp(getNumberByResource('sys.float.ohos_id_dialog_margin_start')),
+      end: LengthMetrics.vp(getNumberByResource('sys.float.ohos_id_dialog_margin_end')),
       bottom: $r('sys.float.ohos_id_dialog_margin_bottom')
     })
     // 1.backgroundcolor use in blur enable mod mast set this color: colorDialogBgBlur. but now it is not found
@@ -1311,7 +1290,7 @@ export struct LoadingDialog {
           .color(this.loadingProgressIconColorWithTheme)
           .width(LOADING_PROGRESS_WIDTH)
           .height(LOADING_PROGRESS_HEIGHT)
-          .margin({ left: LOADING_TEXT_MARGIN_LEFT })
+          .margin({ start: LengthMetrics.vp(LOADING_TEXT_MARGIN_LEFT) })
       }
       .constraintSize({ minHeight: LOADING_MIN_HEIGHT })
     }
