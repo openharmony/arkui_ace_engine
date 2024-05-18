@@ -438,11 +438,8 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
-    if (JSDatePickerTheme::ObtainTextStyle(textStyle)) {
-        DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
-    } else {
-        DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
-    }
+    JSDatePickerTheme::ObtainTextStyle(textStyle);
+    DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
 void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
@@ -453,12 +450,8 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
-
-    if (JSDatePickerTheme::ObtainTextStyle(textStyle)) {
-        DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
-    } else {
-        DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
-    }
+    JSDatePickerTheme::ObtainTextStyle(textStyle);
+    DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
 void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
@@ -469,12 +462,8 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
-
-    if (JSDatePickerTheme::ObtainSelectedTextStyle(textStyle)) {
-        DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
-    } else {
-        DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
-    }
+    JSDatePickerTheme::ObtainSelectedTextStyle(textStyle);
+    DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
 void JSDatePicker::OnChange(const JSCallbackInfo& info)
@@ -1375,12 +1364,9 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
-    if (JSTimePickerTheme::ObtainTextStyle(textStyle)) {
-        TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
-    } else {
-        TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
-    }
-}
+    JSTimePickerTheme::ObtainTextStyle(textStyle);
+    TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    
 
 void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
 {
@@ -1390,11 +1376,8 @@ void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
-    if (JSTimePickerTheme::ObtainTextStyle(textStyle)) {
-        TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
-    } else {
-        TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
-    }
+    JSTimePickerTheme::ObtainTextStyle(textStyle);
+    TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
 void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
@@ -1405,11 +1388,8 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSDatePicker::ParseTextStyle(info[0], textStyle);
     }
-    if (JSTimePickerTheme::ObtainSelectedTextStyle(textStyle)) {
-        TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
-    } else {
-        TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
-    }
+    JSTimePickerTheme::ObtainSelectedTextStyle(textStyle);
+    TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
 void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
