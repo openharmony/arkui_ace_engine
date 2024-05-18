@@ -1072,6 +1072,9 @@ std::function<void(bool)> DatePickerDialogView::CreateLunarChangeEvent(const Ref
     return [weak = AceType::WeakClaim(AceType::RawPtr(dateNode))](bool selected) {
         auto datePicker = weak.Upgrade();
         CHECK_NULL_VOID(datePicker);
+        auto datePickerPattern = datePicker->GetPattern<DatePickerPattern>();
+        CHECK_NULL_VOID(datePickerPattern);
+        SetSelectedDate(datePicker, datePickerPattern->GetCurrentDate());
         auto layoutProp = datePicker->GetLayoutProperty<DataPickerRowLayoutProperty>();
         CHECK_NULL_VOID(layoutProp);
         layoutProp->UpdateLunar(selected);
@@ -1094,6 +1097,12 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountMonthDaysNode(const DatePi
         auto dateNode = dateNodeWeak.Upgrade();
         CHECK_NULL_VOID(monthDaysNode);
         CHECK_NULL_VOID(dateNode);
+        auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+        CHECK_NULL_VOID(datePickerPattern);
+        SetSelectedDate(dateNode, datePickerPattern->GetCurrentDate());
+        auto monthDaysPattern = monthDaysNode->GetPattern<DatePickerPattern>();
+        CHECK_NULL_VOID(monthDaysPattern);
+        SetSelectedDate(monthDaysNode, monthDaysPattern->GetCurrentDate());
         SetShowLunar(monthDaysNode, selected);
         SetShowLunar(dateNode, selected);
         monthDaysNode->MarkModifyDone();
