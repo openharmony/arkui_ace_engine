@@ -1427,7 +1427,9 @@ HWTEST_F(TextInputCursorTest, FinishTextPreview003, TestSize.Level1)
      * @tc.steps: call InsertValueOperation
      * @tc.expected: check GetIsPreviewText return false
      */
-    pattern_->InsertValueOperation(HELLO_TEXT);
+    SourceAndValueInfo info;
+    info.insertValue = HELLO_TEXT;
+    pattern_->InsertValueOperation(info);
     EXPECT_TRUE(pattern_->inputOperations_.front() == InputOperation::SET_PREVIEW_FINISH);
     FlushLayoutTask(frameNode_);
 }

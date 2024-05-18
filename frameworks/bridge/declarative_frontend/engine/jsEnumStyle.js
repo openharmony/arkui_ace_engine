@@ -3083,3 +3083,9 @@ var ViewportFit;
   ViewportFit[ViewportFit["CONTAINS"] = 1] = "CONTAINS";
   ViewportFit[ViewportFit["COVER"] = 2] = "COVER";
 })(ViewportFit || (ViewportFit = {}));
+
+var TextDeleteDirection;
+(function (TextDeleteDirection) {
+    TextDeleteDirection[TextDeleteDirection["BACKWARD"] = 0] = "BACKWARD";
+    TextDeleteDirection[TextDeleteDirection["FORWARD"] = 1] = "FORWARD";
+})(TextDeleteDirection || (TextDeleteDirection = {}));

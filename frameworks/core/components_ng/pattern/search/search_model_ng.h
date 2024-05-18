@@ -55,6 +55,10 @@ public:
     void SetOnScroll(std::function<void(float, float)>&& func) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
+    void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override;
+    void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
+    void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override;
+    void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override;
     void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override;
