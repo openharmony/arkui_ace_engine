@@ -902,8 +902,8 @@ ArkThemeWhiteList.whiteList = [
     'Swiper',
     'Text',
     'TextClock',
-    'TextPicker',
     'TextInput',
+    'TextPicker',
     'TimePicker',
     'Toggle',
 ];
