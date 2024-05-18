@@ -15100,6 +15100,16 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, MenuAlignModifier.identity, MenuAlignModifier, menuAlign);
     return this;
   }
+  menuBackgroundColor(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuBackgroundColorModifier.identity, MenuBackgroundColorModifier, value);
+    return this;
+  }
+  menuBackgroundBlurStyle(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuBackgroundBlurStyleModifier.identity, MenuBackgroundBlurStyleModifier, value);
+    return this;
+  }
   controlSize(controlSize) {
     modifierWithKey(this._modifiersWithKeys, ControlSizeModifier.identity, ControlSizeModifier, controlSize);
     return this;
@@ -15122,6 +15132,40 @@ class ArkSelectComponent extends ArkComponent {
     return this.menuItemNodes.getFrameNode();
   }
 }
+class MenuBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetMenuBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().select.setMenuBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MenuBackgroundColorModifier.identity = Symbol('selectMenuBackgroundColor');
+class MenuBackgroundBlurStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetMenuBackgroundBlurStyle(node);
+    }
+    else {
+      getUINativeModule().select.setMenuBackgroundBlurStyle(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MenuBackgroundBlurStyleModifier.identity = Symbol('selectMenuBackgroundBlurStyle');
 class FontModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

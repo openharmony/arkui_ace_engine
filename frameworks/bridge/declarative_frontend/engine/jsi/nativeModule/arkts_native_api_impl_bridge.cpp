@@ -2401,6 +2401,14 @@ void ArkUINativeModule::RegisterSelectAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetControlSize));
     select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetContentModifierBuilder));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetMenuBackgroundColor));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetMenuBackgroundColor));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuBackgroundBlurStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetMenuBackgroundBlurStyle));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuBackgroundBlurStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetMenuBackgroundBlurStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "select"), select);
 }
 
