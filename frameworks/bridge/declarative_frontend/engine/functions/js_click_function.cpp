@@ -49,12 +49,8 @@ void JsClickFunction::Execute(const ClickInfo& info)
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->SetProperty<double>("pressure", info.GetForce());
-    if (info.GetTiltX().has_value()) {
-        obj->SetProperty<double>("tiltX", info.GetTiltX().value());
-    }
-    if (info.GetTiltY().has_value()) {
-        obj->SetProperty<double>("tiltY", info.GetTiltY().value());
-    }
+    obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
+    obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
@@ -83,12 +79,8 @@ void JsClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsClickPreventDefault));
-    if (info.GetTiltX().has_value()) {
-        obj->SetProperty<double>("tiltX", info.GetTiltX().value());
-    }
-    if (info.GetTiltY().has_value()) {
-        obj->SetProperty<double>("tiltY", info.GetTiltY().value());
-    }
+    obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
+    obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
@@ -122,12 +114,8 @@ void JsClickFunction::Execute(MouseInfo& info)
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     obj->SetProperty<double>("pressure", info.GetForce());
-    if (info.GetTiltX().has_value()) {
-        obj->SetProperty<double>("tiltX", info.GetTiltX().value());
-    }
-    if (info.GetTiltY().has_value()) {
-        obj->SetProperty<double>("tiltY", info.GetTiltY().value());
-    }
+    obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
+    obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
