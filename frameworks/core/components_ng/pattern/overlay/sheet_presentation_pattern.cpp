@@ -1143,7 +1143,10 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
 {
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
-    if (IsFold()) {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    if (IsFold() && !sheetTheme->IsOnlyBottom()) {
         sheetType = SheetType::SHEET_CENTER;
     } else {
         if (LessNotEqual(rootHeight, rootWidth)) {
