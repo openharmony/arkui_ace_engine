@@ -290,7 +290,7 @@ void JSCheckbox::Mark(const JSCallbackInfo& info)
     auto markObj = JSRef<JSObject>::Cast(info[0]);
     auto strokeColorValue = markObj->GetProperty("strokeColor");
     auto theme = GetTheme<CheckboxTheme>();
-    Color strokeColor = theme->GetPointColor();;
+    Color strokeColor = theme->GetPointColor();
     if (!ParseJsColor(strokeColorValue, strokeColor)) {
         if (!JSCheckBoxTheme::ObtainCheckMarkColor(strokeColor)) {
             CheckBoxModel::GetInstance()->SetCheckMarkColor(strokeColor);
