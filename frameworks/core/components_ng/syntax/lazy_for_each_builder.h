@@ -259,6 +259,15 @@ public:
                 }
             }
         }
+        for (auto& [key, node] : expiringItem_) {
+            if (!node.second) {
+                continue;
+            }
+            auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+            if (frameNode && frameNode == targetNode) {
+                return node.first;
+            }
+        }
         return -1;
     }
 

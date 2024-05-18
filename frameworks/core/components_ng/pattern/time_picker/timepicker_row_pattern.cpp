@@ -238,20 +238,54 @@ void TimePickerRowPattern::CreateOrDeleteSecondNode()
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             layoutProperty->UpdateLayoutWeight(1);
             stackSecondNode->MarkModifyDone();
-            if (language_ == "ug") {
-                stackSecondNode->MountToParent(host, 0);
-            } else {
-                stackSecondNode->MountToParent(host);
-            }
+            MountSecondNode(stackSecondNode);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     } else {
         if (!hasSecond_) {
-            host->RemoveChildAtIndex(static_cast<int32_t>(host->GetChildren().size()) - 1);
+            RemoveSecondNode();
             secondId_.reset();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }
+}
+
+void TimePickerRowPattern::MountSecondNode(const RefPtr<FrameNode>& stackSecondNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t secondNodePosition = static_cast<int32_t>(host->GetChildren().size()) - 1;
+    if (!HasAmPmNode()) {
+        if (language_ == "ug") {
+            secondNodePosition = CHILD_INDEX_FIRST;
+        }
+    } else {
+        if (amPmTimeOrder_ == "01") {
+            secondNodePosition = CHILD_INDEX_THIRD;
+        } else if (language_ == "ug") {
+            secondNodePosition = CHILD_INDEX_SECOND;
+        }
+    }
+    stackSecondNode->MountToParent(host, secondNodePosition);
+}
+
+void TimePickerRowPattern::RemoveSecondNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t secondNodePosition = static_cast<int32_t>(host->GetChildren().size()) - 1;
+    if (!HasAmPmNode()) {
+        if (language_ == "ug") {
+            secondNodePosition = CHILD_INDEX_FIRST;
+        }
+    } else {
+        if (amPmTimeOrder_ == "01") {
+            secondNodePosition = CHILD_INDEX_THIRD;
+        } else if (language_ == "ug") {
+            secondNodePosition = CHILD_INDEX_SECOND;
+        }
+    }
+    host->RemoveChildAtIndex(secondNodePosition);
 }
 
 double TimePickerRowPattern::SetAmPmButtonIdeaSize()

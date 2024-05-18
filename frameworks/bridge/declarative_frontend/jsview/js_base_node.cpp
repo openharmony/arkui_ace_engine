@@ -85,6 +85,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
     }
     viewNode_ = newNode;
+    CHECK_NULL_VOID(viewNode_);
     ProccessNode(isSupportExportTexture);
     UpdateEnd(info);
     CHECK_NULL_VOID(viewNode_);

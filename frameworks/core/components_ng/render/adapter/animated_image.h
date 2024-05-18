@@ -165,6 +165,7 @@ private:
     void UseCachedFrame(RefPtr<CanvasImage>&& image) override;
 
     RefPtr<PixelMap> currentFrame_;
+    bool intrSizeInitial_ = true;
 
     ResizeParam size_;
     const RefPtr<ImageSource> src_;
