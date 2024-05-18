@@ -18,7 +18,7 @@ const hilog = requireNapi('hilog');
 const measure = requireNapi('measure');
 const resourceManager = requireNapi('resourceManager');
 const bundleManager = requireNapi('bundleManager');
-
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
@@ -240,7 +240,7 @@ export class TipsDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, p20, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 84, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 85, col: 5 });
                     ViewPU.create(r20);
                     let s20 = () => {
                         return {
@@ -635,7 +635,7 @@ export class SelectDialog extends ViewPU {
                     },
                     buttons: this.buttons,
                 }, undefined, -1, () => {
-                }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 288, col: 14 });
+                }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 289, col: 14 });
                 f17.setController(this.controller);
                 ViewPU.create(f17);
                 let g17 = () => {
@@ -985,7 +985,7 @@ export class SelectDialog extends ViewPU {
                         contentAreaPadding: this.contentPadding,
                         theme: this.theme,
                     }, undefined, y13, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 383, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 384, col: 5 });
                     ViewPU.create(a14);
                     let b14 = () => {
                         return {
@@ -1221,20 +1221,8 @@ export class ConfirmDialog extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             });
             Column.margin({
-                left: {
-                    'id': -1,
-                    'type': 10002,
-                    params: ['sys.float.ohos_id_dialog_margin_start'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__'
-                },
-                right: {
-                    'id': -1,
-                    'type': 10002,
-                    params: ['sys.float.ohos_id_dialog_margin_end'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__'
-                },
+                start: LengthMetrics.vp(getNumberByResource('sys.float.ohos_id_dialog_margin_start')),
+                end: LengthMetrics.vp(getNumberByResource('sys.float.ohos_id_dialog_margin_end')),
                 bottom: {
                     'id': -1,
                     'type': 10002,
@@ -1253,7 +1241,7 @@ export class ConfirmDialog extends ViewPU {
         }, Column);
         this.observeComponentCreation2((g13, h13) => {
             Row.create();
-            Row.padding({ left: 24, right: 24, top: 24 });
+            Row.padding({ start: LengthMetrics.vp(24), end: LengthMetrics.vp(24), top: 24 });
             Row.constraintSize({ minHeight: 56 });
         }, Row);
         this.observeComponentCreation2((e13, f13) => {
@@ -1282,8 +1270,8 @@ export class ConfirmDialog extends ViewPU {
                     this.observeComponentCreation2((c13, d13) => {
                         Row.create();
                         Row.padding({
-                            left: 24,
-                            right: 24,
+                            start: LengthMetrics.vp(24),
+                            end: LengthMetrics.vp(24),
                             top: 8,
                             bottom: 8
                         });
@@ -1327,8 +1315,8 @@ export class ConfirmDialog extends ViewPU {
             Row.height(CHECKBOX_CONTAINER_HEIGHT);
             Row.width('100%');
             Row.padding({
-                left: 24,
-                right: 24,
+                start: LengthMetrics.vp(24),
+                end: LengthMetrics.vp(24),
                 top: 8,
                 bottom: 8
             });
@@ -1342,7 +1330,7 @@ export class ConfirmDialog extends ViewPU {
             Checkbox.onChange((p12) => {
                 this.isChecked = p12;
             });
-            Checkbox.margin({ left: 0, right: 8 });
+            Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) });
         }, Checkbox);
         Checkbox.pop();
         WithTheme.pop();
@@ -1371,8 +1359,8 @@ export class ConfirmDialog extends ViewPU {
             Row.create();
             Row.width('100%');
             Row.padding({
-                left: 16,
-                right: 16,
+                start: LengthMetrics.vp(16),
+                end: LengthMetrics.vp(16),
                 top: 16,
                 bottom: 16
             });
@@ -1638,7 +1626,7 @@ export class AlertDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, y9, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 605, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 584, col: 5 });
                     ViewPU.create(a10);
                     let b10 = () => {
                         return {
@@ -1853,7 +1841,7 @@ export class CustomContentDialog extends ViewPU {
                         buttons: this.buttons,
                         theme: this.theme,
                     }, undefined, o8, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 709, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 688, col: 5 });
                     ViewPU.create(q8);
                     let r8 = () => {
                         return {
@@ -2823,7 +2811,7 @@ export class CustomDialogComponent extends ViewPU {
                         contentAreaPadding: this.contentAreaPadding,
                         theme: this.theme,
                     }, undefined, g2, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 1135, col: 9 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1114, col: 9 });
                     ViewPU.create(i2);
                     let j2 = () => {
                         return {
@@ -3076,7 +3064,7 @@ export class LoadingDialog extends ViewPU {
                         },
                         theme: this.theme,
                     }, undefined, p, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/Dialog.ets', line: 1287, col: 7 });
+                    }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 1266, col: 7 });
                     ViewPU.create(r);
                     let s = () => {
                         return {
@@ -3127,7 +3115,7 @@ export class LoadingDialog extends ViewPU {
             LoadingProgress.color(ObservedObject.GetRawObject(this.loadingProgressIconColorWithTheme));
             LoadingProgress.width(LOADING_PROGRESS_WIDTH);
             LoadingProgress.height(LOADING_PROGRESS_HEIGHT);
-            LoadingProgress.margin({ left: LOADING_TEXT_MARGIN_LEFT });
+            LoadingProgress.margin({ start: LengthMetrics.vp(LOADING_TEXT_MARGIN_LEFT) });
         }, LoadingProgress);
         Row.pop();
         Column.pop();
