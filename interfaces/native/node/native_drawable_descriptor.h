@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_INTERFACES_NATIVE_NODE_NATIVE_DRAWABLE_DESCRIPTOR_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_INTERFACES_NATIVE_NODE_NATIVE_DRAWABLE_DESCRIPTOR_H
 
 typedef struct ArkUI_DrawableDescriptor ArkUI_DrawableDescriptor;
 
@@ -26,3 +27,5 @@ class DrawableDescriptor;
 extern "C" {
 ArkUI_DrawableDescriptor* OH_ArkUI_CreateFromNapiDrawable(OHOS::Ace::Napi::DrawableDescriptor* napiDrawable);
 }
+
+#endif
