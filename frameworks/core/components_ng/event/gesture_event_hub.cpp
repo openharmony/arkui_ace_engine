@@ -1517,12 +1517,15 @@ DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const Re
     DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
 {
     DragDropInfo dragDropInfo;
+    CHECK_NULL_RETURN(dragEventActuator_, dragDropInfo);
+    dragEventActuator_->SetIsDefaultOnDragStartExecuted(false);
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_RETURN(eventHub, dragDropInfo);
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto onDragStart = eventHub->GetOnDragStart();
     if (!onDragStart && eventHub->HasDefaultOnDragStart()) {
         onDragStart = eventHub->GetDefaultOnDragStart();
+        dragEventActuator_->SetIsDefaultOnDragStartExecuted(true);
     }
     dragDropInfo = onDragStart(dragEvent, extraParams);
 
@@ -1550,11 +1553,13 @@ RefPtr<UnifiedData> GestureEventHub::GetUnifiedData(const std::string& frameTag,
         if (dragDropInfo.extraInfo.empty()) {
             dragDropInfo.extraInfo = defaultDropInfo.extraInfo;
         }
+        CHECK_NULL_RETURN(dragEventActuator_, nullptr);
+        dragEventActuator_->SetIsDefaultOnDragStartExecuted(true);
         unifiedData = dragEvent->GetData();
     }
     auto defaultOnDragStart = eventHub->GetDefaultOnDragStart();
     CHECK_NULL_RETURN(defaultOnDragStart, unifiedData);
-    if (hasData && frameTag == V2::RICH_EDITOR_ETS_TAG) {
+    if (hasData && IsTextCategoryComponent(frameTag) && !dragEventActuator_->IsDefaultOnDragStartExecuted()) {
         defaultOnDragStart(dragEvent, "");
     }
     return unifiedData;
