@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float BOX_EPSILON = 0.5f;
+constexpr float DOUBLE = 2.0f
 }
 
 bool RichEditorSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -88,6 +89,10 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     }
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    visibleContentRect.SetLeft(visibleContentRect.GetX() - BOX_EPSILON);
+    visibleContentRect.SetWidth(visibleContentRect.Width() + DOUBLE * BOX_EPSILON);
+    visibleContentRect.SetTop(visibleContentRect.GetY() - BOX_EPSILON);
+    visibleContentRect.SetHeight(visibleContentRect.Height() + DOUBLE * BOX_EPSILON);
     if (IsSingleHandle()) {
         return visibleContentRect.IsInRegion(bottomPoint);
     }
