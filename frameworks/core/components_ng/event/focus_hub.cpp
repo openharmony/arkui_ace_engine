@@ -202,11 +202,12 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
             information += GetIsFocusGroup() ? " GroupId:" : " ScopeId:";
             information += focusScopeId_;
         }
-        
-        if (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PRIOR)) {
+        bool isPrior = (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PRIOR));
+        if (isPrior) {
             information += (" prior-focus-in-" + focusScopeId_);
         }
-        if (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PREVIOUS)) {
+        bool isPrevious = (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PREVIOUS));
+        if (isPrevious) {
             information += (" previous-focus-in-" + focusScopeId_);
         }
         auto focusMgr = GetFocusManager();
