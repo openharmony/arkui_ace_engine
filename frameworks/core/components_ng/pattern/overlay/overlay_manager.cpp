@@ -382,6 +382,14 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
         onFinish();
     }
 
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_VOID(container);
+    if (isShowInSubWindow && !container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
+    }
+
+    ContainerScope scope(currentId);
     auto root = node->GetParent();
     CHECK_NULL_VOID(root);
     root->RemoveChild(node);
@@ -394,8 +402,6 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
         }
     }
 
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
     if (container->IsDialogContainer() || isShowInSubWindow) {
         SubwindowManager::GetInstance()->HideSubWindowNG();
     }
