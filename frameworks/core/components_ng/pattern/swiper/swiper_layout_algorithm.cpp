@@ -979,7 +979,9 @@ void SwiperLayoutAlgorithm::LayoutItem(
             offset += OffsetF(crossOffset, prevMargin_ + spaceWidth_);
         }
     } else {
-        offset += OffsetF(pos.second.startPos, crossOffset);
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        float offsetPos = isRtl ? contentMainSize_ - pos.second.endPos : pos.second.startPos;
+        offset += OffsetF(offsetPos, crossOffset);
         if (!NearZero(prevMargin_)) {
             offset += OffsetF(prevMargin_ + spaceWidth_, crossOffset);
         }

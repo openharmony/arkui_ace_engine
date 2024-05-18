@@ -618,7 +618,8 @@ public:
         return nextValidIndex_;
     }
     void UpdateNextValidIndex();
-
+    void CheckMarkForIndicatorBoundary();
+    bool IsHorizontalAndRightToLeft() const;
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
@@ -754,6 +755,7 @@ private:
     void CheckAndSetArrowHoverState(const PointF& mousePoint);
     RectF GetArrowFrameRect(const int32_t index) const;
     float GetCustomPropertyOffset() const;
+    float GetCustomPropertyTargetOffset() const;
     void UpdateAnimationProperty(float velocity);
     void TriggerAnimationEndOnForceStop();
     void TriggerAnimationEndOnSwipeToLeft();
