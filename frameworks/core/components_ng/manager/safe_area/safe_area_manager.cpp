@@ -167,9 +167,15 @@ SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetSafeArea() const
 {
+#ifdef PREVIEW
+    if (ignoreSafeArea_) {
+        return {};
+    }
+#else
     if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return {};
     }
+#endif
     return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
 }
 
