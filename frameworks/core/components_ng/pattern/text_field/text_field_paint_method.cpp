@@ -168,8 +168,14 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
     textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
 
-    textFieldOverlayModifier_->SetUnderlineWidth(textFieldPattern->GetUnderlineWidth());
-    textFieldOverlayModifier_->SetUnderlineColor(textFieldPattern->GetUnderlineColor());
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (textFieldLayoutProperty->HasShowUnderline() && textFieldLayoutProperty->GetShowUnderlineValue()) {
+        textFieldOverlayModifier_->SetUnderlineWidth(textFieldPattern->GetUnderlineWidth());
+        textFieldOverlayModifier_->SetUnderlineColor(textFieldPattern->GetUnderlineColor());
+    } else {
+        textFieldOverlayModifier_->SetUnderlineWidth(0.0f);
+    }
 
     textFieldOverlayModifier_->SetShowSelect(textFieldPattern->GetShowSelect());
     textFieldOverlayModifier_->SetChangeSelectedRects(textFieldPattern->NeedPaintSelect());
