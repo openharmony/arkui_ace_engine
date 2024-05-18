@@ -67,16 +67,7 @@ public:
         return false;
     }
 
-    static bool ObtainDisappearTextStyle(NG::PickerTextStyle& textStyle)
-    {
-        if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
-            textStyle.textColor = themeColors.value().FontPrimary();
-            return true;
-        }
-        return false;
-    }
-
-    static bool ObtainNormalTextStyle(NG::PickerTextStyle& textStyle)
+    static bool ObtainTextStyle(NG::PickerTextStyle& textStyle)
     {
         if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
             textStyle.textColor = themeColors.value().FontPrimary();
