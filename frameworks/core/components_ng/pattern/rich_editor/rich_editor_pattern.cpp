@@ -213,27 +213,28 @@ void RichEditorPattern::SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, 
     CHECK_NULL_VOID(imageLayoutProperty);
     std::function<ImageSourceInfo()> createSourceInfoFunc = CreateImageSourceInfo(options);
     imageLayoutProperty->UpdateImageSourceInfo(createSourceInfoFunc());
-    CHECK_NULL_VOID(options.imageAttribute.has_value());
-    auto imgAttr = options.imageAttribute.value();
-    if (imgAttr.size.has_value()) {
-        imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
-    }
-    if (imgAttr.verticalAlign.has_value()) {
-        imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
-    }
-    if (imgAttr.objectFit.has_value()) {
-        imageLayoutProperty->UpdateImageFit(imgAttr.objectFit.value());
-    }
-    if (imgAttr.marginProp.has_value()) {
-        imageLayoutProperty->UpdateMargin(imgAttr.marginProp.value());
-    }
-    if (imgAttr.paddingProp.has_value()) {
-        imageLayoutProperty->UpdatePadding(imgAttr.paddingProp.value());
-    }
-    if (imgAttr.borderRadius.has_value()) {
-        auto imageRenderCtx = imageNode->GetRenderContext();
-        imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
-        imageRenderCtx->SetClipToBounds(true);
+    if (options.imageAttribute.has_value()) {
+        auto imgAttr = options.imageAttribute.value();
+        if (imgAttr.size.has_value()) {
+            imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
+        }
+        if (imgAttr.verticalAlign.has_value()) {
+            imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
+        }
+        if (imgAttr.objectFit.has_value()) {
+            imageLayoutProperty->UpdateImageFit(imgAttr.objectFit.value());
+        }
+        if (imgAttr.marginProp.has_value()) {
+            imageLayoutProperty->UpdateMargin(imgAttr.marginProp.value());
+        }
+        if (imgAttr.paddingProp.has_value()) {
+            imageLayoutProperty->UpdatePadding(imgAttr.paddingProp.value());
+        }
+        if (imgAttr.borderRadius.has_value()) {
+            auto imageRenderCtx = imageNode->GetRenderContext();
+            imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
+            imageRenderCtx->SetClipToBounds(true);
+        }
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
