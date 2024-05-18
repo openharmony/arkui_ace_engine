@@ -22,7 +22,6 @@
 #include "drawable_descriptor.h"
 #include "node_extened.h"
 
-
 extern "C" {
 
 ArkUI_DrawableDescriptor* OH_ArkUI_CreateFromNapiDrawable(OHOS::Ace::Napi::DrawableDescriptor* napiDrawable)
