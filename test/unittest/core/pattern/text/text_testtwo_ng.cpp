@@ -388,7 +388,8 @@ HWTEST_F(TextTestTwoNg, TextPatternTest005, TestSize.Level1)
      * @tc.steps: step2. Create imageNodeList and add imageNode into imageNodeList.
      */
     std::vector<WeakPtr<FrameNode>> imageNodeList;
-    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+		ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     imageNodeList.emplace_back(AceType::WeakClaim(AceType::RawPtr(imageNode)));
 
@@ -398,6 +399,192 @@ HWTEST_F(TextTestTwoNg, TextPatternTest005, TestSize.Level1)
      */
     textPattern->SetImageSpanNodeList(imageNodeList);
     EXPECT_EQ(textPattern->imageNodeList_.size(), 1);
+}
+
+/**
+ * @tc.name: TextPatternTest006
+ * @tc.desc: Test the SetImageSpanNodeList func of TextPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextPatternTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode("", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create imageNodeList and add imageNode into imageNodeList.
+     */
+    std::vector<WeakPtr<FrameNode>> imageNodeLocalList;
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
+    for (int i = 0; i < 10; i++) {
+        auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+			ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        imageNodeList.emplace_back(AceType::WeakClaim(AceType::RawPtr(imageNode)));
+        imageNodeLocalList.emplace_back(imageNode);
+    }
+
+    /**
+     * @tc.steps: step3. call SetImageSpanNodeList.
+     * @tc.expected: The imageNodeList_ size is equal to 10.
+     */
+    textPattern->SetImageSpanNodeList(imageNodeList);
+    EXPECT_EQ(textPattern->imageNodeList_.size(), 10);
+}
+
+/**
+ * @tc.name: TextPatternTest007
+ * @tc.desc: Test the SetImageSpanNodeList func of TextPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextPatternTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode("", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create imageNodeList and add imageNode into imageNodeList.
+     */
+    std::vector<WeakPtr<FrameNode>> imageNodeLocalList;
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
+    for (int i = 0; i < 100; i++) {
+        auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+			[]() { return AceType::MakeRefPtr<ImagePattern>(); });
+        imageNodeList.emplace_back(AceType::WeakClaim(AceType::RawPtr(imageNode)));
+        imageNodeLocalList.emplace_back(imageNode);
+    }
+
+    /**
+     * @tc.steps: step3. call SetImageSpanNodeList.
+     * @tc.expected: The imageNodeList_ size is equal to 100.
+     */
+    textPattern->SetImageSpanNodeList(imageNodeList);
+    EXPECT_EQ(textPattern->imageNodeList_.size(), 100);
+}
+
+/**
+ * @tc.name: TextPatternTest008
+ * @tc.desc: Test the SetImageSpanNodeList func of TextPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextPatternTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode("", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetImageSpanNodeList.
+     * @tc.expected: The imageNodeList_ size is equal to 0.
+     */
+    EXPECT_EQ(textPattern->imageNodeList_.size(), 0);
+}
+
+/**
+ * @tc.name: TextPatternTest009
+ * @tc.desc: Test the SetImageSpanNodeList func of TextPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextPatternTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode("", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create imageNodeList and add imageNode into imageNodeList.
+     */
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
+    imageNodeList.emplace_back(nullptr);
+
+    /**
+     * @tc.steps: step3. call SetImageSpanNodeList.
+     * @tc.expected: The imageNodeList_ size is equal to 1.
+     */
+    textPattern->SetImageSpanNodeList(imageNodeList);
+    EXPECT_EQ(textPattern->imageNodeList_.size(), 1);
+}
+
+/**
+ * @tc.name: TextPatternTest010
+ * @tc.desc: Test the SetImageSpanNodeList func of TextPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextPatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode("", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create imageNodeList and add imageNode into imageNodeList.
+     */
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
+    for (int i = 0; i < 10; i++) {
+        imageNodeList.emplace_back(nullptr);
+    }
+
+    /**
+     * @tc.steps: step3. call SetImageSpanNodeList.
+     * @tc.expected: The imageNodeList_ size is equal to 10.
+     */
+    textPattern->SetImageSpanNodeList(imageNodeList);
+    EXPECT_EQ(textPattern->imageNodeList_.size(), 10);
+}
+
+/**
+ * @tc.name: TextPatternTest011
+ * @tc.desc: Test the SetImageSpanNodeList func of TextPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextPatternTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode("", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create imageNodeList and add imageNode into imageNodeList.
+     */
+    std::vector<WeakPtr<FrameNode>> imageNodeLocalList;
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
+    for (int i = 0; i < 100; i++) {
+        imageNodeList.emplace_back(nullptr);
+    }
+
+    /**
+     * @tc.steps: step3. call SetImageSpanNodeList.
+     * @tc.expected: The imageNodeList_ size is equal to 100.
+     */
+    textPattern->SetImageSpanNodeList(imageNodeList);
+    EXPECT_EQ(textPattern->imageNodeList_.size(), 100);
 }
 
 /**
@@ -2153,5 +2340,4 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest004, TestSize.Level1)
     ASSERT_NE(OverlayModifier, nullptr);
     EXPECT_EQ(textOverlayModifier->isClip_->Get(), true);
 }
-
 } // namespace OHOS::Ace::NG
