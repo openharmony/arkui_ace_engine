@@ -504,7 +504,7 @@ public:
         std::vector<RefPtr<FrameNode>> children;
         return children;
     }
-    
+
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
         bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
@@ -547,6 +547,7 @@ public:
     void HandleLeaveHotzoneEvent();
 
 protected:
+    void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {

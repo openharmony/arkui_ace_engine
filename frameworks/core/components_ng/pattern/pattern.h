@@ -172,6 +172,11 @@ public:
 
     virtual void OnContextAttached() {}
 
+    virtual OPINC_TYPE_E OpIncType()
+    {
+        return OPINC_NODE_POSSIBLE;
+    }
+
     virtual void OnModifyDone()
     {
 #if (defined(__aarch64__) || defined(__x86_64__))

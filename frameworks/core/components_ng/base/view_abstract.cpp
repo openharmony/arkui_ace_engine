@@ -2467,6 +2467,9 @@ void ViewAbstract::SetRenderGroup(bool isRenderGroup)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RenderGroup, isRenderGroup);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetApplicationRenderGroupMarked(true);
 }
 
 void ViewAbstract::SetRenderFit(RenderFit renderFit)
@@ -2713,6 +2716,8 @@ void ViewAbstract::SetSphericalEffect(FrameNode* frameNode, double radio)
 void ViewAbstract::SetRenderGroup(FrameNode* frameNode, bool isRenderGroup)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(RenderGroup, isRenderGroup, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetApplicationRenderGroupMarked(true);
 }
 
 void ViewAbstract::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
