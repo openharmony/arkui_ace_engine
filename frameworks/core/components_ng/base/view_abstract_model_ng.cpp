@@ -321,7 +321,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                         if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
                             return;
                         }
-                        if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
+                        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
                             auto context = targetNode->GetRenderContext();
                             CHECK_NULL_VOID(context);
                             auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();

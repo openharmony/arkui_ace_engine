@@ -155,7 +155,8 @@ void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<Men
     }
 }
 
-void ShowMenuOpacityAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& renderContext)
+void ShowMenuOpacityAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& renderContext,
+    int32_t delay)
 {
     CHECK_NULL_VOID(menuTheme);
     CHECK_NULL_VOID(renderContext);
@@ -164,6 +165,7 @@ void ShowMenuOpacityAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<R
     AnimationOption option = AnimationOption();
     option.SetCurve(Curves::FRICTION);
     option.SetDuration(menuTheme->GetContextMenuAppearDuration());
+    option.SetDelay(delay);
     AnimationUtils::Animate(option, [renderContext]() {
         if (renderContext) {
             renderContext->UpdateOpacity(1.0);
@@ -989,63 +991,83 @@ Offset MenuPattern::GetTransformCenter() const
     }
 }
 
+void MenuPattern::ShowPreviewMenuScaleAnimation()
+{
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto preview = menuWrapperPattern->GetPreview();
+    CHECK_NULL_VOID(preview);
+    auto previewRenderContext = preview->GetRenderContext();
+    CHECK_NULL_VOID(previewRenderContext);
+    auto previewGeometryNode = preview->GetGeometryNode();
+    CHECK_NULL_VOID(previewGeometryNode);
+    auto previewPosition = previewGeometryNode->GetFrameOffset();
+    OffsetF previewOriginPosition = GetPreviewOriginOffset();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto springMotionResponse = menuTheme->GetSpringMotionResponse();
+    auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
+    auto delay = isShowHoverImage_ && preview->GetTag() == V2::MENU_PREVIEW_ETS_TAG ?
+        menuTheme->GetHoverImageDelayDuration() : 0;
+
+    previewRenderContext->UpdatePosition(
+        OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
+    AnimationOption scaleOption = AnimationOption();
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
+    scaleOption.SetCurve(motion);
+    scaleOption.SetDelay(delay);
+    AnimationUtils::Animate(scaleOption, [previewRenderContext, previewPosition]() {
+        if (previewRenderContext) {
+            previewRenderContext->UpdatePosition(
+                OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
+        }
+    });
+}
+
 void MenuPattern::ShowPreviewMenuAnimation()
 {
+    CHECK_NULL_VOID(isFirstShow_ && previewMode_ != MenuPreviewMode::NONE);
+    ShowPreviewMenuScaleAnimation();
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (isFirstShow_ && previewMode_ != MenuPreviewMode::NONE) {
-        auto menuWrapper = GetMenuWrapper();
-        CHECK_NULL_VOID(menuWrapper);
-        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(menuWrapperPattern);
-        auto preview = menuWrapperPattern->GetPreview();
-        CHECK_NULL_VOID(preview);
-        auto previewRenderContext = preview->GetRenderContext();
-        CHECK_NULL_VOID(previewRenderContext);
-        auto previewGeometryNode = preview->GetGeometryNode();
-        CHECK_NULL_VOID(previewGeometryNode);
-        auto previewPosition = previewGeometryNode->GetFrameOffset();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
-        auto menuPosition = host->GetPaintRectOffset();
-        OffsetF previewOriginPosition = GetPreviewOriginOffset();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
+    auto menuPosition = host->GetPaintRectOffset();
 
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-        CHECK_NULL_VOID(menuTheme);
-        auto menuAnimationScale = menuTheme->GetMenuAnimationScale();
-        auto springMotionResponse = menuTheme->GetSpringMotionResponse();
-        auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto menuAnimationScale = menuTheme->GetMenuAnimationScale();
+    auto springMotionResponse = menuTheme->GetSpringMotionResponse();
+    auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
 
-        renderContext->UpdateTransformScale(VectorF(menuAnimationScale, menuAnimationScale));
+    renderContext->UpdateTransformScale(VectorF(menuAnimationScale, menuAnimationScale));
 
-        previewRenderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
-        renderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(originOffset_.GetX()), Dimension(originOffset_.GetY())));
+    renderContext->UpdatePosition(
+        OffsetT<Dimension>(Dimension(originOffset_.GetX()), Dimension(originOffset_.GetY())));
 
-        ShowMenuOpacityAnimation(menuTheme, renderContext);
+    auto delay = isShowHoverImage_ ? menuTheme->GetHoverImageDelayDuration() : 0;
+    ShowMenuOpacityAnimation(menuTheme, renderContext, delay);
 
-        AnimationOption scaleOption = AnimationOption();
-        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
-        scaleOption.SetCurve(motion);
-        AnimationUtils::Animate(scaleOption, [renderContext, menuPosition, previewRenderContext, previewPosition]() {
-            if (renderContext) {
-                renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
-                renderContext->UpdatePosition(
-                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-            }
-
-            if (previewRenderContext) {
-                previewRenderContext->UpdatePosition(
-                    OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
-            }
-        });
-    }
+    AnimationOption scaleOption = AnimationOption();
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
+    scaleOption.SetCurve(motion);
+    scaleOption.SetDelay(delay);
+    AnimationUtils::Animate(scaleOption, [renderContext, menuPosition]() {
+        if (renderContext) {
+            renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+            renderContext->UpdatePosition(
+                OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+        }
+    });
     isFirstShow_ = false;
 }
 
