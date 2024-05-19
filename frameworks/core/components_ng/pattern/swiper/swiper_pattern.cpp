@@ -484,12 +484,20 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetIndex, int32_t captureId
     CHECK_NULL_VOID(host);
     auto targetNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(targetIndex));
     CHECK_NULL_VOID(targetNode);
-    auto callback = [weak = WeakClaim(this), captureId, targetIndex](
+    auto callback = [weak = WeakClaim(this), captureId, targetIndex, hostInstanceId = GetHostInstanceId()](
                         std::shared_ptr<Media::PixelMap> pixelMap) {
-        auto swiper = weak.Upgrade();
-        CHECK_NULL_VOID(swiper);
-        ContainerScope scope(swiper->GetHostInstanceId());
-        swiper->UpdateCaptureSource(pixelMap, captureId, targetIndex);
+        ContainerScope scope(hostInstanceId);
+        auto piplineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(piplineContext);
+        auto taskExecutor = piplineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weak, pixelMap, captureId, targetIndex]() mutable {
+                auto swiper = weak.Upgrade();
+                CHECK_NULL_VOID(swiper);
+                swiper->UpdateCaptureSource(pixelMap, captureId, targetIndex);
+            },
+            TaskExecutor::TaskType::UI, "ArkUISwiperUpdateCaptureSource");
     };
     if (forceUpdate) {
         // The size changes caused by layout need to wait for rendering before taking a screenshot
@@ -523,20 +531,12 @@ void SwiperPattern::UpdateCaptureSource(
 
     auto captureNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(captureId)));
     CHECK_NULL_VOID(captureNode);
-    auto piplineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(piplineContext);
-    auto taskExecutor = piplineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [captureNode, pixelMap, margin]() mutable {
-            auto imageLayoutProperty = captureNode->GetLayoutProperty<ImageLayoutProperty>();
-            CHECK_NULL_VOID(imageLayoutProperty);
-            imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
-            imageLayoutProperty->UpdateMargin(margin);
-            captureNode->MarkModifyDone();
-            captureNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        },
-        TaskExecutor::TaskType::UI, "ArkUISwiperUpdateCaptureSource");
+    auto imageLayoutProperty = captureNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
+    imageLayoutProperty->UpdateMargin(margin);
+    captureNode->MarkModifyDone();
+    captureNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void SwiperPattern::InitSurfaceChangedCallback()
@@ -4668,6 +4668,8 @@ void SwiperPattern::DumpAdvanceInfo()
         : DumpLog::GetInstance().AddDesc("pauseTargetIndex:null");
     velocity_.has_value() ? DumpLog::GetInstance().AddDesc("velocity:" + std::to_string(velocity_.value()))
                           : DumpLog::GetInstance().AddDesc("velocity:null");
+    GetCurveIncludeMotion() ? DumpLog::GetInstance().AddDesc("curve:" + GetCurveIncludeMotion()->ToString())
+                            : DumpLog::GetInstance().AddDesc("curve:null");
     isFinishAnimation_ ? DumpLog::GetInstance().AddDesc("isFinishAnimation:true")
                        : DumpLog::GetInstance().AddDesc("isFinishAnimation:false");
     mainSizeIsMeasured_ ? DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:true")
