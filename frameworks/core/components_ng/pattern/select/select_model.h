@@ -21,6 +21,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
@@ -41,7 +42,12 @@ struct MenuAlign {
     DimensionOffset offset = DimensionOffset(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
 };
 
-using SelectParam = std::pair<std::string, std::string>;
+struct SelectParam {
+    std::string text;
+    std::string icon;
+    std::function<void(WeakPtr<NG::FrameNode>)> symbolIcon = nullptr;
+    RefPtr<SymbolModifier> symbolModifier = nullptr;
+};
 
 class SelectModel {
 public:

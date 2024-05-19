@@ -326,7 +326,7 @@ RefPtr<FrameNode> MenuPattern::BuildContentModifierNode(int index)
 {
     CHECK_NULL_RETURN(makeFunc_, nullptr);
     auto property = selectProperties_[index];
-    MenuItemConfiguration menuItemConfiguration(property.value, property.icon,
+    MenuItemConfiguration menuItemConfiguration(property.value, property.icon, property.symbolModifier,
         index, property.selected, property.selectEnable);
     return (makeFunc_.value())(menuItemConfiguration);
 }
@@ -532,13 +532,13 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
         }
         auto optionPattern = childNode->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(optionPattern);
-        optionPattern->UpdateText(params.at(i).first);
-        optionPattern->UpdateIcon(params.at(i).second);
+        optionPattern->UpdateText(params.at(i).text);
+        optionPattern->UpdateIcon(params.at(i).icon, params.at(i).symbolIcon);
         childNode->MarkModifyDone();
         childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     for (size_t i = updateCount; i < paramCount; i++) {
-        auto optionNode = OptionView::CreateSelectOption(params.at(i).first, params.at(i).second, i);
+        auto optionNode = OptionView::CreateSelectOption(params.at(i), i);
         if (i == 0) {
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
             props->UpdateNeedDivider(false);
